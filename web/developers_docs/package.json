@@ -19,6 +19,6 @@
     "@vitejs/plugin-react": "^4.3.4",
     "typescript": "~5.7.2",
     "vite": "^6.3.5",
-    "vite-plugin-static-copy": "^3.4.0"
+    "vite-plugin-static-copy": "^4.1.1"
   }
 }
