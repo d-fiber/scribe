@@ -1,0 +1,126 @@
+// Copyright (C) 2026 Fiber
+//
+// This file is part of scribe and is made available under the PolyForm Shield
+// License 1.0.0. The full terms are in the LICENSE file at the root of this
+// repository, and at https://polyformproject.org/licenses/shield/1.0.0
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+//
+// The one thing you may not do:
+// - Use it to provide any product that competes with scribe, or with any
+//   product Fiber or its affiliates provide using scribe. Products compete
+//   even when they are offered free of charge, through a different kind of
+//   interface, or for a different technical platform.
+//
+// If you pass this software on:
+// - Anyone who receives any part of it from you must also receive these terms,
+//   or the URL above, together with the "Required Notice" line carried by the
+//   LICENSE file.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE COMES AS IS, WITHOUT ANY WARRANTY OR
+// CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
+// OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
+// LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+// The test forge re-implements the signing format so fixtures can be built
+// before the rest mock exists. That duplication is only safe as long as both
+// sides stay interchangeable, which is exactly what this file checks.
+
+import { PendingToken, PendingTokenPurpose } from "@scribe/host/dependencies/security/auth/src/_core/pending_token.ts";
+import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
+import { AccountRole } from "@scribe/core/contracts/account.ts";
+import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { forgeToken } from "@scribe/host/dependencies/security/auth/testing/pending_token.ts";
+import { assert, assertEquals, assertNotEquals } from "@std/assert";
+
+const IDENTIFIER = "u1@example.com";
+
+Deno.test("forge: a forged token is accepted by the production reader", async () => {
+  for (const purpose of Object.values(PendingTokenPurpose)) {
+    const reader = new PendingToken(purpose);
+    const token = await forgeToken(IDENTIFIER, AccountRole.User, { purpose });
+    const payload = await reader.payload(token);
+
+    assertNotEquals(payload, null, `purpose ${purpose} must round-trip`);
+    assertEquals(payload?.identifier, IDENTIFIER);
+    assertEquals(payload?.role, AccountRole.User);
+  }
+});
+
+Deno.test("forge: an issued token is shaped exactly like a forged one", async () => {
+  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  try {
+    const issued = await new PendingToken().issue(IDENTIFIER, AccountRole.User, "device-1");
+    const forged = await forgeToken(IDENTIFIER, AccountRole.User, { deviceId: "device-1" });
+
+    assert(issued !== null);
+    assertEquals(issued.split(".").length, forged.split(".").length);
+
+    const [issuedPayload, issuedSignature] = issued.split(".");
+    const [forgedPayload, forgedSignature] = forged.split(".");
+
+    assertEquals(issuedSignature.length, forgedSignature.length);
+    assertEquals(
+      Object.keys(JSON.parse(atob(issuedPayload))).sort(),
+      Object.keys(JSON.parse(atob(forgedPayload))).sort(),
+      "a new claim on either side would make every fixture silently unverifiable",
+    );
+  } finally {
+    rest.restore();
+  }
+});
+
+Deno.test("forge: the device binding survives the round-trip", async () => {
+  const reader = new PendingToken();
+
+  assertEquals(
+    (await reader.payload(await forgeToken(IDENTIFIER, AccountRole.User, { deviceId: "device-1" })))?.deviceId,
+    "device-1",
+  );
+  assertEquals(
+    (await reader.payload(await forgeToken(IDENTIFIER, AccountRole.User)))?.deviceId,
+    null,
+  );
+});
+
+Deno.test("issue: the row it stores is the hash of the token it returns", async () => {
+  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  try {
+    const token = await new PendingToken().issue(IDENTIFIER, AccountRole.User, null);
+    const rows = rest.rows("internal_t__otp_pending_tokens");
+
+    assert(token !== null);
+    assertEquals(rows.length, 1);
+    assertEquals(rows[0].token_hash, await sha256Hex(token));
+    assert(
+      (rows[0].expires_at as number) > Date.now(),
+      "an already-expired row would make the token unusable on arrival",
+    );
+  } finally {
+    rest.restore();
+  }
+});
+
+Deno.test("issue: a vpn link outlives a sign-in challenge", () => {
+  assertEquals(new PendingToken(PendingTokenPurpose.SignIn).ttlMs, 10 * 60 * 1000);
+  assertEquals(
+    new PendingToken(PendingTokenPurpose.VpnAccess).ttlMs,
+    4 * 60 * 60 * 1000,
+    "a mailed link survives a working half-day, not a full night",
+  );
+});
+
+Deno.test("payload: an oversized token is rejected before any crypto work", async () => {
+  const reader = new PendingToken();
+
+  assertEquals(await reader.payload("x".repeat(2049)), null);
+  assertEquals(await reader.payload(""), null);
+});

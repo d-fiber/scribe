@@ -1,0 +1,76 @@
+// Copyright (C) 2026 Fiber
+//
+// This file is part of scribe and is made available under the PolyForm Shield
+// License 1.0.0. The full terms are in the LICENSE file at the root of this
+// repository, and at https://polyformproject.org/licenses/shield/1.0.0
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+//
+// The one thing you may not do:
+// - Use it to provide any product that competes with scribe, or with any
+//   product Fiber or its affiliates provide using scribe. Products compete
+//   even when they are offered free of charge, through a different kind of
+//   interface, or for a different technical platform.
+//
+// If you pass this software on:
+// - Anyone who receives any part of it from you must also receive these terms,
+//   or the URL above, together with the "Required Notice" line carried by the
+//   LICENSE file.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE COMES AS IS, WITHOUT ANY WARRANTY OR
+// CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
+// OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
+// LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+syntax = "proto3";
+
+package scribe.v1;
+
+message Time {
+  int64 millis = 1;
+}
+
+message Size {
+  int64 bytes = 1;
+}
+
+message Failure {
+  string code = 1;
+  string message = 2;
+}
+
+message Json {
+  bytes value = 1;
+}
+
+enum Caller {
+  CALLER_UNSPECIFIED = 0;
+  CALLER_ANONYMOUS = 1;
+  CALLER_USER = 2;
+  CALLER_ADMIN = 3;
+  CALLER_SERVICE = 4;
+  CALLER_WEBHOOK = 5;
+}
+
+enum Method {
+  METHOD_UNSPECIFIED = 0;
+  METHOD_GET = 1;
+  METHOD_POST = 2;
+  METHOD_PUT = 3;
+  METHOD_PATCH = 4;
+  METHOD_DELETE = 5;
+}
+
+enum Need {
+  NEED_UNSPECIFIED = 0;
+  NEED_DEVICE = 1;
+  NEED_LOCATION = 2;
+}

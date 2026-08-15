@@ -1,0 +1,135 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "20 23 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  host:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: host
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Lint
+        run: deno lint
+
+      - name: Type check
+        run: deno task check
+
+      - name: Run tests
+        run: deno task test
+
+      - name: Run tests with network access
+        run: deno task test:net
+
+  sdk-js:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sdk/js
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Type check
+        run: deno task check
+
+      - name: Run tests
+        run: deno task test
+
+  headers:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check license headers
+        run: bash .github/headers/check.sh
+
+  versioning:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .github/versioning
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install protoc
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
+      - name: Run tests
+        run: python3 -m unittest discover -s tests -t . -v
+
+  dependencies:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Report the Deno dependencies that moved
+        run: |
+          set -eu
+          {
+            echo "## Deno dependencies"
+            echo ""
+            echo "Dependabot does not read Deno, so this is the only place these show up."
+            echo ""
+            for root in host sdk/js; do
+              echo "### $root"
+              echo ""
+              echo '```'
+              (cd "$root" && deno outdated 2>&1) || echo "could not read $root"
+              echo '```'
+              echo ""
+            done
+            echo "Imports pinned by URL are invisible here too. Today that is"
+            echo '`jose`, pinned to a fixed version of deno.land/x in host/deno.json.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  protocol:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install protoc
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
+      - name: Compile every .proto
+        run: |
+          set -eu
+          cd "$(dirname "$GITHUB_WORKSPACE")"
+          root="$(basename "$GITHUB_WORKSPACE")"
+          find "$root" -name '*.proto' -path '*/protocol/*' -print0 \
+            | xargs -0 protoc -I . --descriptor_set_out=/dev/null

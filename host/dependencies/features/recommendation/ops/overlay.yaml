@@ -1,0 +1,4 @@
+services:
+  db:
+    volumes:
+      - "{{sdk_root}}/host/dependencies/features/recommendation/db/provisioning/gorse.sql:/docker-entrypoint-initdb.d/init-scripts/98-gorse.sql:Z"

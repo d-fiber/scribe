@@ -1,0 +1,19 @@
+name: recommendation
+title: Recommandations (Gorse).
+optional: true
+
+requires: []
+
+ops:
+  services:
+    - gorse
+  profile: reco
+  gateway: []
+  env:
+    - GORSE_API_KEY
+
+sql: null
+protocol: protocol/recommendation.proto
+export: ./features
+
+routes: []

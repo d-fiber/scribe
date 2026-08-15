@@ -1,0 +1,4 @@
+services:
+  gorse:
+    environment:
+      GOMAXPROCS: "{{gorse_gomaxprocs}}"

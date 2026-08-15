@@ -1,0 +1,38 @@
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "[CHORE]:"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: /web
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "[CHORE]:"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: /sdk/js
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "[CHORE]:"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: pub
+    directory: /sdk/dart
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "[CHORE]:"
+    open-pull-requests-limit: 5

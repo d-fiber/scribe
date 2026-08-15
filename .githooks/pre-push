@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+#!/usr/bin/env bash
+# Copyright (C) 2026 Fiber
+#
+# This file is part of scribe and is made available under the PolyForm Shield
+# License 1.0.0. The full terms are in the LICENSE file at the root of this
+# repository, and at https://polyformproject.org/licenses/shield/1.0.0
+#
+# What you may do:
+# - Use this software for any purpose, including commercially, and build and
+#   sell your own products on top of it.
+# - Change it, and create new works based on it.
+# - Distribute copies of it, with or without your changes.
+#
+# The one thing you may not do:
+# - Use it to provide any product that competes with scribe, or with any
+#   product Fiber or its affiliates provide using scribe. Products compete
+#   even when they are offered free of charge, through a different kind of
+#   interface, or for a different technical platform.
+#
+# If you pass this software on:
+# - Anyone who receives any part of it from you must also receive these terms,
+#   or the URL above, together with the "Required Notice" line carried by the
+#   LICENSE file.
+#
+# Disclaimer:
+# AS FAR AS THE LAW ALLOWS, THIS SOFTWARE COMES AS IS, WITHOUT ANY WARRANTY OR
+# CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
+# OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
+# LEGAL CLAIM.
+#
+# This header is a summary written for convenience. Where it differs from the
+# LICENSE file, the LICENSE file governs.
+
+set -uo pipefail
+
+failed=0
+started=$SECONDS
+
+step() {
+  local label="$1"
+  shift
+
+  if ! "$@" >/tmp/scribe-prepush.log 2>&1; then
+    echo "FAILED   $label"
+    sed 's/^/         /' /tmp/scribe-prepush.log | tail -25
+    failed=$((failed + 1))
+    return
+  fi
+
+  echo "ok       $label"
+}
+
+missing() {
+  echo "skipped  $1 ($2 is not installed)"
+}
+
+if command -v deno >/dev/null 2>&1; then
+  step "host lints"        bash -c 'cd host && deno lint'
+  step "host type-checks"  bash -c 'cd host && deno task check'
+  step "sdk/js type-checks" bash -c 'cd sdk/js && deno task check'
+else
+  missing "the Deno checks" deno
+fi
+
+if command -v protoc >/dev/null 2>&1; then
+  step "the contract compiles" bash -c '
+    cd "$(dirname "$PWD")"
+    root="$(basename "$OLDPWD")"
+    find "$root" -name "*.proto" -path "*/protocol/*" -print0 | xargs -0 protoc -I . --descriptor_set_out=/dev/null'
+else
+  missing "the protocol check" protoc
+fi
+
+step "every source file carries the license header" bash .github/headers/check.sh
+
+rm -f /tmp/scribe-prepush.log
+
+if [ "$failed" -gt 0 ]; then
+  cat >&2 <<MESSAGE
+
+Push refused: $failed check(s) failed after $((SECONDS - started))s.
+
+These are the same checks CI runs, so pushing would only move the failure to a
+place where it blocks the release instead of your terminal.
+
+If you know what you are doing, git push --no-verify skips this hook. CI will
+still catch it, and main will still refuse the merge.
+MESSAGE
+  exit 1
+fi
+
+echo "All checks passed in $((SECONDS - started))s"

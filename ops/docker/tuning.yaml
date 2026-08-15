@@ -1,0 +1,76 @@
+name: "{{app_name_snake}}"
+
+services:
+  db:
+    command:
+      [
+        "postgres",
+        "-c",
+        "config_file=/etc/postgresql/postgresql.conf",
+        "-c",
+        "log_min_messages=fatal",
+        "-c",
+        "max_connections={{db_max_connections}}",
+        "-c",
+        "shared_buffers={{db_shared_buffers}}",
+        "-c",
+        "effective_cache_size={{db_effective_cache_size}}",
+        "-c",
+        "work_mem={{db_work_mem}}",
+        "-c",
+        "maintenance_work_mem={{db_maintenance_work_mem}}",
+        "-c",
+        "wal_buffers={{db_wal_buffers}}",
+        "-c",
+        "max_worker_processes={{db_max_worker_processes}}",
+        "-c",
+        "max_parallel_workers={{db_max_parallel_workers}}",
+        "-c",
+        "max_parallel_workers_per_gather={{db_max_parallel_workers_per_gather}}",
+        "-c",
+        "archive_mode=${PGBACKREST_ARCHIVE_MODE:-off}",
+        "-c",
+        "archive_command=pgbackrest archive-push %p",
+      ]
+
+  redis:
+    command:
+      [
+        "redis-server",
+        "--requirepass",
+        "${REDIS_PASSWORD}",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "{{redis_maxmemory}}",
+        "--maxmemory-policy",
+        "volatile-lru",
+        "--io-threads",
+        "{{redis_io_threads}}",
+        "--io-threads-do-reads",
+        "{{redis_io_threads_do_reads}}",
+      ]
+
+
+  rest:
+    environment:
+      PGRST_DB_POOL: "{{rest_db_pool}}"
+      GHCRTS: "{{rest_ghc_rts}}"
+
+
+
+
+  supavisor:
+    environment:
+      ERL_AFLAGS: "+S {{supavisor_schedulers}}:{{supavisor_schedulers}}"
+
+
+
+  nats:
+    environment:
+      GOMAXPROCS: "{{nats_gomaxprocs}}"
+
+  kong:
+    environment:
+      KONG_UPSTREAM_KEEPALIVE_POOL_SIZE: "{{kong_keepalive_pool}}"
+      KONG_NGINX_WORKER_PROCESSES: "{{kong_nginx_worker_processes}}"

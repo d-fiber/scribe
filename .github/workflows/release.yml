@@ -1,0 +1,98 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Work out the version and changelog without writing anything
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  cut:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+          ssh-key: ${{ secrets.RELEASE_PUSH_KEY }}
+          persist-credentials: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Install protoc
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
+      - name: Refuse to release when dev has nothing new
+        run: |
+          set -eu
+          git fetch origin main:refs/remotes/origin/main
+          if git diff --quiet origin/main..HEAD; then
+            echo "dev and main are identical, there is nothing to release"
+            exit 1
+          fi
+          echo "Commits waiting to be released:"
+          git log --no-merges --format='  %h %s' origin/main..HEAD
+
+      - name: Work out the version and write the changelog
+        working-directory: .github/versioning
+        run: |
+          python3 bump.py \
+            --repo="$GITHUB_WORKSPACE" \
+            --base=origin/main \
+            --head=HEAD \
+            ${{ inputs.dry-run && '--check' || '' }}
+
+      - name: Push the release commit to dev
+        if: ${{ !inputs.dry-run }}
+        run: |
+          set -eu
+          git config user.name "scribe-release[bot]"
+          git config user.email "scribe-release@users.noreply.github.com"
+          git add --all
+          if git diff --cached --quiet; then
+            echo "Nothing to commit, the versions and changelog were already current"
+            exit 0
+          fi
+          version=$(cat VERSION)
+          git commit -m "[RELEASE]: scribe $version"
+          git push origin HEAD:dev
+          echo "Pushed with the deploy key, so the test workflows run on this commit"
+          echo "and attach their results to the SHA the pull request will point at."
+
+      - name: Open the pull request that moves dev into main
+        if: ${{ !inputs.dry-run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          version=$(cat VERSION)
+          existing=$(gh pr list --base main --head dev --state open --json number --jq '.[0].number // empty')
+
+          if [ -n "$existing" ]; then
+            gh pr edit "$existing" --title "Release scribe $version"
+            echo "Updated PR #$existing for scribe $version"
+            exit 0
+          fi
+
+          gh pr create \
+            --base main \
+            --head dev \
+            --title "Release scribe $version" \
+            --body "$(printf 'Cut by the release workflow.\n\nVersions and `CHANGELOG.md` are already committed on `dev`. Merging this is what publishes scribe %s to `main`, the branch people clone.\n\nThe changelog entry for this release is at the top of `CHANGELOG.md`.' "$version")"

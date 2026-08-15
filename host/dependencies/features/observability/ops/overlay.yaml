@@ -1,0 +1,8 @@
+services:
+  db:
+    volumes:
+      - "{{sdk_root}}/host/dependencies/features/observability/db/provisioning/logs.sql:/docker-entrypoint-initdb.d/init-scripts/98-logs.sql:Z"
+  studio:
+    depends_on:
+      analytics:
+        condition: "service_healthy"

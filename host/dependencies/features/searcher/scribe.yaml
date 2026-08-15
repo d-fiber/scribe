@@ -1,0 +1,21 @@
+name: searcher
+title: Indexation et recherche plein texte (OpenSearch).
+optional: true
+
+requires: []
+
+ops:
+  services:
+    - opensearch
+    - opensearch-setup
+  profile: search
+  gateway: []
+  env:
+    - OPENSEARCH_URL
+
+sql: null
+protocol: protocol/searcher.proto
+export: ./features
+
+routes:
+  - api/internal/searcher

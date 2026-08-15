@@ -1,0 +1,24 @@
+{
+  "name": "app-docs",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --mode landing",
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@app/hosting-ui": "*",
+    "@scalar/api-reference": "latest",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "~5.7.2",
+    "vite": "^6.3.5",
+    "vite-plugin-static-copy": "^3.4.0"
+  }
+}

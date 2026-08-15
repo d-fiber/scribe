@@ -1,0 +1,12 @@
+{
+  "name": "@scribe/sdk-js",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@bufbuild/protoc-gen-es": "^2.9.0",
+    "@types/node": "^26.2.0"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "^2.9.0"
+  }
+}

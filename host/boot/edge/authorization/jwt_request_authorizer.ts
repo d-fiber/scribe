@@ -1,0 +1,68 @@
+// Copyright (C) 2026 Fiber
+//
+// This file is part of scribe and is made available under the PolyForm Shield
+// License 1.0.0. The full terms are in the LICENSE file at the root of this
+// repository, and at https://polyformproject.org/licenses/shield/1.0.0
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+//
+// The one thing you may not do:
+// - Use it to provide any product that competes with scribe, or with any
+//   product Fiber or its affiliates provide using scribe. Products compete
+//   even when they are offered free of charge, through a different kind of
+//   interface, or for a different technical platform.
+//
+// If you pass this software on:
+// - Anyone who receives any part of it from you must also receive these terms,
+//   or the URL above, together with the "Required Notice" line carried by the
+//   LICENSE file.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE COMES AS IS, WITHOUT ANY WARRANTY OR
+// CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
+// OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
+// LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
+import { bearerToken } from "./bearer_token.ts";
+import type { RequestAuthorizer } from "./request_authorizer.ts";
+import type { TokenVerifier } from "./token_verifier.ts";
+
+export class JwtRequestAuthorizer implements RequestAuthorizer {
+  readonly #verifier: TokenVerifier;
+  readonly #exemptServices: ReadonlySet<string>;
+
+  constructor(verifier: TokenVerifier, exemptServices: Iterable<string>) {
+    this.#verifier = verifier;
+    this.#exemptServices = new Set(exemptServices);
+  }
+
+  async authorize(
+    request: Request,
+    service: string,
+  ): Promise<Response | null> {
+    if (request.method === "OPTIONS") return null;
+    if (this.#exemptServices.has(service)) return null;
+
+    const token = bearerToken(request);
+    if (token === null) {
+      return ServerResponse.unauthorized({
+        message: "Missing or invalid authorization.",
+      });
+    }
+
+    if (await this.#verifier.verify(token)) return null;
+
+    return ServerResponse.unauthorized({
+      code: "invalid_jwt",
+      message: "Invalid JWT",
+    });
+  }
+}

@@ -1,0 +1,21 @@
+name: observability
+title: Expedition des journaux vers un collecteur externe.
+optional: true
+
+requires: []
+
+ops:
+  services:
+    - vector
+    - analytics
+  profile: ops
+  gateway: []
+  env:
+    - LOGFLARE_PUBLIC_ACCESS_TOKEN
+    - LOGFLARE_PRIVATE_ACCESS_TOKEN
+
+sql: null
+protocol: protocol/observability.proto
+export: ./features
+
+routes: []

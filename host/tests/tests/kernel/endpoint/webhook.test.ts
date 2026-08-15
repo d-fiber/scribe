@@ -1,0 +1,204 @@
+// Copyright (C) 2026 Fiber
+//
+// This file is part of scribe and is made available under the PolyForm Shield
+// License 1.0.0. The full terms are in the LICENSE file at the root of this
+// repository, and at https://polyformproject.org/licenses/shield/1.0.0
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+//
+// The one thing you may not do:
+// - Use it to provide any product that competes with scribe, or with any
+//   product Fiber or its affiliates provide using scribe. Products compete
+//   even when they are offered free of charge, through a different kind of
+//   interface, or for a different technical platform.
+//
+// If you pass this software on:
+// - Anyone who receives any part of it from you must also receive these terms,
+//   or the URL above, together with the "Required Notice" line carried by the
+//   LICENSE file.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE COMES AS IS, WITHOUT ANY WARRANTY OR
+// CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
+// OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
+// LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+import {
+  importSigningKey,
+  matchesAnyCandidate,
+} from "@scribe/core/kernel/endpoint/webhook/signature.ts";
+import {
+  isFreshTimestamp,
+  MAX_TIMESTAMP_SKEW_S,
+  readSignedRequest,
+  type SignedWebhookRequest,
+} from "@scribe/core/kernel/endpoint/webhook/signed_request.ts";
+import { RequestScope } from "@scribe/core/runtime/scope.ts";
+import { assert, assertEquals, assertFalse } from "@std/assert";
+
+const SECRET_BYTES = new Uint8Array(32).fill(7);
+const SECRET = `whsec_${btoa(String.fromCharCode(...SECRET_BYTES))}`;
+
+function nowSeconds(): number {
+  return Math.floor(Date.now() / 1000);
+}
+
+async function sign(signed: SignedWebhookRequest): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    SECRET_BYTES,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const mac = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(
+      `${signed.id}.${signed.timestamp}.${signed.rawBody}`,
+    ),
+  );
+  return btoa(String.fromCharCode(...new Uint8Array(mac)));
+}
+
+function withHeaders<T>(
+  headers: Record<string, string>,
+  body: string,
+  run: () => T,
+): T {
+  const req = new Request("http://api.test/hook", {
+    method: "POST",
+    headers,
+    body,
+  });
+  return RequestScope.run(req, new TextEncoder().encode(body), run, "127.0.0.1");
+}
+
+Deno.test("readSignedRequest keeps only the signature part of each entry", () => {
+  const signed = withHeaders(
+    {
+      "webhook-id": "msg_1",
+      "webhook-timestamp": "1700000000",
+      "webhook-signature": "v1,AAAA v1,BBBB",
+    },
+    "{}",
+    readSignedRequest,
+  );
+
+  assertEquals(signed?.candidateSignatures, ["AAAA", "BBBB"]);
+  assertEquals(signed?.rawBody, "{}");
+});
+
+Deno.test("readSignedRequest refuses a delivery missing any of the three headers", () => {
+  const complete = {
+    "webhook-id": "msg_1",
+    "webhook-timestamp": "1700000000",
+    "webhook-signature": "v1,AAAA",
+  };
+
+  for (const missing of Object.keys(complete)) {
+    const headers = { ...complete } as Record<string, string>;
+    delete headers[missing];
+
+    assertEquals(
+      withHeaders(headers, "{}", readSignedRequest),
+      null,
+      `without ${missing} there is nothing to verify`,
+    );
+  }
+});
+
+Deno.test("readSignedRequest refuses a signature header carrying no signature", () => {
+  assertEquals(
+    withHeaders(
+      {
+        "webhook-id": "msg_1",
+        "webhook-timestamp": "1700000000",
+        "webhook-signature": "v1",
+      },
+      "{}",
+      readSignedRequest,
+    ),
+    null,
+  );
+});
+
+Deno.test("isFreshTimestamp accepts the window and refuses either side of it", () => {
+  assert(isFreshTimestamp(String(nowSeconds())));
+  assert(isFreshTimestamp(String(nowSeconds() - MAX_TIMESTAMP_SKEW_S + 5)));
+  assertFalse(isFreshTimestamp(String(nowSeconds() - MAX_TIMESTAMP_SKEW_S - 5)));
+  assertFalse(isFreshTimestamp(String(nowSeconds() + MAX_TIMESTAMP_SKEW_S + 5)));
+});
+
+Deno.test("isFreshTimestamp refuses what is not a number", () => {
+  for (const bad of ["", "soon", "NaN", "Infinity"]) {
+    assertFalse(isFreshTimestamp(bad), `"${bad}" is not a timestamp`);
+  }
+});
+
+Deno.test("importSigningKey refuses a secret without its whsec_ prefix", async () => {
+  assertEquals(await importSigningKey("nope"), null);
+  assertEquals(await importSigningKey(""), null);
+});
+
+Deno.test("matchesAnyCandidate accepts a genuine signature among decoys", async () => {
+  const signed: SignedWebhookRequest = {
+    id: "msg_1",
+    timestamp: String(nowSeconds()),
+    candidateSignatures: [],
+    rawBody: '{"ok":true}',
+  };
+  const genuine = await sign(signed);
+  const key = await importSigningKey(SECRET);
+  assert(key);
+
+  assert(
+    await matchesAnyCandidate(key, {
+      ...signed,
+      candidateSignatures: ["AAAA", genuine],
+    }),
+  );
+});
+
+Deno.test("matchesAnyCandidate refuses a signature computed on another body", async () => {
+  const timestamp = String(nowSeconds());
+  const genuine = await sign({
+    id: "msg_1",
+    timestamp,
+    candidateSignatures: [],
+    rawBody: '{"ok":true}',
+  });
+  const key = await importSigningKey(SECRET);
+  assert(key);
+
+  assertFalse(
+    await matchesAnyCandidate(key, {
+      id: "msg_1",
+      timestamp,
+      candidateSignatures: [genuine],
+      rawBody: '{"ok":false}',
+    }),
+    "the body is part of the signed message",
+  );
+});
+
+Deno.test("matchesAnyCandidate skips an unreadable candidate instead of throwing", async () => {
+  const key = await importSigningKey(SECRET);
+  assert(key);
+
+  assertFalse(
+    await matchesAnyCandidate(key, {
+      id: "msg_1",
+      timestamp: String(nowSeconds()),
+      candidateSignatures: ["!!! not base64 !!!"],
+      rawBody: "{}",
+    }),
+  );
+});

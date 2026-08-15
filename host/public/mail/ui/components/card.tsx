@@ -1,0 +1,195 @@
+// Copyright (C) 2026 Fiber
+//
+// This file is part of scribe and is made available under the PolyForm Shield
+// License 1.0.0. The full terms are in the LICENSE file at the root of this
+// repository, and at https://polyformproject.org/licenses/shield/1.0.0
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+//
+// The one thing you may not do:
+// - Use it to provide any product that competes with scribe, or with any
+//   product Fiber or its affiliates provide using scribe. Products compete
+//   even when they are offered free of charge, through a different kind of
+//   interface, or for a different technical platform.
+//
+// If you pass this software on:
+// - Anyone who receives any part of it from you must also receive these terms,
+//   or the URL above, together with the "Required Notice" line carried by the
+//   LICENSE file.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE COMES AS IS, WITHOUT ANY WARRANTY OR
+// CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
+// OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
+// LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+// Anciennement "AppSection" (renommé 2026-07-29) : entrait en collision de
+// nom avec le vrai Section de @react-email/components (conteneur de layout
+// générique, voir ./section.tsx) alors que ce component-ci est une carte
+// bordurée avec fond, soit un badge centré (`item`) soit une liste de lignes
+// label/valeur (`rows`) rien à voir avec un layout générique.
+
+import React from "react";
+import type { AppColors, AppFonts } from "../types.ts";
+import { AppSection } from "./section.tsx";
+import { makeAppSeparator } from "./separator.tsx";
+import { AppSpacing } from "./spacing.tsx";
+import { makeAppText } from "./text.tsx";
+import { themeMode } from "./theme.ts";
+
+interface CardRowPrefix {
+  icon?: React.ReactNode;
+  title: string;
+  subtitle?: string;
+}
+
+export interface CardRowItem {
+  prefix: CardRowPrefix;
+  suffix: React.ReactNode;
+}
+
+export interface CardItem {
+  label: string;
+  isFlexible?: boolean;
+}
+
+type AppCardProps = { item: CardItem } | { rows: CardRowItem[] };
+
+export function makeAppCard(colors: AppColors, fonts: AppFonts) {
+  const { AppText } = makeAppText(colors, fonts);
+  const { AppSeparator } = makeAppSeparator(colors);
+  const l = colors.light;
+  const d = colors.dark;
+
+  const AppCardStyle = [
+    themeMode({
+      tokens: { container: { light: l.surface.fill, dark: d.surface.fill } },
+      attribute: "data-card",
+      property: "background-color",
+    }),
+    themeMode({
+      tokens: {
+        container: { light: l.outline.border, dark: d.outline.border },
+      },
+      attribute: "data-card",
+      property: "border-color",
+    }),
+    themeMode({
+      tokens: {
+        label: { light: l.text.tertiary, dark: d.text.tertiary },
+        value: { light: l.text.primary, dark: d.text.primary },
+        subtitle: { light: l.text.secondary, dark: d.text.secondary },
+      },
+      attribute: "data-card-el",
+      property: "color",
+    }),
+  ].join("\n");
+
+  const containerStyle: React.CSSProperties = {
+    width: "100%",
+    background: l.surface.fill,
+    borderRadius: "10px",
+    border: `1px solid ${l.outline.border}`,
+    borderCollapse: "separate" as const,
+    overflow: "hidden",
+    paddingLeft: "16px",
+    paddingRight: "16px",
+  };
+
+  function rowPadding(i: number, total: number): string {
+    if (i === 0) return "14px 0px 14px";
+    if (i === total - 1) return "14px 0px 14px";
+    return "14px 0px";
+  }
+
+  function AppCard(props: AppCardProps) {
+    if ("item" in props) {
+      const isFlexible = props.item.isFlexible ?? true;
+      const itemContainerStyle: React.CSSProperties = {
+        ...containerStyle,
+        width: isFlexible ? "100%" : "auto",
+      };
+      return (
+        <AppSection>
+          <table
+            data-card="container"
+            align="center"
+            cellPadding={0}
+            cellSpacing={0}
+            style={itemContainerStyle}
+          >
+            <tbody>
+              <tr>
+                <td style={{ padding: "14px 20px", textAlign: "center" }}>
+                  <AppText.title3 label={props.item.label} />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </AppSection>
+      );
+    }
+
+    return (
+      <AppSection>
+        <table
+          data-card="container"
+          align="center"
+          cellPadding={0}
+          cellSpacing={0}
+          style={containerStyle}
+        >
+          <tbody>
+            {props.rows.map((row, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && (
+                  <tr>
+                    <td colSpan={2} style={{ padding: 0 }}>
+                      <AppSeparator.size0 />
+                    </td>
+                  </tr>
+                )}
+                <tr>
+                  <td style={{ padding: rowPadding(i, props.rows.length) }}>
+                    {row.prefix.icon && (
+                      <div style={{ marginBottom: "4px" }}>
+                        {row.prefix.icon}
+                      </div>
+                    )}
+                    <AppText.body2 label={row.prefix.title} color="primary" />
+                    {row.prefix.subtitle && (
+                      <>
+                        <AppSpacing.size4 />
+                        <AppText.caption1
+                          label={row.prefix.subtitle}
+                          color="secondary"
+                        />
+                      </>
+                    )}
+                  </td>
+                  <td
+                    style={{
+                      padding: rowPadding(i, props.rows.length),
+                      textAlign: "right",
+                    }}
+                  >
+                    {row.suffix}
+                  </td>
+                </tr>
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </AppSection>
+    );
+  }
+
+  return { AppCard, AppCardStyle };
+}

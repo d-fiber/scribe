@@ -1,0 +1,154 @@
+// Copyright (C) 2026 Fiber
+//
+// This file is part of scribe and is made available under the PolyForm Shield
+// License 1.0.0. The full terms are in the LICENSE file at the root of this
+// repository, and at https://polyformproject.org/licenses/shield/1.0.0
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+//
+// The one thing you may not do:
+// - Use it to provide any product that competes with scribe, or with any
+//   product Fiber or its affiliates provide using scribe. Products compete
+//   even when they are offered free of charge, through a different kind of
+//   interface, or for a different technical platform.
+//
+// If you pass this software on:
+// - Anyone who receives any part of it from you must also receive these terms,
+//   or the URL above, together with the "Required Notice" line carried by the
+//   LICENSE file.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE COMES AS IS, WITHOUT ANY WARRANTY OR
+// CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
+// OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
+// LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+import { Env } from "@scribe/host/env.ts";
+import { AccountRoles } from "@scribe/host/dependencies/database/storage/src/access/account_roles.ts";
+import {
+  RealtimeTransports,
+  SyncEventsTransport,
+} from "@scribe/host/dependencies/database/realtime/mod.ts";
+import {
+  StorageTransports,
+  SupabaseStorageTransport,
+} from "@scribe/host/dependencies/database/storage/mod.ts";
+import { AccountRoleResolver } from "@scribe/host/dependencies/security/auth/src/_core/account.ts";
+import { DatabaseAdminRbacSource } from "@scribe/host/dependencies/security/rbac/mod.ts";
+import { HttpLogShipper } from "@scribe/host/dependencies/features/observability/http_log_shipper.ts";
+import { LogShipping } from "@scribe/core/kernel/observability/logs_queue.ts";
+import { AdminRbacResolver } from "@scribe/core/kernel/identity/resolver/rbac_resolver.ts";
+import {
+  extensions,
+  OptionalExtension,
+} from "@scribe/core/runtime/support/extensions/mod.ts";
+import { cacheSettings } from "@scribe/core/runtime/support/settings/cache.ts";
+import { databaseSettings } from "@scribe/core/runtime/support/settings/database.ts";
+import { deviceSettings } from "@scribe/core/runtime/support/settings/device.ts";
+import { firewallSettings } from "@scribe/core/runtime/support/settings/firewall.ts";
+import { httpSettings } from "@scribe/core/runtime/support/settings/http.ts";
+import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
+import { loggingSettings } from "@scribe/core/runtime/support/settings/logging.ts";
+import { queueSettings } from "@scribe/core/runtime/support/settings/queue.ts";
+import { storageSettings } from "@scribe/core/runtime/support/settings/storage.ts";
+import { workerSettings } from "@scribe/core/runtime/support/settings/worker.ts";
+import { SEARCHER_EXTENSION } from "@scribe/host/dependencies/features/searcher/core/extension.ts";
+import { EXTENSION_CRON, EXTENSION_QUEUE } from "./extensions.ts";
+
+cacheSettings.use({ redisUrl: Env.REDIS_URL });
+queueSettings.use({ natsUrl: Env.NATS_URL });
+databaseSettings.use({
+  restUrl: Env.SUPABASE_REST_INTERNAL_URL,
+  anonKey: Env.SUPABASE_ANON_KEY,
+  serviceRoleKey: Env.SUPABASE_SERVICE_ROLE_KEY,
+});
+identitySettings.use({
+  authUrl: Env.SUPABASE_AUTH_INTERNAL_URL,
+  anonKey: Env.SUPABASE_ANON_KEY,
+  serviceRoleKey: Env.SUPABASE_SERVICE_ROLE_KEY,
+  jwtSecret: Deno.env.get("JWT_SECRET"),
+});
+firewallSettings.use({ internalSecret: Env.INTERNAL_SECRET });
+deviceSettings.use({ payloadPrivateKeyHex: Env.DEVICE_PAYLOAD_PRIVATE_KEY });
+httpSettings.use({ port: Env.PORT });
+storageSettings.use({
+  apiUrl: Env.SUPABASE_STORAGE_INTERNAL_URL,
+  serviceRoleKey: Env.SUPABASE_SERVICE_ROLE_KEY,
+  publicBaseUrl: Env.APP_URL,
+  privateBaseUrl: Env.ADMIN_URL,
+});
+
+const WORKER_CALLBACK_PORT = 4747;
+
+const WORKER_HANDSHAKE_ATTEMPTS = 10;
+
+const WORKER_HANDSHAKE_DELAY_MS = 1_000;
+
+const GATEWAY_PUBLIC_NODES = ["admin", "app"];
+
+function publicNodes(): readonly string[] {
+  const declared = Deno.env.get("GATEWAY_PUBLIC_NODES");
+  if (!declared) return GATEWAY_PUBLIC_NODES;
+
+  return declared.split(",").map((name) => name.trim()).filter((name) => name !== "");
+}
+
+workerSettings.use({
+  endpoint: Deno.env.get("WORKER_ENDPOINT") ?? null,
+  callbackUrl: Deno.env.get("WORKER_CALLBACK_URL") ??
+    `http://host.docker.internal:${WORKER_CALLBACK_PORT}`,
+  callbackPort: Number(Deno.env.get("WORKER_CALLBACK_PORT") ?? WORKER_CALLBACK_PORT),
+  handshakeAttempts: WORKER_HANDSHAKE_ATTEMPTS,
+  handshakeDelayMs: WORKER_HANDSHAKE_DELAY_MS,
+  publicNodes: publicNodes(),
+});
+
+function logShipHeaders(): Record<string, string> {
+  const raw = Deno.env.get("LOG_SHIP_HEADERS");
+  if (!raw) return {};
+
+  try {
+    return JSON.parse(raw) as Record<string, string>;
+  } catch (error) {
+    throw new Error(`LOG_SHIP_HEADERS is not valid JSON: ${error}`);
+  }
+}
+
+loggingSettings.use({
+  shipUrl: Deno.env.get("LOG_SHIP_URL") ?? null,
+  shipHeaders: logShipHeaders(),
+});
+
+AdminRbacResolver.use(new DatabaseAdminRbacSource());
+LogShipping.use(new HttpLogShipper());
+AccountRoles.use(AccountRoleResolver);
+RealtimeTransports.use(new SyncEventsTransport());
+StorageTransports.use(new SupabaseStorageTransport());
+
+extensions.register(
+  new OptionalExtension(
+    EXTENSION_QUEUE,
+    () => import("@app/extensions/event_driven/queue/queue.ts"),
+  ),
+);
+
+extensions.register(
+  new OptionalExtension(
+    EXTENSION_CRON,
+    () => import("@app/extensions/event_driven/cron/cron.ts"),
+  ),
+);
+
+extensions.register(
+  new OptionalExtension(
+    SEARCHER_EXTENSION,
+    () => import("@app/extensions/manifest/searcher/search.ts"),
+  ),
+);

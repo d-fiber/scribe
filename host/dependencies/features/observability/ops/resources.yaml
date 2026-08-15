@@ -1,0 +1,18 @@
+services:
+  vector:
+    cpu_shares: 512
+    deploy:
+      resources:
+        limits:
+          memory: "{{vector_mem_limit}}"
+        reservations:
+          memory: "{{vector_mem_res}}"
+  analytics:
+    cpu_shares: 512
+    deploy:
+      resources:
+        limits:
+          cpus: "{{analytics_cpu_limit}}"
+          memory: "{{analytics_mem_limit}}"
+        reservations:
+          memory: "{{analytics_mem_res}}"

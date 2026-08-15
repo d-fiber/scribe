@@ -1,0 +1,4 @@
+services:
+  db:
+    volumes:
+      - "{{sdk_root}}/host/dependencies/security/vpn/db/init:/docker-entrypoint-init-sql/modules/vpn:ro"

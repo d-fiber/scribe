@@ -1,0 +1,73 @@
+{
+  "workspace": [
+    "./core",
+    "./dependencies"
+  ],
+  "tasks": {
+    "check": "deno check **/*.ts",
+    "test": "deno test --allow-env --allow-sys --allow-read --env-file=tests/.env.test",
+    "test:net": "deno test --allow-env --allow-sys --allow-read --allow-net --env-file=tests/.env.test",
+    "preview:hosting": "deno run --config deno.json --allow-net --allow-env --allow-read --env-file=tests/.env.test --watch api/internal/hosting/_preview.ts",
+    "docs:install": "cd api/public/docs && npm install",
+    "docs": "cd api/public/docs && npm run dev"
+  },
+  "fmt": {
+    "lineWidth": 120
+  },
+  "lint": {
+    "plugins": [
+      "./core/.lint/private-module-scope.ts",
+      "./core/.lint/layers.ts",
+      "./core/.lint/project-boundary.ts"
+    ],
+    "rules": {
+      "include": [
+        "private-module-scope/private-module-scope",
+        "layers/layers",
+        "project-boundary/project-boundary"
+      ]
+    }
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  },
+  "imports": {
+    "@scribe/core/": "./core/",
+    "@scribe/host/": "./",
+    "@scribe/protocol/": "../protocol/",
+    "@scribe/sdk": "../sdk/js/mod.ts",
+    "@scribe/sdk/": "../sdk/js/",
+    "@bufbuild/protobuf": "npm:@bufbuild/protobuf@^2",
+    "@bufbuild/protobuf/codegenv2": "npm:@bufbuild/protobuf@^2/codegenv2",
+    "@bufbuild/protobuf/wkt": "npm:@bufbuild/protobuf@^2/wkt",
+    "@std/assert": "jsr:@std/assert@1",
+    "@std/media-types": "jsr:@std/media-types@1",
+    "@std/testing/mock": "jsr:@std/testing@1/mock",
+    "@std/testing/time": "jsr:@std/testing@1/time",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2",
+    "@supabase/postgrest-js": "npm:@supabase/postgrest-js@1",
+    "@opensearch-project/opensearch": "npm:@opensearch-project/opensearch@2",
+    "nodemailer": "npm:nodemailer@6",
+    "bcryptjs": "npm:bcryptjs@2",
+    "libphonenumber-js": "npm:libphonenumber-js@1",
+    "jose": "https://deno.land/x/jose@v4.14.4/index.ts",
+    "blurhash": "npm:blurhash@2",
+    "fast-png": "npm:fast-png@6",
+    "jpeg-js": "npm:jpeg-js@0.4",
+    "@jsquash/webp/decode": "npm:@jsquash/webp@1/decode.js",
+    "@jsquash/webp/encode": "npm:@jsquash/webp@1/encode.js",
+    "hono": "jsr:@hono/hono@4",
+    "ioredis": "npm:ioredis@5",
+    "@nats-io/transport-deno": "jsr:@nats-io/transport-deno@3",
+    "@nats-io/jetstream": "jsr:@nats-io/jetstream@3",
+    "croner": "npm:croner@8",
+    "react": "npm:react@19",
+    "react/jsx-runtime": "npm:react@19/jsx-runtime",
+    "react-dom/server": "npm:react-dom@19/server",
+    "@react-email/render": "npm:@react-email/render@1",
+    "@react-email/components": "npm:@react-email/components@0",
+    "lucide-react": "npm:lucide-react@1",
+    "lucide-react/bundle": "npm:/lucide-react@1/dist/cjs/lucide-react.js"
+  }
+}

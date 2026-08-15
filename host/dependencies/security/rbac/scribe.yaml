@@ -1,0 +1,19 @@
+name: rbac
+title: Roles et permissions des administrateurs.
+optional: false
+
+requires:
+  - security/auth
+
+ops:
+  services: []
+  profile: null
+  gateway: []
+  env: []
+
+sql: null
+protocol: protocol/rbac.proto
+export: ./security/rbac
+
+routes:
+  - api/public/admin/src/team

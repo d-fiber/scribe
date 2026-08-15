@@ -1,0 +1,76 @@
+// Copyright (C) 2026 Fiber
+//
+// This file is part of scribe and is made available under the PolyForm Shield
+// License 1.0.0. The full terms are in the LICENSE file at the root of this
+// repository, and at https://polyformproject.org/licenses/shield/1.0.0
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+//
+// The one thing you may not do:
+// - Use it to provide any product that competes with scribe, or with any
+//   product Fiber or its affiliates provide using scribe. Products compete
+//   even when they are offered free of charge, through a different kind of
+//   interface, or for a different technical platform.
+//
+// If you pass this software on:
+// - Anyone who receives any part of it from you must also receive these terms,
+//   or the URL above, together with the "Required Notice" line carried by the
+//   LICENSE file.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE COMES AS IS, WITHOUT ANY WARRANTY OR
+// CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
+// OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
+// LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+import type {
+  SessionAdmin,
+  SessionUser,
+} from "@scribe/core/contracts/account.ts";
+import { RequestScope } from "@scribe/core/runtime/scope.ts";
+
+export type RequestUser = SessionUser | SessionAdmin | null;
+
+const _RESOLVED_KEY = "identity:user:resolved";
+const _PENDING_KEY = "identity:user:pending";
+
+export class RequestIdentityCache {
+  static resolved(): RequestUser | undefined {
+    return RequestScope.cache.get<RequestUser>(_RESOLVED_KEY);
+  }
+
+  static seed(user: RequestUser): void {
+    RequestScope.cache.set(_RESOLVED_KEY, user);
+  }
+
+  static async remember(
+    resolve: () => Promise<RequestUser>,
+  ): Promise<RequestUser> {
+    const resolved = this.resolved();
+    if (resolved !== undefined) return resolved;
+
+    const pending = RequestScope.cache.get<Promise<RequestUser>>(_PENDING_KEY);
+    if (pending !== undefined) {
+      const user = await pending;
+      RequestScope.cache.set(_RESOLVED_KEY, user);
+      return user;
+    }
+
+    const promise = resolve();
+    RequestScope.cache.set(_PENDING_KEY, promise);
+    const user = await promise;
+    RequestScope.cache.set(_RESOLVED_KEY, user);
+    return user;
+  }
+}
+
+export function currentIdentity(): RequestUser {
+  return RequestIdentityCache.resolved() ?? null;
+}

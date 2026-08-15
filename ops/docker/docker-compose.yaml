@@ -1,0 +1,634 @@
+name: "{{app_name_snake}}"
+services:
+  studio:
+    profiles: ["ops"]
+    container_name: "supabase-studio"
+    build:
+      context: "{{sdk_root}}"
+      dockerfile: "docker/Dockerfile.studio"
+    restart: "unless-stopped"
+    volumes:
+      - "{{sdk_root}}/host/snippets:/app/snippets:Z"
+      - "{{sdk_root}}/host:/app/edge-functions:Z"
+    environment:
+      HOSTNAME: "::"
+      STUDIO_PG_META_URL: "http://meta:8080"
+      POSTGRES_PORT: "5432"
+      POSTGRES_HOST: "db"
+      POSTGRES_DB: "postgres"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PG_META_CRYPTO_KEY: ${PG_META_CRYPTO_KEY}
+      PGRST_DB_SCHEMAS: "public"
+      PGRST_DB_MAX_ROWS: "1000"
+      PGRST_DB_EXTRA_SEARCH_PATH: "public"
+      DEFAULT_ORGANIZATION_NAME: "{{app_name}} Organization"
+      DEFAULT_PROJECT_NAME: "{{app_name}}"
+      OPENAI_API_KEY: "-"
+      SUPABASE_URL: "http://kong:8000"
+      SUPABASE_PUBLIC_URL: ${ADMIN_URL}
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_KEY: ${SERVICE_KEY}
+      AUTH_JWT_SECRET: ${JWT_SECRET}
+      LOGFLARE_API_KEY: ${LOGFLARE_PUBLIC_ACCESS_TOKEN}
+      LOGFLARE_PUBLIC_ACCESS_TOKEN: ${LOGFLARE_PUBLIC_ACCESS_TOKEN}
+      LOGFLARE_PRIVATE_ACCESS_TOKEN: ${LOGFLARE_PRIVATE_ACCESS_TOKEN}
+      LOGFLARE_URL: "http://analytics:4000"
+      NEXT_PUBLIC_ENABLE_LOGS: "false"
+      NEXT_ANALYTICS_BACKEND_PROVIDER: "postgres"
+      SNIPPETS_MANAGEMENT_FOLDER: "/app/snippets"
+      EDGE_FUNCTIONS_MANAGEMENT_FOLDER: "/app/edge-functions"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "fetch(''http://localhost:3000/api/platform/profile'').then((r) => {if (r.status >= 500) throw new Error(r.status)})"',
+        ]
+      interval: "5s"
+      timeout: "10s"
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  caddy:
+    container_name: "supabase-caddy"
+    image: "caddy:2"
+    restart: "unless-stopped"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - "{{sdk_root}}/ops/proxy/caddy:/etc/caddy:z"
+      - "caddy_data:/data"
+      - "caddy_config:/config"
+      - "./{{alchemy_dir}}/docs/dist/landing:/srv/docs/landing"
+      - "./{{alchemy_dir}}/docs/dist/admin:/srv/docs/admin"
+      - "./{{alchemy_dir}}/docs/dist/app:/srv/docs/app"
+      - "./{{alchemy_dir}}/docs/admin.yaml:/srv/docs/admin/admin.yaml:ro"
+      - "./{{alchemy_dir}}/docs/app.yaml:/srv/docs/app/app.yaml:ro"
+      - "./assets:/srv/public-assets:ro"
+    environment:
+      MAIN_DOMAIN: ${MAIN_URL}
+      ADMIN_DOMAIN: ${ADMIN_URL}
+      INTRA_DOMAIN: ${INTRA_URL}
+      APP_DOMAIN: ${APP_URL}
+      DASHBOARD_BASIC_AUTH: ${DASHBOARD_BASIC_AUTH}
+      ACME_EMAIL: ${ACME_EMAIL}
+    command:
+      - /bin/sh
+      - -c
+      - caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+    depends_on:
+      kong:
+        condition: "service_healthy"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  kong:
+    container_name: "supabase-kong"
+    image: "kong/kong:3.9.1"
+    restart: "unless-stopped"
+    volumes:
+      - "./{{alchemy_dir}}/ops/gateway/kong.yml:/home/kong/temp.yml:ro,z"
+      - "{{sdk_root}}/ops/gateway/kong-entrypoint.sh:/home/kong/kong-entrypoint.sh:ro,z"
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: "/usr/local/kong/kong.yml"
+      KONG_PORT_MAPS: "443:8000"
+      KONG_REAL_IP_HEADER: "X-Real-IP"
+      KONG_TRUSTED_IPS: "172.16.0.0/12,192.168.0.0/16,10.0.0.0/8"
+      KONG_DNS_ORDER: "LAST,A,CNAME"
+      KONG_DNS_NOT_FOUND_TTL: "1"
+      KONG_PLUGINS: "request-transformer,cors,key-auth,acl,basic-auth,request-termination,ip-restriction,rate-limiting,post-function,pre-function"
+      KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: "160k"
+      KONG_NGINX_PROXY_PROXY_BUFFERS: "64 160k"
+      KONG_PROXY_ACCESS_LOG: "off"
+      KONG_NGINX_HTTP_KEEPALIVE_TIMEOUT: "15s"
+      KONG_NGINX_HTTP_KEEPALIVE_REQUESTS: "1000"
+      KONG_NGINX_HTTP_CLIENT_HEADER_TIMEOUT: "10s"
+      KONG_NGINX_HTTP_CLIENT_BODY_TIMEOUT: "10s"
+      KONG_NGINX_HTTP_SEND_TIMEOUT: "10s"
+      KONG_NGINX_WORKER_PROCESSES: "auto"
+      KONG_NGINX_WORKER_CONNECTIONS: "8192"
+      KONG_UPSTREAM_KEEPALIVE_IDLE_TIMEOUT: "60"
+      KONG_UPSTREAM_KEEPALIVE_MAX_REQUESTS: "1000"
+      KONG_UPSTREAM_KEEPALIVE_POOL_SIZE: "512"
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_KEY: ${SERVICE_KEY}
+      DASHBOARD_USERNAME: ${DASHBOARD_USERNAME}
+      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
+      ADMIN_APP_KEYS: ${ADMIN_APP_KEYS}
+      APP_KEYS: ${APP_KEYS}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+    entrypoint: "/home/kong/kong-entrypoint.sh"
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: "5s"
+      timeout: "5s"
+      retries: 5
+    networks:
+      default:
+        aliases:
+          - api-gw
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  rest:
+    container_name: "supabase-rest"
+    image: "postgrest/postgrest:v14.8"
+    restart: "unless-stopped"
+    environment:
+      PGRST_DB_URI: "postgres://authenticator:${POSTGRES_PASSWORD}@db:5432/postgres"
+      PGRST_DB_SCHEMAS: "public"
+      PGRST_DB_MAX_ROWS: "1000"
+      PGRST_DB_EXTRA_SEARCH_PATH: "public"
+      PGRST_DB_ANON_ROLE: "anon"
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+      PGRST_DB_POOL: "40"
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      PGRST_APP_SETTINGS_JWT_SECRET: ${JWT_SECRET}
+      PGRST_APP_SETTINGS_JWT_EXP: "3600"
+    command: ["postgrest"]
+    depends_on:
+      db:
+        condition: "service_healthy"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  db-migrate:
+    container_name: "db-migrate"
+    image: "ghcr.io/amacneil/dbmate:2"
+    restart: "no"
+    environment:
+      DATABASE_URL: "postgres://postgres:${POSTGRES_PASSWORD}@db:5432/postgres?sslmode=disable"
+    volumes:
+      - "{{sdk_root}}/host/core/db/migrations:/db/migrations/default:ro"
+      - "./lib/db/migrations:/db/migrations/project:ro"
+      - "{{sdk_root}}/ops/docker/db/run-migrations.sh:/run-migrations.sh:ro"
+    entrypoint: ["/bin/sh", "/run-migrations.sh"]
+    depends_on:
+      db:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+  meta:
+    container_name: "supabase-meta"
+    image: "supabase/postgres-meta:v0.96.3"
+    restart: "unless-stopped"
+    depends_on:
+      db:
+        condition: "service_healthy"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    environment:
+      PG_META_PORT: "8080"
+      PG_META_DB_HOST: "db"
+      PG_META_DB_PORT: "5432"
+      PG_META_DB_NAME: "postgres"
+      PG_META_DB_USER: "supabase_admin"
+      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      CRYPTO_KEY: ${PG_META_CRYPTO_KEY}
+  functions:
+    container_name: "supabase-edge-functions"
+    image: "supabase/edge-runtime:v1.71.2"
+    restart: "unless-stopped"
+    volumes:
+      - "{{sdk_root}}/host:/home/deno/functions:Z"
+      - "./{{alchemy_dir}}/sdk/js:/home/deno/{{alchemy_dir}}/sdk/js:ro"
+      - "./lib/extensions:/home/deno/lib/extensions:ro"
+      - "./lib/public:/home/deno/lib/public:ro"
+      - "deno-cache:/home/deno/.cache/deno"
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      SUPABASE_URL: "http://kong:8000"
+      SUPABASE_AUTH_INTERNAL_URL: "http://auth:9999"
+      SUPABASE_REST_INTERNAL_URL: "http://rest:3000"
+      SUPABASE_STORAGE_INTERNAL_URL: "http://storage:5000"
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_KEY}
+      PENDING_TOKEN_SECRET: ${PENDING_TOKEN_SECRET}
+      SUPABASE_DB_URL: "postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres"
+      SMTP_ACCOUNT_HOST: ${SMTP_ACCOUNT_HOST}
+      SMTP_ACCOUNT_PORT: ${SMTP_ACCOUNT_PORT}
+      SMTP_ACCOUNT_USER: ${SMTP_ACCOUNT_USER}
+      SMTP_ACCOUNT_PASS: ${SMTP_ACCOUNT_PASS}
+      SMTP_NOREPLY_HOST: ${SMTP_NOREPLY_HOST}
+      SMTP_NOREPLY_PORT: ${SMTP_NOREPLY_PORT}
+      SMTP_NOREPLY_USER: ${SMTP_NOREPLY_USER}
+      SMTP_NOREPLY_PASS: ${SMTP_NOREPLY_PASS}
+      VERIFY_JWT: "true"
+      OPENSEARCH_URL: "http://opensearch:9200"
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      GEOCODING_API_KEY: ${GEOCODING_API_KEY}
+      APP_NAME: "{{app_name}}"
+      APP_URL: ${APP_URL}
+      APP_DEEPLINK_SCHEME: ${APP_DEEPLINK_SCHEME}
+      APP_IOS_STORE_URL: ${APP_IOS_STORE_URL}
+      APP_ANDROID_STORE_URL: ${APP_ANDROID_STORE_URL}
+      FCM_PROJECT_ID: ${FCM_PROJECT_ID}
+      FCM_CLIENT_EMAIL: ${FCM_CLIENT_EMAIL}
+      FCM_PRIVATE_KEY: ${FCM_PRIVATE_KEY}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_MESSAGE_SERVICE_SID: ${TWILIO_MESSAGE_SERVICE_SID}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_ADDITIONAL_CLIENT_IDS: ${GOOGLE_ADDITIONAL_CLIENT_IDS}
+      APPLE_CLIENT_ID: ${APPLE_CLIENT_ID}
+      APPLE_CLIENT_SECRET: ${APPLE_CLIENT_SECRET}
+      APPLE_ADDITIONAL_CLIENT_IDS: ${APPLE_ADDITIONAL_CLIENT_IDS}
+      ADMIN_URL: ${ADMIN_URL}
+      MAIN_URL: ${MAIN_URL}
+      INTRA_URL: ${INTRA_URL}
+      HOOK_SEND_EMAIL_SECRETS: ${HOOK_SEND_EMAIL_SECRETS}
+      HOOK_SEND_SMS_SECRETS: ${HOOK_SEND_SMS_SECRETS}
+      HOOK_CUSTOM_ACCESS_TOKEN_SECRETS: ${HOOK_CUSTOM_ACCESS_TOKEN_SECRETS}
+      DEVICE_PAYLOAD_PRIVATE_KEY: ${DEVICE_PAYLOAD_PRIVATE_KEY}
+      ADMIN_APP_KEYS: ${ADMIN_APP_KEYS}
+      APP_KEYS: ${APP_KEYS}
+      REDIS_URL: "redis://:${REDIS_PASSWORD}@redis:6379"
+      NATS_URL: "nats://${NATS_PASSWORD}@nats:4222"
+      WG_EASY_URL: "http://host.docker.internal:51821"
+      WG_EASY_PASSWORD: ${WG_EASY_PASSWORD}
+      GORSE_URL: "http://gorse:8088"
+      GORSE_API_KEY: ${GORSE_API_KEY}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    dns:
+      - "8.8.8.8"
+      - "1.1.1.1"
+    command: ["start", "--main-service", "/home/deno/functions/boot"]
+    depends_on:
+      auth:
+        condition: "service_healthy"
+      kong:
+        condition: "service_healthy"
+      redis:
+        condition: "service_healthy"
+      nats:
+        condition: "service_healthy"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "bash -c 'exec 3<>/dev/tcp/localhost/9000; printf \"GET /_health HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3; head -n 1 <&3 | grep -q \" 200 \"' 2>/dev/null",
+        ]
+      interval: "10s"
+      timeout: "5s"
+      retries: 10
+      start_period: "30s"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  api:
+    build:
+      context: "{{sdk_root}}"
+      dockerfile: "docker/Dockerfile.api"
+    restart: "unless-stopped"
+    volumes:
+      - "{{sdk_root}}/host:/app/scribe/host:ro"
+      - "{{sdk_root}}/sdk:/app/scribe/sdk:ro"
+      - "./{{alchemy_dir}}/sdk/js:/app/{{alchemy_dir}}/sdk/js:ro"
+      - "./lib/api:/app/lib/api:ro"
+      - "./lib/extensions:/app/lib/extensions:ro"
+      - "./lib/public:/app/lib/public:ro"
+      - "deno-cache:/root/.cache/deno"
+    environment:
+      PORT: "3000"
+      WORKER_ENDPOINT: ${WORKER_ENDPOINT}
+      WORKER_CALLBACK_URL: "http://api:4747"
+      WORKER_CALLBACK_PORT: "4747"
+      SMTP_ACCOUNT_HOST: ${SMTP_ACCOUNT_HOST}
+      SMTP_ACCOUNT_PORT: ${SMTP_ACCOUNT_PORT}
+      SMTP_ACCOUNT_USER: ${SMTP_ACCOUNT_USER}
+      SMTP_ACCOUNT_PASS: ${SMTP_ACCOUNT_PASS}
+      SMTP_NOREPLY_HOST: ${SMTP_NOREPLY_HOST}
+      SMTP_NOREPLY_PORT: ${SMTP_NOREPLY_PORT}
+      SMTP_NOREPLY_USER: ${SMTP_NOREPLY_USER}
+      SMTP_NOREPLY_PASS: ${SMTP_NOREPLY_PASS}
+      APP_NAME: "{{app_name}}"
+      JWT_SECRET: ${JWT_SECRET}
+      SUPABASE_URL: "http://kong:8000"
+      SUPABASE_AUTH_INTERNAL_URL: "http://auth:9999"
+      SUPABASE_REST_INTERNAL_URL: "http://rest:3000"
+      SUPABASE_STORAGE_INTERNAL_URL: "http://storage:5000"
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_KEY}
+      PENDING_TOKEN_SECRET: ${PENDING_TOKEN_SECRET}
+      VERIFY_JWT: "true"
+      OPENSEARCH_URL: "http://opensearch:9200"
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      GEOCODING_API_KEY: ${GEOCODING_API_KEY}
+      APP_URL: ${APP_URL}
+      APP_DEEPLINK_SCHEME: ${APP_DEEPLINK_SCHEME}
+      APP_IOS_STORE_URL: ${APP_IOS_STORE_URL}
+      APP_ANDROID_STORE_URL: ${APP_ANDROID_STORE_URL}
+      FCM_PROJECT_ID: ${FCM_PROJECT_ID}
+      FCM_CLIENT_EMAIL: ${FCM_CLIENT_EMAIL}
+      FCM_PRIVATE_KEY: ${FCM_PRIVATE_KEY}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_MESSAGE_SERVICE_SID: ${TWILIO_MESSAGE_SERVICE_SID}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_ADDITIONAL_CLIENT_IDS: ${GOOGLE_ADDITIONAL_CLIENT_IDS}
+      APPLE_CLIENT_ID: ${APPLE_CLIENT_ID}
+      APPLE_CLIENT_SECRET: ${APPLE_CLIENT_SECRET}
+      APPLE_ADDITIONAL_CLIENT_IDS: ${APPLE_ADDITIONAL_CLIENT_IDS}
+      ADMIN_URL: ${ADMIN_URL}
+      MAIN_URL: ${MAIN_URL}
+      INTRA_URL: ${INTRA_URL}
+      HOOK_SEND_EMAIL_SECRETS: ${HOOK_SEND_EMAIL_SECRETS}
+      HOOK_SEND_SMS_SECRETS: ${HOOK_SEND_SMS_SECRETS}
+      HOOK_CUSTOM_ACCESS_TOKEN_SECRETS: ${HOOK_CUSTOM_ACCESS_TOKEN_SECRETS}
+      DEVICE_PAYLOAD_PRIVATE_KEY: ${DEVICE_PAYLOAD_PRIVATE_KEY}
+      ADMIN_APP_KEYS: ${ADMIN_APP_KEYS}
+      APP_KEYS: ${APP_KEYS}
+      REDIS_URL: "redis://:${REDIS_PASSWORD}@redis:6379"
+      NATS_URL: "nats://${NATS_PASSWORD}@nats:4222"
+      WG_EASY_URL: "http://host.docker.internal:51821"
+      WG_EASY_PASSWORD: ${WG_EASY_PASSWORD}
+      WG_SUBNET_PREFIX: "10.8.0."
+      GORSE_URL: "http://gorse:8088"
+      GORSE_API_KEY: ${GORSE_API_KEY}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command:
+      - "run"
+      - "--allow-net"
+      - "--allow-env"
+      - "--allow-read"
+      - "--allow-sys=osRelease,osUptime,hostname"
+      - "--allow-run=ffmpeg"
+      - "--allow-write=/tmp"
+      - "--no-lock"
+      - "--config"
+      - "/app/{{alchemy_dir}}/sdk/js/scribe.container.json"
+      - "/app/scribe/host/boot/server.ts"
+    dns:
+      - "8.8.8.8"
+      - "1.1.1.1"
+    depends_on:
+      auth:
+        condition: "service_healthy"
+      kong:
+        condition: "service_healthy"
+      redis:
+        condition: "service_healthy"
+      nats:
+        condition: "service_healthy"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/app/health || exit 1"]
+      interval: "10s"
+      timeout: "5s"
+      retries: 10
+      start_period: "60s"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  worker:
+    profiles: ["worker"]
+    container_name: "worker"
+    build:
+      context: "{{sdk_root}}"
+      dockerfile: "docker/Dockerfile.api"
+    restart: "unless-stopped"
+    volumes:
+      - "{{sdk_root}}/sdk:/app/scribe/sdk:ro"
+      - "./{{alchemy_dir}}/sdk/js:/app/{{alchemy_dir}}/sdk/js:ro"
+      - "./lib/src:/app/lib/src:ro"
+      - "./lib/contracts:/app/lib/contracts:ro"
+      - "deno-cache:/root/.cache/deno"
+    environment:
+      WORKER_PORT: "8787"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command:
+      - "run"
+      - "--allow-net"
+      - "--allow-env"
+      - "--allow-read"
+      - "--no-lock"
+      - "--config"
+      - "/app/{{alchemy_dir}}/sdk/js/scribe.container.json"
+      - "/app/lib/src/main.ts"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+
+  db:
+    container_name: "supabase-db"
+    build:
+      context: "{{sdk_root}}"
+      dockerfile: "docker/Dockerfile.postgres"
+    restart: "unless-stopped"
+    volumes:
+      - "{{sdk_root}}/host/core/db/provisioning/_supabase.sql:/docker-entrypoint-initdb.d/init-scripts/97-_supabase.sql:Z"
+      - "{{sdk_root}}/host/core/db/provisioning/pooler.sql:/docker-entrypoint-initdb.d/init-scripts/98-pooler.sql:Z"
+      - "{{sdk_root}}/host/core/db/provisioning/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z"
+      - "{{sdk_root}}/host/core/db/provisioning/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z"
+      - "{{sdk_root}}/host/core/db/provisioning/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z"
+      - "{{sdk_root}}/host/core/db/init:/docker-entrypoint-init-sql/caleb:ro"
+      - "./lib/db/init:/docker-entrypoint-init-sql/project:ro"
+      - "{{sdk_root}}/ops/docker/db/run-init-scripts.sh:/docker-entrypoint-initdb.d/init-scripts/999-00_run_init_scripts.sh:Z"
+      - "{{sdk_root}}/postgres:/var/lib/postgresql/data:Z"
+      - "db-config:/etc/postgresql-custom"
+    environment:
+      POSTGRES_HOST: "/var/run/postgresql"
+      SMTP_ENCRYPTION_KEY: "${SMTP_ENCRYPTION_KEY}"
+      API_INTERNAL_URL: "${API_INTERNAL_URL:-http://api:3000}"
+      FUNCTIONS_INTERNAL_URL: "${FUNCTIONS_INTERNAL_URL:-http://functions:9000}"
+      PGBACKREST_STANZA: "{{app_name_snake}}"
+      PGBACKREST_PG1_PATH: "/var/lib/postgresql/data"
+      PGBACKREST_REPO1_TYPE: "${PGBACKREST_REPO_TYPE:-none}"
+      PGBACKREST_REPO1_PATH: "/pgbackrest"
+      PGBACKREST_REPO1_S3_BUCKET: "${PGBACKREST_BUCKET:-}"
+      PGBACKREST_REPO1_S3_ENDPOINT: "${PGBACKREST_ENDPOINT:-}"
+      PGBACKREST_REPO1_S3_REGION: "${PGBACKREST_REGION:-}"
+      PGBACKREST_REPO1_S3_KEY: "${PGBACKREST_KEY:-}"
+      PGBACKREST_REPO1_S3_KEY_SECRET: "${PGBACKREST_KEY_SECRET:-}"
+      PGBACKREST_REPO1_S3_URI_STYLE: "path"
+      PGBACKREST_REPO1_RETENTION_FULL: "2"
+      PGBACKREST_COMPRESS_TYPE: "zst"
+      PGBACKREST_COMPRESS_LEVEL: "3"
+      PGBACKREST_PROCESS_MAX: "4"
+      PGBACKREST_ARCHIVE_ASYNC: "y"
+      PGBACKREST_SPOOL_PATH: "/var/spool/pgbackrest"
+      PGBACKREST_LOG_PATH: "/var/log/pgbackrest"
+      PGBACKREST_START_FAST: "y"
+      PGBACKREST_DELTA: "y"
+      PGPORT: "5432"
+      POSTGRES_PORT: "5432"
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: "postgres"
+      POSTGRES_DB: "postgres"
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXP: "3600"
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+    command:
+      [
+        "postgres",
+        "-c",
+        "config_file=/etc/postgresql/postgresql.conf",
+        "-c",
+        "log_min_messages=fatal",
+        "-c",
+        "max_connections=300",
+        "-c",
+        "shared_buffers=4GB",
+        "-c",
+        "effective_cache_size=12GB",
+      ]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost"]
+      interval: "5s"
+      timeout: "5s"
+      retries: 10
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  supavisor:
+    container_name: "supabase-pooler"
+    image: "supabase/supavisor:2.7.4"
+    restart: "unless-stopped"
+    volumes:
+      - "{{sdk_root}}/ops/pooler/pooler.exs:/etc/pooler/pooler.exs:ro,z"
+    environment:
+      PORT: "4000"
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: "postgres"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_URL: "ecto://supabase_admin:${POSTGRES_PASSWORD}@db:5432/_supabase"
+      CLUSTER_POSTGRES: "true"
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      VAULT_ENC_KEY: ${VAULT_ENC_KEY}
+      API_JWT_SECRET: ${JWT_SECRET}
+      METRICS_JWT_SECRET: ${JWT_SECRET}
+      REGION: "local"
+      ERL_AFLAGS: "-proto_dist inet_tcp"
+      POOLER_TENANT_ID: "{{app_name_snake}}"
+      POOLER_DEFAULT_POOL_SIZE: "80"
+      POOLER_MAX_CLIENT_CONN: "5000"
+      POOLER_POOL_MODE: "transaction"
+      DB_POOL_SIZE: "10"
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        '/app/bin/migrate && /app/bin/supavisor eval "$$(cat /etc/pooler/pooler.exs)" && /app/bin/server',
+      ]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-sSfL",
+          "--head",
+          "-o",
+          "/dev/null",
+          "http://127.0.0.1:4000/api/health",
+        ]
+      interval: "10s"
+      timeout: "5s"
+      retries: 10
+      start_period: "30s"
+    depends_on:
+      db:
+        condition: "service_healthy"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  redis:
+    container_name: "redis"
+    image: "redis:7-alpine"
+    restart: "unless-stopped"
+    volumes:
+      - "redis-data:/data"
+    command:
+      [
+        "redis-server",
+        "--requirepass",
+        "${REDIS_PASSWORD}",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "1gb",
+        "--maxmemory-policy",
+        "volatile-lru",
+      ]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: "5s"
+      timeout: "5s"
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+  nats:
+    container_name: "nats"
+    image: "nats:2-alpine"
+    restart: "unless-stopped"
+    volumes:
+      - "nats-data:/data"
+    command:
+      [
+        "-js",
+        "-sd",
+        "/data",
+        "--auth",
+        "${NATS_PASSWORD}",
+      ]
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8222/healthz"]
+      interval: "5s"
+      timeout: "5s"
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+volumes:
+  db-config: null
+  deno-cache: null
+  caddy_data: null
+  caddy_config: null
+  redis-data: null
+  nats-data: null

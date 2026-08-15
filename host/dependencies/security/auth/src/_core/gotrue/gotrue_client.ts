@@ -1,0 +1,61 @@
+// Copyright (C) 2026 Fiber
+//
+// This file is part of scribe and is made available under the PolyForm Shield
+// License 1.0.0. The full terms are in the LICENSE file at the root of this
+// repository, and at https://polyformproject.org/licenses/shield/1.0.0
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+//
+// The one thing you may not do:
+// - Use it to provide any product that competes with scribe, or with any
+//   product Fiber or its affiliates provide using scribe. Products compete
+//   even when they are offered free of charge, through a different kind of
+//   interface, or for a different technical platform.
+//
+// If you pass this software on:
+// - Anyone who receives any part of it from you must also receive these terms,
+//   or the URL above, together with the "Required Notice" line carried by the
+//   LICENSE file.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE COMES AS IS, WITHOUT ANY WARRANTY OR
+// CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
+// OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
+// LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+export { SocialProvider } from "./primitives.ts";
+export {
+  adminHeaders,
+  anonHeaders,
+  authUrl,
+  parseError,
+  userHeaders,
+} from "@scribe/host/dependencies/security/auth/src/_core/gotrue/transport.ts";
+export type {
+  AuthError,
+  GoTrueSessionResponse,
+  GoTrueUser,
+} from "@scribe/host/dependencies/security/auth/src/_core/gotrue/transport.ts";
+
+import { GoTrueResetPassword } from "@scribe/host/dependencies/security/auth/src/_core/gotrue/reset_password.ts";
+import { GoTrueSession } from "@scribe/host/dependencies/security/auth/src/_core/gotrue/session.ts";
+import { GoTrueSignIn } from "@scribe/host/dependencies/security/auth/src/_core/gotrue/sign_in.ts";
+import { GoTrueSignUp } from "@scribe/host/dependencies/security/auth/src/_core/gotrue/sign_up.ts";
+import { GoTrueUser } from "@scribe/host/dependencies/security/auth/src/_core/gotrue/user.ts";
+
+export class GoTrueClient {
+  readonly signIn: GoTrueSignIn = new GoTrueSignIn();
+  readonly signUp: GoTrueSignUp = new GoTrueSignUp();
+  readonly session: GoTrueSession = new GoTrueSession();
+  readonly resetPassword: GoTrueResetPassword = new GoTrueResetPassword();
+  readonly user: GoTrueUser = new GoTrueUser();
+}
+
+export const goTrue = new GoTrueClient();

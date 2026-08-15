@@ -1,0 +1,24 @@
+name: vpn
+title: Acces VPN des administrateurs (wg-easy).
+optional: true
+
+requires:
+  - security/auth
+
+ops:
+  services:
+    - vpn-admins
+  profile: ops
+  gateway: []
+  env:
+    - VPN_DOMAIN
+
+sql: db/init
+protocol: protocol/vpn.proto
+export: ./security/vpn
+
+routes:
+  - api/public/admin/src/vpn
+  - api/public/admin/src/user/vpn
+  - api/internal/vpn
+  - api/internal/hosting/vpn

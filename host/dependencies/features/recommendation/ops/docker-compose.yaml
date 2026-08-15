@@ -1,0 +1,30 @@
+services:
+  gorse:
+    profiles: ["reco"]
+    container_name: "gorse"
+    image: "zhenghaoz/gorse-in-one:latest"
+    restart: "unless-stopped"
+    environment:
+      GORSE_CACHE_STORE: "redis://:${REDIS_PASSWORD}@redis:6379/1"
+      GORSE_DATA_STORE: "postgres://postgres:${POSTGRES_PASSWORD}@db:5432/gorse?sslmode=disable"
+      GORSE_SERVER_API_KEY: ${GORSE_API_KEY}
+    depends_on:
+      redis:
+        condition: "service_healthy"
+      db:
+        condition: "service_healthy"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://localhost:8088/api/health/live || exit 1",
+        ]
+      interval: "10s"
+      timeout: "5s"
+      retries: 5
+      start_period: "20s"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

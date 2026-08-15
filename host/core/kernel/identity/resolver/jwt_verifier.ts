@@ -1,0 +1,111 @@
+// Copyright (C) 2026 Fiber
+//
+// This file is part of scribe and is made available under the PolyForm Shield
+// License 1.0.0. The full terms are in the LICENSE file at the root of this
+// repository, and at https://polyformproject.org/licenses/shield/1.0.0
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+//
+// The one thing you may not do:
+// - Use it to provide any product that competes with scribe, or with any
+//   product Fiber or its affiliates provide using scribe. Products compete
+//   even when they are offered free of charge, through a different kind of
+//   interface, or for a different technical platform.
+//
+// If you pass this software on:
+// - Anyone who receives any part of it from you must also receive these terms,
+//   or the URL above, together with the "Required Notice" line carried by the
+//   LICENSE file.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE COMES AS IS, WITHOUT ANY WARRANTY OR
+// CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
+// OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
+// LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
+import * as jose from "jose";
+
+const _SYMMETRIC_ALGS = ["HS256"];
+const _ASYMMETRIC_ALGS = ["ES256", "RS256"];
+const _AUDIENCE = "authenticated";
+const _END_USER_ROLE = "authenticated";
+
+function _isEndUserToken(payload: jose.JWTPayload): boolean {
+  const { sub, role } = payload as jose.JWTPayload & { role?: unknown };
+  if (typeof sub !== "string" || sub.length === 0) return false;
+  return role === _END_USER_ROLE;
+}
+
+type RemoteKeySet = ReturnType<typeof jose.createRemoteJWKSet>;
+
+let remoteKeys: RemoteKeySet | null = null;
+
+function remoteKeySet(): RemoteKeySet | null {
+  if (remoteKeys !== null) return remoteKeys;
+
+  try {
+    remoteKeys = jose.createRemoteJWKSet(
+      new URL("/.well-known/jwks.json", identitySettings.get().authUrl),
+    );
+    return remoteKeys;
+  } catch (error) {
+    console.error(
+      "[jwt-verifier] no JWKS endpoint, asymmetric tokens will be refused:",
+      error,
+    );
+    return null;
+  }
+}
+
+type Verification = (jwt: string) => Promise<jose.JWTVerifyResult>;
+
+function verificationFor(alg: string | undefined): Verification | null {
+  if (alg === undefined) return null;
+
+  if (_SYMMETRIC_ALGS.includes(alg)) {
+    const secret = identitySettings.get().jwtSecret;
+    if (!secret) return null;
+
+    const key = new TextEncoder().encode(secret);
+    return (jwt) =>
+      jose.jwtVerify(jwt, key, {
+        audience: _AUDIENCE,
+        algorithms: _SYMMETRIC_ALGS,
+      });
+  }
+
+  if (_ASYMMETRIC_ALGS.includes(alg)) {
+    const keys = remoteKeySet();
+    if (keys === null) return null;
+
+    return (jwt) =>
+      jose.jwtVerify(jwt, keys, {
+        audience: _AUDIENCE,
+        algorithms: _ASYMMETRIC_ALGS,
+      });
+  }
+
+  return null;
+}
+
+export class JwtVerifier {
+  static async verify(jwt: string): Promise<jose.JWTPayload | null> {
+    try {
+      const verification = verificationFor(jose.decodeProtectedHeader(jwt).alg);
+      if (verification === null) return null;
+
+      const { payload } = await verification(jwt);
+      return _isEndUserToken(payload) ? payload : null;
+    } catch {
+      return null;
+    }
+  }
+}

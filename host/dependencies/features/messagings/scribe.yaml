@@ -1,0 +1,19 @@
+name: messagings
+title: Envoi d'e-mails, de SMS et de notifications push.
+optional: true
+
+requires: []
+
+ops:
+  services: []
+  profile: null
+  gateway: []
+  env: []
+
+sql: null
+protocol: protocol/messagings.proto
+export: ./features
+
+routes:
+  - api/internal/messaging
+  - api/public/admin/src/features/messaging

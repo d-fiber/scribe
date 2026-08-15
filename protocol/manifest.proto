@@ -1,0 +1,130 @@
+// Copyright (C) 2026 Fiber
+//
+// This file is part of scribe and is made available under the PolyForm Shield
+// License 1.0.0. The full terms are in the LICENSE file at the root of this
+// repository, and at https://polyformproject.org/licenses/shield/1.0.0
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+//
+// The one thing you may not do:
+// - Use it to provide any product that competes with scribe, or with any
+//   product Fiber or its affiliates provide using scribe. Products compete
+//   even when they are offered free of charge, through a different kind of
+//   interface, or for a different technical platform.
+//
+// If you pass this software on:
+// - Anyone who receives any part of it from you must also receive these terms,
+//   or the URL above, together with the "Required Notice" line carried by the
+//   LICENSE file.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE COMES AS IS, WITHOUT ANY WARRANTY OR
+// CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
+// OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
+// LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+syntax = "proto3";
+
+package scribe.v1;
+
+import "scribe/protocol/common.proto";
+import "scribe/protocol/broadcast.proto";
+
+message RateLimiter {
+  uint32 limit = 1;
+  Time window = 2;
+  Time penalty = 3;
+  Time max_penalty = 4;
+}
+
+message Route {
+  reserved 4;
+  reserved "mount";
+
+  string route_id = 1;
+  Method method = 2;
+  string path = 3;
+  repeated Caller access = 5;
+  RateLimiter rate_limit = 6;
+  repeated Need needs = 7;
+  bool webhook_verified = 8;
+  string rate_limit_key = 9;
+  repeated string required_permissions = 10;
+  string node = 11;
+}
+
+message NodeDeclaration {
+  string name = 1;
+  bool public = 2;
+}
+
+message HookDeclaration {
+  string hook_id = 1;
+  string event = 2;
+  uint32 priority = 3;
+}
+
+message QueueDeclaration {
+  string queue_id = 1;
+  string name = 2;
+  uint32 batch_size = 3;
+  Time visibility_timeout = 4;
+  uint32 max_attempts = 5;
+}
+
+message CronDeclaration {
+  string cron_id = 1;
+  string name = 2;
+  string schedule = 3;
+}
+
+message SearcherDeclaration {
+  string entity = 1;
+  string index = 2;
+  Json mappings = 3;
+  Json settings = 4;
+}
+
+message RealtimeDeclaration {
+  string entity = 1;
+  repeated string events = 2;
+  EventScope scope = 3;
+}
+
+message StorageDeclaration {
+  string folder = 1;
+  string path_template = 2;
+  Size max_size = 3;
+  repeated string mime_types = 4;
+}
+
+message Manifest {
+  string protocol_version = 1;
+  string worker_language = 2;
+  repeated Route routes = 3;
+  repeated HookDeclaration hooks = 4;
+  repeated QueueDeclaration queues = 5;
+  repeated CronDeclaration crons = 6;
+  repeated SearcherDeclaration searchers = 7;
+  repeated RealtimeDeclaration realtimes = 8;
+  repeated StorageDeclaration storages = 9;
+  string sdk_version = 10;
+  repeated NodeDeclaration nodes = 11;
+}
+
+message HandshakeRequest {
+  string host_protocol_version = 1;
+  string host_endpoint = 2;
+  string capability_token = 3;
+}
+
+service Registration {
+  rpc Describe(HandshakeRequest) returns (Manifest);
+}

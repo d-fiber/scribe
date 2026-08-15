@@ -1,0 +1,66 @@
+// Copyright (C) 2026 Fiber
+//
+// This file is part of scribe and is made available under the PolyForm Shield
+// License 1.0.0. The full terms are in the LICENSE file at the root of this
+// repository, and at https://polyformproject.org/licenses/shield/1.0.0
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+//
+// The one thing you may not do:
+// - Use it to provide any product that competes with scribe, or with any
+//   product Fiber or its affiliates provide using scribe. Products compete
+//   even when they are offered free of charge, through a different kind of
+//   interface, or for a different technical platform.
+//
+// If you pass this software on:
+// - Anyone who receives any part of it from you must also receive these terms,
+//   or the URL above, together with the "Required Notice" line carried by the
+//   LICENSE file.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE COMES AS IS, WITHOUT ANY WARRANTY OR
+// CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
+// OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
+// LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+import * as jose from "jose";
+import type { TokenVerifier } from "./token_verifier.ts";
+
+export class AlgorithmTokenVerifier implements TokenVerifier {
+  readonly #byAlgorithm: ReadonlyMap<string, TokenVerifier>;
+
+  constructor(verifiers: readonly TokenVerifier[]) {
+    const byAlgorithm = new Map<string, TokenVerifier>();
+    for (const verifier of verifiers) {
+      for (const algorithm of verifier.algorithms) {
+        byAlgorithm.set(algorithm, verifier);
+      }
+    }
+    this.#byAlgorithm = byAlgorithm;
+  }
+
+  get algorithms(): readonly string[] {
+    return [...this.#byAlgorithm.keys()];
+  }
+
+  verify(token: string): Promise<boolean> {
+    const verifier = this.#verifierFor(token);
+    return verifier === null ? Promise.resolve(false) : verifier.verify(token);
+  }
+
+  #verifierFor(token: string): TokenVerifier | null {
+    try {
+      const { alg } = jose.decodeProtectedHeader(token);
+      return alg === undefined ? null : this.#byAlgorithm.get(alg) ?? null;
+    } catch {
+      return null;
+    }
+  }
+}

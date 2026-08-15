@@ -1,0 +1,30 @@
+name: cla
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cla-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  signed:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Check every contributor has signed
+        run: |
+          python3 .github/cla/check.py \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}"

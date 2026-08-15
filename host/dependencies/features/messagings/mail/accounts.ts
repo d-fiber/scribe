@@ -1,0 +1,255 @@
+// Copyright (C) 2026 Fiber
+//
+// This file is part of scribe and is made available under the PolyForm Shield
+// License 1.0.0. The full terms are in the LICENSE file at the root of this
+// repository, and at https://polyformproject.org/licenses/shield/1.0.0
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+//
+// The one thing you may not do:
+// - Use it to provide any product that competes with scribe, or with any
+//   product Fiber or its affiliates provide using scribe. Products compete
+//   even when they are offered free of charge, through a different kind of
+//   interface, or for a different technical platform.
+//
+// If you pass this software on:
+// - Anyone who receives any part of it from you must also receive these terms,
+//   or the URL above, together with the "Required Notice" line carried by the
+//   LICENSE file.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE COMES AS IS, WITHOUT ANY WARRANTY OR
+// CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
+// OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
+// LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+import { rest } from "@scribe/host/dependencies/database/rest/rest.ts";
+import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
+import { Repository } from "./core/repository.ts";
+
+export const FOUNDATION_SMTP_ACCOUNTS = {
+  account: "account",
+  noreply: "noreply",
+} as const;
+
+export interface SmtpAccountCredentials {
+  readonly name: string;
+  readonly host: string;
+  readonly port: number;
+  readonly username: string;
+  readonly password: string;
+}
+
+export interface SmtpAccount {
+  readonly name: string;
+  readonly host: string | null;
+  readonly port: number | null;
+  readonly username: string | null;
+  readonly isConfigured: boolean;
+  readonly isActive: boolean;
+  readonly createdAt: number;
+  readonly updatedAt: number;
+}
+
+export interface UpsertSmtpAccountInput {
+  readonly name: string;
+  readonly host: string;
+  readonly port: number;
+  readonly username: string;
+  readonly password: string;
+}
+
+export enum SmtpAccountError {
+  NotFound = "not_found",
+  Incomplete = "incomplete",
+  Reserved = "reserved",
+  InUse = "in_use",
+  Backend = "backend",
+}
+
+export interface SmtpAccountService {
+  credentials(
+    name: string,
+  ): Promise<Result<SmtpAccountCredentials, SmtpAccountError>>;
+  list(): Promise<Result<SmtpAccount[], SmtpAccountError>>;
+  get(name: string): Promise<Result<SmtpAccount, SmtpAccountError>>;
+  upsert(
+    input: UpsertSmtpAccountInput,
+  ): Promise<Result<SmtpAccount, SmtpAccountError>>;
+  setActive(
+    name: string,
+    isActive: boolean,
+  ): Promise<Result<void, SmtpAccountError>>;
+  clearCredentials(name: string): Promise<Result<void, SmtpAccountError>>;
+  remove(name: string): Promise<Result<void, SmtpAccountError>>;
+}
+
+interface CredentialsRow {
+  name: string;
+  host: string | null;
+  port: number | null;
+  username: string | null;
+  password: string | null;
+}
+
+interface SummaryRow {
+  name: string;
+  host: string | null;
+  port: number | null;
+  username: string | null;
+  is_configured: boolean;
+  is_active: boolean;
+  created_at: number;
+  updated_at: number;
+}
+
+type DeleteOutcome = "deleted" | "not_found" | "in_use" | "reserved";
+
+const DELETE_FAILURES: Record<string, SmtpAccountError> = {
+  not_found: SmtpAccountError.NotFound,
+  in_use: SmtpAccountError.InUse,
+  reserved: SmtpAccountError.Reserved,
+};
+
+export class SmtpAccountRepository
+  extends Repository<SmtpAccountError>
+  implements SmtpAccountService
+{
+  protected override get backendError(): SmtpAccountError {
+    return SmtpAccountError.Backend;
+  }
+
+  credentials(
+    name: string,
+  ): Promise<Result<SmtpAccountCredentials, SmtpAccountError>> {
+    return this.guard(async () => {
+      const { data, error } = await rest.rpc<CredentialsRow[]>(
+        "smtp_account_credentials",
+        { p_name: name },
+      );
+      if (error) throw error;
+
+      const row = (data ?? [])[0];
+      if (!row) return new Failure(SmtpAccountError.NotFound);
+
+      if (
+        row.host === null ||
+        row.port === null ||
+        row.username === null ||
+        row.password === null
+      ) {
+        return new Failure(SmtpAccountError.Incomplete);
+      }
+
+      return new OK({
+        name: row.name,
+        host: row.host,
+        port: row.port,
+        username: row.username,
+        password: row.password,
+      });
+    });
+  }
+
+  list(): Promise<Result<SmtpAccount[], SmtpAccountError>> {
+    return this.guard(async () => {
+      const rows = await this.#summaries("smtp_accounts_list");
+      return new OK(rows.map((row) => this.#domain(row)));
+    });
+  }
+
+  get(name: string): Promise<Result<SmtpAccount, SmtpAccountError>> {
+    return this.guard(async () => {
+      const row = (
+        await this.#summaries("smtp_account_summary", { p_name: name })
+      )[0];
+      return row
+        ? new OK(this.#domain(row))
+        : new Failure(SmtpAccountError.NotFound);
+    });
+  }
+
+  upsert(
+    input: UpsertSmtpAccountInput,
+  ): Promise<Result<SmtpAccount, SmtpAccountError>> {
+    return this.guard(async () => {
+      const { error } = await rest.rpc("upsert_smtp_account", {
+        p_name: input.name,
+        p_host: input.host,
+        p_port: input.port,
+        p_username: input.username,
+        p_password: input.password,
+      });
+      if (error) throw error;
+
+      return this.get(input.name);
+    });
+  }
+
+  setActive(
+    name: string,
+    isActive: boolean,
+  ): Promise<Result<void, SmtpAccountError>> {
+    return this.#toggle("set_smtp_account_active", {
+      p_name: name,
+      p_is_active: isActive,
+    });
+  }
+
+  clearCredentials(name: string): Promise<Result<void, SmtpAccountError>> {
+    return this.#toggle("clear_smtp_account_credentials", { p_name: name });
+  }
+
+  remove(name: string): Promise<Result<void, SmtpAccountError>> {
+    return this.guard(async () => {
+      const { data, error } = await rest.rpc("delete_smtp_account", {
+        p_name: name,
+      });
+      if (error) throw error;
+
+      const failure = DELETE_FAILURES[data as unknown as DeleteOutcome];
+      return failure ? new Failure(failure) : new OK();
+    });
+  }
+
+  #toggle(
+    fn: string,
+    args: Record<string, unknown>,
+  ): Promise<Result<void, SmtpAccountError>> {
+    return this.guard(async () => {
+      const { data, error } = await rest.rpc(fn, args);
+      if (error) throw error;
+
+      return data ? new OK() : new Failure(SmtpAccountError.NotFound);
+    });
+  }
+
+  async #summaries(
+    fn: string,
+    args?: Record<string, unknown>,
+  ): Promise<SummaryRow[]> {
+    const { data, error } = await rest.rpc<SummaryRow[]>(fn, args);
+    if (error) throw error;
+    return data ?? [];
+  }
+
+  #domain(row: SummaryRow): SmtpAccount {
+    return {
+      name: row.name,
+      host: row.host,
+      port: row.port,
+      username: row.username,
+      isConfigured: row.is_configured,
+      isActive: row.is_active,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }
+}
