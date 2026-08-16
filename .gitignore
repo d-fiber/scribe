@@ -1,9 +1,10 @@
 .DS_Store
 .env
 
-# Runtime data directories a rendered project creates at its root. Anchored,
-# because unanchored they also swallowed host/dependencies/database/storage
-# and its generated bindings, which are source.
+/tools/linux/
+/tools/macos/
+/tools/windows/
+
 /postgres/
 /storage/
 /opensearch/
