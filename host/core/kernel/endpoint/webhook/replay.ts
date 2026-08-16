@@ -33,13 +33,15 @@
 import { kv } from "@scribe/core/runtime/redis/mod.ts";
 import { MAX_TIMESTAMP_SKEW_S } from "./signed_request.ts";
 
+export const CLAIM_TTL_S = 2 * MAX_TIMESTAMP_SKEW_S;
+
 export async function claimWebhookId(id: string): Promise<boolean> {
   try {
     const claimed = await kv().set(
       `webhook:seen:${id}`,
       "1",
       "EX",
-      MAX_TIMESTAMP_SKEW_S,
+      CLAIM_TTL_S,
       "NX",
     );
     return claimed === "OK";

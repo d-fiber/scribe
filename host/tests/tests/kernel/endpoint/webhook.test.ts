@@ -40,8 +40,15 @@ import {
   readSignedRequest,
   type SignedWebhookRequest,
 } from "@scribe/core/kernel/endpoint/webhook/signed_request.ts";
+import "@scribe/core/testing/settings.ts";
+import {
+  CLAIM_TTL_S,
+  claimWebhookId,
+} from "@scribe/core/kernel/endpoint/webhook/replay.ts";
+import { kv, type Kv } from "@scribe/core/runtime/redis/mod.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 import { assert, assertEquals, assertFalse } from "@std/assert";
+import { stub } from "@std/testing/mock";
 
 const SECRET_BYTES = new Uint8Array(32).fill(7);
 const SECRET = `whsec_${btoa(String.fromCharCode(...SECRET_BYTES))}`;
@@ -200,5 +207,46 @@ Deno.test("matchesAnyCandidate skips an unreadable candidate instead of throwing
       candidateSignatures: ["!!! not base64 !!!"],
       rawBody: "{}",
     }),
+  );
+});
+
+Deno.test("the replay claim outlives every timestamp the freshness check accepts", async () => {
+  const seen: number[] = [];
+  const kvSet = stub(
+    kv(),
+    "set",
+    ((_key: string, _value: string, _mode: string, ttl: number) => {
+      seen.push(ttl);
+      return Promise.resolve("OK" as const);
+    }) as unknown as Kv["set"],
+  );
+
+  try {
+    assert(await claimWebhookId("msg_replay"));
+  } finally {
+    kvSet.restore();
+  }
+
+  assertEquals(seen, [CLAIM_TTL_S]);
+  assert(
+    CLAIM_TTL_S >= 2 * MAX_TIMESTAMP_SKEW_S,
+    "a delivery timestamped MAX_TIMESTAMP_SKEW_S in the future is accepted now " +
+      "and still accepted MAX_TIMESTAMP_SKEW_S from now, so a claim that only " +
+      "lives one skew leaves the tail of that window unprotected",
+  );
+});
+
+Deno.test("a future-dated delivery stays claimed for as long as it stays fresh", () => {
+  const signedAt = nowSeconds() + MAX_TIMESTAMP_SKEW_S;
+  const firstDeliveryAt = nowSeconds();
+  const lastFreshAt = signedAt + MAX_TIMESTAMP_SKEW_S;
+
+  assert(
+    isFreshTimestamp(String(signedAt)),
+    "the freshness check accepts a timestamp a full skew in the future",
+  );
+  assert(
+    firstDeliveryAt + CLAIM_TTL_S >= lastFreshAt,
+    "the claim must still exist when the last acceptable replay arrives",
   );
 });
