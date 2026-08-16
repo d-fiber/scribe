@@ -4,6 +4,22 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 0.1.3 (2026-08-16)
+
+Component versions: @scribe/core 0.1.2
+
+### Security
+
+- redact log keys by word instead of by substring (393e7762)
+- keep Object.prototype out of the table owner registry (1651edbf)
+- quote the literals the worker puts in a PostgREST or group (483c17bf)
+- hold a webhook claim for its whole replay window (6bf13d54)
+
+### Performance
+
+- decrypt a repeated device payload once, not once per request (7abcfe75)
+- stop rebuilding a URL to read the path and the query (cc552e12)
+
 ## 0.1.2 (2026-08-16)
 
 Component versions: @scribe/core 0.1.1, @dependencies/core 0.1.2
