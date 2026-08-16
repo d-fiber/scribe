@@ -45,6 +45,13 @@ import {
 } from "@scribe/sdk/gen/scribe/host/dependencies/database/rest/protocol/rest_pb.ts";
 import { PostgrestClients } from "@scribe/core/clients/database/client.ts";
 import { ownerOf } from "@scribe/core/clients/database/schema.ts";
+import {
+  assertPlainColumn,
+  keywordLiteral,
+  quoteFilterList,
+  quoteFilterLiteral,
+  UnsafeFilterError,
+} from "@scribe/core/clients/database/query/literal.ts";
 import { ownerScope } from "@scribe/core/clients/database/query/scope.ts";
 import { decodeJson, encodeJson } from "../json.ts";
 
@@ -87,28 +94,51 @@ function applyOperator(builder: any, filter: Filter): any {
   }
 }
 
+const OPERATOR_NAMES: Partial<Record<FilterOperator, string>> = {
+  [FilterOperator.EQ]: "eq",
+  [FilterOperator.NEQ]: "neq",
+  [FilterOperator.GT]: "gt",
+  [FilterOperator.GTE]: "gte",
+  [FilterOperator.LT]: "lt",
+  [FilterOperator.LTE]: "lte",
+  [FilterOperator.LIKE]: "like",
+  [FilterOperator.ILIKE]: "ilike",
+  [FilterOperator.IN]: "in",
+  [FilterOperator.IS]: "is",
+  [FilterOperator.CONTAINS]: "cs",
+  [FilterOperator.CONTAINED_BY]: "cd",
+  [FilterOperator.OVERLAPS]: "ov",
+  [FilterOperator.TEXT_SEARCH]: "fts",
+};
+
 function operatorName(operator: FilterOperator): string {
-  const names: Partial<Record<FilterOperator, string>> = {
-    [FilterOperator.EQ]: "eq",
-    [FilterOperator.NEQ]: "neq",
-    [FilterOperator.GT]: "gt",
-    [FilterOperator.GTE]: "gte",
-    [FilterOperator.LT]: "lt",
-    [FilterOperator.LTE]: "lte",
-    [FilterOperator.LIKE]: "like",
-    [FilterOperator.ILIKE]: "ilike",
-    [FilterOperator.IN]: "in",
-    [FilterOperator.IS]: "is",
-  };
-  return names[operator] ?? "eq";
+  const name = OPERATOR_NAMES[operator];
+  if (name === undefined) {
+    throw new UnsafeFilterError(`operator ${operator} has no disjunction form`);
+  }
+  return name;
+}
+
+function disjunctionTerm(filter: Filter): string {
+  const column = assertPlainColumn(filter.column);
+  const operator = operatorName(filter.operator);
+  const value = decodeJson(filter.value);
+  const negation = filter.negated ? "not." : "";
+
+  if (filter.operator === FilterOperator.IS) {
+    return `${column}.${negation}is.${keywordLiteral(value)}`;
+  }
+
+  if (filter.operator === FilterOperator.IN) {
+    const values = Array.isArray(value) ? value : [value];
+    return `${column}.${negation}in.${quoteFilterList(values)}`;
+  }
+
+  return `${column}.${negation}${operator}.${quoteFilterLiteral(value)}`;
 }
 
 function disjunction(group: FilterGroup): string {
-  return group.filters
-    .map((filter) =>
-      `${filter.column}.${operatorName(filter.operator)}.${String(decodeJson(filter.value))}`
-    )
-    .join(",");
+  return group.filters.map(disjunctionTerm).join(",");
 }
 
 function applyFilters(builder: any, where: FilterGroup | undefined): any {
