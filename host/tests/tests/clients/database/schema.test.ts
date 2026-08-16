@@ -30,16 +30,31 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-const owners = new Map<string, string>();
+import { ownerOf, registerTableOwners } from "@scribe/core/clients/database/schema.ts";
+import { assertEquals } from "@std/assert";
 
-export function registerTableOwners(
-  tableOwners: Record<string, string>,
-): void {
-  for (const [table, column] of Object.entries(tableOwners)) {
-    owners.set(table, column);
+Deno.test("a table nobody registered has no owner column", () => {
+  registerTableOwners({ t__orders: "user_id" });
+
+  assertEquals(ownerOf("t__orders"), "user_id");
+  assertEquals(ownerOf("t__unregistered"), null);
+});
+
+Deno.test("an Object.prototype member is not mistaken for an owner column", () => {
+  registerTableOwners({ t__orders: "user_id" });
+
+  for (const inherited of ["constructor", "toString", "valueOf", "hasOwnProperty", "__proto__"]) {
+    assertEquals(
+      ownerOf(inherited),
+      null,
+      `${inherited} must not resolve through the prototype chain`,
+    );
   }
-}
+});
 
-export function ownerOf(table: string): string | null {
-  return owners.get(table) ?? null;
-}
+Deno.test("a registered owner is always a string, never a borrowed function", () => {
+  registerTableOwners({ toString: "user_id" });
+
+  assertEquals(typeof ownerOf("toString"), "string");
+  assertEquals(ownerOf("toString"), "user_id");
+});
