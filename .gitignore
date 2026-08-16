@@ -1,6 +1,13 @@
 .DS_Store
 .env
 
+# The tools binaries, fetched by tools/install.sh from a release. Committing
+# them would add ~300 MB to the history on every release, and the compiled docs
+# is over the 100 MB GitHub accepts for a single file.
+/tools/linux/
+/tools/macos/
+/tools/windows/
+
 # Runtime data directories a rendered project creates at its root. Anchored,
 # because unanchored they also swallowed host/dependencies/database/storage
 # and its generated bindings, which are source.
