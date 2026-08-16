@@ -31,27 +31,6 @@
 # This header is a summary written for convenience. Where it differs from the
 # LICENSE file, the LICENSE file governs.
 
-# Puts the scribe tools in place.
-#
-# The binaries are not committed. A compiled docs is 114 MB on Linux, which is
-# over the 100 MB a file may weigh on GitHub, and committing a fresh set on
-# every release would grow the repository by roughly 300 MB each time, forever.
-# They live as assets on a release instead, and this script fetches the pair
-# that matches the machine it runs on.
-#
-# Two ways to run it:
-#
-#   From a clone, which is the usual one:
-#     sh tools/install.sh
-#
-#   Without a clone, the way oh-my-zsh is installed. It clones scribe first,
-#   into ./scribe unless SCRIBE_DIRECTORY says otherwise:
-#     sh -c "$(curl -fsSL https://raw.githubusercontent.com/d-fiber/scribe/main/tools/install.sh)"
-#
-# While the repository is private both the clone and the download need
-# credentials, and the script uses the GitHub CLI for them. Once scribe is
-# public, curl alone is enough and gh stops being needed.
-
 set -eu
 
 REPOSITORY="${SCRIBE_REPOSITORY:-d-fiber/scribe}"
@@ -64,12 +43,6 @@ fail() { printf '%s\n' "$*" >&2; exit 1; }
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
-# Which set of binaries this machine needs.
-#
-# The release carries one build per operating system and no more, because that
-# is what the build matrix produces: Linux x86_64, macOS arm64, Windows x86_64.
-# An Intel Mac has no build of its own and is told so rather than handed an
-# executable it cannot run.
 detect_platform() {
   system=$(uname -s)
   machine=$(uname -m)
@@ -95,10 +68,6 @@ detect_platform() {
   esac
 }
 
-# The root of the checkout this script should install into.
-#
-# Run from a clone, that is the clone. Run through curl there is no clone at
-# all, so one is made first, which is what makes the one-line form work.
 is_scribe_checkout() {
   [ -d "$1/.git" ] && [ -d "$1/tools" ] && [ -f "$1/VERSION" ] && [ -d "$1/host" ]
 }
@@ -106,9 +75,6 @@ is_scribe_checkout() {
 locate_or_clone() {
   candidate=""
 
-  # Piped through sh, $0 is "sh" and dirname gives ".", so the parent of the
-  # script tells us nothing. Every candidate is checked for the shape of a
-  # scribe checkout rather than for a .git directory, which any repository has.
   if [ -n "${SCRIBE_DIRECTORY:-}" ]; then
     candidate="$SCRIBE_DIRECTORY"
   elif is_scribe_checkout "$(dirname "$0")/.."; then
@@ -142,8 +108,6 @@ locate_or_clone() {
   fi
 }
 
-# Assets are named <tool>-<platform>[.exe] on the release, and land as
-# tools/<platform>/<tool>[.exe] in the checkout.
 fetch() {
   destination="$ROOT/tools/$PLATFORM"
   mkdir -p "$destination"
