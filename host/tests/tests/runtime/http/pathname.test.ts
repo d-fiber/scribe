@@ -36,7 +36,7 @@ import {
   pathnameOf,
   searchOf,
   stripPrefix,
-} from "@scribe/core/kernel/http/serve/pathname.ts";
+} from "@scribe/core/runtime/http/pathname.ts";
 import { assertEquals } from "@std/assert";
 
 const ORIGIN = "http://api.test";

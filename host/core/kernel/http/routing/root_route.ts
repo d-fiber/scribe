@@ -31,7 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { InternalService } from "@scribe/core/kernel/http/routing/internal_services.ts";
-import { firstSegmentOf, stripPrefix } from "@scribe/core/kernel/http/serve/pathname.ts";
+import { firstSegmentOf, stripPrefix } from "@scribe/core/runtime/http/pathname.ts";
 
 export const ADMIN_PATH_SEGMENT = "admin";
 export const APP_PATH_SEGMENT = "app";

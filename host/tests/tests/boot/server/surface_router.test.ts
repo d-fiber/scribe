@@ -33,7 +33,7 @@
 import { SurfaceRegistry } from "@scribe/host/boot/server/surface_registry.ts";
 import { SurfaceRouter } from "@scribe/host/boot/server/surface_router.ts";
 import { INTERNAL_SEGMENTS } from "@scribe/core/kernel/http/routing/root_route.ts";
-import { pathnameOf } from "@scribe/core/kernel/http/serve/pathname.ts";
+import { pathnameOf } from "@scribe/core/runtime/http/pathname.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 import { assertEquals } from "@std/assert";
 import { Hono } from "hono";

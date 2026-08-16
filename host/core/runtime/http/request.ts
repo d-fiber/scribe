@@ -33,7 +33,10 @@
 import { jwtPayloadUnverified } from "@scribe/core/runtime/support/crypto/jwt_payload.ts";
 import { resolveClientIp } from "@scribe/core/runtime/http/ip/mod.ts";
 import { MAX_BODY_BYTES } from "@scribe/core/runtime/http/limits.ts";
+import { pathnameOf, searchOf } from "@scribe/core/runtime/http/pathname.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
+
+const SEARCH_PARAMS_KEY = "http:search-params";
 
 class RequestReader {
   private get req(): Request {
@@ -72,11 +75,20 @@ class RequestReader {
   }
 
   path(): string {
-    return new URL(this.req.url).pathname;
+    return pathnameOf(this.req.url);
+  }
+
+  searchParams(): URLSearchParams {
+    const cached = RequestScope.cache.get<URLSearchParams>(SEARCH_PARAMS_KEY);
+    if (cached !== undefined) return cached;
+
+    const params = new URLSearchParams(searchOf(this.req.url));
+    RequestScope.cache.set(SEARCH_PARAMS_KEY, params);
+    return params;
   }
 
   query(key: string): string | null {
-    return new URL(this.req.url).searchParams.get(key);
+    return this.searchParams().get(key);
   }
 
   method(): string {

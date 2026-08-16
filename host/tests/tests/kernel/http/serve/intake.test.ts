@@ -31,7 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { readBoundedBody } from "@scribe/core/kernel/http/serve/body_reader.ts";
-import { stripPrefix } from "@scribe/core/kernel/http/serve/pathname.ts";
+import { stripPrefix } from "@scribe/core/runtime/http/pathname.ts";
 import { rewriteRequest } from "@scribe/core/kernel/http/serve/request_rewrite.ts";
 import {
   admitUpload,

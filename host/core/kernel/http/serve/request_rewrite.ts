@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { originOf, searchOf } from "@scribe/core/kernel/http/serve/pathname.ts";
+import { originOf, searchOf } from "@scribe/core/runtime/http/pathname.ts";
 
 function bytesOnly(bodyBytes: Uint8Array): ArrayBuffer {
   const coversWholeBuffer = bodyBytes.byteOffset === 0 &&
