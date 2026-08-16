@@ -30,6 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { DEVICE_PAYLOAD_MAX_AGE_MS, DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS } from "./freshness.ts";
+import { PlaintextCache } from "./plaintext_cache.ts";
 import { devicePayloadPrivateKey } from "./private_key.ts";
 
 const EPHEMERAL_KEY_BYTES = 32;
@@ -37,6 +39,11 @@ const NONCE_BYTES = 12;
 const GCM_TAG_BYTES = 16;
 
 const HKDF_INFO = new TextEncoder().encode("device-payload-v1");
+
+const PLAINTEXT_TTL_MS = DEVICE_PAYLOAD_MAX_AGE_MS +
+  DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS;
+
+const plaintexts = new PlaintextCache(PLAINTEXT_TTL_MS);
 
 interface SealedBox {
   readonly ephemeralPublicKey: Uint8Array<ArrayBuffer>;
@@ -46,20 +53,45 @@ interface SealedBox {
 
 export class DevicePayloadCipher {
   static async decrypt(encrypted: string): Promise<unknown | null> {
-    const sealed = openSealedBox(encrypted);
-    if (sealed === null) return null;
+    const now = Date.now();
 
-    try {
-      const aesKey = await deriveAesKey(sealed.ephemeralPublicKey);
-      const decrypted = await crypto.subtle.decrypt(
-        { name: "AES-GCM", iv: sealed.nonce },
-        aesKey,
-        sealed.cipherWithTag,
-      );
-      return JSON.parse(new TextDecoder().decode(decrypted));
-    } catch {
-      return null;
-    }
+    const cached = plaintexts.lookup(encrypted, now);
+    if (cached !== undefined) return objectFrom(cached);
+
+    const plaintext = await decipher(encrypted);
+    plaintexts.remember(encrypted, plaintext, now);
+    return objectFrom(plaintext);
+  }
+
+  static get cachedPlaintexts(): number {
+    return plaintexts.size;
+  }
+}
+
+function objectFrom(plaintext: string | null): unknown | null {
+  if (plaintext === null) return null;
+
+  try {
+    return JSON.parse(plaintext);
+  } catch {
+    return null;
+  }
+}
+
+async function decipher(encrypted: string): Promise<string | null> {
+  const sealed = openSealedBox(encrypted);
+  if (sealed === null) return null;
+
+  try {
+    const aesKey = await deriveAesKey(sealed.ephemeralPublicKey);
+    const decrypted = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: sealed.nonce },
+      aesKey,
+      sealed.cipherWithTag,
+    );
+    return new TextDecoder().decode(decrypted);
+  } catch {
+    return null;
   }
 }
 

@@ -40,6 +40,7 @@ import {
 import { DevicePayloadValidator } from "@scribe/core/runtime/device/payload/validator.ts";
 import { installValkeryMock } from "@scribe/core/testing/runtime/redis.ts";
 import { assert, assertEquals } from "@std/assert";
+import { spy } from "@std/testing/mock";
 
 const BINDING = "user-1";
 
@@ -368,5 +369,87 @@ Deno.test("validator: a missing required field is refused", () => {
 Deno.test("validator: a non-object is refused without throwing", () => {
   for (const raw of [null, undefined, 42, "payload", []]) {
     assertEquals(DevicePayloadValidator.validate(raw, BINDING), null);
+  }
+});
+
+Deno.test("cache: the same payload derives its key once, not once per request", async () => {
+  const kv = installValkeryMock();
+  const sealed = await seal(nominalPayload());
+  const derive = spy(crypto.subtle, "deriveBits");
+  try {
+    assert(await decryptRequestDevice(sealed, BINDING));
+    const afterFirst = derive.calls.length;
+
+    for (let i = 0; i < 5; i++) assert(await decryptRequestDevice(sealed, BINDING));
+
+    assertEquals(afterFirst, 1, "the first presentation pays the X25519 derivation");
+    assertEquals(
+      derive.calls.length,
+      afterFirst,
+      "five more presentations of the identical payload must not touch the curve again",
+    );
+  } finally {
+    derive.restore();
+    kv.restore();
+  }
+});
+
+Deno.test("cache: each request gets its own device object, never a shared one", async () => {
+  const kv = installValkeryMock();
+  try {
+    const sealed = await seal(nominalPayload());
+
+    const first = await decryptRequestDevice(sealed, BINDING);
+    const second = await decryptRequestDevice(sealed, BINDING);
+    assert(first && second);
+
+    assert(first !== second, "a shared object would let one request corrupt the next");
+    (first as { model: string }).model = "tampered";
+    assertEquals(second.model, "iPhone15,2");
+
+    const third = await decryptRequestDevice(sealed, BINDING);
+    assertEquals(third?.model, "iPhone15,2", "the cache must not have kept the mutation");
+  } finally {
+    kv.restore();
+  }
+});
+
+Deno.test("cache: a payload that is too old is still refused on a cache hit", async () => {
+  const kv = installValkeryMock();
+  try {
+    const stale = await seal(
+      nominalPayload({ iat: Date.now() - DEVICE_PAYLOAD_MAX_AGE_MS - 60_000 }),
+    );
+
+    assertEquals(await decryptRequestDevice(stale, BINDING), null);
+    assertEquals(
+      await decryptRequestDevice(stale, BINDING),
+      null,
+      "freshness is re-checked per request, it is not part of what is cached",
+    );
+  } finally {
+    kv.restore();
+  }
+});
+
+Deno.test("cache: a payload sealed for another binding stays refused when cached", async () => {
+  const kv = installValkeryMock();
+  try {
+    const other = await seal(nominalPayload({ binding: "user-2" }));
+
+    assertEquals(
+      await decryptRequestDevice(other, BINDING),
+      null,
+      "the binding is checked against the caller, and this one does not match",
+    );
+
+    const rightful = await decryptRequestDevice(other, "user-2");
+    assert(
+      rightful,
+      "the cache holds the plaintext, never a verdict: the rightful caller still passes",
+    );
+    assertEquals(rightful.binding, "user-2");
+  } finally {
+    kv.restore();
   }
 });
