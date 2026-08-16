@@ -374,6 +374,7 @@ services:
       - "host.docker.internal:host-gateway"
     command:
       - "run"
+      - "--v8-flags=--max-old-space-size={{api_max_old_space}}"
       - "--allow-net"
       - "--allow-env"
       - "--allow-read"
