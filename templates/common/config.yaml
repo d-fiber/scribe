@@ -1,0 +1,20 @@
+name: "{{name}}"
+url: "https://{{host}}.example.com"
+email: "dev@{{host}}.example.com"
+
+sdk: "{{sdk}}"
+
+app:
+  deeplink_scheme: "{{name}}"
+  ios_store_url: ""
+  android_store_url: ""
+
+dependencies:
+  - security/auth
+  - security/rbac
+
+api:
+  config:
+    origins:
+      - "https://{{host}}.example.com"
+    allowed_countries: []
