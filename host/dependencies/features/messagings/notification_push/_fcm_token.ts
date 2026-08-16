@@ -33,7 +33,8 @@
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { Valkery } from "@scribe/core/runtime/redis/cache/valkery.ts";
 import { Env } from "@scribe/host/env.ts";
-import { importPKCS8, SignJWT } from "jose";
+import { importPKCS8 } from "jose/key/import.ts";
+import { SignJWT } from "jose/jwt/sign.ts";
 
 const _TOKEN_URL = "https://oauth2.googleapis.com/token";
 const _SCOPE = "https://www.googleapis.com/auth/firebase.messaging";

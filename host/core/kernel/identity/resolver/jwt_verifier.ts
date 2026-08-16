@@ -31,20 +31,23 @@
 // LICENSE file, the LICENSE file governs.
 
 import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
-import * as jose from "jose";
+import { decodeProtectedHeader } from "jose/util/decode_protected_header.ts";
+import { createRemoteJWKSet } from "jose/jwks/remote.ts";
+import { jwtVerify } from "jose/jwt/verify.ts";
+import type { JWTPayload, JWTVerifyResult } from "jose/types.d.ts";
 
 const _SYMMETRIC_ALGS = ["HS256"];
 const _ASYMMETRIC_ALGS = ["ES256", "RS256"];
 const _AUDIENCE = "authenticated";
 const _END_USER_ROLE = "authenticated";
 
-function _isEndUserToken(payload: jose.JWTPayload): boolean {
-  const { sub, role } = payload as jose.JWTPayload & { role?: unknown };
+function _isEndUserToken(payload: JWTPayload): boolean {
+  const { sub, role } = payload as JWTPayload & { role?: unknown };
   if (typeof sub !== "string" || sub.length === 0) return false;
   return role === _END_USER_ROLE;
 }
 
-type RemoteKeySet = ReturnType<typeof jose.createRemoteJWKSet>;
+type RemoteKeySet = ReturnType<typeof createRemoteJWKSet>;
 
 let remoteKeys: RemoteKeySet | null = null;
 
@@ -52,7 +55,7 @@ function remoteKeySet(): RemoteKeySet | null {
   if (remoteKeys !== null) return remoteKeys;
 
   try {
-    remoteKeys = jose.createRemoteJWKSet(
+    remoteKeys = createRemoteJWKSet(
       new URL("/.well-known/jwks.json", identitySettings.get().authUrl),
     );
     return remoteKeys;
@@ -65,7 +68,7 @@ function remoteKeySet(): RemoteKeySet | null {
   }
 }
 
-type Verification = (jwt: string) => Promise<jose.JWTVerifyResult>;
+type Verification = (jwt: string) => Promise<JWTVerifyResult>;
 
 function verificationFor(alg: string | undefined): Verification | null {
   if (alg === undefined) return null;
@@ -76,7 +79,7 @@ function verificationFor(alg: string | undefined): Verification | null {
 
     const key = new TextEncoder().encode(secret);
     return (jwt) =>
-      jose.jwtVerify(jwt, key, {
+      jwtVerify(jwt, key, {
         audience: _AUDIENCE,
         algorithms: _SYMMETRIC_ALGS,
       });
@@ -87,7 +90,7 @@ function verificationFor(alg: string | undefined): Verification | null {
     if (keys === null) return null;
 
     return (jwt) =>
-      jose.jwtVerify(jwt, keys, {
+      jwtVerify(jwt, keys, {
         audience: _AUDIENCE,
         algorithms: _ASYMMETRIC_ALGS,
       });
@@ -97,9 +100,9 @@ function verificationFor(alg: string | undefined): Verification | null {
 }
 
 export class JwtVerifier {
-  static async verify(jwt: string): Promise<jose.JWTPayload | null> {
+  static async verify(jwt: string): Promise<JWTPayload | null> {
     try {
-      const verification = verificationFor(jose.decodeProtectedHeader(jwt).alg);
+      const verification = verificationFor(decodeProtectedHeader(jwt).alg);
       if (verification === null) return null;
 
       const { payload } = await verification(jwt);

@@ -34,7 +34,7 @@ import "@scribe/core/testing/settings.ts";
 import { Env } from "@scribe/host/env.ts";
 import { JwtVerifier } from "@scribe/core/kernel/identity/resolver/jwt_verifier.ts";
 import { assertEquals, assertNotEquals } from "@std/assert";
-import * as jose from "jose";
+import { SignJWT } from "jose/jwt/sign.ts";
 
 const SECRET = () => new TextEncoder().encode(Env.JWT_SECRET!);
 
@@ -47,7 +47,7 @@ interface Claims {
 
 function hs256(claims: Claims, alg = "HS256"): Promise<string> {
   const { aud, exp, ...rest } = claims;
-  let jwt = new jose.SignJWT({ ...rest }).setProtectedHeader({ alg });
+  let jwt = new SignJWT({ ...rest }).setProtectedHeader({ alg });
   if (aud !== undefined) jwt = jwt.setAudience(aud);
   jwt = jwt.setExpirationTime(exp ?? Math.floor(Date.now() / 1000) + 3600);
   return jwt.sign(SECRET());
@@ -113,7 +113,7 @@ Deno.test("verify: an expired token is refused", async () => {
 });
 
 Deno.test("verify: a token signed with another secret is refused", async () => {
-  const foreign = await new jose.SignJWT({ role: "authenticated", sub: "user-1" })
+  const foreign = await new SignJWT({ role: "authenticated", sub: "user-1" })
     .setProtectedHeader({ alg: "HS256" })
     .setAudience("authenticated")
     .setExpirationTime("1h")

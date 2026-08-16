@@ -51,7 +51,7 @@
     "nodemailer": "npm:nodemailer@6",
     "bcryptjs": "npm:bcryptjs@2",
     "libphonenumber-js": "npm:libphonenumber-js@1",
-    "jose": "https://deno.land/x/jose@v4.14.4/index.ts",
+    "jose/": "https://deno.land/x/jose@v4.14.4/",
     "blurhash": "npm:blurhash@2",
     "fast-png": "npm:fast-png@6",
     "jpeg-js": "npm:jpeg-js@0.4",

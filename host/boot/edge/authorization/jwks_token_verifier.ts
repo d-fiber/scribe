@@ -30,10 +30,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import * as jose from "jose";
+import { createRemoteJWKSet } from "jose/jwks/remote.ts";
+import { jwtVerify } from "jose/jwt/verify.ts";
 import type { TokenVerifier } from "./token_verifier.ts";
 
-type KeySet = ReturnType<typeof jose.createRemoteJWKSet>;
+type KeySet = ReturnType<typeof createRemoteJWKSet>;
 
 export class JwksTokenVerifier implements TokenVerifier {
   readonly algorithms = ["ES256", "RS256"] as const;
@@ -47,7 +48,7 @@ export class JwksTokenVerifier implements TokenVerifier {
   static fromAuthUrl(authUrl: string | undefined): JwksTokenVerifier | null {
     if (!authUrl) return null;
     try {
-      const keys = jose.createRemoteJWKSet(
+      const keys = createRemoteJWKSet(
         new URL("/.well-known/jwks.json", authUrl),
       );
       return new JwksTokenVerifier(keys);
@@ -58,7 +59,7 @@ export class JwksTokenVerifier implements TokenVerifier {
 
   async verify(token: string): Promise<boolean> {
     try {
-      await jose.jwtVerify(token, this.#keys);
+      await jwtVerify(token, this.#keys);
       return true;
     } catch {
       return false;
