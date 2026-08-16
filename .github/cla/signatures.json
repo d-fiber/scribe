@@ -1,5 +1,5 @@
 {
-  "agreementInForce": false,
+  "agreementInForce": true,
   "exempt": {
     "emails": [
       "scribe-release@users.noreply.github.com",
