@@ -31,6 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { serve } from "@scribe/core/kernel/http/serve/mod.ts";
+import { pathnameOf } from "@scribe/core/kernel/http/serve/pathname.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 import type { Bootstrapper } from "../lifecycle/bootstrapper.ts";
 import { Runtime } from "../lifecycle/runtime.ts";
@@ -63,6 +64,6 @@ export class ServerRuntime extends Runtime {
   }
 
   protected override listen(): void {
-    serve(() => this.#router.route(new URL(RequestScope.get().url).pathname));
+    serve(() => this.#router.route(pathnameOf(RequestScope.get().url)));
   }
 }

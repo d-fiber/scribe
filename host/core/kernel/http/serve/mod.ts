@@ -32,7 +32,8 @@
 
 import { readBoundedBody } from "@scribe/core/kernel/http/serve/body_reader.ts";
 import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
-import { rewriteRequest, stripPrefix } from "@scribe/core/kernel/http/serve/request_rewrite.ts";
+import { pathnameOf, stripPrefix } from "@scribe/core/kernel/http/serve/pathname.ts";
+import { rewriteRequest } from "@scribe/core/kernel/http/serve/request_rewrite.ts";
 import {
   admitUpload,
   inflightUploadBytes,
@@ -76,7 +77,7 @@ export function serveFunction(app: Hono, name: string): void {
   const root: Hono = logger(app);
 
   serve(() => {
-    const pathname = new URL(RequestScope.get().url).pathname;
+    const pathname = pathnameOf(RequestScope.get().url);
     return forward(root, stripPrefix(pathname, name));
   });
 }

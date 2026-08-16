@@ -31,7 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Hono } from "hono";
-import { stripPrefix } from "@scribe/core/kernel/http/serve/request_rewrite.ts";
+import { firstSegmentOf, stripPrefix } from "@scribe/core/kernel/http/serve/pathname.ts";
 
 export interface NodeSurface {
   readonly app: Hono;
@@ -54,8 +54,8 @@ export const NodeSurfaces = {
   },
 
   resolve(pathname: string): NodeSurface | null {
-    const [segment] = pathname.split("/").filter(Boolean);
-    if (segment === undefined) return null;
+    const segment = firstSegmentOf(pathname);
+    if (segment === "") return null;
 
     const app = surfaces.get(segment);
     if (!app) return null;

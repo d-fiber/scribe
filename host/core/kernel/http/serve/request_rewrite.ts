@@ -30,11 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export function stripPrefix(pathname: string, prefix: string): string {
-  const segments = pathname.split("/").filter(Boolean);
-  if (segments[0] !== prefix) return pathname;
-  return "/" + segments.slice(1).join("/");
-}
+import { originOf } from "@scribe/core/kernel/http/serve/pathname.ts";
 
 function bytesOnly(bodyBytes: Uint8Array): ArrayBuffer {
   const coversWholeBuffer = bodyBytes.byteOffset === 0 &&
@@ -50,13 +46,12 @@ export function rewriteRequest(
   bodyBytes: Uint8Array | null,
   pathname: string,
 ): Request {
-  const url = new URL(req.url);
   const hasBody = req.method !== "GET" && req.method !== "HEAD";
   const body: BodyInit | null =
     hasBody && bodyBytes && bodyBytes.byteLength > 0
       ? bytesOnly(bodyBytes)
       : null;
-  return new Request(new URL(pathname || "/", url.origin), {
+  return new Request(new URL(pathname || "/", originOf(req.url)), {
     method: req.method,
     headers: req.headers,
     body,

@@ -31,7 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { InternalService } from "@scribe/core/kernel/http/routing/internal_services.ts";
-import { stripPrefix } from "@scribe/core/kernel/http/serve/request_rewrite.ts";
+import { firstSegmentOf, stripPrefix } from "@scribe/core/kernel/http/serve/pathname.ts";
 
 export const ADMIN_PATH_SEGMENT = "admin";
 export const APP_PATH_SEGMENT = "app";
@@ -52,15 +52,24 @@ export interface RootRoute {
   readonly subPath: string;
 }
 
+const SLASH = 47;
+
 function isInternalPath(pathname: string): boolean {
-  return INTERNAL_SEGMENTS.some((segment) => {
-    const prefix = `/${segment}`;
-    return pathname === prefix || pathname.startsWith(`${prefix}/`);
-  });
+  if (pathname.charCodeAt(0) !== SLASH) return false;
+
+  for (const segment of INTERNAL_SEGMENTS) {
+    if (!pathname.startsWith(segment, 1)) continue;
+
+    const after = segment.length + 1;
+    if (after === pathname.length || pathname.charCodeAt(after) === SLASH) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export function resolveRootRoute(pathname: string): RootRoute | null {
-  const [firstSegment] = pathname.split("/").filter(Boolean);
+  const firstSegment = firstSegmentOf(pathname);
 
   if (firstSegment === ADMIN_PATH_SEGMENT) {
     return {
