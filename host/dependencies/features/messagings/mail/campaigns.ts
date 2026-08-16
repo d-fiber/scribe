@@ -45,6 +45,24 @@ import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import type { EmailTemplateId } from "./templates.ts";
 
+type EmailCampaignRow = Pick<
+  InternalTEmailCampaignsRow,
+  | "email_campaign_id"
+  | "email_template_id"
+  | "audience"
+  | "filters"
+  | "data"
+  | "is_active"
+  | "next_run_at"
+  | "last_run_at"
+  | "created_at"
+  | "updated_at"
+  | "schedule_kind"
+  | "scheduled_at"
+  | "cron_expression"
+  | "schedule_timezone"
+>;
+
 export interface EmailCampaignFilters {
   readonly deviceOs?: DeviceOs | null;
   readonly appVersion?: string | null;
@@ -216,6 +234,22 @@ export class EmailCampaignRepository
 
       let query = rest
         .internal_t__email_campaigns()
+        .select((s) => ({
+          email_campaign_id: s.email_campaign_id,
+          email_template_id: s.email_template_id,
+          audience: s.audience,
+          filters: s.filters,
+          data: s.data,
+          is_active: s.is_active,
+          next_run_at: s.next_run_at,
+          last_run_at: s.last_run_at,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+          schedule_kind: s.schedule_kind,
+          scheduled_at: s.scheduled_at,
+          cron_expression: s.cron_expression,
+          schedule_timezone: s.schedule_timezone,
+        }))
         .order("email_campaign_id", { ascending: false });
       if (options?.activeOnly) query = query.where((f) => f.is_active.eq(true));
 
@@ -236,6 +270,22 @@ export class EmailCampaignRepository
     return this.guard(async () => {
       const rows = await rest
         .internal_t__email_campaigns()
+        .select((s) => ({
+          email_campaign_id: s.email_campaign_id,
+          email_template_id: s.email_template_id,
+          audience: s.audience,
+          filters: s.filters,
+          data: s.data,
+          is_active: s.is_active,
+          next_run_at: s.next_run_at,
+          last_run_at: s.last_run_at,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+          schedule_kind: s.schedule_kind,
+          scheduled_at: s.scheduled_at,
+          cron_expression: s.cron_expression,
+          schedule_timezone: s.schedule_timezone,
+        }))
         .where((f) => [f.is_active.eq(true), f.next_run_at.lte(now)])
         .order("next_run_at", { ascending: true })
         .get();
@@ -390,7 +440,7 @@ export class EmailCampaignRepository
     };
   }
 
-  #schedule(row: InternalTEmailCampaignsRow): EmailCampaignSchedule {
+  #schedule(row: EmailCampaignRow): EmailCampaignSchedule {
     return row.schedule_kind === "once"
       ? { kind: "once", at: row.scheduled_at as number }
       : {
@@ -400,7 +450,7 @@ export class EmailCampaignRepository
         };
   }
 
-  #domain(row: InternalTEmailCampaignsRow): EmailCampaign {
+  #domain(row: EmailCampaignRow): EmailCampaign {
     return {
       id: row.email_campaign_id,
       emailTemplateId: row.email_template_id,

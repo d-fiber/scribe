@@ -40,6 +40,20 @@ import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import type { EmailTemplateId } from "./templates.ts";
 
+type MailRow = Pick<
+  InternalTMailsRow,
+  | "mail_id"
+  | "recipient"
+  | "subject"
+  | "email_template_id"
+  | "data"
+  | "status"
+  | "account"
+  | "tracking_token"
+  | "created_at"
+  | "updated_at"
+>;
+
 const TRACKING_TOKEN_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const TRACKING_TOKEN_LENGTH = 15;
 
@@ -231,6 +245,18 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
 
       let query = rest
         .internal_t__mails()
+        .select((s) => ({
+          mail_id: s.mail_id,
+          recipient: s.recipient,
+          subject: s.subject,
+          email_template_id: s.email_template_id,
+          data: s.data,
+          status: s.status,
+          account: s.account,
+          tracking_token: s.tracking_token,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+        }))
         .order("created_at", { ascending: false });
       if (options?.recipient !== undefined) {
         const recipient = options.recipient;
@@ -302,7 +328,7 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
     }
   }
 
-  #domain(row: InternalTMailsRow): Mail {
+  #domain(row: MailRow): Mail {
     return {
       id: row.mail_id,
       recipient: row.recipient,

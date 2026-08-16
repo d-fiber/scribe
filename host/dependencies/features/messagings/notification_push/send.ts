@@ -38,6 +38,17 @@ import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import { fcmSend } from "./_fcm_send.ts";
 
+type PushNotificationRow = Pick<
+  InternalTNotificationPushesRow,
+  | "push_id"
+  | "notification_id"
+  | "device_id"
+  | "status"
+  | "error"
+  | "created_at"
+  | "updated_at"
+>;
+
 export type PushNotificationId = number;
 
 export enum PushNotificationStatus {
@@ -96,6 +107,15 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
     return this.guard(async () => {
       const existing = await rest
         .internal_t__notification_pushes()
+        .select((s) => ({
+          push_id: s.push_id,
+          notification_id: s.notification_id,
+          device_id: s.device_id,
+          status: s.status,
+          error: s.error,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+        }))
         .where((f) => f.notification_id.eq(notificationId))
         .get();
       if (existing.length > 0) {
@@ -133,6 +153,15 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
 
       const rows = await rest
         .internal_t__notification_pushes()
+        .select((s) => ({
+          push_id: s.push_id,
+          notification_id: s.notification_id,
+          device_id: s.device_id,
+          status: s.status,
+          error: s.error,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+        }))
         .where((f) => f.notification_id.eq(notificationId))
         .order("created_at", { ascending: false })
         .range(offset, offset + size)
@@ -228,7 +257,7 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
       .getOne();
   }
 
-  #domain(row: InternalTNotificationPushesRow): PushNotification {
+  #domain(row: PushNotificationRow): PushNotification {
     return {
       id: row.push_id,
       notificationId: row.notification_id,

@@ -37,6 +37,15 @@ import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 
+type EmailTemplateRow = Pick<
+  InternalTEmailTemplatesRow,
+  | "email_template_id"
+  | "name"
+  | "subject"
+  | "html"
+  | "text"
+>;
+
 export type EmailTemplateId = number;
 
 export interface EmailTemplate {
@@ -107,6 +116,13 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
 
       const rows = await rest
         .internal_t__email_templates()
+        .select((s) => ({
+          email_template_id: s.email_template_id,
+          name: s.name,
+          subject: s.subject,
+          html: s.html,
+          text: s.text,
+        }))
         .order("email_template_id", { ascending: false })
         .range(offset, offset + size)
         .get();
@@ -162,7 +178,7 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
     };
   }
 
-  #domain(row: InternalTEmailTemplatesRow): EmailTemplate {
+  #domain(row: EmailTemplateRow): EmailTemplate {
     return {
       id: row.email_template_id,
       name: row.name,

@@ -38,6 +38,15 @@ import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import type { MailId } from "./send.ts";
 
+type MailStatisticRow = Pick<
+  InternalTMailStatisticsRow,
+  | "statistic_id"
+  | "mail_id"
+  | "ip_address"
+  | "user_agent"
+  | "created_at"
+>;
+
 export type MailStatisticId = number;
 
 export interface MailStatistic {
@@ -97,6 +106,13 @@ export class MailStatisticRepository extends Repository<MailStatisticError> impl
 
       const rows = await rest
         .internal_t__mail_statistics()
+        .select((s) => ({
+          statistic_id: s.statistic_id,
+          mail_id: s.mail_id,
+          ip_address: s.ip_address,
+          user_agent: s.user_agent,
+          created_at: s.created_at,
+        }))
         .where((f) => f.mail_id.eq(mailId))
         .order("created_at", { ascending: false })
         .range(offset, offset + size)
@@ -137,7 +153,7 @@ export class MailStatisticRepository extends Repository<MailStatisticError> impl
     });
   }
 
-  #domain(row: InternalTMailStatisticsRow): MailStatistic {
+  #domain(row: MailStatisticRow): MailStatistic {
     return {
       id: row.statistic_id,
       mailId: row.mail_id,

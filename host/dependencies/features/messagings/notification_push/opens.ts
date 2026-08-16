@@ -38,6 +38,13 @@ import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import type { PushNotificationId } from "./send.ts";
 
+type PushOpenRow = Pick<
+  InternalTNotificationPushOpensRow,
+  | "open_id"
+  | "push_id"
+  | "created_at"
+>;
+
 export type PushNotificationOpenId = number;
 
 export interface PushNotificationOpen {
@@ -92,6 +99,11 @@ export class PushNotificationOpenRepository extends Repository<PushNotificationO
 
       const rows = await rest
         .internal_t__notification_push_opens()
+        .select((s) => ({
+          open_id: s.open_id,
+          push_id: s.push_id,
+          created_at: s.created_at,
+        }))
         .where((f) => f.push_id.eq(pushId))
         .order("created_at", { ascending: false })
         .range(offset, offset + size)
@@ -128,7 +140,7 @@ export class PushNotificationOpenRepository extends Repository<PushNotificationO
     });
   }
 
-  #domain(row: InternalTNotificationPushOpensRow): PushNotificationOpen {
+  #domain(row: PushOpenRow): PushNotificationOpen {
     return {
       id: row.open_id,
       pushNotificationId: row.push_id,

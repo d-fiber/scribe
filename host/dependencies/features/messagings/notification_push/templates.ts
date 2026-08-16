@@ -37,6 +37,15 @@ import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 
+type PushTemplateRow = Pick<
+  InternalTPushTemplatesRow,
+  | "push_template_id"
+  | "name"
+  | "title"
+  | "body"
+  | "data"
+>;
+
 export type PushTemplateId = number;
 
 export interface PushTemplate {
@@ -103,6 +112,13 @@ export class PushTemplateRepository extends Repository<PushTemplateError> implem
 
       const rows = await rest
         .internal_t__push_templates()
+        .select((s) => ({
+          push_template_id: s.push_template_id,
+          name: s.name,
+          title: s.title,
+          body: s.body,
+          data: s.data,
+        }))
         .order("push_template_id", { ascending: false })
         .range(offset, offset + size)
         .get();
@@ -174,7 +190,7 @@ export class PushTemplateRepository extends Repository<PushTemplateError> implem
     };
   }
 
-  #domain(row: InternalTPushTemplatesRow): PushTemplate {
+  #domain(row: PushTemplateRow): PushTemplate {
     return {
       id: row.push_template_id,
       name: row.name,

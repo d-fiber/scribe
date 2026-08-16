@@ -41,6 +41,22 @@ import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import type { PushTemplateId } from "./templates.ts";
 
+type PushCampaignRow = Pick<
+  InternalTPushCampaignsRow,
+  | "push_campaign_id"
+  | "push_template_id"
+  | "filters"
+  | "is_active"
+  | "next_run_at"
+  | "last_run_at"
+  | "created_at"
+  | "updated_at"
+  | "schedule_kind"
+  | "scheduled_at"
+  | "cron_expression"
+  | "schedule_timezone"
+>;
+
 export interface PushCampaignFilters {
   readonly deviceOs?: DeviceOs | null;
   readonly appVersion?: string | null;
@@ -180,6 +196,20 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
 
       let query = rest
         .internal_t__push_campaigns()
+        .select((s) => ({
+          push_campaign_id: s.push_campaign_id,
+          push_template_id: s.push_template_id,
+          filters: s.filters,
+          is_active: s.is_active,
+          next_run_at: s.next_run_at,
+          last_run_at: s.last_run_at,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+          schedule_kind: s.schedule_kind,
+          scheduled_at: s.scheduled_at,
+          cron_expression: s.cron_expression,
+          schedule_timezone: s.schedule_timezone,
+        }))
         .order("push_campaign_id", { ascending: false });
       if (options?.activeOnly) query = query.where((f) => f.is_active.eq(true));
 
@@ -198,6 +228,20 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
     return this.guard(async () => {
       const rows = await rest
         .internal_t__push_campaigns()
+        .select((s) => ({
+          push_campaign_id: s.push_campaign_id,
+          push_template_id: s.push_template_id,
+          filters: s.filters,
+          is_active: s.is_active,
+          next_run_at: s.next_run_at,
+          last_run_at: s.last_run_at,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+          schedule_kind: s.schedule_kind,
+          scheduled_at: s.scheduled_at,
+          cron_expression: s.cron_expression,
+          schedule_timezone: s.schedule_timezone,
+        }))
         .where((f) => [f.is_active.eq(true), f.next_run_at.lte(now)])
         .order("next_run_at", { ascending: true })
         .get();
@@ -318,7 +362,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
     };
   }
 
-  #schedule(row: InternalTPushCampaignsRow): PushCampaignSchedule {
+  #schedule(row: PushCampaignRow): PushCampaignSchedule {
     return row.schedule_kind === "once" ? { kind: "once", at: row.scheduled_at as number } : {
       kind: "cron",
       expression: row.cron_expression as string,
@@ -326,7 +370,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
     };
   }
 
-  #domain(row: InternalTPushCampaignsRow): PushCampaign {
+  #domain(row: PushCampaignRow): PushCampaign {
     return {
       id: row.push_campaign_id,
       pushTemplateId: row.push_template_id,
