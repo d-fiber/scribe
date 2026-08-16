@@ -8,7 +8,6 @@
 /storage/
 /opensearch/
 
-host/deno.lock
 host/.coverage/
 
 node_modules/
