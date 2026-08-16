@@ -63,6 +63,13 @@ export const DEFAULT_STATE: QueryState = {
   rangeVal: null,
 };
 
+export const AMBIGUITY_PROBE = 2;
+
+export function atMostOneRow(state: QueryState): QueryState {
+  if (state.limitCount !== null || state.rangeVal !== null) return state;
+  return { ...state, limitCount: AMBIGUITY_PROBE };
+}
+
 export function buildRead(db: any, table: string, state: QueryState): any {
   let qb = db.from(table).select(state.selectCols ?? "*");
   for (const f of state.filters) qb = f.apply(qb);
@@ -79,8 +86,7 @@ export function buildWrite(
   op: "update" | "delete",
   data?: unknown,
 ): any {
-  let qb =
-    op === "update" ? db.from(table).update(data) : db.from(table).delete();
+  let qb = op === "update" ? db.from(table).update(data) : db.from(table).delete();
   for (const f of state.filters) qb = f.apply(qb);
   return qb;
 }

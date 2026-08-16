@@ -40,7 +40,7 @@ import { ownerScope } from "./scope.ts";
 import type { ExtractShape, RelNode, Selector } from "./selector.ts";
 import { columnsOf, selector } from "./selector.ts";
 import type { QueryState } from "./state.ts";
-import { buildRead, buildWrite, DEFAULT_STATE } from "./state.ts";
+import { atMostOneRow, buildRead, buildWrite, DEFAULT_STATE } from "./state.ts";
 
 const OPEN_SCOPE: ScopeDecision = { kind: "open" };
 
@@ -257,7 +257,11 @@ export class TypedQueryBuilder<
   }
 
   async getOne(): Promise<Result | null> {
-    const qb = buildRead(this.#db, this.#table, this.#scoped().state);
+    const qb = buildRead(
+      this.#db,
+      this.#table,
+      atMostOneRow(this.#scoped().state),
+    );
     const { data, error } = (await qb.maybeSingle()) as {
       data: unknown;
       error: unknown;

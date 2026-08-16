@@ -53,6 +53,7 @@ import {
   UnsafeFilterError,
 } from "@scribe/core/clients/database/query/literal.ts";
 import { ownerScope } from "@scribe/core/clients/database/query/scope.ts";
+import { AMBIGUITY_PROBE } from "@scribe/core/clients/database/query/state.ts";
 import { decodeJson, encodeJson } from "../json.ts";
 
 function applyOperator(builder: any, filter: Filter): any {
@@ -234,6 +235,8 @@ function shaped(builder: any, query: Query): any {
     current = current.range(range.offset, range.offset + range.limit - 1);
   } else if (range && range.offset > 0) {
     current = current.range(range.offset, range.offset + 999);
+  } else if (query.single) {
+    current = current.limit(AMBIGUITY_PROBE);
   }
 
   return query.single ? current.maybeSingle() : current;
