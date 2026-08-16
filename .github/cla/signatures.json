@@ -1,5 +1,5 @@
 {
-  "agreementInForce": false,
+  "agreementInForce": true,
   "exempt": {
     "emails": [
       "scribe-release@users.noreply.github.com",
@@ -8,7 +8,7 @@
       "49699333+dependabot[bot]@users.noreply.github.com"
     ],
     "domains": [
-      "fiber.app"
+      "fiberstudio.app"
     ]
   },
   "signed": []

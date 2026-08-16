@@ -1,11 +1,13 @@
 .DS_Store
 .env
 
-postgres/
-storage/
-opensearch/
+# Runtime data directories a rendered project creates at its root. Anchored,
+# because unanchored they also swallowed host/dependencies/database/storage
+# and its generated bindings, which are source.
+/postgres/
+/storage/
+/opensearch/
 
-host/deno.lock
 host/.coverage/
 
 node_modules/
