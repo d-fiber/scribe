@@ -4,6 +4,15 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 0.1.5 (2026-08-16)
+
+Component versions: @dependencies/core 0.1.3
+
+### Performance
+
+- select only the columns the messaging repositories map (ca7bda8d)
+- select only the columns the devops repositories map (67ffb5a6)
+
 ## 0.1.4 (2026-08-16)
 
 Component versions: @scribe/core 0.1.3
