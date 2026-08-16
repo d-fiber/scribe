@@ -4,6 +4,21 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 0.1.2 (2026-08-16)
+
+Component versions: @scribe/core 0.1.1, @dependencies/core 0.1.2
+
+### Fixed
+
+- keep the query string across a surface forward (2e331af8)
+
+### Performance
+
+- bound the api heap so the GC runs before the OOM killer (ab66c3c8)
+- read the request path without allocating a URL (0b884e9c)
+- import jose by subpath instead of through its barrel (46d5462a)
+- stop redoing per-request work the edge path cannot change (bf3d932e)
+
 ## 0.1.1 (2026-08-16)
 
 Component versions: @dependencies/core 0.1.1, @scribe/sdk 0.1.1
