@@ -33,13 +33,20 @@
 import { SurfaceRegistry } from "@scribe/host/boot/server/surface_registry.ts";
 import { SurfaceRouter } from "@scribe/host/boot/server/surface_router.ts";
 import { INTERNAL_SEGMENTS } from "@scribe/core/kernel/http/routing/root_route.ts";
+import { pathnameOf } from "@scribe/core/kernel/http/serve/pathname.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 import { assertEquals } from "@std/assert";
 import { Hono } from "hono";
 
 function surfaceEcho(label: string): Hono {
   const app = new Hono();
-  app.all("*", (c) => c.json({ label, path: new URL(c.req.url).pathname }));
+  app.all("*", (c) =>
+    c.json({
+      label,
+      path: new URL(c.req.url).pathname,
+      offset: c.req.query("offset") ?? null,
+      scopedOffset: new URL(RequestScope.get().url).searchParams.get("offset"),
+    }));
   return app;
 }
 
@@ -102,4 +109,26 @@ Deno.test("SurfaceRouter answers 404 on a path no surface claims", async () => {
   const response = await route("/nowhere");
 
   assertEquals(response.status, 404);
+});
+
+Deno.test("SurfaceRouter hands the surface the query string, not just the path", async () => {
+  const url = "http://localhost/admin/team/roles?offset=40&size=10";
+  const router = new SurfaceRouter(registry());
+
+  const response = await RequestScope.run(
+    new Request(url),
+    new Uint8Array(0),
+    () => router.route(pathnameOf(url)),
+    null,
+  );
+
+  const body = (await response.json()) as {
+    path: string;
+    offset: string | null;
+    scopedOffset: string | null;
+  };
+
+  assertEquals(body.path, "/team/roles");
+  assertEquals(body.offset, "40");
+  assertEquals(body.scopedOffset, "40");
 });

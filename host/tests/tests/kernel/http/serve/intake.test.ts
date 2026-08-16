@@ -168,6 +168,29 @@ Deno.test("rewriteRequest carries the body bytes across the rewrite", async () =
   assertEquals(await rewritten.text(), '{"kept":true}');
 });
 
+Deno.test("rewriteRequest keeps the query string the surface prefix hid", () => {
+  const rewritten = rewriteRequest(
+    new Request("http://api.test/admin/team/roles?offset=40&size=10"),
+    null,
+    "/team/roles",
+  );
+
+  const url = new URL(rewritten.url);
+  assertEquals(url.pathname, "/team/roles");
+  assertEquals(url.searchParams.get("offset"), "40");
+  assertEquals(url.searchParams.get("size"), "10");
+});
+
+Deno.test("rewriteRequest adds no query string when the request carried none", () => {
+  const rewritten = rewriteRequest(
+    new Request("http://api.test/admin/team/roles"),
+    null,
+    "/team/roles",
+  );
+
+  assertEquals(rewritten.url, "http://api.test/team/roles");
+});
+
 Deno.test("rewriteRequest sends only the view, not the buffer behind it", async () => {
   const backing = new TextEncoder().encode("PADDING{\"kept\":true}");
   const view = backing.subarray(7);

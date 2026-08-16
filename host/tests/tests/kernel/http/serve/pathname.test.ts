@@ -30,7 +30,13 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { firstSegmentOf, originOf, pathnameOf, stripPrefix } from "@scribe/core/kernel/http/serve/pathname.ts";
+import {
+  firstSegmentOf,
+  originOf,
+  pathnameOf,
+  searchOf,
+  stripPrefix,
+} from "@scribe/core/kernel/http/serve/pathname.ts";
 import { assertEquals } from "@std/assert";
 
 const ORIGIN = "http://api.test";
@@ -161,6 +167,26 @@ Deno.test("originOf yields the same base as URL.origin for rewriting", () => {
     const fromSlice = new URL("/team", originOf(url)).href;
     const fromOrigin = new URL("/team", new URL(url).origin).href;
     assertEquals(fromSlice, fromOrigin, url);
+  }
+});
+
+Deno.test("searchOf reads the same query string as URL.search", () => {
+  const urls = [
+    `${ORIGIN}/admin/team`,
+    `${ORIGIN}/admin/team?offset=40&size=10`,
+    `${ORIGIN}/admin/team?`,
+    `${ORIGIN}/admin/team?a=b#frag`,
+    `${ORIGIN}/admin/team#frag`,
+    `${ORIGIN}/admin/team#frag?notaquery`,
+    `${ORIGIN}/admin/team?#frag`,
+    `${ORIGIN}?offset=40`,
+    ORIGIN,
+    `${ORIGIN}/admin/team?q=a%2fb&r=%2e%2e`,
+    `${ORIGIN}/admin/team?q=a+b&r=c%20d`,
+  ];
+
+  for (const url of urls) {
+    assertEquals(searchOf(url), new URL(url).search, url);
   }
 });
 

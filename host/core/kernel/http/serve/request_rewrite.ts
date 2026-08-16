@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { originOf } from "@scribe/core/kernel/http/serve/pathname.ts";
+import { originOf, searchOf } from "@scribe/core/kernel/http/serve/pathname.ts";
 
 function bytesOnly(bodyBytes: Uint8Array): ArrayBuffer {
   const coversWholeBuffer = bodyBytes.byteOffset === 0 &&
@@ -51,7 +51,8 @@ export function rewriteRequest(
     hasBody && bodyBytes && bodyBytes.byteLength > 0
       ? bytesOnly(bodyBytes)
       : null;
-  return new Request(new URL(pathname || "/", originOf(req.url)), {
+  const target = (pathname || "/") + searchOf(req.url);
+  return new Request(new URL(target, originOf(req.url)), {
     method: req.method,
     headers: req.headers,
     body,

@@ -71,6 +71,18 @@ export function originOf(url: string): string {
   return pathStart === -1 ? url : url.slice(0, pathStart);
 }
 
+export function searchOf(url: string): string {
+  const pathStart = pathStartOf(url);
+  const from = pathStart === -1 ? 0 : pathStart;
+
+  const fragment = url.indexOf("#", from);
+  const end = fragment === -1 ? url.length : fragment;
+
+  const query = url.indexOf("?", from);
+  if (query === -1 || query >= end || end - query === 1) return "";
+  return url.slice(query, end);
+}
+
 function segmentStart(pathname: string): number {
   let at = 0;
   while (at < pathname.length && pathname.charCodeAt(at) === SLASH) at++;
