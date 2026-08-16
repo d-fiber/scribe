@@ -27,6 +27,9 @@ jobs:
         with:
           deno-version: v2.x
 
+      - name: Install the npm dependencies
+        run: deno install
+
       - name: Lint
         run: deno lint
 
@@ -51,6 +54,9 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+
+      - name: Install the npm dependencies
+        run: deno install
 
       - name: Type check
         run: deno task check
