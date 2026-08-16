@@ -109,15 +109,18 @@ jobs:
           git commit -m "[RELEASE]: scribe $version"
           git push origin HEAD:dev
 
-      - name: Move main to dev
+      - name: Bring dev into main
         run: |
           set -eu
           git fetch origin main:refs/remotes/origin/main
+          tip=$(git rev-parse HEAD)
 
           if git diff --quiet origin/main..HEAD; then
             echo "main already carries this tree, nothing to promote"
             exit 0
           fi
 
-          git push origin HEAD:main
-          echo "main now carries scribe $(cat VERSION) at $(git rev-parse --short HEAD)"
+          git checkout -B promotion origin/main
+          git merge --no-edit "$tip"
+          git push origin promotion:main
+          echo "main now carries scribe $(cat VERSION) from ${tip}"
