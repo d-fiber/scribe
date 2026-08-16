@@ -37,6 +37,19 @@ import { type Pagination, pagination } from "@scribe/core/contracts/pagination.t
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { Repository } from "../core/repository.ts";
 
+type RemoteConfigRow = Pick<
+  InternalTRemoteConfigsRow,
+  | "remote_config_id"
+  | "key"
+  | "value"
+  | "audience"
+  | "description"
+  | "is_active"
+  | "hash"
+  | "created_at"
+  | "updated_at"
+>;
+
 const DEFAULT_PAGE_SIZE = 30;
 const VISIBLE_AUDIENCES_RPC = "visible_remote_config_audiences";
 
@@ -129,6 +142,17 @@ export class RemoteConfigRepository extends Repository<RemoteConfigError> implem
 
       const rows = await rest
         .internal_t__remote_configs()
+        .select((s) => ({
+          remote_config_id: s.remote_config_id,
+          key: s.key,
+          value: s.value,
+          audience: s.audience,
+          description: s.description,
+          is_active: s.is_active,
+          hash: s.hash,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+        }))
         .order("created_at", { ascending: false })
         .range(offset, offset + size)
         .get();
@@ -146,6 +170,17 @@ export class RemoteConfigRepository extends Repository<RemoteConfigError> implem
 
       const rows = await rest
         .internal_t__remote_configs()
+        .select((s) => ({
+          remote_config_id: s.remote_config_id,
+          key: s.key,
+          value: s.value,
+          audience: s.audience,
+          description: s.description,
+          is_active: s.is_active,
+          hash: s.hash,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+        }))
         .where((f) => [f.is_active.eq(true), f.audience.in(audiences)])
         .get();
 
@@ -252,7 +287,7 @@ export class RemoteConfigRepository extends Repository<RemoteConfigError> implem
     return (data ?? []) as unknown as RemoteConfigAudience[];
   }
 
-  #domain(row: InternalTRemoteConfigsRow): RemoteConfig {
+  #domain(row: RemoteConfigRow): RemoteConfig {
     return {
       id: row.remote_config_id,
       key: row.key,

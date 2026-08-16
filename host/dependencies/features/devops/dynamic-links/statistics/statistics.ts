@@ -42,6 +42,20 @@ import type {
 } from "../link/link.ts";
 import { dynamicLinkStatisticsQueue } from "./_queue.ts";
 
+type DynamicLinkStatisticRow = Pick<
+  InternalTDynamicLinkStatisticsRow,
+  | "statistic_id"
+  | "short_link_id"
+  | "user_id"
+  | "device_id"
+  | "ip_address"
+  | "user_agent"
+  | "referer"
+  | "outcome"
+  | "platform"
+  | "created_at"
+>;
+
 const DEFAULT_PAGE_SIZE = 30;
 
 export type DynamicLinkStatisticId = number;
@@ -136,6 +150,18 @@ export class DynamicLinkStatisticsRepository
 
       const rows = await rest
         .internal_t__dynamic_link_statistics()
+        .select((s) => ({
+          statistic_id: s.statistic_id,
+          short_link_id: s.short_link_id,
+          user_id: s.user_id,
+          device_id: s.device_id,
+          ip_address: s.ip_address,
+          user_agent: s.user_agent,
+          referer: s.referer,
+          outcome: s.outcome,
+          platform: s.platform,
+          created_at: s.created_at,
+        }))
         .where((f) => f.short_link_id.eq(dynamicLinkId))
         .order("created_at", { ascending: false })
         .range(offset, offset + size)
@@ -168,7 +194,7 @@ export class DynamicLinkStatisticsRepository
     });
   }
 
-  #domain(row: InternalTDynamicLinkStatisticsRow): DynamicLinkStatistic {
+  #domain(row: DynamicLinkStatisticRow): DynamicLinkStatistic {
     return {
       id: row.statistic_id,
       dynamicLinkId: row.short_link_id,

@@ -43,6 +43,11 @@ import {
 import { dynamicLinkCache } from "./_cache.ts";
 import { generateSlug } from "./_slug.ts";
 
+type DynamicLinkRow = Pick<
+  InternalTDynamicLinksRow,
+  "short_link_id" | "slug" | "payload" | "expires_at" | "created_at" | "updated_at"
+>;
+
 const MAX_SLUG_ATTEMPTS = 5;
 const DEFAULT_PAGE_SIZE = 30;
 
@@ -139,6 +144,14 @@ export class DynamicLinkRepository
 
       const rows = await rest
         .internal_t__dynamic_links()
+        .select((s) => ({
+          short_link_id: s.short_link_id,
+          slug: s.slug,
+          payload: s.payload,
+          expires_at: s.expires_at,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+        }))
         .order("created_at", { ascending: false })
         .range(offset, offset + size)
         .get();
@@ -237,7 +250,7 @@ export class DynamicLinkRepository
     return link.expiresAt !== null && link.expiresAt < Date.now();
   }
 
-  #domain(row: InternalTDynamicLinksRow): DynamicLink | null {
+  #domain(row: DynamicLinkRow): DynamicLink | null {
     const payload = parseDynamicLinkPayload(row.payload);
     if (!payload) {
       console.warn(

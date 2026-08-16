@@ -39,6 +39,16 @@ import type { RemoteConfigId, RemoteConfigPaginationOptions } from "../config/co
 import { Repository } from "../core/repository.ts";
 import { remoteConfigStatisticsQueue } from "./_queue.ts";
 
+type RemoteConfigStatisticRow = Pick<
+  InternalTRemoteConfigStatisticsRow,
+  | "statistic_id"
+  | "remote_config_id"
+  | "user_id"
+  | "audience"
+  | "outcome"
+  | "created_at"
+>;
+
 const DEFAULT_PAGE_SIZE = 30;
 
 export type RemoteConfigStatisticId = number;
@@ -121,6 +131,14 @@ export class RemoteConfigStatisticsRepository extends Repository<RemoteConfigSta
 
       const rows = await rest
         .internal_t__remote_config_statistics()
+        .select((s) => ({
+          statistic_id: s.statistic_id,
+          remote_config_id: s.remote_config_id,
+          user_id: s.user_id,
+          audience: s.audience,
+          outcome: s.outcome,
+          created_at: s.created_at,
+        }))
         .where((f) => f.remote_config_id.eq(remoteConfigId))
         .order("created_at", { ascending: false })
         .range(offset, offset + size)
@@ -161,7 +179,7 @@ export class RemoteConfigStatisticsRepository extends Repository<RemoteConfigSta
     });
   }
 
-  #domain(row: InternalTRemoteConfigStatisticsRow): RemoteConfigStatistic {
+  #domain(row: RemoteConfigStatisticRow): RemoteConfigStatistic {
     return {
       id: row.statistic_id,
       remoteConfigId: row.remote_config_id,
