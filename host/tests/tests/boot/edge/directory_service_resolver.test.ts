@@ -32,7 +32,8 @@
 
 import { DirectoryServiceResolver } from "@scribe/host/boot/edge/services/directory_service_resolver.ts";
 import type { ModuleProbe } from "@scribe/host/boot/edge/services/module_probe.ts";
-import { assertEquals } from "@std/assert";
+import { ResolutionCache } from "@scribe/host/boot/edge/services/resolution_cache.ts";
+import { assert, assertEquals } from "@std/assert";
 
 const ROOT = "/home/deno/functions";
 
@@ -121,4 +122,77 @@ Deno.test("DirectoryServiceResolver probes the documented prefix order", async (
     `${ROOT}/api/public/a`,
     `${ROOT}/api/internal/a`,
   ]);
+});
+
+Deno.test("DirectoryServiceResolver probes the same path only once", async () => {
+  const { resolver: subject, probe } = resolver(`${ROOT}/api/internal/vpn`);
+
+  await subject.resolve("/vpn/config");
+  const afterFirst = probe.probed.length;
+  await subject.resolve("/vpn/config");
+  await subject.resolve("/vpn/config");
+
+  assertEquals(probe.probed.length, afterFirst);
+});
+
+Deno.test("DirectoryServiceResolver reuses a single-segment match across sub-paths", async () => {
+  const { resolver: subject, probe } = resolver(`${ROOT}/api/internal/vpn`);
+
+  await subject.resolve("/vpn/config");
+  probe.probed.length = 0;
+  await subject.resolve("/vpn/renew");
+
+  assertEquals(probe.probed, [
+    `${ROOT}/vpn/renew`,
+    `${ROOT}/api/vpn/renew`,
+    `${ROOT}/api/public/vpn/renew`,
+    `${ROOT}/api/internal/vpn/renew`,
+  ]);
+});
+
+Deno.test("DirectoryServiceResolver remembers that nothing matched", async () => {
+  const { resolver: subject, probe } = resolver();
+
+  assertEquals(await subject.resolve("/unknown/thing"), {
+    service: "unknown",
+    servicePath: `${ROOT}/unknown`,
+  });
+  const afterFirst = probe.probed.length;
+
+  assertEquals(await subject.resolve("/unknown/thing"), {
+    service: "unknown",
+    servicePath: `${ROOT}/unknown`,
+  });
+  assertEquals(probe.probed.length, afterFirst);
+});
+
+Deno.test("DirectoryServiceResolver keeps resolving once the cache is full", async () => {
+  const probe = new KnownDirectories(new Set([`${ROOT}/api/internal/vpn`]));
+  const subject = new DirectoryServiceResolver(
+    ROOT,
+    probe,
+    new ResolutionCache(2),
+    new ResolutionCache(2),
+  );
+
+  for (let index = 0; index < 50; index++) {
+    assertEquals(await subject.resolve(`/absent${index}/thing`), {
+      service: `absent${index}`,
+      servicePath: `${ROOT}/absent${index}`,
+    });
+  }
+
+  assertEquals(await subject.resolve("/vpn/config"), {
+    service: "vpn",
+    servicePath: `${ROOT}/api/internal/vpn`,
+  });
+});
+
+Deno.test("ResolutionCache never grows past its limit", () => {
+  const cache = new ResolutionCache(4);
+
+  for (let index = 0; index < 100; index++) {
+    cache.remember(`service-${index}`, null);
+    assert(cache.size <= 4);
+  }
 });

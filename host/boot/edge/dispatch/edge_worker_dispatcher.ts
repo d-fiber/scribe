@@ -43,10 +43,16 @@ export interface WorkerLimits {
 export class EdgeWorkerDispatcher implements WorkerDispatcher {
   readonly #platform: EdgePlatform;
   readonly #limits: WorkerLimits;
+  readonly #envVars: string[][];
 
-  constructor(platform: EdgePlatform, limits: WorkerLimits) {
+  constructor(
+    platform: EdgePlatform,
+    limits: WorkerLimits,
+    envVars: string[][] = Object.entries(Deno.env.toObject()),
+  ) {
     this.#platform = platform;
     this.#limits = limits;
+    this.#envVars = envVars;
   }
 
   async dispatch(request: Request, servicePath: string): Promise<Response> {
@@ -57,7 +63,7 @@ export class EdgeWorkerDispatcher implements WorkerDispatcher {
         workerTimeoutMs: this.#limits.workerTimeoutMs,
         noModuleCache: false,
         importMapPath: this.#limits.importMapPath,
-        envVars: Object.entries(Deno.env.toObject()),
+        envVars: this.#envVars,
       });
 
       const forwarded = await this.#forward(request);

@@ -134,3 +134,35 @@ Deno.test("EdgeWorkerDispatcher turns a platform failure into a 500", async () =
   assertEquals(response.status, 500);
   assertEquals(body.code, "internal_error");
 });
+
+Deno.test("EdgeWorkerDispatcher hands the platform the environment it was built with", async () => {
+  const platform = new FakePlatform();
+  const envVars = [["A", "1"], ["B", "2"]];
+
+  await new EdgeWorkerDispatcher(platform, LIMITS, envVars).dispatch(
+    new Request("http://localhost/app"),
+    "/functions/app",
+  );
+
+  assertEquals(platform.options?.envVars, envVars);
+});
+
+Deno.test("EdgeWorkerDispatcher reads the environment once, not per dispatch", async () => {
+  const platform = new FakePlatform();
+  const subject = new EdgeWorkerDispatcher(platform, LIMITS);
+
+  await subject.dispatch(new Request("http://localhost/app"), "/functions/app");
+  const first = platform.options?.envVars;
+
+  Deno.env.set("SCRIBE_DISPATCH_PROBE", "late");
+  try {
+    await subject.dispatch(
+      new Request("http://localhost/app"),
+      "/functions/app",
+    );
+
+    assertEquals(platform.options?.envVars, first);
+  } finally {
+    Deno.env.delete("SCRIBE_DISPATCH_PROBE");
+  }
+});

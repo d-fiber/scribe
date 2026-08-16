@@ -31,6 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { FilesystemModuleProbe, type ModuleProbe } from "./module_probe.ts";
+import { ResolutionCache } from "./resolution_cache.ts";
 import type { ResolvedService, ServiceResolver } from "./service_resolver.ts";
 
 const API_PREFIXES = ["api/", "api/public/", "api/internal/"] as const;
@@ -41,10 +42,19 @@ const FLAT_PREFIXES: readonly string[] = API_PREFIXES;
 export class DirectoryServiceResolver implements ServiceResolver {
   readonly #root: string;
   readonly #probe: ModuleProbe;
+  readonly #namespacedMatches: ResolutionCache;
+  readonly #flatMatches: ResolutionCache;
 
-  constructor(root: string, probe: ModuleProbe = new FilesystemModuleProbe()) {
+  constructor(
+    root: string,
+    probe: ModuleProbe = new FilesystemModuleProbe(),
+    namespacedMatches: ResolutionCache = new ResolutionCache(),
+    flatMatches: ResolutionCache = new ResolutionCache(),
+  ) {
     this.#root = root;
     this.#probe = probe;
+    this.#namespacedMatches = namespacedMatches;
+    this.#flatMatches = flatMatches;
   }
 
   async resolve(pathname: string): Promise<ResolvedService | null> {
@@ -52,18 +62,38 @@ export class DirectoryServiceResolver implements ServiceResolver {
     if (segments.length === 0) return null;
 
     if (segments.length >= 2) {
-      const namespaced = await this.#firstMatch(
+      const namespaced = await this.#cachedMatch(
         `${segments[0]}/${segments[1]}`,
         NAMESPACED_PREFIXES,
+        this.#namespacedMatches,
       );
       if (namespaced !== null) return namespaced;
     }
 
     const service = segments[0];
-    const flat = await this.#firstMatch(service, FLAT_PREFIXES);
+    const flat = await this.#cachedMatch(
+      service,
+      FLAT_PREFIXES,
+      this.#flatMatches,
+    );
     if (flat !== null) return flat;
 
     return { service, servicePath: `${this.#root}/${service}` };
+  }
+
+  async #cachedMatch(
+    service: string,
+    prefixes: readonly string[],
+    cache: ResolutionCache,
+  ): Promise<ResolvedService | null> {
+    const remembered = cache.lookup(service);
+    if (remembered !== undefined) {
+      return remembered === null ? null : { service, servicePath: remembered };
+    }
+
+    const match = await this.#firstMatch(service, prefixes);
+    cache.remember(service, match === null ? null : match.servicePath);
+    return match;
   }
 
   async #firstMatch(
