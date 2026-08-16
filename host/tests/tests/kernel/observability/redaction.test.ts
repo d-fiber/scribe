@@ -31,10 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { previewOf } from "@scribe/core/kernel/observability/console/body_preview.ts";
-import {
-  redactIfJson,
-  redactSensitive,
-} from "@scribe/core/kernel/observability/redaction.ts";
+import { isSensitiveKey, redactIfJson, redactSensitive } from "@scribe/core/kernel/observability/redaction.ts";
 import { assert, assertEquals, assertStringIncludes } from "@std/assert";
 
 function jsonResponse(body: unknown, status: number): Response {
@@ -125,4 +122,64 @@ Deno.test("previewOf leaves the response readable by the caller", async () => {
   await previewOf(response);
 
   assertEquals(await response.json(), { code: "conflict" });
+});
+
+Deno.test("redactSensitive covers the secret-bearing names the old pattern missed", () => {
+  assertEquals(
+    redactSensitive({
+      api_key: "ak_live_1",
+      apiKey: "ak_live_2",
+      app_key: "ak_live_3",
+      smtp_account_credentials: { user: "u", password: "p" },
+      otp: "483920",
+      token_hash: "abc",
+      signature: "v1,AAA",
+      x_internal_secret: "s",
+      cookie: "sid=1",
+      jwt: "ey.ey.sig",
+    }),
+    {
+      api_key: "[redacted]",
+      apiKey: "[redacted]",
+      app_key: "[redacted]",
+      smtp_account_credentials: "[redacted]",
+      otp: "[redacted]",
+      token_hash: "[redacted]",
+      signature: "[redacted]",
+      x_internal_secret: "[redacted]",
+      cookie: "[redacted]",
+      jwt: "[redacted]",
+    },
+  );
+});
+
+Deno.test("redactSensitive matches whole words, so an innocent name stays readable", () => {
+  assertEquals(
+    redactSensitive({
+      keyword: "search terms",
+      monkey: "still here",
+      postal_code: "75011",
+      country_code: "FR",
+      authored_at: "2026-01-01",
+      tokenizer: "kept",
+    }),
+    {
+      keyword: "search terms",
+      monkey: "still here",
+      postal_code: "75011",
+      country_code: "FR",
+      authored_at: "2026-01-01",
+      tokenizer: "kept",
+    },
+  );
+});
+
+Deno.test("isSensitiveKey splits on separators and on camel humps alike", () => {
+  for (const sensitive of ["key", "API_KEY", "apiKey", "x-app-key", "refreshToken", "otpCode"]) {
+    assert(isSensitiveKey(sensitive), sensitive);
+  }
+
+  for (const innocent of ["keyword", "monkey", "tokenizer", "authored", "pinned", "id"]) {
+    assert(!isSensitiveKey(innocent), innocent);
+  }
 });

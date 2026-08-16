@@ -30,8 +30,35 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-const SENSITIVE_KEY_PATTERN = /token|password|secret|authorization/i;
+const SENSITIVE_WORDS: ReadonlySet<string> = new Set([
+  "auth",
+  "authorization",
+  "bearer",
+  "cookie",
+  "credential",
+  "credentials",
+  "jwt",
+  "key",
+  "keys",
+  "otp",
+  "passcode",
+  "passwd",
+  "password",
+  "pin",
+  "secret",
+  "signature",
+  "token",
+  "tokens",
+]);
+
+const WORD_BOUNDARY = /[^A-Za-z0-9]+|(?<=[a-z0-9])(?=[A-Z])/;
 const REDACTED = "[redacted]";
+
+export function isSensitiveKey(key: string): boolean {
+  return key
+    .split(WORD_BOUNDARY)
+    .some((word) => SENSITIVE_WORDS.has(word.toLowerCase()));
+}
 
 export function redactSensitive(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(redactSensitive);
@@ -39,7 +66,7 @@ export function redactSensitive(value: unknown): unknown {
   if (value !== null && typeof value === "object") {
     const out: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
-      out[key] = SENSITIVE_KEY_PATTERN.test(key) ? REDACTED : redactSensitive(val);
+      out[key] = isSensitiveKey(key) ? REDACTED : redactSensitive(val);
     }
     return out;
   }
