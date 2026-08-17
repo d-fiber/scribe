@@ -32,32 +32,53 @@
 
 import { MAX_BODY_BYTES, MAX_FORM_BYTES } from "@scribe/core/runtime/http/limits.ts";
 
-const MAX_INFLIGHT_UPLOAD_BYTES = 256 * 1024 * 1024;
+/**
+ * The ceiling on request body bytes this process will hold at once.
+ *
+ * It covers every body, not only uploads: a small body admitted for free is
+ * still a buffer the process has to keep until the handler answers, and
+ * thousands of them at 64 KiB apiece take the process past its container long
+ * before any single upload does.
+ */
+const MAX_INFLIGHT_BODY_BYTES = 256 * 1024 * 1024;
 
 let inflightBytes = 0;
 
-export interface UploadAdmission {
+export interface BodyAdmission {
   readonly reservedBytes: number;
   readonly maxBodyBytes: number;
+
+  /**
+   * The size this request declared, or `null` when it declared nothing usable.
+   *
+   * The reader uses it to allocate the destination once instead of collecting
+   * chunks and copying them into a second buffer of the same size.
+   */
+  readonly declaredBytes: number | null;
 }
 
-export function admitUpload(req: Request): UploadAdmission | null {
-  if (!isMultipart(req)) {
-    return { reservedBytes: 0, maxBodyBytes: MAX_BODY_BYTES };
-  }
+/**
+ * Reserves room for this request's body, or `null` when the process is full.
+ *
+ * A refusal is a 503, not a rejection of the request itself: the caller may
+ * retry once other bodies have been released.
+ */
+export function admitBody(req: Request): BodyAdmission | null {
+  const ceiling = isMultipart(req) ? MAX_FORM_BYTES : MAX_BODY_BYTES;
+  const declared = declaredSize(req, ceiling);
+  const size = declared ?? ceiling;
 
-  const size = declaredUploadSize(req);
-  if (inflightBytes + size > MAX_INFLIGHT_UPLOAD_BYTES) return null;
+  if (inflightBytes + size > MAX_INFLIGHT_BODY_BYTES) return null;
 
   inflightBytes += size;
-  return { reservedBytes: size, maxBodyBytes: size };
+  return { reservedBytes: size, maxBodyBytes: size, declaredBytes: declared };
 }
 
-export function releaseUpload(admission: UploadAdmission): void {
+export function releaseBody(admission: BodyAdmission): void {
   inflightBytes -= admission.reservedBytes;
 }
 
-export function inflightUploadBytes(): number {
+export function inflightBodyBytes(): number {
   return inflightBytes;
 }
 
@@ -68,10 +89,16 @@ function isMultipart(req: Request): boolean {
     .includes("multipart/form-data") ?? false;
 }
 
-function declaredUploadSize(req: Request): number {
+/**
+ * What this request says it will send, or `null` when it says nothing usable.
+ *
+ * A declared size doubles as the read bound, so a content-length that lies low
+ * cannot buy a small reservation and then send more than it reserved.
+ */
+function declaredSize(req: Request, ceiling: number): number | null {
   const declared = Number(req.headers.get("content-length") ?? 0);
 
-  return Number.isFinite(declared) && declared > 0 && declared <= MAX_FORM_BYTES
+  return Number.isFinite(declared) && declared > 0 && declared <= ceiling
     ? declared
-    : MAX_FORM_BYTES;
+    : null;
 }

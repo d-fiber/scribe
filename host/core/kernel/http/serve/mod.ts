@@ -35,10 +35,10 @@ import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
 import { pathnameOf, stripPrefix } from "@scribe/core/runtime/http/pathname.ts";
 import { rewriteRequest } from "@scribe/core/kernel/http/serve/request_rewrite.ts";
 import {
-  admitUpload,
-  inflightUploadBytes,
-  releaseUpload,
-} from "@scribe/core/kernel/http/serve/upload_admission.ts";
+  admitBody,
+  inflightBodyBytes,
+  releaseBody,
+} from "@scribe/core/kernel/http/serve/body_admission.ts";
 import { logger } from "@scribe/core/kernel/observability/logger.ts";
 import "@scribe/core/kernel/location/ip_location.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
@@ -49,16 +49,20 @@ const RETRY_AFTER_S = "5";
 
 export function serve(handler: () => Response | Promise<Response>): void {
   Deno.serve({ port: httpSettings.get().port }, async (req, info) => {
-    const admission = admitUpload(req);
-    if (admission === null) return uploadRefused();
+    const admission = admitBody(req);
+    if (admission === null) return bodyRefused();
 
     try {
-      const bodyBytes = await readBoundedBody(req, admission.maxBodyBytes);
+      const bodyBytes = await readBoundedBody(
+        req,
+        admission.maxBodyBytes,
+        admission.declaredBytes,
+      );
       if (bodyBytes === null) return ServerResponse.payloadTooLarge();
 
       return await RequestScope.run(req, bodyBytes, handler, peerOf(info));
     } finally {
-      releaseUpload(admission);
+      releaseBody(admission);
     }
   });
 }
@@ -82,9 +86,9 @@ export function serveFunction(app: Hono, name: string): void {
   });
 }
 
-function uploadRefused(): Response {
+function bodyRefused(): Response {
   console.warn(
-    `[serve] upload refused, ${inflightUploadBytes()} bytes already in flight`,
+    `[serve] body refused, ${inflightBodyBytes()} bytes already in flight`,
   );
 
   const response = ServerResponse.serviceUnavailable();

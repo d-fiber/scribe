@@ -34,10 +34,10 @@ import { readBoundedBody } from "@scribe/core/kernel/http/serve/body_reader.ts";
 import { stripPrefix } from "@scribe/core/runtime/http/pathname.ts";
 import { rewriteRequest } from "@scribe/core/kernel/http/serve/request_rewrite.ts";
 import {
-  admitUpload,
-  inflightUploadBytes,
-  releaseUpload,
-} from "@scribe/core/kernel/http/serve/upload_admission.ts";
+  admitBody,
+  inflightBodyBytes,
+  releaseBody,
+} from "@scribe/core/kernel/http/serve/body_admission.ts";
 import { MAX_BODY_BYTES, MAX_FORM_BYTES } from "@scribe/core/runtime/http/limits.ts";
 import { assert, assertEquals } from "@std/assert";
 
@@ -88,21 +88,102 @@ Deno.test("readBoundedBody yields null past the bound instead of buffering on", 
   assertEquals(await readBoundedBody(jsonRequest("x".repeat(50)), 10), null);
 });
 
+Deno.test("readBoundedBody fills the declared buffer once instead of copying twice", async () => {
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode("hello "));
+      controller.enqueue(new TextEncoder().encode("world"));
+      controller.close();
+    },
+  });
+  const req = new Request("http://api.test/", { method: "POST", body: stream });
+
+  const bytes = await readBoundedBody(req, MAX_BODY_BYTES, 11);
+
+  assertEquals(new TextDecoder().decode(bytes!), "hello world");
+});
+
+Deno.test("readBoundedBody trims a body that came in under its declared length", async () => {
+  const bytes = await readBoundedBody(jsonRequest('{"a":1}'), MAX_BODY_BYTES, 64);
+
+  assertEquals(
+    new TextDecoder().decode(bytes!),
+    '{"a":1}',
+    "the preallocated tail must not be handed on as body bytes",
+  );
+  assertEquals(bytes?.byteLength, 7);
+});
+
+Deno.test("readBoundedBody refuses a body that overruns what it declared", async () => {
+  assertEquals(
+    await readBoundedBody(jsonRequest("x".repeat(50)), MAX_BODY_BYTES, 10),
+    null,
+    "a content-length that lies low bought a small reservation and must not outgrow it",
+  );
+});
+
 Deno.test("readBoundedBody treats a body-less request as empty, not as an error", async () => {
   const req = new Request("http://api.test/", { method: "GET" });
 
   assertEquals((await readBoundedBody(req, MAX_BODY_BYTES))?.byteLength, 0);
 });
 
-Deno.test("admitUpload leaves a non-multipart request on the json bound", () => {
-  const admission = admitUpload(jsonRequest("{}"));
+Deno.test("admitBody charges a non-multipart request to the in-flight budget too", () => {
+  const admission = admitBody(jsonRequest("{}"));
+  try {
+    assert(admission);
+    assertEquals(
+      admission.reservedBytes,
+      admission.maxBodyBytes,
+      "a body admitted for free is a body nothing bounds: a thousand of them is what takes the process past its container",
+    );
+    assertEquals(admission.maxBodyBytes, MAX_BODY_BYTES);
+    assertEquals(admission.declaredBytes, null, "the fetch Request declared no length");
+  } finally {
+    if (admission) releaseBody(admission);
+  }
 
-  assertEquals(admission?.reservedBytes, 0);
-  assertEquals(admission?.maxBodyBytes, MAX_BODY_BYTES);
+  assertEquals(inflightBodyBytes(), 0);
 });
 
-Deno.test("admitUpload reserves exactly what it will let itself buffer", () => {
-  const admission = admitUpload(upload(1_000));
+Deno.test("admitBody holds a non-multipart request to its own declared length", () => {
+  const req = new Request("http://api.test/", {
+    method: "POST",
+    headers: { "content-type": "application/json", "content-length": "512" },
+    body: "{}",
+  });
+
+  const admission = admitBody(req);
+  try {
+    assertEquals(admission?.reservedBytes, 512);
+    assertEquals(admission?.maxBodyBytes, 512);
+    assertEquals(admission?.declaredBytes, 512);
+  } finally {
+    if (admission) releaseBody(admission);
+  }
+});
+
+Deno.test("admitBody caps an over-declared json body at the json ceiling", () => {
+  const req = new Request("http://api.test/", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "content-length": String(MAX_BODY_BYTES + 1),
+    },
+    body: "{}",
+  });
+
+  const admission = admitBody(req);
+  try {
+    assertEquals(admission?.maxBodyBytes, MAX_BODY_BYTES);
+    assertEquals(admission?.declaredBytes, null, "an unusable length is no length at all");
+  } finally {
+    if (admission) releaseBody(admission);
+  }
+});
+
+Deno.test("admitBody reserves exactly what it will let itself buffer", () => {
+  const admission = admitBody(upload(1_000));
   try {
     assertEquals(
       admission?.reservedBytes,
@@ -111,41 +192,42 @@ Deno.test("admitUpload reserves exactly what it will let itself buffer", () => {
     );
     assertEquals(admission?.reservedBytes, 1_000);
   } finally {
-    if (admission) releaseUpload(admission);
+    if (admission) releaseBody(admission);
   }
 });
 
-Deno.test("admitUpload falls back to the form ceiling without a usable length", () => {
+Deno.test("admitBody falls back to the form ceiling without a usable length", () => {
   for (const declared of [null, 0, -1, MAX_FORM_BYTES + 1]) {
-    const admission = admitUpload(upload(declared));
+    const admission = admitBody(upload(declared));
     try {
       assertEquals(admission?.reservedBytes, MAX_FORM_BYTES);
       assertEquals(admission?.maxBodyBytes, MAX_FORM_BYTES);
+      assertEquals(admission?.declaredBytes, null);
     } finally {
-      if (admission) releaseUpload(admission);
+      if (admission) releaseBody(admission);
     }
   }
 });
 
-Deno.test("admitUpload refuses once the in-flight budget is spent, and frees it back", () => {
+Deno.test("admitBody refuses once the in-flight budget is spent, and frees it back", () => {
   const held = [];
   try {
     for (let i = 0; i < 2; i++) {
-      const admission = admitUpload(upload(null));
+      const admission = admitBody(upload(null));
       assert(admission, `upload ${i} fits in the 256 MB budget`);
       held.push(admission);
     }
 
     assertEquals(
-      admitUpload(upload(null)),
+      admitBody(upload(null)),
       null,
       "a third 100 MB upload would take the budget past 256 MB",
     );
   } finally {
-    for (const admission of held) releaseUpload(admission);
+    for (const admission of held) releaseBody(admission);
   }
 
-  assertEquals(inflightUploadBytes(), 0, "releasing must return the budget");
+  assertEquals(inflightBodyBytes(), 0, "releasing must return the budget");
 });
 
 Deno.test("stripPrefix removes the service segment and nothing else", () => {

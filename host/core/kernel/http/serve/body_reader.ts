@@ -30,13 +30,28 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+/**
+ * Reads the whole request body, or `null` once it grows past `maxBytes`.
+ *
+ * Pass `declaredBytes` when the request announced a content-length: the
+ * destination is then allocated once and written through, instead of holding
+ * every chunk and copying them into a second buffer of the same size. That
+ * second buffer doubles the peak cost of every request that has one.
+ *
+ * @param declaredBytes - The announced size, which must not be smaller than
+ * what the body turns out to be. A body that overruns it is refused the same
+ * way as one that overruns `maxBytes`.
+ */
 export async function readBoundedBody(
   req: Request,
   maxBytes: number,
+  declaredBytes: number | null = null,
 ): Promise<Uint8Array | null> {
   if (!req.body) return new Uint8Array(0);
 
+  const bound = declaredBytes === null ? maxBytes : Math.min(declaredBytes, maxBytes);
   const reader = req.body.getReader();
+  const preallocated = declaredBytes === null ? null : new Uint8Array(bound);
   const chunks: Uint8Array[] = [];
   let total = 0;
 
@@ -45,19 +60,22 @@ export async function readBoundedBody(
       const { done, value } = await reader.read();
       if (done) break;
 
-      total += value.byteLength;
-      if (total > maxBytes) {
+      if (total + value.byteLength > bound) {
         await reader.cancel().catch(() => {});
         return null;
       }
-      chunks.push(value);
+
+      if (preallocated !== null) preallocated.set(value, total);
+      else chunks.push(value);
+
+      total += value.byteLength;
     }
   } catch (error) {
     console.error("[serve] could not read the request body:", error);
     return new Uint8Array(0);
   }
 
-  return joined(chunks, total);
+  return preallocated !== null ? preallocated.subarray(0, total) : joined(chunks, total);
 }
 
 function joined(chunks: readonly Uint8Array[], total: number): Uint8Array {
