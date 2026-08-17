@@ -31,52 +31,21 @@
 // LICENSE file, the LICENSE file governs.
 
 import { create } from "@bufbuild/protobuf";
-import {
-  type LogAck,
-  LogAckSchema,
-  type LogBatch,
-  LogLevel,
-} from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
-import type { LogEntry } from "@scribe/core/contracts/logging.ts";
-import { logsQueue } from "@scribe/core/kernel/observability/logs_queue.ts";
-import { decodeJson } from "../json.ts";
-
-const levels: Record<LogLevel, LogEntry["level"]> = {
-  [LogLevel.UNSPECIFIED]: "info",
-  [LogLevel.DEBUG]: "debug",
-  [LogLevel.INFO]: "info",
-  [LogLevel.WARN]: "warn",
-  [LogLevel.ERROR]: "error",
-};
-
-function toLogEntry(entry: LogBatch["entries"][number]): LogEntry {
-  const metadata = decodeJson<Record<string, unknown>>(entry.metadata) ?? {};
-
-  return {
-    level: levels[entry.level] ?? "info",
-    action: entry.action,
-    actorType: entry.actorType === "" ? undefined : entry.actorType,
-    actorId: entry.actorId === "" ? undefined : entry.actorId,
-    metadata: {
-      ...metadata,
-      traceId: entry.traceId,
-      invocationId: entry.invocationId,
-    },
-    timestamp: Number(entry.timestamp),
-  };
-}
+import { type LogAck, LogAckSchema, type LogBatch } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 
 /**
- * Enqueues what the worker sent, as one message rather than one per entry.
+ * Takes what the worker sent, and drops it.
  *
- * The worker has already grouped these entries, so pushing them one at a time
- * would undo its batching and make the ack wait for as many NATS round trips
- * as the batch holds.
+ * A node that declared a `_log.ts` never gets here: its `log()` calls are
+ * short-circuited to the sink inside the worker rather than crossing back for
+ * an answer the worker already has. What arrives here therefore belongs to a
+ * project that declared no sink, and the host has nowhere to put it -- there
+ * is no collector behind it any more, and printing it would be the framework
+ * deciding what a project's logs are worth.
+ *
+ * The capability stays because the worker cannot know that from its side: it
+ * calls, and it is answered.
  */
-export async function shipLogs(batch: LogBatch): Promise<LogAck> {
-  if (batch.entries.length > 0) {
-    await logsQueue.push(batch.entries.map(toLogEntry));
-  }
-
-  return create(LogAckSchema, {});
+export function shipLogs(_batch: LogBatch): Promise<LogAck> {
+  return Promise.resolve(create(LogAckSchema, {}));
 }

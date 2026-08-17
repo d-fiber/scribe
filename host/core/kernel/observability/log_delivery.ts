@@ -30,54 +30,29 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-const SENSITIVE_WORDS: ReadonlySet<string> = new Set([
-  "auth",
-  "authorization",
-  "bearer",
-  "cookie",
-  "credential",
-  "credentials",
-  "jwt",
-  "key",
-  "keys",
-  "otp",
-  "passcode",
-  "passwd",
-  "password",
-  "pin",
-  "secret",
-  "signature",
-  "token",
-  "tokens",
-]);
+import type { LogEntry } from "@scribe/core/contracts/logging.ts";
+import { LogBuffer } from "@scribe/core/kernel/observability/log_buffer.ts";
+import { LogRoutes } from "@scribe/core/kernel/observability/log_routing.ts";
 
-const WORD_BOUNDARY = /[^A-Za-z0-9]+|(?<=[a-z0-9])(?=[A-Z])/;
-const REDACTED = "[redacted]";
+export type { LogEntry };
 
-export function isSensitiveKey(key: string): boolean {
-  return key
-    .split(WORD_BOUNDARY)
-    .some((word) => SENSITIVE_WORDS.has(word.toLowerCase()));
+/**
+ * Sends a node's entries to the sink that node declared, or drops them.
+ *
+ * A `_log.ts` is the only thing that says where logs go, so a project that
+ * declared none has said it wants none. The host keeps no destination of its
+ * own -- no queue, no collector, no terminal -- because any it kept would put
+ * every deployment on a path nobody asked for, and would have to be turned off
+ * by a setting rather than by not asking for it.
+ */
+function publishLogs(
+  node: string | null,
+  entries: readonly LogEntry[],
+): Promise<unknown> {
+  const routing = LogRoutes.current;
+  if (!routing.claims(node)) return Promise.resolve();
+
+  return routing.deliver(node, entries);
 }
 
-export function redactSensitive(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(redactSensitive);
-
-  if (value !== null && typeof value === "object") {
-    const out: Record<string, unknown> = {};
-    for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
-      out[key] = isSensitiveKey(key) ? REDACTED : redactSensitive(val);
-    }
-    return out;
-  }
-
-  return value;
-}
-
-export function redactIfJson(text: string): string {
-  try {
-    return JSON.stringify(redactSensitive(JSON.parse(text)));
-  } catch {
-    return text;
-  }
-}
+export const logBuffer: LogBuffer = new LogBuffer(publishLogs);

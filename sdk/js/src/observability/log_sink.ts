@@ -111,12 +111,13 @@ const BLOCK_SIZE = 100;
 const LINGER_MS = 5_000;
 
 /**
- * Where a node's log entries go once the framework stops deciding for you.
+ * Where a node's log entries go. It is the only place they go.
  *
  * Declare one by exporting a subclass from a `_log.ts`: at the root of a node
  * to take that node's entries, or at `lib/_log.ts` to take everything no node
- * claimed. A node without one leaves its entries to the host's own shipper, so
- * declaring a sink is what moves the decision into the project.
+ * claimed. A node with none produces nothing -- the framework keeps no
+ * destination of its own, so declaring a sink is what turns logging on rather
+ * than what redirects it.
  *
  * A sink has two ways of reading what it is handed, and they answer different
  * needs. {@link each} sees every entry the moment it arrives, which is what
@@ -125,8 +126,9 @@ const LINGER_MS = 5_000;
  * per logged line. Overriding either is optional, and overriding neither is a
  * sink that quietly drops what it takes.
  *
- * Nothing is printed for you once a sink exists. {@link printEntry} is the same
- * primitive the host uses, and calling it is a choice this class hands back.
+ * Nothing is printed for you, here or on the host. {@link printEntry} renders
+ * the same box the request log has always shown, and calling it from
+ * {@link each} is what puts a terminal back.
  *
  * @example
  * ```ts

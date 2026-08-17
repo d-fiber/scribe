@@ -32,15 +32,6 @@
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
-/**
- * How much of the request log the terminal is worth writing.
- *
- * `silent` names no entry, so it turns the terminal off without turning
- * shipping off with it. The two are separate: what an operator reads on a
- * terminal and what a collector keeps are not the same question.
- */
-export type ConsoleLogLevel = LogLevel | "silent";
-
 export interface LogEntry {
   readonly level: LogLevel;
   readonly action: string;
@@ -59,10 +50,6 @@ export interface LogEntry {
   readonly node?: string | null;
 }
 
-export interface LogShipper {
-  ship(entries: readonly LogEntry[]): Promise<void>;
-}
-
 /**
  * Where the project decided its own entries should go, when it decided at all.
  *
@@ -70,6 +57,11 @@ export interface LogShipper {
  * running in the worker -- while the entries are raised in `kernel/`, which
  * cannot import `project/`. The host asks two questions and hands over a batch;
  * everything about how a sink was declared stays on the other side.
+ *
+ * It is the only destination there is. A host that finds no sink drops the
+ * entry rather than falling back on one of its own: what a project's logs are
+ * worth keeping is the project's decision, and the framework taking it back
+ * would put every deployment on a path nobody asked for.
  */
 export interface LogRouting {
   /**
@@ -83,10 +75,9 @@ export interface LogRouting {
   /**
    * Whether a sink takes delivery of what `node` produced.
    *
-   * `false` means the entry stays on the host's own path -- the queue, then
-   * whatever `LOG_SHIP_URL` names. It is also what decides whether the host
-   * still prints the exchange: a node with a sink prints from there or not at
-   * all.
+   * `false` means the entry goes nowhere: it is neither kept nor printed. A
+   * node answers `false` when neither it nor the root of the project declared a
+   * `_log.ts`, which is a project that has not asked for its logs.
    */
   claims(node: string | null): boolean;
 

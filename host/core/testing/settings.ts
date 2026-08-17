@@ -30,14 +30,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { consoleLevelNamed } from "@scribe/core/kernel/observability/level.ts";
 import { cacheSettings } from "@scribe/core/runtime/support/settings/cache.ts";
 import { databaseSettings } from "@scribe/core/runtime/support/settings/database.ts";
 import { deviceSettings } from "@scribe/core/runtime/support/settings/device.ts";
 import { firewallSettings } from "@scribe/core/runtime/support/settings/firewall.ts";
 import { httpSettings } from "@scribe/core/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
-import { loggingSettings } from "@scribe/core/runtime/support/settings/logging.ts";
 import { queueSettings } from "@scribe/core/runtime/support/settings/queue.ts";
 import { storageSettings } from "@scribe/core/runtime/support/settings/storage.ts";
 
@@ -74,11 +72,6 @@ export function installTestSettings(): void {
     serviceRoleKey: env("SUPABASE_SERVICE_ROLE_KEY", "service"),
     publicBaseUrl: env("APP_URL", "http://localhost"),
     privateBaseUrl: env("ADMIN_URL", "http://localhost"),
-  });
-  loggingSettings.use({
-    shipUrl: Deno.env.get("LOG_SHIP_URL") ?? null,
-    shipHeaders: {},
-    consoleLevel: consoleLevelNamed(Deno.env.get("LOG_CONSOLE_LEVEL")) ?? "silent",
   });
 }
 

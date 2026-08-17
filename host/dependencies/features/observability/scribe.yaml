@@ -1,5 +1,5 @@
 name: observability
-title: Shipping the logs to an external collector.
+title: Collecting the container logs with Vector.
 optional: true
 
 requires: []

@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { consoleLevelNamed, levelForStatus, reaches } from "@scribe/core/kernel/observability/level.ts";
+import { levelForStatus } from "@scribe/core/kernel/observability/level.ts";
 import { assertEquals } from "@std/assert";
 
 Deno.test("levelForStatus blames the caller for a 4xx and the host for a 5xx", () => {
@@ -42,41 +42,4 @@ Deno.test("levelForStatus blames the caller for a 4xx and the host for a 5xx", (
   assertEquals(levelForStatus(499), "warn");
   assertEquals(levelForStatus(500), "error");
   assertEquals(levelForStatus(503), "error");
-});
-
-Deno.test("reaches keeps a warn threshold silent on the exchanges that went fine", () => {
-  assertEquals(reaches("info", "warn"), false, "a 200 is what the threshold exists to drop");
-  assertEquals(reaches("debug", "warn"), false);
-  assertEquals(reaches("warn", "warn"), true, "the threshold itself is included");
-  assertEquals(reaches("error", "warn"), true);
-});
-
-Deno.test("reaches lets a developer ask for every exchange", () => {
-  for (const level of ["debug", "info", "warn", "error"] as const) {
-    assertEquals(reaches(level, "debug"), true, `${level} must clear the lowest threshold`);
-  }
-});
-
-Deno.test("reaches stops at silent, including the failures", () => {
-  for (const level of ["debug", "info", "warn", "error"] as const) {
-    assertEquals(reaches(level, "silent"), false, `${level} must not print under silent`);
-  }
-});
-
-Deno.test("consoleLevelNamed accepts what an env file realistically carries", () => {
-  assertEquals(consoleLevelNamed("warn"), "warn");
-  assertEquals(consoleLevelNamed("ERROR"), "error");
-  assertEquals(consoleLevelNamed("  info  "), "info");
-  assertEquals(consoleLevelNamed("silent"), "silent");
-});
-
-Deno.test("consoleLevelNamed refuses a name it does not know instead of silencing the terminal", () => {
-  assertEquals(consoleLevelNamed("verbose"), null);
-  assertEquals(consoleLevelNamed(""), null);
-  assertEquals(consoleLevelNamed(undefined), null);
-  assertEquals(
-    consoleLevelNamed("constructor"),
-    null,
-    "a member of Object.prototype is not a level, and `in` alone says it is",
-  );
 });

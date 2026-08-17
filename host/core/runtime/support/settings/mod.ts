@@ -37,7 +37,6 @@ export { deviceSettings } from "./device.ts";
 export { firewallSettings } from "./firewall.ts";
 export { httpSettings } from "./http.ts";
 export { identitySettings } from "./identity.ts";
-export { loggingSettings } from "./logging.ts";
 export { queueSettings } from "./queue.ts";
 export { storageSettings } from "./storage.ts";
 export { workerSettings } from "./worker.ts";

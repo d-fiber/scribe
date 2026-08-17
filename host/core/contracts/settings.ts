@@ -30,7 +30,6 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { ConsoleLogLevel } from "@scribe/core/contracts/logging.ts";
 
 export interface CacheSettings {
   readonly redisUrl: string;
@@ -102,17 +101,3 @@ export interface WorkerSettings {
   readonly publicNodes: readonly string[];
 }
 
-export interface LoggingSettings {
-  readonly shipUrl: string | null;
-  readonly shipHeaders: Readonly<Record<string, string>>;
-
-  /**
-   * The lowest severity of exchange the terminal is worth writing.
-   *
-   * The request log runs on every request, so printing an exchange is a write
-   * to stdout per request, and under Docker that write travels through the
-   * daemon. A deployment reads its terminal for what went wrong; a developer
-   * lowers this to `info` to watch every exchange go by.
-   */
-  readonly consoleLevel: ConsoleLogLevel;
-}

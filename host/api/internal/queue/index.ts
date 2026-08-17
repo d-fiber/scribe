@@ -45,7 +45,6 @@ import {
 } from "./drain/endpoint.ts";
 
 import "@scribe/host/dependencies/features/searcher/sync/queue.ts";
-import "@scribe/core/kernel/observability/logs_queue.ts";
 
 await extensions.load(EXTENSION_QUEUE);
 console.info(queueRegistry.report());

@@ -30,15 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { ConsoleLogLevel, LogLevel } from "@scribe/core/contracts/logging.ts";
-
-const RANK: Readonly<Record<ConsoleLogLevel, number>> = {
-  debug: 0,
-  info: 1,
-  warn: 2,
-  error: 3,
-  silent: 4,
-};
+import type { LogLevel } from "@scribe/core/contracts/logging.ts";
 
 /**
  * The level a status code deserves.
@@ -50,23 +42,4 @@ export function levelForStatus(status: number): LogLevel {
   if (status >= 500) return "error";
   if (status >= 400) return "warn";
   return "info";
-}
-
-/** Whether an entry at `level` clears the `threshold` a deployment set. */
-export function reaches(level: LogLevel, threshold: ConsoleLogLevel): boolean {
-  return RANK[level] >= RANK[threshold];
-}
-
-/**
- * The level `name` spells, or `null` when it spells none.
- *
- * A misspelt level must not silence a terminal by accident, so the caller is
- * told rather than handed a default it did not ask for.
- */
-export function consoleLevelNamed(name: string | undefined): ConsoleLogLevel | null {
-  if (name === undefined) return null;
-
-  const candidate = name.trim().toLowerCase();
-
-  return Object.hasOwn(RANK, candidate) ? candidate as ConsoleLogLevel : null;
 }
