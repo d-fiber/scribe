@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "@bufbuild/protoc-gen-es": "^2.9.0",
+    "@bufbuild/protoc-gen-es": "^2.14.0",
     "@types/node": "^26.2.0"
   },
   "dependencies": {
