@@ -143,7 +143,6 @@ services:
         max-size: "10m"
         max-file: "3"
   rest:
-    container_name: "supabase-rest"
     image: "postgrest/postgrest:v14.8"
     restart: "unless-stopped"
     environment:

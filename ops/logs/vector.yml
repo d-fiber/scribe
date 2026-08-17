@@ -16,7 +16,8 @@ transforms:
     source: |-
       .project = "default"
       .event_message = del(.message)
-      .appname = del(.container_name)
+      .appname = del(.label."com.docker.compose.service")
+      del(.container_name)
       del(.container_created_at)
       del(.container_id)
       del(.source_type)
@@ -30,13 +31,13 @@ transforms:
     inputs:
       - project_logs
     route:
-      kong: '.appname == "supabase-kong"'
-      auth: '.appname == "supabase-auth"'
-      rest: '.appname == "supabase-rest"'
-      realtime: '.appname == "realtime-dev.supabase-realtime"'
-      storage: '.appname == "supabase-storage"'
-      functions: '.appname == "supabase-edge-functions"'
-      db: '.appname == "supabase-db"'
+      kong: '.appname == "kong"'
+      auth: '.appname == "auth"'
+      rest: '.appname == "rest"'
+      realtime: '.appname == "realtime"'
+      storage: '.appname == "storage"'
+      functions: '.appname == "functions"'
+      db: '.appname == "db"'
   kong_logs:
     type: remap
     inputs:
