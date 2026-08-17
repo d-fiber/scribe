@@ -1,0 +1,4 @@
+[submodule "host/packages"]
+	path = host/packages
+	url = git@github.com:d-fiber/scribe_packages.git
+	branch = dev
