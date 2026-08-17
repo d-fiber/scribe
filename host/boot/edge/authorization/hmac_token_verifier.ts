@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { jwtVerify } from "jose/jwt/verify.ts";
+import { jwtVerify } from "jose";
 import type { TokenVerifier } from "./token_verifier.ts";
 
 export class HmacTokenVerifier implements TokenVerifier {

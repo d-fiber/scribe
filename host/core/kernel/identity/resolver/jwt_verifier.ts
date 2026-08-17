@@ -31,10 +31,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
-import { decodeProtectedHeader } from "jose/util/decode_protected_header.ts";
-import { createRemoteJWKSet } from "jose/jwks/remote.ts";
-import { jwtVerify } from "jose/jwt/verify.ts";
-import type { JWTPayload, JWTVerifyResult } from "jose/types.d.ts";
+import { createRemoteJWKSet, decodeProtectedHeader, jwtVerify } from "jose";
+import type { JWTPayload, JWTVerifyResult } from "jose";
 
 const _SYMMETRIC_ALGS = ["HS256"];
 const _ASYMMETRIC_ALGS = ["ES256", "RS256"];

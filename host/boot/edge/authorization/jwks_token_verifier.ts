@@ -30,8 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { createRemoteJWKSet } from "jose/jwks/remote.ts";
-import { jwtVerify } from "jose/jwt/verify.ts";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import type { TokenVerifier } from "./token_verifier.ts";
 
 type KeySet = ReturnType<typeof createRemoteJWKSet>;

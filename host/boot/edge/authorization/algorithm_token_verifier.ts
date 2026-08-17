@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { decodeProtectedHeader } from "jose/util/decode_protected_header.ts";
+import { decodeProtectedHeader } from "jose";
 import type { TokenVerifier } from "./token_verifier.ts";
 
 export class AlgorithmTokenVerifier implements TokenVerifier {

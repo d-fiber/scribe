@@ -34,7 +34,7 @@ import "@scribe/core/testing/settings.ts";
 import { Env } from "@scribe/host/env.ts";
 import { JwtVerifier } from "@scribe/core/kernel/identity/resolver/jwt_verifier.ts";
 import { assertEquals, assertNotEquals } from "@std/assert";
-import { SignJWT } from "jose/jwt/sign.ts";
+import { SignJWT } from "jose";
 
 const SECRET = () => new TextEncoder().encode(Env.JWT_SECRET!);
 
