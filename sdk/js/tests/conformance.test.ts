@@ -37,6 +37,7 @@ import { Worker as WorkerService } from "../gen/scribe/protocol/invocation_pb.ts
 import { QueueDispatch } from "../gen/scribe/host/core/runtime/event_driven/queue/protocol/queue_pb.ts";
 import { HookDispatch } from "../gen/scribe/host/core/runtime/event_driven/hook/protocol/hook_pb.ts";
 import { CronDispatch } from "../gen/scribe/host/core/runtime/event_driven/cron/protocol/cron_pb.ts";
+import { LogDispatch } from "../gen/scribe/protocol/logs_pb.ts";
 import { procedurePath } from "../src/transport/wire.ts";
 
 const sdkRoot = new URL("../", import.meta.url);
@@ -99,6 +100,7 @@ Deno.test("the procedure paths a foreign SDK must implement are stable", () => {
     procedurePath(CronDispatch.method.trigger),
     "/scribe.runtime.cron.v1.CronDispatch/Trigger",
   );
+  assertEquals(procedurePath(LogDispatch.method.handle), "/scribe.v1.LogDispatch/Handle");
 });
 
 Deno.test("the generated stubs are versioned, not gitignored", async () => {
