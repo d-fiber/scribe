@@ -68,6 +68,17 @@ export interface DeviceSettings {
 
 export interface HttpSettings {
   readonly port: number;
+
+  /**
+   * The ceiling on request body bytes this process holds at once.
+   *
+   * It has to come from outside because only the deployment knows how much
+   * memory the replica was given. Bodies live in external buffers that add up
+   * with the V8 heap rather than fitting inside it, so a figure compiled into
+   * the framework is either far above what a small replica can hold or far
+   * below what a large one should admit.
+   */
+  readonly maxInflightBodyBytes: number;
 }
 
 export interface WorkerSettings {

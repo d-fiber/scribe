@@ -30,6 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/core/testing/settings.ts";
 import { readBoundedBody } from "@scribe/core/kernel/http/serve/body_reader.ts";
 import { stripPrefix } from "@scribe/core/runtime/http/pathname.ts";
 import { rewriteRequest } from "@scribe/core/kernel/http/serve/request_rewrite.ts";
@@ -39,6 +40,7 @@ import {
   releaseBody,
 } from "@scribe/core/kernel/http/serve/body_admission.ts";
 import { MAX_BODY_BYTES, MAX_FORM_BYTES } from "@scribe/core/runtime/http/limits.ts";
+import { httpSettings } from "@scribe/core/runtime/support/settings/http.ts";
 import { assert, assertEquals } from "@std/assert";
 
 function upload(contentLength: number | null): Request {
@@ -228,6 +230,29 @@ Deno.test("admitBody refuses once the in-flight budget is spent, and frees it ba
   }
 
   assertEquals(inflightBodyBytes(), 0, "releasing must return the budget");
+});
+
+Deno.test("admitBody spends the budget the deployment configured, not a compiled-in one", () => {
+  const configured = httpSettings.get();
+  httpSettings.use({ ...configured, maxInflightBodyBytes: MAX_FORM_BYTES });
+
+  try {
+    const first = admitBody(upload(null));
+    try {
+      assert(first, "one upload is exactly the budget a 100 MB replica was given");
+      assertEquals(
+        admitBody(upload(null)),
+        null,
+        "a replica sized under the old 256 MB ceiling must refuse the second upload",
+      );
+    } finally {
+      if (first) releaseBody(first);
+    }
+  } finally {
+    httpSettings.use(configured);
+  }
+
+  assertEquals(inflightBodyBytes(), 0);
 });
 
 Deno.test("stripPrefix removes the service segment and nothing else", () => {

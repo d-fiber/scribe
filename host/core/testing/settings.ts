@@ -64,7 +64,10 @@ export function installTestSettings(): void {
   deviceSettings.use({
     payloadPrivateKeyHex: env("DEVICE_PAYLOAD_PRIVATE_KEY", ""),
   });
-  httpSettings.use({ port: Number(env("PORT", "3000")) });
+  httpSettings.use({
+    port: Number(env("PORT", "3000")),
+    maxInflightBodyBytes: Number(env("API_MAX_INFLIGHT_BODY_MB", "256")) * 1024 * 1024,
+  });
   storageSettings.use({
     apiUrl: env("SUPABASE_STORAGE_INTERNAL_URL", "http://localhost:5000"),
     serviceRoleKey: env("SUPABASE_SERVICE_ROLE_KEY", "service"),

@@ -31,16 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { MAX_BODY_BYTES, MAX_FORM_BYTES } from "@scribe/core/runtime/http/limits.ts";
-
-/**
- * The ceiling on request body bytes this process will hold at once.
- *
- * It covers every body, not only uploads: a small body admitted for free is
- * still a buffer the process has to keep until the handler answers, and
- * thousands of them at 64 KiB apiece take the process past its container long
- * before any single upload does.
- */
-const MAX_INFLIGHT_BODY_BYTES = 256 * 1024 * 1024;
+import { httpSettings } from "@scribe/core/runtime/support/settings/http.ts";
 
 let inflightBytes = 0;
 
@@ -62,13 +53,20 @@ export interface BodyAdmission {
  *
  * A refusal is a 503, not a rejection of the request itself: the caller may
  * retry once other bodies have been released.
+ *
+ * The budget covers every body, not only uploads: a small body admitted for
+ * free is still a buffer the process has to keep until the handler answers,
+ * and thousands of them at 64 KiB apiece take the process past its container
+ * long before any single upload does.
  */
 export function admitBody(req: Request): BodyAdmission | null {
   const ceiling = isMultipart(req) ? MAX_FORM_BYTES : MAX_BODY_BYTES;
   const declared = declaredSize(req, ceiling);
   const size = declared ?? ceiling;
 
-  if (inflightBytes + size > MAX_INFLIGHT_BODY_BYTES) return null;
+  if (inflightBytes + size > httpSettings.get().maxInflightBodyBytes) {
+    return null;
+  }
 
   inflightBytes += size;
   return { reservedBytes: size, maxBodyBytes: size, declaredBytes: declared };

@@ -62,6 +62,22 @@ import { workerSettings } from "@scribe/core/runtime/support/settings/worker.ts"
 import { SEARCHER_EXTENSION } from "@scribe/host/dependencies/features/searcher/core/extension.ts";
 import { EXTENSION_CRON, EXTENSION_QUEUE } from "./extensions.ts";
 
+/**
+ * What the body budget falls back to when the deployment names no figure.
+ *
+ * This was the compiled-in ceiling before the compose learned to size it, so a
+ * rendering made by an older CLI keeps the behaviour it already had instead of
+ * losing its budget to a zero.
+ */
+const DEFAULT_MAX_INFLIGHT_BODY_MB = 256;
+
+function maxInflightBodyBytes(): number {
+  const declared = Number(Deno.env.get("API_MAX_INFLIGHT_BODY_MB"));
+  const megabytes = Number.isFinite(declared) && declared > 0 ? declared : DEFAULT_MAX_INFLIGHT_BODY_MB;
+
+  return megabytes * 1024 * 1024;
+}
+
 cacheSettings.use({ redisUrl: Env.REDIS_URL });
 queueSettings.use({ natsUrl: Env.NATS_URL });
 databaseSettings.use({
@@ -77,7 +93,7 @@ identitySettings.use({
 });
 firewallSettings.use({ internalSecret: Env.INTERNAL_SECRET });
 deviceSettings.use({ payloadPrivateKeyHex: Env.DEVICE_PAYLOAD_PRIVATE_KEY });
-httpSettings.use({ port: Env.PORT });
+httpSettings.use({ port: Env.PORT, maxInflightBodyBytes: maxInflightBodyBytes() });
 storageSettings.use({
   apiUrl: Env.SUPABASE_STORAGE_INTERNAL_URL,
   serviceRoleKey: Env.SUPABASE_SERVICE_ROLE_KEY,

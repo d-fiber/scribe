@@ -313,6 +313,7 @@ services:
       - "deno-cache:/root/.cache/deno"
     environment:
       PORT: "3000"
+      API_MAX_INFLIGHT_BODY_MB: "{{api_max_inflight_body}}"
       WORKER_ENDPOINT: ${WORKER_ENDPOINT}
       WORKER_CALLBACK_PORT: "4747"
       SMTP_ACCOUNT_HOST: ${SMTP_ACCOUNT_HOST}
