@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { DiscoveredRoute } from "../mod.ts";
+import type { DiscoveredLogSink, DiscoveredRoute } from "../mod.ts";
 import * as _r0 from "./app/brand/index.ts";
 import * as _b0 from "./app/_middleware.ts";
 import * as _r1 from "./app/brand/[brandId].ts";
@@ -53,3 +53,5 @@ export const routes: readonly DiscoveredRoute[] = [
     branches: [_b0],
   },
 ];
+
+export const logSinks: readonly DiscoveredLogSink[] = [];

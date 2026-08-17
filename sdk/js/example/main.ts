@@ -31,9 +31,9 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Node, ScribeServer } from "../mod.ts";
-import { nodes, routes } from "./routes.ts";
+import { logSinks, nodes, routes } from "./routes.ts";
 
-const server = new ScribeServer({ routes, nodes })
+const server = new ScribeServer({ routes, nodes, logSinks })
   .addNode(new Node({ name: "app", public: true }));
 
 if (import.meta.main) await server.run();
