@@ -7,6 +7,10 @@
     remote_ip 10.8.0.0/24 172.28.0.0/16
 }
 
+(compression) {
+    encode zstd gzip
+}
+
 (security_headers) {
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -19,6 +23,7 @@
 
 {$APP_DOMAIN} {
     import security_headers DENY
+    import compression
     @public_assets {
         path /assets/*
     }
@@ -66,6 +71,7 @@
         level DEBUG
     }
     import security_headers DENY
+    import compression
     @browser {
         header Accept *text/html*
         not path /functions/v1/hosting/*
@@ -94,6 +100,7 @@
         level DEBUG
     }
     import security_headers SAMEORIGIN
+    import compression
 
     handle / {
         redir {$MAIN_DOMAIN} permanent
