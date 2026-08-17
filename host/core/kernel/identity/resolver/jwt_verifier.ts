@@ -68,6 +68,32 @@ function remoteKeySet(): RemoteKeySet | null {
 
 type Verification = (jwt: string) => Promise<JWTVerifyResult>;
 
+let hmacSecret: string | null = null;
+let hmacKey: Promise<CryptoKey> | null = null;
+
+/**
+ * The shared secret as a `CryptoKey`, imported once per secret.
+ *
+ * Handing jose the raw bytes makes it import the key again on every single
+ * verification, which measured as a fifth of the whole HS256 cost. The import
+ * is keyed on the secret itself so that swapping it — which only tests do —
+ * still takes effect.
+ */
+function symmetricKey(secret: string): Promise<CryptoKey> {
+  if (secret !== hmacSecret || hmacKey === null) {
+    hmacSecret = secret;
+    hmacKey = crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"],
+    );
+  }
+
+  return hmacKey;
+}
+
 function verificationFor(alg: string | undefined): Verification | null {
   if (alg === undefined) return null;
 
@@ -75,9 +101,8 @@ function verificationFor(alg: string | undefined): Verification | null {
     const secret = identitySettings.get().jwtSecret;
     if (!secret) return null;
 
-    const key = new TextEncoder().encode(secret);
-    return (jwt) =>
-      jwtVerify(jwt, key, {
+    return async (jwt) =>
+      jwtVerify(jwt, await symmetricKey(secret), {
         audience: _AUDIENCE,
         algorithms: _SYMMETRIC_ALGS,
       });
