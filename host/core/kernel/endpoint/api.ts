@@ -52,13 +52,18 @@ export abstract class ApiEndpoint extends RouteEndpoint {
 
   protected async execute(): Promise<Response> {
     const callers = callersOf(this.access());
-    if (!(await isAllowed(callers, this.webhookVerified()))) {
-      return this.response.unauthorized();
-    }
 
-    if (!(await withinRateLimit(this.rateLimitKey(), this.rateLimit()))) {
-      return this.response.tooManyRequests();
-    }
+    // Both of these reach Redis and neither needs the other's answer, so they
+    // travel together. The cost is that a refused caller now spends a rate
+    // limit token, which is the desirable half of the trade: a flood of
+    // invalid tokens used to be answered without ever being counted.
+    const [allowed, withinLimit] = await Promise.all([
+      isAllowed(callers, this.webhookVerified()),
+      withinRateLimit(this.rateLimitKey(), this.rateLimit()),
+    ]);
+
+    if (!allowed) return this.response.unauthorized();
+    if (!withinLimit) return this.response.tooManyRequests();
 
     return this.run(new ApiContext());
   }

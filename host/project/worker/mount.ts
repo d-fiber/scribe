@@ -110,10 +110,17 @@ function responseOf(reply: Reply): Response {
 }
 
 async function serve(route: Route, client: WorkerClient, c: Context): Promise<Response> {
-  const allowed = route.access.map((caller) => callers[caller] ?? Caller.Anonymous);
-  if (!(await isAllowed(allowed, route.webhookVerified))) {
-    return ServerResponse.unauthorized();
-  }
+  const declared = route.access.map((caller) => callers[caller] ?? Caller.Anonymous);
+
+  // The rate limit is independent of who the caller is, so it rides alongside
+  // the identity lookup rather than waiting for it. The permission check does
+  // depend on the resolved identity, so it stays behind.
+  const [allowed, withinLimit] = await Promise.all([
+    isAllowed(declared, route.webhookVerified),
+    withinRateLimit(route.rateLimitKey, limiterOf(route.rateLimit)),
+  ]);
+
+  if (!allowed) return ServerResponse.unauthorized();
 
   if (route.requiredPermissions.length > 0 && !(await grantsAll(route.requiredPermissions))) {
     return ServerResponse.forbidden({
@@ -122,9 +129,7 @@ async function serve(route: Route, client: WorkerClient, c: Context): Promise<Re
     });
   }
 
-  if (!(await withinRateLimit(route.rateLimitKey, limiterOf(route.rateLimit)))) {
-    return ServerResponse.tooManyRequests();
-  }
+  if (!withinLimit) return ServerResponse.tooManyRequests();
 
   const traceId = crypto.randomUUID();
   const token = CapabilityTokens.issue({

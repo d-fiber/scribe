@@ -44,9 +44,15 @@ async function grantsAll(required: readonly string[]): Promise<boolean> {
 
 async function serve(descriptor: RouteDescriptor, c: Context): Promise<Response> {
   const callers = callersOf(descriptor.access);
-  if (!(await isAllowed(callers, descriptor.webhookVerified ?? false))) {
-    return ServerResponse.unauthorized();
-  }
+
+  // Same reasoning as the worker routes in project/worker/mount.ts: the limiter
+  // does not need to know who is calling, so it runs alongside the lookup.
+  const [allowed, withinLimit] = await Promise.all([
+    isAllowed(callers, descriptor.webhookVerified ?? false),
+    withinRateLimit(descriptor.rateLimitKey, descriptor.rateLimit),
+  ]);
+
+  if (!allowed) return ServerResponse.unauthorized();
 
   const required = descriptor.requiredPermissions ?? [];
   if (required.length > 0 && !(await grantsAll(required))) {
@@ -56,9 +62,7 @@ async function serve(descriptor: RouteDescriptor, c: Context): Promise<Response>
     });
   }
 
-  if (!(await withinRateLimit(descriptor.rateLimitKey, descriptor.rateLimit))) {
-    return ServerResponse.tooManyRequests();
-  }
+  if (!withinLimit) return ServerResponse.tooManyRequests();
 
   return descriptor.handler({ pathParams: c.req.param() });
 }
