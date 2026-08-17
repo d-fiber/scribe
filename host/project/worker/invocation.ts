@@ -60,10 +60,35 @@ const methods: Record<string, ProtoMethod> = {
   DELETE: ProtoMethod.DELETE,
 };
 
+/**
+ * The request headers a worker is allowed to see.
+ *
+ * Everything else stays on the host, credentials first: `authorization` is the
+ * caller's own bearer token, and `cookie`, `apikey`, `x-app-key`,
+ * `x-admin-app-key` and `x-internal-secret` are replayable the moment a
+ * handler logs them or echoes them back. A worker never needs any of them — it
+ * is handed the identity already resolved, in `Invocation.identity`.
+ *
+ * An allow list rather than a deny list, so that a secret header added later
+ * stays on this side without anyone having to remember to exclude it.
+ */
+const FORWARDED_HEADERS: ReadonlySet<string> = new Set([
+  "accept",
+  "accept-language",
+  "content-type",
+  "if-match",
+  "if-modified-since",
+  "if-none-match",
+  "origin",
+  "range",
+  "x-request-id",
+]);
+
 function headersOf(): Record<string, string> {
   const headers: Record<string, string> = {};
   request.headers().forEach((value, key) => {
-    headers[key.toLowerCase()] = value;
+    const name = key.toLowerCase();
+    if (FORWARDED_HEADERS.has(name)) headers[name] = value;
   });
   return headers;
 }
