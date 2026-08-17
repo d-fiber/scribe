@@ -33,6 +33,7 @@ class LogEntry extends $pb.GeneratedMessage {
     $fixnum.Int64? timestamp,
     $core.String? traceId,
     $core.String? invocationId,
+    $core.String? node,
   }) {
     final result = create();
     if (level != null) result.level = level;
@@ -43,6 +44,7 @@ class LogEntry extends $pb.GeneratedMessage {
     if (timestamp != null) result.timestamp = timestamp;
     if (traceId != null) result.traceId = traceId;
     if (invocationId != null) result.invocationId = invocationId;
+    if (node != null) result.node = node;
     return result;
   }
 
@@ -69,6 +71,7 @@ class LogEntry extends $pb.GeneratedMessage {
     ..aInt64(6, _omitFieldNames ? '' : 'timestamp')
     ..aOS(7, _omitFieldNames ? '' : 'traceId')
     ..aOS(8, _omitFieldNames ? '' : 'invocationId')
+    ..aOS(9, _omitFieldNames ? '' : 'node')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -162,6 +165,15 @@ class LogEntry extends $pb.GeneratedMessage {
   $core.bool hasInvocationId() => $_has(7);
   @$pb.TagNumber(8)
   void clearInvocationId() => $_clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.String get node => $_getSZ(8);
+  @$pb.TagNumber(9)
+  set node($core.String value) => $_setString(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasNode() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearNode() => $_clearField(9);
 }
 
 class LogBatch extends $pb.GeneratedMessage {
@@ -249,6 +261,107 @@ class LogAck extends $pb.GeneratedMessage {
   static LogAck? _defaultInstance;
 }
 
+class LogDelivery extends $pb.GeneratedMessage {
+  factory LogDelivery({
+    $core.String? node,
+    $core.Iterable<LogEntry>? entries,
+  }) {
+    final result = create();
+    if (node != null) result.node = node;
+    if (entries != null) result.entries.addAll(entries);
+    return result;
+  }
+
+  LogDelivery._();
+
+  factory LogDelivery.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory LogDelivery.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'LogDelivery',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'scribe.v1'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'node')
+    ..pPM<LogEntry>(2, _omitFieldNames ? '' : 'entries',
+        subBuilder: LogEntry.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LogDelivery clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LogDelivery copyWith(void Function(LogDelivery) updates) =>
+      super.copyWith((message) => updates(message as LogDelivery))
+          as LogDelivery;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static LogDelivery create() => LogDelivery._();
+  @$core.override
+  LogDelivery createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static LogDelivery getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<LogDelivery>(create);
+  static LogDelivery? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get node => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set node($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasNode() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearNode() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<LogEntry> get entries => $_getList(1);
+}
+
+class LogDeliveryAck extends $pb.GeneratedMessage {
+  factory LogDeliveryAck() => create();
+
+  LogDeliveryAck._();
+
+  factory LogDeliveryAck.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory LogDeliveryAck.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'LogDeliveryAck',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'scribe.v1'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LogDeliveryAck clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LogDeliveryAck copyWith(void Function(LogDeliveryAck) updates) =>
+      super.copyWith((message) => updates(message as LogDeliveryAck))
+          as LogDeliveryAck;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static LogDeliveryAck create() => LogDeliveryAck._();
+  @$core.override
+  LogDeliveryAck createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static LogDeliveryAck getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<LogDeliveryAck>(create);
+  static LogDeliveryAck? _defaultInstance;
+}
+
+/// Worker to host: what the project logged through the SDK, on its way to the
+/// host's shipper.
 class LoggingApi {
   final $pb.RpcClient _client;
 
@@ -256,6 +369,22 @@ class LoggingApi {
 
   $async.Future<LogAck> ship($pb.ClientContext? ctx, LogBatch request) =>
       _client.invoke<LogAck>(ctx, 'Logging', 'Ship', request, LogAck());
+}
+
+/// Host to worker: the entries a `_log.ts` declared it would take.
+///
+/// The reverse direction of Logging.Ship, and the reason both exist: the access
+/// log is produced where the exchange happens, which is the host, while the sink
+/// that decides what to do with it is project code, which runs in the worker.
+class LogDispatchApi {
+  final $pb.RpcClient _client;
+
+  LogDispatchApi(this._client);
+
+  $async.Future<LogDeliveryAck> handle(
+          $pb.ClientContext? ctx, LogDelivery request) =>
+      _client.invoke<LogDeliveryAck>(
+          ctx, 'LogDispatch', 'Handle', request, LogDeliveryAck());
 }
 
 const $core.bool _omitFieldNames =

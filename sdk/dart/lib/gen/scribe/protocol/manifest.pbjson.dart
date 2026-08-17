@@ -128,13 +128,14 @@ const NodeDeclaration$json = {
   '2': [
     {'1': 'name', '3': 1, '4': 1, '5': 9, '10': 'name'},
     {'1': 'public', '3': 2, '4': 1, '5': 8, '10': 'public'},
+    {'1': 'log_sink', '3': 3, '4': 1, '5': 8, '10': 'logSink'},
   ],
 };
 
 /// Descriptor for `NodeDeclaration`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List nodeDeclarationDescriptor = $convert.base64Decode(
     'Cg9Ob2RlRGVjbGFyYXRpb24SEgoEbmFtZRgBIAEoCVIEbmFtZRIWCgZwdWJsaWMYAiABKAhSBn'
-    'B1YmxpYw==');
+    'B1YmxpYxIZCghsb2dfc2luaxgDIAEoCFIHbG9nU2luaw==');
 
 @$core.Deprecated('Use hookDeclarationDescriptor instead')
 const HookDeclaration$json = {
@@ -341,6 +342,7 @@ const Manifest$json = {
       '6': '.scribe.v1.NodeDeclaration',
       '10': 'nodes'
     },
+    {'1': 'root_log_sink', '3': 12, '4': 1, '5': 8, '10': 'rootLogSink'},
   ],
 };
 
@@ -355,7 +357,8 @@ final $typed_data.Uint8List manifestDescriptor = $convert.base64Decode(
     'YXJhdGlvblIJc2VhcmNoZXJzEjwKCXJlYWx0aW1lcxgIIAMoCzIeLnNjcmliZS52MS5SZWFsdG'
     'ltZURlY2xhcmF0aW9uUglyZWFsdGltZXMSOQoIc3RvcmFnZXMYCSADKAsyHS5zY3JpYmUudjEu'
     'U3RvcmFnZURlY2xhcmF0aW9uUghzdG9yYWdlcxIfCgtzZGtfdmVyc2lvbhgKIAEoCVIKc2RrVm'
-    'Vyc2lvbhIwCgVub2RlcxgLIAMoCzIaLnNjcmliZS52MS5Ob2RlRGVjbGFyYXRpb25SBW5vZGVz');
+    'Vyc2lvbhIwCgVub2RlcxgLIAMoCzIaLnNjcmliZS52MS5Ob2RlRGVjbGFyYXRpb25SBW5vZGVz'
+    'EiIKDXJvb3RfbG9nX3NpbmsYDCABKAhSC3Jvb3RMb2dTaW5r');
 
 @$core.Deprecated('Use handshakeRequestDescriptor instead')
 const HandshakeRequest$json = {

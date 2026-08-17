@@ -277,10 +277,12 @@ class NodeDeclaration extends $pb.GeneratedMessage {
   factory NodeDeclaration({
     $core.String? name,
     $core.bool? public,
+    $core.bool? logSink,
   }) {
     final result = create();
     if (name != null) result.name = name;
     if (public != null) result.public = public;
+    if (logSink != null) result.logSink = logSink;
     return result;
   }
 
@@ -299,6 +301,7 @@ class NodeDeclaration extends $pb.GeneratedMessage {
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'name')
     ..aOB(2, _omitFieldNames ? '' : 'public')
+    ..aOB(3, _omitFieldNames ? '' : 'logSink')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -337,6 +340,15 @@ class NodeDeclaration extends $pb.GeneratedMessage {
   $core.bool hasPublic() => $_has(1);
   @$pb.TagNumber(2)
   void clearPublic() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get logSink => $_getBF(2);
+  @$pb.TagNumber(3)
+  set logSink($core.bool value) => $_setBool(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasLogSink() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearLogSink() => $_clearField(3);
 }
 
 class HookDeclaration extends $pb.GeneratedMessage {
@@ -870,6 +882,7 @@ class Manifest extends $pb.GeneratedMessage {
     $core.Iterable<StorageDeclaration>? storages,
     $core.String? sdkVersion,
     $core.Iterable<NodeDeclaration>? nodes,
+    $core.bool? rootLogSink,
   }) {
     final result = create();
     if (protocolVersion != null) result.protocolVersion = protocolVersion;
@@ -883,6 +896,7 @@ class Manifest extends $pb.GeneratedMessage {
     if (storages != null) result.storages.addAll(storages);
     if (sdkVersion != null) result.sdkVersion = sdkVersion;
     if (nodes != null) result.nodes.addAll(nodes);
+    if (rootLogSink != null) result.rootLogSink = rootLogSink;
     return result;
   }
 
@@ -917,6 +931,7 @@ class Manifest extends $pb.GeneratedMessage {
     ..aOS(10, _omitFieldNames ? '' : 'sdkVersion')
     ..pPM<NodeDeclaration>(11, _omitFieldNames ? '' : 'nodes',
         subBuilder: NodeDeclaration.create)
+    ..aOB(12, _omitFieldNames ? '' : 'rootLogSink')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -987,6 +1002,15 @@ class Manifest extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(11)
   $pb.PbList<NodeDeclaration> get nodes => $_getList(10);
+
+  @$pb.TagNumber(12)
+  $core.bool get rootLogSink => $_getBF(11);
+  @$pb.TagNumber(12)
+  set rootLogSink($core.bool value) => $_setBool(11, value);
+  @$pb.TagNumber(12)
+  $core.bool hasRootLogSink() => $_has(11);
+  @$pb.TagNumber(12)
+  void clearRootLogSink() => $_clearField(12);
 }
 
 class HandshakeRequest extends $pb.GeneratedMessage {

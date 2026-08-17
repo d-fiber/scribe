@@ -53,6 +53,7 @@ message LogEntry {
   int64 timestamp = 6;
   string trace_id = 7;
   string invocation_id = 8;
+  string node = 9;
 }
 
 message LogBatch {
@@ -61,6 +62,24 @@ message LogBatch {
 
 message LogAck {}
 
+// Worker to host: what the project logged through the SDK, on its way to the
+// host's shipper.
 service Logging {
   rpc Ship(LogBatch) returns (LogAck);
+}
+
+message LogDelivery {
+  string node = 1;
+  repeated LogEntry entries = 2;
+}
+
+message LogDeliveryAck {}
+
+// Host to worker: the entries a `_log.ts` declared it would take.
+//
+// The reverse direction of Logging.Ship, and the reason both exist: the access
+// log is produced where the exchange happens, which is the host, while the sink
+// that decides what to do with it is project code, which runs in the worker.
+service LogDispatch {
+  rpc Handle(LogDelivery) returns (LogDeliveryAck);
 }

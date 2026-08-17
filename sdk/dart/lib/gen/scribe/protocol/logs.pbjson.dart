@@ -61,6 +61,7 @@ const LogEntry$json = {
     {'1': 'timestamp', '3': 6, '4': 1, '5': 3, '10': 'timestamp'},
     {'1': 'trace_id', '3': 7, '4': 1, '5': 9, '10': 'traceId'},
     {'1': 'invocation_id', '3': 8, '4': 1, '5': 9, '10': 'invocationId'},
+    {'1': 'node', '3': 9, '4': 1, '5': 9, '10': 'node'},
   ],
 };
 
@@ -70,7 +71,8 @@ final $typed_data.Uint8List logEntryDescriptor = $convert.base64Decode(
     'oGYWN0aW9uGAIgASgJUgZhY3Rpb24SHQoKYWN0b3JfdHlwZRgDIAEoCVIJYWN0b3JUeXBlEhkK'
     'CGFjdG9yX2lkGAQgASgJUgdhY3RvcklkEisKCG1ldGFkYXRhGAUgASgLMg8uc2NyaWJlLnYxLk'
     'pzb25SCG1ldGFkYXRhEhwKCXRpbWVzdGFtcBgGIAEoA1IJdGltZXN0YW1wEhkKCHRyYWNlX2lk'
-    'GAcgASgJUgd0cmFjZUlkEiMKDWludm9jYXRpb25faWQYCCABKAlSDGludm9jYXRpb25JZA==');
+    'GAcgASgJUgd0cmFjZUlkEiMKDWludm9jYXRpb25faWQYCCABKAlSDGludm9jYXRpb25JZBISCg'
+    'Rub2RlGAkgASgJUgRub2Rl');
 
 @$core.Deprecated('Use logBatchDescriptor instead')
 const LogBatch$json = {
@@ -101,6 +103,36 @@ const LogAck$json = {
 final $typed_data.Uint8List logAckDescriptor =
     $convert.base64Decode('CgZMb2dBY2s=');
 
+@$core.Deprecated('Use logDeliveryDescriptor instead')
+const LogDelivery$json = {
+  '1': 'LogDelivery',
+  '2': [
+    {'1': 'node', '3': 1, '4': 1, '5': 9, '10': 'node'},
+    {
+      '1': 'entries',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.scribe.v1.LogEntry',
+      '10': 'entries'
+    },
+  ],
+};
+
+/// Descriptor for `LogDelivery`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List logDeliveryDescriptor = $convert.base64Decode(
+    'CgtMb2dEZWxpdmVyeRISCgRub2RlGAEgASgJUgRub2RlEi0KB2VudHJpZXMYAiADKAsyEy5zY3'
+    'JpYmUudjEuTG9nRW50cnlSB2VudHJpZXM=');
+
+@$core.Deprecated('Use logDeliveryAckDescriptor instead')
+const LogDeliveryAck$json = {
+  '1': 'LogDeliveryAck',
+};
+
+/// Descriptor for `LogDeliveryAck`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List logDeliveryAckDescriptor =
+    $convert.base64Decode('Cg5Mb2dEZWxpdmVyeUFjaw==');
+
 const $core.Map<$core.String, $core.dynamic> LoggingServiceBase$json = {
   '1': 'Logging',
   '2': [
@@ -121,3 +153,28 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
 final $typed_data.Uint8List loggingServiceDescriptor = $convert.base64Decode(
     'CgdMb2dnaW5nEi4KBFNoaXASEy5zY3JpYmUudjEuTG9nQmF0Y2gaES5zY3JpYmUudjEuTG9nQW'
     'Nr');
+
+const $core.Map<$core.String, $core.dynamic> LogDispatchServiceBase$json = {
+  '1': 'LogDispatch',
+  '2': [
+    {
+      '1': 'Handle',
+      '2': '.scribe.v1.LogDelivery',
+      '3': '.scribe.v1.LogDeliveryAck'
+    },
+  ],
+};
+
+@$core.Deprecated('Use logDispatchServiceDescriptor instead')
+const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
+    LogDispatchServiceBase$messageJson = {
+  '.scribe.v1.LogDelivery': LogDelivery$json,
+  '.scribe.v1.LogEntry': LogEntry$json,
+  '.scribe.v1.Json': $0.Json$json,
+  '.scribe.v1.LogDeliveryAck': LogDeliveryAck$json,
+};
+
+/// Descriptor for `LogDispatch`. Decode as a `google.protobuf.ServiceDescriptorProto`.
+final $typed_data.Uint8List logDispatchServiceDescriptor = $convert.base64Decode(
+    'CgtMb2dEaXNwYXRjaBI7CgZIYW5kbGUSFi5zY3JpYmUudjEuTG9nRGVsaXZlcnkaGS5zY3JpYm'
+    'UudjEuTG9nRGVsaXZlcnlBY2s=');

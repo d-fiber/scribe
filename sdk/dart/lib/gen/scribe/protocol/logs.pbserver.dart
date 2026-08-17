@@ -46,3 +46,32 @@ abstract class LoggingServiceBase extends $pb.GeneratedService {
   $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
       get $messageJson => LoggingServiceBase$messageJson;
 }
+
+abstract class LogDispatchServiceBase extends $pb.GeneratedService {
+  $async.Future<$1.LogDeliveryAck> handle(
+      $pb.ServerContext ctx, $1.LogDelivery request);
+
+  $pb.GeneratedMessage createRequest($core.String methodName) {
+    switch (methodName) {
+      case 'Handle':
+        return $1.LogDelivery();
+      default:
+        throw $core.ArgumentError('Unknown method: $methodName');
+    }
+  }
+
+  $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx,
+      $core.String methodName, $pb.GeneratedMessage request) {
+    switch (methodName) {
+      case 'Handle':
+        return handle(ctx, request as $1.LogDelivery);
+      default:
+        throw $core.ArgumentError('Unknown method: $methodName');
+    }
+  }
+
+  $core.Map<$core.String, $core.dynamic> get $json =>
+      LogDispatchServiceBase$json;
+  $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
+      get $messageJson => LogDispatchServiceBase$messageJson;
+}

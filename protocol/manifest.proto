@@ -63,6 +63,7 @@ message Route {
 message NodeDeclaration {
   string name = 1;
   bool public = 2;
+  bool log_sink = 3;
 }
 
 message HookDeclaration {
@@ -117,6 +118,7 @@ message Manifest {
   repeated StorageDeclaration storages = 9;
   string sdk_version = 10;
   repeated NodeDeclaration nodes = 11;
+  bool root_log_sink = 12;
 }
 
 message HandshakeRequest {
