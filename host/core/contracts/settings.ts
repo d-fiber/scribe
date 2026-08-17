@@ -72,7 +72,17 @@ export interface HttpSettings {
 
 export interface WorkerSettings {
   readonly endpoint: string | null;
-  readonly callbackUrl: string;
+
+  /**
+   * The address this replica tells the worker to call back on, or `null` to
+   * derive it from the replica's own hostname.
+   *
+   * Capability grants live in the memory of the process that issued them, so a
+   * shared service name would send the worker to any replica and the grant
+   * would be unknown there. Only override this when the worker cannot reach the
+   * replica by hostname — a host running outside the container network.
+   */
+  readonly callbackUrl: string | null;
   readonly callbackPort: number;
   readonly handshakeAttempts: number;
   readonly handshakeDelayMs: number;

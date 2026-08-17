@@ -55,13 +55,19 @@ function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function ownCallbackUrl(port: number): string {
+  return `http://${Deno.hostname()}:${port}`;
+}
+
 async function handshake(client: WorkerClient, token: string): Promise<Manifest> {
-  const { callbackUrl, handshakeAttempts, handshakeDelayMs } = workerSettings.get();
+  const { callbackUrl, callbackPort, handshakeAttempts, handshakeDelayMs } = workerSettings.get();
+  const address = callbackUrl ?? ownCallbackUrl(callbackPort);
+  console.log(`[worker-host] announcing ${address} as this replica's callback address`);
 
   let last: unknown = null;
   for (let attempt = 1; attempt <= handshakeAttempts; attempt += 1) {
     try {
-      return await client.describe(callbackUrl, token);
+      return await client.describe(address, token);
     } catch (cause) {
       last = cause;
       console.warn(`[worker-host] handshake attempt ${attempt} failed, retrying.`);
