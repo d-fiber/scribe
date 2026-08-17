@@ -34,8 +34,9 @@ import type { RouteMethod } from "../contracts/access.ts";
 import { type MountedRoute, mountedRoute } from "../manifest/worker.ts";
 import type { RouteHandler, WorkerRoute } from "../manifest/route.ts";
 import { type Contribution, merge, wrapAll } from "./contribution.ts";
-import type { DiscoveredModule, DiscoveredRoute } from "./discovery.ts";
+import type { DiscoveredRoute } from "./discovery.ts";
 import { Endpoint } from "./endpoint.ts";
+import { instances } from "./instances.ts";
 import { Middleware } from "./middleware.ts";
 
 export class RoutingError extends Error {
@@ -43,16 +44,6 @@ export class RoutingError extends Error {
     super(message);
     this.name = "RoutingError";
   }
-}
-
-type Instantiable<T> = new () => T;
-
-function instances<T>(module: DiscoveredModule, base: Function): T[] {
-  return Object.values(module)
-    .filter((exported): exported is Instantiable<T> =>
-      typeof exported === "function" && exported.prototype instanceof base
-    )
-    .map((constructor) => new constructor());
 }
 
 function endpointsOf(discovered: DiscoveredRoute): Endpoint[] {

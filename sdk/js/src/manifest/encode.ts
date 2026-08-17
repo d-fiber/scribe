@@ -58,7 +58,12 @@ export function describeWorker(worker: WorkerDefinition): Manifest {
     protocolVersion: PROTOCOL_VERSION,
     workerLanguage: WORKER_LANGUAGE,
     sdkVersion: SDK_VERSION,
-    nodes: worker.nodes.map((node) => ({ name: node.name, public: node.public })),
+    nodes: worker.nodes.map((node) => ({
+      name: node.name,
+      public: node.public,
+      logSink: node.logSink,
+    })),
+    rootLogSink: worker.sinks.hasRoot,
     routes: worker.routes.map(encodeRoute),
     hooks: [...worker.hooks].map(([hookId, hook]) => ({
       hookId,

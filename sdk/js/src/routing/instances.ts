@@ -30,25 +30,23 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export type DiscoveredModule = Readonly<Record<string, unknown>>;
+import type { DiscoveredModule } from "./discovery.ts";
 
-export interface DiscoveredRoute {
-  readonly node: string;
-  readonly path: string;
-  readonly file: string;
-  readonly module: DiscoveredModule;
-  readonly branches: readonly DiscoveredModule[];
-}
+type Instantiable<T> = new () => T;
 
 /**
- * A `_log.ts` the generator found, and the node it answers for.
+ * Every export of `module` that extends `base`, instantiated.
  *
- * `node` is `null` for `lib/_log.ts`, the sink that takes what no node claimed.
- * A node without a `_log.ts` simply has no entry here, which is what makes
- * "declare nothing and nothing is delivered" the default rather than a branch.
+ * This is how a convention file declares what it declares: the generator hands
+ * over the module namespace and nothing else, so the base class is what tells
+ * an endpoint from a middleware from a log sink. A file may hold several, and
+ * a file that holds none is not an error -- an empty `_log.ts` is a project
+ * that has not written its sink yet.
  */
-export interface DiscoveredLogSink {
-  readonly node: string | null;
-  readonly file: string;
-  readonly module: DiscoveredModule;
+export function instances<T>(module: DiscoveredModule, base: Function): T[] {
+  return Object.values(module)
+    .filter((exported): exported is Instantiable<T> =>
+      typeof exported === "function" && exported.prototype instanceof base
+    )
+    .map((constructor) => new constructor());
 }

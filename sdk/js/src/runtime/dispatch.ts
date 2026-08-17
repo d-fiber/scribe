@@ -52,7 +52,13 @@ import {
   CronOutcomeSchema,
   type CronTrigger,
 } from "../../gen/scribe/host/core/runtime/event_driven/cron/protocol/cron_pb.ts";
+import {
+  type LogDelivery,
+  type LogDeliveryAck,
+  LogDeliveryAckSchema,
+} from "../../gen/scribe/protocol/logs_pb.ts";
 import { decodeJson, encodeJson } from "../contracts/json.ts";
+import { loggedEntry } from "../observability/log_sink.ts";
 import type { QueueMessage } from "../manifest/events.ts";
 import type { WorkerDefinition } from "../manifest/worker.ts";
 import { describeCause } from "../transport/failure.ts";
@@ -69,7 +75,7 @@ export async function invoke(worker: WorkerDefinition, invocation: Invocation): 
     );
   }
 
-  return CallScope.run(scopeOf(invocation), async () => {
+  return CallScope.run(scopeOf(invocation, mounted.node), async () => {
     try {
       const response = await mounted.route.handler(new InvocationContext(invocation));
       return await replyFrom(invocation.invocationId, response);
@@ -77,6 +83,40 @@ export async function invoke(worker: WorkerDefinition, invocation: Invocation): 
       return failedReply(invocation.invocationId, "handler_failed", describeCause(cause));
     }
   });
+}
+
+/**
+ * Hands a delivery to the sink that claimed it.
+ *
+ * The ack is unconditional, and so is the catch around the sink: the entries
+ * describe exchanges that are already answered, so nothing useful is left to
+ * tell the host. A sink that throws would otherwise make the host retry a batch
+ * of logs, and a sink that fails on every batch would retry forever.
+ *
+ * A delivery for a node with no sink is not an error either. The host learns
+ * which nodes have one from the manifest, so the only way to get here is a
+ * worker that was replaced by one declaring fewer sinks while the host still
+ * held the old manifest.
+ */
+export async function deliverLogs(
+  worker: WorkerDefinition,
+  delivery: LogDelivery,
+): Promise<LogDeliveryAck> {
+  const node = delivery.node === "" ? null : delivery.node;
+  const sink = worker.sinks.resolve(node);
+
+  if (sink !== null && delivery.entries.length > 0) {
+    try {
+      await sink.receive(delivery.entries.map(loggedEntry));
+    } catch (cause) {
+      console.error(
+        `[worker] the log sink of ${node ?? "the project root"} threw:`,
+        describeCause(cause),
+      );
+    }
+  }
+
+  return create(LogDeliveryAckSchema, {});
 }
 
 export async function handleBatch(worker: WorkerDefinition, batch: Batch): Promise<BatchOutcome> {
@@ -102,7 +142,12 @@ export async function handleBatch(worker: WorkerDefinition, batch: Batch): Promi
   }));
 
   return CallScope.run(
-    { capabilityToken: batch.capabilityToken, traceId: batch.traceId, invocationId: batch.queueId },
+    {
+      capabilityToken: batch.capabilityToken,
+      traceId: batch.traceId,
+      invocationId: batch.queueId,
+      node: "",
+    },
     async () => {
       try {
         const acknowledged = new Set(await queue.handler(messages as never));
@@ -144,6 +189,7 @@ export async function handleEvent(worker: WorkerDefinition, event: Event): Promi
       capabilityToken: event.capabilityToken,
       traceId: event.traceId,
       invocationId: event.hookId,
+      node: "",
     },
     async () => {
       try {
@@ -183,6 +229,7 @@ export async function triggerCron(
       capabilityToken: trigger.capabilityToken,
       traceId: trigger.traceId,
       invocationId: trigger.cronId,
+      node: "",
     },
     async () => {
       try {
@@ -200,11 +247,12 @@ export async function triggerCron(
   );
 }
 
-function scopeOf(invocation: Invocation) {
+function scopeOf(invocation: Invocation, node: string) {
   return {
     capabilityToken: invocation.capabilityToken,
     traceId: invocation.traceId,
     invocationId: invocation.invocationId,
+    node,
   };
 }
 

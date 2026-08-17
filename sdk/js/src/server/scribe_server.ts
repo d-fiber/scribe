@@ -39,8 +39,9 @@ import type {
   WorkerStorage,
 } from "../manifest/events.ts";
 import { type MountedRoute, WorkerDefinition } from "../manifest/worker.ts";
+import { SinkRegistry } from "../observability/sink_registry.ts";
 import type { Contribution } from "../routing/contribution.ts";
-import type { DiscoveredRoute } from "../routing/discovery.ts";
+import type { DiscoveredLogSink, DiscoveredRoute } from "../routing/discovery.ts";
 import { compileNode, RoutingError } from "../routing/tree.ts";
 import { env } from "../runtime/env.ts";
 import { serveWorker, workerHandler } from "../runtime/serve.ts";
@@ -61,6 +62,7 @@ export interface ServerOptions {
   readonly hostname?: string;
   readonly routes?: readonly DiscoveredRoute[];
   readonly nodes?: readonly string[];
+  readonly logSinks?: readonly DiscoveredLogSink[];
   readonly queues?: readonly WorkerQueue<never>[];
   readonly hooks?: readonly WorkerHook[];
   readonly crons?: readonly WorkerCron[];
@@ -97,14 +99,19 @@ export class ScribeServer {
     this.#rejectMissingFolders();
     this.#rejectUndeclaredRoutes(discovered);
 
+    const sinks = new SinkRegistry(this.#options.logSinks ?? []);
+    this.#rejectUndeclaredSinks(sinks);
+
     const routes: MountedRoute[] = nodes.flatMap((node) => [
       ...compileNode(node.name, node.layers, discovered),
     ]);
 
     return new WorkerDefinition({
+      sinks,
       nodes: nodes.map((node) => ({
         name: node.name,
         public: node.public,
+        logSink: sinks.hasNode(node.name),
       })),
       routes,
       queues: this.#options.queues,
@@ -146,6 +153,27 @@ export class ScribeServer {
       throw new RoutingError(
         `${route.file} lives under "${route.node}/", which no addNode() declares: ` +
           `nothing is served until the server opts in.`,
+      );
+    }
+  }
+
+  /**
+   * Refuses a `_log.ts` under a folder no `addNode()` opens.
+   *
+   * Without this the file is read, the class is built, and nothing is ever
+   * delivered to it: the host only ever names nodes the manifest declares. The
+   * failure would be a sink that stays silent, which is indistinguishable from
+   * a sink that has nothing to report.
+   */
+  #rejectUndeclaredSinks(sinks: SinkRegistry): void {
+    const declared = new Set(this.#nodes.map((node) => node.name));
+
+    for (const node of sinks.nodes()) {
+      if (declared.has(node)) continue;
+
+      throw new RoutingError(
+        `A _log.ts lives under "${node}/", which no addNode() declares: ` +
+          `nothing would ever be delivered to it.`,
       );
     }
   }

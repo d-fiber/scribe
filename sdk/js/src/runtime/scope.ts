@@ -37,11 +37,25 @@ export interface CallScopeState {
   readonly capabilityToken: string;
   readonly traceId: string;
   readonly invocationId: string;
+
+  /**
+   * The node this call is running for, empty when it runs for none.
+   *
+   * It is what lets `log` reach the node's own sink without a round trip
+   * through the host. A queue pass or a cron carries none: those belong to the
+   * project rather than to one of its nodes.
+   */
+  readonly node: string;
 }
 
 const storage = new AsyncLocalStorage<CallScopeState>();
 
-let ambient: CallScopeState = { capabilityToken: "", traceId: "", invocationId: "" };
+let ambient: CallScopeState = {
+  capabilityToken: "",
+  traceId: "",
+  invocationId: "",
+  node: "",
+};
 
 export const CallScope = {
   run<T>(state: CallScopeState, handler: () => T): T {

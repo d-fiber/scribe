@@ -86,7 +86,7 @@ Deno.test("a rest query travels as a description the host executes", async () =>
 
   await withHost(capture, [{ id: "1", name: "Fiber", admin_id: "a" }], async () => {
     const rows = await CallScope.run(
-      { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv" },
+      { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", node: "" },
       () =>
         rest
           .from<Brand>("brands")
@@ -117,7 +117,7 @@ Deno.test("the capability token of the invocation is replayed on every outgoing 
 
   await withHost(capture, [], async () => {
     await CallScope.run(
-      { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv" },
+      { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", node: "" },
       () => rest.from<Brand>("brands").rows(),
     );
   });

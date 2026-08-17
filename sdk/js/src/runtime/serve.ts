@@ -35,13 +35,14 @@ import { Worker as WorkerService } from "../../gen/scribe/protocol/invocation_pb
 import { QueueDispatch } from "../../gen/scribe/host/core/runtime/event_driven/queue/protocol/queue_pb.ts";
 import { HookDispatch } from "../../gen/scribe/host/core/runtime/event_driven/hook/protocol/hook_pb.ts";
 import { CronDispatch } from "../../gen/scribe/host/core/runtime/event_driven/cron/protocol/cron_pb.ts";
+import { LogDispatch } from "../../gen/scribe/protocol/logs_pb.ts";
 import { host } from "../capabilities/channel.ts";
 import { describeWorker } from "../manifest/encode.ts";
 import type { WorkerDefinition } from "../manifest/worker.ts";
 import { PROTOCOL_VERSION, speaksSameContract } from "../protocol/version.ts";
 import { TransportFailure } from "../transport/failure.ts";
 import { UnaryServer } from "../transport/server.ts";
-import { handleBatch, handleEvent, invoke, triggerCron } from "./dispatch.ts";
+import { deliverLogs, handleBatch, handleEvent, invoke, triggerCron } from "./dispatch.ts";
 import { CallScope } from "./scope.ts";
 
 export interface ServeOptions {
@@ -82,6 +83,7 @@ export function workerServer(worker: WorkerDefinition): UnaryServer {
         capabilityToken: handshake.capabilityToken,
         traceId: "",
         invocationId: "",
+        node: "",
       });
 
       return describeWorker(worker);
@@ -89,7 +91,8 @@ export function workerServer(worker: WorkerDefinition): UnaryServer {
     .on(WorkerService.method.invoke, (invocation) => invoke(worker, invocation))
     .on(QueueDispatch.method.handle, (batch) => handleBatch(worker, batch))
     .on(HookDispatch.method.handle, (event) => handleEvent(worker, event))
-    .on(CronDispatch.method.trigger, (trigger) => triggerCron(worker, trigger));
+    .on(CronDispatch.method.trigger, (trigger) => triggerCron(worker, trigger))
+    .on(LogDispatch.method.handle, (delivery) => deliverLogs(worker, delivery));
 }
 
 export function workerHandler(

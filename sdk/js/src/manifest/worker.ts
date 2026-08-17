@@ -30,6 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { log } from "../observability/logger.ts";
+import { SinkRegistry } from "../observability/sink_registry.ts";
 import type {
   WorkerCron,
   WorkerHook,
@@ -51,6 +53,7 @@ export class ManifestError extends Error {
 export interface NodeManifest {
   readonly name: string;
   readonly public: boolean;
+  readonly logSink: boolean;
 }
 
 export interface MountedRoute {
@@ -68,6 +71,7 @@ export interface WorkerInput {
   readonly searchers?: readonly WorkerSearcher[];
   readonly realtimes?: readonly WorkerRealtime[];
   readonly storages?: readonly WorkerStorage[];
+  readonly sinks?: SinkRegistry;
 }
 
 export class WorkerDefinition {
@@ -79,6 +83,7 @@ export class WorkerDefinition {
   readonly searchers: readonly WorkerSearcher[];
   readonly realtimes: readonly WorkerRealtime[];
   readonly storages: readonly WorkerStorage[];
+  readonly sinks: SinkRegistry;
 
   readonly #byRouteId: Map<string, MountedRoute>;
 
@@ -91,6 +96,8 @@ export class WorkerDefinition {
     this.searchers = input.searchers ?? [];
     this.realtimes = input.realtimes ?? [];
     this.storages = input.storages ?? [];
+    this.sinks = input.sinks ?? new SinkRegistry();
+    log.useSinks(this.sinks);
 
     this.#byRouteId = new Map(
       this.routes.map((entry) => [entry.routeId, entry]),

@@ -67,6 +67,7 @@ export type { ServerOptions } from "./src/server/scribe_server.ts";
 
 export type { Contribution } from "./src/routing/contribution.ts";
 export type {
+  DiscoveredLogSink,
   DiscoveredModule,
   DiscoveredRoute
 } from "./src/routing/discovery.ts";
@@ -167,7 +168,20 @@ export type {
   StoredObject
 } from "./src/capabilities/storage.ts";
 
+export {
+  BOLD,
+  DIM,
+  formatEntry,
+  printEntry,
+  RESET,
+  styleLevel,
+  styleMethod,
+  styleStatus,
+} from "./src/observability/console.ts";
 export { log } from "./src/observability/logger.ts";
+export { loggedEntry, LogSink } from "./src/observability/log_sink.ts";
+export type { LoggedEntry, LoggedLevel } from "./src/observability/log_sink.ts";
+export { SinkRegistry } from "./src/observability/sink_registry.ts";
 export { trace } from "./src/observability/tracer.ts";
 
 export { UnaryClient } from "./src/transport/client.ts";
