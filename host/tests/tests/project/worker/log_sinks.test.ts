@@ -175,3 +175,22 @@ Deno.test("the metadata of an exchange survives the crossing", async () => {
   assertEquals(delivered[0].entries[0].metadata, { method: "GET", status: 200 });
   assertEquals(delivered[0].entries[0].level, "info");
 });
+
+Deno.test("the preview of a failed response crosses with the rest of the metadata", async () => {
+  const { sinks } = await attach([ROOT_SINK]);
+  const failed: LogEntry = {
+    level: "warn",
+    action: "/brand",
+    node: null,
+    metadata: { method: "GET", status: 404, preview: '{"error":"no such brand"}' },
+    timestamp: 1,
+  };
+
+  await sinks.deliver(null, [failed]);
+
+  assertEquals(delivered[0].entries[0].metadata, {
+    method: "GET",
+    status: 404,
+    preview: '{"error":"no such brand"}',
+  });
+});

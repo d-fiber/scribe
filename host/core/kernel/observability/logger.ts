@@ -32,6 +32,7 @@
 
 import "@scribe/core/runtime/support/edge_runtime_shim.ts";
 import type { LogLevel } from "@scribe/core/contracts/logging.ts";
+import { previewOf } from "@scribe/core/kernel/observability/body_preview.ts";
 import { levelForStatus } from "@scribe/core/kernel/observability/level.ts";
 import { LogRoutes } from "@scribe/core/kernel/observability/log_routing.ts";
 import { logBuffer } from "@scribe/core/kernel/observability/log_delivery.ts";
@@ -56,13 +57,17 @@ function ship(
   status: number,
   level: LogLevel,
   node: string | null,
+  preview: string,
 ): void {
   try {
     const published = logBuffer.record({
       level,
       action: route,
       node,
-      metadata: { method, status },
+      // The preview is left out entirely rather than sent empty: it exists on
+      // failures alone, and an empty string in every other entry would be a
+      // field a sink has to check before it can use it.
+      metadata: preview === "" ? { method, status } : { method, status, preview },
       timestamp: Date.now(),
     });
 
@@ -80,7 +85,18 @@ const observeExchange = createMiddleware(async (c, next) => {
   const level = levelForStatus(c.res.status);
   const node = LogRoutes.current.nodeOf(route);
 
-  ship(method, route, c.res.status, level, node);
+  // The await stays here rather than being deferred with the delivery: the
+  // preview reads a clone of a body the runtime is about to stream, so
+  // deferring it would race the read against a response already gone out. It
+  // costs nothing under 400, where `previewOf` answers before reading anything.
+  let preview = "";
+  try {
+    preview = await previewOf(c.res);
+  } catch (error) {
+    console.error("[logger] could not read the response body:", error);
+  }
+
+  ship(method, route, c.res.status, level, node, preview);
 });
 
 export function logger(app: Hono): Hono {

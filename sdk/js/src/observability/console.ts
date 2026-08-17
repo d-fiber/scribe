@@ -78,20 +78,24 @@ export function styleLevel(level: LoggedLevel): string {
 
 function exchangeOf(
   entry: LoggedEntry,
-): { method: string; status: number } | null {
-  const { method, status } = entry.metadata;
+): { method: string; status: number; preview: string } | null {
+  const { method, status, preview } = entry.metadata;
 
   return typeof method === "string" && typeof status === "number"
-    ? { method, status }
+    ? { method, status, preview: typeof preview === "string" ? preview : "" }
     : null;
 }
 
 /**
  * The line this entry deserves, ready to be written.
  *
- * An exchange gets the two-line box the host used to print, and anything else
- * gets one line. Returned rather than written so a sink can send it somewhere
- * that is not a terminal.
+ * An exchange gets a two-line box closed by its status, and anything else gets
+ * one line. Returned rather than written so a sink can send it somewhere that
+ * is not a terminal.
+ *
+ * An exchange is recognised by its metadata carrying a `method` and a `status`,
+ * which is what the host puts there. A failed one carries a `preview` of what
+ * the response said, and it closes the box after the status.
  */
 export function formatEntry(entry: LoggedEntry): string {
   const origin = entry.node === null ? "" : `${DIM}${entry.node}${RESET} `;
@@ -102,7 +106,10 @@ export function formatEntry(entry: LoggedEntry): string {
   }
 
   const opening = `${DIM}┌${RESET} ${origin}${styleMethod(exchange.method)} ${entry.action}`;
-  const closing = `${DIM}└${RESET} ${styleStatus(exchange.status)}`;
+  // The preview rides on failures alone, so the closing line is the status by
+  // itself on everything that went fine.
+  const said = exchange.preview === "" ? "" : `  ${DIM}${exchange.preview}${RESET}`;
+  const closing = `${DIM}└${RESET} ${styleStatus(exchange.status)}${said}`;
 
   return `${opening}\n${closing}`;
 }

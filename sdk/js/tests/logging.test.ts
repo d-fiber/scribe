@@ -34,6 +34,7 @@ import { assertEquals, assertThrows } from "@std/assert";
 import { create } from "@bufbuild/protobuf";
 import {
   describeWorker,
+  formatEntry,
   type DiscoveredLogSink,
   type DiscoveredModule,
   type LoggedEntry,
@@ -363,4 +364,35 @@ Deno.test("a sink that reads neither way drops what it takes without failing", a
 
   await sink.receive(actions(150));
   await sink.flush();
+});
+
+/**
+ * An entry as the host raises it for an exchange.
+ *
+ * The action of an exchange is the route alone: the verb travels in the
+ * metadata, which is what tells `formatEntry` this is an exchange at all.
+ */
+function exchange(metadata: Record<string, unknown>): LoggedEntry {
+  return { ...logged("/brand"), metadata };
+}
+
+/** The visible text of a formatted entry, with the colour codes taken out. */
+function plain(entry: LoggedEntry): string {
+  // deno-lint-ignore no-control-regex -- the escapes are what is being removed.
+  return formatEntry(entry).replaceAll(/\x1b\[[0-9;]*m/g, "");
+}
+
+Deno.test("an exchange that went fine closes on its status alone", () => {
+  assertEquals(plain(exchange({ method: "GET", status: 200 })), "┌ GET    /brand\n└ 200");
+});
+
+Deno.test("a failed exchange closes on what the response said", () => {
+  assertEquals(
+    plain(exchange({ method: "GET", status: 404, preview: '{"error":"no such brand"}' })),
+    '┌ GET    /brand\n└ 404  {"error":"no such brand"}',
+  );
+});
+
+Deno.test("an entry that is not an exchange stays on one line", () => {
+  assertEquals(plain(logged("cron/sweep")), "INFO  cron/sweep");
 });
