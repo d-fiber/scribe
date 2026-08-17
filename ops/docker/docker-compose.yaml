@@ -535,10 +535,10 @@ services:
       REGION: "local"
       ERL_AFLAGS: "-proto_dist inet_tcp"
       POOLER_TENANT_ID: "{{app_name_snake}}"
-      POOLER_DEFAULT_POOL_SIZE: "80"
-      POOLER_MAX_CLIENT_CONN: "5000"
+      POOLER_DEFAULT_POOL_SIZE: "{{supavisor_pool_size}}"
+      POOLER_MAX_CLIENT_CONN: "{{supavisor_max_clients}}"
       POOLER_POOL_MODE: "transaction"
-      DB_POOL_SIZE: "10"
+      DB_POOL_SIZE: "{{supavisor_db_pool}}"
     command:
       [
         "/bin/sh",
