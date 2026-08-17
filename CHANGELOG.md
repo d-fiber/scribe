@@ -4,6 +4,18 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 1.0.1 (2026-08-17)
+
+Component versions: @scribe/core 0.1.7, @scribe/sdk 0.1.3
+
+### Added
+
+- send a failed response's body with the entry that describes it (ed4d22ca)
+
+### Tooling
+
+- mirror the versions the SDK announces from the files that own them (a1c64309)
+
 ## 1.0.0 (2026-08-17)
 
 Component versions: @scribe/core 0.1.6, @dependencies/core 0.1.6, protocol 2.0.1, @scribe/sdk 0.1.2
