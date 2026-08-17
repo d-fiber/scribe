@@ -4,6 +4,43 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 1.0.0 (2026-08-17)
+
+Component versions: @scribe/core 0.1.6, @dependencies/core 0.1.6, protocol 2.0.1, @scribe/sdk 0.1.2
+
+### Breaking
+
+- make a _log.ts the only place logs go (cd778a85)
+
+### Added
+
+- hand the server the log sinks the routes table exports (9ca76774)
+- let a log sink read its entries one by one or by the block (c5740030)
+- route each node's log entries to the sink it declared (ffb51ae7)
+- let a project take its own logs through a _log.ts (72281453)
+- carry the node and the sink declarations on the protocol (e5a4e356)
+
+### Fixed
+
+- type the two log timers the way setTimeout answers (553fc9fa)
+- drop the log entry import log routing no longer uses (e190f5e9)
+- size the in-flight body budget on the api container (264214b1)
+- take the pooler pool sizes from the sizing (1fd8eb9a)
+
+### Performance
+
+- answer a repeated bearer token from the process (695726ae)
+- stop the request log costing a write and a publish per request (25fa98d4)
+- compress what caddy serves on the three domains (9380a0c0)
+
+### Changed
+
+- gather every rendered file under templates/ (b66ca672)
+
+### Tests
+
+- pin the log dispatch path a foreign SDK must serve (0f2561fa)
+
 ## 0.1.7 (2026-08-17)
 
 Component versions: @scribe/core 0.1.5, @dependencies/core 0.1.5
