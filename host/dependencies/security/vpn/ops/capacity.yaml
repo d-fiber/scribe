@@ -1,0 +1,8 @@
+services:
+  - name: vpn-admins
+    weight: 37
+    runtime: plain
+    profile: ops
+    min: 32Mi
+    dev: 64Mi
+    cpu_shares: 512

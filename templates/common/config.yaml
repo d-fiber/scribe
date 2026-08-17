@@ -13,6 +13,8 @@ dependencies:
   - security/auth
   - security/rbac
 
+worker: false
+
 api:
   config:
     origins:
