@@ -34,8 +34,27 @@ import { kv } from "@scribe/core/runtime/redis/mod.ts";
 
 export const IDENTITY_CACHE_KEY = "identity:jwt";
 
+/**
+ * How long a revoked user keeps being re-checked against GoTrue.
+ *
+ * An identity is normally read from the token's own claims, which cannot
+ * change once signed. After a revocation the claims of tokens already in the
+ * wild are stale, so this marker forces those tokens back through GoTrue until
+ * they expire. It must therefore outlive the longest access token GoTrue
+ * issues, which `GOTRUE_JWT_EXP` sets to 3600 in
+ * `dependencies/security/auth/ops/docker-compose.yaml`. Raise this to match if
+ * that value ever grows: a window shorter than the token lifetime lets a
+ * demoted account keep its old claims, while one that is too long only costs
+ * an HTTP call per cache miss.
+ */
+const RECHECK_WINDOW_SECONDS = 3_600;
+
 function indexKey(userId: string): string {
   return `${IDENTITY_CACHE_KEY}:index:${userId}`;
+}
+
+function recheckKey(userId: string): string {
+  return `${IDENTITY_CACHE_KEY}:recheck:${userId}`;
 }
 
 export class IdentityRevocation {
@@ -63,8 +82,25 @@ export class IdentityRevocation {
         await kv().del(...fingerprints.map((f) => `${IDENTITY_CACHE_KEY}:${f}`));
       }
       await kv().del(key);
+      await kv().setex(recheckKey(userId), RECHECK_WINDOW_SECONDS, "1");
     } catch (e) {
       console.error("[identity-revocation] revoke failed:", e);
+    }
+  }
+
+  /**
+   * Whether this user's tokens must be resolved against GoTrue rather than
+   * from their own claims.
+   *
+   * Fails closed: when Redis cannot answer, the caller is told to re-check, so
+   * a revocation is never lost to an unavailable cache.
+   */
+  static async recheckRequired(userId: string): Promise<boolean> {
+    try {
+      return (await kv().exists(recheckKey(userId))) === 1;
+    } catch (e) {
+      console.error("[identity-revocation] recheck lookup failed:", e);
+      return true;
     }
   }
 }

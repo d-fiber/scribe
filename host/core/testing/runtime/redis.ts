@@ -51,6 +51,10 @@ import { type InstalledMock, installMock } from "../install.ts";
 // behavior (jitter aside) instead of a hand-rolled re-implementation of it.
 export function installValkeryMock(): InstalledMock {
   const store = new Map<string, string>();
+  // `IdentityRevocation` indexes a user's cached fingerprints in a set, next to
+  // the string entries the cache itself writes. Same fake transport, separate
+  // shape, because Redis keeps them apart too.
+  const sets = new Map<string, Set<string>>();
 
   const mocks = [
     installMock(
@@ -71,9 +75,44 @@ export function installValkeryMock(): InstalledMock {
       "del",
       ((...keys: string[]) => {
         let deleted = 0;
-        for (const key of keys) if (store.delete(key)) deleted++;
+        for (const key of keys) {
+          if (store.delete(key)) deleted++;
+          if (sets.delete(key)) deleted++;
+        }
         return Promise.resolve(deleted);
       }) as unknown as Kv["del"],
+    ),
+    installMock(
+      kv(),
+      "exists",
+      ((...keys: string[]) =>
+        Promise.resolve(
+          keys.filter((key) => store.has(key) || sets.has(key)).length,
+        )) as unknown as Kv["exists"],
+    ),
+    installMock(
+      kv(),
+      "sadd",
+      ((key: string, ...members: string[]) => {
+        const set = sets.get(key) ?? new Set<string>();
+        const before = set.size;
+        for (const member of members) set.add(member);
+        sets.set(key, set);
+        return Promise.resolve(set.size - before);
+      }) as unknown as Kv["sadd"],
+    ),
+    installMock(
+      kv(),
+      "smembers",
+      ((key: string) =>
+        Promise.resolve(Array.from(sets.get(key) ?? []))) as unknown as Kv["smembers"],
+    ),
+    installMock(
+      // Expiry is not simulated: a test that needs a key gone deletes it.
+      kv(),
+      "expire",
+      ((key: string) =>
+        Promise.resolve(store.has(key) || sets.has(key) ? 1 : 0)) as unknown as Kv["expire"],
     ),
     installMock(
       kv(),

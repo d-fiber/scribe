@@ -1,0 +1,204 @@
+// Copyright (C) 2026 Fiber
+//
+// This file is part of scribe and is made available under the PolyForm Shield
+// License 1.0.0. The full terms are in the LICENSE file at the root of this
+// repository, and at https://polyformproject.org/licenses/shield/1.0.0
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+//
+// The one thing you may not do:
+// - Use it to provide any product that competes with scribe, or with any
+//   product Fiber or its affiliates provide using scribe. Products compete
+//   even when they are offered free of charge, through a different kind of
+//   interface, or for a different technical platform.
+//
+// If you pass this software on:
+// - Anyone who receives any part of it from you must also receive these terms,
+//   or the URL above, together with the "Required Notice" line carried by the
+//   LICENSE file.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE COMES AS IS, WITHOUT ANY WARRANTY OR
+// CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
+// OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
+// LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+import "@scribe/core/testing/settings.ts";
+import { JwtIdentityResolver } from "@scribe/core/kernel/identity/resolver/jwt_resolver.ts";
+import { JwtVerifier } from "@scribe/core/kernel/identity/resolver/jwt_verifier.ts";
+import { IdentityRevocation } from "@scribe/core/runtime/redis/identity_revocation.ts";
+import { installValkeryMock } from "@scribe/core/testing/runtime/redis.ts";
+import { installMock } from "@scribe/core/testing/install.ts";
+import { assert, assertEquals } from "@std/assert";
+
+const USER_JWT = "header.user.signature";
+const ADMIN_JWT = "header.admin.signature";
+
+function inSeconds(offset: number): number {
+  return Math.floor(Date.now() / 1_000) + offset;
+}
+
+interface Claims {
+  readonly sub: string;
+  readonly email?: string;
+  readonly app_metadata?: Record<string, unknown>;
+  readonly exp?: number;
+  readonly [claim: string]: unknown;
+}
+
+/**
+ * Stands the resolver up against a fake Redis, a fake verifier and a fake
+ * GoTrue, and reports how often each was actually reached.
+ */
+function harness(claims: Record<string, Claims | null>) {
+  const redis = installValkeryMock();
+  const calls = { verify: 0, gotrue: 0 };
+
+  const verifier = installMock(JwtVerifier, "verify", (jwt: string) => {
+    calls.verify++;
+    return Promise.resolve(claims[jwt] ?? null);
+  });
+
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = ((input: string | URL | Request) => {
+    calls.gotrue++;
+    assert(String(input).endsWith("/user"), "only GoTrue's /user is ever called");
+    return Promise.resolve(
+      new Response(
+        JSON.stringify({
+          id: "u1",
+          email: "fresh@x.io",
+          app_metadata: { role: "user" },
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      ),
+    );
+  }) as typeof fetch;
+
+  return {
+    calls,
+    restore(): void {
+      globalThis.fetch = realFetch;
+      verifier.restore();
+      redis.restore();
+    },
+  };
+}
+
+Deno.test("a second request on the same token never pays for the signature again", async () => {
+  const h = harness({
+    [USER_JWT]: { sub: "u1", email: "u@x.io", exp: inSeconds(600) },
+  });
+
+  try {
+    await JwtIdentityResolver.resolveIdentity(USER_JWT);
+    await JwtIdentityResolver.resolveIdentity(USER_JWT);
+
+    assertEquals(
+      h.calls.verify,
+      1,
+      "the cache sits in front of the verification: an ES256 signature costs three quarters of the request",
+    );
+  } finally {
+    h.restore();
+  }
+});
+
+Deno.test("a cached identity stops being served once its token has expired", async () => {
+  const h = harness({
+    [USER_JWT]: { sub: "u1", email: "u@x.io", exp: inSeconds(1) },
+  });
+
+  try {
+    assert(await JwtIdentityResolver.resolveIdentity(USER_JWT));
+    assertEquals(h.calls.verify, 1);
+
+    // The same token, two seconds past its own exp. Reading the cache without
+    // checking exp would hand the identity back for the rest of the entry's
+    // five minutes.
+    const past = inSeconds(2) * 1_000;
+    const later = installMock(Date, "now", () => past as unknown as number);
+    try {
+      await JwtIdentityResolver.resolveIdentity(USER_JWT);
+      assertEquals(
+        h.calls.verify,
+        2,
+        "an expired entry must send the token back through verification, not answer for it",
+      );
+    } finally {
+      later.restore();
+    }
+  } finally {
+    h.restore();
+  }
+});
+
+Deno.test("the identity is read from the claims, without asking GoTrue", async () => {
+  const h = harness({
+    [ADMIN_JWT]: {
+      sub: "a1",
+      email: "a@x.io",
+      app_metadata: { role: "admin" },
+      exp: inSeconds(600),
+    },
+  });
+
+  try {
+    const identity = await JwtIdentityResolver.resolveIdentity(ADMIN_JWT);
+
+    assertEquals(identity?.id, "a1");
+    assertEquals(identity?.email, "a@x.io");
+    assertEquals(identity?.isAdmin, true);
+    assertEquals(
+      h.calls.gotrue,
+      0,
+      "GoTrue returns the very values the token already carries, signed",
+    );
+  } finally {
+    h.restore();
+  }
+});
+
+Deno.test("a revoked user is resolved against GoTrue until the marker lapses", async () => {
+  const h = harness({
+    [ADMIN_JWT]: {
+      sub: "u1",
+      email: "stale@x.io",
+      app_metadata: { role: "admin" },
+      exp: inSeconds(600),
+    },
+  });
+
+  try {
+    await IdentityRevocation.revoke("u1");
+    const identity = await JwtIdentityResolver.resolveIdentity(ADMIN_JWT);
+
+    assertEquals(h.calls.gotrue, 1);
+    assertEquals(
+      identity?.isAdmin,
+      false,
+      "the claims still say admin: a revocation is exactly the case where they cannot be trusted",
+    );
+    assertEquals(identity?.email, "fresh@x.io");
+  } finally {
+    h.restore();
+  }
+});
+
+Deno.test("a token that fails verification buys nothing, cached or not", async () => {
+  const h = harness({ [USER_JWT]: null });
+
+  try {
+    assertEquals(await JwtIdentityResolver.resolveIdentity(USER_JWT), null);
+    assertEquals(h.calls.gotrue, 0);
+  } finally {
+    h.restore();
+  }
+});

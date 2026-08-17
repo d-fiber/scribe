@@ -35,6 +35,7 @@ import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
 import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { JwtVerifier } from "@scribe/core/kernel/identity/resolver/jwt_verifier.ts";
+import type { JWTPayload } from "jose";
 import { Valkery } from "@scribe/core/runtime/redis/cache/valkery.ts";
 import {
   IDENTITY_CACHE_KEY,
@@ -45,6 +46,18 @@ export interface ResolvedJwtIdentity {
   readonly id: string;
   readonly email: string | null;
   readonly isAdmin: boolean;
+}
+
+/**
+ * A cached identity, carrying the expiry of the token it was resolved from.
+ *
+ * The cache is read before the signature is verified, so the entry has to
+ * answer for the token's lifetime on its own. `exp` is `null` when the token
+ * carried no such claim, which is the one case where nothing has to be
+ * enforced here.
+ */
+interface _CachedJwtIdentity extends ResolvedJwtIdentity {
+  readonly exp: number | null;
 }
 
 const _FETCH_TIMEOUT_MS = 5_000;
@@ -59,42 +72,99 @@ class _JwtIdentityCache extends Valkery {
   }
 }
 
+function _expired(exp: number | null): boolean {
+  return exp !== null && exp <= Date.now() / 1_000;
+}
+
+function _roleOf(appMetadata: unknown): unknown {
+  return typeof appMetadata === "object" && appMetadata !== null
+    ? (appMetadata as Record<string, unknown>).role
+    : undefined;
+}
+
 function _parseGoTrueUser(
   raw: Record<string, unknown>,
 ): ResolvedJwtIdentity | null {
   const { id, email, app_metadata } = raw;
   if (typeof id !== "string" || !id) return null;
 
-  const role =
-    typeof app_metadata === "object" && app_metadata !== null
-      ? (app_metadata as Record<string, unknown>).role
-      : undefined;
-
   return {
     id,
     email: typeof email === "string" && email ? email : null,
-    isAdmin: role === AccountRole.Admin,
+    isAdmin: _roleOf(app_metadata) === AccountRole.Admin,
+  };
+}
+
+/**
+ * The identity the token itself asserts.
+ *
+ * GoTrue puts the same three values in the access token that it returns from
+ * `/user`, and the signature has just been checked, so the HTTP call buys
+ * nothing but freshness — which {@link IdentityRevocation.recheckRequired}
+ * asks for by name when it is actually needed.
+ */
+function _identityFromClaims(payload: JWTPayload): ResolvedJwtIdentity | null {
+  const { sub, email, app_metadata } = payload as JWTPayload & {
+    email?: unknown;
+    app_metadata?: unknown;
+  };
+  if (typeof sub !== "string" || !sub) return null;
+
+  return {
+    id: sub,
+    email: typeof email === "string" && email ? email : null,
+    isAdmin: _roleOf(app_metadata) === AccountRole.Admin,
   };
 }
 
 export class JwtIdentityResolver {
   private static readonly _cache = new _JwtIdentityCache();
 
+  /**
+   * The identity behind a bearer token, or `null` when the token buys nothing.
+   *
+   * The cache is consulted before the signature is verified, which is what
+   * keeps the crypto off the hot path — an ES256 verification costs three
+   * quarters of everything else the host does. Nothing is weakened by the
+   * order: an entry only exists because a previous request verified the very
+   * token that hashes to this key, and the entry carries its own expiry.
+   */
   static async resolveIdentity(
     jwt: string,
   ): Promise<ResolvedJwtIdentity | null> {
-    if ((await JwtVerifier.verify(jwt)) === null) return null;
-
     const cacheKey = await sha256Hex(jwt);
-    const cached = await this._cache.get<ResolvedJwtIdentity>(cacheKey);
-    if (cached !== null) return cached;
 
-    const raw = await this._fetchUser(jwt);
-    if (raw === null) return null;
+    const cached = await this._cache.get<_CachedJwtIdentity>(cacheKey);
+    if (cached !== null && !_expired(cached.exp)) return cached;
 
-    const identity = _parseGoTrueUser(raw);
+    const payload = await JwtVerifier.verify(jwt);
+    if (payload === null) return null;
+
+    const identity = await this._identityOf(payload, jwt);
     if (identity === null) return null;
 
+    await this._remember(identity, cacheKey, payload.exp ?? null);
+    return identity;
+  }
+
+  private static async _identityOf(
+    payload: JWTPayload,
+    jwt: string,
+  ): Promise<ResolvedJwtIdentity | null> {
+    const claimed = _identityFromClaims(payload);
+    if (claimed === null) return null;
+
+    if (!(await IdentityRevocation.recheckRequired(claimed.id))) return claimed;
+
+    const raw = await this._fetchUser(jwt);
+    return raw === null ? null : _parseGoTrueUser(raw);
+  }
+
+  private static async _remember(
+    identity: ResolvedJwtIdentity,
+    cacheKey: string,
+    exp: number | null,
+  ): Promise<void> {
     const revocable = await IdentityRevocation.remember(
       identity.id,
       cacheKey,
@@ -104,11 +174,10 @@ export class JwtIdentityResolver {
       console.error(
         "[jwt-resolver] identity left uncached: revocation index unavailable",
       );
-      return identity;
+      return;
     }
 
-    await this._cache.add(cacheKey, identity);
-    return identity;
+    await this._cache.add<_CachedJwtIdentity>(cacheKey, { ...identity, exp });
   }
 
   static invalidate(userId: string): Promise<void> {
