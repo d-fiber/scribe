@@ -149,7 +149,7 @@ const LINGER_MS = 5_000;
  */
 export abstract class LogSink {
   #held: LoggedEntry[] = [];
-  #timer: number | null = null;
+  #timer: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Takes a delivery, and calls back what this sink declared.

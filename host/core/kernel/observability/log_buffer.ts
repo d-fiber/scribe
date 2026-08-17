@@ -87,7 +87,7 @@ export class LogBuffer {
   ) => Promise<unknown>;
 
   #entries: LogEntry[] = [];
-  #timer: number | null = null;
+  #timer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     publish: (node: string | null, entries: readonly LogEntry[]) => Promise<unknown>,
