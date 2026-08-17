@@ -314,10 +314,6 @@ services:
     environment:
       PORT: "3000"
       WORKER_ENDPOINT: ${WORKER_ENDPOINT}
-      # WORKER_CALLBACK_URL is deliberately unset: "http://api:4747" is the
-      # service name, and Docker resolves it to any of the api replicas. A
-      # capability grant only exists in the replica that issued it, so the
-      # worker must be told each replica's own hostname instead.
       WORKER_CALLBACK_PORT: "4747"
       SMTP_ACCOUNT_HOST: ${SMTP_ACCOUNT_HOST}
       SMTP_ACCOUNT_PORT: ${SMTP_ACCOUNT_PORT}
