@@ -95,6 +95,22 @@ export function loggedEntry(entry: LogEntry): LoggedEntry {
 }
 
 /**
+ * How many entries gather before {@link LogSink.block} is called.
+ *
+ * A hundred is small enough that a quiet node still ships something on its own,
+ * and large enough that a busy one stops opening a request per logged line.
+ */
+const BLOCK_SIZE = 100;
+
+/**
+ * How long an unfinished block waits before it is handed over anyway.
+ *
+ * Without it a node that logs slowly would hold its last few entries until the
+ * process ends, which is exactly when nobody is reading them any more.
+ */
+const LINGER_MS = 5_000;
+
+/**
  * Where a node's log entries go once the framework stops deciding for you.
  *
  * Declare one by exporting a subclass from a `_log.ts`: at the root of a node
@@ -102,27 +118,123 @@ export function loggedEntry(entry: LogEntry): LoggedEntry {
  * claimed. A node without one leaves its entries to the host's own shipper, so
  * declaring a sink is what moves the decision into the project.
  *
+ * A sink has two ways of reading what it is handed, and they answer different
+ * needs. {@link each} sees every entry the moment it arrives, which is what
+ * printing wants. {@link block} sees them by the hundred, which is what sending
+ * them somewhere wants: a collector reached one entry at a time is a request
+ * per logged line. Overriding either is optional, and overriding neither is a
+ * sink that quietly drops what it takes.
+ *
  * Nothing is printed for you once a sink exists. {@link printEntry} is the same
  * primitive the host uses, and calling it is a choice this class hands back.
  *
  * @example
  * ```ts
  * export class AppLogs extends LogSink {
- *   override async receive(entries: readonly LoggedEntry[]): Promise<void> {
- *     for (const entry of entries) printEntry(entry);
- *     await fetch(PUSHGATEWAY, { method: "POST", body: encode(entries) });
+ *   protected override blockSize(): number {
+ *     return 500;
+ *   }
+ *
+ *   protected override each(entry: LoggedEntry): void {
+ *     printEntry(entry);
+ *   }
+ *
+ *   protected override async block(entries: readonly LoggedEntry[]): Promise<void> {
+ *     await fetch(COLLECTOR, { method: "POST", body: JSON.stringify(entries) });
  *   }
  * }
  * ```
  */
 export abstract class LogSink {
+  #held: LoggedEntry[] = [];
+  #timer: number | null = null;
+
   /**
-   * Takes a batch of entries.
+   * Takes a delivery, and calls back what this sink declared.
    *
-   * Batches, never single entries: a sink that forwards to a collector would
-   * otherwise open one request per logged line. What it throws is caught and
-   * reported by the worker, so a sink that fails cannot break the exchange it
-   * was describing.
+   * This is the framework's way in, and a sink has no reason to override it:
+   * {@link each} and {@link block} are where a project decides anything. What
+   * they throw is caught and reported by the caller, so a sink that fails
+   * cannot break the exchange it was describing -- but the rest of that
+   * delivery is lost with it.
    */
-  abstract receive(entries: readonly LoggedEntry[]): Promise<void> | void;
+  async receive(entries: readonly LoggedEntry[]): Promise<void> {
+    for (const entry of entries) {
+      // Awaiting unconditionally would cost a microtask per entry on the
+      // common case, which is a sink that prints and returns nothing.
+      const seen = this.each(entry);
+      if (seen !== undefined) await seen;
+    }
+
+    const size = this.blockSize();
+    if (size <= 0) {
+      await this.#hand(entries);
+      return;
+    }
+
+    this.#held.push(...entries);
+
+    while (this.#held.length >= size) await this.#hand(this.#held.splice(0, size));
+
+    if (this.#held.length > 0) this.#arm();
+    else this.#disarm();
+  }
+
+  /**
+   * How many entries {@link block} takes at a time.
+   *
+   * Zero or less turns the gathering off: {@link block} is then called with
+   * each delivery exactly as it arrives, which is the cheapest path and the one
+   * to take when the entries are handed straight to something local.
+   */
+  protected blockSize(): number {
+    return BLOCK_SIZE;
+  }
+
+  /** Takes one entry, as soon as it arrives. */
+  protected each(_entry: LoggedEntry): Promise<void> | void {}
+
+  /** Takes {@link blockSize} entries at a time. */
+  protected block(_entries: readonly LoggedEntry[]): Promise<void> | void {}
+
+  /**
+   * Hands over what an unfinished block is holding.
+   *
+   * Called on its own after {@link LINGER_MS}, and worth calling by hand from a
+   * project that knows it is about to stop.
+   */
+  async flush(): Promise<void> {
+    this.#disarm();
+    if (this.#held.length === 0) return;
+
+    const held = this.#held;
+    this.#held = [];
+    await this.#hand(held);
+  }
+
+  async #hand(entries: readonly LoggedEntry[]): Promise<void> {
+    const taken = this.block(entries);
+    if (taken !== undefined) await taken;
+  }
+
+  #arm(): void {
+    if (this.#timer !== null) return;
+
+    this.#timer = setTimeout(() => {
+      this.#timer = null;
+
+      // Nobody is waiting on this one, so a sink that throws here would come
+      // back as an unhandled rejection and take the worker down with it.
+      this.flush().catch((cause) => {
+        console.error("[worker] a log sink threw on its own flush:", cause);
+      });
+    }, LINGER_MS);
+  }
+
+  #disarm(): void {
+    if (this.#timer === null) return;
+
+    clearTimeout(this.#timer);
+    this.#timer = null;
+  }
 }
