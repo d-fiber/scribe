@@ -31,32 +31,54 @@
 // LICENSE file, the LICENSE file governs.
 
 import "@scribe/core/runtime/support/edge_runtime_shim.ts";
+import type { LogLevel } from "@scribe/core/contracts/logging.ts";
 import { printExchange } from "@scribe/core/kernel/observability/console/request_log.ts";
-import { logsQueue } from "@scribe/core/kernel/observability/logs_queue.ts";
+import { levelForStatus, reaches } from "@scribe/core/kernel/observability/level.ts";
+import { logBuffer } from "@scribe/core/kernel/observability/logs_queue.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
+import { loggingSettings } from "@scribe/core/runtime/support/settings/logging.ts";
 import { Hono } from "hono";
 import { createMiddleware } from "hono/factory";
 
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
 
-function levelFor(status: number): "info" | "warn" | "error" {
-  if (status >= 500) return "error";
-  if (status >= 400) return "warn";
-  return "info";
-}
-
-function ship(method: string, route: string, status: number): void {
+/**
+ * Holds the exchange for the collector, and never makes the client wait.
+ *
+ * The buffer answers with a publish only when this entry filled the batch, so
+ * `waitUntil` is armed on the requests that flush rather than on all of them.
+ */
+function ship(method: string, route: string, status: number, level: LogLevel): void {
   try {
-    EdgeRuntime.waitUntil(
-      logsQueue.push({
-        level: levelFor(status),
-        action: route,
-        metadata: { method, status },
-        timestamp: Date.now(),
-      }),
-    );
+    const published = logBuffer.record({
+      level,
+      action: route,
+      metadata: { method, status },
+      timestamp: Date.now(),
+    });
+
+    if (published !== null) EdgeRuntime.waitUntil(published);
   } catch (error) {
     console.error("[logger] could not enqueue the request log:", error);
+  }
+}
+
+/**
+ * Prints the exchange, unless the deployment asked for a quieter terminal.
+ *
+ * The await stays on the response path rather than being deferred, because the
+ * preview reads a clone of a body the runtime is about to stream: deferring it
+ * would race the read against a response that has already gone out. It costs
+ * nothing on the path that matters, since a level that does not reach the
+ * threshold never gets here.
+ */
+async function trace(method: string, route: string, response: Response, level: LogLevel): Promise<void> {
+  if (!reaches(level, loggingSettings.get().consoleLevel)) return;
+
+  try {
+    await printExchange(method, route, response);
+  } catch (error) {
+    console.error("[logger] could not print the exchange:", error);
   }
 }
 
@@ -65,9 +87,10 @@ const observeExchange = createMiddleware(async (c, next) => {
 
   const method = request.method();
   const route = request.path();
+  const level = levelForStatus(c.res.status);
 
-  await printExchange(method, route, c.res);
-  ship(method, route, c.res.status);
+  await trace(method, route, c.res, level);
+  ship(method, route, c.res.status, level);
 });
 
 export function logger(app: Hono): Hono {

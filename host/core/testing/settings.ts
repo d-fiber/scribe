@@ -30,6 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { consoleLevelNamed } from "@scribe/core/kernel/observability/level.ts";
 import { cacheSettings } from "@scribe/core/runtime/support/settings/cache.ts";
 import { databaseSettings } from "@scribe/core/runtime/support/settings/database.ts";
 import { deviceSettings } from "@scribe/core/runtime/support/settings/device.ts";
@@ -77,6 +78,7 @@ export function installTestSettings(): void {
   loggingSettings.use({
     shipUrl: Deno.env.get("LOG_SHIP_URL") ?? null,
     shipHeaders: {},
+    consoleLevel: consoleLevelNamed(Deno.env.get("LOG_CONSOLE_LEVEL")) ?? "silent",
   });
 }
 

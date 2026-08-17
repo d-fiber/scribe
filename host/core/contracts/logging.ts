@@ -30,8 +30,19 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+export type LogLevel = "debug" | "info" | "warn" | "error";
+
+/**
+ * How much of the request log the terminal is worth writing.
+ *
+ * `silent` names no entry, so it turns the terminal off without turning
+ * shipping off with it. The two are separate: what an operator reads on a
+ * terminal and what a collector keeps are not the same question.
+ */
+export type ConsoleLogLevel = LogLevel | "silent";
+
 export interface LogEntry {
-  readonly level: "debug" | "info" | "warn" | "error";
+  readonly level: LogLevel;
   readonly action: string;
   readonly actorType?: string;
   readonly actorId?: string;

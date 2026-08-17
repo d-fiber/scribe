@@ -31,6 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { LogEntry, LogShipper } from "@scribe/core/contracts/logging.ts";
+import { LogBuffer } from "@scribe/core/kernel/observability/log_buffer.ts";
 import { defineQueue } from "@scribe/core/runtime/event_driven/queue/mod.ts";
 
 export type { LogEntry };
@@ -43,13 +44,30 @@ export const LogShipping = {
   },
 };
 
-function shipLogEntries(entries: readonly LogEntry[]): Promise<void> {
+/**
+ * Hands the collector every entry the fetched messages carried.
+ *
+ * A message is a batch, so a fetch of a hundred messages is a hundred batches
+ * and `flat` is what turns them back into the flat list the port takes. It
+ * also carries across a deployment: a message written by an older host holds
+ * one entry rather than an array, and flattening leaves it where it is.
+ */
+function shipLogEntries(batches: readonly (readonly LogEntry[])[]): Promise<void> {
   if (shipper === null) return Promise.resolve();
 
-  return shipper.ship(entries);
+  return shipper.ship(batches.flat());
 }
 
-export const logsQueue = defineQueue<LogEntry>(
+/**
+ * The `logs` queue, whose message is a batch of entries rather than one entry.
+ *
+ * One message per request is one NATS round trip per request, on a path that
+ * runs on every request. Producers therefore go through {@link logBuffer}
+ * rather than pushing here directly.
+ */
+export const logsQueue = defineQueue<readonly LogEntry[]>(
   { name: "logs", batch: { lingerMs: 3_000 } },
   shipLogEntries,
 );
+
+export const logBuffer: LogBuffer = new LogBuffer((entries) => logsQueue.push(entries));

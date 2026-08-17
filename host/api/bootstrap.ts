@@ -60,6 +60,8 @@ import { queueSettings } from "@scribe/core/runtime/support/settings/queue.ts";
 import { storageSettings } from "@scribe/core/runtime/support/settings/storage.ts";
 import { workerSettings } from "@scribe/core/runtime/support/settings/worker.ts";
 import { SEARCHER_EXTENSION } from "@scribe/host/dependencies/features/searcher/core/extension.ts";
+import type { ConsoleLogLevel } from "@scribe/core/contracts/logging.ts";
+import { consoleLevelNamed } from "@scribe/core/kernel/observability/level.ts";
 import { EXTENSION_CRON, EXTENSION_QUEUE } from "./extensions.ts";
 
 /**
@@ -136,9 +138,31 @@ function logShipHeaders(): Record<string, string> {
   }
 }
 
+/**
+ * What the terminal prints when the deployment names no level.
+ *
+ * The request log runs on every request, so `info` is one write to stdout per
+ * request for exchanges that went fine. `warn` keeps the refusals and the
+ * failures, which is what a terminal is read for; `LOG_CONSOLE_LEVEL=info`
+ * brings the full trace back for a developer watching a local stack.
+ */
+const DEFAULT_CONSOLE_LEVEL = "warn";
+
+function consoleLevel(): ConsoleLogLevel {
+  const declared = Deno.env.get("LOG_CONSOLE_LEVEL");
+  const level = consoleLevelNamed(declared);
+  if (level !== null) return level;
+
+  if (declared !== undefined && declared !== "") {
+    console.warn(`[bootstrap] LOG_CONSOLE_LEVEL names no level ("${declared}"), falling back to ${DEFAULT_CONSOLE_LEVEL}.`);
+  }
+  return DEFAULT_CONSOLE_LEVEL;
+}
+
 loggingSettings.use({
   shipUrl: Deno.env.get("LOG_SHIP_URL") ?? null,
   shipHeaders: logShipHeaders(),
+  consoleLevel: consoleLevel(),
 });
 
 AdminRbacResolver.use(new DatabaseAdminRbacSource());

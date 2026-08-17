@@ -30,42 +30,43 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { serve } from "@scribe/core/kernel/http/serve/mod.ts";
-import { pathnameOf } from "@scribe/core/runtime/http/pathname.ts";
-import { RequestScope } from "@scribe/core/runtime/scope.ts";
-import type { Bootstrapper } from "../lifecycle/bootstrapper.ts";
-import { Runtime } from "../lifecycle/runtime.ts";
-import { CronBootstrapper } from "./bootstrappers/cron_bootstrapper.ts";
-import { ExtensionsBootstrapper } from "./bootstrappers/extensions_bootstrapper.ts";
-import { QueueBootstrapper } from "./bootstrappers/queue_bootstrapper.ts";
-import { RequestLogBootstrapper } from "./bootstrappers/request_log_bootstrapper.ts";
-import type { SurfaceRegistry } from "./surface_registry.ts";
-import { SurfaceRouter } from "./surface_router.ts";
+import type { ConsoleLogLevel, LogLevel } from "@scribe/core/contracts/logging.ts";
 
-export class ServerRuntime extends Runtime {
-  override readonly name = "server";
+const RANK: Readonly<Record<ConsoleLogLevel, number>> = {
+  debug: 0,
+  info: 1,
+  warn: 2,
+  error: 3,
+  silent: 4,
+};
 
-  readonly #router: SurfaceRouter;
+/**
+ * The level a status code deserves.
+ *
+ * A refusal the caller brought on itself is a `warn`, not an `error`: the host
+ * did its job. Only the 5xx range says something went wrong here.
+ */
+export function levelForStatus(status: number): LogLevel {
+  if (status >= 500) return "error";
+  if (status >= 400) return "warn";
+  return "info";
+}
 
-  constructor(registry: SurfaceRegistry) {
-    super();
-    this.#router = new SurfaceRouter(registry);
-  }
+/** Whether an entry at `level` clears the `threshold` a deployment set. */
+export function reaches(level: LogLevel, threshold: ConsoleLogLevel): boolean {
+  return RANK[level] >= RANK[threshold];
+}
 
-  protected override bootstrappers(): readonly Bootstrapper[] {
-    return [
-      new ExtensionsBootstrapper(),
-      new CronBootstrapper(),
-      new QueueBootstrapper(),
-      new RequestLogBootstrapper(),
-    ];
-  }
+/**
+ * The level `name` spells, or `null` when it spells none.
+ *
+ * A misspelt level must not silence a terminal by accident, so the caller is
+ * told rather than handed a default it did not ask for.
+ */
+export function consoleLevelNamed(name: string | undefined): ConsoleLogLevel | null {
+  if (name === undefined) return null;
 
-  protected override shutdownSignals(): readonly Deno.Signal[] {
-    return ["SIGTERM", "SIGINT"];
-  }
+  const candidate = name.trim().toLowerCase();
 
-  protected override listen(): void {
-    serve(() => this.#router.route(pathnameOf(RequestScope.get().url)));
-  }
+  return Object.hasOwn(RANK, candidate) ? candidate as ConsoleLogLevel : null;
 }

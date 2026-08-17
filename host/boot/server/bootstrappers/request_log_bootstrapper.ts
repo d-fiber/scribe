@@ -30,42 +30,26 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { serve } from "@scribe/core/kernel/http/serve/mod.ts";
-import { pathnameOf } from "@scribe/core/runtime/http/pathname.ts";
-import { RequestScope } from "@scribe/core/runtime/scope.ts";
-import type { Bootstrapper } from "../lifecycle/bootstrapper.ts";
-import { Runtime } from "../lifecycle/runtime.ts";
-import { CronBootstrapper } from "./bootstrappers/cron_bootstrapper.ts";
-import { ExtensionsBootstrapper } from "./bootstrappers/extensions_bootstrapper.ts";
-import { QueueBootstrapper } from "./bootstrappers/queue_bootstrapper.ts";
-import { RequestLogBootstrapper } from "./bootstrappers/request_log_bootstrapper.ts";
-import type { SurfaceRegistry } from "./surface_registry.ts";
-import { SurfaceRouter } from "./surface_router.ts";
+import { logBuffer } from "@scribe/core/kernel/observability/logs_queue.ts";
+import type { Bootstrapper } from "../../lifecycle/bootstrapper.ts";
 
-export class ServerRuntime extends Runtime {
-  override readonly name = "server";
+/**
+ * Publishes the request log entries this replica is still holding.
+ *
+ * The buffer trades a window of entries for one publish instead of one per
+ * request, and this is what keeps a rolling deploy from paying that trade:
+ * a replica taken out on SIGTERM publishes what it has before it goes.
+ *
+ * There is nothing to do at boot. The buffer arms itself on its first entry,
+ * and arming it here would only publish an empty batch on a replica that never
+ * serves a request.
+ */
+export class RequestLogBootstrapper implements Bootstrapper {
+  readonly name = "request-log";
 
-  readonly #router: SurfaceRouter;
+  boot(): void {}
 
-  constructor(registry: SurfaceRegistry) {
-    super();
-    this.#router = new SurfaceRouter(registry);
-  }
-
-  protected override bootstrappers(): readonly Bootstrapper[] {
-    return [
-      new ExtensionsBootstrapper(),
-      new CronBootstrapper(),
-      new QueueBootstrapper(),
-      new RequestLogBootstrapper(),
-    ];
-  }
-
-  protected override shutdownSignals(): readonly Deno.Signal[] {
-    return ["SIGTERM", "SIGINT"];
-  }
-
-  protected override listen(): void {
-    serve(() => this.#router.route(pathnameOf(RequestScope.get().url)));
+  shutdown(): Promise<void> {
+    return logBuffer.flush();
   }
 }

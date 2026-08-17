@@ -49,22 +49,33 @@ const levels: Record<LogLevel, LogEntry["level"]> = {
   [LogLevel.ERROR]: "error",
 };
 
-export async function shipLogs(batch: LogBatch): Promise<LogAck> {
-  for (const entry of batch.entries) {
-    const metadata = decodeJson<Record<string, unknown>>(entry.metadata) ?? {};
+function toLogEntry(entry: LogBatch["entries"][number]): LogEntry {
+  const metadata = decodeJson<Record<string, unknown>>(entry.metadata) ?? {};
 
-    await logsQueue.push({
-      level: levels[entry.level] ?? "info",
-      action: entry.action,
-      actorType: entry.actorType === "" ? undefined : entry.actorType,
-      actorId: entry.actorId === "" ? undefined : entry.actorId,
-      metadata: {
-        ...metadata,
-        traceId: entry.traceId,
-        invocationId: entry.invocationId,
-      },
-      timestamp: Number(entry.timestamp),
-    });
+  return {
+    level: levels[entry.level] ?? "info",
+    action: entry.action,
+    actorType: entry.actorType === "" ? undefined : entry.actorType,
+    actorId: entry.actorId === "" ? undefined : entry.actorId,
+    metadata: {
+      ...metadata,
+      traceId: entry.traceId,
+      invocationId: entry.invocationId,
+    },
+    timestamp: Number(entry.timestamp),
+  };
+}
+
+/**
+ * Enqueues what the worker sent, as one message rather than one per entry.
+ *
+ * The worker has already grouped these entries, so pushing them one at a time
+ * would undo its batching and make the ack wait for as many NATS round trips
+ * as the batch holds.
+ */
+export async function shipLogs(batch: LogBatch): Promise<LogAck> {
+  if (batch.entries.length > 0) {
+    await logsQueue.push(batch.entries.map(toLogEntry));
   }
 
   return create(LogAckSchema, {});
