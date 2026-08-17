@@ -41,6 +41,6 @@ run_dir() {
   done
 }
 
-run_dir /docker-entrypoint-init-sql/caleb
+run_dir /docker-entrypoint-init-sql/framework
 run_dir /docker-entrypoint-init-sql/modules
 run_dir /docker-entrypoint-init-sql/project

@@ -457,7 +457,7 @@ services:
       - "{{sdk_root}}/host/core/db/provisioning/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z"
       - "{{sdk_root}}/host/core/db/provisioning/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z"
       - "{{sdk_root}}/host/core/db/provisioning/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z"
-      - "{{sdk_root}}/host/core/db/init:/docker-entrypoint-init-sql/caleb:ro"
+      - "{{sdk_root}}/host/core/db/init:/docker-entrypoint-init-sql/framework:ro"
       - "./lib/db/init:/docker-entrypoint-init-sql/project:ro"
       - "{{sdk_root}}/ops/docker/db/run-init-scripts.sh:/docker-entrypoint-initdb.d/init-scripts/999-00_run_init_scripts.sh:Z"
       - "{{sdk_root}}/postgres:/var/lib/postgresql/data:Z"
