@@ -32,6 +32,22 @@
 
 import type { LogEntry } from "@scribe/core/contracts/logging.ts";
 
+/** The entries of `batch`, gathered under the node each one belongs to. */
+function groupByNode(
+  batch: readonly LogEntry[],
+): Map<string | null, LogEntry[]> {
+  const grouped = new Map<string | null, LogEntry[]>();
+
+  for (const entry of batch) {
+    const node = entry.node ?? null;
+    const bucket = grouped.get(node);
+    if (bucket) bucket.push(entry);
+    else grouped.set(node, [entry]);
+  }
+
+  return grouped;
+}
+
 /**
  * How many entries one queue message carries at most.
  *
@@ -65,12 +81,17 @@ const LINGER_MS = 1_000;
  * loses none.
  */
 export class LogBuffer {
-  readonly #publish: (entries: readonly LogEntry[]) => Promise<unknown>;
+  readonly #publish: (
+    node: string | null,
+    entries: readonly LogEntry[],
+  ) => Promise<unknown>;
 
   #entries: LogEntry[] = [];
   #timer: number | null = null;
 
-  constructor(publish: (entries: readonly LogEntry[]) => Promise<unknown>) {
+  constructor(
+    publish: (node: string | null, entries: readonly LogEntry[]) => Promise<unknown>,
+  ) {
     this.#publish = publish;
   }
 
@@ -96,11 +117,16 @@ export class LogBuffer {
   }
 
   /**
-   * Publishes what is held, and forgets it either way.
+   * Publishes what is held, one batch per node, and forgets it either way.
+   *
+   * The split by node is not cosmetic: a node that declared a sink takes
+   * delivery of its own entries and of nobody else's, so a batch that mixed two
+   * nodes could not be routed at all.
    *
    * A failed publish drops its batch instead of putting it back: keeping it
    * would grow the buffer for as long as the outage lasts, and access logs are
-   * not worth taking the process down with them.
+   * not worth taking the process down with them. One node failing does not stop
+   * the others.
    */
   async flush(): Promise<void> {
     this.#disarm();
@@ -109,10 +135,15 @@ export class LogBuffer {
     const batch = this.#entries;
     this.#entries = [];
 
-    try {
-      await this.#publish(batch);
-    } catch (error) {
-      console.error(`[log-buffer] dropped ${batch.length} entries:`, error);
+    for (const [node, entries] of groupByNode(batch)) {
+      try {
+        await this.#publish(node, entries);
+      } catch (error) {
+        console.error(
+          `[log-buffer] dropped ${entries.length} entries of ${node ?? "no node"}:`,
+          error,
+        );
+      }
     }
   }
 

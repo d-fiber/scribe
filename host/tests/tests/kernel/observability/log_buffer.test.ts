@@ -36,14 +36,19 @@ import { assert, assertEquals } from "@std/assert";
 
 const MAX_BUFFERED = 500;
 
-function entry(action: string): LogEntry {
-  return { level: "info", action, metadata: {}, timestamp: 0 };
+function entry(action: string, node: string | null = null): LogEntry {
+  return { level: "info", action, node, metadata: {}, timestamp: 0 };
 }
 
-function recorder(): { buffer: LogBuffer; batches: (readonly LogEntry[])[] } {
-  const batches: (readonly LogEntry[])[] = [];
-  const buffer = new LogBuffer((entries) => {
-    batches.push(entries);
+interface Published {
+  readonly node: string | null;
+  readonly entries: readonly LogEntry[];
+}
+
+function recorder(): { buffer: LogBuffer; batches: Published[] } {
+  const batches: Published[] = [];
+  const buffer = new LogBuffer((node, entries) => {
+    batches.push({ node, entries });
     return Promise.resolve();
   });
 
@@ -67,9 +72,9 @@ Deno.test("a whole burst leaves as one message, not as one message each", async 
   await buffer.flush();
 
   assertEquals(batches.length, 1, "fifty requests must cost one publish");
-  assertEquals(batches[0].length, 50);
-  assertEquals(batches[0][0].action, "/r0");
-  assertEquals(batches[0][49].action, "/r49");
+  assertEquals(batches[0].entries.length, 50);
+  assertEquals(batches[0].entries[0].action, "/r0");
+  assertEquals(batches[0].entries[49].action, "/r49");
 });
 
 Deno.test("the buffer publishes rather than grows once it is full", async () => {
@@ -82,7 +87,7 @@ Deno.test("the buffer publishes rather than grows once it is full", async () => 
   await published;
 
   assertEquals(batches.length, 1);
-  assertEquals(batches[0].length, MAX_BUFFERED);
+  assertEquals(batches[0].entries.length, MAX_BUFFERED);
   assertEquals(buffer.pending, 0, "a full buffer must empty itself, not keep growing");
 });
 
@@ -93,7 +98,47 @@ Deno.test("a lone entry is published on the linger, without anybody asking", asy
   await new Promise((resolve) => setTimeout(resolve, 1_200));
 
   assertEquals(batches.length, 1, "an entry on a quiet host must not wait for the next request");
-  assertEquals(batches[0][0].action, "/quiet");
+  assertEquals(batches[0].entries[0].action, "/quiet");
+  assertEquals(buffer.pending, 0);
+});
+
+Deno.test("two nodes never end up in the same batch", async () => {
+  const { buffer, batches } = recorder();
+
+  buffer.record(entry("/app/a", "app"));
+  buffer.record(entry("/admin/b", "admin"));
+  buffer.record(entry("/app/c", "app"));
+  buffer.record(entry("/queue/drain"));
+  await buffer.flush();
+
+  assertEquals(batches.length, 3, "one publish per node, and one for what belongs to none");
+
+  const app = batches.find((batch) => batch.node === "app");
+  assertEquals(app?.entries.map((e) => e.action), ["/app/a", "/app/c"]);
+
+  const admin = batches.find((batch) => batch.node === "admin");
+  assertEquals(admin?.entries.map((e) => e.action), ["/admin/b"]);
+
+  const none = batches.find((batch) => batch.node === null);
+  assertEquals(
+    none?.entries.map((e) => e.action),
+    ["/queue/drain"],
+    "an entry of no node cannot be handed to a node's sink",
+  );
+});
+
+Deno.test("one node failing to publish does not take the others down", async () => {
+  const delivered: (string | null)[] = [];
+  const buffer = new LogBuffer((node) => {
+    delivered.push(node);
+    return node === "app" ? Promise.reject(new Error("the sink is down")) : Promise.resolve();
+  });
+
+  buffer.record(entry("/app/a", "app"));
+  buffer.record(entry("/admin/b", "admin"));
+  await buffer.flush();
+
+  assertEquals(delivered.length, 2, "admin must still be attempted after app threw");
   assertEquals(buffer.pending, 0);
 });
 

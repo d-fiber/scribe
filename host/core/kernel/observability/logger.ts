@@ -34,6 +34,7 @@ import "@scribe/core/runtime/support/edge_runtime_shim.ts";
 import type { LogLevel } from "@scribe/core/contracts/logging.ts";
 import { printExchange } from "@scribe/core/kernel/observability/console/request_log.ts";
 import { levelForStatus, reaches } from "@scribe/core/kernel/observability/level.ts";
+import { LogRoutes } from "@scribe/core/kernel/observability/log_routing.ts";
 import { logBuffer } from "@scribe/core/kernel/observability/logs_queue.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
 import { loggingSettings } from "@scribe/core/runtime/support/settings/logging.ts";
@@ -48,11 +49,18 @@ declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
  * The buffer answers with a publish only when this entry filled the batch, so
  * `waitUntil` is armed on the requests that flush rather than on all of them.
  */
-function ship(method: string, route: string, status: number, level: LogLevel): void {
+function ship(
+  method: string,
+  route: string,
+  status: number,
+  level: LogLevel,
+  node: string | null,
+): void {
   try {
     const published = logBuffer.record({
       level,
       action: route,
+      node,
       metadata: { method, status },
       timestamp: Date.now(),
     });
@@ -72,7 +80,17 @@ function ship(method: string, route: string, status: number, level: LogLevel): v
  * nothing on the path that matters, since a level that does not reach the
  * threshold never gets here.
  */
-async function trace(method: string, route: string, response: Response, level: LogLevel): Promise<void> {
+async function trace(
+  method: string,
+  route: string,
+  response: Response,
+  level: LogLevel,
+  node: string | null,
+): Promise<void> {
+  // A node that declared a _log.ts prints from there or not at all. It is
+  // handed the same primitives the host uses, so printing here as well would
+  // put every exchange of that node on the terminal twice.
+  if (LogRoutes.current.claims(node)) return;
   if (!reaches(level, loggingSettings.get().consoleLevel)) return;
 
   try {
@@ -88,9 +106,10 @@ const observeExchange = createMiddleware(async (c, next) => {
   const method = request.method();
   const route = request.path();
   const level = levelForStatus(c.res.status);
+  const node = LogRoutes.current.nodeOf(route);
 
-  await trace(method, route, c.res, level);
-  ship(method, route, c.res.status, level);
+  await trace(method, route, c.res, level, node);
+  ship(method, route, c.res.status, level, node);
 });
 
 export function logger(app: Hono): Hono {

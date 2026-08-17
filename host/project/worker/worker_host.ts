@@ -36,6 +36,8 @@ import type { Manifest, NodeDeclaration } from "@scribe/sdk/gen/scribe/protocol/
 import { workerSettings } from "@scribe/core/runtime/support/settings/worker.ts";
 import { capabilityServer } from "./capability_server.ts";
 import { CapabilityTokens } from "./capability_tokens.ts";
+import { LogRoutes } from "@scribe/core/kernel/observability/log_routing.ts";
+import { WorkerLogSinks } from "./log_sinks.ts";
 import { mountManifest, NodeMountError } from "./mount.ts";
 import { NodeSurfaces } from "./node_surfaces.ts";
 import { WorkerClient } from "./worker_client.ts";
@@ -150,6 +152,7 @@ export const WorkerHost = {
 
     const mounted = mountManifest(resolver(surfaces), manifest, client);
     attached = manifest;
+    LogRoutes.use(new WorkerLogSinks(client, manifest));
 
     const described = manifest.nodes
       .map((node) => `${node.name}${node.public ? "" : " (internal)"}`)
@@ -159,5 +162,14 @@ export const WorkerHost = {
       `[worker-host] ${manifest.workerLanguage} worker attached: ${mounted} routes on ${described}, ` +
         `${manifest.queues.length} queues, ${manifest.hooks.length} hooks, ${manifest.crons.length} crons.`,
     );
+
+    const sinks = manifest.nodes.filter((node) => node.logSink).map((node) => node.name);
+    if (sinks.length > 0 || manifest.rootLogSink) {
+      console.log(
+        `[worker-host] the project takes its own logs: ${
+          [...sinks, ...(manifest.rootLogSink ? ["the project root"] : [])].join(", ")
+        }.`,
+      );
+    }
   },
 };

@@ -32,6 +32,7 @@
 
 import type { LogEntry, LogShipper } from "@scribe/core/contracts/logging.ts";
 import { LogBuffer } from "@scribe/core/kernel/observability/log_buffer.ts";
+import { LogRoutes } from "@scribe/core/kernel/observability/log_routing.ts";
 import { defineQueue } from "@scribe/core/runtime/event_driven/queue/mod.ts";
 
 export type { LogEntry };
@@ -70,4 +71,21 @@ export const logsQueue = defineQueue<readonly LogEntry[]>(
   shipLogEntries,
 );
 
-export const logBuffer: LogBuffer = new LogBuffer((entries) => logsQueue.push(entries));
+/**
+ * Sends a node's entries where that node said they should go.
+ *
+ * A node that declared a `_log.ts` takes delivery and the queue never sees the
+ * entries: the project asked to decide, so shipping them to `LOG_SHIP_URL` as
+ * well would send the same lines to two places without anybody asking for it.
+ * A node that declared none keeps the default path.
+ */
+function publishLogs(
+  node: string | null,
+  entries: readonly LogEntry[],
+): Promise<unknown> {
+  const routing = LogRoutes.current;
+
+  return routing.claims(node) ? routing.deliver(node, entries) : logsQueue.push(entries);
+}
+
+export const logBuffer: LogBuffer = new LogBuffer(publishLogs);

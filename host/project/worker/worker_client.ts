@@ -38,6 +38,8 @@ import { Worker as WorkerService } from "@scribe/sdk/gen/scribe/protocol/invocat
 import { QueueDispatch } from "@scribe/sdk/gen/scribe/host/core/runtime/event_driven/queue/protocol/queue_pb.ts";
 import { HookDispatch } from "@scribe/sdk/gen/scribe/host/core/runtime/event_driven/hook/protocol/hook_pb.ts";
 import { CronDispatch } from "@scribe/sdk/gen/scribe/host/core/runtime/event_driven/cron/protocol/cron_pb.ts";
+import type { LogEntry } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
+import { LogDispatch } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 
 export class WorkerClient {
   constructor(
@@ -103,6 +105,21 @@ export class WorkerClient {
       capabilityToken,
       scheduledAt: BigInt(scheduledAt),
       firedAt: BigInt(Date.now()),
+    });
+  }
+
+  /**
+   * Hands a node's log entries to the `_log.ts` that claimed them.
+   *
+   * The reverse of {@link shipLogs}: these entries were raised here and are on
+   * their way to project code. No capability token travels with them, because
+   * a sink is handed data and is not entitled to call anything back on the
+   * strength of having received it.
+   */
+  deliverLogs(node: string | null, entries: readonly LogEntry[]) {
+    return this.#channel("", "").call(LogDispatch.method.handle, {
+      node: node ?? "",
+      entries: [...entries],
     });
   }
 
