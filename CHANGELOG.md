@@ -4,6 +4,29 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 0.1.6 (2026-08-17)
+
+Component versions: @scribe/core 0.1.4, @dependencies/core 0.1.4
+
+### Fixed
+
+- count every request body against the in-flight budget (6fd51732)
+- have each api replica announce its own callback address (fd220c28)
+
+### Security
+
+- keep the caller's credentials out of the worker invocation (1511e4fa)
+
+### Performance
+
+- check access and the rate limit in one round trip (f699ceb9)
+- take the crypto and GoTrue off the identity hot path (1e6f23ff)
+- import the shared jwt secret as a key once (659771f7)
+
+### Tooling
+
+- move jose from deno.land/x to jsr (92590364)
+
 ## 0.1.5 (2026-08-16)
 
 Component versions: @dependencies/core 0.1.3
