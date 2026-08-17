@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { LogEntry, LogRouting } from "@scribe/core/contracts/logging.ts";
+import type { LogRouting } from "@scribe/core/contracts/logging.ts";
 
 /**
  * What a host with no project sink does: nothing, for every question.
