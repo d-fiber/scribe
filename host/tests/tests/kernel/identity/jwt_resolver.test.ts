@@ -34,6 +34,7 @@ import "@scribe/core/testing/settings.ts";
 import { JwtIdentityResolver } from "@scribe/core/kernel/identity/resolver/jwt_resolver.ts";
 import { JwtVerifier } from "@scribe/core/kernel/identity/resolver/jwt_verifier.ts";
 import { IdentityRevocation } from "@scribe/core/runtime/redis/identity_revocation.ts";
+import { kv, type Kv } from "@scribe/core/runtime/redis/mod.ts";
 import { installValkeryMock } from "@scribe/core/testing/runtime/redis.ts";
 import { installMock } from "@scribe/core/testing/install.ts";
 import { assert, assertEquals } from "@std/assert";
@@ -59,6 +60,10 @@ interface Claims {
  */
 function harness(claims: Record<string, Claims | null>) {
   const redis = installValkeryMock();
+  // A fresh fake Redis is a fresh cache only if the process drops what it was
+  // holding too: the local tier outlives the mock otherwise, and every test
+  // after the first reads the previous one's identities.
+  JwtIdentityResolver.forget();
   const calls = { verify: 0, gotrue: 0 };
 
   const verifier = installMock(JwtVerifier, "verify", (jwt: string) => {
@@ -106,6 +111,69 @@ Deno.test("a second request on the same token never pays for the signature again
       1,
       "the cache sits in front of the verification: an ES256 signature costs three quarters of the request",
     );
+  } finally {
+    h.restore();
+  }
+});
+
+Deno.test("a second request on the same token does not go back to Redis either", async () => {
+  const h = harness({
+    [USER_JWT]: { sub: "u1", email: "u@x.io", exp: inSeconds(600) },
+  });
+
+  const inner = kv().get.bind(kv());
+  let reads = 0;
+  const counted = installMock(
+    kv(),
+    "get",
+    ((key: string) => {
+      reads++;
+      return inner(key);
+    }) as unknown as Kv["get"],
+  );
+
+  try {
+    await JwtIdentityResolver.resolveIdentity(USER_JWT);
+    const before = reads;
+
+    const again = await JwtIdentityResolver.resolveIdentity(USER_JWT);
+
+    assertEquals(again?.id, "u1");
+    assertEquals(
+      reads,
+      before,
+      "the identity cache is read on every authenticated request: holding it in the process is what stops that doubling the Redis load",
+    );
+  } finally {
+    counted.restore();
+    h.restore();
+  }
+});
+
+Deno.test("the process stops answering for a token once its own window has passed", async () => {
+  const h = harness({
+    [USER_JWT]: { sub: "u1", email: "u@x.io", exp: inSeconds(600) },
+  });
+
+  try {
+    await JwtIdentityResolver.resolveIdentity(USER_JWT);
+
+    // Six seconds on, past the five the local tier holds for. Redis still has
+    // the entry, so this must be a Redis read and not a verification.
+    const past = Date.now() + 6_000;
+    const later = installMock(Date, "now", (() => past) as unknown as () => number);
+    try {
+      const again = await JwtIdentityResolver.resolveIdentity(USER_JWT);
+
+      assertEquals(again?.id, "u1");
+      assertEquals(
+        h.calls.verify,
+        1,
+        "the shared cache still holds it: only the local window lapsed",
+      );
+    } finally {
+      later.restore();
+    }
   } finally {
     h.restore();
   }

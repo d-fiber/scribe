@@ -36,6 +36,7 @@ import { identitySettings } from "@scribe/core/runtime/support/settings/identity
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { JwtVerifier } from "@scribe/core/kernel/identity/resolver/jwt_verifier.ts";
 import type { JWTPayload } from "jose";
+import { TtlLru } from "@scribe/core/runtime/support/cache/ttl_lru.ts";
 import { Valkery } from "@scribe/core/runtime/redis/cache/valkery.ts";
 import {
   IDENTITY_CACHE_KEY,
@@ -61,6 +62,31 @@ interface _CachedJwtIdentity extends ResolvedJwtIdentity {
 }
 
 const _FETCH_TIMEOUT_MS = 5_000;
+
+/**
+ * How long this process answers from its own memory before asking Redis again.
+ *
+ * Every authenticated request reads the identity cache, so a token used at any
+ * rate at all is a Redis round trip per request on top of the rate limiter's.
+ * This collapses that to one read per window per replica.
+ *
+ * It is short on purpose, because it is the one thing that weakens revocation.
+ * {@link IdentityRevocation.revoke} works by deleting the Redis entry, and a
+ * process holding its own copy never learns of the deletion: for this long, a
+ * revoked token and a demoted admin still hold on the replicas that were
+ * already serving them. Five seconds keeps that below what an operator can
+ * observe while still covering the burst a single client sends.
+ */
+const _LOCAL_TTL_MS = 5_000;
+
+/**
+ * How many resolved tokens this process holds.
+ *
+ * Sized on distinct callers in flight rather than on total users: a token that
+ * has not been seen in the last five seconds is worth nothing here, and at a
+ * couple of hundred bytes an entry this is under a megabyte held.
+ */
+const _LOCAL_MAX_ENTRIES = 5_000;
 
 class _JwtIdentityCache extends Valkery {
   override get key(): string {
@@ -120,22 +146,38 @@ function _identityFromClaims(payload: JWTPayload): ResolvedJwtIdentity | null {
 export class JwtIdentityResolver {
   private static readonly _cache = new _JwtIdentityCache();
 
+  private static readonly _local = new TtlLru<_CachedJwtIdentity>({
+    max: _LOCAL_MAX_ENTRIES,
+    ttlMs: _LOCAL_TTL_MS,
+  });
+
   /**
    * The identity behind a bearer token, or `null` when the token buys nothing.
    *
-   * The cache is consulted before the signature is verified, which is what
-   * keeps the crypto off the hot path, because an ES256 verification costs three
-   * quarters of everything else the host does. Nothing is weakened by the
-   * order: an entry only exists because a previous request verified the very
-   * token that hashes to this key, and the entry carries its own expiry.
+   * Three tiers, each answering what the one before could not: this process,
+   * then Redis, then the signature and GoTrue. The caches are consulted before
+   * the signature is verified, which is what keeps the crypto off the hot path,
+   * because an ES256 verification costs three quarters of everything else the
+   * host does. Nothing is weakened by the order: an entry only exists because a
+   * previous request verified the very token that hashes to this key, and the
+   * entry carries its own expiry.
+   *
+   * The in-process tier costs a window of staleness that Redis alone did not.
+   * See {@link _LOCAL_TTL_MS}.
    */
   static async resolveIdentity(
     jwt: string,
   ): Promise<ResolvedJwtIdentity | null> {
     const cacheKey = await sha256Hex(jwt);
 
+    const local = this._local.get(cacheKey);
+    if (local !== null && !_expired(local.exp)) return local;
+
     const cached = await this._cache.get<_CachedJwtIdentity>(cacheKey);
-    if (cached !== null && !_expired(cached.exp)) return cached;
+    if (cached !== null && !_expired(cached.exp)) {
+      this._local.set(cacheKey, cached);
+      return cached;
+    }
 
     const payload = await JwtVerifier.verify(jwt);
     if (payload === null) return null;
@@ -177,11 +219,34 @@ export class JwtIdentityResolver {
       return;
     }
 
+    this._local.set(cacheKey, { ...identity, exp });
     await this._cache.add<_CachedJwtIdentity>(cacheKey, { ...identity, exp });
   }
 
+  /**
+   * Revokes a user, and drops what this process was holding for anybody.
+   *
+   * The local cache is keyed by token, so there is no way to pick out the
+   * entries belonging to one user. Everything goes: a revocation is rare, and
+   * the alternative is serving this user from memory for the whole window on
+   * the very replica that was told to stop. The other replicas still wait it
+   * out, which is what the window means.
+   */
   static invalidate(userId: string): Promise<void> {
+    this.forget();
     return IdentityRevocation.revoke(userId);
+  }
+
+  /**
+   * Drops every identity this process is holding, without touching Redis.
+   *
+   * Whoever replaces what the shared cache holds has to call this, or the
+   * process keeps answering from a view of the world that no longer exists.
+   * That is a test standing a fresh cache up, and it is why the local tier is
+   * not something a caller can forget about.
+   */
+  static forget(): void {
+    this._local.clear();
   }
 
   private static async _fetchUser(
