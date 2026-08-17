@@ -4,6 +4,23 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 0.1.7 (2026-08-17)
+
+Component versions: @scribe/core 0.1.5, @dependencies/core 0.1.5
+
+### Added
+
+- declare what a service costs where the service lives (25a25e3f)
+
+### Fixed
+
+- drop the container name a replicated service cannot hold (10805598)
+
+### Changed
+
+- write everything in the source in English (201a4e2d)
+- name the framework's init sql root after the framework (1bf67320)
+
 ## 0.1.6 (2026-08-17)
 
 Component versions: @scribe/core 0.1.4, @dependencies/core 0.1.4
