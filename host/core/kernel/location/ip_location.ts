@@ -86,7 +86,7 @@ export class GeolocationResolver {
     try {
       const url = provider.buildUrl(ip);
       if (!url.startsWith("https://")) {
-        console.error(`[geolocation] fournisseur non-HTTPS ignoré : ${url}`);
+        console.error(`[geolocation] ignoring non-HTTPS provider: ${url}`);
         return null;
       }
 

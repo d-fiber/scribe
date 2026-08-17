@@ -31,7 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 // `defineQueue` declares the queue, registers it and arms its body with
-// `queueRunner` — all in one call. These tests cover the declaration; the drain
+// `queueRunner`, all in one call. These tests cover the declaration; the drain
 // itself is covered by runner.test.ts.
 
 import { assertEquals, assertStringIncludes, assertThrows } from "@std/assert";

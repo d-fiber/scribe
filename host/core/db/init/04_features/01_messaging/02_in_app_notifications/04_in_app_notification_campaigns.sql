@@ -76,9 +76,9 @@ create trigger in_app_notification_campaigns_validate_filters
   before insert or update on public.internal_t__in_app_notification_campaigns
   for each row execute function validate_campaign_filters_trigger();
 
--- Même filtres que resolve_push_campaign_audience() (push_campaigns.sql),
--- sans l'exigence d'un notification_token FCM : une notification in-app
--- n'a pas besoin qu'un device soit enregistré pour le push.
+-- The same filters as resolve_push_campaign_audience() in push_campaigns.sql,
+-- without the FCM notification_token requirement: an in-app notification does
+-- not need a device registered for push.
 create or replace function resolve_in_app_notification_campaign_audience(p_filters jsonb)
 returns table(user_id uuid)
 language sql

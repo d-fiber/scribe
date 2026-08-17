@@ -30,24 +30,26 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-/** Ce que le client dit connaître, par entité : `{ brand: ["id1", "id2"] }`. */
+/** What the client says it already holds, per entity: `{ brand: ["id1", "id2"] }`. */
 export type SyncKnownIds = Record<string, string[]>;
 
-/** Delta pour une entité. Les ids sont disjoints entre les deux listes. */
+/** The delta for one entity. No id appears in both lists. */
 export interface SyncEntityDelta {
-  /** À (re)charger : créées ou modifiées depuis le curseur. */
+  /** To load or reload, having been created or changed since the cursor. */
   upserted: string[];
-  /** À retirer localement. */
+  /** To drop locally. */
   deleted: string[];
 }
 
 export interface SyncResult {
-  /** À renvoyer tel quel au prochain appel. */
+  /** To send back as it stands on the next call. */
   cursor: number;
   /**
-   * Le curseur précédait la fenêtre de rétention : le delta est incalculable et
-   * les listes sont vides. Le client doit réconcilier lui-même (recharger ses
-   * listes) plutôt que d'appliquer un diff.
+   * Whether the cursor sat before the retention window.
+   *
+   * The delta cannot be worked out then, so the lists come back empty and the
+   * client has to reconcile on its own by reloading its lists, rather than
+   * applying a diff.
    */
   full_resync: boolean;
   entities: Record<string, SyncEntityDelta>;

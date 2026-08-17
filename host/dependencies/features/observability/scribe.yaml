@@ -1,5 +1,5 @@
 name: observability
-title: Expedition des journaux vers un collecteur externe.
+title: Shipping the logs to an external collector.
 optional: true
 
 requires: []

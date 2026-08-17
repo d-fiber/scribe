@@ -1,5 +1,5 @@
 name: messagings
-title: Envoi d'e-mails, de SMS et de notifications push.
+title: Sending email, SMS and push notifications.
 optional: true
 
 requires: []

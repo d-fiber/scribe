@@ -63,7 +63,7 @@ Deno.test("a daily cron pins the hour instead of drifting", () => {
   assertEquals(
     second - first,
     24 * 60 * 60 * 1000,
-    "24h pile — un frequency_hours calcule depuis last_run_at aurait derive",
+    "exactly 24h, where a frequency_hours computed from last_run_at would have drifted",
   );
 });
 
@@ -75,7 +75,7 @@ Deno.test("the schedule follows daylight saving time, it does not drift with it"
   assertEquals(
     iso(beforeSwitch),
     "2026-10-25T08:00:00.000Z",
-    "apres le passage a l'heure d'hiver, 09:00 Paris = 08:00 UTC",
+    "once the clocks go back, 09:00 in Paris is 08:00 UTC",
   );
 });
 

@@ -1,5 +1,5 @@
 name: auth
-title: "Identite : sessions, OTP, OAuth, webhooks GoTrue."
+title: "Identity: sessions, OTP, OAuth, GoTrue webhooks."
 optional: false
 
 requires: []

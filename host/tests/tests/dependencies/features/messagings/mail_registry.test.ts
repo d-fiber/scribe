@@ -79,7 +79,7 @@ Deno.test("templates: the seeded rows carry a name and no content", async () => 
     assertEquals(
       byName.data.text,
       null,
-      "le rendu se fait en TypeScript, la colonne reste vide — interpolate() rendra null",
+      "rendering happens in TypeScript, so the column stays empty and interpolate() returns null",
     );
   } finally {
     rest.restore();
@@ -114,7 +114,7 @@ Deno.test("templates: filling subject + text re-arms the interpolation fallback"
     const row = rest.rows(TEMPLATES)[0];
     assertEquals(row.subject, "Bonjour {{name}}");
     assertEquals(row.text, "Contenu");
-    assertEquals(row.name, "app/auth/confirm-account", "le nom n'est pas touche");
+    assertEquals(row.name, "app/auth/confirm-account", "the name is left alone");
   } finally {
     rest.restore();
   }
@@ -131,7 +131,7 @@ Deno.test("templates: create then remove", async () => {
     });
     assert(created.ok);
     assertEquals(rest.rows(TEMPLATES).length, 1);
-    assertEquals(created.data.html, null, "html reste nul quand il n'est pas fourni");
+    assertEquals(created.data.html, null, "html stays null when none is given");
 
     const removed = await new EmailTemplateRepository().remove(created.data.id);
     assert(removed.ok);
@@ -183,7 +183,7 @@ Deno.test("statistics: record writes one open, list scopes to its mail", async (
     assertEquals(
       list.data.items.every((s) => s.mailId === 100),
       true,
-      "aucune ouverture d'un autre mail ne remonte",
+      "an open on another email never shows up",
     );
     assertEquals(list.data.items.length, 2);
   } finally {
@@ -217,7 +217,7 @@ Deno.test("statistics: an unknown id is not-found", async () => {
   }
 });
 
-// --- comptes SMTP -----------------------------------------------------------
+// --- SMTP accounts ----------------------------------------------------------
 
 function accountsHarness(rows: Record<string, unknown>[]) {
   const rest = installRestMock({});
@@ -257,7 +257,7 @@ Deno.test("accounts: an unknown or inactive account is not-found", async () => {
     assertEquals(
       res.error,
       SmtpAccountError.NotFound,
-      "la RPC filtre deja is_active, une ligne coupee ne remonte pas",
+      "the RPC already filters on is_active, so a row that was switched off never shows up",
     );
   } finally {
     h.restore();
@@ -275,7 +275,7 @@ Deno.test("accounts: an env-backed row is reported incomplete, never half-used",
     assertEquals(
       res.error,
       SmtpAccountError.Incomplete,
-      "les deux comptes du socle vivent en environnement, pas en base",
+      "the two accounts of the socle live in the environment, not in the database",
     );
   } finally {
     h.restore();

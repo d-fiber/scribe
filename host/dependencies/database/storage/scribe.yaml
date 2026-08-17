@@ -1,5 +1,5 @@
 name: storage
-title: Objets, buckets et derivees d'images.
+title: Objects, buckets and image derivatives.
 optional: true
 
 requires: []

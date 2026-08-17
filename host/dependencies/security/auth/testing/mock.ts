@@ -31,10 +31,10 @@
 // LICENSE file, the LICENSE file governs.
 
 import "@scribe/core/testing/settings.ts";
-// L'arbre de `clients.security.auth` (sign_in/sign_up/reset_password/session/user)
-// is deep and every flow returns a different `Result<T, E>` shape: there is no
-// safe universal default, unlike broadcast. Requires `--allow-net` +
-// `tests/.env.test` (voir `.claude/testing.md`), comme `rest/install_rest.ts`.
+// The `clients.security.auth` tree, covering sign_in, sign_up, reset_password,
+// session and user, is deep, and every flow returns a different `Result<T, E>`
+// shape. There is no safe universal default here, unlike broadcast. It needs
+// `--allow-net` and `tests/.env.test`, the way `rest/install_rest.ts` does.
 
 import { clients } from "@scribe/host/dependencies/clients.ts";
 import { type AutoMock, createAutoMock } from "@scribe/core/testing/auto_mock.ts";

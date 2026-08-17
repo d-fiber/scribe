@@ -1,6 +1,6 @@
 services:
   - name: storage-v1
-    _comment: "Storage: /storage/v1/* -> http://storage:5000/ — LECTURE SEULE. Objets publics (/object/public/*) lisibles sans aucune condition ; tout le reste (bucket privé) exige un JWT admin, et le VPN est imposé en amont par Caddy qui ne route le privé que sur ADMIN_DOMAIN. Aucun upload ni suppression ne passe par ici : ils vont tous aux edge functions, qui portent la validation (identité, extension, taille, chemin)."
+    _comment: "Storage: /storage/v1/* -> http://storage:5000/, read only. Public objects under /object/public/* are readable with no condition at all. Everything else lives in the private bucket and demands an admin JWT, with the VPN imposed upstream by Caddy, which only routes the private path on ADMIN_DOMAIN. No upload and no deletion comes through here: they all go to the edge functions, which carry the validation of identity, extension, size and path."
     url: http://storage:5000/
     routes:
       - name: storage-v1-all
@@ -15,23 +15,23 @@ services:
         config:
           access:
             - |
-              -- Lecture seule : aucune écriture ne doit passer par la passerelle.
-              -- 404 plutôt que 405, pour ne pas révéler que la route existe.
+              -- Read only, so no write may come through the gateway.
+              -- A 404 rather than a 405, so as not to reveal that the route exists.
               local method = kong.request.get_method()
               if method ~= "GET" and method ~= "HEAD" then
                 return kong.response.exit(404, '{"message":"Not found"}', {["Content-Type"] = "application/json"})
               end
 
-              -- Objets publics : lisibles sans aucune condition, y compris sans
-              -- jeton. C'est ce qui rend l'URL utilisable par un <img>, un mail
-              -- ou un CDN. Le bucket app_bucket est public côté storage, la RLS
-              -- ne s'applique pas à ce chemin.
+              -- Public objects are readable with no condition at all, token
+              -- included. That is what makes the URL usable from an <img>, an
+              -- email or a CDN. app_bucket is public on the storage side, and
+              -- the RLS does not apply to this path.
               local path = kong.request.get_path()
               if path:find("/object/public/", 1, true) then
                 return
               end
 
-              -- Tout le reste vise le bucket privé : jeton obligatoire.
+              -- Everything else aims at the private bucket, so a token is required.
               local auth = kong.request.get_header("authorization")
               local token = auth and auth:match("^[Bb]earer%s+(.+)$")
 
@@ -66,9 +66,10 @@ services:
                 return kong.response.exit(401, '{"message":"Unauthorized"}', {["Content-Type"] = "application/json"})
               end
 
-              -- Privé = admin uniquement. La RLS le vérifie aussi côté base
-              -- (storage_select_admin_bucket) et Caddy impose le VPN en amont :
-              -- trois barrières indépendantes, aucune ne suffit seule.
+              -- Private means admin only. The RLS checks it again in the
+              -- database, in storage_select_admin_bucket, and Caddy imposes the
+              -- VPN upstream. Three independent barriers, and none of them is
+              -- enough on its own.
               if role ~= "admin" then
                 return kong.response.exit(404, '{"message":"Not found"}', {["Content-Type"] = "application/json"})
               end

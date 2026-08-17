@@ -100,7 +100,7 @@ function _parseGoTrueUser(
  *
  * GoTrue puts the same three values in the access token that it returns from
  * `/user`, and the signature has just been checked, so the HTTP call buys
- * nothing but freshness — which {@link IdentityRevocation.recheckRequired}
+ * nothing but freshness, which {@link IdentityRevocation.recheckRequired}
  * asks for by name when it is actually needed.
  */
 function _identityFromClaims(payload: JWTPayload): ResolvedJwtIdentity | null {
@@ -124,7 +124,7 @@ export class JwtIdentityResolver {
    * The identity behind a bearer token, or `null` when the token buys nothing.
    *
    * The cache is consulted before the signature is verified, which is what
-   * keeps the crypto off the hot path — an ES256 verification costs three
+   * keeps the crypto off the hot path, because an ES256 verification costs three
    * quarters of everything else the host does. Nothing is weakened by the
    * order: an entry only exists because a previous request verified the very
    * token that hashes to this key, and the entry carries its own expiry.

@@ -80,7 +80,7 @@ export interface WorkerSettings {
    * Capability grants live in the memory of the process that issued them, so a
    * shared service name would send the worker to any replica and the grant
    * would be unknown there. Only override this when the worker cannot reach the
-   * replica by hostname — a host running outside the container network.
+   * replica by hostname, meaning a host running outside the container network.
    */
   readonly callbackUrl: string | null;
   readonly callbackPort: number;

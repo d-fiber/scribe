@@ -51,11 +51,11 @@ create table if not exists public.internal_t__admin_users_devices (
   unique (admin_id, device_id)
 );
 
--- Pas d'index sur (admin_id) seul : la contrainte `unique (admin_id, device_id)`
--- ci-dessus crée déjà un index composite dont le préfixe gauche sert les
--- recherches sur admin_id. Un second index ne ferait qu'alourdir chaque
--- écriture. La requête chaude du chemin requête, `where admin_id = $1 and
--- device_id = $2`, est servie par la contrainte.
+-- No index on (admin_id) alone. The `unique (admin_id, device_id)` constraint
+-- above already creates a composite index whose left prefix serves lookups on
+-- admin_id, and a second index would only make every write heavier. The hot
+-- query on the request path, `where admin_id = $1 and device_id = $2`, is
+-- served by the constraint.
 
 alter table public.internal_t__admin_users_devices enable row level security;
 

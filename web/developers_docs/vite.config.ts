@@ -82,16 +82,16 @@ export default defineConfig(({ mode }) => {
     );
   }
 
-  // Chaque variante n'embarque que la spec qu'elle affiche : la landing n'en a
-  // aucune, une surface a la sienne. Copier les autres alourdit le bundle et
-  // publie une API sur le domaine d'une autre.
+  // A variant carries only the spec it displays. The landing has none, and a
+  // surface has its own. Copying the others makes the bundle heavier and
+  // publishes one API on the domain of another.
   const yamlSources = surface
     ? [{ src: path.join(GENERATED_DOCS, surface.spec), rename: surface.spec }]
     : [];
 
-  // La marque du projet, distribuee dans chaque variante. `requireAssets()`
-  // echoue en nommant les fichiers manquants : le portail ne se construit pas
-  // sur un projet qui n'a pas fourni les siens.
+  // The project's branding, shipped in every variant. `requireAssets()` fails
+  // by naming the files that are missing, so the portal does not build on a
+  // project that has not supplied its own.
   const assetTargets = requireAssets().map((src: string) => ({
     src,
     dest: ".",

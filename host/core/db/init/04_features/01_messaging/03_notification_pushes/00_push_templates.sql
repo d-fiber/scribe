@@ -42,9 +42,9 @@ alter table public.internal_t__push_templates enable row level security;
 
 revoke all on public.internal_t__push_templates from authenticated, anon;
 
--- name est repris tel quel dans internal_t__in_app_notifications.type (text
--- libre, pas de FK ni d'enum) : ajouter un template ici suffit, rien
--- d'autre à synchroniser.
+-- name is carried as it stands into internal_t__in_app_notifications.type,
+-- which is free text with neither a foreign key nor an enum. Adding a template
+-- here is therefore enough, and nothing else has to be kept in step.
 insert into public.internal_t__push_templates (name, title, body, data) values
   (
     'welcome',

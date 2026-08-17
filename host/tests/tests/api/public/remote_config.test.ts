@@ -321,7 +321,7 @@ Deno.test("the admin surface refuses an anonymous caller", async () => {
   }
 });
 
-// --- admin: la vue de gestion voit tout -------------------------------------
+// --- admin: the management view sees everything ----------------------------
 
 Deno.test("the admin list carries every config, whatever its audience or state", async () => {
   const rest = harness([
@@ -411,7 +411,7 @@ Deno.test("the admin read serves a config whose audience it could never consume"
   }
 });
 
-// --- admin: écriture --------------------------------------------------------
+// --- admin: writing ---------------------------------------------------------
 
 Deno.test("POST /features/devops/remote-config/config creates the row", async () => {
   const rest = harness([]);
@@ -534,7 +534,7 @@ Deno.test("DELETE /features/devops/remote-config/config/:key removes the row", a
   }
 });
 
-// --- statistiques de lecture ------------------------------------------------
+// --- read statistics --------------------------------------------------------
 
 Deno.test("reading a key records one enqueued row, never an inline write", async () => {
   const rest = harness([config()]);
@@ -642,7 +642,7 @@ Deno.test("the admin surface records nothing at all", async () => {
   }
 });
 
-// --- admin: les statistiques ------------------------------------------------
+// --- admin: the statistics --------------------------------------------------
 
 function statistic(overrides: Partial<Row> = {}): Row {
   return {

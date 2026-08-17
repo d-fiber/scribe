@@ -30,9 +30,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-// Types domaine du feature sms. Neutres, comme entities.ts côté mail : pas de
-// DB, pas de campagnes/statistiques — un SMS est envoyé et livré tout de
-// suite, contrairement à un mail (voir mail/entities.ts pour le contraste).
+// The domain types of the sms feature. They are neutral, like entities.ts on
+// the mail side: no database, no campaign and no statistics, because an SMS is
+// sent and delivered at once, unlike an email. See mail/entities.ts for the
+// contrast.
 
 export interface SmsContent {
   readonly text: string;

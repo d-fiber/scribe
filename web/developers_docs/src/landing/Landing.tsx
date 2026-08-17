@@ -51,8 +51,8 @@ interface DocEntry {
   links: DocLink[];
 }
 
-// Le portail ne connait aucune surface : `gen docs` les ecrit dans son
-// manifeste, le build les injecte ici. Seule la presentation reste locale.
+// The portal knows no surface of its own. `gen docs` writes them into its
+// manifest and the build injects them here. Only the presentation stays local.
 const PALETTE = ["#5b4fcf", "#0d8fcc", "#0f9d6b", "#c2410c", "#a21caf"];
 
 const ICONS = [

@@ -69,7 +69,7 @@ function harness(rows: Row[] = []) {
   };
 }
 
-// --- lecture ----------------------------------------------------------------
+// --- reading ----------------------------------------------------------------
 
 Deno.test("get maps the stored columns back to a schedule union", async () => {
   const h = harness([
@@ -120,7 +120,7 @@ Deno.test("due() returns only active campaigns whose next run has passed", async
   try {
     const res = await h.campaigns.due(1_000);
     assert(res.ok);
-    assertEquals(res.data.map((c) => c.id), [1], "ni la future, ni l'inactive");
+    assertEquals(res.data.map((c) => c.id), [1], "neither the future one nor the inactive one");
   } finally {
     h.restore();
   }
@@ -144,7 +144,7 @@ Deno.test("list can restrict to active campaigns", async () => {
   }
 });
 
-// --- création ---------------------------------------------------------------
+// --- creation ---------------------------------------------------------------
 
 Deno.test("create computes next_run_at from the cron expression", async () => {
   const h = harness();
@@ -154,7 +154,7 @@ Deno.test("create computes next_run_at from the cron expression", async () => {
 
     assert(res.ok);
     assert(res.data.nextRunAt !== null);
-    assert(res.data.nextRunAt > Date.now(), "la prochaine occurrence est dans le futur");
+    assert(res.data.nextRunAt > Date.now(), "the next occurrence is in the future");
     assertEquals(h.rows()[0].schedule_kind, "cron");
     assertEquals(h.rows()[0].cron_expression, "0 9 * * *");
   } finally {
@@ -173,7 +173,7 @@ Deno.test("create refuses a malformed cron expression without writing", async ()
 
     assert(!res.ok);
     assertEquals(res.error, EmailCampaignError.InvalidSchedule);
-    assertEquals(h.rows().length, 0, "rien n'est ecrit quand l'ordonnancement est refuse");
+    assertEquals(h.rows().length, 0, "nothing is written when the schedule is refused");
   } finally {
     h.restore();
   }
@@ -207,13 +207,13 @@ Deno.test("create serialises the typed filters into their snake_case columns", a
     const filters = h.rows()[0].filters as Record<string, unknown>;
     assertEquals(filters.is_email_verified, true);
     assertEquals(filters.inactive_days, 30);
-    assertEquals(filters.device_os, null, "les filtres absents sont explicitement nuls");
+    assertEquals(filters.device_os, null, "filters that were not given are explicitly null");
   } finally {
     h.restore();
   }
 });
 
-// --- mise à jour ------------------------------------------------------------
+// --- update -----------------------------------------------------------------
 
 Deno.test("update answers not-found instead of silently doing nothing", async () => {
   const h = harness([campaign()]);
@@ -242,9 +242,9 @@ Deno.test("extraFilters merges into the existing filters instead of wiping them"
     assert(res.ok);
 
     const filters = h.rows()[0].filters as Record<string, unknown>;
-    assertEquals(filters.is_email_verified, true, "les filtres generiques survivent");
+    assertEquals(filters.is_email_verified, true, "the generic filters survive");
     assertEquals(filters.country, "FR");
-    assertEquals(filters.segment, "gold", "la cle projet est bien remplacee");
+    assertEquals(filters.segment, "gold", "the project key is replaced");
   } finally {
     h.restore();
   }
@@ -295,13 +295,13 @@ Deno.test("update refuses an invalid schedule before touching the row", async ()
 
     assert(!res.ok);
     assertEquals(res.error, EmailCampaignError.InvalidSchedule);
-    assertEquals(h.rows()[0].cron_expression, "0 9 * * *", "la ligne est intacte");
+    assertEquals(h.rows()[0].cron_expression, "0 9 * * *", "the row is untouched");
   } finally {
     h.restore();
   }
 });
 
-// --- exécution --------------------------------------------------------------
+// --- execution --------------------------------------------------------------
 
 Deno.test("markRan advances a recurring campaign and keeps it active", async () => {
   const h = harness([campaign({ next_run_at: 1_000 })]);
@@ -313,7 +313,7 @@ Deno.test("markRan advances a recurring campaign and keeps it active", async () 
 
     const row = h.rows()[0];
     assertEquals(row.last_run_at, ranAt);
-    assert((row.next_run_at as number) > ranAt, "la prochaine occurrence est replanifiee");
+    assert((row.next_run_at as number) > ranAt, "the next occurrence is scheduled again");
     assertEquals(row.is_active, true);
   } finally {
     h.restore();

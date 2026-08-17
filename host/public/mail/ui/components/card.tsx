@@ -30,11 +30,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-// Anciennement "AppSection" (renommé 2026-07-29) : entrait en collision de
-// nom avec le vrai Section de @react-email/components (conteneur de layout
-// générique, voir ./section.tsx) alors que ce component-ci est une carte
-// bordurée avec fond, soit un badge centré (`item`) soit une liste de lignes
-// label/valeur (`rows`) rien à voir avec un layout générique.
+// This was called "AppSection" until 2026-07-29, and the name collided with the
+// real Section of @react-email/components, a generic layout container, see
+// ./section.tsx. This component is a bordered card with a background, holding
+// either a centred badge through `item` or a list of label and value rows
+// through `rows`, which is nothing like a generic layout.
 
 import React from "react";
 import type { AppColors, AppFonts } from "../types.ts";

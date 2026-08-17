@@ -32,7 +32,7 @@
 
 // The engine no longer has a global flag: a hook runs as soon as a handler is
 // registered, full stop. There is therefore nothing left to initialize before
-// these tests, and no shared state across test files — the only constraint is
+// these tests, and no shared state across test files. The only constraint is
 // that a hook name is unique per process (the registry guarantees it), hence the
 // distinct names below.
 
@@ -151,7 +151,7 @@ Deno.test("background() does not run the handler within the request", async () =
   });
 
   // The push goes to NATS, absent in tests: it fails, is traced, and does not
-  // prevent `run()` from returning. That is precisely what we want to check —
+  // prevent `run()` from returning. That is precisely what we want to check:
   // the background handler is never called inline.
   await hook.run({ id: "x" });
 

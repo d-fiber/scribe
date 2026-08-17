@@ -167,7 +167,7 @@ Deno.test("scope: .unscoped() returns the whole table to a user", async () => {
 });
 
 Deno.test({
-  name: "scope: un insert porte l'id de l'appelant",
+  name: "scope: an insert carries the id of the caller",
   sanitizeOps: false,
   sanitizeResources: false,
   async fn() {

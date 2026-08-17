@@ -110,8 +110,8 @@ Deno.test("create resolves the template by name and queues a pending mail", asyn
     assert(res.ok);
     assertEquals(res.data.emailTemplateId, 7);
     assertEquals(res.data.status, MailStatus.Pending);
-    assert(res.data.openToken.length > 0, "le token de tracking est genere cote client");
-    assertEquals(h.sent().length, 0, "create n'envoie rien, il met en file");
+    assert(res.data.openToken.length > 0, "the tracking token is generated on the client side");
+    assertEquals(h.sent().length, 0, "create sends nothing, it queues");
   } finally {
     h.restore();
   }
@@ -172,7 +172,7 @@ Deno.test("deliver sends over SMTP, marks the mail sent and snapshots the subjec
 
     const row = h.rows()[0];
     assertEquals(row.status, MailStatus.Sent);
-    assertEquals(row.subject, "Bienvenue", "le sujet reellement envoye est fige sur la ligne");
+    assertEquals(row.subject, "Bienvenue", "the subject that was actually sent is frozen on the row");
   } finally {
     h.restore();
   }
@@ -185,8 +185,8 @@ Deno.test("deliver injects the tracking pixel into the html body", async () => {
     await h.sender.deliver(1, { subject: "s", html: "<p>hi</p>", text: "hi" });
 
     const html = h.sent()[0].html ?? "";
-    assert(html.includes("/v1/app/mail/open/tok-abc"), "le pixel porte le token, jamais le mail_id");
-    assert(html.startsWith("<p>hi</p>"), "le corps d'origine est preserve");
+    assert(html.includes("/v1/app/mail/open/tok-abc"), "the pixel carries the token, never the mail_id");
+    assert(html.startsWith("<p>hi</p>"), "the original body is preserved");
   } finally {
     h.restore();
   }
@@ -214,7 +214,7 @@ Deno.test("an SMTP failure marks the mail failed and reports it", async () => {
     assertEquals(
       h.rows()[0].status,
       MailStatus.Failed,
-      "le statut est ecrit malgre l'echec, la ligne ne reste pas pending",
+      "the status is written despite the failure, so the row does not stay pending",
     );
   } finally {
     h.restore();

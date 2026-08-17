@@ -31,8 +31,9 @@
 // LICENSE file, the LICENSE file governs.
 
 
-// La famille vient de la CSS var, que le tokens.css du projet surcharge ; le
-// repli est une pile systeme, jamais la police d'un projet en particulier.
+// The family comes from the CSS variable, which the project's tokens.css
+// overrides. The fallback is a system stack, never the typeface of one
+// particular project.
 export const fontFamily = "var(--app-font-family)";
 
 export const fontFaceCss = "";

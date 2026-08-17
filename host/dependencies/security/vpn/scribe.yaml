@@ -1,5 +1,5 @@
 name: vpn
-title: Acces VPN des administrateurs (wg-easy).
+title: Administrator VPN access, served by wg-easy.
 optional: true
 
 requires:

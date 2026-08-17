@@ -1,5 +1,5 @@
 name: recommendation
-title: Recommandations (Gorse).
+title: Recommendations, served by Gorse.
 optional: true
 
 requires: []

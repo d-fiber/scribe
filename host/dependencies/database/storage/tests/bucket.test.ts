@@ -36,8 +36,9 @@ import "@scribe/core/testing/settings.ts";
 import { assertEquals } from "@std/assert";
 import { Bucket } from "@scribe/host/dependencies/database/storage/src/bucket/bucket.ts";
 
-// Un faux `list()` : chaque préfixe rend `folders` sous-dossiers puis `files`
-// fichiers, ce qui laisse contrôler la profondeur et la largeur de l'arbre.
+// A fake `list()`. Every prefix returns `folders` subdirectories and then
+// `files` files, which leaves the depth and the width of the tree under
+// control.
 function tree(folders: number, files: number, calls: string[]) {
   return function (this: Bucket, prefix: string, offset = 0) {
     calls.push(prefix);

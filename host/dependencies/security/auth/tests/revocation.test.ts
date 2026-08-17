@@ -36,7 +36,7 @@ import { SignOutScope } from "@scribe/core/contracts/account.ts";
 import { goTrueError, installGoTrueMock } from "@scribe/host/dependencies/security/auth/testing/gotrue.ts";
 import { assertEquals } from "@std/assert";
 
-Deno.test("logout goes out as POST — a DELETE got a 405 and revoked nothing", async () => {
+Deno.test("logout goes out as POST, where a DELETE got a 405 and revoked nothing", async () => {
   const gotrue = installGoTrueMock({
     "POST /logout*": () => ({ status: 204 }),
   });

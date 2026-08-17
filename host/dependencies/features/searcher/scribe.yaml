@@ -1,5 +1,5 @@
 name: searcher
-title: Indexation et recherche plein texte (OpenSearch).
+title: Full-text indexing and search, served by OpenSearch.
 optional: true
 
 requires: []

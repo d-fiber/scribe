@@ -1,5 +1,5 @@
 name: realtime
-title: Abonnements Postgres -> WebSocket, canaux et diffusion.
+title: Postgres subscriptions over WebSocket, channels and broadcast.
 optional: true
 
 requires: []

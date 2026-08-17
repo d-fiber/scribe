@@ -66,7 +66,7 @@ const methods: Record<string, ProtoMethod> = {
  * Everything else stays on the host, credentials first: `authorization` is the
  * caller's own bearer token, and `cookie`, `apikey`, `x-app-key`,
  * `x-admin-app-key` and `x-internal-secret` are replayable the moment a
- * handler logs them or echoes them back. A worker never needs any of them — it
+ * handler logs them or echoes them back. A worker never needs any of them, since it
  * is handed the identity already resolved, in `Invocation.identity`.
  *
  * An allow list rather than a deny list, so that a secret header added later

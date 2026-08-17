@@ -103,8 +103,10 @@ export function parseTemplate(template: string): ParsedTemplate {
 }
 
 /**
- * Construit la clé. Chaque valeur d'exécution repasse par `pathSegment()` :
- * un id contenant `../..` est refusé ici, pas normalisé par `fetch()` plus loin.
+ * Builds the key.
+ *
+ * Every runtime value goes back through `pathSegment()`, so an id holding
+ * `../..` is refused here rather than normalised away by `fetch()` later on.
  */
 export function renderTemplate(
   segments: readonly TemplateSegment[],

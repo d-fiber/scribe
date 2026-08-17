@@ -1,5 +1,5 @@
 name: rbac
-title: Roles et permissions des administrateurs.
+title: Administrator roles and permissions.
 optional: false
 
 requires:

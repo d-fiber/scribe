@@ -97,52 +97,52 @@ interface PreviewPage {
 const PAGES: readonly PreviewPage[] = [
   {
     path: "/reset/form",
-    label: "reset/form — le formulaire",
+    label: "reset/form: the form",
     render: () => resetForm(SAMPLE_TOKEN),
   },
   {
     path: "/reset/form/mismatch",
-    label: "reset/form — mots de passe différents (bannière d'erreur)",
+    label: "reset/form: passwords that differ, with the error banner",
     render: () => resetForm(SAMPLE_TOKEN, ResetFormError.PasswordsDoNotMatch),
   },
   ...Object.values(ResetOutcome).map((outcome) => ({
     path: `/reset/status/${outcome}`,
-    label: `reset/status — ${outcome}`,
+    label: `reset/status: ${outcome}`,
     render: () => resetStatus(outcome),
   })),
   ...Object.values(ConfirmAccountOutcome).map((outcome) => ({
     path: `/confirm-account/status/${outcome}`,
-    label: `confirm-account/status — ${outcome}`,
+    label: `confirm-account/status: ${outcome}`,
     render: () => confirmAccountStatus(outcome),
   })),
   {
     path: "/confirm-account/deeplink",
-    label: "confirm-account/deeplink — redirige vers poppin://",
+    label: "confirm-account/deeplink: redirects to the app scheme",
     render: () => confirmAccountDeeplink("poppin://auth/confirm#access_token=preview"),
   },
   {
     path: "/not-found",
-    label: "not-found — page introuvable (commune)",
+    label: "not-found: the shared page for a missing route",
     render: () => notFound(),
   },
   ...Object.values(EmailChangeOutcome).map((outcome) => ({
     path: `/email-change/status/${outcome}`,
-    label: `email-change/status — ${outcome}`,
+    label: `email-change/status: ${outcome}`,
     render: () => emailChangeStatus(outcome),
   })),
   {
     path: "/vpn/download",
-    label: "vpn/download — le formulaire",
+    label: "vpn/download: the form",
     render: () => vpnDownload(),
   },
   ...Object.values(VpnOutcome).map((outcome) => ({
     path: `/vpn/status/${outcome}`,
-    label: `vpn/status — ${outcome}`,
+    label: `vpn/status: ${outcome}`,
     render: () => vpnStatus(outcome),
   })),
   {
     path: "/link/interstitial/deeplink",
-    label: "link/interstitial — deeplink + repli store",
+    label: "link/interstitial: deeplink with the store fallback",
     render: () =>
       linkInterstitial({
         kind: LinkInterstitialKind.Deeplink,
@@ -154,7 +154,7 @@ const PAGES: readonly PreviewPage[] = [
   },
   {
     path: "/link/interstitial/redirect",
-    label: "link/interstitial — redirection externe",
+    label: "link/interstitial: an external redirect",
     render: () =>
       linkInterstitial({
         kind: LinkInterstitialKind.Redirect,
@@ -166,7 +166,7 @@ const PAGES: readonly PreviewPage[] = [
   },
   ...Object.values(LinkOutcome).map((outcome) => ({
     path: `/link/status/${outcome}`,
-    label: `link/status — ${outcome}`,
+    label: `link/status: ${outcome}`,
     render: () => linkStatus(outcome),
   })),
 ];
@@ -203,13 +203,13 @@ function index(locale: string): Response {
   ).join(" · ");
 
   return new Response(
-    `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>hosting preview</title>
+    `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>hosting preview</title>
 <style>body{font:14px/1.6 ui-monospace,monospace;max-width:52rem;margin:3rem auto;padding:0 1rem}
 h1{font-size:1.1rem}h2{font-size:.95rem;margin-top:2rem;text-transform:uppercase;letter-spacing:.08em;opacity:.6}
 ul{list-style:none;padding:0}li{padding:.35rem 0;border-bottom:1px solid #8883}
 code{opacity:.45;float:right}a{color:inherit}</style></head>
 <body><h1>hosting preview <span style="float:right">${switcher}</span></h1>
-<p style="opacity:.6">Les pages sont rendues par <code>_page.ts</code> : mêmes renderers, même CSP, mêmes codes HTTP qu'en production. Le formulaire de reset est soumissible, sa validation navigateur comprise.</p>
+<p style="opacity:.6">These pages are rendered by <code>_page.ts</code>, with the same renderers, the same CSP and the same HTTP codes as in production. The reset form can be submitted, browser validation included.</p>
 ${sections}</body></html>`,
     {
       headers: {

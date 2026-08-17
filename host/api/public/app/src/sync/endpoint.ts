@@ -105,9 +105,9 @@ export class SyncEndpoint extends ApiEndpoint {
       });
     }
 
-    // Toutes les combinaisons (entité × canal) partent ensemble : le client
-    // paie un aller-retour, pas un par entité comme le ferait un endpoint de
-    // sync dédié par entité.
+    // Every entity and channel pair goes out together, so the client pays for
+    // one round trip rather than one per entity, the way a sync endpoint
+    // dedicated to a single entity would.
     const queries = entities.flatMap((entity) =>
       channels.map((channel) => this.#query(entity, channel, cursor, known[entity]))
     );
@@ -130,10 +130,12 @@ export class SyncEndpoint extends ApiEndpoint {
   }
 
   /**
-   * Les canaux qu'un compte peut réellement recevoir : le canal large de son
-   * rôle, son canal privé, et les topics demandés dont il est membre. Filtrer
-   * l'appartenance ici et non côté SQL évite qu'un client sonde un topic
-   * auquel il n'appartient pas pour en déduire l'activité.
+   * The channels an account can really receive on.
+   *
+   * Those are the broad channel of its role, its own private channel, and the
+   * requested topics it belongs to. Membership is filtered here rather than in
+   * SQL so that a client cannot probe a topic it does not belong to and read
+   * activity off the answer.
    */
   async #channels(userId: string, topics: unknown): Promise<Channel[] | null> {
     const requested = Array.isArray(topics) ? topics.filter((t): t is string => typeof t === "string") : [];
@@ -195,20 +197,21 @@ export class SyncEndpoint extends ApiEndpoint {
         if (!row) continue;
 
         if (row.full_resync) fullResync = true;
-        // Le maximum, pas le minimum : un canal sans événement renvoie le
-        // curseur d'entrée, et prendre le minimum bloquerait l'avancée dès
-        // qu'un canal est inactif. Avancer est sûr parce que la marge de
-        // sécurité de get_sync_ids est calculée sur le même `now` pour tous.
+        // The maximum and not the minimum. A channel with no event returns the
+        // cursor it was given, so taking the minimum would freeze the cursor as
+        // soon as one channel went quiet. Moving forward is safe because the
+        // safety margin of get_sync_ids is computed on the same `now` for all
+        // of them.
         if (row.new_cursor && row.new_cursor > newCursor) newCursor = row.new_cursor;
 
         for (const id of row.upserted_ids ?? []) upserted.add(id);
         for (const id of row.deleted_ids ?? []) deleted.add(id);
       }
 
-      // Un id supprimé sur un canal et modifié sur un autre est traité comme
-      // supprimé : c'est l'issue qui fait converger le client vers l'absence,
-      // et un upsert perdu se rattrape au cycle suivant alors qu'une
-      // suppression manquée laisse une ligne fantôme.
+      // An id deleted on one channel and changed on another counts as deleted.
+      // That is the outcome that makes the client converge on absence: a lost
+      // upsert is caught on the next cycle, whereas a missed deletion leaves a
+      // ghost row behind.
       for (const id of deleted) upserted.delete(id);
 
       merged[entity] = { upserted: [...upserted], deleted: [...deleted] };

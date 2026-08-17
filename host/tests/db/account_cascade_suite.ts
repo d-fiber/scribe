@@ -78,7 +78,7 @@ export function registerAccountCascadeTests(label: string, extraRoots: string[] 
       );
       assert(
         declaration !== null,
-        `${table} must reference auth.users(id) on delete cascade — that is what makes the sign-up rollback complete`,
+        `${table} must reference auth.users(id) on delete cascade, which is what makes the sign-up rollback complete`,
       );
     }
   });

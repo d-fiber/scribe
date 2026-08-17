@@ -30,22 +30,22 @@
 -- This header is a summary written for convenience. Where it differs from the
 -- LICENSE file, the LICENSE file governs.
 
--- Deux buckets, une seule différence : qui peut lire.
+-- Two buckets, differing on one thing only: who is allowed to read.
 --
---   app_bucket   public  → servi sur APP_URL en /object/public/..., sans jeton
---                          côté storage. Pour tout ce qui est destiné à l'app.
---   admin_bucket privé   → servi sur ADMIN_URL en /object/<bucket>/..., donc
---                          derrière le VPN (Caddy) + un JWT (Kong) + la RLS
---                          ci-dessous, qui exige le rôle admin.
+--   app_bucket   public   served on APP_URL under /object/public/..., with no
+--                         token on the storage side. For anything meant for the app.
+--   admin_bucket private  served on ADMIN_URL under /object/<bucket>/..., so
+--                         behind the VPN in Caddy, a JWT in Kong, and the RLS
+--                         below, which demands the admin role.
 --
--- Aucun des deux ne contraint types ni tailles : ces règles vivent dans les
--- entités TS (scribe/host/dependencies/database/storage/), qui déclarent
--- extensions et taille max par ressource. Les dupliquer ici créerait deux
--- sources de vérité, et le refus du bucket est muet côté client.
+-- Neither constrains types or sizes. Those rules live in the TypeScript
+-- entities, which declare extensions and a maximum size per resource.
+-- Duplicating them here would make two sources of truth, and the refusal a
+-- bucket returns says nothing to the client.
 --
--- Aucun dossier n'est créé : storage.objects.name est une clé plate, les "/"
--- ne sont qu'une convention de nommage (storage.foldername() les parse à la
--- lecture). Un upload sur "brands/<id>/logo" crée l'objet directement.
+-- No folder is ever created. storage.objects.name is a flat key and the "/" are
+-- only a naming convention, which storage.foldername() parses on read. An
+-- upload to "brands/<id>/logo" creates the object directly.
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES
   ('app_bucket',   'app_bucket',   true,  NULL, NULL),
@@ -57,9 +57,9 @@ ON CONFLICT (id) DO UPDATE
 
 DO $$
 BEGIN
-  -- Bucket public : lecture ouverte à tout compte authentifié. Le bucket étant
-  -- `public = true`, cette policy ne couvre que le chemin authentifié
-  -- (/object/<bucket>/...), le chemin /object/public/... ne la consulte pas.
+  -- The public bucket, readable by any authenticated account. Since the bucket
+  -- is `public = true`, this policy only covers the authenticated path,
+  -- /object/<bucket>/..., and /object/public/... never consults it.
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies
     WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'storage_select_app_bucket'
@@ -69,9 +69,9 @@ BEGIN
       USING (bucket_id = 'app_bucket');
   END IF;
 
-  -- Bucket privé : réservé aux admins. C'est la seule barrière qui ne dépend
-  -- ni du réseau (VPN) ni de la passerelle (Kong) — une URL qui fuite reste
-  -- inutilisable sans un JWT portant app_metadata.role = 'admin'.
+  -- The private bucket, for admins only. This is the one barrier that depends
+  -- neither on the network in the VPN nor on the gateway in Kong, so a URL that
+  -- leaks stays useless without a JWT carrying app_metadata.role = 'admin'.
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies
     WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'storage_select_admin_bucket'
@@ -86,10 +86,11 @@ BEGIN
 END;
 $$;
 
--- Aucune policy d'écriture pour `authenticated` : les uploads et suppressions
--- passent tous par les edge functions, avec la clé service qui contourne la
--- RLS. Les anciennes policies storage_insert/update/delete laissaient un compte
--- authentifié écrire dans le bucket ; seule la passerelle Kong l'en empêchait.
+-- No write policy for `authenticated`. Uploads and deletions all go through the
+-- edge functions, with the service key that bypasses the RLS. The old
+-- storage_insert, storage_update and storage_delete policies let an
+-- authenticated account write into the bucket, and only the Kong gateway
+-- stopped it.
 DROP POLICY IF EXISTS "storage_insert" ON storage.objects;
 DROP POLICY IF EXISTS "storage_update" ON storage.objects;
 DROP POLICY IF EXISTS "storage_delete" ON storage.objects;

@@ -71,7 +71,7 @@ Deno.test("the two baseline accounts resolve without touching the database", asy
     assertEquals(
       h.rpcCalls(),
       0,
-      "account/noreply viennent de l'environnement — l'envoi d'auth doit marcher table vide",
+      "account and noreply come from the environment, so sending auth mail has to work on an empty table",
     );
   } finally {
     h.restore();
@@ -84,7 +84,7 @@ Deno.test("the baseline getters and for() return the very same sender", async ()
   try {
     const viaFor = await h.mail.for(FOUNDATION_SMTP_ACCOUNTS.noreply);
     assert(viaFor.ok);
-    assertEquals(viaFor.data, h.mail.noreply, "un seul transport SMTP par compte");
+    assertEquals(viaFor.data, h.mail.noreply, "one SMTP transport per account, and no more");
   } finally {
     h.restore();
   }
@@ -114,8 +114,8 @@ Deno.test("a project account is read once, then served from cache", async () => 
     const second = await h.mail.for("billing");
 
     assert(first.ok && second.ok);
-    assertEquals(first.data, second.data, "la meme instance est reservie");
-    assertEquals(h.rpcCalls(), 1, "un seul aller-retour base par compte et par process");
+    assertEquals(first.data, second.data, "the same instance is served again");
+    assertEquals(h.rpcCalls(), 1, "one database round trip per account and per process");
   } finally {
     h.restore();
   }
@@ -158,7 +158,7 @@ Deno.test("a failed lookup is not cached, a later insert is picked up", async ()
     accounts.push({ name: "billing", host: "smtp.x.io", port: 587, username: "u", password: "p" });
 
     const after = await h.mail.for("billing");
-    assert(after.ok, "ajouter une ligne suffit, sans redemarrer le process");
+    assert(after.ok, "adding a row is enough, with no process restart");
     assertEquals(h.rpcCalls(), 2);
   } finally {
     h.restore();

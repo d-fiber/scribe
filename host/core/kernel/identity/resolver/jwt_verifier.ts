@@ -76,7 +76,7 @@ let hmacKey: Promise<CryptoKey> | null = null;
  *
  * Handing jose the raw bytes makes it import the key again on every single
  * verification, which measured as a fifth of the whole HS256 cost. The import
- * is keyed on the secret itself so that swapping it — which only tests do —
+ * is keyed on the secret itself so that swapping it, which only tests do,
  * still takes effect.
  */
 function symmetricKey(secret: string): Promise<CryptoKey> {

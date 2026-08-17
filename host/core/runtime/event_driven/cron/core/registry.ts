@@ -58,7 +58,7 @@ export class CronRegistry {
   report(): string {
     const jobs = this.list();
     if (jobs.length === 0) {
-      return "[cron] no job declared — lib/extensions/event_driven/cron/ is empty or failed to load";
+      return "[cron] no job declared, lib/extensions/event_driven/cron/ is empty or failed to load";
     }
 
     const next = jobs
