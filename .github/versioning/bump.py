@@ -42,7 +42,7 @@ from datetime import date
 from pathlib import Path
 
 from versioning.api import api_surface
-from versioning.components import Component, discover, read_version, write_version
+from versioning.components import ANNOUNCED_FILE, Component, discover, mirror_announced, read_version, write_version
 from versioning.git import materialise, revision_exists, touched_paths
 from versioning.proto import ProtocMissing, proto_surface
 from versioning.changelog import entries, has_breaking, prepend, render
@@ -165,6 +165,10 @@ def main() -> int:
 
     for decision in moving:
         write_version(repository, decision.component, decision.after)
+
+    mirrored = mirror_announced(repository, [decision.component for decision in decisions])
+    if mirrored:
+        print(f"Mirrored into {ANNOUNCED_FILE}: {', '.join(mirrored)}")
 
     if before and after:
         release.write_text(f"{after}\n")

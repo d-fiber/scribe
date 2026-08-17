@@ -41,6 +41,7 @@ import {
   Node,
   NodeRoot,
   Post,
+  PROTOCOL_VERSION,
   type RateLimiter,
   type RouteHandler,
   RoutingError,
@@ -280,7 +281,7 @@ Deno.test("the manifest carries the nodes and their visibility", () => {
 
   const manifest = describeWorker(server.definition());
 
-  assertEquals(manifest.protocolVersion, "2.0.0");
+  assertEquals(manifest.protocolVersion, PROTOCOL_VERSION);
   assertEquals(manifest.nodes.map((node) => [node.name, node.public]), [
     ["app", true],
     ["services", false],

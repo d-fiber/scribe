@@ -42,6 +42,10 @@ SKIPPED = {"node_modules", ".git", ".github", "gen", "dist"}
 
 VERSION_LINE = re.compile(r'("version"\s*:\s*")[^"]*(")')
 
+ANNOUNCED_FILE = "sdk/js/src/protocol/version.ts"
+
+ANNOUNCED = {"PROTOCOL_VERSION": "protocol", "SDK_VERSION": "sdk/js"}
+
 @dataclass(frozen=True)
 class Component:
     label: str
@@ -130,3 +134,32 @@ def write_version(tree_root: Path, component: Component, version: str) -> None:
         raise ValueError(f"could not rewrite the version in {component.version_file}")
 
     path.write_text(replaced)
+
+
+def announced_line(name: str) -> re.Pattern[str]:
+    return re.compile(rf'(export const {name}\s*=\s*")[^"]*(")')
+
+
+def mirror_announced(tree_root: Path, components: list[Component]) -> list[str]:
+    path = tree_root / ANNOUNCED_FILE
+    if not path.is_file():
+        return []
+
+    by_directory = {component.directory: component for component in components}
+    raw = path.read_text()
+    mirrored: list[str] = []
+
+    for name, directory in ANNOUNCED.items():
+        component = by_directory.get(directory)
+        if component is None:
+            continue
+
+        version = read_version(tree_root, component)
+        raw, count = announced_line(name).subn(rf"\g<1>{version}\g<2>", raw, count=1)
+        if count == 0:
+            raise ValueError(f"{ANNOUNCED_FILE} declares no {name}")
+
+        mirrored.append(f"{name} {version}")
+
+    path.write_text(raw)
+    return mirrored
