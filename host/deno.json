@@ -8,6 +8,9 @@
     "check": "deno check **/*.ts",
     "test": "deno test --allow-env --allow-sys --allow-read --env-file=tests/.env.test",
     "test:net": "deno test --allow-env --allow-sys --allow-read --allow-net --env-file=tests/.env.test",
+    "e2e:up": "docker compose -f packages/foundation/e2e_tests/compose.yaml up -d --wait",
+    "e2e:down": "docker compose -f packages/foundation/e2e_tests/compose.yaml down -v",
+    "test:e2e": "deno test --allow-env --allow-sys --allow-read --allow-net --env-file=tests/.env.test packages/foundation/e2e_tests/valkery.e2e.ts packages/foundation/e2e_tests/database.e2e.ts packages/foundation/e2e_tests/queue.e2e.ts packages/foundation/e2e_tests/cron.e2e.ts packages/foundation/e2e_tests/hook.e2e.ts packages/foundation/e2e_tests/http.e2e.ts",
     "preview:hosting": "deno run --config deno.json --allow-net --allow-env --allow-read --env-file=tests/.env.test --watch api/internal/hosting/_preview.ts",
     "docs:install": "cd api/public/docs && npm install",
     "docs": "cd api/public/docs && npm run dev"
