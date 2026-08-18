@@ -43,3 +43,14 @@ ALTER DATABASE postgres SET "app.settings.internal_secret" TO :'internal_secret'
 ALTER DATABASE postgres SET "app.settings.api_url" TO :'api_url';
 ALTER DATABASE postgres SET "app.settings.functions_url" TO :'functions_url';
 ALTER DATABASE postgres SET "app.settings.smtp_key" TO :'smtp_key';
+
+CREATE OR REPLACE FUNCTION auth.jwt() RETURNS jsonb
+  LANGUAGE sql STABLE
+  AS $$
+    SELECT coalesce(
+      nullif(current_setting('request.jwt.claim', true), ''),
+      nullif(current_setting('request.jwt.claims', true), '')
+    )::jsonb
+  $$;
+
+GRANT EXECUTE ON FUNCTION auth.jwt() TO public;
