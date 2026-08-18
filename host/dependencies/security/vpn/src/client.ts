@@ -67,26 +67,8 @@ const _TIMEOUT_MS = 5_000;
 const _SESSION_TTL = 3_600;
 const _DEFAULT_PAGE_SIZE = 30;
 
-class _VpnSessionCache extends Valkery {
-  override get key(): string {
-    return "vpn:session";
-  }
-  override get ttl(): Time {
-    return Time.seconds(_SESSION_TTL);
-  }
-}
-
-class _VpnListCache extends Valkery {
-  override get key(): string {
-    return "vpn:list";
-  }
-  override get ttl(): Time {
-    return Time.hours(24);
-  }
-}
-
 class _VpnSession {
-  readonly #cache = new _VpnSessionCache();
+  readonly #cache = new Valkery<string>({ key: "vpn:session", ttl: Time.seconds(_SESSION_TTL) });
 
   constructor(
     private readonly baseUrl: string,
@@ -150,7 +132,7 @@ export interface AdminVpnService {
 
 export class AdminVpnClient implements AdminVpnService {
   readonly #session = new _VpnSession(Env.WG_EASY_URL, Env.WG_EASY_PASSWORD);
-  readonly #cache = new _VpnListCache();
+  readonly #cache = new Valkery<Vpn[]>({ key: "vpn:list", ttl: Time.hours(24) });
 
   async get(vpnId: string): Promise<Result<Vpn, VpnError>> {
     const list = await this.#list();

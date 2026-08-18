@@ -43,7 +43,7 @@ import {
 } from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/hook/hook_pb.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { hookRegistry } from "@scribe/foundation/src/hook/mod.ts";
-import { QueueProducer } from "@scribe/foundation/src/queue/core/producer.ts";
+import { QueuePublisher } from "@scribe/foundation/src/queue/core/producer.ts";
 import { queueRegistry } from "@scribe/foundation/src/queue/mod.ts";
 import { decodeJson } from "../json.ts";
 
@@ -62,7 +62,7 @@ export async function queuePush(request: PushRequest): Promise<PushResult> {
     });
   }
 
-  const producer = new QueueProducer<unknown>(registered);
+  const producer = new QueuePublisher<unknown>(registered);
   const delay = Number(request.delay?.millis ?? 0n);
 
   try {

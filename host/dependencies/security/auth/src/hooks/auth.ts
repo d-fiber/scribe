@@ -32,7 +32,7 @@
 
 import type { AccountRole } from "@scribe/core/contracts/account.ts";
 import { OK, type Result } from "@scribe/core/contracts/result.ts";
-import { defineHook, type Hook, type HookHandler } from "@scribe/foundation/src/hook/mod.ts";
+import { Hook, type HookHandler } from "@scribe/foundation/src/hook/mod.ts";
 
 export enum SignInProvider {
   Email = "email",
@@ -48,7 +48,7 @@ export interface SignInHookPayload {
 
 export type SignInHook = HookHandler<SignInHookPayload>;
 
-export const signInHook: Hook<SignInHookPayload, void> = defineHook<SignInHookPayload>({
+export const signInHook: Hook<SignInHookPayload, void> = new Hook<SignInHookPayload>({
   name: "auth.sign-in",
 });
 
@@ -74,7 +74,7 @@ export type SignUpHookResult = Result<void, SignUpHookError>;
 
 export type SignUpHook = HookHandler<SignUpHookPayload, SignUpHookResult>;
 
-export const signUpHook: Hook<SignUpHookPayload, SignUpHookResult> = defineHook<SignUpHookPayload, SignUpHookResult>({
+export const signUpHook: Hook<SignUpHookPayload, SignUpHookResult> = new Hook<SignUpHookPayload, SignUpHookResult>({
   name: "auth.sign-up",
   fallback: new OK(),
 });
@@ -94,6 +94,6 @@ export interface ResetPasswordHookPayload {
 
 export type ResetPasswordHook = HookHandler<ResetPasswordHookPayload>;
 
-export const resetPasswordHook: Hook<ResetPasswordHookPayload, void> = defineHook<ResetPasswordHookPayload>({
+export const resetPasswordHook: Hook<ResetPasswordHookPayload, void> = new Hook<ResetPasswordHookPayload>({
   name: "auth.reset-password",
 });

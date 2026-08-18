@@ -31,12 +31,12 @@
 // LICENSE file, the LICENSE file governs.
 
 import { database } from "@scribe/foundation/src/database/database.ts";
-import { defineQueue } from "@scribe/foundation/src/queue/core/define.ts";
+import { Queue } from "@scribe/foundation/src/queue/mod.ts";
 import type { RecordStatisticInput } from "./statistics.ts";
 
 const LINGER_MS = 500;
 
-export const dynamicLinkStatisticsQueue = defineQueue<RecordStatisticInput>(
+export const dynamicLinkStatisticsQueue = new Queue<RecordStatisticInput>(
   { name: "dynamic-link-statistics", batch: { lingerMs: LINGER_MS } },
   async (hits) => {
     if (hits.length === 0) return;

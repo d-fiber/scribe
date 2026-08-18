@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { defineQueue } from "@scribe/foundation/src/queue/core/define.ts";
+import { Queue } from "@scribe/foundation/src/queue/mod.ts";
 import { extensions } from "@scribe/core/runtime/support/extensions/mod.ts";
 import { SEARCHER_EXTENSION } from "../core/extension.ts";
 import { searcherRegistry } from "../core/registry.ts";
@@ -63,7 +63,7 @@ function group(jobs: readonly SyncJob[]): Grouped {
   return grouped;
 }
 
-export const searcherSyncQueue = defineQueue<SyncJob>(
+export const searcherSyncQueue = new Queue<SyncJob>(
   { name: "searcher-sync", batch: { lingerMs: LINGER_MS } },
   async (jobs) => {
     await extensions.load(SEARCHER_EXTENSION);

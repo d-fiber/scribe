@@ -56,64 +56,28 @@ export enum SmsIntent {
   ChangePhone = "change-phone",
 }
 
-class _SmsIntentCache extends Valkery {
-  override get key(): string {
-    return "sms-intent";
-  }
-  override get ttl(): Time {
-    return SMS_INTENT_TTL;
-  }
-}
-
 class _SmsIntentStore {
-  readonly #cache = new _SmsIntentCache();
+  readonly #cache = new Valkery<SmsIntent>({ key: "sms-intent", ttl: SMS_INTENT_TTL });
 
   mark(phone: string, intent: SmsIntent): Promise<void> {
     return this.#cache.add(phone, intent);
   }
 
   async consume(phone: string): Promise<SmsIntent | null> {
-    const intent = await this.#cache.get<SmsIntent>(phone);
+    const intent = await this.#cache.get(phone);
     if (intent === null) return null;
     await this.#cache.delete(phone);
     return intent;
   }
 }
 
-class _RoleByEmailCache extends Valkery {
-  override get key(): string {
-    return "email:role";
-  }
-  override get ttl(): Time {
-    return ROLE_TTL;
-  }
-}
-
-class _RoleByPhoneCache extends Valkery {
-  override get key(): string {
-    return "phone:role";
-  }
-  override get ttl(): Time {
-    return ROLE_TTL;
-  }
-}
-
-class _RoleByIdCache extends Valkery {
-  override get key(): string {
-    return "user:role";
-  }
-  override get ttl(): Time {
-    return ROLE_TTL;
-  }
-}
-
 class _RoleCache {
-  readonly #email = new _RoleByEmailCache();
-  readonly #phone = new _RoleByPhoneCache();
-  readonly #id = new _RoleByIdCache();
+  readonly #email = new Valkery<AccountRole>({ key: "email:role", ttl: ROLE_TTL });
+  readonly #phone = new Valkery<AccountRole>({ key: "phone:role", ttl: ROLE_TTL });
+  readonly #id = new Valkery<AccountRole>({ key: "user:role", ttl: ROLE_TTL });
 
   getByEmail(email: string): Promise<AccountRole | null> {
-    return this.#email.get<AccountRole>(email);
+    return this.#email.get(email);
   }
 
   async setByEmail(
@@ -128,7 +92,7 @@ class _RoleCache {
   }
 
   getByPhone(phone: string): Promise<AccountRole | null> {
-    return this.#phone.get<AccountRole>(phone);
+    return this.#phone.get(phone);
   }
 
   async setByPhone(
@@ -143,7 +107,7 @@ class _RoleCache {
   }
 
   getById(userId: string): Promise<AccountRole | null> {
-    return this.#id.get<AccountRole>(userId);
+    return this.#id.get(userId);
   }
 
   setById(userId: string, role: AccountRole): Promise<void> {
@@ -197,20 +161,11 @@ class _RoleCache {
   }
 }
 
-class _DevicesNamespace extends Valkery {
-  override get key(): string {
-    return "session:devices";
-  }
-  override get ttl(): Time {
-    return Time.seconds(300);
-  }
-}
-
 class _DevicesCache {
-  readonly #cache = new _DevicesNamespace();
+  readonly #cache = new Valkery<UserDevice[] | AdminDevice[]>({ key: "session:devices", ttl: Time.seconds(300) });
 
   list(userId: string): Promise<UserDevice[] | AdminDevice[] | null> {
-    return this.#cache.get<UserDevice[] | AdminDevice[]>(userId);
+    return this.#cache.get(userId);
   }
 
   remember(
@@ -225,23 +180,14 @@ class _DevicesCache {
   }
 }
 
-class _DeviceNamespace extends Valkery {
-  override get key(): string {
-    return "session:device";
-  }
-  override get ttl(): Time {
-    return Time.seconds(300);
-  }
-}
-
 class _DeviceCache {
-  readonly #cache = new _DeviceNamespace();
+  readonly #cache = new Valkery<UserDevice | AdminDevice>({ key: "session:device", ttl: Time.seconds(300) });
 
   get(
     userId: string,
     deviceId: string,
   ): Promise<UserDevice | AdminDevice | null> {
-    return this.#cache.get<UserDevice | AdminDevice>(
+    return this.#cache.get(
       deviceKey(userId, deviceId),
     );
   }
@@ -263,20 +209,11 @@ class _DeviceCache {
   }
 }
 
-class _HardwareNamespace extends Valkery {
-  override get key(): string {
-    return "device:hw";
-  }
-  override get ttl(): Time {
-    return Time.seconds(300);
-  }
-}
-
 class _HardwareCache {
-  readonly #cache = new _HardwareNamespace();
+  readonly #cache = new Valkery<unknown>({ key: "device:hw", ttl: Time.seconds(300) });
 
   get<T>(userId: string, deviceId: string): Promise<T | null> {
-    return this.#cache.get<T>(deviceKey(userId, deviceId));
+    return this.#cache.get(deviceKey(userId, deviceId)) as Promise<T | null>;
   }
 
   remember<T>(userId: string, deviceId: string, hardware: T): Promise<void> {
@@ -292,30 +229,12 @@ class _HardwareCache {
   }
 }
 
-class _RefreshIdemCache extends Valkery {
-  override get key(): string {
-    return "refresh-idem";
-  }
-  override get ttl(): Time {
-    return SESSION_IDEM_TTL;
-  }
-}
-
-class _RecoverIdemCache extends Valkery {
-  override get key(): string {
-    return "recover-idem";
-  }
-  override get ttl(): Time {
-    return SESSION_IDEM_TTL;
-  }
-}
-
 class _SessionIdemCache {
-  readonly #refresh = new _RefreshIdemCache();
-  readonly #recover = new _RecoverIdemCache();
+  readonly #refresh = new Valkery<unknown>({ key: "refresh-idem", ttl: SESSION_IDEM_TTL });
+  readonly #recover = new Valkery<unknown>({ key: "recover-idem", ttl: SESSION_IDEM_TTL });
 
   refreshed<T>(key: string): Promise<T | null> {
-    return this.#refresh.get<T>(key);
+    return this.#refresh.get(key) as Promise<T | null>;
   }
 
   async rememberRefreshed<T>(
@@ -330,7 +249,7 @@ class _SessionIdemCache {
   }
 
   recovered<T>(key: string): Promise<T | null> {
-    return this.#recover.get<T>(key);
+    return this.#recover.get(key) as Promise<T | null>;
   }
 
   async rememberRecovered<T>(
@@ -393,20 +312,11 @@ class _SessionIdemCache {
 const INTRA_TTL = Time.seconds(60);
 const INTRA_INDEX_KEY = "intra:auth:index";
 
-class _IntraAuthNamespace extends Valkery {
-  override get key(): string {
-    return "intra:auth";
-  }
-  override get ttl(): Time {
-    return INTRA_TTL;
-  }
-}
-
 class _IntraAuthCache {
-  readonly #cache = new _IntraAuthNamespace();
+  readonly #cache = new Valkery<string>({ key: "intra:auth", ttl: INTRA_TTL });
 
   get(fingerprint: string): Promise<string | null> {
-    return this.#cache.get<string>(fingerprint);
+    return this.#cache.get(fingerprint);
   }
 
   async remember(fingerprint: string, adminId: string): Promise<void> {

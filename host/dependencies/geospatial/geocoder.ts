@@ -50,26 +50,8 @@ export interface GeoCoordinates {
   lng: number;
 }
 
-class _GeocodeCache extends Valkery {
-  override get key(): string {
-    return "geocode:fwd";
-  }
-  override get ttl(): Time {
-    return CACHE_TTL;
-  }
-}
-
-class _ReverseGeocodeCache extends Valkery {
-  override get key(): string {
-    return "geocode:rev";
-  }
-  override get ttl(): Time {
-    return CACHE_TTL;
-  }
-}
-
-const geocodeCache = new _GeocodeCache();
-const reverseGeocodeCache = new _ReverseGeocodeCache();
+const geocodeCache = new Valkery<GeoCoordinates | null>({ key: "geocode:fwd", ttl: CACHE_TTL });
+const reverseGeocodeCache = new Valkery<GeoAddress | null>({ key: "geocode:rev", ttl: CACHE_TTL });
 
 function geocodeKey(address: GeoAddress): string {
   return [address.street, address.postal_code, address.city, address.country]

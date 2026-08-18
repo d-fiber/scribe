@@ -88,16 +88,6 @@ const _LOCAL_TTL_MS = 5_000;
  */
 const _LOCAL_MAX_ENTRIES = 5_000;
 
-class _JwtIdentityCache extends Valkery {
-  override get key(): string {
-    return IDENTITY_CACHE_KEY;
-  }
-
-  override get ttl(): Time {
-    return Time.minutes(5);
-  }
-}
-
 function _expired(exp: number | null): boolean {
   return exp !== null && exp <= Date.now() / 1_000;
 }
@@ -144,7 +134,7 @@ function _identityFromClaims(payload: JWTPayload): ResolvedJwtIdentity | null {
 }
 
 export class JwtIdentityResolver {
-  private static readonly _cache = new _JwtIdentityCache();
+  private static readonly _cache = new Valkery<_CachedJwtIdentity>({ key: IDENTITY_CACHE_KEY, ttl: Time.minutes(5) });
 
   private static readonly _local = new TtlLru<_CachedJwtIdentity>({
     max: _LOCAL_MAX_ENTRIES,
@@ -173,7 +163,7 @@ export class JwtIdentityResolver {
     const local = this._local.get(cacheKey);
     if (local !== null && !_expired(local.exp)) return local;
 
-    const cached = await this._cache.get<_CachedJwtIdentity>(cacheKey);
+    const cached = await this._cache.get(cacheKey);
     if (cached !== null && !_expired(cached.exp)) {
       this._local.set(cacheKey, cached);
       return cached;
@@ -220,7 +210,7 @@ export class JwtIdentityResolver {
     }
 
     this._local.set(cacheKey, { ...identity, exp });
-    await this._cache.add<_CachedJwtIdentity>(cacheKey, { ...identity, exp });
+    await this._cache.add(cacheKey, { ...identity, exp });
   }
 
   /**

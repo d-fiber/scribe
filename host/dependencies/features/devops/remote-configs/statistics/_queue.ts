@@ -31,12 +31,12 @@
 // LICENSE file, the LICENSE file governs.
 
 import { database } from "@scribe/foundation/src/database/database.ts";
-import { defineQueue } from "@scribe/foundation/src/queue/core/define.ts";
+import { Queue } from "@scribe/foundation/src/queue/mod.ts";
 import type { RecordRemoteConfigStatisticInput } from "./statistics.ts";
 
 const LINGER_MS = 500;
 
-export const remoteConfigStatisticsQueue = defineQueue<
+export const remoteConfigStatisticsQueue = new Queue<
   RecordRemoteConfigStatisticInput
 >(
   { name: "remote-config-statistics", batch: { lingerMs: LINGER_MS } },

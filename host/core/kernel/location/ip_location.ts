@@ -45,17 +45,8 @@ export type { RequestIpLocation };
 const _TIMEOUT_MS = 3_000;
 const _EMPTY_LOCATION: RequestIpLocation = { city: "", country: "" };
 
-class _IpGeoCache extends Valkery {
-  override get key(): string {
-    return "ip:geo";
-  }
-  override get ttl(): Time {
-    return Time.days(1);
-  }
-}
-
 export class GeolocationResolver {
-  private static readonly _cache = new _IpGeoCache();
+  private static readonly _cache = new Valkery<RequestIpLocation>({ key: "ip:geo", ttl: Time.days(1) });
 
   private static readonly _providers: readonly GeolocationProvider[] = [
     new IpWhoProvider(),

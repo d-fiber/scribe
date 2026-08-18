@@ -38,16 +38,7 @@ import { importPKCS8, SignJWT } from "jose";
 const _TOKEN_URL = "https://oauth2.googleapis.com/token";
 const _SCOPE = "https://www.googleapis.com/auth/firebase.messaging";
 
-class _FcmTokenCache extends Valkery {
-  override get key(): string {
-    return "fcm:token";
-  }
-  override get ttl(): Time {
-    return Time.seconds(3000);
-  }
-}
-
-const _cache = new _FcmTokenCache();
+const _cache = new Valkery<string | null>({ key: "fcm:token", ttl: Time.seconds(3000) });
 
 async function _mint(): Promise<string | null> {
   try {

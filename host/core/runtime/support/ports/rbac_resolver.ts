@@ -34,18 +34,8 @@ import type { AdminRbac, AdminRbacSource } from "@scribe/core/contracts/rbac.ts"
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
 
-class _AdminRbacCache extends Valkery {
-  override get key(): string {
-    return "identity:rbac";
-  }
-
-  override get ttl(): Time {
-    return Time.minutes(5);
-  }
-}
-
 export class AdminRbacResolver {
-  private static readonly _cache = new _AdminRbacCache();
+  private static readonly _cache = new Valkery<AdminRbac>({ key: "identity:rbac", ttl: Time.minutes(5) });
   private static _source: AdminRbacSource | null = null;
 
   static use(source: AdminRbacSource): void {
@@ -53,7 +43,7 @@ export class AdminRbacResolver {
   }
 
   static async resolve(adminId: string): Promise<AdminRbac | null> {
-    const cached = await this._cache.get<AdminRbac>(adminId);
+    const cached = await this._cache.get(adminId);
     if (cached !== null) return cached;
 
     const source = this._requireSource();

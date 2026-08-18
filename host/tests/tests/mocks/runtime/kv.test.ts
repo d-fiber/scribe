@@ -40,20 +40,11 @@ import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
 import { assertEquals } from "@std/assert";
 import { installRateLimiterMock, installValkeryMock } from "@scribe/core/testing/runtime/redis.ts";
 
-class _TestCache extends Valkery {
-  override get key(): string {
-    return "test";
-  }
-  override get ttl(): Time {
-    return Time.seconds(60);
-  }
-}
-
 Deno.test(
   "installValkeryMock: a Valkery subclass reads/writes against an in-memory store, restore() puts Redis back",
   async () => {
     const mock = installValkeryMock();
-    const cache = new _TestCache();
+    const cache = new Valkery<unknown>({ key: "test", ttl: Time.seconds(60) });
 
     assertEquals(await cache.get("missing"), null);
     await cache.add("1", "a");
@@ -67,7 +58,7 @@ Deno.test(
   "installValkeryMock: upsert only calls fn once for a cached key",
   async () => {
     const mock = installValkeryMock();
-    const cache = new _TestCache();
+    const cache = new Valkery<unknown>({ key: "test", ttl: Time.seconds(60) });
     let calls = 0;
     const fn = () => {
       calls++;
@@ -86,7 +77,7 @@ Deno.test(
   "installValkeryMock: clear with a prefix only clears matching keys",
   async () => {
     const mock = installValkeryMock();
-    const cache = new _TestCache();
+    const cache = new Valkery<unknown>({ key: "test", ttl: Time.seconds(60) });
     await cache.add("brand:1", "a");
     await cache.add("brand:2", "b");
     await cache.add("store:1", "c");

@@ -35,32 +35,20 @@ import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
 
 const DEFAULT_TTL = Time.seconds(300);
 
-class _NamespacedCache extends Valkery {
-  constructor(
-    private readonly _key: string,
-    private readonly _ttl: Time,
-  ) {
-    super();
-  }
-  override get key(): string {
-    return this._key;
-  }
-  override get ttl(): Time {
-    return this._ttl;
-  }
-}
-
 export class EntitySearchCache<TPreview> {
-  readonly #results: Valkery;
-  readonly #items: Valkery;
+  // Two namespaces, and only one of them holds a single shape. A preview is always a
+  // `TPreview`; a result set is whatever the query that produced it answers, which differs per
+  // call — hence the `unknown` and the one cast below, at the only place that is honest about it.
+  readonly #results: Valkery<unknown>;
+  readonly #items: Valkery<TPreview>;
 
   constructor(table: string, name: string, ttl: Time = DEFAULT_TTL) {
-    this.#results = new _NamespacedCache(`os:${table}`, ttl);
-    this.#items = new _NamespacedCache(`${name}:item`, ttl);
+    this.#results = new Valkery<unknown>({ key: `os:${table}`, ttl });
+    this.#items = new Valkery<TPreview>({ key: `${name}:item`, ttl });
   }
 
   results<T>(key: string, produce: () => Promise<T>): Promise<T> {
-    return this.#results.upsert(key, produce);
+    return this.#results.upsert(key, produce) as Promise<T>;
   }
 
   async invalidate(id: string): Promise<void> {
@@ -75,7 +63,7 @@ export class EntitySearchCache<TPreview> {
     const byId = new Map<string, TPreview>();
     // One round trip for the page, not one per result: a search that returns fifty ids used
     // to read fifty keys one after the other.
-    const cached = await this.#items.getMany<TPreview>(ids);
+    const cached = await this.#items.getMany(ids);
 
     const missing: string[] = [];
     cached.forEach((item, i) => {

@@ -57,9 +57,9 @@ export type {
   FormSchema,
 } from "./kernel/validation/schema.ts";
 
-export { defineQueue } from "@scribe/foundation/src/queue/mod.ts";
-export { at, cron, defineCron, every } from "@scribe/foundation/src/cron/mod.ts";
-export { defineHook, Hook } from "@scribe/foundation/src/hook/mod.ts";
+export { Queue } from "@scribe/foundation/src/queue/mod.ts";
+export { at, Cron, cronExpression, every } from "@scribe/foundation/src/cron/mod.ts";
+export { Hook } from "@scribe/foundation/src/hook/mod.ts";
 export { Valkery } from "@scribe/foundation/src/valkery/mod.ts";
 export { RequestScope } from "./runtime/scope.ts";
 export { RateLimitError, RateLimitScope } from "./runtime/redis/rate_limiter/mod.ts";

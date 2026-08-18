@@ -40,24 +40,14 @@ interface CachedLink {
   readonly link: DynamicLink | null;
 }
 
-class _DynamicLinkCache extends Valkery {
-  override get key(): string {
-    return "dynlink:slug";
-  }
-
-  override get ttl(): Time {
-    return CACHE_TTL;
-  }
-}
-
-const cache = new _DynamicLinkCache();
+const cache = new Valkery<CachedLink>({ key: "dynlink:slug", ttl: CACHE_TTL });
 
 class DynamicLinkCache {
   async read(
     slug: string,
     load: () => Promise<DynamicLink | null>,
   ): Promise<DynamicLink | null> {
-    const cached = await cache.upsert<CachedLink>(slug, async () => ({
+    const cached = await cache.upsert(slug, async () => ({
       link: await load(),
     }));
     return cached.link;

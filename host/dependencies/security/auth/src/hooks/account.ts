@@ -31,13 +31,12 @@
 // LICENSE file, the LICENSE file governs.
 
 import {
-  defineHook,
-  type Hook,
+  Hook,
   type HookHandler,
 } from "@scribe/foundation/src/hook/mod.ts";
 
 export type DeletedHook = HookHandler<string>;
-export const userDeleteHook: Hook<string, void> = defineHook<string>({
+export const userDeleteHook: Hook<string, void> = new Hook<string>({
   name: "account.deleted",
 });
 
@@ -47,7 +46,7 @@ export interface SignOutHookPayload {
 }
 
 export type SignOutHook = HookHandler<SignOutHookPayload>;
-export const signOutHook: Hook<SignOutHookPayload, void> = defineHook<SignOutHookPayload>({
+export const signOutHook: Hook<SignOutHookPayload, void> = new Hook<SignOutHookPayload>({
   name: "account.sign-out",
 });
 
@@ -56,7 +55,7 @@ export interface UpdatePasswordHookPayload {
 }
 
 export type UpdatePasswordHook = HookHandler<UpdatePasswordHookPayload>;
-export const updateUserPasswordHook: Hook<UpdatePasswordHookPayload, void> = defineHook<UpdatePasswordHookPayload>({
+export const updateUserPasswordHook: Hook<UpdatePasswordHookPayload, void> = new Hook<UpdatePasswordHookPayload>({
   name: "account.update-password",
 });
 
@@ -66,7 +65,7 @@ export interface UpdateEmailHookPayload {
 }
 
 export type UpdateEmailHook = HookHandler<UpdateEmailHookPayload>;
-export const updateUserEmailHook: Hook<UpdateEmailHookPayload, void> = defineHook<UpdateEmailHookPayload>({
+export const updateUserEmailHook: Hook<UpdateEmailHookPayload, void> = new Hook<UpdateEmailHookPayload>({
   name: "account.update-email",
 });
 
@@ -76,7 +75,7 @@ export interface UpdatePhoneHookPayload {
 }
 
 export type UpdatePhoneHook = HookHandler<UpdatePhoneHookPayload>;
-export const updateUserPhoneHook: Hook<UpdatePhoneHookPayload, void> = defineHook<UpdatePhoneHookPayload>({
+export const updateUserPhoneHook: Hook<UpdatePhoneHookPayload, void> = new Hook<UpdatePhoneHookPayload>({
   name: "account.update-phone",
 });
 
@@ -86,7 +85,7 @@ export interface DeviceInsertHookPayload {
 }
 
 export type DeviceInsertHook = HookHandler<DeviceInsertHookPayload>;
-export const deviceInsertHook: Hook<DeviceInsertHookPayload, void> = defineHook<DeviceInsertHookPayload>({
+export const deviceInsertHook: Hook<DeviceInsertHookPayload, void> = new Hook<DeviceInsertHookPayload>({
   name: "account.device-insert",
 });
 
@@ -96,6 +95,6 @@ export interface DeviceDeleteHookPayload {
 }
 
 export type DeviceDeleteHook = HookHandler<DeviceDeleteHookPayload>;
-export const deviceDeleteHook: Hook<DeviceDeleteHookPayload, void> = defineHook<DeviceDeleteHookPayload>({
+export const deviceDeleteHook: Hook<DeviceDeleteHookPayload, void> = new Hook<DeviceDeleteHookPayload>({
   name: "account.device-delete",
 });
