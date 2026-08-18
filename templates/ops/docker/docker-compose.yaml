@@ -164,8 +164,6 @@ services:
       - "1.1.1.1"
     command: ["start", "--main-service", "/home/deno/functions/boot"]
     depends_on:
-      auth:
-        condition: "service_healthy"
       kong:
         condition: "service_healthy"
       redis:
@@ -277,8 +275,6 @@ services:
       - "8.8.8.8"
       - "1.1.1.1"
     depends_on:
-      auth:
-        condition: "service_healthy"
       kong:
         condition: "service_healthy"
       redis:

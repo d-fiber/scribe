@@ -3,3 +3,11 @@ services:
     volumes:
       - "{{sdk_root}}/host/dependencies/security/auth/db/init:/docker-entrypoint-init-sql/modules/auth:ro"
       - "{{sdk_root}}/host/dependencies/security/auth/db/provisioning/auth-owner.sql:/docker-entrypoint-initdb.d/init-scripts/97-auth-owner.sql:Z"
+  functions:
+    depends_on:
+      auth:
+        condition: "service_healthy"
+  api:
+    depends_on:
+      auth:
+        condition: "service_healthy"
