@@ -31,17 +31,18 @@
 // LICENSE file, the LICENSE file governs.
 
 import { AccountRole } from "@scribe/core/contracts/account.ts";
-import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
-import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { JwtVerifier } from "@scribe/core/kernel/identity/resolver/jwt_verifier.ts";
-import type { JWTPayload } from "jose";
-import { TtlLru } from "@scribe/core/runtime/support/cache/ttl_lru.ts";
-import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
 import {
   IDENTITY_CACHE_KEY,
   IdentityRevocation,
 } from "@scribe/core/runtime/redis/identity_revocation.ts";
+import { TtlLru } from "@scribe/core/runtime/support/cache/ttl_lru.ts";
+import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
+import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
+import { get } from "@scribe/foundation/src/http/mod.ts";
+import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
+import type { JWTPayload } from "jose";
 
 export interface ResolvedJwtIdentity {
   readonly id: string;
@@ -134,7 +135,10 @@ function _identityFromClaims(payload: JWTPayload): ResolvedJwtIdentity | null {
 }
 
 export class JwtIdentityResolver {
-  private static readonly _cache = new Valkery<_CachedJwtIdentity>({ key: IDENTITY_CACHE_KEY, ttl: Time.minutes(5) });
+  private static readonly _cache = new Valkery<_CachedJwtIdentity>({
+    key: IDENTITY_CACHE_KEY,
+    ttl: Time.minutes(5),
+  });
 
   private static readonly _local = new TtlLru<_CachedJwtIdentity>({
     max: _LOCAL_MAX_ENTRIES,
@@ -243,16 +247,15 @@ export class JwtIdentityResolver {
     jwt: string,
   ): Promise<Record<string, unknown> | null> {
     try {
-      const res = await fetch(`${identitySettings.get().authUrl}/user`, {
-        method: "GET",
+      const res = await get(`${identitySettings.get().authUrl}/user`, {
         headers: {
           "Content-Type": "application/json",
           apikey: identitySettings.get().anonKey,
           Authorization: `Bearer ${jwt}`,
         },
-        signal: AbortSignal.timeout(_FETCH_TIMEOUT_MS),
+        timeout: _FETCH_TIMEOUT_MS,
       });
-      return res.ok ? ((await res.json()) as Record<string, unknown>) : null;
+      return res.ok ? res.json<Record<string, unknown>>() : null;
     } catch {
       return null;
     }

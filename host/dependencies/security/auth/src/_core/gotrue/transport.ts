@@ -31,6 +31,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
+import { currentClient } from "@scribe/foundation/src/http/run_with_client.ts";
+import type { Response as HttpResponse } from "@scribe/foundation/src/http/response/response.ts";
 import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
 
 export type AuthError = { code: string; message: string };
@@ -81,6 +83,8 @@ export function anonHeaders(): HeadersInit {
   };
 }
 
+const AUTH_TIMEOUT_MS = 10_000;
+
 export function adminHeaders(): HeadersInit {
   return {
     "Content-Type": "application/json",
@@ -97,9 +101,16 @@ export function userHeaders(jwt: string): HeadersInit {
   };
 }
 
-export async function parseError(res: Response): Promise<AuthError> {
+/** What a call to GoTrue carries. It is the subset of a request that every call site uses. */
+export interface AuthRequest {
+  readonly method: string;
+  readonly headers?: HeadersInit;
+  readonly body?: string;
+}
+
+export function parseError(res: HttpResponse): AuthError {
   try {
-    const body = await res.json();
+    const body = res.json<{ error_code?: string; error?: string; msg?: string; error_description?: string }>();
     return {
       code: body.error_code ?? body.error ?? "unexpected_error",
       message: body.msg ?? body.error_description ?? "Unexpected error",
@@ -109,20 +120,48 @@ export async function parseError(res: Response): Promise<AuthError> {
   }
 }
 
+/**
+ * Sends one call to GoTrue and closes the client behind it.
+ *
+ * The timeout is the whole point of routing this through the package client: GoTrue sits on the
+ * sign-in path, and a request that never comes back holds the caller's request with it.
+ */
+export async function sendAuth(url: string, init: AuthRequest): Promise<HttpResponse> {
+  const client = currentClient();
+  const options = { headers: init.headers, body: init.body ?? null, timeout: AUTH_TIMEOUT_MS };
+
+  try {
+    switch (init.method.toUpperCase()) {
+      case "POST":
+        return await client.post(url, options);
+      case "PUT":
+        return await client.put(url, options);
+      case "PATCH":
+        return await client.patch(url, options);
+      case "DELETE":
+        return await client.delete(url, options);
+      default:
+        return await client.get(url, options);
+    }
+  } finally {
+    client.close();
+  }
+}
+
 export async function requestAuth<T>(
   url: string,
-  init: RequestInit,
+  init: AuthRequest,
 ): Promise<Result<T, AuthError>> {
-  const res = await fetch(url, init);
-  if (!res.ok) return new Failure(await parseError(res));
-  return new OK((await res.json()) as T);
+  const res = await sendAuth(url, init);
+  if (!res.ok) return new Failure(parseError(res));
+  return new OK(res.json<T>());
 }
 
 export async function requestAuthVoid(
   url: string,
-  init: RequestInit,
+  init: AuthRequest,
 ): Promise<Result<void, AuthError>> {
-  const res = await fetch(url, init);
-  if (!res.ok) return new Failure(await parseError(res));
+  const res = await sendAuth(url, init);
+  if (!res.ok) return new Failure(parseError(res));
   return new OK();
 }

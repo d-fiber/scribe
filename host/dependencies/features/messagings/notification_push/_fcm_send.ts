@@ -31,6 +31,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Env } from "@scribe/host/env.ts";
+import { post } from "@scribe/foundation/src/http/mod.ts";
+import type { Response as HttpResponse } from "@scribe/foundation/src/http/response/response.ts";
 import { fcmAccessToken } from "./_fcm_token.ts";
 
 export type FcmMessage = {
@@ -63,14 +65,13 @@ function fcmErrorCode(body: string): string | null {
   }
 }
 
-function post(message: FcmMessage, accessToken: string): Promise<Response> {
-  return fetch(
+function send(message: FcmMessage, accessToken: string): Promise<HttpResponse> {
+  return post(
     `https://fcm.googleapis.com/v1/projects/${Env.FCM_PROJECT_ID}/messages:send`,
     {
-      method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+        "content-type": "application/json",
       },
       body: JSON.stringify({
         message: {
@@ -79,7 +80,7 @@ function post(message: FcmMessage, accessToken: string): Promise<Response> {
           data: message.data,
         },
       }),
-      signal: AbortSignal.timeout(10_000),
+      timeout: 10_000,
     },
   );
 }
@@ -91,14 +92,14 @@ export async function fcmSend(message: FcmMessage): Promise<FcmSendResult> {
   }
 
   try {
-    let res = await post(message, accessToken);
-    if (!res.ok && RETRYABLE_STATUSES.has(res.status)) {
+    let res = await send(message, accessToken);
+    if (!res.ok && RETRYABLE_STATUSES.has(res.statusCode)) {
       await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
-      res = await post(message, accessToken);
+      res = await send(message, accessToken);
     }
     if (res.ok) return { ok: true };
 
-    const body = await res.text();
+    const body = res.body;
     const errorCode = fcmErrorCode(body);
     return {
       ok: false,

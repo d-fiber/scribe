@@ -38,6 +38,7 @@ import {
   authUrl,
   type GoTrueUser as GoTrueUserRecord,
   parseError,
+  sendAuth,
   requestAuth,
 } from "@scribe/host/dependencies/security/auth/src/_core/gotrue/transport.ts";
 
@@ -104,11 +105,11 @@ export class GoTrueUser {
   readonly role = new GoTrueUserRole();
 
   async delete(userId: string): Promise<Result<void, AuthError>> {
-    const res = await fetch(userUrl(userId), {
+    const res = await sendAuth(userUrl(userId), {
       method: "DELETE",
       headers: adminHeaders(),
     });
-    if (res.ok || res.status === 404) return new OK();
-    return new Failure(await parseError(res));
+    if (res.ok || res.statusCode === 404) return new OK();
+    return new Failure(parseError(res));
   }
 }

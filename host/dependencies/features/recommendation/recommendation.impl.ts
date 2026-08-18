@@ -47,6 +47,8 @@ import {
   RecommendationUpsertUserError,
 } from "@scribe/host/dependencies/features/recommendation/recommendation.ts";
 import { Env } from "@scribe/host/env.ts";
+import { currentClient } from "@scribe/foundation/src/http/run_with_client.ts";
+import type { Response } from "@scribe/foundation/src/http/response/response.ts";
 
 const TIMEOUT_MS = 5_000;
 
@@ -54,14 +56,10 @@ export class RecommendationClient implements RecommendationService {
   async upsertUser(
     user: GorseUser,
   ): Promise<Result<void, RecommendationUpsertUserError>> {
-    const res = await this.#fetch("/api/user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        UserId: user.id,
-        Labels: user.labels ?? {},
-        Comment: user.comment ?? "",
-      }),
+    const res = await this.#send("POST", "/api/user", {
+      UserId: user.id,
+      Labels: user.labels ?? {},
+      Comment: user.comment ?? "",
     });
     if (!res.ok) return new Failure(RecommendationUpsertUserError.Unexpected);
     return new OK();
@@ -70,17 +68,13 @@ export class RecommendationClient implements RecommendationService {
   async upsertItem(
     item: GorseItem,
   ): Promise<Result<void, RecommendationUpsertItemError>> {
-    const res = await this.#fetch("/api/item", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ItemId: item.id,
-        Categories: item.categories ?? [],
-        Labels: item.labels ?? {},
-        IsHidden: item.isHidden ?? false,
-        Timestamp: item.timestamp ?? new Date().toISOString(),
-        Comment: item.comment ?? "",
-      }),
+    const res = await this.#send("POST", "/api/item", {
+      ItemId: item.id,
+      Categories: item.categories ?? [],
+      Labels: item.labels ?? {},
+      IsHidden: item.isHidden ?? false,
+      Timestamp: item.timestamp ?? new Date().toISOString(),
+      Comment: item.comment ?? "",
     });
     if (!res.ok) return new Failure(RecommendationUpsertItemError.Unexpected);
     return new OK();
@@ -89,10 +83,8 @@ export class RecommendationClient implements RecommendationService {
   async deleteUser(
     userId: string,
   ): Promise<Result<void, RecommendationDeleteUserError>> {
-    const res = await this.#fetch(`/api/user/${encodeURIComponent(userId)}`, {
-      method: "DELETE",
-    });
-    if (res.status === 404) {
+    const res = await this.#send("DELETE", `/api/user/${encodeURIComponent(userId)}`);
+    if (res.statusCode === 404) {
       return new Failure(RecommendationDeleteUserError.NotFound);
     }
     if (!res.ok) return new Failure(RecommendationDeleteUserError.Unexpected);
@@ -102,10 +94,8 @@ export class RecommendationClient implements RecommendationService {
   async deleteItem(
     itemId: string,
   ): Promise<Result<void, RecommendationDeleteItemError>> {
-    const res = await this.#fetch(`/api/item/${encodeURIComponent(itemId)}`, {
-      method: "DELETE",
-    });
-    if (res.status === 404) {
+    const res = await this.#send("DELETE", `/api/item/${encodeURIComponent(itemId)}`);
+    if (res.statusCode === 404) {
       return new Failure(RecommendationDeleteItemError.NotFound);
     }
     if (!res.ok) return new Failure(RecommendationDeleteItemError.Unexpected);
@@ -115,19 +105,17 @@ export class RecommendationClient implements RecommendationService {
   async insertFeedback(
     feedback: GorseFeedback[],
   ): Promise<Result<void, RecommendationFeedbackError>> {
-    const res = await this.#fetch("/api/feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(
-        feedback.map((f) => ({
-          FeedbackType: f.type,
-          UserId: f.userId,
-          ItemId: f.itemId,
-          Value: f.value ?? 1,
-          Timestamp: f.timestamp ?? new Date().toISOString(),
-        })),
-      ),
-    });
+    const res = await this.#send(
+      "POST",
+      "/api/feedback",
+      feedback.map((f) => ({
+        FeedbackType: f.type,
+        UserId: f.userId,
+        ItemId: f.itemId,
+        Value: f.value ?? 1,
+        Timestamp: f.timestamp ?? new Date().toISOString(),
+      })),
+    );
     if (!res.ok) return new Failure(RecommendationFeedbackError.Unexpected);
     return new OK();
   }
@@ -142,21 +130,38 @@ export class RecommendationClient implements RecommendationService {
     if (options?.offset) params.set("offset", String(options.offset));
     const query = params.size > 0 ? `?${params}` : "";
 
-    const res = await this.#fetch(
+    const res = await this.#send(
+      "GET",
       `/api/recommend/${encodeURIComponent(userId)}${query}`,
     );
     if (!res.ok) return new Failure(RecommendationRecommendError.Unexpected);
-    return new OK((await res.json()) as string[]);
+    return new OK(res.json<string[]>());
   }
 
-  #fetch(path: string, init: RequestInit = {}): Promise<Response> {
-    return fetch(`${Env.GORSE_URL}${path}`, {
-      ...init,
+  // Gorse answers JSON everywhere and reads it everywhere, so the content type and the key are
+  // set once here rather than at each of the six calls.
+  async #send(
+    method: "GET" | "POST" | "DELETE",
+    path: string,
+    body?: unknown,
+  ): Promise<Response> {
+    const client = currentClient();
+    const url = `${Env.GORSE_URL}${path}`;
+    const options = {
       headers: {
-        ...init.headers,
         "X-API-Key": Env.GORSE_API_KEY,
+        ...(body === undefined ? {} : { "content-type": "application/json" }),
       },
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
+      body: body === undefined ? null : JSON.stringify(body),
+      timeout: TIMEOUT_MS,
+    };
+
+    try {
+      if (method === "POST") return await client.post(url, options);
+      if (method === "DELETE") return await client.delete(url, options);
+      return await client.get(url, options);
+    } finally {
+      client.close();
+    }
   }
 }

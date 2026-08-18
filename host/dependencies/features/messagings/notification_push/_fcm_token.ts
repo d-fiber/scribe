@@ -31,6 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Time } from "@scribe/core/contracts/common/time.ts";
+import { post } from "@scribe/foundation/src/http/mod.ts";
 import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
 import { Env } from "@scribe/host/env.ts";
 import { importPKCS8, SignJWT } from "jose";
@@ -56,18 +57,16 @@ async function _mint(): Promise<string | null> {
       .setExpirationTime(now + 3600)
       .sign(privateKey);
 
-    const res = await fetch(_TOKEN_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
+    const res = await post(_TOKEN_URL, {
+      body: {
         grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
         assertion,
-      }),
-      signal: AbortSignal.timeout(5000),
+      },
+      timeout: 5000,
     });
     if (!res.ok) return null;
 
-    const data = await res.json();
+    const data = res.json<{ access_token?: unknown }>();
     return typeof data.access_token === "string" ? data.access_token : null;
   } catch {
     return null;

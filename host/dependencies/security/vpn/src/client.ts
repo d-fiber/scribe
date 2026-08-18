@@ -31,6 +31,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Time } from "@scribe/core/contracts/common/time.ts";
+import { currentClient } from "@scribe/foundation/src/http/run_with_client.ts";
+import type { Response as HttpResponse } from "@scribe/foundation/src/http/response/response.ts";
 import type { Pagination } from "@scribe/core/contracts/pagination.ts";
 import { pagination as paginate } from "@scribe/core/contracts/pagination.ts";
 import type { Result } from "@scribe/core/contracts/result.ts";
@@ -99,18 +101,30 @@ class _VpnSession {
       );
     }
 
-    const res = await fetch(`${this.baseUrl}/api/session`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: this.password }),
-      signal: AbortSignal.timeout(_TIMEOUT_MS),
-    });
+    const client = currentClient();
+    let res: HttpResponse;
+    try {
+      res = await client.post(`${this.baseUrl}/api/session`, {
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ password: this.password }),
+        timeout: _TIMEOUT_MS,
+      });
+    } finally {
+      client.close();
+    }
+
     if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      throw new Error(`wg-easy login failed: ${res.status} - ${body}`);
+      throw new Error(`wg-easy login failed: ${res.statusCode} - ${res.body}`);
     }
     return res.headers.get("set-cookie")?.split(";")[0] ?? "";
   }
+}
+
+/** What a call to wg-easy carries. */
+interface WgRequest {
+  readonly method?: "GET" | "POST" | "PUT" | "DELETE";
+  readonly headers?: Record<string, string>;
+  readonly body?: string;
 }
 
 export interface AdminVpnService {
@@ -208,7 +222,7 @@ export class AdminVpnClient implements AdminVpnService {
         method: "DELETE",
       },
     );
-    if (res.status === 404) return new Failure(VpnError.NotFound);
+    if (res.statusCode === 404) return new Failure(VpnError.NotFound);
     if (!res.ok) return new Failure(VpnError.Unexpected);
     await this.#invalidateList();
     return new OK();
@@ -234,7 +248,7 @@ export class AdminVpnClient implements AdminVpnService {
         method: "POST",
       },
     );
-    if (res.status === 404) return new Failure(VpnError.NotFound);
+    if (res.statusCode === 404) return new Failure(VpnError.NotFound);
     if (!res.ok) return new Failure(VpnError.Unexpected);
     await this.#invalidateList();
     return new OK();
@@ -247,7 +261,7 @@ export class AdminVpnClient implements AdminVpnService {
         method: "POST",
       },
     );
-    if (res.status === 404) return new Failure(VpnError.NotFound);
+    if (res.statusCode === 404) return new Failure(VpnError.NotFound);
     if (!res.ok) return new Failure(VpnError.Unexpected);
     await this.#invalidateList();
     return new OK();
@@ -262,7 +276,7 @@ export class AdminVpnClient implements AdminVpnService {
         body: JSON.stringify({ name }),
       },
     );
-    if (res.status === 404) return new Failure(VpnError.NotFound);
+    if (res.statusCode === 404) return new Failure(VpnError.NotFound);
     if (!res.ok) return new Failure(VpnError.Unexpected);
     await this.#invalidateList();
     return new OK();
@@ -272,26 +286,26 @@ export class AdminVpnClient implements AdminVpnService {
     const res = await this.#fetch(
       `/api/wireguard/client/${encodeURIComponent(vpnId)}/configuration`,
     );
-    if (res.status === 404) return new Failure(VpnError.NotFound);
+    if (res.statusCode === 404) return new Failure(VpnError.NotFound);
     if (!res.ok) return new Failure(VpnError.Unexpected);
-    return new OK(await res.text());
+    return new OK(res.body);
   }
 
   async qrcode(vpnId: string): Promise<Result<string, VpnError>> {
     const res = await this.#fetch(
       `/api/wireguard/client/${encodeURIComponent(vpnId)}/qrcode.svg`,
     );
-    if (res.status === 404) return new Failure(VpnError.NotFound);
+    if (res.statusCode === 404) return new Failure(VpnError.NotFound);
     if (!res.ok) return new Failure(VpnError.Unexpected);
-    return new OK(await res.text());
+    return new OK(res.body);
   }
 
   async #list(): Promise<Result<Vpn[], void>> {
     try {
       const data = await this.#cache.upsert("all", async () => {
         const res = await this.#fetch("/api/wireguard/client");
-        if (!res.ok) throw new Error(`wg-easy list failed: ${res.status}`);
-        return (await res.json()) as Vpn[];
+        if (!res.ok) throw new Error(`wg-easy list failed: ${res.statusCode}`);
+        return res.json<Vpn[]>();
       });
       return new OK(data);
     } catch {
@@ -303,19 +317,36 @@ export class AdminVpnClient implements AdminVpnService {
     return this.#cache.delete("all");
   }
 
-  async #fetch(path: string, init: RequestInit = {}): Promise<Response> {
-    const attempt = (cookie: string) =>
-      fetch(`${Env.WG_EASY_URL}${path}`, {
-        ...init,
-        headers: this.#session.headers(
-          cookie,
-          init.headers as Record<string, string> | undefined,
-        ),
-        signal: AbortSignal.timeout(_TIMEOUT_MS),
-      });
+  // wg-easy expires a session cookie without warning, so a 401 is answered by taking a fresh
+  // cookie and sending once more. Only once: a second 401 is a password that no longer works.
+  async #fetch(path: string, init: WgRequest = {}): Promise<HttpResponse> {
+    const attempt = async (cookie: string): Promise<HttpResponse> => {
+      const client = currentClient();
+      const url = `${Env.WG_EASY_URL}${path}`;
+      const options = {
+        headers: this.#session.headers(cookie, init.headers),
+        body: init.body ?? null,
+        timeout: _TIMEOUT_MS,
+      };
+
+      try {
+        switch (init.method) {
+          case "POST":
+            return await client.post(url, options);
+          case "PUT":
+            return await client.put(url, options);
+          case "DELETE":
+            return await client.delete(url, options);
+          default:
+            return await client.get(url, options);
+        }
+      } finally {
+        client.close();
+      }
+    };
 
     const res = await attempt(await this.#session.cookie());
-    if (res.status !== 401) return res;
+    if (res.statusCode !== 401) return res;
 
     await this.#session.invalidate();
     return attempt(await this.#session.cookie());

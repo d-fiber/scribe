@@ -67,19 +67,31 @@ export function installGoTrueMock(
 ): GoTrueMock {
   const calls: GoTrueCall[] = [];
   const table: [string, GoTrueHandler][] = Object.entries(routes);
+
+function _decodeBody(body: BodyInit | null | undefined): Record<string, unknown> | null {
+  if (body === null || body === undefined) return null;
+
+  const text = typeof body === "string"
+    ? body
+    : body instanceof Uint8Array
+    ? new TextDecoder().decode(body)
+    : null;
+  if (text === null) return null;
+
+  try {
+    return JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
   const original = globalThis.fetch;
 
   globalThis.fetch = ((input: string | URL | Request, init?: RequestInit) => {
     const url = typeof input === "string" ? input : input.toString();
     const method = (init?.method ?? "GET").toUpperCase();
-    let body: Record<string, unknown> | null = null;
-    if (typeof init?.body === "string") {
-      try {
-        body = JSON.parse(init.body) as Record<string, unknown>;
-      } catch {
-        body = null;
-      }
-    }
+    // The package client encodes a body to bytes before it reaches fetch, so a harness that
+    // only reads strings sees every payload as absent and lets the call through to the network.
+    const body = _decodeBody(init?.body);
 
     const call: GoTrueCall = { method, path: _path(url), body };
     calls.push(call);

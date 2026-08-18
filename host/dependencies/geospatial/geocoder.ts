@@ -31,6 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Env } from "@scribe/host/env.ts";
+import { get } from "@scribe/foundation/src/http/mod.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
 
@@ -140,11 +141,11 @@ class GeocoderClient {
     const url = `${BASE_URL}?${queryParam}&key=${Env.GEOCODING_API_KEY}`;
 
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
-      const data = await res.json();
+      const res = await get(url, { timeout: TIMEOUT_MS });
+      const data = res.json<{ status?: string; results?: _GoogleGeocodingResult[] }>();
 
       if (data.status !== "OK" || !data.results?.length) return null;
-      return data.results as _GoogleGeocodingResult[];
+      return data.results;
     } catch {
       return null;
     }

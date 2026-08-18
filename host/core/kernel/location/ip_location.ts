@@ -31,6 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Time } from "@scribe/core/contracts/common/time.ts";
+import { get } from "@scribe/foundation/src/http/mod.ts";
 import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
 import { isPrivateIp } from "@scribe/core/runtime/http/ip/mod.ts";
 import type { GeolocationProvider, RequestIpLocation } from "./provider.ts";
@@ -81,14 +82,13 @@ export class GeolocationResolver {
         return null;
       }
 
-      const res = await fetch(url, {
+      const res = await get(url, {
         headers: { Accept: "application/json" },
-        signal: AbortSignal.timeout(_TIMEOUT_MS),
+        timeout: _TIMEOUT_MS,
       });
       if (!res.ok) return null;
 
-      const data = await res.json();
-      return provider.parse(data);
+      return provider.parse(res.json());
     } catch {
       return null;
     }

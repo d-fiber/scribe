@@ -31,6 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Env } from "@scribe/host/env.ts";
+import { post } from "@scribe/foundation/src/http/mod.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import type { SmsContent } from "../entities.ts";
 import { SmsError, type SmsSenderService } from "./send.ts";
@@ -50,22 +51,18 @@ export class SmsSenderTwilio implements SmsSenderService {
     const authToken = Env.TWILIO_AUTH_TOKEN as string;
     const messagingServiceSid = Env.TWILIO_MESSAGE_SERVICE_SID as string;
 
-    const body = new URLSearchParams({
-      To: to,
-      MessagingServiceSid: messagingServiceSid,
-      Body: content.text,
-    });
-
     try {
-      const res = await fetch(
+      const res = await post(
         `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
         {
-          method: "POST",
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
             Authorization: `Basic ${btoa(`${accountSid}:${authToken}`)}`,
           },
-          body,
+          body: {
+            To: to,
+            MessagingServiceSid: messagingServiceSid,
+            Body: content.text,
+          },
         },
       );
       if (!res.ok) return new Failure(SmsError.SendFailed);
