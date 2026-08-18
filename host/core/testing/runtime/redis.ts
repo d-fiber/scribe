@@ -39,7 +39,7 @@ import "@scribe/core/testing/settings.ts";
 // Side-effect only: registers the `releaseLock` Lua command on `kv` and pulls
 // its `declare module "ioredis"` augmentation into this file's type-check
 // graph, since `Valkery` subclasses aren't imported directly here.
-import type { LockCommands } from "@scribe/core/runtime/redis/cache/lock/release_script.ts";
+import type { LockCommands } from "@scribe/host/packages/foundation/cache/lock/release_script.ts";
 import { kv, type Kv } from "@scribe/core/runtime/redis/mod.ts";
 import { rateLimiter, type RateLimitResult } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
 import { stub } from "@std/testing/mock";

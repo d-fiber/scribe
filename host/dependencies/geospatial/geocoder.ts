@@ -32,7 +32,7 @@
 
 import { Env } from "@scribe/host/env.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { Valkery } from "@scribe/core/runtime/redis/cache/valkery.ts";
+import { Valkery } from "@scribe/host/packages/foundation/cache/valkery.ts";
 
 const BASE_URL = "https://maps.googleapis.com/maps/api/geocode/json";
 const TIMEOUT_MS = 5_000;

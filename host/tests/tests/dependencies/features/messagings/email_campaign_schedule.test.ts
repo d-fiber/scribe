@@ -31,7 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { nextRunOf } from "@scribe/host/dependencies/features/messagings/mail/campaigns.ts";
-import { CronTimezone } from "@scribe/core/runtime/event_driven/cron/timezone.ts";
+import { CronTimezone } from "@scribe/host/packages/foundation/event_driven/cron/timezone.ts";
 import { assert, assertEquals } from "@std/assert";
 
 const PARIS = CronTimezone.EuropeParis;

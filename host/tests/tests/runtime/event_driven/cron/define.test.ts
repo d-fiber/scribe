@@ -36,7 +36,7 @@
 
 import { assertEquals, assertStringIncludes, assertThrows } from "@std/assert";
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { cronRegistry, defineCron, every } from "@scribe/core/runtime/event_driven/cron/mod.ts";
+import { cronRegistry, defineCron, every } from "@scribe/host/packages/foundation/event_driven/cron/mod.ts";
 
 const noop = () => Promise.resolve();
 

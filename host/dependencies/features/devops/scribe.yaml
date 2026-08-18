@@ -14,7 +14,4 @@ sql: null
 protocol: protocol/devops.proto
 export: ./features
 
-routes:
-  - api/public/admin/src/features/devops
-  - api/public/app/src/features/devops
-  - api/internal/hosting/link
+routes: []

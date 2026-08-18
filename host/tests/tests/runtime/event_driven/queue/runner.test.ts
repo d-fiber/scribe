@@ -40,9 +40,9 @@
 // letter, which require a real NATS + Redis instance (see .claude/testing.md).
 
 import { assertEquals } from "@std/assert";
-import { defineQueue } from "@scribe/core/runtime/event_driven/queue/mod.ts";
-import { MessageDispatcher } from "@scribe/core/runtime/event_driven/queue/runner/dispatcher.ts";
-import { DrainTally } from "@scribe/core/runtime/event_driven/queue/runner/drain_tally.ts";
+import { defineQueue } from "@scribe/host/packages/foundation/event_driven/queue/mod.ts";
+import { MessageDispatcher } from "@scribe/host/packages/foundation/event_driven/queue/runner/dispatcher.ts";
+import { DrainTally } from "@scribe/host/packages/foundation/event_driven/queue/runner/drain_tally.ts";
 
 import type { JsMsg } from "@nats-io/jetstream";
 

@@ -17,5 +17,4 @@ sql: null
 protocol: protocol/searcher.proto
 export: ./features
 
-routes:
-  - api/internal/searcher
+routes: []

@@ -41,17 +41,17 @@ import {
   type Batch,
   type BatchOutcome,
   BatchOutcomeSchema,
-} from "../../gen/scribe/host/core/runtime/event_driven/queue/protocol/queue_pb.ts";
+} from "../../gen/scribe/host/packages/foundation/event_driven/queue/protocol/queue_pb.ts";
 import {
   type Event,
   type HandleResult,
   HandleResultSchema,
-} from "../../gen/scribe/host/core/runtime/event_driven/hook/protocol/hook_pb.ts";
+} from "../../gen/scribe/host/packages/foundation/event_driven/hook/protocol/hook_pb.ts";
 import {
   type CronOutcome,
   CronOutcomeSchema,
   type CronTrigger,
-} from "../../gen/scribe/host/core/runtime/event_driven/cron/protocol/cron_pb.ts";
+} from "../../gen/scribe/host/packages/foundation/event_driven/cron/protocol/cron_pb.ts";
 import {
   type LogDelivery,
   type LogDeliveryAck,

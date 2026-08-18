@@ -33,9 +33,4 @@ sql: db/init
 protocol: protocol/auth.proto
 export: ./security/auth
 
-routes:
-  - api/public/admin/src/auth
-  - api/public/app/src/auth
-  - api/internal/gotrue
-  - api/internal/hosting/confirm
-  - api/internal/hosting/reset
+routes: []

@@ -20,5 +20,4 @@ sql: db/init
 protocol: protocol/realtime.proto
 export: ./database/realtime
 
-routes:
-  - api/public/app/src/sync
+routes: []

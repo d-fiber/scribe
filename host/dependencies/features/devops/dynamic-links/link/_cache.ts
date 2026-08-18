@@ -31,7 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { Valkery } from "@scribe/core/runtime/redis/cache/valkery.ts";
+import { Valkery } from "@scribe/host/packages/foundation/cache/valkery.ts";
 import type { DynamicLink } from "./link.ts";
 
 const CACHE_TTL = Time.minutes(10);

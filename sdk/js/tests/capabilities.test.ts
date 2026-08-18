@@ -38,7 +38,7 @@ import {
   type Query,
   Rest,
 } from "../gen/scribe/host/packages/foundation/database/rest/protocol/rest_pb.ts";
-import { Cache } from "../gen/scribe/host/core/runtime/redis/cache/protocol/cache_pb.ts";
+import { Cache } from "../gen/scribe/host/packages/foundation/cache/protocol/cache_pb.ts";
 import { decodeJson, encodeJson } from "../src/contracts/json.ts";
 
 interface Brand extends Record<string, unknown> {

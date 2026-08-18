@@ -31,7 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
-import { defineQueue } from "@scribe/core/runtime/event_driven/queue/core/define.ts";
+import { defineQueue } from "@scribe/host/packages/foundation/event_driven/queue/core/define.ts";
 import type { RecordStatisticInput } from "./statistics.ts";
 
 const LINGER_MS = 500;

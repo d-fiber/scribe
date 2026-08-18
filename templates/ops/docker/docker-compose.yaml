@@ -8,7 +8,6 @@ services:
       dockerfile: "docker/Dockerfile.studio"
     restart: "unless-stopped"
     volumes:
-      - "{{sdk_root}}/host/snippets:/app/snippets:Z"
       - "{{sdk_root}}/host:/app/edge-functions:Z"
     environment:
       HOSTNAME: "::"
@@ -35,7 +34,6 @@ services:
       LOGFLARE_URL: "http://analytics:4000"
       NEXT_PUBLIC_ENABLE_LOGS: "false"
       NEXT_ANALYTICS_BACKEND_PROVIDER: "postgres"
-      SNIPPETS_MANAGEMENT_FOLDER: "/app/snippets"
       EDGE_FUNCTIONS_MANAGEMENT_FOLDER: "/app/edge-functions"
     healthcheck:
       test:

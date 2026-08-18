@@ -35,9 +35,9 @@ import type { Manifest } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import { Registration } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import type { Invocation, Reply } from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
 import { Worker as WorkerService } from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
-import { QueueDispatch } from "@scribe/sdk/gen/scribe/host/core/runtime/event_driven/queue/protocol/queue_pb.ts";
-import { HookDispatch } from "@scribe/sdk/gen/scribe/host/core/runtime/event_driven/hook/protocol/hook_pb.ts";
-import { CronDispatch } from "@scribe/sdk/gen/scribe/host/core/runtime/event_driven/cron/protocol/cron_pb.ts";
+import { QueueDispatch } from "@scribe/sdk/gen/scribe/host/packages/foundation/event_driven/queue/protocol/queue_pb.ts";
+import { HookDispatch } from "@scribe/sdk/gen/scribe/host/packages/foundation/event_driven/hook/protocol/hook_pb.ts";
+import { CronDispatch } from "@scribe/sdk/gen/scribe/host/packages/foundation/event_driven/cron/protocol/cron_pb.ts";
 import type { LogEntry } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 import { LogDispatch } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 

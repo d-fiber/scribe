@@ -32,8 +32,8 @@
 
 import { create } from "@bufbuild/protobuf";
 import { TimeSchema } from "../../gen/scribe/protocol/common_pb.ts";
-import { Queue } from "../../gen/scribe/host/core/runtime/event_driven/queue/protocol/queue_pb.ts";
-import { Hook } from "../../gen/scribe/host/core/runtime/event_driven/hook/protocol/hook_pb.ts";
+import { Queue } from "../../gen/scribe/host/packages/foundation/event_driven/queue/protocol/queue_pb.ts";
+import { Hook } from "../../gen/scribe/host/packages/foundation/event_driven/hook/protocol/hook_pb.ts";
 import { encodeJson } from "../contracts/json.ts";
 import type { Time } from "../contracts/time.ts";
 import { CallScope } from "../runtime/scope.ts";

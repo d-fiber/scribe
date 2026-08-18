@@ -37,7 +37,7 @@ import { Time } from "@scribe/core/contracts/common/time.ts";
 import { JwtVerifier } from "@scribe/core/kernel/identity/resolver/jwt_verifier.ts";
 import type { JWTPayload } from "jose";
 import { TtlLru } from "@scribe/core/runtime/support/cache/ttl_lru.ts";
-import { Valkery } from "@scribe/core/runtime/redis/cache/valkery.ts";
+import { Valkery } from "@scribe/host/packages/foundation/cache/valkery.ts";
 import {
   IDENTITY_CACHE_KEY,
   IdentityRevocation,

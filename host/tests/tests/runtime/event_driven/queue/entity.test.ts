@@ -35,7 +35,7 @@
 // itself is covered by runner.test.ts.
 
 import { assertEquals, assertStringIncludes, assertThrows } from "@std/assert";
-import { defineQueue, queueRegistry, queueRunner } from "@scribe/core/runtime/event_driven/queue/mod.ts";
+import { defineQueue, queueRegistry, queueRunner } from "@scribe/host/packages/foundation/event_driven/queue/mod.ts";
 
 Deno.test("defineQueue() arms the body with the runner", () => {
   defineQueue<{ id: string }>(

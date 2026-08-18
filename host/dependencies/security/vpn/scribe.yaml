@@ -17,8 +17,4 @@ sql: db/init
 protocol: protocol/vpn.proto
 export: ./security/vpn
 
-routes:
-  - api/public/admin/src/vpn
-  - api/public/admin/src/user/vpn
-  - api/internal/vpn
-  - api/internal/hosting/vpn
+routes: []

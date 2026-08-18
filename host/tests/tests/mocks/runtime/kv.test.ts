@@ -36,7 +36,7 @@
 
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { rateLimiter, RateLimitError } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
-import { Valkery } from "@scribe/core/runtime/redis/cache/valkery.ts";
+import { Valkery } from "@scribe/host/packages/foundation/cache/valkery.ts";
 import { assertEquals } from "@std/assert";
 import { installRateLimiterMock, installValkeryMock } from "@scribe/core/testing/runtime/redis.ts";
 

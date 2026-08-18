@@ -32,33 +32,38 @@
 
 const ALLOWED: Record<string, readonly string[]> = {
   contracts: [],
-  runtime: ["contracts"],
-  kernel: ["contracts", "runtime"],
-  testing: ["contracts", "runtime", "kernel", "dependencies", "testing"],
-  dependencies: ["contracts", "runtime", "dependencies"],
-  api: ["contracts", "runtime", "kernel", "dependencies", "api"],
+  // `runtime` and `packages` name each other on purpose. They are one layer cut
+  // across two repositories: the cache, the queue, the cron and the hook sat in
+  // `runtime/` until they moved to the mandatory package, and they still reach
+  // back for the Redis connection and the async primitives. Ranking one above
+  // the other would be inventing an order the code does not have.
+  runtime: ["contracts", "packages"],
+  packages: ["contracts", "runtime", "packages"],
+  kernel: ["contracts", "runtime", "packages"],
+  testing: ["contracts", "runtime", "packages", "kernel", "dependencies", "testing"],
+  dependencies: ["contracts", "runtime", "packages", "dependencies"],
   boot: [
     "contracts",
     "runtime",
+    "packages",
     "kernel",
     "testing",
     "dependencies",
-    "api",
     "boot",
   ],
   tests: [
     "contracts",
     "runtime",
+    "packages",
     "kernel",
     "testing",
     "dependencies",
-    "api",
     "boot",
     "tests",
   ],
 };
 
-const HOST_CONSUMERS: readonly string[] = ["api", "boot", "tests"];
+const HOST_CONSUMERS: readonly string[] = ["boot", "tests"];
 
 const PACKAGE_MARKER = "/scribe/host/core/";
 const FUNCTIONS_MARKER = "/scribe/host/";
@@ -103,7 +108,19 @@ function isHostEntry(source: string): boolean {
 
 const HOST_PREFIXES = ["@scribe/host/", "@app/"] as const;
 
+/**
+ * The one thing under `@scribe/host/` this package may reach.
+ *
+ * `foundation` is the package a project cannot leave out -- the cache, the
+ * queue, the cron, the hook and the PostgREST engine live there, and `core`
+ * declares them in its own surface. Everything else under `@scribe/host/` is a
+ * module a project chooses, which `core` must keep standing without.
+ */
+const MANDATORY_PACKAGE = "@scribe/host/packages/foundation/";
+
 function isHostSpecifier(source: string): boolean {
+  if (source.startsWith(MANDATORY_PACKAGE)) return false;
+
   return HOST_PREFIXES.some((prefix) => source.startsWith(prefix));
 }
 

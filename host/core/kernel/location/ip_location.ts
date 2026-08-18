@@ -31,7 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { Valkery } from "@scribe/core/runtime/redis/cache/valkery.ts";
+import { Valkery } from "@scribe/host/packages/foundation/cache/valkery.ts";
 import { isPrivateIp } from "@scribe/core/runtime/http/ip/mod.ts";
 import type { GeolocationProvider, RequestIpLocation } from "./provider.ts";
 import { DbIpProvider } from "./providers/db_ip_provider.ts";

@@ -15,5 +15,4 @@ sql: null
 protocol: protocol/rbac.proto
 export: ./security/rbac
 
-routes:
-  - api/public/admin/src/team
+routes: []

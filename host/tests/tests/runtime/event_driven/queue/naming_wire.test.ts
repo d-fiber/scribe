@@ -38,11 +38,11 @@ import {
   SHARED_CONSUMER,
   SHARED_STREAM,
   subjectOf,
-} from "@scribe/core/runtime/event_driven/queue/core/naming.ts";
+} from "@scribe/host/packages/foundation/event_driven/queue/core/naming.ts";
 import {
   decode,
   encode,
-} from "@scribe/core/runtime/event_driven/queue/core/wire.ts";
+} from "@scribe/host/packages/foundation/event_driven/queue/core/wire.ts";
 import { assertEquals, assertNotEquals } from "@std/assert";
 
 Deno.test("sanitize keeps what NATS accepts and folds the rest", () => {

@@ -25,6 +25,4 @@ sql: db/init
 protocol: protocol/storage.proto
 export: ./database/storage
 
-routes:
-  - api/public/admin/src/user/account/avatar
-  - api/public/app/src/user/support/issue
+routes: []

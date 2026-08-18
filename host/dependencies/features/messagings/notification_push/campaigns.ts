@@ -35,7 +35,7 @@ import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
 import type { DeviceOs, Localization } from "@scribe/core/contracts/enums.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
-import type { CronTimezone } from "@scribe/core/runtime/event_driven/cron/timezone.ts";
+import type { CronTimezone } from "@scribe/host/packages/foundation/event_driven/cron/timezone.ts";
 import { Cron } from "croner";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";

@@ -40,8 +40,8 @@ import "@scribe/core/testing/settings.ts";
 
 import { assertEquals, assertThrows } from "@std/assert";
 import { FakeTime } from "@std/testing/time";
-import type { Scheduled } from "@scribe/core/runtime/event_driven/cron/schedule.ts";
-import { CronRunner } from "@scribe/core/runtime/event_driven/cron/runner/cron_runner.ts";
+import type { Scheduled } from "@scribe/host/packages/foundation/event_driven/cron/schedule.ts";
+import { CronRunner } from "@scribe/host/packages/foundation/event_driven/cron/runner/cron_runner.ts";
 import { kv } from "@scribe/core/runtime/redis/mod.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 

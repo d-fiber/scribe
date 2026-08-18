@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { SlotLock } from "@scribe/core/runtime/event_driven/cron/runner/slot_lock.ts";
-import type { Scheduled } from "@scribe/core/runtime/event_driven/cron/schedule.ts";
+import { SlotLock } from "@scribe/host/packages/foundation/event_driven/cron/runner/slot_lock.ts";
+import type { Scheduled } from "@scribe/host/packages/foundation/event_driven/cron/schedule.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { assertEquals, assertNotEquals } from "@std/assert";
 

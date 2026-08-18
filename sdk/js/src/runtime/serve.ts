@@ -32,9 +32,9 @@
 
 import { Registration } from "../../gen/scribe/protocol/manifest_pb.ts";
 import { Worker as WorkerService } from "../../gen/scribe/protocol/invocation_pb.ts";
-import { QueueDispatch } from "../../gen/scribe/host/core/runtime/event_driven/queue/protocol/queue_pb.ts";
-import { HookDispatch } from "../../gen/scribe/host/core/runtime/event_driven/hook/protocol/hook_pb.ts";
-import { CronDispatch } from "../../gen/scribe/host/core/runtime/event_driven/cron/protocol/cron_pb.ts";
+import { QueueDispatch } from "../../gen/scribe/host/packages/foundation/event_driven/queue/protocol/queue_pb.ts";
+import { HookDispatch } from "../../gen/scribe/host/packages/foundation/event_driven/hook/protocol/hook_pb.ts";
+import { CronDispatch } from "../../gen/scribe/host/packages/foundation/event_driven/cron/protocol/cron_pb.ts";
 import { LogDispatch } from "../../gen/scribe/protocol/logs_pb.ts";
 import { host } from "../capabilities/channel.ts";
 import { describeWorker } from "../manifest/encode.ts";

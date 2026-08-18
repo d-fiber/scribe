@@ -33,11 +33,11 @@
 import type {
   DistributedLock,
   LockOutcome,
-} from "@scribe/core/runtime/redis/cache/lock/distributed_lock.ts";
+} from "@scribe/host/packages/foundation/cache/lock/distributed_lock.ts";
 import {
   type CacheSlot,
   SingleFlight,
-} from "@scribe/core/runtime/redis/cache/single_flight.ts";
+} from "@scribe/host/packages/foundation/cache/single_flight.ts";
 import { assert, assertEquals } from "@std/assert";
 
 class ScriptedLock {

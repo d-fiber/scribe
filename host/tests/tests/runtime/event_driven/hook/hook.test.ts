@@ -36,7 +36,7 @@
 // that a hook name is unique per process (the registry guarantees it), hence the
 // distinct names below.
 
-import { defineHook, hookRegistry } from "@scribe/core/runtime/event_driven/hook/mod.ts";
+import { defineHook, hookRegistry } from "@scribe/host/packages/foundation/event_driven/hook/mod.ts";
 import { Failure, OK, Result } from "@scribe/core/contracts/result.ts";
 import { assertEquals, assertRejects, assertStrictEquals, assertThrows } from "@std/assert";
 

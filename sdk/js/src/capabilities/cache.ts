@@ -35,7 +35,7 @@ import { TimeSchema } from "../../gen/scribe/protocol/common_pb.ts";
 import {
   Cache,
   CacheKeySchema,
-} from "../../gen/scribe/host/core/runtime/redis/cache/protocol/cache_pb.ts";
+} from "../../gen/scribe/host/packages/foundation/cache/protocol/cache_pb.ts";
 import { decodeJson, encodeJson } from "../contracts/json.ts";
 import type { Time } from "../contracts/time.ts";
 import { host } from "./channel.ts";

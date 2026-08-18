@@ -41,7 +41,7 @@ import {
   type SetRequest,
   type SetResult,
   SetResultSchema,
-} from "@scribe/sdk/gen/scribe/host/core/runtime/redis/cache/protocol/cache_pb.ts";
+} from "@scribe/sdk/gen/scribe/host/packages/foundation/cache/protocol/cache_pb.ts";
 import { kv } from "@scribe/core/runtime/redis/mod.ts";
 import { decodeJson, encodeJson } from "../json.ts";
 

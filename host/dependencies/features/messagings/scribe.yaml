@@ -14,6 +14,4 @@ sql: null
 protocol: protocol/messagings.proto
 export: ./features
 
-routes:
-  - api/internal/messaging
-  - api/public/admin/src/features/messaging
+routes: []

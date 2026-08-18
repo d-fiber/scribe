@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { withJitter } from "@scribe/core/runtime/redis/cache/entry_ttl.ts";
-import { KeySpace } from "@scribe/core/runtime/redis/cache/key_space.ts";
+import { withJitter } from "@scribe/host/packages/foundation/cache/entry_ttl.ts";
+import { KeySpace } from "@scribe/host/packages/foundation/cache/key_space.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { assert, assertEquals } from "@std/assert";
 

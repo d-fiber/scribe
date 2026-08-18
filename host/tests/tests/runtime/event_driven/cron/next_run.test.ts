@@ -34,10 +34,10 @@
 // private-module-scope lint only cares about the source tree, and test file
 // names under tests/tests/ mirror it for discoverability, not for privacy.
 
-import { nextRun, nextRunAfterSlot } from "@scribe/core/runtime/event_driven/cron/core/next_run.ts";
-import { at, cron, every } from "@scribe/core/runtime/event_driven/cron/schedule.ts";
+import { nextRun, nextRunAfterSlot } from "@scribe/host/packages/foundation/event_driven/cron/core/next_run.ts";
+import { at, cron, every } from "@scribe/host/packages/foundation/event_driven/cron/schedule.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { CronTimezone } from "@scribe/core/runtime/event_driven/cron/timezone.ts";
+import { CronTimezone } from "@scribe/host/packages/foundation/event_driven/cron/timezone.ts";
 import { assertEquals } from "@std/assert";
 
 Deno.test(

@@ -38,8 +38,8 @@ import {
 import { dynamicLinkStatisticsQueue } from "@scribe/host/dependencies/features/devops/dynamic-links/statistics/_queue.ts";
 import { DynamicLinkStatisticsRepository } from "@scribe/host/dependencies/features/devops/dynamic-links/statistics/statistics.ts";
 import { DeviceOs } from "@scribe/core/contracts/enums.ts";
-import { queueRegistry } from "@scribe/core/runtime/event_driven/queue/core/registry.ts";
-import type { BatchHandler } from "@scribe/core/runtime/event_driven/queue/contract.ts";
+import { queueRegistry } from "@scribe/host/packages/foundation/event_driven/queue/core/registry.ts";
+import type { BatchHandler } from "@scribe/host/packages/foundation/event_driven/queue/contract.ts";
 import type { Row } from "@scribe/core/testing/database/fake_postgrest.ts";
 import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
 import { installMock } from "@scribe/core/testing/install.ts";

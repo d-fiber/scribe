@@ -35,16 +35,16 @@ import {
   QUEUE_DEFAULTS,
   type RegisteredQueue,
   subjectsOf,
-} from "@scribe/core/runtime/event_driven/queue/core/declaration.ts";
+} from "@scribe/host/packages/foundation/event_driven/queue/core/declaration.ts";
 import {
   planFor,
   planSignature,
-} from "@scribe/core/runtime/event_driven/queue/core/topology/plan.ts";
-import { defineQueue } from "@scribe/core/runtime/event_driven/queue/mod.ts";
+} from "@scribe/host/packages/foundation/event_driven/queue/core/topology/plan.ts";
+import { defineQueue } from "@scribe/host/packages/foundation/event_driven/queue/mod.ts";
 import {
   graceFor,
   IMMEDIATE_GRACE_MS,
-} from "@scribe/core/runtime/event_driven/queue/runner/grace.ts";
+} from "@scribe/host/packages/foundation/event_driven/queue/runner/grace.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { assertEquals, assertNotEquals } from "@std/assert";
 
