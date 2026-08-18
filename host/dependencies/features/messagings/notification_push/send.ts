@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTNotificationPushesRow } from "@scribe/host/packages/foundation/database/rest/gen/rows.ts";
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import type { InternalTNotificationPushesRow } from "@scribe/foundation/src/database/gen/rows.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
@@ -105,7 +105,7 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
     content: PushNotificationContent,
   ): Promise<Result<PushNotification[], PushNotificationSendError>> {
     return this.guard(async () => {
-      const existing = await rest
+      const existing = await database
         .internal_t__notification_pushes()
         .select((s) => ({
           push_id: s.push_id,
@@ -122,7 +122,7 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
         return new OK(existing.map((row) => this.#domain(row)));
       }
 
-      const notification = await rest
+      const notification = await database
         .internal_t__in_app_notifications()
         .select((s) => ({ user_id: s.user_id }))
         .where((f) => f.notification_id.eq(notificationId))
@@ -151,7 +151,7 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
       const offset = options?.offset ?? 0;
       const size = options?.size ?? DEFAULT_PAGE_SIZE;
 
-      const rows = await rest
+      const rows = await database
         .internal_t__notification_pushes()
         .select((s) => ({
           push_id: s.push_id,
@@ -181,7 +181,7 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
     pushId: PushNotificationId,
   ): Promise<Result<void, PushNotificationSendError>> {
     return this.guard(async () => {
-      const removed = await rest
+      const removed = await database
         .internal_t__notification_pushes()
         .where((f) => f.push_id.eq(pushId))
         .deleteOne((s) => ({ push_id: s.push_id }));
@@ -195,7 +195,7 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
     userId: string,
     content: PushNotificationContent,
   ): Promise<InternalTNotificationPushesRow[]> {
-    const devices = await rest
+    const devices = await database
       .internal_t__app_user_devices()
       .select((s) => ({ id: s.id, notification_token: s.notification_token }))
       .where((f) => f.user_id.eq(userId))
@@ -236,13 +236,13 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
     });
 
     if (!result.ok && result.deadToken) {
-      await rest
+      await database
         .internal_t__app_user_devices()
         .where((f) => f.id.eq(deviceId))
         .update({ notification_token: null });
     }
 
-    return rest.internal_t__notification_pushes().insertOne({
+    return database.internal_t__notification_pushes().insertOne({
       notification_id: notificationId,
       device_id: deviceId,
       status: result.ok ? PushNotificationStatus.Sent : PushNotificationStatus.Failed,
@@ -251,7 +251,7 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
   }
 
   #row(pushId: PushNotificationId): Promise<InternalTNotificationPushesRow | null> {
-    return rest
+    return database
       .internal_t__notification_pushes()
       .where((f) => f.push_id.eq(pushId))
       .getOne();

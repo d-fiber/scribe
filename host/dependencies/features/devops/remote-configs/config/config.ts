@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTRemoteConfigsRow } from "@scribe/host/packages/foundation/database/rest/gen/rows.ts";
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import type { InternalTRemoteConfigsRow } from "@scribe/foundation/src/database/gen/rows.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import type { RemoteConfigAudience } from "@scribe/core/contracts/enums.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
@@ -124,7 +124,7 @@ export class RemoteConfigRepository extends Repository<RemoteConfigError> implem
 
   get(key: string): Promise<Result<RemoteConfig, RemoteConfigError>> {
     return this.guard(async () => {
-      const row = await rest
+      const row = await database
         .internal_t__remote_configs()
         .where((f) => f.key.eq(key))
         .getOne();
@@ -140,7 +140,7 @@ export class RemoteConfigRepository extends Repository<RemoteConfigError> implem
       const offset = options?.offset ?? 0;
       const size = options?.size ?? DEFAULT_PAGE_SIZE;
 
-      const rows = await rest
+      const rows = await database
         .internal_t__remote_configs()
         .select((s) => ({
           remote_config_id: s.remote_config_id,
@@ -168,7 +168,7 @@ export class RemoteConfigRepository extends Repository<RemoteConfigError> implem
     return this.guard(async () => {
       const audiences = await this.#audiences(callerType);
 
-      const rows = await rest
+      const rows = await database
         .internal_t__remote_configs()
         .select((s) => ({
           remote_config_id: s.remote_config_id,
@@ -195,7 +195,7 @@ export class RemoteConfigRepository extends Repository<RemoteConfigError> implem
     return this.guard(async () => {
       const [audiences, row] = await Promise.all([
         this.#audiences(callerType),
-        rest
+        database
           .internal_t__remote_configs()
           .where((f) => f.key.eq(key))
           .getOne(),
@@ -215,7 +215,7 @@ export class RemoteConfigRepository extends Repository<RemoteConfigError> implem
     input: CreateRemoteConfigInput,
   ): Promise<Result<RemoteConfig, RemoteConfigError>> {
     return this.guard(async () => {
-      const row = await rest.internal_t__remote_configs().insertOne({
+      const row = await database.internal_t__remote_configs().insertOne({
         key: input.key,
         value: input.value,
         audience: input.audience,
@@ -232,7 +232,7 @@ export class RemoteConfigRepository extends Repository<RemoteConfigError> implem
     input: UpdateRemoteConfigInput,
   ): Promise<Result<void, RemoteConfigError>> {
     return this.guard(async () => {
-      const existing = await rest
+      const existing = await database
         .internal_t__remote_configs()
         .select((s) => ({ key: s.key }))
         .where((f) => f.key.eq(key))
@@ -240,7 +240,7 @@ export class RemoteConfigRepository extends Repository<RemoteConfigError> implem
 
       if (!existing) return new Failure(RemoteConfigError.NotFound);
 
-      const ok = await rest
+      const ok = await database
         .internal_t__remote_configs()
         .where((f) => f.key.eq(key))
         .update(this.#patch(input));
@@ -251,7 +251,7 @@ export class RemoteConfigRepository extends Repository<RemoteConfigError> implem
 
   remove(key: string): Promise<Result<void, RemoteConfigError>> {
     return this.guard(async () => {
-      const removed = await rest
+      const removed = await database
         .internal_t__remote_configs()
         .where((f) => f.key.eq(key))
         .deleteOne((s) => ({ key: s.key }));
@@ -279,7 +279,7 @@ export class RemoteConfigRepository extends Repository<RemoteConfigError> implem
   async #audiences(
     callerType: RemoteConfigCallerType,
   ): Promise<RemoteConfigAudience[]> {
-    const { data, error } = await rest.rpc<string[]>(VISIBLE_AUDIENCES_RPC, {
+    const { data, error } = await database.rpc<string[]>(VISIBLE_AUDIENCES_RPC, {
       p_caller_type: callerType,
     });
     if (error) throw error;

@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { defineQueue } from "@scribe/host/packages/foundation/event_driven/queue/core/define.ts";
+import { defineQueue } from "@scribe/foundation/src/queue/core/define.ts";
 import { extensions } from "@scribe/core/runtime/support/extensions/mod.ts";
 import { SEARCHER_EXTENSION } from "../core/extension.ts";
 import { searcherRegistry } from "../core/registry.ts";

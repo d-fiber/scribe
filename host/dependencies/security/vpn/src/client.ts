@@ -36,7 +36,7 @@ import { pagination as paginate } from "@scribe/core/contracts/pagination.ts";
 import type { Result } from "@scribe/core/contracts/result.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
 import { Env } from "@scribe/host/env.ts";
-import { Valkery } from "@scribe/host/packages/foundation/cache/valkery.ts";
+import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
 
 export interface Vpn {
   id: string;

@@ -30,12 +30,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTPushCampaignsRow } from "@scribe/host/packages/foundation/database/rest/gen/rows.ts";
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import type { InternalTPushCampaignsRow } from "@scribe/foundation/src/database/gen/rows.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import type { DeviceOs, Localization } from "@scribe/core/contracts/enums.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
-import type { CronTimezone } from "@scribe/host/packages/foundation/event_driven/cron/timezone.ts";
+import type { CronTimezone } from "@scribe/foundation/src/cron/timezone.ts";
 import { Cron } from "croner";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
@@ -194,7 +194,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
       const offset = options?.offset ?? 0;
       const size = options?.size ?? DEFAULT_PAGE_SIZE;
 
-      let query = rest
+      let query = database
         .internal_t__push_campaigns()
         .select((s) => ({
           push_campaign_id: s.push_campaign_id,
@@ -226,7 +226,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
 
   due(now: number = Date.now()): Promise<Result<PushCampaign[], PushCampaignError>> {
     return this.guard(async () => {
-      const rows = await rest
+      const rows = await database
         .internal_t__push_campaigns()
         .select((s) => ({
           push_campaign_id: s.push_campaign_id,
@@ -256,7 +256,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
         return new Failure(PushCampaignError.InvalidSchedule);
       }
 
-      const row = await rest.internal_t__push_campaigns().insertOne({
+      const row = await database.internal_t__push_campaigns().insertOne({
         push_template_id: input.pushTemplateId,
         ...this.#scheduleColumns(input.schedule),
         filters: buildFilters(input.filters, input.extraFilters, null),
@@ -279,7 +279,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
       const existing = await this.#row(id);
       if (!existing) return new Failure(PushCampaignError.NotFound);
 
-      const ok = await rest
+      const ok = await database
         .internal_t__push_campaigns()
         .where((f) => f.push_campaign_id.eq(id))
         .update(this.#patch(input, existing));
@@ -293,7 +293,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
       const existing = await this.#row(id);
       if (!existing) return new Failure(PushCampaignError.NotFound);
 
-      const ok = await rest
+      const ok = await database
         .internal_t__push_campaigns()
         .where((f) => f.push_campaign_id.eq(id))
         .update({ is_active: isActive });
@@ -304,7 +304,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
 
   markRan(id: PushCampaignId, ranAt: number): Promise<Result<void, PushCampaignError>> {
     return this.guard(async () => {
-      const { data, error } = await rest.rpc("mark_push_campaign_ran", {
+      const { data, error } = await database.rpc("mark_push_campaign_ran", {
         p_campaign_id: id,
         p_ran_at: ranAt,
       });
@@ -316,7 +316,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
 
   remove(id: PushCampaignId): Promise<Result<void, PushCampaignError>> {
     return this.guard(async () => {
-      const removed = await rest
+      const removed = await database
         .internal_t__push_campaigns()
         .where((f) => f.push_campaign_id.eq(id))
         .deleteOne((s) => ({ push_campaign_id: s.push_campaign_id }));
@@ -326,7 +326,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
   }
 
   #row(id: PushCampaignId): Promise<InternalTPushCampaignsRow | null> {
-    return rest
+    return database
       .internal_t__push_campaigns()
       .where((f) => f.push_campaign_id.eq(id))
       .getOne();

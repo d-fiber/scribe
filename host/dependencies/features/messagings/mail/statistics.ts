@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTMailStatisticsRow } from "@scribe/host/packages/foundation/database/rest/gen/rows.ts";
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import type { InternalTMailStatisticsRow } from "@scribe/foundation/src/database/gen/rows.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
@@ -87,7 +87,7 @@ export class MailStatisticRepository extends Repository<MailStatisticError> impl
 
   get(id: MailStatisticId): Promise<Result<MailStatistic, MailStatisticError>> {
     return this.guard(async () => {
-      const row = await rest
+      const row = await database
         .internal_t__mail_statistics()
         .where((f) => f.statistic_id.eq(id))
         .getOne();
@@ -104,7 +104,7 @@ export class MailStatisticRepository extends Repository<MailStatisticError> impl
       const offset = options?.offset ?? 0;
       const size = options?.size ?? DEFAULT_PAGE_SIZE;
 
-      const rows = await rest
+      const rows = await database
         .internal_t__mail_statistics()
         .select((s) => ({
           statistic_id: s.statistic_id,
@@ -132,7 +132,7 @@ export class MailStatisticRepository extends Repository<MailStatisticError> impl
     input: RecordMailStatisticInput,
   ): Promise<Result<void, MailStatisticError>> {
     return this.guard(async () => {
-      const row = await rest.internal_t__mail_statistics().insertOne({
+      const row = await database.internal_t__mail_statistics().insertOne({
         mail_id: input.mailId,
         ip_address: input.ipAddress ?? null,
         user_agent: input.userAgent ?? null,
@@ -144,7 +144,7 @@ export class MailStatisticRepository extends Repository<MailStatisticError> impl
 
   remove(id: MailStatisticId): Promise<Result<void, MailStatisticError>> {
     return this.guard(async () => {
-      const ok = await rest
+      const ok = await database
         .internal_t__mail_statistics()
         .where((f) => f.statistic_id.eq(id))
         .delete();

@@ -33,7 +33,7 @@
 import type { AccountRole, AdminDevice, UserDevice } from "@scribe/core/contracts/account.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { kv } from "@scribe/core/runtime/redis/mod.ts";
-import { Valkery } from "@scribe/host/packages/foundation/cache/valkery.ts";
+import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
 
 function deviceKey(userId: string, deviceId: string): string {
   return `${userId}:${deviceId}`;

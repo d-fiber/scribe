@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTDynamicLinksRow } from "@scribe/host/packages/foundation/database/rest/gen/rows.ts";
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import type { InternalTDynamicLinksRow } from "@scribe/foundation/src/database/gen/rows.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { Repository } from "../core/repository.ts";
@@ -121,7 +121,7 @@ export class DynamicLinkRepository
 
   getById(id: DynamicLinkId): Promise<Result<DynamicLink, DynamicLinkError>> {
     return this.guard(async () => {
-      const row = await rest
+      const row = await database
         .internal_t__dynamic_links()
         .where((f) => f.short_link_id.eq(id))
         .getOne();
@@ -142,7 +142,7 @@ export class DynamicLinkRepository
       const offset = options?.offset ?? 0;
       const size = options?.size ?? DEFAULT_PAGE_SIZE;
 
-      const rows = await rest
+      const rows = await database
         .internal_t__dynamic_links()
         .select((s) => ({
           short_link_id: s.short_link_id,
@@ -169,7 +169,7 @@ export class DynamicLinkRepository
   ): Promise<Result<DynamicLink, DynamicLinkError>> {
     return this.guard(async () => {
       for (let attempt = 0; attempt < MAX_SLUG_ATTEMPTS; attempt++) {
-        const row = await rest.internal_t__dynamic_links().insertOne({
+        const row = await database.internal_t__dynamic_links().insertOne({
           slug: generateSlug(),
           payload: dynamicLinkPayloadRecord(input.payload),
           expires_at: input.expiresAt ?? null,
@@ -191,7 +191,7 @@ export class DynamicLinkRepository
     input: UpdateDynamicLinkInput,
   ): Promise<Result<void, DynamicLinkError>> {
     return this.guard(async () => {
-      const existing = await rest
+      const existing = await database
         .internal_t__dynamic_links()
         .select((s) => ({ slug: s.slug }))
         .where((f) => f.short_link_id.eq(id))
@@ -199,7 +199,7 @@ export class DynamicLinkRepository
 
       if (!existing) return new Failure(DynamicLinkError.NotFound);
 
-      const ok = await rest
+      const ok = await database
         .internal_t__dynamic_links()
         .where((f) => f.short_link_id.eq(id))
         .update(this.#patch(input));
@@ -213,7 +213,7 @@ export class DynamicLinkRepository
 
   remove(id: DynamicLinkId): Promise<Result<void, DynamicLinkError>> {
     return this.guard(async () => {
-      const removed = await rest
+      const removed = await database
         .internal_t__dynamic_links()
         .where((f) => f.short_link_id.eq(id))
         .deleteOne((s) => ({ slug: s.slug }));
@@ -238,7 +238,7 @@ export class DynamicLinkRepository
   }
 
   async #load(slug: string): Promise<DynamicLink | null> {
-    const row = await rest
+    const row = await database
       .internal_t__dynamic_links()
       .where((f) => f.slug.eq(slug))
       .getOne();

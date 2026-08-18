@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTEmailCampaignsRow } from "@scribe/host/packages/foundation/database/rest/gen/rows.ts";
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import type { InternalTEmailCampaignsRow } from "@scribe/foundation/src/database/gen/rows.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import {
   CampaignAudience,
   type DeviceOs,
@@ -39,7 +39,7 @@ import {
 } from "@scribe/core/contracts/enums.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
-import type { CronTimezone } from "@scribe/host/packages/foundation/event_driven/cron/timezone.ts";
+import type { CronTimezone } from "@scribe/foundation/src/cron/timezone.ts";
 import { Cron } from "croner";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
@@ -232,7 +232,7 @@ export class EmailCampaignRepository
       const offset = options?.offset ?? 0;
       const size = options?.size ?? DEFAULT_PAGE_SIZE;
 
-      let query = rest
+      let query = database
         .internal_t__email_campaigns()
         .select((s) => ({
           email_campaign_id: s.email_campaign_id,
@@ -268,7 +268,7 @@ export class EmailCampaignRepository
     now: number = Date.now(),
   ): Promise<Result<EmailCampaign[], EmailCampaignError>> {
     return this.guard(async () => {
-      const rows = await rest
+      const rows = await database
         .internal_t__email_campaigns()
         .select((s) => ({
           email_campaign_id: s.email_campaign_id,
@@ -302,7 +302,7 @@ export class EmailCampaignRepository
         return new Failure(EmailCampaignError.InvalidSchedule);
       }
 
-      const row = await rest.internal_t__email_campaigns().insertOne({
+      const row = await database.internal_t__email_campaigns().insertOne({
         email_template_id: input.emailTemplateId,
         audience: input.audience ?? CampaignAudience.USER,
         ...this.#scheduleColumns(input.schedule),
@@ -330,7 +330,7 @@ export class EmailCampaignRepository
       const existing = await this.#row(id);
       if (!existing) return new Failure(EmailCampaignError.NotFound);
 
-      const ok = await rest
+      const ok = await database
         .internal_t__email_campaigns()
         .where((f) => f.email_campaign_id.eq(id))
         .update(this.#patch(input, existing));
@@ -347,7 +347,7 @@ export class EmailCampaignRepository
       const existing = await this.#row(id);
       if (!existing) return new Failure(EmailCampaignError.NotFound);
 
-      const ok = await rest
+      const ok = await database
         .internal_t__email_campaigns()
         .where((f) => f.email_campaign_id.eq(id))
         .update({ is_active: isActive });
@@ -366,7 +366,7 @@ export class EmailCampaignRepository
 
       const next = nextRunOf(this.#schedule(existing), ranAt);
 
-      const ok = await rest
+      const ok = await database
         .internal_t__email_campaigns()
         .where((f) => f.email_campaign_id.eq(id))
         .update({
@@ -381,7 +381,7 @@ export class EmailCampaignRepository
 
   remove(id: EmailCampaignId): Promise<Result<void, EmailCampaignError>> {
     return this.guard(async () => {
-      const removed = await rest
+      const removed = await database
         .internal_t__email_campaigns()
         .where((f) => f.email_campaign_id.eq(id))
         .deleteOne((s) => ({ email_campaign_id: s.email_campaign_id }));
@@ -391,7 +391,7 @@ export class EmailCampaignRepository
   }
 
   #row(id: EmailCampaignId): Promise<InternalTEmailCampaignsRow | null> {
-    return rest
+    return database
       .internal_t__email_campaigns()
       .where((f) => f.email_campaign_id.eq(id))
       .getOne();

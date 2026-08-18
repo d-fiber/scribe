@@ -38,10 +38,10 @@ import {
 import { dynamicLinkStatisticsQueue } from "@scribe/host/dependencies/features/devops/dynamic-links/statistics/_queue.ts";
 import { DynamicLinkStatisticsRepository } from "@scribe/host/dependencies/features/devops/dynamic-links/statistics/statistics.ts";
 import { DeviceOs } from "@scribe/core/contracts/enums.ts";
-import { queueRegistry } from "@scribe/host/packages/foundation/event_driven/queue/core/registry.ts";
-import type { BatchHandler } from "@scribe/host/packages/foundation/event_driven/queue/contract.ts";
+import { queueRegistry } from "@scribe/foundation/src/queue/core/registry.ts";
+import type { BatchHandler } from "@scribe/foundation/contracts/queue/queue.ts";
 import type { Row } from "@scribe/core/testing/database/fake_postgrest.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installMock } from "@scribe/core/testing/install.ts";
 import { assert, assertEquals } from "@std/assert";
 
@@ -73,7 +73,7 @@ Deno.test("record enqueues the hit instead of writing it inline", async () => {
       return Promise.resolve("job-1");
     }) as typeof dynamicLinkStatisticsQueue.push,
   );
-  const rest = installRestMock({ [TABLE]: [] });
+  const database = installDatabaseMock({ [TABLE]: [] });
 
   try {
     const input = hit({ platform: DeviceOs.IOS });
@@ -82,12 +82,12 @@ Deno.test("record enqueues the hit instead of writing it inline", async () => {
     assert(result.ok);
     assertEquals(pushed, [input]);
     assertEquals(
-      rest.rows(TABLE).length,
+      database.rows(TABLE).length,
       0,
       "recording must not touch the database on the request path",
     );
   } finally {
-    rest.restore();
+    database.restore();
     queue.restore();
   }
 });
@@ -110,7 +110,7 @@ Deno.test("a queue that refuses the job surfaces as a backend failure", async ()
 });
 
 Deno.test("the batch handler writes every hit in a single insert", async () => {
-  const rest = installRestMock({ [TABLE]: [] });
+  const database = installDatabaseMock({ [TABLE]: [] });
 
   try {
     await drain()([
@@ -119,7 +119,7 @@ Deno.test("the batch handler writes every hit in a single insert", async () => {
       hit({ dynamicLinkId: 2, outcome: DynamicLinkOutcome.Crawler }),
     ]);
 
-    const rows = rest.rows(TABLE);
+    const rows = database.rows(TABLE);
     assertEquals(rows.length, 3);
     assertEquals(rows.map((row: Row) => row.outcome), [
       DynamicLinkOutcome.Served,
@@ -128,12 +128,12 @@ Deno.test("the batch handler writes every hit in a single insert", async () => {
     ]);
     assertEquals(rows.map((row: Row) => row.short_link_id), [1, 1, 2]);
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("the batch handler maps the domain input onto the table columns", async () => {
-  const rest = installRestMock({ [TABLE]: [] });
+  const database = installDatabaseMock({ [TABLE]: [] });
 
   try {
     await drain()([
@@ -149,7 +149,7 @@ Deno.test("the batch handler maps the domain input onto the table columns", asyn
       }),
     ]);
 
-    assertEquals(rest.rows(TABLE)[0], {
+    assertEquals(database.rows(TABLE)[0], {
       short_link_id: 7,
       outcome: DynamicLinkOutcome.StoreFallback,
       platform: DeviceOs.ANDROID,
@@ -160,33 +160,33 @@ Deno.test("the batch handler maps the domain input onto the table columns", asyn
       referer: "https://brand.test",
     });
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("an anonymous hit writes explicit nulls, never undefined", async () => {
-  const rest = installRestMock({ [TABLE]: [] });
+  const database = installDatabaseMock({ [TABLE]: [] });
 
   try {
     await drain()([hit()]);
 
-    const row = rest.rows(TABLE)[0];
+    const row = database.rows(TABLE)[0];
     for (const column of ["platform", "user_id", "device_id", "ip_address", "user_agent", "referer"]) {
       assertEquals(row[column], null, `${column} must be null, not undefined`);
     }
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("an empty batch writes nothing at all", async () => {
-  const rest = installRestMock({ [TABLE]: [] });
+  const database = installDatabaseMock({ [TABLE]: [] });
 
   try {
     await drain()([]);
 
-    assertEquals(rest.rows(TABLE).length, 0);
+    assertEquals(database.rows(TABLE).length, 0);
   } finally {
-    rest.restore();
+    database.restore();
   }
 });

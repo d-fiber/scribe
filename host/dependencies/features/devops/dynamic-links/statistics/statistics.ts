@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTDynamicLinkStatisticsRow } from "@scribe/host/packages/foundation/database/rest/gen/rows.ts";
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import type { InternalTDynamicLinkStatisticsRow } from "@scribe/foundation/src/database/gen/rows.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import type { DeviceOs } from "@scribe/core/contracts/enums.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
@@ -127,7 +127,7 @@ export class DynamicLinkStatisticsRepository
     id: DynamicLinkStatisticId,
   ): Promise<Result<DynamicLinkStatistic, DynamicLinkStatisticsError>> {
     return this.guard(async () => {
-      const row = await rest
+      const row = await database
         .internal_t__dynamic_link_statistics()
         .where((f) => f.statistic_id.eq(id))
         .getOne();
@@ -148,7 +148,7 @@ export class DynamicLinkStatisticsRepository
       const offset = options?.offset ?? 0;
       const size = options?.size ?? DEFAULT_PAGE_SIZE;
 
-      const rows = await rest
+      const rows = await database
         .internal_t__dynamic_link_statistics()
         .select((s) => ({
           statistic_id: s.statistic_id,
@@ -185,7 +185,7 @@ export class DynamicLinkStatisticsRepository
     id: DynamicLinkStatisticId,
   ): Promise<Result<void, DynamicLinkStatisticsError>> {
     return this.guard(async () => {
-      const ok = await rest
+      const ok = await database
         .internal_t__dynamic_link_statistics()
         .where((f) => f.statistic_id.eq(id))
         .delete();

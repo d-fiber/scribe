@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
-import { defineQueue } from "@scribe/host/packages/foundation/event_driven/queue/core/define.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
+import { defineQueue } from "@scribe/foundation/src/queue/core/define.ts";
 import type { RecordStatisticInput } from "./statistics.ts";
 
 const LINGER_MS = 500;
@@ -52,7 +52,7 @@ export const dynamicLinkStatisticsQueue = defineQueue<RecordStatisticInput>(
       referer: hit.referer ?? null,
     }));
 
-    const ok = await rest.internal_t__dynamic_link_statistics().insert(rows);
+    const ok = await database.internal_t__dynamic_link_statistics().insert(rows);
     if (!ok) {
       console.error(
         `[dynamic-link-statistics] batch of ${rows.length} hits rejected by the database`,

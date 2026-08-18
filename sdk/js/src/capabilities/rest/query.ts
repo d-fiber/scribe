@@ -39,9 +39,9 @@ import {
   type Order,
   OrderSchema,
   RangeSchema,
-  Rest,
+  Database,
   type QueryResult,
-} from "../../../gen/scribe/host/packages/foundation/database/rest/protocol/rest_pb.ts";
+} from "../../../gen/scribe/host/packages/foundation/protocol/database/database_pb.ts";
 import { decodeJson, encodeJson } from "../../contracts/json.ts";
 import { host } from "../channel.ts";
 import { raiseOn } from "../error.ts";
@@ -173,7 +173,7 @@ export class RestQuery<Row extends object> {
     payload?: unknown,
     onConflict: readonly string[] = [],
   ): Promise<QueryResult> {
-    const result = await host.client().call(Rest.method.execute, {
+    const result = await host.client().call(Database.method.execute, {
       table: this.table,
       operation,
       select: [...this.state.select],
@@ -203,7 +203,7 @@ export const rest = {
   },
 
   async rpc<T = unknown>(name: string, args: Record<string, unknown> = {}): Promise<T | null> {
-    const result = await host.client().call(Rest.method.execute, {
+    const result = await host.client().call(Database.method.execute, {
       operation: Operation.RPC,
       rpcName: name,
       rpcArgs: encodeJson(args),

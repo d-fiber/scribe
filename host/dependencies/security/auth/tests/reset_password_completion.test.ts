@@ -39,7 +39,7 @@ import {
 import { ResetPasswordClient } from "@scribe/host/dependencies/security/auth/src/reset_password/reset_password.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installAuthEnv } from "@scribe/host/dependencies/security/auth/testing/env.ts";
 import { installGoTrueMock } from "@scribe/host/dependencies/security/auth/testing/gotrue.ts";
 import { fakeDevice, withRequest } from "@scribe/core/testing/runtime/device.ts";
@@ -73,7 +73,7 @@ Deno.test("complete: a valid token sets the password and burns the token", async
     "PUT /admin/users/*": () => ({ status: 200, body: { id: "user-1" } }),
   });
   const { token, hash } = await issuedToken();
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: appUsers(),
     internal_t__otp_pending_tokens: [pendingRow(hash)],
   });
@@ -88,13 +88,13 @@ Deno.test("complete: a valid token sets the password and burns the token", async
     assert(result instanceof OK, `expected success, got ${JSON.stringify(result)}`);
     assertEquals(gotrue.called("PUT", "/admin/users/user-1"), 1);
     assertEquals(
-      rest.rows("internal_t__otp_pending_tokens").length,
+      database.rows("internal_t__otp_pending_tokens").length,
       0,
       "the token is single-use: it must be gone once spent",
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -104,7 +104,7 @@ Deno.test("complete: the same token cannot be replayed", async () => {
     "PUT /admin/users/*": () => ({ status: 200, body: { id: "user-1" } }),
   });
   const { token, hash } = await issuedToken();
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: appUsers(),
     internal_t__otp_pending_tokens: [pendingRow(hash)],
   });
@@ -127,14 +127,14 @@ Deno.test("complete: the same token cannot be replayed", async () => {
     assertEquals(gotrue.called("PUT", "/admin/users/user-1"), 1);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("complete: a token signed for sign-in is refused", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: appUsers(),
     internal_t__otp_pending_tokens: [],
   });
@@ -157,7 +157,7 @@ Deno.test("complete: a token signed for sign-in is refused", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -165,7 +165,7 @@ Deno.test("complete: a token signed for sign-in is refused", async () => {
 Deno.test("complete: a token absent from the store is refused", async () => {
   const gotrue = installGoTrueMock({});
   const { token } = await issuedToken();
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: appUsers(),
     internal_t__otp_pending_tokens: [],
   });
@@ -185,14 +185,14 @@ Deno.test("complete: a token absent from the store is refused", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("complete: garbage tokens are refused without throwing", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({ internal_t__app_users: appUsers() });
+  const database = installDatabaseMock({ internal_t__app_users: appUsers() });
   const env = installAuthEnv();
 
   try {
@@ -208,7 +208,7 @@ Deno.test("complete: garbage tokens are refused without throwing", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -216,7 +216,7 @@ Deno.test("complete: garbage tokens are refused without throwing", async () => {
 Deno.test("complete: mismatched passwords leave the token usable", async () => {
   const gotrue = installGoTrueMock({});
   const { token, hash } = await issuedToken();
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: appUsers(),
     internal_t__otp_pending_tokens: [pendingRow(hash)],
   });
@@ -231,14 +231,14 @@ Deno.test("complete: mismatched passwords leave the token usable", async () => {
     assert(result instanceof Failure);
     assertEquals(result.error, ResetPasswordCompleteError.PasswordsDoNotMatch);
     assertEquals(
-      rest.rows("internal_t__otp_pending_tokens").length,
+      database.rows("internal_t__otp_pending_tokens").length,
       1,
       "a typo must not burn the reset token",
     );
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -248,7 +248,7 @@ Deno.test("complete: a weak password is refused and nothing is written", async (
     "PUT /admin/users/*": () => ({ status: 200, body: { id: "user-1" } }),
   });
   const { token, hash } = await issuedToken();
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: appUsers(),
     internal_t__otp_pending_tokens: [pendingRow(hash)],
   });
@@ -265,7 +265,7 @@ Deno.test("complete: a weak password is refused and nothing is written", async (
     assertEquals(gotrue.called("PUT", "/admin/users/user-1"), 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -273,7 +273,7 @@ Deno.test("complete: a weak password is refused and nothing is written", async (
 Deno.test("complete: a token whose account vanished is refused", async () => {
   const gotrue = installGoTrueMock({});
   const { token, hash } = await issuedToken("ghost@example.com");
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: appUsers(),
     internal_t__otp_pending_tokens: [pendingRow(hash)],
   });
@@ -290,7 +290,7 @@ Deno.test("complete: a token whose account vanished is refused", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -300,7 +300,7 @@ Deno.test("complete: a phone-issued token resolves the same account", async () =
     "PUT /admin/users/*": () => ({ status: 200, body: { id: "user-1" } }),
   });
   const { token, hash } = await issuedToken(PHONE);
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: appUsers(),
     internal_t__otp_pending_tokens: [pendingRow(hash)],
   });
@@ -316,7 +316,7 @@ Deno.test("complete: a phone-issued token resolves the same account", async () =
     assertEquals(gotrue.called("PUT", "/admin/users/user-1"), 1);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -324,7 +324,7 @@ Deno.test("complete: a phone-issued token resolves the same account", async () =
 Deno.test("complete: a user token cannot reach an admin account", async () => {
   const gotrue = installGoTrueMock({});
   const { token, hash } = await issuedToken("a1@example.com", AccountRole.User);
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: appUsers(),
     internal_t__admin_users: [{ admin_id: "admin-1", email: "a1@example.com", phone: null }],
     internal_t__otp_pending_tokens: [pendingRow(hash)],
@@ -344,14 +344,14 @@ Deno.test("complete: a user token cannot reach an admin account", async () => {
     assertEquals(gotrue.called("PUT", "/admin/users/admin-1"), 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("issue: the recovery session is revoked and swapped for a reset token", async () => {
   const gotrue = installGoTrueMock({ "POST /logout*": () => ({ status: 204 }) });
-  const rest = installRestMock({ internal_t__app_users: appUsers() });
+  const database = installDatabaseMock({ internal_t__app_users: appUsers() });
   const env = installAuthEnv();
 
   try {
@@ -374,17 +374,17 @@ Deno.test("issue: the recovery session is revoked and swapped for a reset token"
     const payload = await resetToken.payload(token);
     assertEquals(payload?.identifier, EMAIL);
     assertEquals(payload?.role, AccountRole.User);
-    assertEquals(rest.rows("internal_t__otp_pending_tokens").length, 1);
+    assertEquals(database.rows("internal_t__otp_pending_tokens").length, 1);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("issue: an unknown account yields no token", async () => {
   const gotrue = installGoTrueMock({ "POST /logout*": () => ({ status: 204 }) });
-  const rest = installRestMock({ internal_t__app_users: [] });
+  const database = installDatabaseMock({ internal_t__app_users: [] });
   const env = installAuthEnv();
 
   try {
@@ -394,10 +394,10 @@ Deno.test("issue: an unknown account yields no token", async () => {
     );
 
     assertEquals(token, null);
-    assertEquals(rest.rows("internal_t__otp_pending_tokens").length, 0);
+    assertEquals(database.rows("internal_t__otp_pending_tokens").length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -407,7 +407,7 @@ Deno.test("issue then complete: the email branch closes end to end", async () =>
     "POST /logout*": () => ({ status: 204 }),
     "PUT /admin/users/*": () => ({ status: 200, body: { id: "user-1" } }),
   });
-  const rest = installRestMock({ internal_t__app_users: appUsers() });
+  const database = installDatabaseMock({ internal_t__app_users: appUsers() });
   const env = installAuthEnv();
 
   try {
@@ -425,10 +425,10 @@ Deno.test("issue then complete: the email branch closes end to end", async () =>
 
     assert(result instanceof OK, `expected success, got ${JSON.stringify(result)}`);
     assertEquals(gotrue.called("PUT", "/admin/users/user-1"), 1);
-    assertEquals(rest.rows("internal_t__otp_pending_tokens").length, 0);
+    assertEquals(database.rows("internal_t__otp_pending_tokens").length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -438,7 +438,7 @@ Deno.test("complete: an admin token is refused by the user surface", async () =>
     "PUT /admin/users/*": () => ({ status: 200, body: { id: "admin-1" } }),
   });
   const { token, hash } = await issuedToken("admin@example.com", AccountRole.Admin);
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: appUsers(),
     internal_t__admin_users: [{ admin_id: "admin-1", email: "admin@example.com" }],
     internal_t__otp_pending_tokens: [pendingRow(hash)],
@@ -455,13 +455,13 @@ Deno.test("complete: an admin token is refused by the user surface", async () =>
     assertEquals(result.error, ResetPasswordCompleteError.InvalidOrExpiredToken);
     assertEquals(gotrue.calls.length, 0, "gotrue must never be reached");
     assertEquals(
-      rest.rows("internal_t__otp_pending_tokens").length,
+      database.rows("internal_t__otp_pending_tokens").length,
       1,
       "a refused token stays available for its own surface",
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -471,7 +471,7 @@ Deno.test("complete: a user token is refused by the admin surface", async () => 
     "PUT /admin/users/*": () => ({ status: 200, body: { id: "user-1" } }),
   });
   const { token, hash } = await issuedToken();
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: appUsers(),
     internal_t__otp_pending_tokens: [pendingRow(hash)],
   });
@@ -488,14 +488,14 @@ Deno.test("complete: a user token is refused by the admin surface", async () => 
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("completionForToken: the role comes from the token, not from the surface", async () => {
   const env = installAuthEnv();
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const client = new ResetPasswordClient();
 
   try {
@@ -515,14 +515,14 @@ Deno.test("completionForToken: the role comes from the token, not from the surfa
       client.admin.completion,
     );
   } finally {
-    rest.restore();
+    database.restore();
     env.restore();
   }
 });
 
 Deno.test("completionForToken: an unreadable token routes nowhere", async () => {
   const env = installAuthEnv();
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const client = new ResetPasswordClient();
 
   try {
@@ -538,7 +538,7 @@ Deno.test("completionForToken: an unreadable token routes nowhere", async () => 
       "a token minted for another purpose must not open the reset page",
     );
   } finally {
-    rest.restore();
+    database.restore();
     env.restore();
   }
 });

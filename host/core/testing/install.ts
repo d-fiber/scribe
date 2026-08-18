@@ -61,7 +61,7 @@ export function installMock<T extends object, K extends keyof T>(
 
 // Accessor variant, for singletons whose surface is exposed by getters carried
 // by the *prototype* (`rest`, `broadcast.device`): `installMock` would set a
-// value frozen at install time, whereas a mock must stay dynamic (`RestMock.user`
+// value frozen at install time, whereas a mock must stay dynamic (`DatabaseMock.user`
 // only becomes non-null after `asUser()`). Since `Object.getOwnPropertyDescriptor`
 // returns `undefined` for a prototype getter, `restore()` simply deletes the own
 // property and the original getter reappears.

@@ -42,14 +42,14 @@ import {
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
 import { fakeDevice, withRequest } from "@scribe/core/testing/runtime/device.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installAuthEnv } from "@scribe/host/dependencies/security/auth/testing/env.ts";
 import { goTrueError, installGoTrueMock } from "@scribe/host/dependencies/security/auth/testing/gotrue.ts";
 import { assert, assertEquals } from "@std/assert";
 
 Deno.test("email: a known address gets a recovery mail", async () => {
   const gotrue = installGoTrueMock({ "POST /recover": () => ({ status: 200, body: {} }) });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -61,7 +61,7 @@ Deno.test("email: a known address gets a recovery mail", async () => {
     assertEquals(gotrue.called("POST", "/recover"), 1);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -75,7 +75,7 @@ Deno.test(
         body: goTrueError("over_email_send_rate_limit"),
       }),
     });
-    const rest = installRestMock({});
+    const database = installDatabaseMock({});
     const env = installAuthEnv();
 
     try {
@@ -90,7 +90,7 @@ Deno.test(
       );
     } finally {
       env.restore();
-      rest.restore();
+      database.restore();
       gotrue.restore();
     }
   },
@@ -98,7 +98,7 @@ Deno.test(
 
 Deno.test("email: an unknown address is indistinguishable from a known one", async () => {
   const gotrue = installGoTrueMock({ "POST /recover": () => ({ status: 200, body: {} }) });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -113,14 +113,14 @@ Deno.test("email: an unknown address is indistinguishable from a known one", asy
     assertEquals(known.ok, unknown.ok);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("email: invalid input is refused before any send", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -135,14 +135,14 @@ Deno.test("email: invalid input is refused before any send", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("email: the recipient limit carries the role and the mailbox", async () => {
   const gotrue = installGoTrueMock({ "POST /recover": () => ({ status: 200, body: {} }) });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -159,14 +159,14 @@ Deno.test("email: the recipient limit carries the role and the mailbox", async (
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("email: admin and user do not share a recipient bucket", async () => {
   const gotrue = installGoTrueMock({ "POST /recover": () => ({ status: 200, body: {} }) });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -183,7 +183,7 @@ Deno.test("email: admin and user do not share a recipient bucket", async () => {
     assertEquals(new Set(recipientKeys).size, 2);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -192,7 +192,7 @@ Deno.test("phone: an sms send limit does not leak account existence either", asy
   const gotrue = installGoTrueMock({
     "POST /otp": () => ({ status: 429, body: goTrueError("over_sms_send_rate_limit") }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -203,14 +203,14 @@ Deno.test("phone: an sms send limit does not leak account existence either", asy
     assert(result instanceof OK);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("phone: the otp never creates an account on the reset path", async () => {
   const gotrue = installGoTrueMock({ "POST /otp": () => ({ status: 200, body: {} }) });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -221,14 +221,14 @@ Deno.test("phone: the otp never creates an account on the reset path", async () 
     assertEquals(gotrue.calls[0].body?.create_user, false);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("phone: an invalid number is refused before any send", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -243,7 +243,7 @@ Deno.test("phone: an invalid number is refused before any send", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });

@@ -35,9 +35,9 @@ import {
   PushCampaignError,
   PushCampaignRepository,
 } from "@scribe/host/dependencies/features/messagings/notification_push/push.ts";
-import { CronTimezone } from "@scribe/host/packages/foundation/event_driven/cron/timezone.ts";
+import { CronTimezone } from "@scribe/foundation/src/cron/timezone.ts";
 import type { Row } from "@scribe/core/testing/database/fake_postgrest.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { assert, assertEquals } from "@std/assert";
 
 const FUTURE = 4_102_444_800_000;
@@ -76,8 +76,8 @@ function campaigns(): Row[] {
 }
 
 function harness() {
-  const rest = installRestMock({ internal_t__push_campaigns: campaigns() });
-  return { rest, repository: new PushCampaignRepository() };
+  const database = installDatabaseMock({ internal_t__push_campaigns: campaigns() });
+  return { database, repository: new PushCampaignRepository() };
 }
 
 // --- schedule validation -----------------------------------------------------
@@ -121,7 +121,7 @@ Deno.test("get: maps both schedule shapes back to the union", async () => {
       timezone: CronTimezone.EuropeParis,
     });
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -132,7 +132,7 @@ Deno.test("get: an unknown id is NotFound", async () => {
     assert(!result.ok);
     assertEquals(result.error, PushCampaignError.NotFound);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -147,13 +147,13 @@ Deno.test("due: reads next_run_at, not the schedule columns", async () => {
       "only the campaign whose next_run_at has passed",
     );
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
 Deno.test("list: activeOnly narrows the page", async () => {
   const h = harness();
-  h.rest.seed("internal_t__push_campaigns", [
+  h.database.seed("internal_t__push_campaigns", [
     ...campaigns(),
     { ...campaigns()[0], push_campaign_id: 12, is_active: false },
   ]);
@@ -167,7 +167,7 @@ Deno.test("list: activeOnly narrows the page", async () => {
     assert(active.ok);
     assertEquals(active.data.items.map((c) => c.id).sort(), [10, 11]);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -183,9 +183,9 @@ Deno.test("create: refuses an invalid schedule before touching the table", async
 
     assert(!result.ok);
     assertEquals(result.error, PushCampaignError.InvalidSchedule);
-    assertEquals(h.rest.rows("internal_t__push_campaigns").length, 2);
+    assertEquals(h.database.rows("internal_t__push_campaigns").length, 2);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -202,7 +202,7 @@ Deno.test("create: writes the schedule columns and leaves next_run_at to the tri
     });
 
     assert(result.ok);
-    const row = h.rest
+    const row = h.database
       .rows("internal_t__push_campaigns")
       .find((r) => r.push_campaign_id !== 10 && r.push_campaign_id !== 11);
 
@@ -216,7 +216,7 @@ Deno.test("create: writes the schedule columns and leaves next_run_at to the tri
       "next_run_at is computed by push_campaigns_set_next_run, never written from here",
     );
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -229,7 +229,7 @@ Deno.test("create: a once schedule clears the cron columns", async () => {
     });
 
     assert(result.ok);
-    const row = h.rest
+    const row = h.database
       .rows("internal_t__push_campaigns")
       .find((r) => r.push_campaign_id !== 10 && r.push_campaign_id !== 11);
 
@@ -237,7 +237,7 @@ Deno.test("create: a once schedule clears the cron columns", async () => {
     assertEquals(row?.scheduled_at, FUTURE);
     assertEquals(row?.cron_expression, null);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -250,7 +250,7 @@ Deno.test("create: filters are serialised to the snake_case jsonb shape", async 
       filters: { appVersionMin: "1.2.0", inactiveDays: 30 },
     });
 
-    const row = h.rest
+    const row = h.database
       .rows("internal_t__push_campaigns")
       .find((r) => r.push_campaign_id !== 10 && r.push_campaign_id !== 11);
     const filters = row?.filters as Record<string, unknown>;
@@ -263,7 +263,7 @@ Deno.test("create: filters are serialised to the snake_case jsonb shape", async 
       "an unset criterion is written as null, which resolve_push_campaign_audience reads as 'no filter'",
     );
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -279,7 +279,7 @@ Deno.test("update: an unknown id is NotFound, not a silent OK", async () => {
       "QueryBuilder.update() returns true on zero rows: the repository must pre-read",
     );
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -289,7 +289,7 @@ Deno.test("update: extraFilters merge with the stored filters instead of replaci
     const result = await h.repository.update(11, { extraFilters: { city: "Paris" } });
     assert(result.ok);
 
-    const row = h.rest
+    const row = h.database
       .rows("internal_t__push_campaigns")
       .find((r) => r.push_campaign_id === 11);
     const filters = row?.filters as Record<string, unknown>;
@@ -297,7 +297,7 @@ Deno.test("update: extraFilters merge with the stored filters instead of replaci
     assertEquals(filters.city, "Paris");
     assertEquals(filters.device_os, "ios", "the existing criterion survives");
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -311,7 +311,7 @@ Deno.test("update: an invalid schedule is refused", async () => {
     assert(!result.ok);
     assertEquals(result.error, PushCampaignError.InvalidSchedule);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -325,18 +325,18 @@ Deno.test("setActive: an unknown id is NotFound", async () => {
     const found = await h.repository.setActive(10, false);
     assert(found.ok);
     assertEquals(
-      h.rest.rows("internal_t__push_campaigns").find((r) => r.push_campaign_id === 10)?.is_active,
+      h.database.rows("internal_t__push_campaigns").find((r) => r.push_campaign_id === 10)?.is_active,
       false,
     );
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
 Deno.test("markRan: delegates to the shared SQL function", async () => {
   const h = harness();
   const calls: Record<string, unknown>[] = [];
-  h.rest.onRpc("mark_push_campaign_ran", (args) => {
+  h.database.onRpc("mark_push_campaign_ran", (args) => {
     calls.push(args ?? {});
     return true;
   });
@@ -349,20 +349,20 @@ Deno.test("markRan: delegates to the shared SQL function", async () => {
     assertEquals(calls[0].p_campaign_id, 10);
     assertEquals(calls[0].p_ran_at, 1_700_000_000_000);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
 Deno.test("markRan: an unknown campaign is NotFound", async () => {
   const h = harness();
-  h.rest.onRpc("mark_push_campaign_ran", () => false);
+  h.database.onRpc("mark_push_campaign_ran", () => false);
 
   try {
     const result = await h.repository.markRan(404, 1);
     assert(!result.ok);
     assertEquals(result.error, PushCampaignError.NotFound);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -372,12 +372,12 @@ Deno.test("remove: an unknown id is NotFound, not a silent OK", async () => {
     const missing = await h.repository.remove(404);
     assert(!missing.ok);
     assertEquals(missing.error, PushCampaignError.NotFound);
-    assertEquals(h.rest.rows("internal_t__push_campaigns").length, 2);
+    assertEquals(h.database.rows("internal_t__push_campaigns").length, 2);
 
     const removed = await h.repository.remove(10);
     assert(removed.ok);
-    assertEquals(h.rest.rows("internal_t__push_campaigns").length, 1);
+    assertEquals(h.database.rows("internal_t__push_campaigns").length, 1);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });

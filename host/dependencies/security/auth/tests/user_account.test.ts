@@ -38,7 +38,7 @@ import {
   UserPhoneClient,
 } from "@scribe/host/dependencies/security/auth/src/user/phone.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installAuthEnv } from "@scribe/host/dependencies/security/auth/testing/env.ts";
 import {
   goTrueError,
@@ -56,7 +56,7 @@ const APP_USERS = [{ user_id: "user-1", email: "u1@example.com", phone: null }];
 
 Deno.test("email: self-service goes through the session, not the admin endpoint", async () => {
   const gotrue = installGoTrueMock({ "PUT /user": () => ({ status: 200, body: goTrueUser() }) });
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -70,14 +70,14 @@ Deno.test("email: self-service goes through the session, not the admin endpoint"
     assertEquals(gotrue.called("PUT", "/admin/users/user-1"), 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("email: nobody can change someone else's address through the self path", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -90,7 +90,7 @@ Deno.test("email: nobody can change someone else's address through the self path
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -99,7 +99,7 @@ Deno.test("email: an address already taken surfaces as a conflict", async () => 
   const gotrue = installGoTrueMock({
     "PUT /user": () => ({ status: 422, body: goTrueError("email_exists") }),
   });
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -112,14 +112,14 @@ Deno.test("email: an address already taken surfaces as a conflict", async () => 
     assertEquals(result.error, UpdateUserEmailError.Conflict);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("email: an invalid address never reaches gotrue", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -133,7 +133,7 @@ Deno.test("email: an invalid address never reaches gotrue", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -142,7 +142,7 @@ Deno.test("email: the operator path applies immediately and ends the sessions", 
   const gotrue = installGoTrueMock({
     "PUT /admin/users/*": () => ({ status: 200, body: goTrueUser() }),
   });
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: [...APP_USERS],
     internal_t__app_user_devices: [
       { id: "d1", user_id: "user-1", device_id: "device-1", hash: "h", trusted_at: Date.now() },
@@ -160,14 +160,14 @@ Deno.test("email: the operator path applies immediately and ends the sessions", 
     assertEquals(gotrue.called("PUT", "/admin/users/user-1"), 1);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("phone: an invalid number never reaches gotrue", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -181,7 +181,7 @@ Deno.test("phone: an invalid number never reaches gotrue", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -190,7 +190,7 @@ Deno.test("phone: a number already taken surfaces as a conflict", async () => {
   const gotrue = installGoTrueMock({
     "PUT /user": () => ({ status: 422, body: goTrueError("phone_exists") }),
   });
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -203,14 +203,14 @@ Deno.test("phone: a number already taken surfaces as a conflict", async () => {
     assertEquals(result.error, UpdateUserPhoneError.Conflict);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("password: mismatched confirmation is refused before re-authenticating", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -224,14 +224,14 @@ Deno.test("password: mismatched confirmation is refused before re-authenticating
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("password: reusing the current password is refused", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -245,14 +245,14 @@ Deno.test("password: reusing the current password is refused", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("password: the policy applies to the new password", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -266,7 +266,7 @@ Deno.test("password: the policy applies to the new password", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -275,7 +275,7 @@ Deno.test("password: a wrong current password stops before any write", async () 
   const gotrue = installGoTrueMock({
     "POST /token*": () => ({ status: 400, body: goTrueError("invalid_credentials") }),
   });
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -289,7 +289,7 @@ Deno.test("password: a wrong current password stops before any write", async () 
     assertEquals(gotrue.called("PUT", "/admin/users/user-1"), 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -300,7 +300,7 @@ Deno.test("password: a successful change revokes every session globally", async 
     "PUT /admin/users/*": () => ({ status: 200, body: goTrueUser() }),
     "POST /logout*": () => ({ status: 204 }),
   });
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -317,7 +317,7 @@ Deno.test("password: a successful change revokes every session globally", async 
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -328,7 +328,7 @@ Deno.test("password: a failed gotrue write leaves the sessions untouched", async
     "PUT /admin/users/*": () => ({ status: 500, body: goTrueError("unexpected_failure") }),
     "POST /logout*": () => ({ status: 204 }),
   });
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -345,7 +345,7 @@ Deno.test("password: a failed gotrue write leaves the sessions untouched", async
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -354,7 +354,7 @@ Deno.test("phone change: requesting it only sends the otp, it commits nothing", 
   const gotrue = installGoTrueMock({
     "PUT /user": () => ({ status: 200, body: { id: "user-1" } }),
   });
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -371,7 +371,7 @@ Deno.test("phone change: requesting it only sends the otp, it commits nothing", 
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -380,7 +380,7 @@ Deno.test("phone change: a wrong code leaves the number untouched", async () => 
   const gotrue = installGoTrueMock({
     "POST /verify": () => ({ status: 401, body: goTrueError("otp_expired") }),
   });
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -393,14 +393,14 @@ Deno.test("phone change: a wrong code leaves the number untouched", async () => 
     assertEquals(result.error, ConfirmUserPhoneError.InvalidOrExpired);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("phone change: a malformed code never reaches gotrue", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -413,7 +413,7 @@ Deno.test("phone change: a malformed code never reaches gotrue", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -422,7 +422,7 @@ Deno.test("phone change: gotrue is asked to verify a phone_change, not an sms", 
   const gotrue = installGoTrueMock({
     "POST /verify": () => ({ status: 200, body: { id: "user-1" } }),
   });
-  const rest = installRestMock({ internal_t__app_users: [...APP_USERS] });
+  const database = installDatabaseMock({ internal_t__app_users: [...APP_USERS] });
   const env = installAuthEnv();
 
   try {
@@ -439,7 +439,7 @@ Deno.test("phone change: gotrue is asked to verify a phone_change, not an sms", 
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });

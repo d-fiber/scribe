@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import { type CampaignCandidate, type CampaignFilters, isSet } from "./filters.ts";
 
 const PAGE_SIZE = 1000;
@@ -65,7 +65,7 @@ export async function fetchUserCandidates(
   const results: UserCandidateRow[] = [];
 
   for (let offset = 0;; offset += PAGE_SIZE) {
-    const page = await rest
+    const page = await database
       .internal_t__app_users()
       .select((s) => ({
         user_id: s.user_id,
@@ -120,7 +120,7 @@ export async function fetchAdminCandidates(
   const results: AdminCandidateRow[] = [];
 
   for (let offset = 0;; offset += PAGE_SIZE) {
-    const page = await rest
+    const page = await database
       .internal_t__admin_users()
       .select((s) => ({
         admin_id: s.admin_id,
@@ -179,7 +179,7 @@ export async function fetchLastSignInAt(
   const result = new Map<string, number | null>();
   if (ids.length === 0) return result;
 
-  const { data, error } = await rest.rpc<LastSignInRow>(
+  const { data, error } = await database.rpc<LastSignInRow>(
     "get_last_sign_in_at",
     { p_ids: ids },
   );

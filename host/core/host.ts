@@ -40,11 +40,11 @@ export { resolveIdentity } from "./kernel/identity/middleware.ts";
 export { AdminRbacResolver } from "./runtime/support/ports/rbac_resolver.ts";
 export type { AdminRbac, AdminRbacSource } from "./contracts/rbac.ts";
 
-export { cronRegistry } from "@scribe/host/packages/foundation/event_driven/cron/core/registry.ts";
-export { cronRunner } from "@scribe/host/packages/foundation/event_driven/cron/runner/cron_runner.ts";
-export { queueRegistry } from "@scribe/host/packages/foundation/event_driven/queue/core/registry.ts";
-export { queueRunner } from "@scribe/host/packages/foundation/event_driven/queue/runner/queue_runner.ts";
-export { hookRegistry } from "@scribe/host/packages/foundation/event_driven/hook/core/registry.ts";
+export { cronRegistry } from "@scribe/foundation/src/cron/core/registry.ts";
+export { cronRunner } from "@scribe/foundation/src/cron/runner/cron_runner.ts";
+export { queueRegistry } from "@scribe/foundation/src/queue/core/registry.ts";
+export { queueRunner } from "@scribe/foundation/src/queue/runner/queue_runner.ts";
+export { hookRegistry } from "@scribe/foundation/src/hook/core/registry.ts";
 export {
   type Extension,
   ExtensionRegistry,

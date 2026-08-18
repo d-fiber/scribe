@@ -40,7 +40,7 @@ import {
 } from "@scribe/host/dependencies/security/auth/src/session/session.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installAuthEnv } from "@scribe/host/dependencies/security/auth/testing/env.ts";
 import {
   goTrueError,
@@ -58,7 +58,7 @@ Deno.test("refresh: a valid refresh token yields a session and its role", async 
   const gotrue = installGoTrueMock({
     "POST /token*": () => ({ status: 200, body: goTrueSession() }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -69,7 +69,7 @@ Deno.test("refresh: a valid refresh token yields a session and its role", async 
     assertEquals(result.data.role, AccountRole.User);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -78,7 +78,7 @@ Deno.test("refresh: a rejected refresh token is Unauthorized, never Unexpected",
   const gotrue = installGoTrueMock({
     "POST /token*": () => ({ status: 400, body: goTrueError("refresh_token_not_found") }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -88,7 +88,7 @@ Deno.test("refresh: a rejected refresh token is Unauthorized, never Unexpected",
     assertEquals(result.error, RefreshSessionError.Unauthorized);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -97,7 +97,7 @@ Deno.test("refresh: a session without a user is refused", async () => {
   const gotrue = installGoTrueMock({
     "POST /token*": () => ({ status: 200, body: goTrueSession({ user: undefined }) }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -107,7 +107,7 @@ Deno.test("refresh: a session without a user is refused", async () => {
     assertEquals(result.error, RefreshSessionError.Unauthorized);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -116,7 +116,7 @@ Deno.test("refresh: the idempotency window is keyed on the refresh token", async
   const gotrue = installGoTrueMock({
     "POST /token*": () => ({ status: 200, body: goTrueSession() }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -131,7 +131,7 @@ Deno.test("refresh: the idempotency window is keyed on the refresh token", async
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -140,7 +140,7 @@ Deno.test("refresh: two distinct refresh tokens never share a cache entry", asyn
   const gotrue = installGoTrueMock({
     "POST /token*": () => ({ status: 200, body: goTrueSession() }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -151,7 +151,7 @@ Deno.test("refresh: two distinct refresh tokens never share a cache entry", asyn
     assertEquals(gotrue.called("POST", "/token"), 2);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -160,7 +160,7 @@ Deno.test("recover: a still-valid access token avoids rotating the refresh token
   const gotrue = installGoTrueMock({
     "GET /user": () => ({ status: 200, body: goTrueUser() }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -170,7 +170,7 @@ Deno.test("recover: a still-valid access token avoids rotating the refresh token
     assertEquals(gotrue.called("POST", "/token"), 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -180,7 +180,7 @@ Deno.test("recover: an expired access token falls back to the refresh token", as
     "GET /user": () => ({ status: 401, body: goTrueError("bad_jwt") }),
     "POST /token*": () => ({ status: 200, body: goTrueSession() }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -190,7 +190,7 @@ Deno.test("recover: an expired access token falls back to the refresh token", as
     assertEquals(gotrue.called("POST", "/token"), 1);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -200,7 +200,7 @@ Deno.test("recover: both tokens dead is Unauthorized", async () => {
     "GET /user": () => ({ status: 401, body: goTrueError("bad_jwt") }),
     "POST /token*": () => ({ status: 400, body: goTrueError("refresh_token_not_found") }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -210,14 +210,14 @@ Deno.test("recover: both tokens dead is Unauthorized", async () => {
     assertEquals(result.error, RecoverSessionError.Unauthorized);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("recover: an empty token is refused without any network call", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -230,14 +230,14 @@ Deno.test("recover: an empty token is refused without any network call", async (
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("signOut: without a session, Unauthorized and nothing is called", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -248,14 +248,14 @@ Deno.test("signOut: without a session, Unauthorized and nothing is called", asyn
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("signOut: a signed-in user revokes its own session, locally", async () => {
   const gotrue = installGoTrueMock({ "POST /logout*": () => ({ status: 204 }) });
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: [{ user_id: "user-1", email: "u1@example.com" }],
   });
   const env = installAuthEnv();
@@ -274,14 +274,14 @@ Deno.test("signOut: a signed-in user revokes its own session, locally", async ()
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("delete: without a session, Unauthorized", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -292,7 +292,7 @@ Deno.test("delete: without a session, Unauthorized", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -302,7 +302,7 @@ Deno.test("delete: revokes globally then deletes the gotrue account", async () =
     "POST /logout*": () => ({ status: 204 }),
     "DELETE /admin/users/*": () => ({ status: 200, body: {} }),
   });
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: [{ user_id: "user-1", email: "u1@example.com" }],
   });
   const env = installAuthEnv();
@@ -321,7 +321,7 @@ Deno.test("delete: revokes globally then deletes the gotrue account", async () =
     assertEquals(gotrue.called("DELETE", "/admin/users/user-1"), 1);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -331,7 +331,7 @@ Deno.test("delete: the per-account limit is keyed on the user id", async () => {
     "POST /logout*": () => ({ status: 204 }),
     "DELETE /admin/users/*": () => ({ status: 200, body: {} }),
   });
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__app_users: [{ user_id: "user-1", email: "u1@example.com" }],
   });
   const env = installAuthEnv();
@@ -350,7 +350,7 @@ Deno.test("delete: the per-account limit is keyed on the user id", async () => {
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });

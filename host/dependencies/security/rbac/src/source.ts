@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Tables } from "@scribe/host/packages/foundation/database/rest/gen/tables.ts";
+import { Tables } from "@scribe/foundation/src/database/gen/tables.ts";
 import type { AdminRbacSource } from "@scribe/core/contracts/rbac.ts";
 import { Env } from "@scribe/host/env.ts";
 import { PostgrestClient } from "@supabase/postgrest-js";

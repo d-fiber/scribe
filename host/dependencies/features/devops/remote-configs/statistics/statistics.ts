@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTRemoteConfigStatisticsRow } from "@scribe/host/packages/foundation/database/rest/gen/rows.ts";
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import type { InternalTRemoteConfigStatisticsRow } from "@scribe/foundation/src/database/gen/rows.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import type { RemoteConfigAudience } from "@scribe/core/contracts/enums.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
@@ -110,7 +110,7 @@ export class RemoteConfigStatisticsRepository extends Repository<RemoteConfigSta
     id: RemoteConfigStatisticId,
   ): Promise<Result<RemoteConfigStatistic, RemoteConfigStatisticsError>> {
     return this.guard(async () => {
-      const row = await rest
+      const row = await database
         .internal_t__remote_config_statistics()
         .where((f) => f.statistic_id.eq(id))
         .getOne();
@@ -129,7 +129,7 @@ export class RemoteConfigStatisticsRepository extends Repository<RemoteConfigSta
       const offset = options?.offset ?? 0;
       const size = options?.size ?? DEFAULT_PAGE_SIZE;
 
-      const rows = await rest
+      const rows = await database
         .internal_t__remote_config_statistics()
         .select((s) => ({
           statistic_id: s.statistic_id,
@@ -170,7 +170,7 @@ export class RemoteConfigStatisticsRepository extends Repository<RemoteConfigSta
     id: RemoteConfigStatisticId,
   ): Promise<Result<void, RemoteConfigStatisticsError>> {
     return this.guard(async () => {
-      const ok = await rest
+      const ok = await database
         .internal_t__remote_config_statistics()
         .where((f) => f.statistic_id.eq(id))
         .delete();

@@ -30,12 +30,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import type { RealtimeRow, RealtimeTransport } from "./transport.ts";
 
 export class SyncEventsTransport implements RealtimeTransport {
   send(row: RealtimeRow): Promise<boolean> {
-    return rest.internal_t__sync_events().insert({
+    return database.internal_t__sync_events().insert({
       scope: row.scope,
       topic: row.topic,
       entity: row.entity,

@@ -35,16 +35,16 @@ import {
   type PushRequest,
   type PushResult,
   PushResultSchema,
-} from "@scribe/sdk/gen/scribe/host/packages/foundation/event_driven/queue/protocol/queue_pb.ts";
+} from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/queue/queue_pb.ts";
 import {
   type EmitResult,
   EmitResultSchema,
   type Event,
-} from "@scribe/sdk/gen/scribe/host/packages/foundation/event_driven/hook/protocol/hook_pb.ts";
+} from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/hook/hook_pb.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { hookRegistry } from "@scribe/host/packages/foundation/event_driven/hook/mod.ts";
-import { QueueProducer } from "@scribe/host/packages/foundation/event_driven/queue/core/producer.ts";
-import { queueRegistry } from "@scribe/host/packages/foundation/event_driven/queue/mod.ts";
+import { hookRegistry } from "@scribe/foundation/src/hook/mod.ts";
+import { QueueProducer } from "@scribe/foundation/src/queue/core/producer.ts";
+import { queueRegistry } from "@scribe/foundation/src/queue/mod.ts";
 import { decodeJson } from "../json.ts";
 
 function describe(cause: unknown): string {

@@ -32,9 +32,9 @@
 
 import { EmailCampaignError, EmailCampaignRepository } from "@scribe/host/dependencies/features/messagings/mail/campaigns.ts";
 import { CampaignAudience } from "@scribe/core/contracts/enums.ts";
-import { CronTimezone } from "@scribe/host/packages/foundation/event_driven/cron/timezone.ts";
+import { CronTimezone } from "@scribe/foundation/src/cron/timezone.ts";
 import type { Row } from "@scribe/core/testing/database/fake_postgrest.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { assert, assertEquals } from "@std/assert";
 
 const TABLE = "internal_t__email_campaigns";
@@ -61,11 +61,11 @@ function campaign(overrides: Partial<Row> = {}): Row {
 }
 
 function harness(rows: Row[] = []) {
-  const rest = installRestMock({ [TABLE]: rows });
+  const database = installDatabaseMock({ [TABLE]: rows });
   return {
     campaigns: new EmailCampaignRepository(),
-    rows: (): Row[] => rest.rows(TABLE),
-    restore: () => rest.restore(),
+    rows: (): Row[] => database.rows(TABLE),
+    restore: () => database.restore(),
   };
 }
 

@@ -33,8 +33,8 @@
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { ApiContext, RateLimiter } from "@scribe/core/kernel/endpoint/api.ts";
 import { ServiceEndpoint } from "@scribe/core/kernel/endpoint/service.ts";
-import { queueStatus } from "@scribe/host/packages/foundation/event_driven/queue/core/status.ts";
-import { queueRunner } from "@scribe/host/packages/foundation/event_driven/queue/runner/queue_runner.ts";
+import { queueStatus } from "@scribe/foundation/src/queue/core/status.ts";
+import { queueRunner } from "@scribe/foundation/src/queue/runner/queue_runner.ts";
 
 const _RATE_LIMIT: RateLimiter = {
   limit: 1000,

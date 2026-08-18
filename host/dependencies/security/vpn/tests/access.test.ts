@@ -34,7 +34,7 @@ import { PendingToken } from "@scribe/host/dependencies/security/vpn/src/pending
 import { type Vpn, vpn, VpnAccessError, VpnAccessLink, VpnError } from "@scribe/host/dependencies/security/vpn/mod.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installMock } from "@scribe/core/testing/install.ts";
 import { forgeToken } from "@scribe/host/dependencies/security/vpn/testing/pending_token.ts";
 import { assert, assertEquals, assertStringIncludes } from "@std/assert";
@@ -85,7 +85,7 @@ function installVpn(options: { owned?: boolean } = {}) {
 }
 
 Deno.test("issue: the link carries a token and points at the hosting page", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   try {
     const url = await VpnAccessLink.issue(ADMIN);
 
@@ -97,7 +97,7 @@ Deno.test("issue: the link carries a token and points at the hosting page", asyn
       "the token grants network access: in a query string it lands in the Kong and Caddy access logs, so it must travel in the fragment",
     );
     assertEquals(
-      rest.rows("internal_t__otp_pending_tokens").length,
+      database.rows("internal_t__otp_pending_tokens").length,
       1,
       "the link is only usable because its hash is stored: issuing must persist",
     );
@@ -107,12 +107,12 @@ Deno.test("issue: the link carries a token and points at the hosting page", asyn
       "the configuration itself must never travel in the mail",
     );
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("redeem: a fresh token returns the configuration and burns the token", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   const vpn = installVpn();
   try {
     const url = await VpnAccessLink.issue(ADMIN);
@@ -123,15 +123,15 @@ Deno.test("redeem: a fresh token returns the configuration and burns the token",
     assert(result.ok);
     assertEquals(result.data.content, CONFIG);
     assertEquals(result.data.filename, "ada-lovelace-vpn.conf");
-    assertEquals(rest.rows("internal_t__otp_pending_tokens").length, 0);
+    assertEquals(database.rows("internal_t__otp_pending_tokens").length, 0);
   } finally {
     vpn.restore();
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("redeem: the same link cannot be used twice", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   const vpn = installVpn();
   try {
     const url = await VpnAccessLink.issue(ADMIN);
@@ -144,12 +144,12 @@ Deno.test("redeem: the same link cannot be used twice", async () => {
     assertEquals(replay.error, VpnAccessError.InvalidOrExpiredToken);
   } finally {
     vpn.restore();
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("redeem: a token never stored is refused even though it is well signed", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   const vpn = installVpn();
   try {
     const forged = await forgeToken(ADMIN, AccountRole.Admin, {});
@@ -160,12 +160,12 @@ Deno.test("redeem: a token never stored is refused even though it is well signed
     assertEquals(result.error, VpnAccessError.InvalidOrExpiredToken);
   } finally {
     vpn.restore();
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("redeem: a sign-in token cannot be replayed as a vpn link", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   const vpn = installVpn();
   try {
     const signIn = await forgeToken(ADMIN, AccountRole.Admin, { purpose: "sign-in" });
@@ -176,12 +176,12 @@ Deno.test("redeem: a sign-in token cannot be replayed as a vpn link", async () =
     assertEquals(result.error, VpnAccessError.InvalidOrExpiredToken);
   } finally {
     vpn.restore();
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("redeem: a user-role token is refused on an admin-only link", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   const vpn = installVpn();
   try {
     const asUser = await new PendingToken().issue(ADMIN, AccountRole.User, null);
@@ -192,12 +192,12 @@ Deno.test("redeem: a user-role token is refused on an admin-only link", async ()
     assertEquals(result.error, VpnAccessError.InvalidOrExpiredToken);
   } finally {
     vpn.restore();
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("redeem: an expired token is refused", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   const vpn = installVpn();
   try {
     const expired = await forgeToken(ADMIN, AccountRole.Admin, {
@@ -210,12 +210,12 @@ Deno.test("redeem: an expired token is refused", async () => {
     assertEquals(result.error, VpnAccessError.InvalidOrExpiredToken);
   } finally {
     vpn.restore();
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("redeem: garbage is refused without throwing", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   const vpn = installVpn();
   try {
     for (const bad of ["", "   ", "nope", "a.b", "x".repeat(4000)]) {
@@ -224,12 +224,12 @@ Deno.test("redeem: garbage is refused without throwing", async () => {
     }
   } finally {
     vpn.restore();
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("redeem: a revoked owner gets nothing, and the token is still spent", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   const vpn = installVpn({ owned: false });
   try {
     const url = await VpnAccessLink.issue(ADMIN);
@@ -238,15 +238,15 @@ Deno.test("redeem: a revoked owner gets nothing, and the token is still spent", 
     const result = await VpnAccessLink.redeem(token, IDENTITY);
 
     assert(!result.ok);
-    assertEquals(rest.rows("internal_t__otp_pending_tokens").length, 0);
+    assertEquals(database.rows("internal_t__otp_pending_tokens").length, 0);
   } finally {
     vpn.restore();
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("redeem: the filename falls back when the profile is incomplete", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   const vpn = installVpn();
   try {
     const url = await VpnAccessLink.issue(ADMIN);
@@ -261,30 +261,30 @@ Deno.test("redeem: the filename falls back when the profile is incomplete", asyn
     assertEquals(result.data.filename, "vpn.conf");
   } finally {
     vpn.restore();
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("ownerOf: reads the owner without consuming the token", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   try {
     const url = await VpnAccessLink.issue(ADMIN);
     const token = tokenOf(url!);
 
     assertEquals(await VpnAccessLink.ownerOf(token), ADMIN);
     assertEquals(
-      rest.rows("internal_t__otp_pending_tokens").length,
+      database.rows("internal_t__otp_pending_tokens").length,
       1,
       "the POST resolves the owner before redeeming: reading must not burn the token",
     );
     assertEquals(await VpnAccessLink.ownerOf("nonsense"), null);
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("ownerOf: a spent token no longer names its owner", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   const vpn = installVpn();
   try {
     const url = await VpnAccessLink.issue(ADMIN);
@@ -299,17 +299,17 @@ Deno.test("ownerOf: a spent token no longer names its owner", async () => {
     );
   } finally {
     vpn.restore();
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("ownerOf: a well-signed token that was never stored names nobody", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   try {
     const forged = await forgeToken(ADMIN, AccountRole.Admin, {});
 
     assertEquals(await VpnAccessLink.ownerOf(forged), null);
   } finally {
-    rest.restore();
+    database.restore();
   }
 });

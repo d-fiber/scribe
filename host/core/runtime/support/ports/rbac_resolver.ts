@@ -32,7 +32,7 @@
 
 import type { AdminRbac, AdminRbacSource } from "@scribe/core/contracts/rbac.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { Valkery } from "@scribe/host/packages/foundation/cache/valkery.ts";
+import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
 
 class _AdminRbacCache extends Valkery {
   override get key(): string {

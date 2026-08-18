@@ -31,13 +31,13 @@
 // LICENSE file, the LICENSE file governs.
 
 // The test forge re-implements the signing format so fixtures can be built
-// before the rest mock exists. That duplication is only safe as long as both
+// before the database mock exists. That duplication is only safe as long as both
 // sides stay interchangeable, which is exactly what this file checks.
 
 import { PendingToken, PendingTokenPurpose } from "@scribe/host/dependencies/security/auth/src/_core/pending_token.ts";
 import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { forgeToken } from "@scribe/host/dependencies/security/auth/testing/pending_token.ts";
 import { assert, assertEquals, assertNotEquals } from "@std/assert";
 
@@ -56,7 +56,7 @@ Deno.test("forge: a forged token is accepted by the production reader", async ()
 });
 
 Deno.test("forge: an issued token is shaped exactly like a forged one", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   try {
     const issued = await new PendingToken().issue(IDENTIFIER, AccountRole.User, "device-1");
     const forged = await forgeToken(IDENTIFIER, AccountRole.User, { deviceId: "device-1" });
@@ -74,7 +74,7 @@ Deno.test("forge: an issued token is shaped exactly like a forged one", async ()
       "a new claim on either side would make every fixture silently unverifiable",
     );
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
@@ -92,10 +92,10 @@ Deno.test("forge: the device binding survives the round-trip", async () => {
 });
 
 Deno.test("issue: the row it stores is the hash of the token it returns", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   try {
     const token = await new PendingToken().issue(IDENTIFIER, AccountRole.User, null);
-    const rows = rest.rows("internal_t__otp_pending_tokens");
+    const rows = database.rows("internal_t__otp_pending_tokens");
 
     assert(token !== null);
     assertEquals(rows.length, 1);
@@ -105,7 +105,7 @@ Deno.test("issue: the row it stores is the hash of the token it returns", async 
       "an already-expired row would make the token unusable on arrival",
     );
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 

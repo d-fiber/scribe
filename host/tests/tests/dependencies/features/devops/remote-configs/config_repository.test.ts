@@ -33,7 +33,7 @@
 import { RemoteConfigRepository } from "@scribe/host/dependencies/features/devops/remote-configs/config/config.ts";
 import { RemoteConfigError } from "@scribe/host/dependencies/features/devops/remote-configs/remote-configs.ts";
 import type { Row } from "@scribe/core/testing/database/fake_postgrest.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { assert, assertEquals } from "@std/assert";
 
 const TABLE = "internal_t__remote_configs";
@@ -62,16 +62,16 @@ function config(overrides: Partial<Row> = {}): Row {
 }
 
 function harness(rows: Row[]) {
-  const rest = installRestMock({ [TABLE]: rows });
-  rest.onRpc(RPC, (args) => {
+  const database = installDatabaseMock({ [TABLE]: rows });
+  database.onRpc(RPC, (args) => {
     const caller = args?.p_caller_type as string | null;
     return caller ? AUDIENCES[caller] ?? ["public"] : ["public"];
   });
 
   return {
     configs: new RemoteConfigRepository(),
-    rows: (): Row[] => rest.rows(TABLE),
-    restore: () => rest.restore(),
+    rows: (): Row[] => database.rows(TABLE),
+    restore: () => database.restore(),
   };
 }
 

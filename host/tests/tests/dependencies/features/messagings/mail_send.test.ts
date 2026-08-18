@@ -32,7 +32,7 @@
 
 import { MailError, MailSenderSmtp, MailStatus } from "@scribe/host/dependencies/features/messagings/mail/send.ts";
 import type { Row } from "@scribe/core/testing/database/fake_postgrest.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installMock } from "@scribe/core/testing/install.ts";
 import nodemailer from "nodemailer";
 import { assert, assertEquals } from "@std/assert";
@@ -65,7 +65,7 @@ function mail(overrides: Partial<Row> = {}): Row {
 }
 
 function harness(options: { mails?: Row[]; templates?: Row[]; failSmtp?: boolean } = {}) {
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     [MAILS]: options.mails ?? [],
     [TEMPLATES]: options.templates ?? [],
   });
@@ -91,10 +91,10 @@ function harness(options: { mails?: Row[]; templates?: Row[]; failSmtp?: boolean
       pass: "p",
     }),
     sent: (): SentMail[] => sent,
-    rows: (): Row[] => rest.rows(MAILS),
+    rows: (): Row[] => database.rows(MAILS),
     restore(): void {
       transport.restore();
-      rest.restore();
+      database.restore();
     },
   };
 }

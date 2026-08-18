@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTPushTemplatesRow } from "@scribe/host/packages/foundation/database/rest/gen/rows.ts";
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import type { InternalTPushTemplatesRow } from "@scribe/foundation/src/database/gen/rows.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
@@ -96,7 +96,7 @@ export class PushTemplateRepository extends Repository<PushTemplateError> implem
 
   getByName(name: string): Promise<Result<PushTemplate, PushTemplateError>> {
     return this.guard(async () => {
-      const row = await rest
+      const row = await database
         .internal_t__push_templates()
         .where((f) => f.name.eq(name))
         .getOne();
@@ -110,7 +110,7 @@ export class PushTemplateRepository extends Repository<PushTemplateError> implem
       const offset = options?.offset ?? 0;
       const size = options?.size ?? DEFAULT_PAGE_SIZE;
 
-      const rows = await rest
+      const rows = await database
         .internal_t__push_templates()
         .select((s) => ({
           push_template_id: s.push_template_id,
@@ -135,7 +135,7 @@ export class PushTemplateRepository extends Repository<PushTemplateError> implem
 
   create(input: CreatePushTemplateInput): Promise<Result<PushTemplate, PushTemplateError>> {
     return this.guard(async () => {
-      const row = await rest.internal_t__push_templates().insertOne({
+      const row = await database.internal_t__push_templates().insertOne({
         name: input.name,
         title: input.title,
         body: input.body,
@@ -154,7 +154,7 @@ export class PushTemplateRepository extends Repository<PushTemplateError> implem
       const existing = await this.#row(id);
       if (!existing) return new Failure(PushTemplateError.NotFound);
 
-      const ok = await rest
+      const ok = await database
         .internal_t__push_templates()
         .where((f) => f.push_template_id.eq(id))
         .update(this.#patch(input));
@@ -165,7 +165,7 @@ export class PushTemplateRepository extends Repository<PushTemplateError> implem
 
   remove(id: PushTemplateId): Promise<Result<void, PushTemplateError>> {
     return this.guard(async () => {
-      const removed = await rest
+      const removed = await database
         .internal_t__push_templates()
         .where((f) => f.push_template_id.eq(id))
         .deleteOne((s) => ({ push_template_id: s.push_template_id }));
@@ -175,7 +175,7 @@ export class PushTemplateRepository extends Repository<PushTemplateError> implem
   }
 
   #row(id: PushTemplateId): Promise<InternalTPushTemplatesRow | null> {
-    return rest
+    return database
       .internal_t__push_templates()
       .where((f) => f.push_template_id.eq(id))
       .getOne();

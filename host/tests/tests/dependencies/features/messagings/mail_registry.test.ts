@@ -37,7 +37,7 @@ import {
 } from "@scribe/host/dependencies/features/messagings/mail/statistics.ts";
 import { EmailTemplateError, EmailTemplateRepository } from "@scribe/host/dependencies/features/messagings/mail/templates.ts";
 import type { Row } from "@scribe/core/testing/database/fake_postgrest.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { assert, assertEquals } from "@std/assert";
 
 const TEMPLATES = "internal_t__email_templates";
@@ -68,7 +68,7 @@ function statistic(overrides: Partial<Row> = {}): Row {
 // --- templates --------------------------------------------------------------
 
 Deno.test("templates: the seeded rows carry a name and no content", async () => {
-  const rest = installRestMock({ [TEMPLATES]: [template()] });
+  const database = installDatabaseMock({ [TEMPLATES]: [template()] });
 
   try {
     const byId = await new EmailTemplateRepository().getById(1);
@@ -82,12 +82,12 @@ Deno.test("templates: the seeded rows carry a name and no content", async () => 
       "rendering happens in TypeScript, so the column stays empty and interpolate() returns null",
     );
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("templates: an unknown id or name is not-found, never a null-ish success", async () => {
-  const rest = installRestMock({ [TEMPLATES]: [template()] });
+  const database = installDatabaseMock({ [TEMPLATES]: [template()] });
 
   try {
     const byId = await new EmailTemplateRepository().getById(999);
@@ -97,12 +97,12 @@ Deno.test("templates: an unknown id or name is not-found, never a null-ish succe
     assertEquals(byId.error, EmailTemplateError.NotFound);
     assertEquals(byName.error, EmailTemplateError.NotFound);
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("templates: filling subject + text re-arms the interpolation fallback", async () => {
-  const rest = installRestMock({ [TEMPLATES]: [template()] });
+  const database = installDatabaseMock({ [TEMPLATES]: [template()] });
 
   try {
     const res = await new EmailTemplateRepository().update(1, {
@@ -111,17 +111,17 @@ Deno.test("templates: filling subject + text re-arms the interpolation fallback"
     });
     assert(res.ok);
 
-    const row = rest.rows(TEMPLATES)[0];
+    const row = database.rows(TEMPLATES)[0];
     assertEquals(row.subject, "Bonjour {{name}}");
     assertEquals(row.text, "Contenu");
     assertEquals(row.name, "app/auth/confirm-account", "the name is left alone");
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("templates: create then remove", async () => {
-  const rest = installRestMock({ [TEMPLATES]: [] });
+  const database = installDatabaseMock({ [TEMPLATES]: [] });
 
   try {
     const created = await new EmailTemplateRepository().create({
@@ -130,19 +130,19 @@ Deno.test("templates: create then remove", async () => {
       text: "Corps",
     });
     assert(created.ok);
-    assertEquals(rest.rows(TEMPLATES).length, 1);
+    assertEquals(database.rows(TEMPLATES).length, 1);
     assertEquals(created.data.html, null, "html stays null when none is given");
 
     const removed = await new EmailTemplateRepository().remove(created.data.id);
     assert(removed.ok);
-    assertEquals(rest.rows(TEMPLATES).length, 0);
+    assertEquals(database.rows(TEMPLATES).length, 0);
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("templates: list paginates most recent first", async () => {
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     [TEMPLATES]: [
       template({ email_template_id: 1, name: "a" }),
       template({ email_template_id: 2, name: "b" }),
@@ -156,14 +156,14 @@ Deno.test("templates: list paginates most recent first", async () => {
     assertEquals(page.data.items.map((t) => t.name), ["c", "b"]);
     assertEquals(page.data.pagination.has_more, true);
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
 // --- statistics -------------------------------------------------------------
 
 Deno.test("statistics: record writes one open, list scopes to its mail", async () => {
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     [STATISTICS]: [
       statistic({ statistic_id: 1, mail_id: 100 }),
       statistic({ statistic_id: 2, mail_id: 200 }),
@@ -187,45 +187,45 @@ Deno.test("statistics: record writes one open, list scopes to its mail", async (
     );
     assertEquals(list.data.items.length, 2);
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("statistics: an absent ip or user agent is stored as an explicit null", async () => {
-  const rest = installRestMock({ [STATISTICS]: [] });
+  const database = installDatabaseMock({ [STATISTICS]: [] });
 
   try {
     await new MailStatisticRepository().record({ mailId: 100 });
 
-    const row = rest.rows(STATISTICS)[0];
+    const row = database.rows(STATISTICS)[0];
     assertEquals(row.ip_address, null);
     assertEquals(row.user_agent, null);
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("statistics: an unknown id is not-found", async () => {
-  const rest = installRestMock({ [STATISTICS]: [statistic()] });
+  const database = installDatabaseMock({ [STATISTICS]: [statistic()] });
 
   try {
     const res = await new MailStatisticRepository().get(999);
     assert(!res.ok);
     assertEquals(res.error, MailStatisticError.NotFound);
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
 // --- SMTP accounts ----------------------------------------------------------
 
 function accountsHarness(rows: Record<string, unknown>[]) {
-  const rest = installRestMock({});
-  rest.onRpc("smtp_account_credentials", (args) => {
+  const database = installDatabaseMock({});
+  database.onRpc("smtp_account_credentials", (args) => {
     const name = args?.p_name as string;
     return rows.filter((r) => r.name === name);
   });
-  return { accounts: new SmtpAccountRepository(), restore: () => rest.restore() };
+  return { accounts: new SmtpAccountRepository(), restore: () => database.restore() };
 }
 
 Deno.test("accounts: a fully configured account comes back decrypted", async () => {

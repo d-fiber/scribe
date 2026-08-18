@@ -40,7 +40,7 @@ import { kv, type Kv } from "@scribe/core/runtime/redis/mod.ts";
 import { installMock } from "@scribe/core/testing/install.ts";
 import { installValkeryMock } from "@scribe/core/testing/runtime/redis.ts";
 import { fakeDevice, withRequest } from "@scribe/core/testing/runtime/device.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import {
   goTrueError,
   goTrueSession,
@@ -113,7 +113,7 @@ Deno.test("trusted device: the session is returned as is, without an OTP", async
   const gotrue = installGoTrueMock({
     "POST /token*": () => ({ status: 200, body: goTrueSession() }),
   });
-  const restMock = installRestMock({
+  const restMock = installDatabaseMock({
     internal_t__app_user_devices: await trustedDeviceRows(),
   });
   const limits = allowAllRateLimits();
@@ -141,7 +141,7 @@ Deno.test("unknown device: OTP challenge and revocation of the password session"
     "POST /otp": () => ({ status: 200, body: {} }),
     "POST /logout*": () => ({ status: 204 }),
   });
-  const restMock = installRestMock({});
+  const restMock = installDatabaseMock({});
   const limits = allowAllRateLimits();
 
   try {
@@ -168,7 +168,7 @@ Deno.test("the pending token is never returned alongside the password session", 
     "POST /otp": () => ({ status: 200, body: {} }),
     "POST /logout*": () => ({ status: 204 }),
   });
-  const restMock = installRestMock({});
+  const restMock = installDatabaseMock({});
   const limits = allowAllRateLimits();
 
   try {
@@ -197,7 +197,7 @@ Deno.test("unexpected role: refused as InvalidCredentials, session revoked", asy
     }),
     "POST /logout*": () => ({ status: 204 }),
   });
-  const restMock = installRestMock({});
+  const restMock = installDatabaseMock({});
   const limits = allowAllRateLimits();
 
   try {
@@ -222,7 +222,7 @@ Deno.test("the password policy does not apply at sign-in", async () => {
     "POST /otp": () => ({ status: 200, body: {} }),
     "POST /logout*": () => ({ status: 204 }),
   });
-  const restMock = installRestMock({});
+  const restMock = installDatabaseMock({});
   const limits = allowAllRateLimits();
 
   try {
@@ -242,7 +242,7 @@ Deno.test("the password policy does not apply at sign-in", async () => {
 
 Deno.test("empty password: refused locally, gotrue is never called", async () => {
   const gotrue = installGoTrueMock({});
-  const restMock = installRestMock({});
+  const restMock = installDatabaseMock({});
   const limits = allowAllRateLimits();
 
   try {
@@ -263,7 +263,7 @@ Deno.test("empty password: refused locally, gotrue is never called", async () =>
 
 Deno.test("oversized password: refused before reaching bcrypt", async () => {
   const gotrue = installGoTrueMock({});
-  const restMock = installRestMock({});
+  const restMock = installDatabaseMock({});
   const limits = allowAllRateLimits();
 
   try {
@@ -287,7 +287,7 @@ Deno.test("unconfirmed email: a single confirmation resend", async () => {
     "POST /token*": () => ({ status: 400, body: goTrueError("email_not_confirmed") }),
     "POST /resend": () => ({ status: 200, body: {} }),
   });
-  const restMock = installRestMock({});
+  const restMock = installDatabaseMock({});
   const limits = allowAllRateLimits();
 
   try {
@@ -310,7 +310,7 @@ Deno.test("per-account limits are keyed on the mailbox, `+` tag stripped", async
   const gotrue = installGoTrueMock({
     "POST /token*": () => ({ status: 400, body: goTrueError("invalid_credentials") }),
   });
-  const restMock = installRestMock({});
+  const restMock = installDatabaseMock({});
   const limits = captureRateLimitKeys();
 
   try {
@@ -339,7 +339,7 @@ Deno.test("a failure consumes the global tier only through the `:all` key", asyn
   const gotrue = installGoTrueMock({
     "POST /token*": () => ({ status: 400, body: goTrueError("invalid_credentials") }),
   });
-  const restMock = installRestMock({});
+  const restMock = installDatabaseMock({});
   const limits = captureRateLimitKeys();
 
   try {
@@ -388,7 +388,7 @@ Deno.test("a saturated global tier does not lock the owner out of their own acco
   const gotrue = installGoTrueMock({
     "POST /token*": () => ({ status: 200, body: goTrueSession() }),
   });
-  const restMock = installRestMock({
+  const restMock = installDatabaseMock({
     internal_t__app_user_devices: await trustedDeviceRows(),
   });
   const limits = throttleWhere(isGlobalIdentityKey);
@@ -414,7 +414,7 @@ Deno.test("a saturated global tier still refuses a wrong password", async () => 
   const gotrue = installGoTrueMock({
     "POST /token*": () => ({ status: 400, body: goTrueError("invalid_credentials") }),
   });
-  const restMock = installRestMock({});
+  const restMock = installDatabaseMock({});
   const limits = throttleWhere(isGlobalIdentityKey);
 
   try {
@@ -436,7 +436,7 @@ Deno.test("a saturated caller tier is refused before GoTrue is ever asked", asyn
   const gotrue = installGoTrueMock({
     "POST /token*": () => ({ status: 200, body: goTrueSession() }),
   });
-  const restMock = installRestMock({});
+  const restMock = installDatabaseMock({});
   const limits = throttleWhere(isCallerIdentityKey);
 
   try {

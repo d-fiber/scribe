@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
-import { defineQueue } from "@scribe/host/packages/foundation/event_driven/queue/core/define.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
+import { defineQueue } from "@scribe/foundation/src/queue/core/define.ts";
 import type { RecordRemoteConfigStatisticInput } from "./statistics.ts";
 
 const LINGER_MS = 500;
@@ -50,7 +50,7 @@ export const remoteConfigStatisticsQueue = defineQueue<
       user_id: read.userId ?? null,
     }));
 
-    const ok = await rest.internal_t__remote_config_statistics().insert(rows);
+    const ok = await database.internal_t__remote_config_statistics().insert(rows);
     if (!ok) {
       console.error(
         `[remote-config-statistics] batch of ${rows.length} reads rejected by the database`,

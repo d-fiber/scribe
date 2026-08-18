@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import type { UserEmailSignUp } from "@scribe/host/dependencies/security/auth/src/sign_up/types.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { identityColumns, type SignUpAccount, type SignUpInsert } from "./account.ts";
@@ -46,7 +46,7 @@ export class UserSignUpAccount<
   }
 
   async exists(userId: string): Promise<boolean> {
-    const row = await rest
+    const row = await database
       .internal_t__app_users()
       .select((s) => ({ user_id: s.user_id }))
       .where((f) => f.user_id.eq(userId))
@@ -59,18 +59,18 @@ export class UserSignUpAccount<
     identity,
     device,
   }: SignUpInsert<TInput, Record<string, never>>): Promise<boolean> {
-    const account = await rest.internal_t__app_users().insert({
+    const account = await database.internal_t__app_users().insert({
       user_id: userId,
       ...identityColumns(identity),
     });
     if (!account) return false;
 
     const [notifications, settings] = await Promise.all([
-      rest.internal_t__in_app_notification_reads().insert({
+      database.internal_t__in_app_notification_reads().insert({
         user_id: userId,
         last_read_at: Date.now(),
       }),
-      rest.internal_t__app_user_settings().insert({
+      database.internal_t__app_user_settings().insert({
         user_id: userId,
         localization: device.localization,
         theme_mode: device.theme_mode,
@@ -81,7 +81,7 @@ export class UserSignUpAccount<
   }
 
   async delete(userId: string): Promise<void> {
-    await rest
+    await database
       .internal_t__app_users()
       .where((f) => f.user_id.eq(userId))
       .delete();

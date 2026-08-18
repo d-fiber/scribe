@@ -44,7 +44,7 @@ import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { SignInProvider } from "@scribe/host/dependencies/security/auth/src/hooks/auth.ts";
 import { fakeDevice, withRequest } from "@scribe/core/testing/runtime/device.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installAuthEnv } from "@scribe/host/dependencies/security/auth/testing/env.ts";
 import { goTrueSession, installGoTrueMock } from "@scribe/host/dependencies/security/auth/testing/gotrue.ts";
 import { assert, assertEquals } from "@std/assert";
@@ -86,7 +86,7 @@ function challenge(channel: OtpChannel = new FakeChannel()) {
 
 Deno.test("verifyOtp refuses a non-numeric code without calling the channel", async () => {
   const env = installAuthEnv();
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const channel = new FakeChannel();
   try {
     const result = await withRequest(fakeDevice(), async () => {
@@ -99,14 +99,14 @@ Deno.test("verifyOtp refuses a non-numeric code without calling the channel", as
     assertEquals(result.error, VerifyOtpError.InvalidOrExpired);
     assertEquals(channel.verified, 0);
   } finally {
-    rest.restore();
+    database.restore();
     env.restore();
   }
 });
 
 Deno.test("verifyOtp refuses a code of invalid length", async () => {
   const env = installAuthEnv();
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const channel = new FakeChannel();
   try {
     const result = await withRequest(fakeDevice(), async () => {
@@ -118,14 +118,14 @@ Deno.test("verifyOtp refuses a code of invalid length", async () => {
     assert(result instanceof Failure);
     assertEquals(channel.verified, 0);
   } finally {
-    rest.restore();
+    database.restore();
     env.restore();
   }
 });
 
 Deno.test("the challenge is bound to the device: another device is refused", async () => {
   const env = installAuthEnv();
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const channel = new FakeChannel();
   try {
     const pending = await withRequest(fakeDevice({ device_id: "device-A" }), async () => {
@@ -143,14 +143,14 @@ Deno.test("the challenge is bound to the device: another device is refused", asy
     assertEquals(result.error, VerifyOtpError.InvalidOrExpired);
     assertEquals(channel.verified, 0);
   } finally {
-    rest.restore();
+    database.restore();
     env.restore();
   }
 });
 
 Deno.test("resend keeps the original challenge when sending fails", async () => {
   const env = installAuthEnv();
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const channel = new FakeChannel();
   try {
     await withRequest(fakeDevice(), async () => {
@@ -167,14 +167,14 @@ Deno.test("resend keeps the original challenge when sending fails", async () => 
       assertEquals(stillThere, true, "the old token must survive a failed send");
     });
   } finally {
-    rest.restore();
+    database.restore();
     env.restore();
   }
 });
 
 Deno.test("resend consumes the old token once the new one is issued", async () => {
   const env = installAuthEnv();
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const channel = new FakeChannel();
   try {
     await withRequest(fakeDevice(), async () => {
@@ -189,14 +189,14 @@ Deno.test("resend consumes the old token once the new one is issued", async () =
       assertEquals(await new PendingToken().exists(resent.data.pendingToken), true);
     });
   } finally {
-    rest.restore();
+    database.restore();
     env.restore();
   }
 });
 
 Deno.test("resend from another device is refused", async () => {
   const env = installAuthEnv();
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const channel = new FakeChannel();
   try {
     const pending = await withRequest(fakeDevice({ device_id: "device-A" }), async () => {
@@ -215,14 +215,14 @@ Deno.test("resend from another device is refused", async () => {
     assertEquals(result.error, ResendError.InvalidOrExpiredToken);
     assertEquals(channel.sent, sentBefore, "no send must go out");
   } finally {
-    rest.restore();
+    database.restore();
     env.restore();
   }
 });
 
 Deno.test("a session without an access_token yields neither a revocation nor a null token", async () => {
   const env = installAuthEnv();
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const gotrue = installGoTrueMock({ "POST /logout*": () => ({ status: 204 }) });
   const channel = new FakeChannel();
   channel.verifyResult = new OK({ user: goTrueSession().user } as unknown as GoTrueSessionResponse);
@@ -239,14 +239,14 @@ Deno.test("a session without an access_token yields neither a revocation nor a n
     assertEquals(gotrue.called("POST", "/logout"), 0);
   } finally {
     gotrue.restore();
-    rest.restore();
+    database.restore();
     env.restore();
   }
 });
 
 Deno.test("start refuses a role that is not the challenge's own", async () => {
   const env = installAuthEnv();
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const channel = new FakeChannel();
   try {
     const result = await withRequest(
@@ -256,32 +256,32 @@ Deno.test("start refuses a role that is not the challenge's own", async () => {
     assert(result instanceof Failure);
     assertEquals(channel.sent, 0);
   } finally {
-    rest.restore();
+    database.restore();
     env.restore();
   }
 });
 
 Deno.test("the pending token is stored hashed, never in clear text", async () => {
   const env = installAuthEnv();
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const channel = new FakeChannel();
   try {
     await withRequest(fakeDevice(), async () => {
       const started = await challenge(channel).start("u1@example.com", AccountRole.User);
       assert(started instanceof OK);
-      const rows = rest.rows("internal_t__otp_pending_tokens");
+      const rows = database.rows("internal_t__otp_pending_tokens");
       assertEquals(rows.length, 1);
       assertEquals(rows[0].token_hash, await sha256Hex(started.data.pendingToken));
     });
   } finally {
-    rest.restore();
+    database.restore();
     env.restore();
   }
 });
 
 Deno.test("verifyOtp keeps the pending token alive when the counter is down", async () => {
   const env = installAuthEnv();
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const channel = new FakeChannel();
   const incr = installMock(
     kv(),
@@ -305,20 +305,20 @@ Deno.test("verifyOtp keeps the pending token alive when the counter is down", as
     );
     assertEquals(channel.verified, 0, "the channel must not be reached");
     assertEquals(
-      rest.rows("internal_t__otp_pending_tokens").length,
+      database.rows("internal_t__otp_pending_tokens").length,
       1,
       "our own outage must not burn the user's challenge",
     );
   } finally {
     incr.restore();
-    rest.restore();
+    database.restore();
     env.restore();
   }
 });
 
 Deno.test("resend keeps the pending token alive when the counter is down", async () => {
   const env = installAuthEnv();
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const channel = new FakeChannel();
   const incr = installMock(
     kv(),
@@ -336,20 +336,20 @@ Deno.test("resend keeps the pending token alive when the counter is down", async
     assert(result instanceof Failure);
     assertEquals(result.error, ResendError.TooManyRequests);
     assertEquals(
-      rest.rows("internal_t__otp_pending_tokens").length,
+      database.rows("internal_t__otp_pending_tokens").length,
       1,
       "our own outage must not burn the user's challenge",
     );
   } finally {
     incr.restore();
-    rest.restore();
+    database.restore();
     env.restore();
   }
 });
 
 Deno.test("verifyOtp still burns the token once the real budget is spent", async () => {
   const env = installAuthEnv();
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const channel = new FakeChannel();
   const incr = installMock(
     kv(),
@@ -367,13 +367,13 @@ Deno.test("verifyOtp still burns the token once the real budget is spent", async
     });
 
     assertEquals(
-      rest.rows("internal_t__otp_pending_tokens").length,
+      database.rows("internal_t__otp_pending_tokens").length,
       0,
       "an exhausted attacker budget still destroys the challenge",
     );
   } finally {
     incr.restore();
-    rest.restore();
+    database.restore();
     env.restore();
   }
 });

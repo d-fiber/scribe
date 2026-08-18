@@ -1,7 +1,8 @@
 {
   "workspace": [
     "./core",
-    "./dependencies"
+    "./dependencies",
+    "./packages/foundation"
   ],
   "tasks": {
     "check": "deno check **/*.ts",
@@ -35,6 +36,7 @@
   "imports": {
     "@scribe/core/": "./core/",
     "@scribe/host/": "./",
+    "@scribe/foundation/": "./packages/foundation/",
     "@scribe/protocol/": "../protocol/",
     "@scribe/sdk": "../sdk/js/mod.ts",
     "@scribe/sdk/": "../sdk/js/",

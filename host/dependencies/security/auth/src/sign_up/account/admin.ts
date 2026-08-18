@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { AvatarType } from "@scribe/core/contracts/enums.ts";
 import { Failure } from "@scribe/core/contracts/result.ts";
@@ -75,7 +75,7 @@ export class AdminSignUpAccount implements
   }
 
   async exists(userId: string): Promise<boolean> {
-    const row = await rest
+    const row = await database
       .internal_t__admin_users()
       .select((s) => ({ admin_id: s.admin_id }))
       .where((f) => f.admin_id.eq(userId))
@@ -92,7 +92,7 @@ export class AdminSignUpAccount implements
   }: SignUpInsert<AdminSignUp, AdminSignUpPrepared>): Promise<boolean> {
     if (identity.channel !== SignUpChannel.Email) return false;
 
-    const account = await rest.internal_t__admin_users().insert({
+    const account = await database.internal_t__admin_users().insert({
       admin_id: userId,
       role: data.role,
       email: identity.email,
@@ -103,7 +103,7 @@ export class AdminSignUpAccount implements
     if (!account) return false;
 
     const [profile, settings] = await Promise.all([
-      rest.internal_t__admin_users_profiles().insert({
+      database.internal_t__admin_users_profiles().insert({
         admin_id: userId,
         avatar_type: AvatarType.TEXT,
         avatar_text: data.firstname[0].toUpperCase() +
@@ -114,7 +114,7 @@ export class AdminSignUpAccount implements
         gender: data.gender,
         birthday: data.birthday,
       }),
-      rest.internal_t__admin_users_settings().insert({
+      database.internal_t__admin_users_settings().insert({
         admin_id: userId,
         localization: device.localization,
         theme_mode: device.theme_mode,
@@ -125,7 +125,7 @@ export class AdminSignUpAccount implements
   }
 
   async delete(userId: string): Promise<void> {
-    await rest
+    await database
       .internal_t__admin_users()
       .where((f) => f.admin_id.eq(userId))
       .delete();

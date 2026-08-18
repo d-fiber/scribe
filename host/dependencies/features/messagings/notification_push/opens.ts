@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTNotificationPushOpensRow } from "@scribe/host/packages/foundation/database/rest/gen/rows.ts";
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import type { InternalTNotificationPushOpensRow } from "@scribe/foundation/src/database/gen/rows.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
@@ -80,7 +80,7 @@ export class PushNotificationOpenRepository extends Repository<PushNotificationO
     id: PushNotificationOpenId,
   ): Promise<Result<PushNotificationOpen, PushNotificationOpenError>> {
     return this.guard(async () => {
-      const row = await rest
+      const row = await database
         .internal_t__notification_push_opens()
         .where((f) => f.open_id.eq(id))
         .getOne();
@@ -97,7 +97,7 @@ export class PushNotificationOpenRepository extends Repository<PushNotificationO
       const offset = options?.offset ?? 0;
       const size = options?.size ?? DEFAULT_PAGE_SIZE;
 
-      const rows = await rest
+      const rows = await database
         .internal_t__notification_push_opens()
         .select((s) => ({
           open_id: s.open_id,
@@ -121,7 +121,7 @@ export class PushNotificationOpenRepository extends Repository<PushNotificationO
 
   record(pushId: PushNotificationId): Promise<Result<void, PushNotificationOpenError>> {
     return this.guard(async () => {
-      const row = await rest
+      const row = await database
         .internal_t__notification_push_opens()
         .insertOne({ push_id: pushId });
 
@@ -131,7 +131,7 @@ export class PushNotificationOpenRepository extends Repository<PushNotificationO
 
   remove(id: PushNotificationOpenId): Promise<Result<void, PushNotificationOpenError>> {
     return this.guard(async () => {
-      const removed = await rest
+      const removed = await database
         .internal_t__notification_push_opens()
         .where((f) => f.open_id.eq(id))
         .deleteOne((s) => ({ open_id: s.open_id }));

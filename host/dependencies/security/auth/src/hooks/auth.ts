@@ -32,7 +32,7 @@
 
 import type { AccountRole } from "@scribe/core/contracts/account.ts";
 import { OK, type Result } from "@scribe/core/contracts/result.ts";
-import { defineHook, type Hook, type HookHandler } from "@scribe/host/packages/foundation/event_driven/hook/mod.ts";
+import { defineHook, type Hook, type HookHandler } from "@scribe/foundation/src/hook/mod.ts";
 
 export enum SignInProvider {
   Email = "email",

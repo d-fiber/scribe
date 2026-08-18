@@ -31,10 +31,10 @@
 // LICENSE file, the LICENSE file governs.
 
 import { TransportFailure, UnaryServer } from "@scribe/sdk";
-import { Cache } from "@scribe/sdk/gen/scribe/host/packages/foundation/cache/protocol/cache_pb.ts";
-import { Queue } from "@scribe/sdk/gen/scribe/host/packages/foundation/event_driven/queue/protocol/queue_pb.ts";
-import { Hook } from "@scribe/sdk/gen/scribe/host/packages/foundation/event_driven/hook/protocol/hook_pb.ts";
-import { Rest } from "@scribe/sdk/gen/scribe/host/packages/foundation/database/rest/protocol/rest_pb.ts";
+import { Valkery } from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/valkery/valkery_pb.ts";
+import { Queue } from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/queue/queue_pb.ts";
+import { Hook } from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/hook/hook_pb.ts";
+import { Database } from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/database/database_pb.ts";
 import { Logging } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 import { CapabilityTokens } from "./capability_tokens.ts";
 import { cacheDelete, cacheGet, cacheSet } from "./capabilities/cache.ts";
@@ -44,13 +44,13 @@ import { executeQuery } from "./capabilities/rest.ts";
 
 export function capabilityServer(): UnaryServer {
   const server = new UnaryServer()
-    .on(Rest.method.execute, (query, call) =>
+    .on(Database.method.execute, (query, call) =>
       CapabilityTokens.run(call.capabilityToken, () => executeQuery(query)))
-    .on(Cache.method.get, (request, call) =>
+    .on(Valkery.method.get, (request, call) =>
       CapabilityTokens.run(call.capabilityToken, () => cacheGet(request)))
-    .on(Cache.method.set, (request, call) =>
+    .on(Valkery.method.set, (request, call) =>
       CapabilityTokens.run(call.capabilityToken, () => cacheSet(request)))
-    .on(Cache.method.delete, (request, call) =>
+    .on(Valkery.method.delete, (request, call) =>
       CapabilityTokens.run(call.capabilityToken, () => cacheDelete(request)))
     .on(Queue.method.push, (request, call) =>
       CapabilityTokens.run(call.capabilityToken, () => queuePush(request)))

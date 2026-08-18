@@ -36,9 +36,9 @@ import {
   FilterOperator,
   Operation,
   type Query,
-  Rest,
-} from "../gen/scribe/host/packages/foundation/database/rest/protocol/rest_pb.ts";
-import { Cache } from "../gen/scribe/host/packages/foundation/cache/protocol/cache_pb.ts";
+  Database,
+} from "../gen/scribe/host/packages/foundation/protocol/database/database_pb.ts";
+import { Valkery } from "../gen/scribe/host/packages/foundation/protocol/valkery/valkery_pb.ts";
 import { decodeJson, encodeJson } from "../src/contracts/json.ts";
 
 interface Brand extends Record<string, unknown> {
@@ -59,14 +59,14 @@ async function withHost(
   run: () => Promise<void>,
 ): Promise<void> {
   const server = new UnaryServer()
-    .on(Rest.method.execute, (query, call) => {
+    .on(Database.method.execute, (query, call) => {
       capture.query = query;
       capture.token = call.capabilityToken;
       capture.trace = call.traceId;
       return { data: encodeJson(rows), count: 7n };
     })
-    .on(Cache.method.get, () => ({ hit: true, value: encodeJson({ cached: true }) }))
-    .on(Cache.method.set, () => ({
+    .on(Valkery.method.get, () => ({ hit: true, value: encodeJson({ cached: true }) }))
+    .on(Valkery.method.set, () => ({
       error: { code: "cache_failed", message: "redis is down" },
     }));
 

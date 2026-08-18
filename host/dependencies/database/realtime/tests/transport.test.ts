@@ -40,7 +40,7 @@ import {
   RealtimeTransports,
   SyncEventsTransport,
 } from "@scribe/host/dependencies/database/realtime/mod.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 
 const thing = defineRealtime({ entity: "thing", events: { changed: event("update") } });
 
@@ -88,7 +88,7 @@ Deno.test("registry: a null topic is not a topic to validate", async () => {
 });
 
 Deno.test("sync_events: a row becomes one insert with the SQL column names", async () => {
-  const mock = installRestMock({ internal_t__sync_events: [] });
+  const mock = installDatabaseMock({ internal_t__sync_events: [] });
   try {
     RealtimeTransports.use(new SyncEventsTransport());
     await thing.changed.to.user("t1", "u1", "room");
@@ -107,7 +107,7 @@ Deno.test("sync_events: a row becomes one insert with the SQL column names", asy
 });
 
 Deno.test("sync_events: an audience row carries no recipient column", async () => {
-  const mock = installRestMock({ internal_t__sync_events: [] });
+  const mock = installDatabaseMock({ internal_t__sync_events: [] });
   try {
     RealtimeTransports.use(new SyncEventsTransport());
     await thing.changed.all.admins("t1");

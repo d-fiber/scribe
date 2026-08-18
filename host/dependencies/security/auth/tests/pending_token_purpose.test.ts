@@ -35,9 +35,9 @@ import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Env } from "@scribe/host/env.ts";
 import { assertEquals, assertNotEquals } from "@std/assert";
 import { forgeToken, issueToken } from "@scribe/host/dependencies/security/auth/testing/pending_token.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 
-installRestMock();
+installDatabaseMock();
 
 const signIn = new PendingToken(PendingTokenPurpose.SignIn);
 const reset = new PendingToken(PendingTokenPurpose.PasswordReset);

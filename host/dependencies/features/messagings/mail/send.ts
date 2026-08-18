@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTMailsRow } from "@scribe/host/packages/foundation/database/rest/gen/rows.ts";
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import type { InternalTMailsRow } from "@scribe/foundation/src/database/gen/rows.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { Env } from "@scribe/host/env.ts";
@@ -166,7 +166,7 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
     data: Record<string, unknown>,
   ): Promise<Result<Mail, MailError>> {
     return this.guard(async () => {
-      const template = await rest
+      const template = await database
         .internal_t__email_templates()
         .where((f) => f.name.eq(templateName))
         .getOne();
@@ -202,7 +202,7 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
 
       const sent = await this.#transmit(found.data, content, from);
 
-      await rest
+      await database
         .internal_t__mails()
         .where((f) => f.mail_id.eq(mailId))
         .update({
@@ -216,7 +216,7 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
 
   get(mailId: MailId): Promise<Result<Mail, MailError>> {
     return this.guard(async () => {
-      const row = await rest
+      const row = await database
         .internal_t__mails()
         .where((f) => f.mail_id.eq(mailId))
         .getOne();
@@ -227,7 +227,7 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
 
   getByOpenToken(openToken: string): Promise<Result<Mail, MailError>> {
     return this.guard(async () => {
-      const row = await rest
+      const row = await database
         .internal_t__mails()
         .where((f) => f.tracking_token.eq(openToken))
         .getOne();
@@ -243,7 +243,7 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
       const offset = options?.offset ?? 0;
       const size = options?.size ?? DEFAULT_PAGE_SIZE;
 
-      let query = rest
+      let query = database
         .internal_t__mails()
         .select((s) => ({
           mail_id: s.mail_id,
@@ -276,7 +276,7 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
 
   remove(mailId: MailId): Promise<Result<void, MailError>> {
     return this.guard(async () => {
-      const ok = await rest
+      const ok = await database
         .internal_t__mails()
         .where((f) => f.mail_id.eq(mailId))
         .delete();
@@ -290,7 +290,7 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
     emailTemplateId: EmailTemplateId | null,
     data: Record<string, unknown>,
   ): Promise<InternalTMailsRow | null> {
-    return rest.internal_t__mails().insertOne({
+    return database.internal_t__mails().insertOne({
       recipient: to,
       email_template_id: emailTemplateId,
       data,

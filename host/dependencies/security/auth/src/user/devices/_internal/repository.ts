@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import { DeviceToken } from "@scribe/host/dependencies/security/auth/src/user/devices/_internal/token.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import type { Location } from "@scribe/core/contracts/common/location.ts";
@@ -127,7 +127,7 @@ class UserDeviceRepository extends DeviceRepository {
   readonly kind = AccountRole.User as const;
 
   private deviceTable() {
-    return rest.internal_t__app_user_devices();
+    return database.internal_t__app_user_devices();
   }
 
   async getId(userId: string, deviceId: string): Promise<string | null> {
@@ -269,7 +269,7 @@ class AdminDeviceRepository extends DeviceRepository {
   readonly kind = AccountRole.Admin as const;
 
   private deviceTable() {
-    return rest.internal_t__admin_users_devices();
+    return database.internal_t__admin_users_devices();
   }
 
   async getId(adminId: string, deviceId: string): Promise<string | null> {

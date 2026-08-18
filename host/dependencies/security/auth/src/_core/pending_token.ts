@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import type { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Env } from "@scribe/host/env.ts";
 import { fromHex, sha256Hex, toHex } from "@scribe/core/runtime/support/crypto/hash.ts";
@@ -82,7 +82,7 @@ export class PendingToken {
     const expiresAt = Date.now() + this.ttlMs;
     const token = await this.#sign(identifier, role, deviceId, expiresAt);
 
-    const saved = await rest.internal_t__otp_pending_tokens().insert({
+    const saved = await database.internal_t__otp_pending_tokens().insert({
       token_hash: await sha256Hex(token),
       expires_at: expiresAt,
     });
@@ -163,7 +163,7 @@ export class PendingToken {
 
   async exists(token: string): Promise<boolean> {
     const hash = await sha256Hex(token);
-    const data = await rest
+    const data = await database
       .internal_t__otp_pending_tokens()
       .select((s) => ({ token_hash: s.token_hash }))
       .where((f) => [f.token_hash.eq(hash), f.expires_at.gt(Date.now())])
@@ -173,7 +173,7 @@ export class PendingToken {
 
   async consume(token: string): Promise<boolean> {
     const hash = await sha256Hex(token);
-    const deleted = await rest
+    const deleted = await database
       .internal_t__otp_pending_tokens()
       .where((f) => [f.token_hash.eq(hash), f.expires_at.gt(Date.now())])
       .deleteOne((s) => ({ token_hash: s.token_hash }));

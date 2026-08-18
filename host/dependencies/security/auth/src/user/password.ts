@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import { AccountRoleResolver } from "@scribe/host/dependencies/security/auth/src/_core/account.ts";
 import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
 import { goTrue } from "@scribe/host/dependencies/security/auth/src/_core/gotrue/gotrue_client.ts";
@@ -212,7 +212,7 @@ export class UserPasswordClient {
   }
 
   async #userIdentity(userId: string): Promise<UserIdentity | null> {
-    const row = await rest
+    const row = await database
       .internal_t__app_users()
       .select((s) => ({ email: s.email, phone: s.phone }))
       .where((f) => f.user_id.eq(userId))
@@ -221,7 +221,7 @@ export class UserPasswordClient {
   }
 
   async #adminIdentity(userId: string): Promise<UserIdentity | null> {
-    const row = await rest
+    const row = await database
       .internal_t__admin_users()
       .unscoped()
       .select((s) => ({ email: s.email }))

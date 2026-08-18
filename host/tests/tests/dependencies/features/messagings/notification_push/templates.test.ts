@@ -37,7 +37,7 @@ import {
   PushTemplateRepository,
 } from "@scribe/host/dependencies/features/messagings/notification_push/push.ts";
 import type { Row } from "@scribe/core/testing/database/fake_postgrest.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { assert, assertEquals } from "@std/assert";
 
 function templates(): Row[] {
@@ -68,13 +68,13 @@ function opens(): Row[] {
 }
 
 function harness() {
-  const rest = installRestMock({
+  const database = installDatabaseMock({
     internal_t__push_templates: templates(),
     internal_t__notification_push_opens: opens(),
   });
 
   return {
-    rest,
+    database,
     templates: new PushTemplateRepository(),
     opens: new PushNotificationOpenRepository(),
   };
@@ -90,7 +90,7 @@ Deno.test("templates.getByName: resolves the name in_app_notifications.type carr
     assertEquals(result.data.id, 1);
     assertEquals(result.data.title, "Bienvenue");
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -101,7 +101,7 @@ Deno.test("templates.getByName: an unknown name is NotFound", async () => {
     assert(!result.ok);
     assertEquals(result.error, PushTemplateError.NotFound);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -112,7 +112,7 @@ Deno.test("templates.getById: an unknown id is NotFound", async () => {
     assert(!result.ok);
     assertEquals(result.error, PushTemplateError.NotFound);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -127,9 +127,9 @@ Deno.test("templates.create: data defaults to null rather than being omitted", a
 
     assert(result.ok);
     assertEquals(result.data.data, null);
-    assertEquals(h.rest.rows("internal_t__push_templates").length, 3);
+    assertEquals(h.database.rows("internal_t__push_templates").length, 3);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -141,7 +141,7 @@ Deno.test("templates.update: an unknown id is NotFound, not a silent OK", async 
     assert(!result.ok);
     assertEquals(result.error, PushTemplateError.NotFound);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -151,13 +151,13 @@ Deno.test("templates.update: writes only the given fields", async () => {
     const result = await h.templates.update(1, { title: "changed" });
     assert(result.ok);
 
-    const row = h.rest
+    const row = h.database
       .rows("internal_t__push_templates")
       .find((r) => r.push_template_id === 1);
     assertEquals(row?.title, "changed");
     assertEquals(row?.body, "Découvre les bons plans", "untouched fields survive");
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -167,13 +167,13 @@ Deno.test("templates.remove: an unknown id is NotFound, not a silent OK", async 
     const missing = await h.templates.remove(404);
     assert(!missing.ok);
     assertEquals(missing.error, PushTemplateError.NotFound);
-    assertEquals(h.rest.rows("internal_t__push_templates").length, 2);
+    assertEquals(h.database.rows("internal_t__push_templates").length, 2);
 
     const removed = await h.templates.remove(1);
     assert(removed.ok);
-    assertEquals(h.rest.rows("internal_t__push_templates").length, 1);
+    assertEquals(h.database.rows("internal_t__push_templates").length, 1);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -186,7 +186,7 @@ Deno.test("opens.list: only the opens of that push", async () => {
     assert(result.ok);
     assertEquals(result.data.items.map((open) => open.id).sort(), [100, 101]);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -197,7 +197,7 @@ Deno.test("opens.get: an unknown id is NotFound", async () => {
     assert(!result.ok);
     assertEquals(result.error, PushNotificationOpenError.NotFound);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -206,9 +206,9 @@ Deno.test("opens.record: appends a row for the push", async () => {
   try {
     const result = await h.opens.record(2);
     assert(result.ok);
-    assertEquals(h.rest.rows("internal_t__notification_push_opens").length, 4);
+    assertEquals(h.database.rows("internal_t__notification_push_opens").length, 4);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });
 
@@ -218,12 +218,12 @@ Deno.test("opens.remove: an unknown id is NotFound, not a silent OK", async () =
     const missing = await h.opens.remove(999);
     assert(!missing.ok);
     assertEquals(missing.error, PushNotificationOpenError.NotFound);
-    assertEquals(h.rest.rows("internal_t__notification_push_opens").length, 3);
+    assertEquals(h.database.rows("internal_t__notification_push_opens").length, 3);
 
     const removed = await h.opens.remove(100);
     assert(removed.ok);
-    assertEquals(h.rest.rows("internal_t__notification_push_opens").length, 2);
+    assertEquals(h.database.rows("internal_t__notification_push_opens").length, 2);
   } finally {
-    h.rest.restore();
+    h.database.restore();
   }
 });

@@ -32,14 +32,14 @@
 
 // deno-lint-ignore-file no-explicit-any
 
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import type { TypedQueryBuilder } from "@scribe/core/clients/database/query/builder.ts";
 import { topicEvents } from "./events.ts";
 import { TopicStore } from "./store.ts";
 
 export class AdminTopicStore extends TopicStore {
   protected override query(): TypedQueryBuilder<any, any, any> {
-    return rest.internal_t__admin_topic_members();
+    return database.internal_t__admin_topic_members();
   }
 
   protected override get ownerColumn(): string {

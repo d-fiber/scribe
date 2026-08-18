@@ -37,7 +37,7 @@ import {
   type DynamicLinkPayload,
 } from "@scribe/host/dependencies/features/devops/dynamic-links/dynamic-links.ts";
 import { DynamicLinkRepository } from "@scribe/host/dependencies/features/devops/dynamic-links/link/link.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import type { Row } from "@scribe/core/testing/database/fake_postgrest.ts";
 import { installValkeryMock } from "@scribe/core/testing/runtime/redis.ts";
 import { assert, assertEquals } from "@std/assert";
@@ -65,14 +65,14 @@ function row(overrides: Partial<Row> = {}): Row {
 
 function harness(rows: Row[] = []) {
   const kv = installValkeryMock();
-  const rest = installRestMock({ [TABLE]: rows });
+  const database = installDatabaseMock({ [TABLE]: rows });
 
   return {
-    rest,
+    database,
     links: new DynamicLinkRepository(),
-    rows: () => rest.rows(TABLE),
+    rows: () => database.rows(TABLE),
     restore() {
-      rest.restore();
+      database.restore();
       kv.restore();
     },
   };

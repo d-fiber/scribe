@@ -34,7 +34,7 @@ import {
   defineHook,
   type Hook,
   type HookHandler,
-} from "@scribe/host/packages/foundation/event_driven/hook/mod.ts";
+} from "@scribe/foundation/src/hook/mod.ts";
 
 export type DeletedHook = HookHandler<string>;
 export const userDeleteHook: Hook<string, void> = defineHook<string>({

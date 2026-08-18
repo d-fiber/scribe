@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { Repository } from "./core/repository.ts";
 
@@ -130,7 +130,7 @@ export class SmtpAccountRepository
     name: string,
   ): Promise<Result<SmtpAccountCredentials, SmtpAccountError>> {
     return this.guard(async () => {
-      const { data, error } = await rest.rpc<CredentialsRow[]>(
+      const { data, error } = await database.rpc<CredentialsRow[]>(
         "smtp_account_credentials",
         { p_name: name },
       );
@@ -180,7 +180,7 @@ export class SmtpAccountRepository
     input: UpsertSmtpAccountInput,
   ): Promise<Result<SmtpAccount, SmtpAccountError>> {
     return this.guard(async () => {
-      const { error } = await rest.rpc("upsert_smtp_account", {
+      const { error } = await database.rpc("upsert_smtp_account", {
         p_name: input.name,
         p_host: input.host,
         p_port: input.port,
@@ -209,7 +209,7 @@ export class SmtpAccountRepository
 
   remove(name: string): Promise<Result<void, SmtpAccountError>> {
     return this.guard(async () => {
-      const { data, error } = await rest.rpc("delete_smtp_account", {
+      const { data, error } = await database.rpc("delete_smtp_account", {
         p_name: name,
       });
       if (error) throw error;
@@ -224,7 +224,7 @@ export class SmtpAccountRepository
     args: Record<string, unknown>,
   ): Promise<Result<void, SmtpAccountError>> {
     return this.guard(async () => {
-      const { data, error } = await rest.rpc(fn, args);
+      const { data, error } = await database.rpc(fn, args);
       if (error) throw error;
 
       return data ? new OK() : new Failure(SmtpAccountError.NotFound);
@@ -235,7 +235,7 @@ export class SmtpAccountRepository
     fn: string,
     args?: Record<string, unknown>,
   ): Promise<SummaryRow[]> {
-    const { data, error } = await rest.rpc<SummaryRow[]>(fn, args);
+    const { data, error } = await database.rpc<SummaryRow[]>(fn, args);
     if (error) throw error;
     return data ?? [];
   }

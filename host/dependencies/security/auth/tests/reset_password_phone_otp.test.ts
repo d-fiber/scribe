@@ -38,7 +38,7 @@ import {
 import { auth, SmsIntent } from "@scribe/host/dependencies/security/auth/src/client.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installAuthEnv } from "@scribe/host/dependencies/security/auth/testing/env.ts";
 import { goTrueError, goTrueSession, installGoTrueMock } from "@scribe/host/dependencies/security/auth/testing/gotrue.ts";
 import { fakeDevice, withRequest } from "@scribe/core/testing/runtime/device.ts";
@@ -58,7 +58,7 @@ Deno.test("phone verify: a valid otp yields a reset token, never a session", asy
     "POST /verify": () => ({ status: 200, body: verifiedSession() }),
     "POST /logout*": () => ({ status: 204 }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -80,7 +80,7 @@ Deno.test("phone verify: a valid otp yields a reset token, never a session", asy
     assertEquals(payload?.role, AccountRole.User);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -90,7 +90,7 @@ Deno.test("phone verify: the session minted by gotrue is revoked on the spot", a
     "POST /verify": () => ({ status: 200, body: verifiedSession() }),
     "POST /logout*": () => ({ status: 204 }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -106,14 +106,14 @@ Deno.test("phone verify: the session minted by gotrue is revoked on the spot", a
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("phone verify: a malformed otp never reaches gotrue", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -126,14 +126,14 @@ Deno.test("phone verify: a malformed otp never reaches gotrue", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("phone verify: an invalid number never reaches gotrue", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -147,7 +147,7 @@ Deno.test("phone verify: an invalid number never reaches gotrue", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -156,7 +156,7 @@ Deno.test("phone verify: a wrong otp is rejected without a reset token", async (
   const gotrue = installGoTrueMock({
     "POST /verify": () => ({ status: 403, body: goTrueError("otp_expired") }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -167,10 +167,10 @@ Deno.test("phone verify: a wrong otp is rejected without a reset token", async (
 
     assert(result instanceof Failure);
     assertEquals(result.error, VerifyPhoneResetOtpError.InvalidOrExpired);
-    assertEquals(rest.rows("internal_t__otp_pending_tokens").length, 0);
+    assertEquals(database.rows("internal_t__otp_pending_tokens").length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -185,7 +185,7 @@ Deno.test("phone verify: an admin number cannot mint a user reset token", async 
     }),
     "POST /logout*": () => ({ status: 204 }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -199,7 +199,7 @@ Deno.test("phone verify: an admin number cannot mint a user reset token", async 
     assertEquals(gotrue.called("POST", "/logout"), 1);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -209,7 +209,7 @@ Deno.test("phone verify: the brute-force budget follows the number, not the call
     "POST /verify": () => ({ status: 200, body: verifiedSession() }),
     "POST /logout*": () => ({ status: 204 }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -229,7 +229,7 @@ Deno.test("phone verify: the brute-force budget follows the number, not the call
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -238,7 +238,7 @@ Deno.test("phone verify: a saturated number is refused before gotrue", async () 
   const gotrue = installGoTrueMock({
     "POST /verify": () => ({ status: 200, body: verifiedSession() }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
   env.block(":verify:to:");
 
@@ -253,14 +253,14 @@ Deno.test("phone verify: a saturated number is refused before gotrue", async () 
     assertEquals(gotrue.called("POST", "/verify"), 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("phone resend: send and resend do not share a budget", async () => {
   const gotrue = installGoTrueMock({ "POST /otp": () => ({ status: 200, body: {} }) });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -278,14 +278,14 @@ Deno.test("phone resend: send and resend do not share a budget", async () => {
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("phone resend: a saturated send bucket does not block a resend", async () => {
   const gotrue = installGoTrueMock({ "POST /otp": () => ({ status: 200, body: {} }) });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
   env.block("reset-password:user:send");
 
@@ -297,14 +297,14 @@ Deno.test("phone resend: a saturated send bucket does not block a resend", async
     assertEquals(gotrue.called("POST", "/otp"), 1);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("phone resend: an invalid number is refused before any send", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -317,14 +317,14 @@ Deno.test("phone resend: an invalid number is refused before any send", async ()
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("phone resend: the otp still never creates an account", async () => {
   const gotrue = installGoTrueMock({ "POST /otp": () => ({ status: 200, body: {} }) });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -336,14 +336,14 @@ Deno.test("phone resend: the otp still never creates an account", async () => {
     assertEquals(gotrue.calls[0].body?.create_user, false);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("phone send: the reset marks its intent so the webhook can name the sms", async () => {
   const gotrue = installGoTrueMock({ "POST /otp": () => ({ status: 200, body: {} }) });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -359,7 +359,7 @@ Deno.test("phone send: the reset marks its intent so the webhook can name the sm
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -368,7 +368,7 @@ Deno.test("phone send: a refused gotrue call leaves no intent behind", async () 
   const gotrue = installGoTrueMock({
     "POST /otp": () => ({ status: 500, body: goTrueError("unexpected_failure") }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -384,14 +384,14 @@ Deno.test("phone send: a refused gotrue call leaves no intent behind", async () 
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("phone send: the intent is single use", async () => {
   const gotrue = installGoTrueMock({ "POST /otp": () => ({ status: 200, body: {} }) });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -408,7 +408,7 @@ Deno.test("phone send: the intent is single use", async () => {
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });

@@ -38,7 +38,7 @@ import {
   RealtimeTransports,
   TopicMembership,
 } from "@scribe/host/dependencies/database/realtime/mod.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 
 class Spy {
   readonly sent: RealtimeRow[] = [];
@@ -51,7 +51,7 @@ class Spy {
 function stage() {
   const spy = new Spy();
   RealtimeTransports.use(spy);
-  const mock = installRestMock({
+  const mock = installDatabaseMock({
     internal_t__user_topic_members: [],
     internal_t__admin_topic_members: [],
   });

@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { AuthCache } from "./cache.ts";
 
@@ -40,13 +40,13 @@ export class AccountRoleResolver {
     if (cached !== null) return cached;
 
     const resolved = await this.#resolve(
-      rest
+      database
         .internal_t__app_users()
         .unscoped()
         .select((s) => ({ user_id: s.user_id }))
         .where((f) => [f.email.eq(email), f.is_email_verified.eq(true)])
         .getOne(),
-      rest
+      database
         .internal_t__admin_users()
         .unscoped()
         .select((s) => ({ admin_id: s.admin_id }))
@@ -65,13 +65,13 @@ export class AccountRoleResolver {
     if (cached !== null) return cached;
 
     const resolved = await this.#resolve(
-      rest
+      database
         .internal_t__app_users()
         .unscoped()
         .select((s) => ({ user_id: s.user_id }))
         .where((f) => [f.phone.eq(phone), f.is_phone_verified.eq(true)])
         .getOne(),
-      rest
+      database
         .internal_t__admin_users()
         .unscoped()
         .select((s) => ({ admin_id: s.admin_id }))
@@ -90,13 +90,13 @@ export class AccountRoleResolver {
     if (cached !== null) return cached;
 
     const resolved = await this.#resolve(
-      rest
+      database
         .internal_t__app_users()
         .unscoped()
         .select((s) => ({ user_id: s.user_id }))
         .where((f) => f.user_id.eq(userId))
         .getOne(),
-      rest
+      database
         .internal_t__admin_users()
         .unscoped()
         .select((s) => ({ admin_id: s.admin_id }))

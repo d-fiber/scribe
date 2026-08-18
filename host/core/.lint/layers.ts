@@ -70,7 +70,18 @@ const FUNCTIONS_MARKER = "/scribe/host/";
 
 const SPECIFIER_PREFIXES = ["@scribe/core/", "@scribe/host/"] as const;
 
+/**
+ * The mandatory package, reached by its own name instead of through the host tree.
+ *
+ * `@scribe/foundation` is a workspace package of its own, so its specifier carries
+ * no layer segment to read. It is the `packages` layer wherever it appears.
+ */
+const FOUNDATION_PREFIX = "@scribe/foundation/";
+const FOUNDATION_LAYER = "packages";
+
 function layerOfSpecifier(source: string): string | null {
+  if (source.startsWith(FOUNDATION_PREFIX)) return FOUNDATION_LAYER;
+
   for (const prefix of SPECIFIER_PREFIXES) {
     if (!source.startsWith(prefix)) continue;
     const layer = source.slice(prefix.length).split("/")[0];
@@ -106,21 +117,13 @@ function isHostEntry(source: string): boolean {
   return source === "@scribe/core/host.ts";
 }
 
+// `@scribe/foundation` is deliberately absent. The mandatory package is named,
+// not a path into the host tree, so `core` reaching it is not core reaching the
+// host: what stays forbidden here is the modules a project chooses, which the
+// package must keep standing without.
 const HOST_PREFIXES = ["@scribe/host/", "@app/"] as const;
 
-/**
- * The one thing under `@scribe/host/` this package may reach.
- *
- * `foundation` is the package a project cannot leave out -- the cache, the
- * queue, the cron, the hook and the PostgREST engine live there, and `core`
- * declares them in its own surface. Everything else under `@scribe/host/` is a
- * module a project chooses, which `core` must keep standing without.
- */
-const MANDATORY_PACKAGE = "@scribe/host/packages/foundation/";
-
 function isHostSpecifier(source: string): boolean {
-  if (source.startsWith(MANDATORY_PACKAGE)) return false;
-
   return HOST_PREFIXES.some((prefix) => source.startsWith(prefix));
 }
 

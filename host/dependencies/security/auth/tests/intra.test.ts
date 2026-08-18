@@ -34,7 +34,7 @@ import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
 import { AccountRevocation } from "@scribe/host/dependencies/security/auth/src/_core/revocation.ts";
 import { IntraSignIn } from "@scribe/host/dependencies/security/auth/src/sign_in/providers/intra.ts";
 import { fakeDevice, withRequest } from "@scribe/core/testing/runtime/device.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installAuthEnv } from "@scribe/host/dependencies/security/auth/testing/env.ts";
 import {
   goTrueError,
@@ -53,7 +53,7 @@ Deno.test("intra: a valid admin is authenticated and its technical session revok
     "POST /token*": () => ({ status: 200, body: ADMIN_SESSION }),
     "POST /logout*": () => ({ status: 204 }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -64,7 +64,7 @@ Deno.test("intra: a valid admin is authenticated and its technical session revok
     assertEquals(adminId, "admin-1");
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -74,7 +74,7 @@ Deno.test("intra: a non-admin account is refused", async () => {
     "POST /token*": () => ({ status: 200, body: goTrueSession() }),
     "POST /logout*": () => ({ status: 204 }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -85,7 +85,7 @@ Deno.test("intra: a non-admin account is refused", async () => {
     assertEquals(adminId, null);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -97,7 +97,7 @@ Deno.test(
       "POST /token*": () => ({ status: 200, body: ADMIN_SESSION }),
       "POST /logout*": () => ({ status: 204 }),
     });
-    const rest = installRestMock({});
+    const database = installDatabaseMock({});
     const env = installAuthEnv();
 
     try {
@@ -117,7 +117,7 @@ Deno.test(
       );
     } finally {
       env.restore();
-      rest.restore();
+      database.restore();
       gotrue.restore();
     }
   },
@@ -131,7 +131,7 @@ Deno.test("intra: a different password does not benefit from the cache", async (
         : { status: 400, body: goTrueError("invalid_credentials") },
     "POST /logout*": () => ({ status: 204 }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -150,7 +150,7 @@ Deno.test("intra: a different password does not benefit from the cache", async (
     assertEquals(gotrue.called("POST", "/token"), 2);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -159,7 +159,7 @@ Deno.test("intra: a failure is never cached", async () => {
   const gotrue = installGoTrueMock({
     "POST /token*": () => ({ status: 400, body: goTrueError("invalid_credentials") }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -173,14 +173,14 @@ Deno.test("intra: a failure is never cached", async () => {
     assertEquals(gotrue.called("POST", "/token"), 3);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("intra: empty password refused without touching gotrue", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -192,7 +192,7 @@ Deno.test("intra: empty password refused without touching gotrue", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -202,7 +202,7 @@ Deno.test("intra: the cache key is keyed, not a bare digest of the credentials",
     "POST /token*": () => ({ status: 200, body: ADMIN_SESSION }),
     "POST /logout*": () => ({ status: 204 }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -224,7 +224,7 @@ Deno.test("intra: the cache key is keyed, not a bare digest of the credentials",
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -234,7 +234,7 @@ Deno.test("intra: revoking an admin drops its cached decision immediately", asyn
     "POST /token*": () => ({ status: 200, body: ADMIN_SESSION }),
     "POST /logout*": () => ({ status: 204 }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -262,7 +262,7 @@ Deno.test("intra: revoking an admin drops its cached decision immediately", asyn
     );
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });

@@ -33,7 +33,7 @@
 import { PendingToken, VPN_ACCESS_PURPOSE } from "@scribe/host/dependencies/security/vpn/src/pending_token.ts";
 import { forgeToken } from "@scribe/host/dependencies/security/vpn/testing/pending_token.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { assert, assertEquals } from "@std/assert";
 
 const ADMIN = "admin-1";
@@ -68,7 +68,7 @@ Deno.test("forge: the default purpose is the one this module issues", async () =
 });
 
 Deno.test("issue: the copy signs what it can verify", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   try {
     const token = new PendingToken();
     const value = await token.issue(ADMIN, AccountRole.Admin, null);
@@ -79,17 +79,17 @@ Deno.test("issue: the copy signs what it can verify", async () => {
     assert(payload !== null);
     assertEquals(payload.identifier, ADMIN);
     assertEquals(
-      rest.rows("internal_t__otp_pending_tokens").length,
+      database.rows("internal_t__otp_pending_tokens").length,
       1,
       "issuing must persist the hash, it is what consume() deletes",
     );
   } finally {
-    rest.restore();
+    database.restore();
   }
 });
 
 Deno.test("consume: a token is spendable exactly once", async () => {
-  const rest = installRestMock({ internal_t__otp_pending_tokens: [] });
+  const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   try {
     const token = new PendingToken();
     const value = (await token.issue(ADMIN, AccountRole.Admin, null))!;
@@ -99,6 +99,6 @@ Deno.test("consume: a token is spendable exactly once", async () => {
     assertEquals(await token.consume(value), false);
     assertEquals(await token.exists(value), false);
   } finally {
-    rest.restore();
+    database.restore();
   }
 });

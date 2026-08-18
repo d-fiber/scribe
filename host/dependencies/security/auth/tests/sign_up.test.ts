@@ -42,7 +42,7 @@ import {
 } from "@scribe/host/dependencies/security/auth/src/sign_up/types.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
 import { fakeDevice, withRequest } from "@scribe/core/testing/runtime/device.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installAuthEnv } from "@scribe/host/dependencies/security/auth/testing/env.ts";
 import {
   goTrueError,
@@ -72,7 +72,7 @@ Deno.test(
       "PUT /admin/users/*": () => ({ status: 200, body: goTrueUser() }),
       "DELETE /admin/users/*": () => ({ status: 200, body: {} }),
     });
-    const rest = installRestMock({
+    const database = installDatabaseMock({
       internal_t__app_users: [{ user_id: "user-1", email: "u1@example.com" }],
     });
     const env = installAuthEnv();
@@ -91,10 +91,10 @@ Deno.test(
         0,
         "the existing account must never be deleted",
       );
-      assertEquals(rest.rows("internal_t__app_users").length, 1);
+      assertEquals(database.rows("internal_t__app_users").length, 1);
     } finally {
       env.restore();
-      rest.restore();
+      database.restore();
       gotrue.restore();
     }
   },
@@ -106,7 +106,7 @@ Deno.test("social: an insert failure does delete the account it just created", a
     "PUT /admin/users/*": () => ({ status: 200, body: goTrueUser() }),
     "DELETE /admin/users/*": () => ({ status: 200, body: {} }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -122,7 +122,7 @@ Deno.test("social: an insert failure does delete the account it just created", a
     assertEquals(gotrue.called("DELETE", "/admin/users/user-1"), 1);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -141,7 +141,7 @@ Deno.test(
       }),
       "DELETE /admin/users/*": () => ({ status: 200, body: {} }),
     });
-    const rest = installRestMock({});
+    const database = installDatabaseMock({});
     const env = installAuthEnv();
 
     try {
@@ -160,7 +160,7 @@ Deno.test(
       );
     } finally {
       env.restore();
-      rest.restore();
+      database.restore();
       gotrue.restore();
     }
   },
@@ -171,7 +171,7 @@ Deno.test("email: a nominal sign-up returns a device token", async () => {
     "POST /signup": () => ({ status: 200, body: goTrueSession() }),
     "PUT /admin/users/*": () => ({ status: 200, body: goTrueUser() }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -183,17 +183,17 @@ Deno.test("email: a nominal sign-up returns a device token", async () => {
 
     assert(result instanceof OK, `expected OK, got ${JSON.stringify(result)}`);
     assertEquals(result.data.device_token.length, 128);
-    assertEquals(rest.rows("internal_t__app_users").length, 1);
+    assertEquals(database.rows("internal_t__app_users").length, 1);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("email: the password policy does apply at sign-up", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -208,7 +208,7 @@ Deno.test("email: the password policy does apply at sign-up", async () => {
     assertEquals(gotrue.calls.length, 0);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
@@ -218,7 +218,7 @@ Deno.test("email: the per-recipient limit is keyed on the mailbox", async () => 
     "POST /signup": () => ({ status: 200, body: goTrueSession() }),
     "PUT /admin/users/*": () => ({ status: 200, body: goTrueUser() }),
   });
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -232,14 +232,14 @@ Deno.test("email: the per-recipient limit is keyed on the mailbox", async () => 
     assertEquals(recipientKeys.length, 1);
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });
 
 Deno.test("email: no gotrue call when the device is missing", async () => {
   const gotrue = installGoTrueMock({});
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   const env = installAuthEnv();
 
   try {
@@ -250,7 +250,7 @@ Deno.test("email: no gotrue call when the device is missing", async () => {
     assertEquals(gotrue.calls.length, 0, "no account created only to be deleted right away");
   } finally {
     env.restore();
-    rest.restore();
+    database.restore();
     gotrue.restore();
   }
 });

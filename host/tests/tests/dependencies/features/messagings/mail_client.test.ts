@@ -31,15 +31,15 @@
 // LICENSE file, the LICENSE file governs.
 
 import { FOUNDATION_SMTP_ACCOUNTS, MailClient, MailError } from "@scribe/host/dependencies/features/messagings/mail/mail.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installMock } from "@scribe/core/testing/install.ts";
 import nodemailer from "nodemailer";
 import { assert, assertEquals } from "@std/assert";
 
 function harness(accounts: Record<string, unknown>[] = []) {
-  const rest = installRestMock({});
+  const database = installDatabaseMock({});
   let rpcCalls = 0;
-  rest.onRpc("smtp_account_credentials", (args) => {
+  database.onRpc("smtp_account_credentials", (args) => {
     rpcCalls++;
     return accounts.filter((a) => a.name === args?.p_name);
   });
@@ -55,7 +55,7 @@ function harness(accounts: Record<string, unknown>[] = []) {
     rpcCalls: (): number => rpcCalls,
     restore(): void {
       transport.restore();
-      rest.restore();
+      database.restore();
     },
   };
 }

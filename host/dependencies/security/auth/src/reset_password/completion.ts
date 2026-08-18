@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import { UpdateUserPasswordError } from "@scribe/host/dependencies/security/auth/src/user/password.ts";
 import { UserClient } from "@scribe/host/dependencies/security/auth/src/user/user.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
@@ -135,7 +135,7 @@ export class ResetPasswordCompletion {
     role: AccountRole,
   ): Promise<string | null> {
     if (role === AccountRole.Admin) {
-      const admin = await rest
+      const admin = await database
         .internal_t__admin_users()
         .select((s) => ({ email: s.email }))
         .where((f) => f.admin_id.eq(userId))
@@ -143,7 +143,7 @@ export class ResetPasswordCompletion {
       return admin?.email ?? null;
     }
 
-    const user = await rest
+    const user = await database
       .internal_t__app_users()
       .select((s) => ({ email: s.email, phone: s.phone }))
       .where((f) => f.user_id.eq(userId))
@@ -158,7 +158,7 @@ export class ResetPasswordCompletion {
     const isEmail = identifier.includes("@");
 
     if (role === AccountRole.Admin) {
-      const admin = await rest
+      const admin = await database
         .internal_t__admin_users()
         .select((s) => ({ admin_id: s.admin_id }))
         .where((f) => isEmail ? f.email.eq(identifier) : f.phone.eq(identifier))
@@ -166,7 +166,7 @@ export class ResetPasswordCompletion {
       return admin?.admin_id ?? null;
     }
 
-    const user = await rest
+    const user = await database
       .internal_t__app_users()
       .select((s) => ({ user_id: s.user_id }))
       .where((f) => (isEmail ? f.email.eq(identifier) : f.phone.eq(identifier)))

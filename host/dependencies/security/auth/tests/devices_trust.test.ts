@@ -33,7 +33,7 @@
 import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
 import { DevicesClient } from "@scribe/host/dependencies/security/auth/src/user/devices/devices.ts";
 import { fakeDevice, withRequest } from "@scribe/core/testing/runtime/device.ts";
-import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
+import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installAuthEnv } from "@scribe/host/dependencies/security/auth/testing/env.ts";
 import { assertEquals } from "@std/assert";
 
@@ -58,14 +58,14 @@ async function isTrust(
   token: string | undefined,
 ): Promise<boolean> {
   const env = installAuthEnv();
-  const rest = installRestMock(seed as never);
+  const database = installDatabaseMock(seed as never);
   try {
     return await withRequest(
       fakeDevice({ device_token: token }),
       () => new DevicesClient().isTrust("device-1", "user-1"),
     );
   } finally {
-    rest.restore();
+    database.restore();
     env.restore();
   }
 }

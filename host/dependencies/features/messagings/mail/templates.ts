@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTEmailTemplatesRow } from "@scribe/host/packages/foundation/database/rest/gen/rows.ts";
-import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
+import type { InternalTEmailTemplatesRow } from "@scribe/foundation/src/database/gen/rows.ts";
+import { database } from "@scribe/foundation/src/database/database.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
@@ -89,7 +89,7 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
 
   getById(id: EmailTemplateId): Promise<Result<EmailTemplate, EmailTemplateError>> {
     return this.guard(async () => {
-      const row = await rest
+      const row = await database
         .internal_t__email_templates()
         .where((f) => f.email_template_id.eq(id))
         .getOne();
@@ -100,7 +100,7 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
 
   getByName(name: string): Promise<Result<EmailTemplate, EmailTemplateError>> {
     return this.guard(async () => {
-      const row = await rest
+      const row = await database
         .internal_t__email_templates()
         .where((f) => f.name.eq(name))
         .getOne();
@@ -114,7 +114,7 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
       const offset = options?.offset ?? 0;
       const size = options?.size ?? DEFAULT_PAGE_SIZE;
 
-      const rows = await rest
+      const rows = await database
         .internal_t__email_templates()
         .select((s) => ({
           email_template_id: s.email_template_id,
@@ -133,7 +133,7 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
 
   create(input: CreateEmailTemplateInput): Promise<Result<EmailTemplate, EmailTemplateError>> {
     return this.guard(async () => {
-      const row = await rest.internal_t__email_templates().insertOne({
+      const row = await database.internal_t__email_templates().insertOne({
         name: input.name,
         subject: input.subject,
         html: input.html ?? null,
@@ -149,7 +149,7 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
     input: UpdateEmailTemplateInput,
   ): Promise<Result<void, EmailTemplateError>> {
     return this.guard(async () => {
-      const ok = await rest
+      const ok = await database
         .internal_t__email_templates()
         .where((f) => f.email_template_id.eq(id))
         .update(this.#patch(input));
@@ -160,7 +160,7 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
 
   remove(id: EmailTemplateId): Promise<Result<void, EmailTemplateError>> {
     return this.guard(async () => {
-      const ok = await rest
+      const ok = await database
         .internal_t__email_templates()
         .where((f) => f.email_template_id.eq(id))
         .delete();
