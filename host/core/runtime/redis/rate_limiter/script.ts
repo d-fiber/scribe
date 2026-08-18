@@ -30,22 +30,22 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { kv } from "@scribe/core/runtime/redis/mod.ts";
+import { kv } from "@scribe/foundation/src/redis/mod.ts";
 
 export interface RateLimitCommands {
-    rateLimitCheck(
-      blockedKey: string,
-      windowKey: string,
-      strikesKey: string,
-      limit: number,
-      window: number,
-      penalty: number,
-      maxPenalty: number,
-      strikeMemory: number,
-      now: number,
-      member: string,
-    ): Promise<[number, number, number]>;
-  }
+  rateLimitCheck(
+    blockedKey: string,
+    windowKey: string,
+    strikesKey: string,
+    limit: number,
+    window: number,
+    penalty: number,
+    maxPenalty: number,
+    strikeMemory: number,
+    now: number,
+    member: string,
+  ): Promise<[number, number, number]>;
+}
 
 const RATE_LIMIT_SCRIPT = `
 local blocked_key = KEYS[1]

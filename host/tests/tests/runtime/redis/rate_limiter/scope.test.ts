@@ -32,7 +32,7 @@
 
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import type { RateLimitCommands } from "@scribe/core/runtime/redis/rate_limiter/script.ts";
-import { kv } from "@scribe/core/runtime/redis/mod.ts";
+import { kv } from "@scribe/foundation/src/redis/mod.ts";
 import { rateLimiter, RateLimitScope } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 import { installMock } from "@scribe/core/testing/install.ts";

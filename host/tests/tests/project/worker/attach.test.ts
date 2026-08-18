@@ -44,7 +44,7 @@ import {
   ScribeServer,
   Time,
 } from "@scribe/sdk";
-import { installRateLimiterMock } from "@scribe/core/testing/runtime/redis.ts";
+import { installRateLimiterMock } from "@scribe/foundation/testing/valkery.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 import { mountManifest } from "@scribe/host/project/worker/mount.ts";
 import { WorkerClient } from "@scribe/host/project/worker/worker_client.ts";

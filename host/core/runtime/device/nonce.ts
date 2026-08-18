@@ -30,28 +30,18 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { kv } from "@scribe/core/runtime/redis/mod.ts";
-import {
-  DEVICE_PAYLOAD_MAX_AGE_MS,
-  DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS,
-} from "./payload/freshness.ts";
+import { claimOnce } from "@scribe/core/runtime/redis/claim_once.ts";
+import { DEVICE_PAYLOAD_MAX_AGE_MS, DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS } from "./payload/freshness.ts";
 
 const NONCE_TTL_S = Math.ceil(
   (DEVICE_PAYLOAD_MAX_AGE_MS + DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS) / 1000,
 );
 
-export async function claimNonce(nonce: string): Promise<boolean> {
-  try {
-    const claimed = await kv().set(
-      `device:nonce:${nonce}`,
-      "1",
-      "EX",
-      NONCE_TTL_S,
-      "NX",
-    );
-    return claimed === "OK";
-  } catch (error) {
-    console.error("[device-payload] nonce store unavailable:", error);
-    return true;
-  }
+export function claimNonce(nonce: string): Promise<boolean> {
+  // A device whose nonce store is down is a device that cannot sign in at all, so a nonce
+  // that cannot be claimed is let through rather than refused.
+  return claimOnce(`device:nonce:${nonce}`, NONCE_TTL_S, {
+    whenUnavailable: "allow",
+    scope: "device-payload",
+  });
 }

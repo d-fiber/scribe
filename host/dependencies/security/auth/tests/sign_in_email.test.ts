@@ -36,9 +36,9 @@ import { EmailSignInError } from "@scribe/host/dependencies/security/auth/src/si
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
 import type { RateLimitCommands } from "@scribe/core/runtime/redis/rate_limiter/script.ts";
-import { kv, type Kv } from "@scribe/core/runtime/redis/mod.ts";
+import { kv, type Kv } from "@scribe/foundation/src/redis/mod.ts";
 import { installMock } from "@scribe/core/testing/install.ts";
-import { installValkeryMock } from "@scribe/core/testing/runtime/redis.ts";
+import { installValkeryMock } from "@scribe/foundation/testing/valkery.ts";
 import { fakeDevice, withRequest } from "@scribe/core/testing/runtime/device.ts";
 import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import {

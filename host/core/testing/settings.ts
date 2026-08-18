@@ -30,13 +30,13 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { cacheSettings } from "@scribe/core/runtime/support/settings/cache.ts";
-import { databaseSettings } from "@scribe/core/runtime/support/settings/database.ts";
+import { cacheSettings } from "@scribe/foundation/src/valkery/settings.ts";
+import { databaseSettings } from "@scribe/foundation/src/database/settings.ts";
 import { deviceSettings } from "@scribe/core/runtime/support/settings/device.ts";
 import { firewallSettings } from "@scribe/core/runtime/support/settings/firewall.ts";
 import { httpSettings } from "@scribe/core/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
-import { queueSettings } from "@scribe/core/runtime/support/settings/queue.ts";
+import { queueSettings } from "@scribe/foundation/src/queue/settings.ts";
 import { storageSettings } from "@scribe/core/runtime/support/settings/storage.ts";
 
 function env(key: string, fallback: string): string {

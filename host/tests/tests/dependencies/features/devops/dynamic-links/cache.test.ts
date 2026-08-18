@@ -36,7 +36,7 @@ import {
   DynamicLinkKind,
 } from "@scribe/host/dependencies/features/devops/dynamic-links/dynamic-links.ts";
 import { dynamicLinkCache } from "@scribe/host/dependencies/features/devops/dynamic-links/link/_cache.ts";
-import { installValkeryMock } from "@scribe/core/testing/runtime/redis.ts";
+import { installValkeryMock } from "@scribe/foundation/testing/valkery.ts";
 import { assertEquals } from "@std/assert";
 
 function link(slug: string, expiresAt: number | null = null): DynamicLink {

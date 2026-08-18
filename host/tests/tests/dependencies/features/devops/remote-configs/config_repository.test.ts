@@ -32,7 +32,7 @@
 
 import { RemoteConfigRepository } from "@scribe/host/dependencies/features/devops/remote-configs/config/config.ts";
 import { RemoteConfigError } from "@scribe/host/dependencies/features/devops/remote-configs/remote-configs.ts";
-import type { Row } from "@scribe/core/testing/database/fake_postgrest.ts";
+import type { Row } from "@scribe/foundation/testing/database.ts";
 import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { assert, assertEquals } from "@std/assert";
 

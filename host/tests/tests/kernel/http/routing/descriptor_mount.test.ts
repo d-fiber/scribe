@@ -38,7 +38,7 @@ import type { RouteDescriptor } from "@scribe/core/kernel/http/routing/descripto
 import { mountDescriptors } from "@scribe/core/kernel/http/routing/descriptor_mount.ts";
 import { RateLimitError } from "@scribe/core/runtime/redis/rate_limiter/contract.ts";
 import { callEndpoint } from "@scribe/core/testing/kernel/endpoint.ts";
-import { installRateLimiterMock } from "@scribe/core/testing/runtime/redis.ts";
+import { installRateLimiterMock } from "@scribe/foundation/testing/valkery.ts";
 import { assertEquals } from "@std/assert";
 import { Hono } from "hono";
 

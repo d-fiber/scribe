@@ -33,7 +33,7 @@
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { ApiContext, ApiEndpoint, Caller } from "@scribe/core/kernel/endpoint/api.ts";
 import { callEndpoint } from "@scribe/core/testing/kernel/endpoint.ts";
-import { installRateLimiterMock } from "@scribe/core/testing/runtime/redis.ts";
+import { installRateLimiterMock } from "@scribe/foundation/testing/valkery.ts";
 import { assertEquals } from "@std/assert";
 
 class UnsignedWebhookEndpoint extends ApiEndpoint {

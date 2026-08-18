@@ -30,7 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { kv } from "@scribe/core/runtime/redis/mod.ts";
+import { KeyIndex } from "@scribe/core/runtime/redis/key_index.ts";
+import { kv } from "@scribe/foundation/src/redis/mod.ts";
 
 export const IDENTITY_CACHE_KEY = "identity:jwt";
 
@@ -49,8 +50,8 @@ export const IDENTITY_CACHE_KEY = "identity:jwt";
  */
 const RECHECK_WINDOW_SECONDS = 3_600;
 
-function indexKey(userId: string): string {
-  return `${IDENTITY_CACHE_KEY}:index:${userId}`;
+function _index(ttlSeconds: number): KeyIndex {
+  return new KeyIndex(`${IDENTITY_CACHE_KEY}:index`, ttlSeconds, "identity-revocation");
 }
 
 function recheckKey(userId: string): string {
@@ -63,25 +64,19 @@ export class IdentityRevocation {
     fingerprint: string,
     ttlSeconds: number,
   ): Promise<boolean> {
-    try {
-      const key = indexKey(userId);
-      await kv().sadd(key, fingerprint);
-      await kv().expire(key, ttlSeconds);
-      return true;
-    } catch (e) {
-      console.error("[identity-revocation] remember failed:", e);
-      return false;
-    }
+    // The window a fingerprint stays indexed for is the token's own, so the index is built per
+    // call rather than held: two tokens of the same user can expire at different times.
+    return await _index(ttlSeconds).remember(userId, fingerprint);
   }
 
   static async revoke(userId: string): Promise<void> {
     try {
-      const key = indexKey(userId);
-      const fingerprints = await kv().smembers(key);
+      const index = _index(RECHECK_WINDOW_SECONDS);
+      const fingerprints = await index.members(userId);
       if (fingerprints.length > 0) {
         await kv().del(...fingerprints.map((f) => `${IDENTITY_CACHE_KEY}:${f}`));
       }
-      await kv().del(key);
+      await index.forget(userId);
       await kv().setex(recheckKey(userId), RECHECK_WINDOW_SECONDS, "1");
     } catch (e) {
       console.error("[identity-revocation] revoke failed:", e);

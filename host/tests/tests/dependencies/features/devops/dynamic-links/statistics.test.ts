@@ -40,7 +40,7 @@ import { DynamicLinkStatisticsRepository } from "@scribe/host/dependencies/featu
 import { DeviceOs } from "@scribe/core/contracts/enums.ts";
 import { queueRegistry } from "@scribe/foundation/src/queue/core/registry.ts";
 import type { BatchHandler } from "@scribe/foundation/contracts/queue/queue.ts";
-import type { Row } from "@scribe/core/testing/database/fake_postgrest.ts";
+import type { Row } from "@scribe/foundation/testing/database.ts";
 import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installMock } from "@scribe/core/testing/install.ts";
 import { assert, assertEquals } from "@std/assert";

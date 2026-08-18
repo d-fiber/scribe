@@ -38,8 +38,8 @@ import {
 } from "@scribe/host/dependencies/features/devops/dynamic-links/dynamic-links.ts";
 import { DynamicLinkRepository } from "@scribe/host/dependencies/features/devops/dynamic-links/link/link.ts";
 import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
-import type { Row } from "@scribe/core/testing/database/fake_postgrest.ts";
-import { installValkeryMock } from "@scribe/core/testing/runtime/redis.ts";
+import type { Row } from "@scribe/foundation/testing/database.ts";
+import { installValkeryMock } from "@scribe/foundation/testing/valkery.ts";
 import { assert, assertEquals } from "@std/assert";
 
 const TABLE = "internal_t__dynamic_links";

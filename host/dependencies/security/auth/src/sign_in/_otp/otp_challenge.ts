@@ -34,7 +34,7 @@ import type { UserClient } from "@scribe/host/dependencies/security/auth/src/use
 import { type AccountRole, SignOutScope } from "@scribe/core/contracts/account.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
-import { kv } from "@scribe/core/runtime/redis/mod.ts";
+import { kv } from "@scribe/foundation/src/redis/mod.ts";
 import { signInHook } from "@scribe/host/dependencies/security/auth/src/hooks/auth.ts";
 import {
   type OtpRateLimitResult,

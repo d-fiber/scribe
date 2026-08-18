@@ -33,7 +33,7 @@
 import { EmailCampaignError, EmailCampaignRepository } from "@scribe/host/dependencies/features/messagings/mail/campaigns.ts";
 import { CampaignAudience } from "@scribe/core/contracts/enums.ts";
 import { CronTimezone } from "@scribe/foundation/src/cron/timezone.ts";
-import type { Row } from "@scribe/core/testing/database/fake_postgrest.ts";
+import type { Row } from "@scribe/foundation/testing/database.ts";
 import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { assert, assertEquals } from "@std/assert";
 

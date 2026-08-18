@@ -38,7 +38,7 @@ import { Time } from "@scribe/core/contracts/common/time.ts";
 import { rateLimiter, RateLimitError } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
 import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
 import { assertEquals } from "@std/assert";
-import { installRateLimiterMock, installValkeryMock } from "@scribe/core/testing/runtime/redis.ts";
+import { installRateLimiterMock, installValkeryMock } from "@scribe/foundation/testing/valkery.ts";
 
 Deno.test(
   "installValkeryMock: a Valkery subclass reads/writes against an in-memory store, restore() puts Redis back",

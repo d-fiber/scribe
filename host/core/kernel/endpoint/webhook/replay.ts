@@ -30,26 +30,16 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { kv } from "@scribe/core/runtime/redis/mod.ts";
+import { claimOnce } from "@scribe/core/runtime/redis/claim_once.ts";
 import { MAX_TIMESTAMP_SKEW_S } from "./signed_request.ts";
 
 export const CLAIM_TTL_S = 2 * MAX_TIMESTAMP_SKEW_S;
 
-export async function claimWebhookId(id: string): Promise<boolean> {
-  try {
-    const claimed = await kv().set(
-      `webhook:seen:${id}`,
-      "1",
-      "EX",
-      CLAIM_TTL_S,
-      "NX",
-    );
-    return claimed === "OK";
-  } catch (error) {
-    console.error(
-      "[webhook] replay index unavailable, refusing the delivery:",
-      error,
-    );
-    return false;
-  }
+export function claimWebhookId(id: string): Promise<boolean> {
+  // The opposite call to the one `claimNonce` makes: an index that cannot answer cannot tell
+  // a first delivery from a replay, and a replayed delivery is the thing this exists to stop.
+  return claimOnce(`webhook:seen:${id}`, CLAIM_TTL_S, {
+    whenUnavailable: "refuse",
+    scope: "webhook",
+  });
 }

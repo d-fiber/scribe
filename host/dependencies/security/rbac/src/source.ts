@@ -32,8 +32,7 @@
 
 import { Tables } from "@scribe/foundation/src/database/gen/tables.ts";
 import type { AdminRbacSource } from "@scribe/core/contracts/rbac.ts";
-import { Env } from "@scribe/host/env.ts";
-import { PostgrestClient } from "@supabase/postgrest-js";
+import { PostgrestClients } from "@scribe/foundation/src/database/client.ts";
 
 export class DatabaseAdminRbacSource implements AdminRbacSource {
   #db: Tables | null = null;
@@ -56,14 +55,10 @@ export class DatabaseAdminRbacSource implements AdminRbacSource {
     return permissions.map((p) => p.permission);
   }
 
+  // Building a client here instead of asking the factory would read the environment directly,
+  // and so would step around the settings slot a test fills — the calls would go to the real
+  // rest instance rather than to the mock, without anything saying so.
   #database(): Tables {
-    return (this.#db ??= new Tables(
-      new PostgrestClient(Env.SUPABASE_REST_INTERNAL_URL, {
-        headers: {
-          apikey: Env.SUPABASE_SERVICE_ROLE_KEY,
-          Authorization: `Bearer ${Env.SUPABASE_SERVICE_ROLE_KEY}`,
-        },
-      }),
-    ));
+    return (this.#db ??= new Tables(PostgrestClients.service()));
   }
 }

@@ -31,12 +31,9 @@
 // LICENSE file, the LICENSE file governs.
 
 export { SettingsSlot } from "./slot.ts";
-export { cacheSettings } from "./cache.ts";
-export { databaseSettings } from "./database.ts";
 export { deviceSettings } from "./device.ts";
 export { firewallSettings } from "./firewall.ts";
 export { httpSettings } from "./http.ts";
 export { identitySettings } from "./identity.ts";
-export { queueSettings } from "./queue.ts";
 export { storageSettings } from "./storage.ts";
 export { workerSettings } from "./worker.ts";

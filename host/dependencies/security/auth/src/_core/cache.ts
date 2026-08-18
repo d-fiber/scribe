@@ -32,7 +32,8 @@
 
 import type { AccountRole, AdminDevice, UserDevice } from "@scribe/core/contracts/account.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { kv } from "@scribe/core/runtime/redis/mod.ts";
+import { KeyIndex } from "@scribe/core/runtime/redis/key_index.ts";
+import { kv } from "@scribe/foundation/src/redis/mod.ts";
 import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
 
 function deviceKey(userId: string, deviceId: string): string {
@@ -129,35 +130,18 @@ class _RoleCache {
     await this.#forget(userId);
   }
 
-  #indexKey(userId: string): string {
-    return `${ROLE_INDEX_KEY}:${userId}`;
-  }
+  readonly #index = new KeyIndex(ROLE_INDEX_KEY, ROLE_TTL.value, "auth-cache:role");
 
   async #remember(userId: string, entry: string): Promise<void> {
-    try {
-      const key = this.#indexKey(userId);
-      await kv().sadd(key, entry);
-      await kv().expire(key, ROLE_TTL.value);
-    } catch (e) {
-      console.error("[auth-cache:role] index failed:", e);
-    }
+    await this.#index.remember(userId, entry);
   }
 
-  async #indexed(userId: string): Promise<string[]> {
-    try {
-      return await kv().smembers(this.#indexKey(userId));
-    } catch (e) {
-      console.error("[auth-cache:role] index read failed:", e);
-      return [];
-    }
+  #indexed(userId: string): Promise<string[]> {
+    return this.#index.members(userId);
   }
 
-  async #forget(userId: string): Promise<void> {
-    try {
-      await kv().del(this.#indexKey(userId));
-    } catch (e) {
-      console.error("[auth-cache:role] index clear failed:", e);
-    }
+  #forget(userId: string): Promise<void> {
+    return this.#index.forget(userId);
   }
 }
 
@@ -277,35 +261,18 @@ class _SessionIdemCache {
     await this.#forget(userId);
   }
 
-  #indexKey(userId: string): string {
-    return `${SESSION_IDEM_INDEX_KEY}:${userId}`;
-  }
+  readonly #index = new KeyIndex(SESSION_IDEM_INDEX_KEY, SESSION_IDEM_TTL.value, "auth-cache:session");
 
   async #remember(userId: string, entry: string): Promise<void> {
-    try {
-      const key = this.#indexKey(userId);
-      await kv().sadd(key, entry);
-      await kv().expire(key, SESSION_IDEM_TTL.value);
-    } catch (e) {
-      console.error("[auth-cache:session] index failed:", e);
-    }
+    await this.#index.remember(userId, entry);
   }
 
-  async #indexed(userId: string): Promise<string[]> {
-    try {
-      return await kv().smembers(this.#indexKey(userId));
-    } catch (e) {
-      console.error("[auth-cache:session] index read failed:", e);
-      return [];
-    }
+  #indexed(userId: string): Promise<string[]> {
+    return this.#index.members(userId);
   }
 
-  async #forget(userId: string): Promise<void> {
-    try {
-      await kv().del(this.#indexKey(userId));
-    } catch (e) {
-      console.error("[auth-cache:session] index clear failed:", e);
-    }
+  #forget(userId: string): Promise<void> {
+    return this.#index.forget(userId);
   }
 }
 

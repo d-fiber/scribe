@@ -48,7 +48,7 @@ import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/ins
 import { installAuthEnv } from "@scribe/host/dependencies/security/auth/testing/env.ts";
 import { goTrueSession, installGoTrueMock } from "@scribe/host/dependencies/security/auth/testing/gotrue.ts";
 import { assert, assertEquals } from "@std/assert";
-import { kv, type Kv } from "@scribe/core/runtime/redis/mod.ts";
+import { kv, type Kv } from "@scribe/foundation/src/redis/mod.ts";
 import { installMock } from "@scribe/core/testing/install.ts";
 
 class FakeChannel implements OtpChannel {

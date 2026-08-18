@@ -29,18 +29,31 @@
 //
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
+import { kv } from "@scribe/foundation/src/redis/mod.ts";
 
-import { cacheSettings } from "@scribe/core/runtime/support/settings/cache.ts";
-import { Redis } from "ioredis";
+/** What a claim does when Redis cannot answer. */
+export type WhenUnavailable = "allow" | "refuse";
 
-export type Kv = Redis;
-
-let _client: Kv | null = null;
-
-export function kv(): Kv {
-  return (_client ??= new Redis(cacheSettings.get().redisUrl, {
-    maxRetriesPerRequest: 3,
-    enableReadyCheck: true,
-    lazyConnect: true,
-  }));
+/**
+ * Claims `key` for `ttlSeconds`, and answers whether this caller is the first to do so.
+ *
+ * It is the short form of a distributed lock: there is nothing to release, because the point
+ * is that the second caller loses for as long as the key lives. A nonce, a webhook delivery
+ * id and an idempotency key are all the same question asked of different keys.
+ *
+ * `whenUnavailable` is not a default anyone should inherit. A replay index that fails open
+ * lets a replayed request through, and a nonce that fails closed locks out every device the
+ * moment Redis blinks — the two callers want opposite things, and each has to say which.
+ */
+export async function claimOnce(
+  key: string,
+  ttlSeconds: number,
+  { whenUnavailable, scope }: { whenUnavailable: WhenUnavailable; scope: string },
+): Promise<boolean> {
+  try {
+    return (await kv().set(key, "1", "EX", ttlSeconds, "NX")) === "OK";
+  } catch (error) {
+    console.error(`[${scope}] claim store unavailable:`, error);
+    return whenUnavailable === "allow";
+  }
 }

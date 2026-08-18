@@ -31,7 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { kv } from "@scribe/core/runtime/redis/mod.ts";
+import { kv } from "@scribe/foundation/src/redis/mod.ts";
 import { RateLimitBucket } from "./bucket.ts";
 import { resolveCaller } from "./caller.ts";
 import {
@@ -73,9 +73,7 @@ export class RateLimiterClient implements RateLimiterService {
     const caller = resolveCaller(key, scope);
     if (caller === null) {
       console.error(
-        `[rate-limiter] unattributable caller for key "${key}", ${
-          failOpen ? "allowing" : "blocking"
-        } request`,
+        `[rate-limiter] unattributable caller for key "${key}", ${failOpen ? "allowing" : "blocking"} request`,
       );
       return fallback(failOpen, limit, window);
     }
@@ -107,9 +105,7 @@ export class RateLimiterClient implements RateLimiterService {
       };
     } catch (error) {
       console.error(
-        `[rate-limiter] check failed for key "${key}", ${
-          failOpen ? "allowing" : "blocking"
-        } request:`,
+        `[rate-limiter] check failed for key "${key}", ${failOpen ? "allowing" : "blocking"} request:`,
         error,
       );
       return fallback(failOpen, limit, window);
@@ -125,9 +121,7 @@ export class RateLimiterClient implements RateLimiterService {
 
     try {
       const blockedFor = await kv().pttl(new RateLimitBucket(caller.key).blockedKey);
-      return blockedFor > 0
-        ? { limited: true, retryAfter: Math.ceil(blockedFor / 1000) }
-        : { limited: false };
+      return blockedFor > 0 ? { limited: true, retryAfter: Math.ceil(blockedFor / 1000) } : { limited: false };
     } catch (error) {
       console.error(
         `[rate-limiter] peek failed for key "${key}", blocking request:`,

@@ -32,9 +32,9 @@
 
 import "@scribe/core/testing/settings.ts";
 import type { RateLimitCommands } from "@scribe/core/runtime/redis/rate_limiter/script.ts";
-import { kv, type Kv } from "@scribe/core/runtime/redis/mod.ts";
+import { kv, type Kv } from "@scribe/foundation/src/redis/mod.ts";
 import { type InstalledMock, installMock } from "@scribe/core/testing/install.ts";
-import { installValkeryMock } from "@scribe/core/testing/runtime/redis.ts";
+import { installValkeryMock } from "@scribe/foundation/testing/valkery.ts";
 
 const _ALLOWED: [number, number, number] = [1, 9, 0];
 const _BLOCKED: [number, number, number] = [0, 900, 1];

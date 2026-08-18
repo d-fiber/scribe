@@ -42,7 +42,7 @@ import {
   type SetResult,
   SetResultSchema,
 } from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/valkery/valkery_pb.ts";
-import { kv } from "@scribe/core/runtime/redis/mod.ts";
+import { kv } from "@scribe/foundation/src/redis/mod.ts";
 import { decodeJson, encodeJson } from "../json.ts";
 
 const PREFIX = "worker";
