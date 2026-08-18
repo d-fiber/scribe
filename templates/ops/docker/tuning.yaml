@@ -33,42 +33,11 @@ services:
         "archive_command=pgbackrest archive-push %p",
       ]
 
-  redis:
-    command:
-      [
-        "redis-server",
-        "--requirepass",
-        "${REDIS_PASSWORD}",
-        "--appendonly",
-        "yes",
-        "--maxmemory",
-        "{{redis_maxmemory}}",
-        "--maxmemory-policy",
-        "volatile-lru",
-        "--io-threads",
-        "{{redis_io_threads}}",
-        "--io-threads-do-reads",
-        "{{redis_io_threads_do_reads}}",
-      ]
-
-
-  rest:
-    environment:
-      PGRST_DB_POOL: "{{rest_db_pool}}"
-      GHCRTS: "{{rest_ghc_rts}}"
-
-
-
-
   supavisor:
     environment:
       ERL_AFLAGS: "+S {{supavisor_schedulers}}:{{supavisor_schedulers}}"
 
 
-
-  nats:
-    environment:
-      GOMAXPROCS: "{{nats_gomaxprocs}}"
 
   kong:
     environment:

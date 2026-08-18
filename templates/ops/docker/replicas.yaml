@@ -4,7 +4,3 @@ services:
   api:
     deploy:
       replicas: {{api_replicas}}
-
-  rest:
-    deploy:
-      replicas: {{rest_replicas}}
