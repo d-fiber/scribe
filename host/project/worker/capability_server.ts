@@ -30,54 +30,17 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { DescMessage, DescMethodUnary } from "@bufbuild/protobuf";
-import { UnaryServer } from "@scribe/sdk";
-import { TransportFailure } from "@scribe/sdk";
+import { TransportFailure, UnaryServer } from "@scribe/sdk";
 import { Cache } from "@scribe/sdk/gen/scribe/host/core/runtime/redis/cache/protocol/cache_pb.ts";
 import { Queue } from "@scribe/sdk/gen/scribe/host/core/runtime/event_driven/queue/protocol/queue_pb.ts";
 import { Hook } from "@scribe/sdk/gen/scribe/host/core/runtime/event_driven/hook/protocol/hook_pb.ts";
 import { Rest } from "@scribe/sdk/gen/scribe/host/dependencies/database/rest/protocol/rest_pb.ts";
 import { Logging } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
-import { Storage } from "@scribe/sdk/gen/scribe/host/dependencies/database/storage/protocol/storage_pb.ts";
-import { Realtime } from "@scribe/sdk/gen/scribe/host/dependencies/database/realtime/protocol/realtime_pb.ts";
-import { Searcher } from "@scribe/sdk/gen/scribe/host/dependencies/features/searcher/protocol/searcher_pb.ts";
-import { Messagings } from "@scribe/sdk/gen/scribe/host/dependencies/features/messagings/protocol/messagings_pb.ts";
-import { Recommendation } from "@scribe/sdk/gen/scribe/host/dependencies/features/recommendation/protocol/recommendation_pb.ts";
-import { Observability } from "@scribe/sdk/gen/scribe/host/dependencies/features/observability/protocol/observability_pb.ts";
-import {
-  DynamicLinks,
-  RemoteConfigs,
-} from "@scribe/sdk/gen/scribe/host/dependencies/features/devops/protocol/devops_pb.ts";
-import { Geospatial } from "@scribe/sdk/gen/scribe/host/dependencies/geospatial/protocol/geospatial_pb.ts";
-import { Auth } from "@scribe/sdk/gen/scribe/host/dependencies/security/auth/protocol/auth_pb.ts";
-import { Rbac } from "@scribe/sdk/gen/scribe/host/dependencies/security/rbac/protocol/rbac_pb.ts";
-import { VpnAdmin } from "@scribe/sdk/gen/scribe/host/dependencies/security/vpn/protocol/vpn_pb.ts";
 import { CapabilityTokens } from "./capability_tokens.ts";
 import { cacheDelete, cacheGet, cacheSet } from "./capabilities/cache.ts";
 import { hookEmit, queuePush } from "./capabilities/event_driven.ts";
 import { shipLogs } from "./capabilities/logging.ts";
 import { executeQuery } from "./capabilities/rest.ts";
-
-type AnyMethod = DescMethodUnary<DescMessage, DescMessage>;
-
-const UNSERVED: readonly AnyMethod[] = [
-  ...methodsOf(Storage),
-  ...methodsOf(Realtime),
-  ...methodsOf(Searcher),
-  ...methodsOf(Messagings),
-  ...methodsOf(Recommendation),
-  ...methodsOf(Observability),
-  ...methodsOf(DynamicLinks),
-  ...methodsOf(RemoteConfigs),
-  ...methodsOf(Geospatial),
-  ...methodsOf(Auth),
-  ...methodsOf(Rbac),
-  ...methodsOf(VpnAdmin),
-];
-
-function methodsOf(service: { method: Record<string, unknown> }): AnyMethod[] {
-  return Object.values(service.method) as AnyMethod[];
-}
 
 export function capabilityServer(): UnaryServer {
   const server = new UnaryServer()
@@ -96,15 +59,15 @@ export function capabilityServer(): UnaryServer {
     .on(Logging.method.ship, (batch, call) =>
       CapabilityTokens.run(call.capabilityToken, () => shipLogs(batch)));
 
-  for (const method of UNSERVED) {
-    server.on(method, () => {
-      throw new TransportFailure(
-        "unimplemented",
-        `${method.parent.typeName}/${method.name} is declared by the contract but not wired on the host yet.`,
-        501,
-      );
-    });
-  }
-
-  return server;
+  // Anything the contract declares and the loop above did not wire answers a
+  // named 501 rather than a 404. Listing those procedures would mean importing
+  // the stub of every module the contract knows, and that list would be wrong
+  // the day a package adds a service.
+  return server.otherwise((path) => {
+    throw new TransportFailure(
+      "unimplemented",
+      `${path} is declared by the contract but not wired on the host yet.`,
+      501,
+    );
+  });
 }

@@ -65,6 +65,24 @@ type ErasedProcedure = {
 
 export class UnaryServer {
   readonly #procedures = new Map<string, ErasedProcedure>();
+  #otherwise: ((path: string) => never) | null = null;
+
+  /**
+   * What answers a procedure this server did not wire.
+   *
+   * Without one, an unknown path is a 404, which is the right answer for a
+   * side that was never meant to serve it. A side that serves *part* of the
+   * contract wants to say so instead, and it cannot list what it left out
+   * without naming every service the contract declares -- a list that goes
+   * stale the day someone adds one.
+   *
+   * The handler is given the procedure path, which carries both the service
+   * and the method, and is expected to throw.
+   */
+  otherwise(handler: (path: string) => never): this {
+    this.#otherwise = handler;
+    return this;
+  }
 
   on<I extends DescMessage, O extends DescMessage>(
     method: DescMethodUnary<I, O>,
@@ -101,6 +119,7 @@ export class UnaryServer {
     const path = new URL(request.url).pathname;
     const procedure = this.#procedures.get(path);
     if (!procedure) {
+      if (this.#otherwise !== null) this.#otherwise(path);
       throw TransportFailure.notFound(`Unknown procedure ${path}.`);
     }
 
