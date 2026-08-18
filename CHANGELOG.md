@@ -4,6 +4,28 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 2.0.1 (2026-08-18)
+
+Component versions: @scribe/core 1.0.1, @dependencies/core 0.1.8, @scribe/sdk 0.1.5
+
+### Added
+
+- build the functions image instead of pulling it (646e27a7)
+
+### Changed
+
+- move realtime and storage into packages of their own (c0f3016d)
+- let vpn hold its pending token with auth's (b3391026)
+- drop the connection pooler (3b9dcfe2)
+- drop the observability module and its log pipeline (4a5d48a2)
+- keep in the base stack only what the framework starts (d50e007f)
+- send every outgoing request through the client, not fetch (e620e383)
+- read Redis, the settings and the harnesses from foundation (10ee2a89)
+
+### Tests
+
+- add the tasks that bring the e2e stack up and run it (3a5604a1)
+
 ## 2.0.0 (2026-08-18)
 
 Component versions: @scribe/core 1.0.0, @dependencies/core 0.1.7, @scribe/sdk 0.1.4
