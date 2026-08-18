@@ -1,15 +1,6 @@
 name: "{{app_name_snake}}"
 
 services:
-  studio:
-    cpu_shares: 512
-    deploy:
-      resources:
-        limits:
-          cpus: "{{studio_cpu_limit}}"
-          memory: "{{studio_mem_limit}}"
-        reservations:
-          memory: "{{studio_mem_res}}"
 
   caddy:
     cpu_shares: 2048
@@ -28,23 +19,6 @@ services:
           memory: "{{kong_mem_limit}}"
         reservations:
           memory: "{{kong_mem_res}}"
-
-
-  db-migrate:
-    deploy:
-      resources:
-        limits:
-          memory: "{{db_migrate_mem_limit}}"
-
-
-  meta:
-    cpu_shares: 1024
-    deploy:
-      resources:
-        limits:
-          memory: "{{meta_mem_limit}}"
-        reservations:
-          memory: "{{meta_mem_res}}"
 
   functions:
     cpu_shares: 1024
@@ -72,23 +46,3 @@ services:
           memory: "{{worker_mem_limit}}"
         reservations:
           memory: "{{worker_mem_res}}"
-
-
-  db:
-    cpu_shares: 4096
-    deploy:
-      resources:
-        limits:
-          memory: "{{db_mem_limit}}"
-        reservations:
-          memory: "{{db_mem_res}}"
-
-
-  supavisor:
-    cpu_shares: 1024
-    deploy:
-      resources:
-        limits:
-          memory: "{{supavisor_mem_limit}}"
-        reservations:
-          memory: "{{supavisor_mem_res}}"

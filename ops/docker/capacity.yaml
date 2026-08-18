@@ -1,11 +1,4 @@
 services:
-  - name: db
-    weight: 2122
-    runtime: postgres
-    min: 256Mi
-    dev: 1Gi
-    cpu_shares: 4096
-
   - name: api
     weight: 1299
     runtime: deno
@@ -35,28 +28,6 @@ services:
     dev: 256Mi
     cpu_shares: 2048
 
-  - name: studio
-    weight: 395
-    runtime: node
-    profile: ops
-    min: 256Mi
-    dev: 512Mi
-    cpu_shares: 512
-
-  - name: supavisor
-    weight: 280
-    runtime: erlang
-    min: 128Mi
-    dev: 256Mi
-    cpu_shares: 1024
-
-  - name: meta
-    weight: 112
-    runtime: node
-    min: 64Mi
-    dev: 128Mi
-    cpu_shares: 1024
-
   - name: caddy
     weight: 93
     runtime: plain
@@ -64,8 +35,3 @@ services:
     dev: 64Mi
     cpu_shares: 2048
 
-  - name: db-migrate
-    weight: 37
-    runtime: oneshot
-    min: 32Mi
-    dev: 32Mi

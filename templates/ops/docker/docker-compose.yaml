@@ -1,54 +1,5 @@
 name: "{{app_name_snake}}"
 services:
-  studio:
-    profiles: ["ops"]
-    container_name: "supabase-studio"
-    build:
-      context: "{{sdk_root}}"
-      dockerfile: "docker/Dockerfile.studio"
-    restart: "unless-stopped"
-    volumes:
-      - "{{sdk_root}}/host:/app/edge-functions:Z"
-    environment:
-      HOSTNAME: "::"
-      STUDIO_PG_META_URL: "http://meta:8080"
-      POSTGRES_PORT: "5432"
-      POSTGRES_HOST: "db"
-      POSTGRES_DB: "postgres"
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      PG_META_CRYPTO_KEY: ${PG_META_CRYPTO_KEY}
-      PGRST_DB_SCHEMAS: "public"
-      PGRST_DB_MAX_ROWS: "1000"
-      PGRST_DB_EXTRA_SEARCH_PATH: "public"
-      DEFAULT_ORGANIZATION_NAME: "{{app_name}} Organization"
-      DEFAULT_PROJECT_NAME: "{{app_name}}"
-      OPENAI_API_KEY: "-"
-      SUPABASE_URL: "http://kong:8000"
-      SUPABASE_PUBLIC_URL: ${ADMIN_URL}
-      SUPABASE_ANON_KEY: ${ANON_KEY}
-      SUPABASE_SERVICE_KEY: ${SERVICE_KEY}
-      AUTH_JWT_SECRET: ${JWT_SECRET}
-      LOGFLARE_API_KEY: ${LOGFLARE_PUBLIC_ACCESS_TOKEN}
-      LOGFLARE_PUBLIC_ACCESS_TOKEN: ${LOGFLARE_PUBLIC_ACCESS_TOKEN}
-      LOGFLARE_PRIVATE_ACCESS_TOKEN: ${LOGFLARE_PRIVATE_ACCESS_TOKEN}
-      LOGFLARE_URL: "http://analytics:4000"
-      NEXT_PUBLIC_ENABLE_LOGS: "false"
-      NEXT_ANALYTICS_BACKEND_PROVIDER: "postgres"
-      EDGE_FUNCTIONS_MANAGEMENT_FOLDER: "/app/edge-functions"
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          'node -e "fetch(''http://localhost:3000/api/platform/profile'').then((r) => {if (r.status >= 500) throw new Error(r.status)})"',
-        ]
-      interval: "5s"
-      timeout: "10s"
-      retries: 3
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
   caddy:
     container_name: "supabase-caddy"
     image: "caddy:2"
@@ -140,45 +91,6 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-  db-migrate:
-    container_name: "db-migrate"
-    image: "ghcr.io/amacneil/dbmate:2"
-    restart: "no"
-    environment:
-      DATABASE_URL: "postgres://postgres:${POSTGRES_PASSWORD}@db:5432/postgres?sslmode=disable"
-    volumes:
-      - "{{sdk_root}}/host/core/db/migrations:/db/migrations/default:ro"
-      - "./lib/db/migrations:/db/migrations/project:ro"
-      - "{{sdk_root}}/ops/docker/db/run-migrations.sh:/run-migrations.sh:ro"
-    entrypoint: ["/bin/sh", "/run-migrations.sh"]
-    depends_on:
-      db:
-        condition: service_healthy
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "1m"
-        max-file: "1"
-  meta:
-    container_name: "supabase-meta"
-    image: "supabase/postgres-meta:v0.96.3"
-    restart: "unless-stopped"
-    depends_on:
-      db:
-        condition: "service_healthy"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    environment:
-      PG_META_PORT: "8080"
-      PG_META_DB_HOST: "db"
-      PG_META_DB_PORT: "5432"
-      PG_META_DB_NAME: "postgres"
-      PG_META_DB_USER: "supabase_admin"
-      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
-      CRYPTO_KEY: ${PG_META_CRYPTO_KEY}
   functions:
     container_name: "supabase-edge-functions"
     image: "supabase/edge-runtime:v1.71.2"
@@ -275,8 +187,8 @@ services:
         max-file: "3"
   api:
     build:
-      context: "{{sdk_root}}"
-      dockerfile: "docker/Dockerfile.api"
+      context: "{{sdk_root}}/ops/docker"
+      dockerfile: "Dockerfile.api"
     restart: "unless-stopped"
     volumes:
       - "{{sdk_root}}/host:/app/scribe/host:ro"
@@ -387,8 +299,8 @@ services:
     profiles: ["worker"]
     container_name: "worker"
     build:
-      context: "{{sdk_root}}"
-      dockerfile: "docker/Dockerfile.api"
+      context: "{{sdk_root}}/ops/docker"
+      dockerfile: "Dockerfile.api"
     restart: "unless-stopped"
     volumes:
       - "{{sdk_root}}/sdk:/app/scribe/sdk:ro"
@@ -417,133 +329,6 @@ services:
         max-file: "3"
 
 
-  db:
-    container_name: "supabase-db"
-    build:
-      context: "{{sdk_root}}"
-      dockerfile: "docker/Dockerfile.postgres"
-    restart: "unless-stopped"
-    volumes:
-      - "{{sdk_root}}/host/core/db/provisioning/_supabase.sql:/docker-entrypoint-initdb.d/init-scripts/97-_supabase.sql:Z"
-      - "{{sdk_root}}/host/core/db/provisioning/pooler.sql:/docker-entrypoint-initdb.d/init-scripts/98-pooler.sql:Z"
-      - "{{sdk_root}}/host/core/db/provisioning/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z"
-      - "{{sdk_root}}/host/core/db/provisioning/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z"
-      - "{{sdk_root}}/host/core/db/provisioning/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z"
-      - "{{sdk_root}}/host/core/db/init:/docker-entrypoint-init-sql/framework:ro"
-      - "./lib/db/init:/docker-entrypoint-init-sql/project:ro"
-      - "{{sdk_root}}/ops/docker/db/run-init-scripts.sh:/docker-entrypoint-initdb.d/init-scripts/999-00_run_init_scripts.sh:Z"
-      - "{{sdk_root}}/postgres:/var/lib/postgresql/data:Z"
-      - "db-config:/etc/postgresql-custom"
-    environment:
-      POSTGRES_HOST: "/var/run/postgresql"
-      SMTP_ENCRYPTION_KEY: "${SMTP_ENCRYPTION_KEY}"
-      API_INTERNAL_URL: "${API_INTERNAL_URL:-http://api:3000}"
-      FUNCTIONS_INTERNAL_URL: "${FUNCTIONS_INTERNAL_URL:-http://functions:9000}"
-      PGBACKREST_STANZA: "{{app_name_snake}}"
-      PGBACKREST_PG1_PATH: "/var/lib/postgresql/data"
-      PGBACKREST_REPO1_TYPE: "${PGBACKREST_REPO_TYPE:-none}"
-      PGBACKREST_REPO1_PATH: "/pgbackrest"
-      PGBACKREST_REPO1_S3_BUCKET: "${PGBACKREST_BUCKET:-}"
-      PGBACKREST_REPO1_S3_ENDPOINT: "${PGBACKREST_ENDPOINT:-}"
-      PGBACKREST_REPO1_S3_REGION: "${PGBACKREST_REGION:-}"
-      PGBACKREST_REPO1_S3_KEY: "${PGBACKREST_KEY:-}"
-      PGBACKREST_REPO1_S3_KEY_SECRET: "${PGBACKREST_KEY_SECRET:-}"
-      PGBACKREST_REPO1_S3_URI_STYLE: "path"
-      PGBACKREST_REPO1_RETENTION_FULL: "2"
-      PGBACKREST_COMPRESS_TYPE: "zst"
-      PGBACKREST_COMPRESS_LEVEL: "3"
-      PGBACKREST_PROCESS_MAX: "4"
-      PGBACKREST_ARCHIVE_ASYNC: "y"
-      PGBACKREST_SPOOL_PATH: "/var/spool/pgbackrest"
-      PGBACKREST_LOG_PATH: "/var/log/pgbackrest"
-      PGBACKREST_START_FAST: "y"
-      PGBACKREST_DELTA: "y"
-      PGPORT: "5432"
-      POSTGRES_PORT: "5432"
-      PGPASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      PGDATABASE: "postgres"
-      POSTGRES_DB: "postgres"
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXP: "3600"
-      INTERNAL_SECRET: ${INTERNAL_SECRET}
-    command:
-      [
-        "postgres",
-        "-c",
-        "config_file=/etc/postgresql/postgresql.conf",
-        "-c",
-        "log_min_messages=fatal",
-        "-c",
-        "max_connections=300",
-        "-c",
-        "shared_buffers=4GB",
-        "-c",
-        "effective_cache_size=12GB",
-      ]
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost"]
-      interval: "5s"
-      timeout: "5s"
-      retries: 10
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-  supavisor:
-    container_name: "supabase-pooler"
-    image: "supabase/supavisor:2.7.4"
-    restart: "unless-stopped"
-    volumes:
-      - "{{sdk_root}}/ops/pooler/pooler.exs:/etc/pooler/pooler.exs:ro,z"
-    environment:
-      PORT: "4000"
-      POSTGRES_PORT: "5432"
-      POSTGRES_DB: "postgres"
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      DATABASE_URL: "ecto://supabase_admin:${POSTGRES_PASSWORD}@db:5432/_supabase"
-      CLUSTER_POSTGRES: "true"
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      VAULT_ENC_KEY: ${VAULT_ENC_KEY}
-      API_JWT_SECRET: ${JWT_SECRET}
-      METRICS_JWT_SECRET: ${JWT_SECRET}
-      REGION: "local"
-      ERL_AFLAGS: "-proto_dist inet_tcp"
-      POOLER_TENANT_ID: "{{app_name_snake}}"
-      POOLER_DEFAULT_POOL_SIZE: "{{supavisor_pool_size}}"
-      POOLER_MAX_CLIENT_CONN: "{{supavisor_max_clients}}"
-      POOLER_POOL_MODE: "transaction"
-      DB_POOL_SIZE: "{{supavisor_db_pool}}"
-    command:
-      [
-        "/bin/sh",
-        "-c",
-        '/app/bin/migrate && /app/bin/supavisor eval "$$(cat /etc/pooler/pooler.exs)" && /app/bin/server',
-      ]
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "-sSfL",
-          "--head",
-          "-o",
-          "/dev/null",
-          "http://127.0.0.1:4000/api/health",
-        ]
-      interval: "10s"
-      timeout: "5s"
-      retries: 10
-      start_period: "30s"
-    depends_on:
-      db:
-        condition: "service_healthy"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 networks:
   default:
     ipam:
