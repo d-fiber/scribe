@@ -40,7 +40,7 @@ import "@scribe/core/testing/settings.ts";
 // `purpose` is a free string on purpose: a test that checks a foreign-purpose
 // token is refused must be able to sign one this module can never produce.
 
-import { VPN_ACCESS_PURPOSE } from "@scribe/host/dependencies/security/vpn/src/pending_token.ts";
+import { PendingTokenPurpose } from "@scribe/host/dependencies/security/auth/src/_core/pending_token.ts";
 import { toHex } from "@scribe/core/runtime/support/crypto/hash.ts";
 import type { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Env } from "@scribe/host/env.ts";
@@ -71,7 +71,7 @@ export async function forgeToken(
       identifier,
       role,
       deviceId: options.deviceId ?? null,
-      purpose: options.purpose ?? VPN_ACCESS_PURPOSE,
+      purpose: options.purpose ?? PendingTokenPurpose.VpnAccess,
       jti: crypto.randomUUID(),
       exp: options.expiresAt ?? Date.now() + 10 * 60 * 1000,
     }),

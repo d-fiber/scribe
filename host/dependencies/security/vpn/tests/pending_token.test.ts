@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { PendingToken, VPN_ACCESS_PURPOSE } from "@scribe/host/dependencies/security/vpn/src/pending_token.ts";
+import { PendingToken, PendingTokenPurpose } from "@scribe/host/dependencies/security/auth/src/_core/pending_token.ts";
 import { forgeToken } from "@scribe/host/dependencies/security/vpn/testing/pending_token.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
@@ -41,7 +41,7 @@ const ADMIN = "admin-1";
 Deno.test("forge: a forged token verifies against the real implementation", async () => {
   const forged = await forgeToken(ADMIN, AccountRole.Admin);
 
-  const payload = await new PendingToken().payload(forged);
+  const payload = await new PendingToken(PendingTokenPurpose.VpnAccess).payload(forged);
 
   assert(
     payload !== null,
@@ -51,13 +51,13 @@ Deno.test("forge: a forged token verifies against the real implementation", asyn
   assertEquals(payload.role, AccountRole.Admin);
 });
 
-Deno.test("forge: the default purpose is the one this module issues", async () => {
+Deno.test("forge: the default purpose is the vpn-access one", async () => {
   const forged = await forgeToken(ADMIN, AccountRole.Admin);
   const foreign = await forgeToken(ADMIN, AccountRole.Admin, {
-    purpose: `${VPN_ACCESS_PURPOSE}-x`,
+    purpose: `${PendingTokenPurpose.VpnAccess}-x`,
   });
 
-  const token = new PendingToken();
+  const token = new PendingToken(PendingTokenPurpose.VpnAccess);
 
   assert(await token.payload(forged) !== null);
   assertEquals(
@@ -67,10 +67,10 @@ Deno.test("forge: the default purpose is the one this module issues", async () =
   );
 });
 
-Deno.test("issue: the copy signs what it can verify", async () => {
+Deno.test("issue: what this module signs is what it can verify", async () => {
   const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   try {
-    const token = new PendingToken();
+    const token = new PendingToken(PendingTokenPurpose.VpnAccess);
     const value = await token.issue(ADMIN, AccountRole.Admin, null);
 
     assert(value !== null);
@@ -91,7 +91,7 @@ Deno.test("issue: the copy signs what it can verify", async () => {
 Deno.test("consume: a token is spendable exactly once", async () => {
   const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   try {
-    const token = new PendingToken();
+    const token = new PendingToken(PendingTokenPurpose.VpnAccess);
     const value = (await token.issue(ADMIN, AccountRole.Admin, null))!;
 
     assertEquals(await token.exists(value), true);

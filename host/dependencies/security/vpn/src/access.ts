@@ -31,7 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { vpn, VpnError } from "./client.ts";
-import { PendingToken } from "./pending_token.ts";
+import { PendingToken, PendingTokenPurpose } from "@scribe/host/dependencies/security/auth/src/_core/pending_token.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { Env } from "@scribe/host/env.ts";
@@ -48,7 +48,7 @@ export interface VpnConfiguration {
 
 export type VpnConfigurationResult = Result<VpnConfiguration, VpnAccessError>;
 
-const _token = new PendingToken();
+const _token = new PendingToken(PendingTokenPurpose.VpnAccess);
 
 function _filenameFor(
   firstName: string | null,
@@ -75,9 +75,11 @@ export class VpnAccessLink {
     const token = await _token.issue(adminId, AccountRole.Admin, null);
     if (!token) return null;
 
-    return `${Env.SUPABASE_URL}/functions/v1/hosting/vpn#token=${encodeURIComponent(
-      token,
-    )}`;
+    return `${Env.SUPABASE_URL}/functions/v1/hosting/vpn#token=${
+      encodeURIComponent(
+        token,
+      )
+    }`;
   }
 
   static async redeem(
@@ -96,9 +98,7 @@ export class VpnAccessLink {
     const peer = await vpn.getByOwner(payload.identifier);
     if (!peer.ok) {
       return new Failure(
-        peer.error === VpnError.NotFound
-          ? VpnAccessError.InvalidOrExpiredToken
-          : VpnAccessError.Unexpected,
+        peer.error === VpnError.NotFound ? VpnAccessError.InvalidOrExpiredToken : VpnAccessError.Unexpected,
       );
     }
 

@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { PendingToken } from "@scribe/host/dependencies/security/vpn/src/pending_token.ts";
+import { PendingToken, PendingTokenPurpose } from "@scribe/host/dependencies/security/auth/src/_core/pending_token.ts";
 import { type Vpn, vpn, VpnAccessError, VpnAccessLink, VpnError } from "@scribe/host/dependencies/security/vpn/mod.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
@@ -184,7 +184,7 @@ Deno.test("redeem: a user-role token is refused on an admin-only link", async ()
   const database = installDatabaseMock({ internal_t__otp_pending_tokens: [] });
   const vpn = installVpn();
   try {
-    const asUser = await new PendingToken().issue(ADMIN, AccountRole.User, null);
+    const asUser = await new PendingToken(PendingTokenPurpose.VpnAccess).issue(ADMIN, AccountRole.User, null);
 
     const result = await VpnAccessLink.redeem(asUser!, IDENTITY);
 
