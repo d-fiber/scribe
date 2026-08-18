@@ -23,6 +23,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check out the packages submodule
+        env:
+          PACKAGES_READ_KEY: ${{ secrets.PACKAGES_READ_KEY }}
+        run: |
+          set -eu
+          mkdir -p ~/.ssh
+          printf '%s\n' "$PACKAGES_READ_KEY" > ~/.ssh/packages
+          chmod 600 ~/.ssh/packages
+          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/packages -o IdentitiesOnly=yes" \
+            git submodule update --init --recursive
+
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
@@ -125,6 +137,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check out the packages submodule
+        env:
+          PACKAGES_READ_KEY: ${{ secrets.PACKAGES_READ_KEY }}
+        run: |
+          set -eu
+          mkdir -p ~/.ssh
+          printf '%s\n' "$PACKAGES_READ_KEY" > ~/.ssh/packages
+          chmod 600 ~/.ssh/packages
+          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/packages -o IdentitiesOnly=yes" \
+            git submodule update --init --recursive
 
       - name: Install protoc
         run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
