@@ -30,21 +30,23 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { AccountRoles } from "@scribe/core/runtime/support/ports/account_roles.ts";
-import type { StorageAuthorize } from "../runtime/config.ts";
-import type { StorageSession } from "./identity.ts";
+import type { AccountRole, AccountRoleSource } from "@scribe/core/contracts/account.ts";
 
-export async function authorizeOwnership(
-  session: StorageSession,
-  authorize: StorageAuthorize | undefined,
-  args: readonly string[],
-): Promise<boolean> {
-  if (!authorize) return true;
-  try {
-    const role = await AccountRoles.withId(session.id);
-    if (role === null) return false;
-    return await authorize({ id: session.id, role }, args);
-  } catch {
-    return false;
-  }
-}
+let source: AccountRoleSource | null = null;
+
+export const AccountRoles: {
+  use(next: AccountRoleSource): void;
+  withId(id: string): Promise<AccountRole | null>;
+} = {
+  use(next: AccountRoleSource): void {
+    source = next;
+  },
+
+  withId(id: string): Promise<AccountRole | null> {
+    if (!source) {
+      console.error("[account-roles] no AccountRoleSource registered: denying.");
+      return Promise.resolve(null);
+    }
+    return source.withId(id);
+  },
+};

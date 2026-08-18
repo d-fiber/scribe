@@ -91,7 +91,7 @@ export type { VideoResource } from "./src/resources/video.ts";
 
 export { StorageClient } from "./src/client.ts";
 
-export { AccountRoles } from "./src/access/account_roles.ts";
+export { AccountRoles } from "@scribe/core/runtime/support/ports/account_roles.ts";
 export { StorageVisibility } from "./src/access/visibility.ts";
 export { StorageTransports } from "./src/bucket/registry.ts";
 export { SupabaseStorageTransport } from "./src/bucket/supabase.ts";

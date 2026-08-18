@@ -41,8 +41,6 @@ import {
   QueueStatusEndpoint,
 } from "./queue_drain.ts";
 
-import "@scribe/host/dependencies/features/searcher/sync/queue.ts";
-
 await extensions.load(EXTENSION_QUEUE);
 console.info(queueRegistry.report());
 

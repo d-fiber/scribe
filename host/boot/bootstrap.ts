@@ -31,18 +31,6 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Env } from "@scribe/host/env.ts";
-import { AccountRoles } from "@scribe/host/dependencies/database/storage/src/access/account_roles.ts";
-import {
-  RealtimeTransports,
-  SyncEventsTransport,
-} from "@scribe/host/dependencies/database/realtime/mod.ts";
-import {
-  StorageTransports,
-  SupabaseStorageTransport,
-} from "@scribe/host/dependencies/database/storage/mod.ts";
-import { AccountRoleResolver } from "@scribe/host/dependencies/security/auth/src/_core/account.ts";
-import { DatabaseAdminRbacSource } from "@scribe/host/dependencies/security/rbac/mod.ts";
-import { AdminRbacResolver } from "@scribe/core/kernel/identity/resolver/rbac_resolver.ts";
 import {
   extensions,
   OptionalExtension,
@@ -56,7 +44,6 @@ import { identitySettings } from "@scribe/core/runtime/support/settings/identity
 import { queueSettings } from "@scribe/core/runtime/support/settings/queue.ts";
 import { storageSettings } from "@scribe/core/runtime/support/settings/storage.ts";
 import { workerSettings } from "@scribe/core/runtime/support/settings/worker.ts";
-import { SEARCHER_EXTENSION } from "@scribe/host/dependencies/features/searcher/core/extension.ts";
 import { EXTENSION_CRON, EXTENSION_QUEUE } from "./extensions.ts";
 
 /**
@@ -104,11 +91,20 @@ const WORKER_HANDSHAKE_ATTEMPTS = 10;
 
 const WORKER_HANDSHAKE_DELAY_MS = 1_000;
 
-const GATEWAY_PUBLIC_NODES = ["admin", "app"];
-
+/**
+ * The nodes the gateway routes publicly, as the deployment declares them.
+ *
+ * Empty when nothing is declared, and empty means the host presumes nothing.
+ * It used to fall back to `admin` and `app`, which was a guess about a project
+ * it cannot see: a node is named after a folder the project chose, so the two
+ * names carried no more truth than any other. A node that declares itself
+ * public without appearing here is only warned about; the refusal is reserved
+ * for the other direction, a node that declares itself internal while the
+ * gateway exposes it.
+ */
 function publicNodes(): readonly string[] {
   const declared = Deno.env.get("GATEWAY_PUBLIC_NODES");
-  if (!declared) return GATEWAY_PUBLIC_NODES;
+  if (!declared) return [];
 
   return declared.split(",").map((name) => name.trim()).filter((name) => name !== "");
 }
@@ -121,11 +117,6 @@ workerSettings.use({
   handshakeDelayMs: WORKER_HANDSHAKE_DELAY_MS,
   publicNodes: publicNodes(),
 });
-
-AdminRbacResolver.use(new DatabaseAdminRbacSource());
-AccountRoles.use(AccountRoleResolver);
-RealtimeTransports.use(new SyncEventsTransport());
-StorageTransports.use(new SupabaseStorageTransport());
 
 extensions.register(
   new OptionalExtension(
@@ -141,9 +132,21 @@ extensions.register(
   ),
 );
 
-extensions.register(
-  new OptionalExtension(
-    SEARCHER_EXTENSION,
-    () => import("@app/extensions/manifest/searcher/search.ts"),
-  ),
-);
+/**
+ * Hands the ports to the modules the project mounted.
+ *
+ * `@generated/registrations.ts` imports the `register.ts` of every mounted
+ * module, and the CLI writes it from `config.yaml`. That indirection is the
+ * whole point: this file wired four modules by name, so adding a fifth meant
+ * editing the framework, and a module could not be unmounted without leaving a
+ * dangling import behind.
+ *
+ * Its absence is ordinary rather than an error -- a checkout with no project
+ * generated nothing, which is the state of the framework's own tests. The ports
+ * then answer as they do when nobody registered: each says so at the first call
+ * that needs it, naming itself.
+ */
+try {
+  await import("@generated/registrations.ts");
+  // deno-lint-ignore no-empty
+} catch {}

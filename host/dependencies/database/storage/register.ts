@@ -30,21 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { AccountRoles } from "@scribe/core/runtime/support/ports/account_roles.ts";
-import type { StorageAuthorize } from "../runtime/config.ts";
-import type { StorageSession } from "./identity.ts";
+import { StorageTransports, SupabaseStorageTransport } from "./mod.ts";
 
-export async function authorizeOwnership(
-  session: StorageSession,
-  authorize: StorageAuthorize | undefined,
-  args: readonly string[],
-): Promise<boolean> {
-  if (!authorize) return true;
-  try {
-    const role = await AccountRoles.withId(session.id);
-    if (role === null) return false;
-    return await authorize({ id: session.id, role }, args);
-  } catch {
-    return false;
-  }
-}
+/** What this module hands the framework when it is mounted. */
+StorageTransports.use(new SupabaseStorageTransport());

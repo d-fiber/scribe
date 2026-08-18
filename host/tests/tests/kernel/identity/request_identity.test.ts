@@ -35,7 +35,7 @@ import type { AdminRbac } from "@scribe/core/contracts/rbac.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { RequestIdentity } from "@scribe/core/kernel/identity/request_identity.ts";
 import { JwtIdentityResolver } from "@scribe/core/kernel/identity/resolver/jwt_resolver.ts";
-import { AdminRbacResolver } from "@scribe/core/kernel/identity/resolver/rbac_resolver.ts";
+import { AdminRbacResolver } from "@scribe/core/runtime/support/ports/rbac_resolver.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 import { installMock } from "@scribe/core/testing/install.ts";
 import { assertEquals } from "@std/assert";

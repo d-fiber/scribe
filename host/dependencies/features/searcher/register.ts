@@ -30,21 +30,21 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { AccountRoles } from "@scribe/core/runtime/support/ports/account_roles.ts";
-import type { StorageAuthorize } from "../runtime/config.ts";
-import type { StorageSession } from "./identity.ts";
+import { extensions, OptionalExtension } from "@scribe/core/runtime/support/extensions/mod.ts";
+import { SEARCHER_EXTENSION } from "./core/extension.ts";
 
-export async function authorizeOwnership(
-  session: StorageSession,
-  authorize: StorageAuthorize | undefined,
-  args: readonly string[],
-): Promise<boolean> {
-  if (!authorize) return true;
-  try {
-    const role = await AccountRoles.withId(session.id);
-    if (role === null) return false;
-    return await authorize({ id: session.id, role }, args);
-  } catch {
-    return false;
-  }
-}
+import "./sync/queue.ts";
+
+/**
+ * What this module hands the framework when it is mounted.
+ *
+ * The `sync/queue.ts` import is for its effect: declaring a queue registers it,
+ * and the runner reads the registry at start. It used to sit in the queue
+ * surface of the host, which meant the host knew this module existed.
+ */
+extensions.register(
+  new OptionalExtension(
+    SEARCHER_EXTENSION,
+    () => import("@app/extensions/manifest/searcher/search.ts"),
+  ),
+);

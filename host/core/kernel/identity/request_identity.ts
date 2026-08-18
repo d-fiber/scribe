@@ -33,7 +33,7 @@
 import type { SessionAdmin, SessionUser } from "@scribe/core/contracts/account.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
-import { AdminRbacResolver } from "./resolver/rbac_resolver.ts";
+import { AdminRbacResolver } from "@scribe/core/runtime/support/ports/rbac_resolver.ts";
 import { JwtIdentityResolver } from "./resolver/jwt_resolver.ts";
 import { RequestIdentityCache, type RequestUser } from "@scribe/core/runtime/http/accessors/identity.ts";
 

@@ -37,7 +37,7 @@ export {
   InternalService,
 } from "./kernel/http/routing/internal_services.ts";
 export { resolveIdentity } from "./kernel/identity/middleware.ts";
-export { AdminRbacResolver } from "./kernel/identity/resolver/rbac_resolver.ts";
+export { AdminRbacResolver } from "./runtime/support/ports/rbac_resolver.ts";
 export type { AdminRbac, AdminRbacSource } from "./contracts/rbac.ts";
 
 export { cronRegistry } from "./runtime/event_driven/cron/core/registry.ts";

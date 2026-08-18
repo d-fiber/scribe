@@ -30,25 +30,14 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { AccountRole, AccountRoleSource } from "@scribe/core/contracts/account.ts";
+import { AccountRoles } from "@scribe/core/runtime/support/ports/account_roles.ts";
+import { AccountRoleResolver } from "./src/_core/account.ts";
 
-let source: AccountRoleSource | null = null;
-
-export const AccountRoles: {
-  use(next: AccountRoleSource): void;
-  withId(id: string): Promise<AccountRole | null>;
-} = {
-  use(next: AccountRoleSource): void {
-    source = next;
-  },
-
-  withId(id: string): Promise<AccountRole | null> {
-    if (!source) {
-      console.error(
-        "[storage-ownership] no AccountRoleSource registered: denying.",
-      );
-      return Promise.resolve(null);
-    }
-    return source.withId(id);
-  },
-};
+/**
+ * What this module hands the framework when it is mounted.
+ *
+ * The registry lives in `core/` next to the contract it serves rather than in
+ * the module that consumes it, so that answering "what role does this account
+ * hold" costs neither side an import of the other.
+ */
+AccountRoles.use(AccountRoleResolver);
