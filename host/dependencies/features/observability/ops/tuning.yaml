@@ -1,4 +1,0 @@
-services:
-  analytics:
-    environment:
-      ERL_AFLAGS: "+S {{analytics_schedulers}}:{{analytics_schedulers}}"
