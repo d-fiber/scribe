@@ -32,7 +32,7 @@
 
 // deno-lint-ignore-file no-explicit-any
 
-import type { TypedQueryBuilder } from "@scribe/core/clients/database/query/builder.ts";
+import type { TypedQueryBuilder } from "@scribe/foundation/src/database/query/builder.ts";
 
 const MAX_MEMBERS = 1_000;
 const MAX_TOPICS_PER_ACCOUNT = 200;

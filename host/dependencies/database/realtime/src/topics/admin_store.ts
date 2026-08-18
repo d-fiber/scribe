@@ -33,7 +33,7 @@
 // deno-lint-ignore-file no-explicit-any
 
 import { database } from "@scribe/foundation/src/database/database.ts";
-import type { TypedQueryBuilder } from "@scribe/core/clients/database/query/builder.ts";
+import type { TypedQueryBuilder } from "@scribe/foundation/src/database/query/builder.ts";
 import { topicEvents } from "./events.ts";
 import { TopicStore } from "./store.ts";
 
