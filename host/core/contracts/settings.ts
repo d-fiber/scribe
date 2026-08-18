@@ -30,28 +30,6 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-
-export interface CacheSettings {
-  readonly redisUrl: string;
-}
-
-export interface QueueSettings {
-  readonly natsUrl: string;
-}
-
-export interface StorageSettings {
-  readonly apiUrl: string;
-  readonly serviceRoleKey: string;
-  readonly publicBaseUrl: string;
-  readonly privateBaseUrl: string;
-}
-
-export interface DatabaseSettings {
-  readonly restUrl: string;
-  readonly anonKey: string;
-  readonly serviceRoleKey: string;
-}
-
 export interface IdentitySettings {
   readonly authUrl: string;
   readonly anonKey: string;
@@ -100,4 +78,3 @@ export interface WorkerSettings {
   readonly handshakeDelayMs: number;
   readonly publicNodes: readonly string[];
 }
-

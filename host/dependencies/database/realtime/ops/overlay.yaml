@@ -1,4 +1,0 @@
-services:
-  db:
-    volumes:
-      - "{{sdk_root}}/host/dependencies/database/realtime/db/provisioning/realtime.sql:/docker-entrypoint-initdb.d/init-scripts/97-realtime.sql:Z"

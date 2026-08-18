@@ -31,7 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { AccountRole } from "@scribe/core/contracts/account.ts";
-import { defineRealtime, event } from "@scribe/host/dependencies/database/realtime/mod.ts";
+import { defineRealtime, event } from "@scribe/realtime/mod.ts";
 
 const devices = defineRealtime({
   entity: "devices",

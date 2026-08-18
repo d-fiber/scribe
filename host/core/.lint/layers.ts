@@ -71,16 +71,23 @@ const FUNCTIONS_MARKER = "/scribe/host/";
 const SPECIFIER_PREFIXES = ["@scribe/core/", "@scribe/host/"] as const;
 
 /**
- * The mandatory package, reached by its own name instead of through the host tree.
+ * The packages, reached by their own name instead of through the host tree.
  *
- * `@scribe/foundation` is a workspace package of its own, so its specifier carries
- * no layer segment to read. It is the `packages` layer wherever it appears.
+ * Each one is a workspace package of its own, so its specifier carries no layer
+ * segment to read. They are the `packages` layer wherever they appear, and a new
+ * package has to be added here to be seen as one.
  */
-const FOUNDATION_PREFIX = "@scribe/foundation/";
-const FOUNDATION_LAYER = "packages";
+const PACKAGE_PREFIXES = [
+  "@scribe/foundation/",
+  "@scribe/realtime/",
+  "@scribe/storage/",
+] as const;
+const PACKAGE_LAYER = "packages";
 
 function layerOfSpecifier(source: string): string | null {
-  if (source.startsWith(FOUNDATION_PREFIX)) return FOUNDATION_LAYER;
+  if (PACKAGE_PREFIXES.some((prefix) => source.startsWith(prefix))) {
+    return PACKAGE_LAYER;
+  }
 
   for (const prefix of SPECIFIER_PREFIXES) {
     if (!source.startsWith(prefix)) continue;

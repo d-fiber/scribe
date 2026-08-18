@@ -30,53 +30,20 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Size } from "@scribe/core/contracts/common/size.ts";
-import {
-  defineStorage,
-  file,
-  type FileSpec,
-  image,
-  type ImageSpec,
-  type PathArgs,
-  type StorageFolder,
-} from "@scribe/storage/mod.ts";
+// deno-lint-ignore-file
 
-export const userStorage: StorageFolder<
-  { avatar: ImageSpec; issue: FileSpec },
-  PathArgs<"users/{account}">
-> = defineStorage({
-  path: "users/{account}",
-  access: { read: "anyone", write: "users" },
-  resources: {
-    avatar: image({
-      extensions: ["png", "jpg", "jpeg"],
-      maxSize: Size.megabytes(10),
-    }),
-    issue: file({
-      extensions: ["png", "jpg", "jpeg", "json"],
-      maxSize: Size.megabytes(10),
-      read: "admins",
-    }),
-  },
-});
+import { type AutoMock, createAutoMock } from "@scribe/core/testing/auto_mock.ts";
+import { installAllMock, type InstalledMock } from "@scribe/core/testing/install.ts";
+import "@scribe/core/testing/settings.ts";
+import { accountStorage } from "@scribe/host/dependencies/security/auth/src/user/storage/account_storage.ts";
 
-export const adminStorage: StorageFolder<
-  { avatar: ImageSpec },
-  PathArgs<"admin/{account}">
-> = defineStorage({
-  path: "admin/{account}",
-  access: { read: "admins", write: "admins" },
-  resources: {
-    avatar: image({
-      extensions: ["png", "jpg", "jpeg"],
-      maxSize: Size.megabytes(10),
-    }),
-  },
-});
-
-export class AccountStorage {
-  readonly user: typeof userStorage = userStorage;
-  readonly admin: typeof adminStorage = adminStorage;
+export function createAccountStorageMock(): AutoMock<typeof accountStorage> {
+  return createAutoMock(accountStorage);
 }
 
-export const accountStorage: AccountStorage = new AccountStorage();
+export function installAccountStorageMock(): AutoMock<typeof accountStorage> &
+  InstalledMock {
+  const mock = createAccountStorageMock();
+  const installed = installAllMock(accountStorage, mock.target);
+  return Object.assign(mock, installed);
+}

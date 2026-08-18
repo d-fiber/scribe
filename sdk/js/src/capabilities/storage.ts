@@ -35,7 +35,7 @@ import { TimeSchema } from "../../gen/scribe/protocol/common_pb.ts";
 import {
   ObjectRefSchema,
   Storage,
-} from "../../gen/scribe/host/dependencies/database/storage/protocol/storage_pb.ts";
+} from "../../gen/scribe/host/packages/storage/protocol/storage_pb.ts";
 import type { Time } from "../contracts/time.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";

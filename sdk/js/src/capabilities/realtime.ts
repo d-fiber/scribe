@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Realtime } from "../../gen/scribe/host/dependencies/database/realtime/protocol/realtime_pb.ts";
+import { Realtime } from "../../gen/scribe/host/packages/realtime/protocol/realtime_pb.ts";
 import { type EventScope, encodeEventScope } from "../contracts/access.ts";
 import { encodeJson } from "../contracts/json.ts";
 import { host } from "./channel.ts";

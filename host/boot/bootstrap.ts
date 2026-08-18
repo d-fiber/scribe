@@ -42,7 +42,6 @@ import { firewallSettings } from "@scribe/core/runtime/support/settings/firewall
 import { httpSettings } from "@scribe/core/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
 import { queueSettings } from "@scribe/foundation/src/queue/settings.ts";
-import { storageSettings } from "@scribe/core/runtime/support/settings/storage.ts";
 import { workerSettings } from "@scribe/core/runtime/support/settings/worker.ts";
 import { EXTENSION_CRON, EXTENSION_QUEUE } from "./extensions.ts";
 
@@ -78,12 +77,6 @@ identitySettings.use({
 firewallSettings.use({ internalSecret: Env.INTERNAL_SECRET });
 deviceSettings.use({ payloadPrivateKeyHex: Env.DEVICE_PAYLOAD_PRIVATE_KEY });
 httpSettings.use({ port: Env.PORT, maxInflightBodyBytes: maxInflightBodyBytes() });
-storageSettings.use({
-  apiUrl: Env.SUPABASE_STORAGE_INTERNAL_URL,
-  serviceRoleKey: Env.SUPABASE_SERVICE_ROLE_KEY,
-  publicBaseUrl: Env.APP_URL,
-  privateBaseUrl: Env.ADMIN_URL,
-});
 
 const WORKER_CALLBACK_PORT = 4747;
 

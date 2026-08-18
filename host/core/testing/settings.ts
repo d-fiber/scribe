@@ -37,7 +37,7 @@ import { firewallSettings } from "@scribe/core/runtime/support/settings/firewall
 import { httpSettings } from "@scribe/core/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
 import { queueSettings } from "@scribe/foundation/src/queue/settings.ts";
-import { storageSettings } from "@scribe/core/runtime/support/settings/storage.ts";
+import { storageSettings } from "@scribe/storage/src/settings.ts";
 
 function env(key: string, fallback: string): string {
   return Deno.env.get(key) ?? fallback;

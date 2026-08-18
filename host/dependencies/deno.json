@@ -3,16 +3,13 @@
   "version": "0.1.7",
   "exports": {
     ".": "./clients.ts",
-    "./database/realtime": "./database/realtime/mod.ts",
-    "./database/storage": "./database/storage/mod.ts",
     "./features": "./features/features.ts",
     "./geospatial": "./geospatial/geocoder.ts",
-    "./security/rbac": "./security/rbac/mod.ts",
     "./security/auth": "./security/auth/mod.ts",
-    "./security/vpn": "./security/vpn/mod.ts",
-    "./database/realtime/testing": "./database/realtime/testing/mock.ts",
-    "./database/storage/testing": "./database/storage/testing/mock.ts",
     "./security/auth/testing": "./security/auth/testing/mock.ts",
+    "./security/auth/testing/account_storage": "./security/auth/testing/account_storage.ts",
+    "./security/rbac": "./security/rbac/mod.ts",
+    "./security/vpn": "./security/vpn/mod.ts",
     "./security/vpn/testing": "./security/vpn/testing/mock.ts"
   }
 }
