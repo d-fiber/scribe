@@ -1,6 +1,6 @@
 {
   "name": "@dependencies/core",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "exports": {
     ".": "./clients.ts",
     "./database/realtime": "./database/realtime/mod.ts",

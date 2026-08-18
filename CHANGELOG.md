@@ -4,6 +4,38 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 2.0.0 (2026-08-18)
+
+Component versions: @scribe/core 1.0.0, @dependencies/core 0.1.7, @scribe/sdk 0.1.4
+
+### Breaking
+
+- declare the foundation engines by construction (3a7f04d0)
+- hand the redis, nats and rest containers to foundation (451d5d82)
+- consume foundation as a named deno package (d3ad6e77)
+- move the cache, queue, cron and hook to foundation (a76a9e72)
+- read the PostgREST engine from the foundation package (3340ee1d)
+- let a module wire itself instead of naming it in the boot (4af8c6a2)
+- serve the project's nodes, and no endpoints of our own (0f43ae73)
+
+### Performance
+
+- read a page of search previews in a single round trip (3b93a8a4)
+
+### Changed
+
+- read the PostgREST engine from the foundation package (ebf5f4b7)
+- derive what the host does not serve instead of listing it (d25a6661)
+
+### Tooling
+
+- move the packages pointer to the body annotation fix (c2b1843a)
+- move the packages pointer to the http client (70b750ec)
+- move the packages pointer to the hook and cron changes (f66e9da4)
+- move the packages pointer to the queue retry change (7adc0e0a)
+- check out the packages submodule with its own key (4dc8af6e)
+- drop the empty snippets placeholder (c29212ac)
+
 ## 1.0.1 (2026-08-17)
 
 Component versions: @scribe/core 0.1.7, @scribe/sdk 0.1.3
