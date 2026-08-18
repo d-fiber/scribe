@@ -4,6 +4,27 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 2.0.2 (2026-08-18)
+
+Component versions: @scribe/core 1.0.2, @dependencies/core 0.1.9
+
+### Fixed
+
+- provision the JWT claims helper the policies read (b57731d1)
+
+### Security
+
+- drop the development seed and the real accounts in it (3aaa8c13)
+
+### Changed
+
+- let a module declare what waits on it, and drop the manifests (8e372dc3)
+- hand the primitive SQL to the mandatory package (3610e273)
+
+### Tests
+
+- render the ops fragments before the end-to-end stack starts (ea04fac3)
+
 ## 2.0.1 (2026-08-18)
 
 Component versions: @scribe/core 1.0.1, @dependencies/core 0.1.8, @scribe/sdk 0.1.5
