@@ -84,6 +84,28 @@ export function installValkeryMock(): InstalledMock {
     ),
     installMock(
       kv(),
+      "mget",
+      ((...keys: string[]) =>
+        Promise.resolve(
+          keys.map((key) => store.get(key) ?? null),
+        )) as unknown as Kv["mget"],
+    ),
+    installMock(
+      // `Valkery` removes with UNLINK rather than DEL, so the fake has to answer it too.
+      // It frees memory on a background thread where DEL holds the single Redis thread.
+      kv(),
+      "unlink",
+      ((...keys: string[]) => {
+        let removed = 0;
+        for (const key of keys) {
+          if (store.delete(key)) removed++;
+          if (sets.delete(key)) removed++;
+        }
+        return Promise.resolve(removed);
+      }) as unknown as Kv["unlink"],
+    ),
+    installMock(
+      kv(),
       "exists",
       ((...keys: string[]) =>
         Promise.resolve(

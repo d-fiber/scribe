@@ -73,9 +73,9 @@ export class EntitySearchCache<TPreview> {
     fetch: (missing: string[]) => Promise<TPreview[]>,
   ): Promise<Map<string, TPreview>> {
     const byId = new Map<string, TPreview>();
-    const cached = await Promise.all(
-      ids.map((id) => this.#items.get<TPreview>(id)),
-    );
+    // One round trip for the page, not one per result: a search that returns fifty ids used
+    // to read fifty keys one after the other.
+    const cached = await this.#items.getMany<TPreview>(ids);
 
     const missing: string[] = [];
     cached.forEach((item, i) => {
