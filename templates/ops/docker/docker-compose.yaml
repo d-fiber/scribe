@@ -93,7 +93,9 @@ services:
         max-file: "3"
   functions:
     container_name: "supabase-edge-functions"
-    image: "supabase/edge-runtime:v1.71.2"
+    build:
+      context: "{{sdk_root}}/ops/docker"
+      dockerfile: "Dockerfile.functions"
     restart: "unless-stopped"
     volumes:
       - "{{sdk_root}}/host:/home/deno/functions:Z"
