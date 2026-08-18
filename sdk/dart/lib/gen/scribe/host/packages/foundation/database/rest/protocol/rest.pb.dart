@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from scribe/host/dependencies/database/rest/protocol/rest.proto.
+// Generated from scribe/host/packages/foundation/database/rest/protocol/rest.proto.
 
 // @dart = 3.3
 
@@ -16,7 +16,7 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../../../../../protocol/common.pb.dart' as $0;
+import '../../../../../../protocol/common.pb.dart' as $0;
 import 'rest.pbenum.dart';
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;

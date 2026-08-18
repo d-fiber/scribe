@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/dependencies/database/rest/rest.ts";
+import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
 import { DeviceToken } from "@scribe/host/dependencies/security/auth/src/user/devices/_internal/token.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import type { Location } from "@scribe/core/contracts/common/location.ts";

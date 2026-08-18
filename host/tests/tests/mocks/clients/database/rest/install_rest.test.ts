@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/dependencies/database/rest/rest.ts";
+import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
 import { assertEquals } from "@std/assert";
 import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
 

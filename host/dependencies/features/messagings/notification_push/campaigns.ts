@@ -30,8 +30,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTPushCampaignsRow } from "@scribe/host/dependencies/database/rest/gen/rows.ts";
-import { rest } from "@scribe/host/dependencies/database/rest/rest.ts";
+import type { InternalTPushCampaignsRow } from "@scribe/host/packages/foundation/database/rest/gen/rows.ts";
+import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
 import type { DeviceOs, Localization } from "@scribe/core/contracts/enums.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";

@@ -34,7 +34,7 @@ import { TransportFailure, UnaryServer } from "@scribe/sdk";
 import { Cache } from "@scribe/sdk/gen/scribe/host/core/runtime/redis/cache/protocol/cache_pb.ts";
 import { Queue } from "@scribe/sdk/gen/scribe/host/core/runtime/event_driven/queue/protocol/queue_pb.ts";
 import { Hook } from "@scribe/sdk/gen/scribe/host/core/runtime/event_driven/hook/protocol/hook_pb.ts";
-import { Rest } from "@scribe/sdk/gen/scribe/host/dependencies/database/rest/protocol/rest_pb.ts";
+import { Rest } from "@scribe/sdk/gen/scribe/host/packages/foundation/database/rest/protocol/rest_pb.ts";
 import { Logging } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 import { CapabilityTokens } from "./capability_tokens.ts";
 import { cacheDelete, cacheGet, cacheSet } from "./capabilities/cache.ts";

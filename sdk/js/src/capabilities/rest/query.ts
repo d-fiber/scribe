@@ -41,7 +41,7 @@ import {
   RangeSchema,
   Rest,
   type QueryResult,
-} from "../../../gen/scribe/host/dependencies/database/rest/protocol/rest_pb.ts";
+} from "../../../gen/scribe/host/packages/foundation/database/rest/protocol/rest_pb.ts";
 import { decodeJson, encodeJson } from "../../contracts/json.ts";
 import { host } from "../channel.ts";
 import { raiseOn } from "../error.ts";

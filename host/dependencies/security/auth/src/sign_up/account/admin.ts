@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/dependencies/database/rest/rest.ts";
+import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { AvatarType } from "@scribe/core/contracts/enums.ts";
 import { Failure } from "@scribe/core/contracts/result.ts";

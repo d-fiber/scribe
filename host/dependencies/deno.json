@@ -3,8 +3,6 @@
   "version": "0.1.6",
   "exports": {
     ".": "./clients.ts",
-    "./database/rest": "./database/rest/rest.ts",
-    "./database/rest/rows": "./database/rest/gen/rows.ts",
     "./database/realtime": "./database/realtime/mod.ts",
     "./database/storage": "./database/storage/mod.ts",
     "./features": "./features/features.ts",

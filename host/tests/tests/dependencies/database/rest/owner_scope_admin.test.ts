@@ -35,7 +35,7 @@
 // we want for "my account" endpoints, and exactly what breaks team management,
 // where an admin acts on *another* admin. These tests pin both halves.
 
-import { rest } from "@scribe/host/dependencies/database/rest/rest.ts";
+import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
 import { installRestMock } from "@scribe/host/tests/mocks/dependencies/database/rest/install_rest.ts";
 import { RequestIdentityCache } from "@scribe/core/runtime/http/accessors/identity.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";

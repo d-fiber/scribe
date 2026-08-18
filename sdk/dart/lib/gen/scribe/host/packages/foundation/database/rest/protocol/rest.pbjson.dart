@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from scribe/host/dependencies/database/rest/protocol/rest.proto.
+// Generated from scribe/host/packages/foundation/database/rest/protocol/rest.proto.
 
 // @dart = 3.3
 
@@ -15,7 +15,7 @@ import 'dart:convert' as $convert;
 import 'dart:core' as $core;
 import 'dart:typed_data' as $typed_data;
 
-import '../../../../../protocol/common.pbjson.dart' as $0;
+import '../../../../../../protocol/common.pbjson.dart' as $0;
 
 @$core.Deprecated('Use operationDescriptor instead')
 const Operation$json = {

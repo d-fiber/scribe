@@ -31,7 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import "@scribe/core/testing/settings.ts";
-import { Tables } from "@scribe/host/dependencies/database/rest/gen/tables.ts";
+import { Tables } from "@scribe/host/packages/foundation/database/rest/gen/tables.ts";
 import type { PostgrestClient } from "@supabase/postgrest-js";
 import { FakePostgrestClient, FakePostgrestSeed, Row, RpcHandler } from "@scribe/core/testing/database/fake_postgrest.ts";
 

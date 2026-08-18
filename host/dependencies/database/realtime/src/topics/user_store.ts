@@ -32,7 +32,7 @@
 
 // deno-lint-ignore-file no-explicit-any
 
-import { rest } from "@scribe/host/dependencies/database/rest/rest.ts";
+import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
 import type { TypedQueryBuilder } from "@scribe/core/clients/database/query/builder.ts";
 import { topicEvents } from "./events.ts";
 import { TopicStore } from "./store.ts";

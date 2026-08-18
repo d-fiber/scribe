@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { rest } from "@scribe/host/dependencies/database/rest/rest.ts";
+import { rest } from "@scribe/host/packages/foundation/database/rest/rest.ts";
 import { AccountRoleResolver } from "@scribe/host/dependencies/security/auth/src/_core/account.ts";
 import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
 import { goTrue } from "@scribe/host/dependencies/security/auth/src/_core/gotrue/gotrue_client.ts";

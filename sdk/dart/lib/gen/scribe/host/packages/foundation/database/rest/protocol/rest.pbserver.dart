@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from scribe/host/dependencies/database/rest/protocol/rest.proto.
+// Generated from scribe/host/packages/foundation/database/rest/protocol/rest.proto.
 
 // @dart = 3.3
 
