@@ -30,32 +30,14 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "../api/bootstrap.ts";
+import "./bootstrap.ts";
 import "@scribe/core/runtime/support/edge_runtime_shim.ts";
-import { InternalService } from "@scribe/core/kernel/http/routing/internal_services.ts";
-import { app as intraAuthApp } from "../api/internal/auth/intra/index.ts";
-import { app as gotrueApp } from "../api/internal/gotrue/index.ts";
-import { app as messagingApp } from "../api/internal/messaging/index.ts";
-import { app as queueApp } from "../api/internal/queue/index.ts";
-import { app as adminApp } from "../api/public/admin/index.ts";
-import { app as appApp } from "../api/public/app/index.ts";
+import { app as queueApp } from "./internal/queue.ts";
 import { WorkerHost } from "../project/worker/mod.ts";
 import { ServerRuntime } from "./server/server_runtime.ts";
-import { SurfaceRegistry } from "./server/surface_registry.ts";
 
 if (WorkerHost.enabled()) {
-  await WorkerHost.attach({ admin: adminApp, app: appApp });
+  await WorkerHost.attach();
 }
 
-const registry = SurfaceRegistry.compose({
-  admin: adminApp,
-  app: appApp,
-  internal: {
-    [InternalService.AuthIntra]: intraAuthApp,
-    [InternalService.Gotrue]: gotrueApp,
-    [InternalService.Messaging]: messagingApp,
-    [InternalService.Queue]: queueApp,
-  },
-});
-
-await new ServerRuntime(registry).start();
+await new ServerRuntime(queueApp).start();

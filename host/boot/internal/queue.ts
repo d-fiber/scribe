@@ -26,27 +26,42 @@
 // CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
 // OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
 // LEGAL CLAIM.
-//
-// This header is a summary written for convenience. Where it differs from the
-// LICENSE file, the LICENSE file governs.
 
+import "../bootstrap.ts";
+import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
 import { Router } from "@scribe/core/kernel/http/routing/router.ts";
+import { serveFunction } from "@scribe/core/kernel/http/serve/mod.ts";
+import { queueRegistry } from "@scribe/core/runtime/event_driven/queue/core/registry.ts";
+import { extensions } from "@scribe/core/runtime/support/extensions/mod.ts";
+import { EXTENSION_QUEUE } from "../extensions.ts";
 import { Hono } from "hono";
-import { AdminEmailCampaignCreateEndpoint } from "./create.ts";
-import { AdminEmailCampaignDeleteEndpoint } from "./delete.ts";
-import { AdminEmailCampaignDueEndpoint, AdminEmailCampaignListEndpoint } from "./list.ts";
-import { AdminEmailCampaignReadEndpoint } from "./read.ts";
-import { AdminEmailCampaignStatusEndpoint } from "./status.ts";
-import { AdminEmailCampaignUpdateEndpoint } from "./update.ts";
+import {
+  QueueDrainEndpoint,
+  QueueDrainOneEndpoint,
+  QueueStatusEndpoint,
+} from "./queue_drain.ts";
 
-export class CampaignRouter extends Router {
+import "@scribe/host/dependencies/features/searcher/sync/queue.ts";
+
+await extensions.load(EXTENSION_QUEUE);
+console.info(queueRegistry.report());
+
+/**
+ * The only internal surface the framework still serves.
+ *
+ * Draining a queue is not a feature, it is how the runtime is driven from
+ * outside the persistent process, so it stays here while the surfaces that
+ * answered for a module left with it.
+ */
+class Queue extends Router {
   protected routes(app: Hono): void {
-    app.get("/", () => AdminEmailCampaignListEndpoint.handle());
-    app.post("/", () => AdminEmailCampaignCreateEndpoint.handle());
-    app.get("/due", () => AdminEmailCampaignDueEndpoint.handle());
-    app.get("/:id", (c) => AdminEmailCampaignReadEndpoint.handle(c.req.param("id")));
-    app.patch("/:id", (c) => AdminEmailCampaignUpdateEndpoint.handle(c.req.param("id")));
-    app.patch("/:id/status", (c) => AdminEmailCampaignStatusEndpoint.handle(c.req.param("id")));
-    app.delete("/:id", (c) => AdminEmailCampaignDeleteEndpoint.handle(c.req.param("id")));
+    app.post("/drain", () => QueueDrainEndpoint.handle());
+    app.post("/drain/:name", (c) => QueueDrainOneEndpoint.handle(c.req.param("name")));
+    app.get("/status", () => QueueStatusEndpoint.handle());
+    app.all("*", () => ServerResponse.notFound());
   }
 }
+
+export const app = Queue.create();
+
+if (import.meta.main) serveFunction(app, "queue");

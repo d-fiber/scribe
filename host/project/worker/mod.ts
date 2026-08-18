@@ -38,4 +38,3 @@ export type { NodeResolver } from "./mount.ts";
 export { NodeSurfaces } from "./node_surfaces.ts";
 export { WorkerClient } from "./worker_client.ts";
 export { WorkerHost } from "./worker_host.ts";
-export type { HostSurfaces } from "./worker_host.ts";

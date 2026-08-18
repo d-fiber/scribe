@@ -26,36 +26,51 @@
 // CONDITION, AND THE LICENSOR WILL NOT BE LIABLE TO YOU FOR ANY DAMAGES ARISING
 // OUT OF THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY KIND OF
 // LEGAL CLAIM.
-//
-// This header is a summary written for convenience. Where it differs from the
-// LICENSE file, the LICENSE file governs.
 
 import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
-import { resolveRootRoute } from "@scribe/core/kernel/http/routing/root_route.ts";
 import { forward } from "@scribe/core/kernel/http/serve/mod.ts";
 import { NodeSurfaces } from "@scribe/host/project/worker/node_surfaces.ts";
-import type { SurfaceRegistry } from "./surface_registry.ts";
+import type { Hono } from "hono";
 
-const HEALTH_CHECK_PATH = "/_health";
+/**
+ * The paths the host answers for itself, and the reason they start with `_`.
+ *
+ * Everything else belongs to a node, and a node is named after a folder of the
+ * project. The route scanner skips a folder whose name starts with `_`, so a
+ * project cannot produce a node called `_health` or `_queue` however it names
+ * its tree -- the prefix is what makes the host's own paths uncollidable
+ * rather than merely unlikely.
+ */
+const HEALTH_PATH = "/_health";
+const QUEUE_PREFIX = "/_queue";
 
+/**
+ * Sends a request to the node that claims it.
+ *
+ * There is no surface left to choose between: a request names its node in its
+ * first segment, and the host holds nothing at the root beyond the two paths
+ * above. What a node serves, who may call it and what wraps it are decided by
+ * the project and travel in the manifest.
+ */
 export class SurfaceRouter {
-  readonly #registry: SurfaceRegistry;
+  readonly #queue: Hono;
 
-  constructor(registry: SurfaceRegistry) {
-    this.#registry = registry;
+  constructor(queue: Hono) {
+    this.#queue = queue;
   }
 
   async route(pathname: string): Promise<Response> {
     try {
-      if (pathname === HEALTH_CHECK_PATH) return new Response("ok");
+      if (pathname === HEALTH_PATH) return new Response("ok");
+
+      if (pathname === QUEUE_PREFIX || pathname.startsWith(`${QUEUE_PREFIX}/`)) {
+        return await forward(this.#queue, pathname.slice(QUEUE_PREFIX.length) || "/");
+      }
 
       const node = NodeSurfaces.resolve(pathname);
-      if (node !== null) return await forward(node.app, node.subPath);
+      if (node === null) return ServerResponse.notFound();
 
-      const match = resolveRootRoute(pathname);
-      if (match === null) return ServerResponse.notFound();
-
-      return await forward(this.#registry.get(match.surface), match.subPath);
+      return await forward(node.app, node.subPath);
     } catch (error) {
       console.error("[boot:server] unhandled routing failure:", error);
       return ServerResponse.unexpected();

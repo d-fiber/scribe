@@ -33,18 +33,9 @@
 export { serve, serveFunction, forward } from "./kernel/http/serve/mod.ts";
 export { logger } from "./kernel/observability/logger.ts";
 export {
-  INTERNAL_SEGMENTS,
-  resolveRootRoute,
-} from "./kernel/http/routing/root_route.ts";
-export type {
-  InternalSegment,
-  RootSurface,
-} from "./kernel/http/routing/root_route.ts";
-export {
   INTERNAL_SERVICES,
   InternalService,
 } from "./kernel/http/routing/internal_services.ts";
-export { ApiSurface, declareApiSurface } from "./kernel/http/routing/api_surface.ts";
 export { resolveIdentity } from "./kernel/identity/middleware.ts";
 export { AdminRbacResolver } from "./kernel/identity/resolver/rbac_resolver.ts";
 export type { AdminRbac, AdminRbacSource } from "./contracts/rbac.ts";

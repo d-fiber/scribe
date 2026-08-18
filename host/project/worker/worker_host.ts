@@ -46,11 +46,6 @@ const BOOTSTRAP_TTL_MS = 86_400_000;
 
 const BOOTSTRAP_REQUEST = new Request("http://worker.bootstrap/");
 
-export interface HostSurfaces {
-  readonly admin: Hono;
-  readonly app: Hono;
-}
-
 let attached: Manifest | null = null;
 
 function wait(ms: number): Promise<void> {
@@ -89,7 +84,15 @@ function rejectIncompatible(manifest: Manifest): void {
   );
 }
 
-function resolver(surfaces: HostSurfaces): (node: NodeDeclaration) => Hono {
+/**
+ * The app a node is mounted on, one fresh Hono per node.
+ *
+ * Every node is treated alike. The host used to hand back two apps of its own
+ * for the nodes called `admin` and `app`, because it served endpoints there
+ * itself; it serves none now, so a name carries no privilege and a project
+ * names its nodes as it likes.
+ */
+function resolver(): (node: NodeDeclaration) => Hono {
   const exposed = new Set(workerSettings.get().publicNodes);
 
   return (node) => {
@@ -106,9 +109,6 @@ function resolver(surfaces: HostSurfaces): (node: NodeDeclaration) => Hono {
       );
     }
 
-    if (node.name === "admin") return surfaces.admin;
-    if (node.name === "app") return surfaces.app;
-
     const app = new Hono();
     NodeSurfaces.register(node.name, app);
     return app;
@@ -124,7 +124,7 @@ export const WorkerHost = {
     return attached;
   },
 
-  async attach(surfaces: HostSurfaces): Promise<void> {
+  async attach(): Promise<void> {
     const settings = workerSettings.get();
     const endpoint = settings.endpoint;
     if (endpoint === null) return;
@@ -150,7 +150,7 @@ export const WorkerHost = {
     const manifest = await handshake(client, token);
     rejectIncompatible(manifest);
 
-    const mounted = mountManifest(resolver(surfaces), manifest, client);
+    const mounted = mountManifest(resolver(), manifest, client);
     attached = manifest;
     LogRoutes.use(new WorkerLogSinks(client, manifest));
 

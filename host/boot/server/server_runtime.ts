@@ -39,7 +39,7 @@ import { CronBootstrapper } from "./bootstrappers/cron_bootstrapper.ts";
 import { ExtensionsBootstrapper } from "./bootstrappers/extensions_bootstrapper.ts";
 import { QueueBootstrapper } from "./bootstrappers/queue_bootstrapper.ts";
 import { RequestLogBootstrapper } from "./bootstrappers/request_log_bootstrapper.ts";
-import type { SurfaceRegistry } from "./surface_registry.ts";
+import type { Hono } from "hono";
 import { SurfaceRouter } from "./surface_router.ts";
 
 export class ServerRuntime extends Runtime {
@@ -47,9 +47,9 @@ export class ServerRuntime extends Runtime {
 
   readonly #router: SurfaceRouter;
 
-  constructor(registry: SurfaceRegistry) {
+  constructor(queue: Hono) {
     super();
-    this.#router = new SurfaceRouter(registry);
+    this.#router = new SurfaceRouter(queue);
   }
 
   protected override bootstrappers(): readonly Bootstrapper[] {

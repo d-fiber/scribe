@@ -31,7 +31,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Time } from "@scribe/core/contracts/common/time.ts";
-import { currentApiSurface } from "@scribe/core/kernel/http/routing/api_surface.ts";
+import { firstSegmentOf } from "@scribe/core/runtime/http/pathname.ts";
+import { request } from "@scribe/core/runtime/http/request.ts";
 import { rateLimiter } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
 
 export interface RateLimiter {
@@ -42,8 +43,21 @@ export interface RateLimiter {
   failOpen?: boolean;
 }
 
+/**
+ * The rate limit key, namespaced by the node the request is on.
+ *
+ * A node is mounted under its own name, so the first segment of the path is
+ * the node. Two nodes that declare the same route must not share a bucket:
+ * `admin` and `app` both serving `/brand` are two different audiences, and one
+ * hammering the endpoint must not lock the other out.
+ *
+ * A path with no segment -- the host answering for itself -- namespaces under
+ * `host`, which no node can be called since a node name comes from a folder.
+ */
 export function scopedRateLimitKey(key: string): string {
-  return `${currentApiSurface()}:${key}`;
+  const node = firstSegmentOf(request.path());
+
+  return `${node === "" ? "host" : node}:${key}`;
 }
 
 export async function withinRateLimit(
