@@ -33,7 +33,8 @@
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import type { Result } from "@scribe/core/contracts/result.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
-import { rateLimiter, type RateLimitResult } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
+import { checkCaller } from "@scribe/core/runtime/http/caller.ts";
 import { CurrentSessionResolver } from "../_core/current_session.ts";
 import { goTrue } from "../_core/gotrue/gotrue_client.ts";
 import { AccountRevocation } from "../_core/revocation.ts";
@@ -64,34 +65,30 @@ export enum UnlinkIdentityError {
 
 export type UnlinkIdentityResult = Result<void, UnlinkIdentityError>;
 
-export class UserIdentitiesClient {
-  private checkListRateLimit(): Promise<RateLimitResult> {
-    return rateLimiter.check({
-      key: `user:identities`,
+const LIST_LIMIT = new RateLimit({
+      key: "user:identities",
       limit: 30,
       window: Time.minutes(1),
       penalty: Time.minutes(1),
       maxPenalty: Time.minutes(10),
       failOpen: false,
-    });
-  }
+});
 
-  private checkUnlinkRateLimit(): Promise<RateLimitResult> {
-    return rateLimiter.check({
-      key: `user:identities:unlink`,
+const UNLINK_LIMIT = new RateLimit({
+      key: "user:identities:unlink",
       limit: 5,
       window: Time.minutes(15),
       penalty: Time.minutes(15),
       maxPenalty: Time.hours(1),
       failOpen: false,
-    });
-  }
+});
 
+export class UserIdentitiesClient {
   async list(): Promise<IdentitiesResult> {
     const session = CurrentSessionResolver.resolve();
     if (!session) return new Failure(IdentitiesError.Unauthorized);
 
-    const rate = await this.checkListRateLimit();
+    const rate = await checkCaller(LIST_LIMIT);
     if (!rate.ok) return new Failure(IdentitiesError.TooManyRequests);
 
     const response = await goTrue.session.user(session.token);
@@ -112,7 +109,7 @@ export class UserIdentitiesClient {
     const session = CurrentSessionResolver.resolve();
     if (!session) return new Failure(UnlinkIdentityError.Unauthorized);
 
-    const rate = await this.checkUnlinkRateLimit();
+    const rate = await checkCaller(UNLINK_LIMIT);
     if (!rate.ok) return new Failure(UnlinkIdentityError.TooManyRequests);
 
     const response = await goTrue.session.user(session.token);

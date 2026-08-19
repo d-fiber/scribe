@@ -31,7 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import "@scribe/core/testing/settings.ts";
-import type { RateLimitCommands } from "@scribe/core/runtime/redis/rate_limiter/script.ts";
+import type { RateLimitCommands } from "@scribe/foundation/src/rate_limit/mod.ts";
 import { kv, type Kv } from "@scribe/foundation/src/redis/mod.ts";
 import { type InstalledMock, installMock } from "@scribe/core/testing/install.ts";
 import { installValkeryMock } from "@scribe/foundation/testing/valkery.ts";

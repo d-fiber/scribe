@@ -53,5 +53,5 @@ export { Hook } from "@scribe/foundation/src/hook/mod.ts";
 export { Isolate } from "@scribe/foundation/src/isolate/mod.ts";
 export { Valkery } from "@scribe/foundation/src/valkery/mod.ts";
 export { RequestScope } from "./runtime/scope.ts";
-export { RateLimitError, RateLimitScope } from "./runtime/redis/rate_limiter/mod.ts";
-export type { RateLimitOptions, RateLimitResult } from "./runtime/redis/rate_limiter/mod.ts";
+export { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
+export type { RateLimitOptions, RateLimitOutcome } from "@scribe/foundation/src/rate_limit/mod.ts";

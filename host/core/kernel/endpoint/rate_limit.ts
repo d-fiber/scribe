@@ -33,7 +33,8 @@
 import type { Time } from "@scribe/core/contracts/common/time.ts";
 import { firstSegmentOf } from "@scribe/core/runtime/http/pathname.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
-import { rateLimiter } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit, SHARED_ADDRESS_MAX_PENALTY, SHARED_ADDRESS_STRIKE_MEMORY } from "@scribe/foundation/src/rate_limit/mod.ts";
+import { CallerKind, requestCaller } from "@scribe/core/runtime/http/caller.ts";
 
 export interface RateLimiter {
   limit: number;
@@ -43,30 +44,46 @@ export interface RateLimiter {
   failOpen?: boolean;
 }
 
-/**
- * The rate limit key, namespaced by the node the request is on.
- *
- * A node is mounted under its own name, so the first segment of the path is
- * the node. Two nodes that declare the same route must not share a bucket:
- * `admin` and `app` both serving `/brand` are two different audiences, and one
- * hammering the endpoint must not lock the other out.
- *
- * A path with no segment -- the host answering for itself -- namespaces under
- * `host`, which no node can be called since a node name comes from a folder.
- */
-export function scopedRateLimitKey(key: string): string {
-  const node = firstSegmentOf(request.path());
-
-  return `${node === "" ? "host" : node}:${key}`;
+/** The shorter of `declared` and `cap`, and `cap` when nothing was declared. */
+function shorter(declared: Time | undefined, cap: Time): Time {
+  return declared !== undefined && declared.value < cap.value ? declared : cap;
 }
 
-export async function withinRateLimit(
-  key: string,
-  limiter: RateLimiter,
-): Promise<boolean> {
-  const result = await rateLimiter.check({
-    key: scopedRateLimitKey(key),
+/**
+ * The node the request is on, which every bucket of that node is prefixed with.
+ *
+ * A node is mounted under its own name, so the first segment of the path is the node. Two nodes
+ * that declare the same route must not share a bucket: `admin` and `app` both serving `/brand`
+ * are two different audiences, and one hammering the endpoint must not lock the other out.
+ *
+ * A path with no segment, the host answering for itself, namespaces under `host`, which no node
+ * can be called since a node name comes from a folder.
+ */
+export function rateLimitPrefix(): string {
+  const node = firstSegmentOf(request.path());
+
+  return node === "" ? "host" : node;
+}
+
+/**
+ * Whether the caller of the current request is inside the limit `key` declares.
+ *
+ * A caller with no session is named by its address, and an address is shared by everyone behind
+ * it, so the penalty of such a bucket is capped whatever the route asked for. A route cannot make
+ * that call itself: it declares one limit and serves both kinds of caller.
+ */
+export async function withinRateLimit(key: string, limiter: RateLimiter): Promise<boolean> {
+  const caller = requestCaller();
+  if (caller === null) return limiter.failOpen ?? true;
+
+  const shared = caller.kind === CallerKind.Address;
+  const limit = new RateLimit({
     ...limiter,
+    key,
+    maxPenalty: shared ? shorter(limiter.maxPenalty, SHARED_ADDRESS_MAX_PENALTY) : limiter.maxPenalty,
+    strikeMemory: shared ? SHARED_ADDRESS_STRIKE_MEMORY : undefined,
   });
+
+  const result = await limit.check(rateLimitPrefix(), caller.id);
   return result.ok;
 }

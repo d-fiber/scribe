@@ -34,7 +34,8 @@ import type { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { resetPasswordHook, ResetPasswordProvider } from "@scribe/host/dependencies/security/auth/src/hooks/auth.ts";
-import { rateLimiter, type RateLimitResult, RateLimitScope } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
+import { checkCaller } from "@scribe/core/runtime/http/caller.ts";
 import { AuthCache, SmsIntent } from "../../_core/cache.ts";
 import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
 import { isRateLimitCode } from "../../_core/errors.ts";
@@ -71,26 +72,32 @@ export type PhoneResetPasswordResult = Result<void, PhoneResetPasswordError>;
 
 export class PhoneResetPassword {
   readonly #token = new PendingToken(PendingTokenPurpose.PasswordReset);
+  readonly #verify: RateLimit;
+  readonly #caller: Readonly<Record<DispatchScope, RateLimit>>;
+  readonly #recipient: Readonly<Record<DispatchScope, RateLimit>>;
 
-  constructor(private readonly role: AccountRole) {}
-
-  private async checkVerifyRateLimit(phone: string): Promise<RateLimitResult> {
-    return await rateLimiter.check({
-      key: `reset-password:phone:${this.role}:verify:to:${await sha256Hex(
-        phone,
-      )}`,
+  constructor(private readonly role: AccountRole) {
+    this.#verify = new RateLimit({
+      key: `reset-password:phone:${role}:verify:to`,
       limit: 5,
       window: Time.minutes(10),
       penalty: Time.minutes(10),
       maxPenalty: Time.hours(1),
       failOpen: false,
-      scope: RateLimitScope.Global,
     });
+    this.#caller = {
+      [DispatchScope.Send]: PhoneResetPassword.#callerLimit(role, DispatchScope.Send),
+      [DispatchScope.Resend]: PhoneResetPassword.#callerLimit(role, DispatchScope.Resend),
+    };
+    this.#recipient = {
+      [DispatchScope.Send]: PhoneResetPassword.#recipientLimit(role, DispatchScope.Send),
+      [DispatchScope.Resend]: PhoneResetPassword.#recipientLimit(role, DispatchScope.Resend),
+    };
   }
 
-  private checkCallerRateLimit(scope: DispatchScope): Promise<RateLimitResult> {
-    return rateLimiter.check({
-      key: `reset-password:phone:${this.role}:${scope}`,
+  static #callerLimit(role: AccountRole, scope: DispatchScope): RateLimit {
+    return new RateLimit({
+      key: `reset-password:phone:${role}:${scope}`,
       limit: 10,
       window: Time.minutes(5),
       penalty: Time.minutes(5),
@@ -99,20 +106,14 @@ export class PhoneResetPassword {
     });
   }
 
-  private async checkRecipientRateLimit(
-    phone: string,
-    scope: DispatchScope,
-  ): Promise<RateLimitResult> {
-    return await rateLimiter.check({
-      key: `reset-password:phone:${this.role}:${scope}:to:${await sha256Hex(
-        phone,
-      )}`,
+  static #recipientLimit(role: AccountRole, scope: DispatchScope): RateLimit {
+    return new RateLimit({
+      key: `reset-password:phone:${role}:${scope}:to`,
       limit: 1,
       window: Time.seconds(90),
       penalty: Time.seconds(90),
       maxPenalty: Time.seconds(90),
       failOpen: false,
-      scope: RateLimitScope.Global,
     });
   }
 
@@ -128,7 +129,7 @@ export class PhoneResetPassword {
     phone: string,
     scope: DispatchScope,
   ): Promise<PhoneResetPasswordResult> {
-    const rate = await this.checkCallerRateLimit(scope);
+    const rate = await checkCaller(this.#caller[scope]);
     if (!rate.ok) return new Failure(PhoneResetPasswordError.TooManyRequests);
 
     if (phone.trim().length === 0) {
@@ -139,7 +140,7 @@ export class PhoneResetPassword {
       return new Failure(PhoneResetPasswordError.InvalidPhone);
     }
 
-    const recipientRate = await this.checkRecipientRateLimit(phoneValue, scope);
+    const recipientRate = await this.#recipient[scope].check("", await sha256Hex(phone));
     if (!recipientRate.ok) {
       return new Failure(PhoneResetPasswordError.TooManyRequests);
     }
@@ -182,7 +183,7 @@ export class PhoneResetPassword {
       return new Failure(VerifyPhoneResetOtpError.InvalidOrExpired);
     }
 
-    const rate = await this.checkVerifyRateLimit(phoneValue);
+    const rate = await this.#verify.check("", await sha256Hex(phone));
     if (!rate.ok) return new Failure(VerifyPhoneResetOtpError.TooManyRequests);
 
     const response = await goTrue.signIn.phone.verify(phoneValue, otp);

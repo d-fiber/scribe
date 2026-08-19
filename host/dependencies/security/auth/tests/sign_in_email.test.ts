@@ -35,7 +35,7 @@ import { EmailSignIn } from "@scribe/host/dependencies/security/auth/src/sign_in
 import { EmailSignInError } from "@scribe/host/dependencies/security/auth/src/sign_in/types.ts";
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
-import type { RateLimitCommands } from "@scribe/core/runtime/redis/rate_limiter/script.ts";
+import type { RateLimitCommands } from "@scribe/foundation/src/rate_limit/mod.ts";
 import { kv, type Kv } from "@scribe/foundation/src/redis/mod.ts";
 import { installMock } from "@scribe/core/testing/install.ts";
 import { installValkeryMock } from "@scribe/foundation/testing/valkery.ts";
@@ -330,7 +330,7 @@ Deno.test("per-account limits are keyed on the mailbox, `+` tag stripped", async
     `caller tier missing : ${limits.keys.join(", ")}`,
   );
   assert(
-    limits.keys.some((k) => k === `sign-in:user:email:to:${inbox}:all`),
+    limits.keys.some((k) => k === `sign-in:user:email:to:all:${inbox}`),
     `global tier missing : ${limits.keys.join(", ")}`,
   );
 });
@@ -353,7 +353,7 @@ Deno.test("a failure consumes the global tier only through the `:all` key", asyn
     gotrue.restore();
   }
 
-  const globalKeys = limits.keys.filter((k) => k.endsWith(":all"));
+  const globalKeys = limits.keys.filter(isGlobalIdentityKey);
   assertEquals(globalKeys.length, 1);
 });
 
@@ -381,8 +381,8 @@ function throttleWhere(isBlocked: (key: string) => boolean) {
   };
 }
 
-const isGlobalIdentityKey = (key: string) => key.endsWith(":all");
-const isCallerIdentityKey = (key: string) => key.includes(":to:") && !key.endsWith(":all");
+const isGlobalIdentityKey = (key: string) => key.includes(":to:all:");
+const isCallerIdentityKey = (key: string) => key.includes(":to:") && !key.includes(":to:all:");
 
 Deno.test("a saturated global tier does not lock the owner out of their own account", async () => {
   const gotrue = installGoTrueMock({

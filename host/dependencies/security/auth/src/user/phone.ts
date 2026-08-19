@@ -40,7 +40,8 @@ import { DevicesClient } from "@scribe/host/dependencies/security/auth/src/user/
 import { CurrentSessionResolver } from "@scribe/host/dependencies/security/auth/src/_core/current_session.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
-import { rateLimiter, type RateLimitResult, RateLimitScope } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
+import { checkCaller } from "@scribe/core/runtime/http/caller.ts";
 
 import { updateUserPhoneHook } from "@scribe/host/dependencies/security/auth/src/hooks/account.ts";
 export type { UpdatePhoneHook, UpdatePhoneHookPayload } from "@scribe/host/dependencies/security/auth/src/hooks/account.ts";
@@ -63,31 +64,35 @@ export enum ConfirmUserPhoneError {
 
 export type ConfirmUserPhoneResult = Result<void, ConfirmUserPhoneError>;
 
-export class UserPhoneClient {
-  readonly #devices = new DevicesClient();
-
-  private checkCallerRateLimit(): Promise<RateLimitResult> {
-    return rateLimiter.check({
-      key: `user:phone`,
+const CALLER_LIMIT = new RateLimit({
+      key: "user:phone",
       limit: 10,
       window: Time.minutes(1),
       penalty: Time.minutes(1),
       maxPenalty: Time.minutes(30),
       failOpen: false,
-    });
-  }
+});
 
-  private async checkTargetRateLimit(userId: string): Promise<RateLimitResult> {
-    return await rateLimiter.check({
-      key: `user:phone:of:${await sha256Hex(userId)}`,
+const TARGET_LIMIT = new RateLimit({
+      key: "user:phone:of",
       limit: 5,
       window: Time.minutes(15),
       penalty: Time.minutes(15),
       maxPenalty: Time.minutes(15),
       failOpen: false,
-      scope: RateLimitScope.Global,
-    });
-  }
+});
+
+const CONFIRM_LIMIT = new RateLimit({
+      key: "user:phone:confirm:to",
+      limit: 5,
+      window: Time.minutes(10),
+      penalty: Time.minutes(10),
+      maxPenalty: Time.hours(1),
+      failOpen: false,
+});
+
+export class UserPhoneClient {
+  readonly #devices = new DevicesClient();
 
   async update(userId: string, phone: string): Promise<UpdateUserPhoneResult> {
     const session = CurrentSessionResolver.resolve();
@@ -125,7 +130,7 @@ export class UserPhoneClient {
       return new Failure(ConfirmUserPhoneError.InvalidOrExpired);
     }
 
-    const rate = await this.checkConfirmRateLimit(phoneValue);
+    const rate = await CONFIRM_LIMIT.check("", await sha256Hex(phone));
     if (!rate.ok) return new Failure(ConfirmUserPhoneError.TooManyRequests);
 
     const response = await goTrue.session.verifyPhoneChange(phoneValue, otp);
@@ -144,18 +149,6 @@ export class UserPhoneClient {
       true,
       true,
     );
-  }
-
-  private async checkConfirmRateLimit(phone: string): Promise<RateLimitResult> {
-    return await rateLimiter.check({
-      key: `user:phone:confirm:to:${await sha256Hex(phone)}`,
-      limit: 5,
-      window: Time.minutes(10),
-      penalty: Time.minutes(10),
-      maxPenalty: Time.hours(1),
-      failOpen: false,
-      scope: RateLimitScope.Global,
-    });
   }
 
   async #commit(
@@ -187,7 +180,7 @@ export class UserPhoneClient {
     revokeSessions: boolean,
     commit: boolean,
   ): Promise<UpdateUserPhoneResult> {
-    const rate = await this.checkCallerRateLimit();
+    const rate = await checkCaller(CALLER_LIMIT);
     if (!rate.ok) return new Failure(UpdateUserPhoneError.TooManyRequests);
 
     const phoneCheck = AuthValidator.phone.check(phone);
@@ -195,7 +188,7 @@ export class UserPhoneClient {
       return new Failure(UpdateUserPhoneError.InvalidPhone);
     }
 
-    const targetRate = await this.checkTargetRateLimit(userId);
+    const targetRate = await TARGET_LIMIT.check("", await sha256Hex(userId));
     if (!targetRate.ok) {
       return new Failure(UpdateUserPhoneError.TooManyRequests);
     }

@@ -45,7 +45,8 @@ import {
 import { type AccountRole, type Session, SignOutScope } from "@scribe/core/contracts/account.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
-import { rateLimiter, type RateLimitResult, RateLimitScope } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
+import { checkCaller } from "@scribe/core/runtime/http/caller.ts";
 
 export { DevicesError, RevokeDeviceError } from "@scribe/host/dependencies/security/auth/src/session/device.ts";
 export type { DevicesResult, RevokeDeviceResult } from "@scribe/host/dependencies/security/auth/src/session/device.ts";
@@ -126,50 +127,39 @@ type RecoveredSession = Session & {
   user: NonNullable<Session["user"]>;
 };
 
-export class SessionClient {
-  readonly device: SessionDeviceClient = new SessionDeviceClient();
-  readonly #users = new UserClient();
-
-  private async checkRefreshRateLimit(
-    refreshToken: string,
-  ): Promise<RateLimitResult> {
-    return await rateLimiter.check({
-      key: `user:refresh-session:${await sha256Hex(refreshToken)}`,
+const REFRESH_LIMIT = new RateLimit({
+      key: "user:refresh-session",
       limit: 20,
       window: Time.minutes(1),
       penalty: Time.minutes(1),
       maxPenalty: Time.minutes(2),
       failOpen: true,
-    });
-  }
+});
 
-  private async checkRecoverRateLimit(
-    refreshToken: string,
-  ): Promise<RateLimitResult> {
-    return await rateLimiter.check({
-      key: `user:recover-session:${await sha256Hex(refreshToken)}`,
+const RECOVER_LIMIT = new RateLimit({
+      key: "user:recover-session",
       limit: 20,
       window: Time.minutes(1),
       penalty: Time.minutes(1),
       maxPenalty: Time.minutes(2),
       failOpen: true,
-    });
-  }
+});
 
-  private async checkDeleteRateLimit(userId: string): Promise<RateLimitResult> {
-    return await rateLimiter.check({
-      key: `user:delete-account:of:${await sha256Hex(userId)}`,
+const DELETE_LIMIT = new RateLimit({
+      key: "user:delete-account:of",
       limit: 3,
       window: Time.minutes(15),
       penalty: Time.minutes(15),
       maxPenalty: Time.minutes(15),
       failOpen: false,
-      scope: RateLimitScope.Global,
-    });
-  }
+});
+
+export class SessionClient {
+  readonly device: SessionDeviceClient = new SessionDeviceClient();
+  readonly #users = new UserClient();
 
   async refresh(refreshToken: string): Promise<RefreshSessionResult> {
-    const rate = await this.checkRefreshRateLimit(refreshToken);
+    const rate = await checkCaller(REFRESH_LIMIT, await sha256Hex(refreshToken));
     if (!rate.ok) return new Failure(RefreshSessionError.TooManyRequests);
 
     const cacheKey = await sha256Hex(refreshToken);
@@ -208,7 +198,7 @@ export class SessionClient {
       return new Failure(RecoverSessionError.Unauthorized);
     }
 
-    const rate = await this.checkRecoverRateLimit(refreshToken);
+    const rate = await checkCaller(RECOVER_LIMIT, await sha256Hex(refreshToken));
     if (!rate.ok) return new Failure(RecoverSessionError.TooManyRequests);
 
     const cacheKey = await sha256Hex(`${accessToken}.${refreshToken}`);
@@ -346,7 +336,7 @@ export class SessionClient {
 
     const { userId, token } = session;
 
-    const rate = await this.checkDeleteRateLimit(userId);
+    const rate = await DELETE_LIMIT.check("", await sha256Hex(userId));
     if (!rate.ok) return new Failure(DeleteAccountError.TooManyRequests);
 
     await Promise.all([

@@ -39,7 +39,8 @@ import type { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { signInHook, SignInProvider } from "@scribe/host/dependencies/security/auth/src/hooks/auth.ts";
-import { rateLimiter, type RateLimitResult, RateLimitScope } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
+import { callerBlocked, checkCaller } from "@scribe/core/runtime/http/caller.ts";
 import { requestDevice } from "@scribe/core/runtime/device/device.ts";
 import { AccountRoleResolver } from "../../_core/account.ts";
 import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
@@ -77,6 +78,12 @@ class EmailOtpChannel implements OtpChannel {
 }
 
 export class EmailSignIn {
+  readonly #caller: RateLimit;
+  readonly #confirm: RateLimit;
+  readonly #identity: RateLimit;
+  readonly #recipients: RateLimit;
+  readonly #resend: RateLimit;
+
   private readonly users: UserClient;
   private readonly otpChallenge: OtpChallenge;
 
@@ -88,72 +95,56 @@ export class EmailSignIn {
       new EmailOtpChannel(),
       expectedRole,
     );
-  }
-
-  private checkCallerRateLimit(): Promise<RateLimitResult> {
-    return rateLimiter.check({
-      key: `sign-in:${this.expectedRole}:email`,
+    this.#caller = new RateLimit({
+      key: `sign-in:${expectedRole}:email`,
       limit: 10,
       window: Time.minutes(1),
       penalty: Time.minutes(1),
       maxPenalty: Time.minutes(10),
       failOpen: false,
     });
-  }
-
-  private async identityKey(email: string): Promise<string> {
-    return `sign-in:${this.expectedRole}:email:to:${await sha256Hex(
-      AuthValidator.email.inbox(email),
-    )}`;
-  }
-
-  private async consumeIdentityFailure(key: string): Promise<void> {
-    await Promise.all([
-      rateLimiter.check({
-        key,
-        limit: 10,
-        window: Time.minutes(15),
-        penalty: Time.minutes(15),
-        maxPenalty: Time.hours(24),
-        failOpen: false,
-      }),
-      rateLimiter.check({
-        key: `${key}:all`,
-        limit: 100,
-        window: Time.minutes(15),
-        penalty: Time.minutes(5),
-        maxPenalty: Time.minutes(5),
-        failOpen: false,
-        scope: RateLimitScope.Global,
-      }),
-    ]);
-  }
-
-  private async identityLimits(
-    key: string,
-  ): Promise<{ caller: boolean; global: boolean }> {
-    const [caller, global] = await Promise.all([
-      rateLimiter.peek({ key }),
-      rateLimiter.peek({ key: `${key}:all`, scope: RateLimitScope.Global }),
-    ]);
-    return { caller: caller.limited, global: global.limited };
-  }
-
-  private async checkConfirmRateLimit(): Promise<RateLimitResult> {
-    return await rateLimiter.check({
-      key: `sign-in:${this.expectedRole}:confirm`,
+    this.#confirm = new RateLimit({
+      key: `sign-in:${expectedRole}:confirm`,
       limit: 20,
       window: Time.minutes(1),
       penalty: Time.minutes(5),
       maxPenalty: Time.hours(1),
       failOpen: false,
     });
+    this.#identity = new RateLimit({
+      key: `sign-in:${expectedRole}:email:to`,
+      limit: 10,
+      window: Time.minutes(15),
+      penalty: Time.minutes(15),
+      maxPenalty: Time.hours(24),
+      failOpen: false,
+    });
+    this.#resend = new RateLimit({
+      key: `sign-in:${expectedRole}:confirm-resend:to`,
+      limit: 1,
+      window: Time.seconds(90),
+      penalty: Time.seconds(90),
+      maxPenalty: Time.seconds(90),
+      failOpen: false,
+    });
+    this.#recipients = new RateLimit({
+      key: `sign-in:${expectedRole}:email:to:all`,
+      limit: 100,
+      window: Time.minutes(15),
+      penalty: Time.minutes(5),
+      maxPenalty: Time.minutes(5),
+      failOpen: false,
+    });
+  }
+
+  private identityOf(email: string): Promise<string> {
+    return sha256Hex(AuthValidator.email.inbox(email));
   }
 
   private async authenticateGoTrueUser(
     email: string,
     password: string,
-    identityKey: string,
+    identity: string,
   ): Promise<
     | { session: AuthenticatedSession; role: AccountRole }
     | Failure<EmailSignInError>
@@ -169,22 +160,14 @@ export class EmailSignIn {
         case "user_not_found":
         case "invalid_credentials":
         case "user_banned":
-          await this.consumeIdentityFailure(identityKey);
+          await Promise.all([checkCaller(this.#identity, identity), this.#recipients.check("", identity)]);
           return new Failure(EmailSignInError.InvalidCredentials);
         case "email_not_confirmed": {
           const role = (await AccountRoleResolver.withEmail(email)) ??
             this.expectedRole;
-          const resendRate = await rateLimiter.check({
-            key: `sign-in:${this.expectedRole}:confirm-resend:to:${await sha256Hex(
-              AuthValidator.email.inbox(email),
-            )}`,
-            limit: 1,
-            window: Time.seconds(90),
-            penalty: Time.seconds(90),
-            maxPenalty: Time.seconds(90),
-            failOpen: false,
-            scope: RateLimitScope.Global,
-          });
+          const resendRate = await this.#resend.check("", 
+            await sha256Hex(AuthValidator.email.inbox(email)),
+          );
           if (!resendRate.ok) {
             return new Failure(EmailSignInError.EmailNotConfirmed);
           }
@@ -215,7 +198,7 @@ export class EmailSignIn {
     email: string,
     password: string,
   ): Promise<EmailSignInResult> {
-    const rate = await this.checkCallerRateLimit();
+    const rate = await checkCaller(this.#caller);
     if (!rate.ok) return new Failure(EmailSignInError.TooManyRequests);
 
     const emailCheck = AuthValidator.email.check(email);
@@ -233,19 +216,20 @@ export class EmailSignIn {
         return new Failure(EmailSignInError.InvalidCredentials);
     }
 
-    const identityKey = await this.identityKey(emailCheck.value);
-    const identityLimits = await this.identityLimits(identityKey);
-    if (identityLimits.caller) {
-      return new Failure(EmailSignInError.TooManyRequests);
-    }
+    const identity = await this.identityOf(emailCheck.value);
+    const [identityBlocked, recipientsBlocked] = await Promise.all([
+      callerBlocked(this.#identity, identity),
+      this.#recipients.isBlocked("", identity),
+    ]);
+    if (identityBlocked) return new Failure(EmailSignInError.TooManyRequests);
 
     const goTrueResult = await this.authenticateGoTrueUser(
       emailCheck.value,
       password,
-      identityKey,
+      identity,
     );
     if (goTrueResult instanceof Failure) {
-      return identityLimits.global ? new Failure(EmailSignInError.TooManyRequests) : goTrueResult;
+      return recipientsBlocked ? new Failure(EmailSignInError.TooManyRequests) : goTrueResult;
     }
     const passwordSession = goTrueResult.session;
     const role = goTrueResult.role;
@@ -254,7 +238,7 @@ export class EmailSignIn {
 
     try {
       if (role !== this.expectedRole) {
-        await this.consumeIdentityFailure(identityKey);
+        await Promise.all([checkCaller(this.#identity, identity), this.#recipients.check("", identity)]);
         return new Failure(EmailSignInError.InvalidCredentials);
       }
 
@@ -310,7 +294,7 @@ export class EmailSignIn {
     tokenHash: string,
     type: "signup" | "recovery" | "email_change" | "email",
   ): Promise<ConfirmEmailResult> {
-    const rate = await this.checkConfirmRateLimit();
+    const rate = await checkCaller(this.#confirm);
     if (!rate.ok) return new Failure(ConfirmEmailError.Failed);
 
     const res = await goTrue.signIn.email.verifyToken(tokenHash, type);

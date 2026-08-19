@@ -33,7 +33,8 @@
 import type { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { rateLimiter, type RateLimitResult } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
+import { checkCaller } from "@scribe/core/runtime/http/caller.ts";
 import { signInHook, SignInProvider } from "@scribe/host/dependencies/security/auth/src/hooks/auth.ts";
 import { DevicesClient } from "../../user/devices/devices.ts";
 import { isRateLimitCode } from "../../_core/errors.ts";
@@ -46,14 +47,14 @@ import { type AuthenticatedSession, SocialSignInError, type SocialSignInResult }
 export class SocialSignIn {
   private readonly devices = new DevicesClient();
 
+  readonly #caller: RateLimit;
+
   constructor(
     private readonly provider: SocialProvider,
     private readonly expectedRole: AccountRole,
-  ) {}
-
-  private checkCallerRateLimit(): Promise<RateLimitResult> {
-    return rateLimiter.check({
-      key: `sign-in:${this.expectedRole}:social`,
+  ) {
+    this.#caller = new RateLimit({
+      key: `sign-in:${expectedRole}:social`,
       limit: 10,
       window: Time.minutes(1),
       penalty: Time.minutes(1),
@@ -97,7 +98,7 @@ export class SocialSignIn {
     nonce: string,
     accessToken?: string,
   ): Promise<SocialSignInResult> {
-    const rate = await this.checkCallerRateLimit();
+    const rate = await checkCaller(this.#caller);
     if (!rate.ok) return new Failure(SocialSignInError.TooManyRequests);
 
     if (idToken.trim().length === 0 || nonce.trim().length === 0) {

@@ -34,7 +34,8 @@ import type { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { resetPasswordHook, ResetPasswordProvider } from "@scribe/host/dependencies/security/auth/src/hooks/auth.ts";
-import { rateLimiter, type RateLimitResult, RateLimitScope } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
+import { checkCaller } from "@scribe/core/runtime/http/caller.ts";
 import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
 import { isRateLimitCode } from "../../_core/errors.ts";
 import { goTrue } from "../../_core/gotrue/gotrue_client.ts";
@@ -50,37 +51,30 @@ export enum EmailResetPasswordError {
 export type EmailResetPasswordResult = Result<void, EmailResetPasswordError>;
 
 export class EmailResetPassword {
-  constructor(private readonly role: AccountRole) {}
+  readonly #caller: RateLimit;
+  readonly #recipient: RateLimit;
 
-  private checkCallerRateLimit(): Promise<RateLimitResult> {
-    return rateLimiter.check({
-      key: `reset-password:email:${this.role}`,
+  constructor(private readonly role: AccountRole) {
+    this.#caller = new RateLimit({
+      key: `reset-password:email:${role}`,
       limit: 10,
       window: Time.minutes(5),
       penalty: Time.minutes(5),
       maxPenalty: Time.hours(24),
       failOpen: false,
     });
-  }
-
-  private async checkRecipientRateLimit(
-    email: string,
-  ): Promise<RateLimitResult> {
-    return await rateLimiter.check({
-      key: `reset-password:email:${this.role}:to:${await sha256Hex(
-        AuthValidator.email.inbox(email),
-      )}`,
+    this.#recipient = new RateLimit({
+      key: `reset-password:email:${role}:to`,
       limit: 1,
       window: Time.seconds(90),
       penalty: Time.seconds(90),
       maxPenalty: Time.seconds(90),
       failOpen: false,
-      scope: RateLimitScope.Global,
     });
   }
 
   async send(email: string): Promise<EmailResetPasswordResult> {
-    const rate = await this.checkCallerRateLimit();
+    const rate = await checkCaller(this.#caller);
     if (!rate.ok) return new Failure(EmailResetPasswordError.TooManyRequests);
 
     const emailCheck = AuthValidator.email.check(email);
@@ -92,7 +86,7 @@ export class EmailResetPassword {
     }
     email = emailCheck.value;
 
-    const recipientRate = await this.checkRecipientRateLimit(email);
+    const recipientRate = await this.#recipient.check("", await sha256Hex(AuthValidator.email.inbox(email)));
     if (!recipientRate.ok) {
       return new Failure(EmailResetPasswordError.TooManyRequests);
     }

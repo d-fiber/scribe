@@ -39,7 +39,8 @@ import { DevicesClient } from "@scribe/host/dependencies/security/auth/src/user/
 import { CurrentSessionResolver } from "@scribe/host/dependencies/security/auth/src/_core/current_session.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
-import { rateLimiter, type RateLimitResult, RateLimitScope } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
+import { checkCaller } from "@scribe/core/runtime/http/caller.ts";
 
 import { updateUserEmailHook } from "@scribe/host/dependencies/security/auth/src/hooks/account.ts";
 export type { UpdateEmailHook, UpdateEmailHookPayload } from "@scribe/host/dependencies/security/auth/src/hooks/account.ts";
@@ -54,31 +55,26 @@ export enum UpdateUserEmailError {
 
 export type UpdateUserEmailResult = Result<void, UpdateUserEmailError>;
 
-export class UserEmailClient {
-  readonly #devices = new DevicesClient();
-
-  private checkCallerRateLimit(): Promise<RateLimitResult> {
-    return rateLimiter.check({
-      key: `user:email`,
+const CALLER_LIMIT = new RateLimit({
+      key: "user:email",
       limit: 10,
       window: Time.minutes(1),
       penalty: Time.minutes(1),
       maxPenalty: Time.minutes(30),
       failOpen: false,
-    });
-  }
+});
 
-  private async checkTargetRateLimit(userId: string): Promise<RateLimitResult> {
-    return await rateLimiter.check({
-      key: `user:email:of:${await sha256Hex(userId)}`,
+const TARGET_LIMIT = new RateLimit({
+      key: "user:email:of",
       limit: 5,
       window: Time.minutes(15),
       penalty: Time.minutes(15),
       maxPenalty: Time.minutes(15),
       failOpen: false,
-      scope: RateLimitScope.Global,
-    });
-  }
+});
+
+export class UserEmailClient {
+  readonly #devices = new DevicesClient();
 
   async update(userId: string, email: string): Promise<UpdateUserEmailResult> {
     const session = CurrentSessionResolver.resolve();
@@ -109,7 +105,7 @@ export class UserEmailClient {
     apply: (email: string) => Promise<Result<unknown, AuthError>>,
     revokeSessions: boolean,
   ): Promise<UpdateUserEmailResult> {
-    const rate = await this.checkCallerRateLimit();
+    const rate = await checkCaller(CALLER_LIMIT);
     if (!rate.ok) return new Failure(UpdateUserEmailError.TooManyRequests);
 
     const emailCheck = AuthValidator.email.check(email);
@@ -117,7 +113,7 @@ export class UserEmailClient {
       return new Failure(UpdateUserEmailError.InvalidEmail);
     }
 
-    const targetRate = await this.checkTargetRateLimit(userId);
+    const targetRate = await TARGET_LIMIT.check("", await sha256Hex(userId));
     if (!targetRate.ok) {
       return new Failure(UpdateUserEmailError.TooManyRequests);
     }

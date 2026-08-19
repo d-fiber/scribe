@@ -39,7 +39,8 @@ import type { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { signInHook, SignInProvider } from "@scribe/host/dependencies/security/auth/src/hooks/auth.ts";
-import { rateLimiter, type RateLimitResult, RateLimitScope } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
+import { callerBlocked, checkCaller } from "@scribe/core/runtime/http/caller.ts";
 import { requestDevice } from "@scribe/core/runtime/device/device.ts";
 import { AccountRoleResolver } from "../../_core/account.ts";
 import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
@@ -71,6 +72,11 @@ class PhoneOtpChannel implements OtpChannel {
 }
 
 export class PhoneSignIn {
+  readonly #caller: RateLimit;
+  readonly #identity: RateLimit;
+  readonly #recipients: RateLimit;
+  readonly #resend: RateLimit;
+
   private readonly users: UserClient;
   private readonly otpChallenge: OtpChallenge;
 
@@ -82,57 +88,48 @@ export class PhoneSignIn {
       new PhoneOtpChannel(),
       expectedRole,
     );
-  }
-
-  private checkCallerRateLimit(): Promise<RateLimitResult> {
-    return rateLimiter.check({
-      key: `sign-in:${this.expectedRole}:phone`,
+    this.#caller = new RateLimit({
+      key: `sign-in:${expectedRole}:phone`,
       limit: 10,
       window: Time.minutes(1),
       penalty: Time.minutes(1),
       maxPenalty: Time.minutes(10),
       failOpen: false,
     });
+    this.#identity = new RateLimit({
+      key: `sign-in:${expectedRole}:phone:to`,
+      limit: 10,
+      window: Time.minutes(15),
+      penalty: Time.minutes(15),
+      maxPenalty: Time.hours(24),
+      failOpen: false,
+    });
+    this.#resend = new RateLimit({
+      key: `sign-in:${expectedRole}:confirm-resend:to`,
+      limit: 1,
+      window: Time.seconds(90),
+      penalty: Time.seconds(90),
+      maxPenalty: Time.seconds(90),
+      failOpen: false,
+    });
+    this.#recipients = new RateLimit({
+      key: `sign-in:${expectedRole}:phone:to:all`,
+      limit: 100,
+      window: Time.minutes(15),
+      penalty: Time.minutes(5),
+      maxPenalty: Time.minutes(5),
+      failOpen: false,
+    });
   }
 
-  private async identityKey(phone: string): Promise<string> {
-    return `sign-in:${this.expectedRole}:phone:to:${await sha256Hex(phone)}`;
-  }
-
-  private async consumeIdentityFailure(key: string): Promise<void> {
-    await Promise.all([
-      rateLimiter.check({
-        key,
-        limit: 10,
-        window: Time.minutes(15),
-        penalty: Time.minutes(15),
-        maxPenalty: Time.hours(24),
-        failOpen: false,
-      }),
-      rateLimiter.check({
-        key: `${key}:all`,
-        limit: 100,
-        window: Time.minutes(15),
-        penalty: Time.minutes(5),
-        maxPenalty: Time.minutes(5),
-        failOpen: false,
-        scope: RateLimitScope.Global,
-      }),
-    ]);
-  }
-
-  private async isIdentityLimited(key: string): Promise<boolean> {
-    const [caller, global] = await Promise.all([
-      rateLimiter.peek({ key }),
-      rateLimiter.peek({ key: `${key}:all`, scope: RateLimitScope.Global }),
-    ]);
-    return caller.limited || global.limited;
+  private identityOf(phone: string): Promise<string> {
+    return sha256Hex(phone);
   }
 
   private async authenticateGoTrueUser(
     phone: string,
     password: string,
-    identityKey: string,
+    identity: string,
   ): Promise<
     | { session: AuthenticatedSession; role: AccountRole }
     | Failure<PhoneSignInError>
@@ -148,22 +145,12 @@ export class PhoneSignIn {
         case "user_not_found":
         case "invalid_credentials":
         case "user_banned":
-          await this.consumeIdentityFailure(identityKey);
+          await Promise.all([checkCaller(this.#identity, identity), this.#recipients.check("", identity)]);
           return new Failure(PhoneSignInError.InvalidCredentials);
         case "phone_not_confirmed": {
           const role = (await AccountRoleResolver.withPhone(phone)) ??
             this.expectedRole;
-          const resendRate = await rateLimiter.check({
-            key: `sign-in:${this.expectedRole}:confirm-resend:to:${await sha256Hex(
-              phone,
-            )}`,
-            limit: 1,
-            window: Time.seconds(90),
-            penalty: Time.seconds(90),
-            maxPenalty: Time.seconds(90),
-            failOpen: false,
-            scope: RateLimitScope.Global,
-          });
+          const resendRate = await this.#resend.check("", await sha256Hex(phone));
           if (!resendRate.ok) {
             return new Failure(PhoneSignInError.PhoneNotConfirmed);
           }
@@ -194,7 +181,7 @@ export class PhoneSignIn {
     phone: string,
     password: string,
   ): Promise<PhoneSignInResult> {
-    const rate = await this.checkCallerRateLimit();
+    const rate = await checkCaller(this.#caller);
     if (!rate.ok) return new Failure(PhoneSignInError.TooManyRequests);
 
     const phoneCheck = AuthValidator.phone.check(phone);
@@ -212,15 +199,19 @@ export class PhoneSignIn {
         return new Failure(PhoneSignInError.InvalidCredentials);
     }
 
-    const identityKey = await this.identityKey(phoneCheck.value);
-    if (await this.isIdentityLimited(identityKey)) {
+    const identity = await this.identityOf(phoneCheck.value);
+    const [identityBlocked, recipientsBlocked] = await Promise.all([
+      callerBlocked(this.#identity, identity),
+      this.#recipients.isBlocked("", identity),
+    ]);
+    if (identityBlocked || recipientsBlocked) {
       return new Failure(PhoneSignInError.TooManyRequests);
     }
 
     const goTrueResult = await this.authenticateGoTrueUser(
       phoneCheck.value,
       password,
-      identityKey,
+      identity,
     );
     if (goTrueResult instanceof Failure) return goTrueResult;
     const passwordSession = goTrueResult.session;
@@ -230,7 +221,7 @@ export class PhoneSignIn {
 
     try {
       if (role !== this.expectedRole) {
-        await this.consumeIdentityFailure(identityKey);
+        await Promise.all([checkCaller(this.#identity, identity), this.#recipients.check("", identity)]);
         return new Failure(PhoneSignInError.InvalidCredentials);
       }
 

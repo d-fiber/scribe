@@ -36,12 +36,7 @@ import { Time } from "@scribe/core/contracts/common/time.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { kv } from "@scribe/foundation/src/redis/mod.ts";
 import { signInHook } from "@scribe/host/dependencies/security/auth/src/hooks/auth.ts";
-import {
-  type OtpRateLimitResult,
-  rateLimiter,
-  type RateLimitResult,
-  RateLimitScope,
-} from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
 import { requestDevice } from "@scribe/core/runtime/device/device.ts";
 import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
 import { isRateLimitCode } from "../../_core/errors.ts";
@@ -90,6 +85,29 @@ const _GLOBAL_OTP_ATTEMPTS = 5;
 
 const _UNCOUNTABLE_RETRY_AFTER_S = Time.minutes(1).value;
 
+/**
+ * What came of a rate limit check on an otp exchange.
+ *
+ * `consume` is what makes it different from a plain outcome: a caller that has burned its
+ * global budget has its pending challenge invalidated as well, so that a script cannot keep a
+ * challenge alive by waiting out each refusal.
+ */
+export type OtpRateLimitResult =
+  | {
+    /** The exchange is allowed. */
+    readonly ok: true;
+  }
+  | {
+    /** The exchange is refused. */
+    readonly ok: false;
+
+    /** Whether the pending challenge is spent along with the refusal. */
+    readonly consume: boolean;
+
+    /** How many seconds before the caller may come back. */
+    readonly retryAfter: number;
+  };
+
 type OtpAttemptTally =
   | { readonly counted: true; readonly attempts: number }
   | { readonly counted: false };
@@ -130,22 +148,27 @@ async function _globalOtpBudget(
   return null;
 }
 
-const _identityOtpLimit = (
-  prefix: string,
-  role: AccountRole,
-  recipient: string,
-): Promise<RateLimitResult> =>
-  rateLimiter.check({
-    key: `sign-in:${role}:${prefix}:to:${recipient}`,
+const _identityOtpLimit = (prefix: string, role: AccountRole): RateLimit =>
+  new RateLimit({
+    key: `sign-in:${role}:${prefix}:to`,
     limit: 10,
     window: Time.minutes(15),
     penalty: Time.minutes(15),
     maxPenalty: Time.minutes(15),
     failOpen: false,
-    scope: RateLimitScope.Global,
   });
 
-const RateLimit = {
+const _resendCadence = (role: AccountRole): RateLimit =>
+  new RateLimit({
+    key: `sign-in:${role}:resend-otp:cadence`,
+    limit: 1,
+    window: Time.seconds(90),
+    penalty: Time.seconds(90),
+    maxPenalty: Time.seconds(90),
+    failOpen: false,
+  });
+
+const OtpBudget = {
   verifyOtp: async (
     fingerprint: string,
     role: AccountRole,
@@ -154,7 +177,7 @@ const RateLimit = {
     const budget = await _globalOtpBudget("verify-otp", fingerprint);
     if (budget) return budget;
 
-    const identity = await _identityOtpLimit("verify-otp", role, recipient);
+    const identity = await _identityOtpLimit("verify-otp", role).check("", recipient);
     if (!identity.ok) {
       return { ok: false, consume: false, retryAfter: identity.retryAfter };
     }
@@ -168,20 +191,12 @@ const RateLimit = {
     const budget = await _globalOtpBudget("resend-otp", fingerprint);
     if (budget) return budget;
 
-    const identity = await _identityOtpLimit("resend-otp", role, recipient);
+    const identity = await _identityOtpLimit("resend-otp", role).check("", recipient);
     if (!identity.ok) {
       return { ok: false, consume: false, retryAfter: identity.retryAfter };
     }
 
-    const rate = await rateLimiter.check({
-      key: `sign-in:${role}:resend-otp:cadence:${recipient}`,
-      limit: 1,
-      window: Time.seconds(90),
-      penalty: Time.seconds(90),
-      maxPenalty: Time.seconds(90),
-      failOpen: false,
-      scope: RateLimitScope.Global,
-    });
+    const rate = await _resendCadence(role).check("", recipient);
 
     if (!rate.ok) {
       return { ok: false, consume: false, retryAfter: rate.retryAfter };
@@ -258,7 +273,7 @@ export class OtpChallenge {
       sha256Hex(identifier),
     ]);
 
-    const rate = await RateLimit.resend(fingerprint, payload.role, recipient);
+    const rate = await OtpBudget.resend(fingerprint, payload.role, recipient);
     if (!rate.ok) {
       if (rate.consume) {
         await this.#token.consume(token);
@@ -318,7 +333,7 @@ export class OtpChallenge {
     }
 
     const fingerprint = await sha256Hex(token);
-    const rate = await RateLimit.verifyOtp(
+    const rate = await OtpBudget.verifyOtp(
       fingerprint,
       payload.role,
       await sha256Hex(payload.identifier),

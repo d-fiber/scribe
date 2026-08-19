@@ -34,7 +34,8 @@ import { Time } from "@scribe/core/contracts/common/time.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
 import type { SignUpHookResult } from "@scribe/host/dependencies/security/auth/src/hooks/auth.ts";
 import { signUpHook, SignUpProvider } from "@scribe/host/dependencies/security/auth/src/hooks/auth.ts";
-import { rateLimiter, type RateLimitResult } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
+import { checkCaller } from "@scribe/core/runtime/http/caller.ts";
 import { requestDevice } from "@scribe/core/runtime/device/device.ts";
 import { isRateLimitCode } from "../../_core/errors.ts";
 import { goTrue } from "../../_core/gotrue/gotrue_client.ts";
@@ -45,22 +46,20 @@ import { type SignUpResult, type SocialSignUpBase, SocialSignUpError } from "../
 
 const userDevices = new DevicesClient();
 
-export class SocialSignUp<TInput extends SocialSignUpBase, TPrepared> {
-  constructor(
-    private readonly provider: SocialProvider,
-    private readonly account: SignUpAccount<TInput, TPrepared>,
-  ) {}
-
-  private checkCallerRateLimit(): Promise<RateLimitResult> {
-    return rateLimiter.check({
-      key: `sign-up:${this.account.role}`,
+const CALLER_LIMIT = new RateLimit({
+      key: "sign-up",
       limit: 5,
       window: Time.minutes(30),
       penalty: Time.hours(1),
       maxPenalty: Time.hours(24),
       failOpen: false,
-    });
-  }
+});
+
+export class SocialSignUp<TInput extends SocialSignUpBase, TPrepared> {
+  constructor(
+    private readonly provider: SocialProvider,
+    private readonly account: SignUpAccount<TInput, TPrepared>,
+  ) {}
 
   private async createGoTrueUser(
     idToken: string,
@@ -86,7 +85,7 @@ export class SocialSignUp<TInput extends SocialSignUpBase, TPrepared> {
   }
 
   async withIdToken(data: TInput): Promise<SignUpResult<SocialSignUpError>> {
-    const rate = await this.checkCallerRateLimit();
+    const rate = await checkCaller(CALLER_LIMIT, this.account.role);
     if (!rate.ok) return new Failure(SocialSignUpError.TooManyRequests);
 
     const idToken = data.idToken;

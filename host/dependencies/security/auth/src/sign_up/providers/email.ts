@@ -34,7 +34,8 @@ import { Time } from "@scribe/core/contracts/common/time.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
 import type { SignUpHookResult } from "@scribe/host/dependencies/security/auth/src/hooks/auth.ts";
 import { signUpHook, SignUpProvider } from "@scribe/host/dependencies/security/auth/src/hooks/auth.ts";
-import { rateLimiter, type RateLimitResult, RateLimitScope } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
+import { checkCaller } from "@scribe/core/runtime/http/caller.ts";
 import { requestDevice } from "@scribe/core/runtime/device/device.ts";
 import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
 import { isRateLimitCode } from "../../_core/errors.ts";
@@ -47,32 +48,25 @@ import { type EmailSignUpBase, EmailSignUpError, type SignUpResult } from "../ty
 const userDevices = new DevicesClient();
 
 export class EmailSignUp<TInput extends EmailSignUpBase, TPrepared> {
-  constructor(private readonly account: SignUpAccount<TInput, TPrepared>) {}
+  readonly #caller: RateLimit;
+  readonly #recipient: RateLimit;
 
-  private checkCallerRateLimit(): Promise<RateLimitResult> {
-    return rateLimiter.check({
-      key: `sign-up:${this.account.role}`,
+  constructor(private readonly account: SignUpAccount<TInput, TPrepared>) {
+    this.#caller = new RateLimit({
+      key: `sign-up:${account.role}`,
       limit: 5,
       window: Time.minutes(30),
       penalty: Time.hours(1),
       maxPenalty: Time.hours(24),
       failOpen: false,
     });
-  }
-
-  private async checkRecipientRateLimit(
-    recipient: string,
-  ): Promise<RateLimitResult> {
-    return await rateLimiter.check({
-      key: `sign-up:${this.account.role}:email:to:${await sha256Hex(
-        AuthValidator.email.inbox(recipient),
-      )}`,
+    this.#recipient = new RateLimit({
+      key: `sign-up:${account.role}:email:to`,
       limit: 3,
       window: Time.minutes(15),
       penalty: Time.minutes(15),
       maxPenalty: Time.minutes(15),
       failOpen: false,
-      scope: RateLimitScope.Global,
     });
   }
 
@@ -113,7 +107,7 @@ export class EmailSignUp<TInput extends EmailSignUpBase, TPrepared> {
   async withEmailAndPassword(
     data: TInput,
   ): Promise<SignUpResult<EmailSignUpError>> {
-    const rate = await this.checkCallerRateLimit();
+    const rate = await checkCaller(this.#caller);
     if (!rate.ok) return new Failure(EmailSignUpError.TooManyRequests);
 
     let email = data.email;
@@ -142,7 +136,7 @@ export class EmailSignUp<TInput extends EmailSignUpBase, TPrepared> {
     if (prepared instanceof Failure) return prepared;
 
     email = email.trim().toLowerCase();
-    const recipientRate = await this.checkRecipientRateLimit(email);
+    const recipientRate = await this.#recipient.check("", await sha256Hex(AuthValidator.email.inbox(email)));
     if (!recipientRate.ok) return new Failure(EmailSignUpError.TooManyRequests);
 
     const device = await requestDevice();

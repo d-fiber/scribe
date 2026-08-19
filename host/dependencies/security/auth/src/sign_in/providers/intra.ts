@@ -32,7 +32,8 @@
 
 import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { rateLimiter, type RateLimitResult } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
+import { callerBlocked, checkCaller } from "@scribe/core/runtime/http/caller.ts";
 import { AuthCache } from "../../_core/cache.ts";
 import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
 import { derivedHex } from "../../_core/crypto.ts";
@@ -62,6 +63,24 @@ function _memoizedFingerprint(
   return pending;
 }
 
+const CALLER_LIMIT = new RateLimit({
+  key: `sign-in:${AccountRole.Admin}:intra`,
+  limit: 10,
+  window: Time.minutes(5),
+  penalty: Time.minutes(5),
+  maxPenalty: Time.hours(1),
+  failOpen: false,
+});
+
+const IDENTITY_LIMIT = new RateLimit({
+  key: `sign-in:${AccountRole.Admin}:intra:to`,
+  limit: 10,
+  window: Time.minutes(15),
+  penalty: Time.minutes(15),
+  maxPenalty: Time.hours(24),
+  failOpen: false,
+});
+
 export class IntraSignIn {
   private async credentialFingerprint(
     email: string,
@@ -74,36 +93,8 @@ export class IntraSignIn {
     );
   }
 
-  private checkCallerRateLimit(): Promise<RateLimitResult> {
-    return rateLimiter.check({
-      key: `sign-in:${AccountRole.Admin}:intra`,
-      limit: 10,
-      window: Time.minutes(5),
-      penalty: Time.minutes(5),
-      maxPenalty: Time.hours(1),
-      failOpen: false,
-    });
-  }
-
-  private async identityKey(email: string): Promise<string> {
-    return `sign-in:${AccountRole.Admin}:intra:to:${await sha256Hex(
-      AuthValidator.email.inbox(email),
-    )}`;
-  }
-
-  private async consumeIdentityFailure(key: string): Promise<void> {
-    await rateLimiter.check({
-      key,
-      limit: 10,
-      window: Time.minutes(15),
-      penalty: Time.minutes(15),
-      maxPenalty: Time.hours(24),
-      failOpen: false,
-    });
-  }
-
-  private async isIdentityLimited(key: string): Promise<boolean> {
-    return (await rateLimiter.peek({ key })).limited;
+  private identityOf(email: string): Promise<string> {
+    return sha256Hex(AuthValidator.email.inbox(email));
   }
 
   async withEmailAndPassword(
@@ -121,15 +112,15 @@ export class IntraSignIn {
     const cached = await AuthCache.intra.get(fingerprint);
     if (cached !== null) return cached;
 
-    const rate = await this.checkCallerRateLimit();
+    const rate = await checkCaller(CALLER_LIMIT);
     if (!rate.ok) return null;
 
-    const identityKey = await this.identityKey(email);
-    if (await this.isIdentityLimited(identityKey)) return null;
+    const identity = await this.identityOf(email);
+    if (await callerBlocked(IDENTITY_LIMIT, identity)) return null;
 
     const res = await goTrue.signIn.email.withPassword(email, password);
     if (!res.ok) {
-      await this.consumeIdentityFailure(identityKey);
+      await checkCaller(IDENTITY_LIMIT, identity);
       return null;
     }
 
@@ -141,7 +132,7 @@ export class IntraSignIn {
     }
 
     if (role !== AccountRole.Admin || !session.user) {
-      await this.consumeIdentityFailure(identityKey);
+      await checkCaller(IDENTITY_LIMIT, identity);
       return null;
     }
 

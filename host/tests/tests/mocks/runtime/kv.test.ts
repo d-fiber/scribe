@@ -35,10 +35,17 @@
 // connection is attempted and `--allow-net` isn't required (see `.claude/testing.md`).
 
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { rateLimiter, RateLimitError } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
 import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
 import { assertEquals } from "@std/assert";
 import { installRateLimiterMock, installValkeryMock } from "@scribe/foundation/testing/valkery.ts";
+
+const LIMIT = new RateLimit({
+  key: "x",
+  limit: 10,
+  window: Time.seconds(60),
+  penalty: Time.seconds(60),
+});
 
 Deno.test(
   "installValkeryMock: a Valkery subclass reads/writes against an in-memory store, restore() puts Redis back",
@@ -95,42 +102,22 @@ Deno.test(
 Deno.test(
   "installRateLimiterMock: defaults to an ok result and restore() puts the real check back",
   async () => {
-    const original = rateLimiter.check;
+    const original = RateLimit.prototype.check;
     const mock = installRateLimiterMock();
 
-    const result = await rateLimiter.check({
-      key: "x",
-      limit: 10,
-      window: Time.seconds(60),
-      penalty: Time.seconds(60),
-    });
+    const result = await LIMIT.check();
     assertEquals(result, { ok: true, remaining: 999 });
 
     mock.restore();
-    assertEquals(rateLimiter.check, original);
+    assertEquals(RateLimit.prototype.check, original);
   },
 );
 
 Deno.test("installRateLimiterMock: accepts a custom result", async () => {
-  const mock = installRateLimiterMock({
-    ok: false,
-    error: RateLimitError.Limited,
-    retryAfter: 30,
-    strikes: 1,
-  });
+  const mock = installRateLimiterMock({ ok: false, retryAfter: 30, strikes: 1 });
 
-  const result = await rateLimiter.check({
-    key: "x",
-    limit: 10,
-    window: Time.seconds(60),
-    penalty: Time.seconds(60),
-  });
+  const result = await LIMIT.check();
 
-  assertEquals(result, {
-    ok: false,
-    error: RateLimitError.Limited,
-    retryAfter: 30,
-    strikes: 1,
-  });
+  assertEquals(result, { ok: false, retryAfter: 30, strikes: 1 });
   mock.restore();
 });

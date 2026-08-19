@@ -41,7 +41,8 @@ import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
 import type { Result } from "@scribe/core/contracts/result.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
-import { rateLimiter, type RateLimitResult, RateLimitScope } from "@scribe/core/runtime/redis/rate_limiter/mod.ts";
+import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
+import { checkCaller } from "@scribe/core/runtime/http/caller.ts";
 
 import { updateUserPasswordHook } from "@scribe/host/dependencies/security/auth/src/hooks/account.ts";
 export type { UpdatePasswordHook, UpdatePasswordHookPayload } from "@scribe/host/dependencies/security/auth/src/hooks/account.ts";
@@ -63,31 +64,26 @@ interface UserIdentity {
   phone: string | null;
 }
 
-export class UserPasswordClient {
-  readonly #devices = new DevicesClient();
-
-  private checkCallerRateLimit(): Promise<RateLimitResult> {
-    return rateLimiter.check({
-      key: `user:password`,
+const CALLER_LIMIT = new RateLimit({
+      key: "user:password",
       limit: 10,
       window: Time.minutes(1),
       penalty: Time.minutes(1),
       maxPenalty: Time.minutes(30),
       failOpen: false,
-    });
-  }
+});
 
-  private async checkTargetRateLimit(userId: string): Promise<RateLimitResult> {
-    return await rateLimiter.check({
-      key: `user:password:of:${await sha256Hex(userId)}`,
+const TARGET_LIMIT = new RateLimit({
+      key: "user:password:of",
       limit: 5,
       window: Time.minutes(15),
       penalty: Time.minutes(15),
       maxPenalty: Time.minutes(15),
       failOpen: false,
-      scope: RateLimitScope.Global,
-    });
-  }
+});
+
+export class UserPasswordClient {
+  readonly #devices = new DevicesClient();
 
   async update(
     userId: string,
@@ -95,10 +91,10 @@ export class UserPasswordClient {
     newPassword: string,
     confirmNewPassword: string,
   ): Promise<UpdateUserPasswordResult> {
-    const rate = await this.checkCallerRateLimit();
+    const rate = await checkCaller(CALLER_LIMIT);
     if (!rate.ok) return new Failure(UpdateUserPasswordError.TooManyRequests);
 
-    const targetRate = await this.checkTargetRateLimit(userId);
+    const targetRate = await TARGET_LIMIT.check("", await sha256Hex(userId));
     if (!targetRate.ok) {
       return new Failure(UpdateUserPasswordError.TooManyRequests);
     }
@@ -166,10 +162,10 @@ export class UserPasswordClient {
     newPassword: string,
     confirmNewPassword: string,
   ): Promise<UpdateUserPasswordResult> {
-    const rate = await this.checkCallerRateLimit();
+    const rate = await checkCaller(CALLER_LIMIT);
     if (!rate.ok) return new Failure(UpdateUserPasswordError.TooManyRequests);
 
-    const targetRate = await this.checkTargetRateLimit(userId);
+    const targetRate = await TARGET_LIMIT.check("", await sha256Hex(userId));
     if (!targetRate.ok) {
       return new Failure(UpdateUserPasswordError.TooManyRequests);
     }

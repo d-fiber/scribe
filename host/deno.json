@@ -16,7 +16,7 @@
     "e2e:up": "deno task e2e:render && deno task e2e:compose up -d --build --wait",
     "e2e:down": "deno task e2e:compose down -v",
     "e2e:reset": "deno task e2e:compose down -v && rm -rf packages/foundation/e2e_tests/.postgres",
-    "test:e2e": "deno test --allow-env --allow-sys --allow-read --allow-net --env-file=tests/.env.test packages/foundation/e2e_tests/valkery.e2e.ts packages/foundation/e2e_tests/database.e2e.ts packages/foundation/e2e_tests/queue.e2e.ts packages/foundation/e2e_tests/cron.e2e.ts packages/foundation/e2e_tests/hook.e2e.ts packages/foundation/e2e_tests/http.e2e.ts packages/foundation/e2e_tests/isolate.e2e.ts",
+    "test:e2e": "deno test --allow-env --allow-sys --allow-read --allow-net --env-file=tests/.env.test packages/foundation/e2e_tests/valkery.e2e.ts packages/foundation/e2e_tests/database.e2e.ts packages/foundation/e2e_tests/queue.e2e.ts packages/foundation/e2e_tests/cron.e2e.ts packages/foundation/e2e_tests/hook.e2e.ts packages/foundation/e2e_tests/http.e2e.ts packages/foundation/e2e_tests/isolate.e2e.ts packages/foundation/e2e_tests/rate_limit.e2e.ts",
     "realtime:e2e:render": "deno run --allow-read --allow-write packages/realtime/e2e_tests/render.ts",
     "realtime:e2e:compose": "docker compose --profile realtime --project-directory packages/realtime/e2e_tests --env-file packages/realtime/e2e_tests/e2e.env -f packages/realtime/e2e_tests/.generated/database.yaml -f packages/realtime/e2e_tests/.generated/realtime.yaml -f packages/realtime/e2e_tests/compose.override.yaml",
     "realtime:e2e:up": "deno task realtime:e2e:render && deno task realtime:e2e:compose up -d --build --wait",
