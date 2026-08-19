@@ -2,6 +2,7 @@
   "agreementInForce": true,
   "exempt": {
     "emails": [
+      "larsanov.inc@gmail.com",
       "scribe-release@users.noreply.github.com",
       "scribe-tools@users.noreply.github.com",
       "scribe-versioning@users.noreply.github.com",
