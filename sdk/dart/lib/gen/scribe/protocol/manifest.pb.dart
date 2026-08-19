@@ -15,7 +15,6 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'broadcast.pbenum.dart' as $1;
 import 'common.pb.dart' as $0;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
@@ -711,14 +710,14 @@ class SearcherDeclaration extends $pb.GeneratedMessage {
 
 class RealtimeDeclaration extends $pb.GeneratedMessage {
   factory RealtimeDeclaration({
-    $core.String? entity,
-    $core.Iterable<$core.String>? events,
-    $1.EventScope? scope,
+    $core.String? channel,
+    $core.Iterable<$core.String>? actions,
+    $core.String? listen,
   }) {
     final result = create();
-    if (entity != null) result.entity = entity;
-    if (events != null) result.events.addAll(events);
-    if (scope != null) result.scope = scope;
+    if (channel != null) result.channel = channel;
+    if (actions != null) result.actions.addAll(actions);
+    if (listen != null) result.listen = listen;
     return result;
   }
 
@@ -735,10 +734,9 @@ class RealtimeDeclaration extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'RealtimeDeclaration',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'scribe.v1'),
       createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'entity')
-    ..pPS(2, _omitFieldNames ? '' : 'events')
-    ..aE<$1.EventScope>(3, _omitFieldNames ? '' : 'scope',
-        enumValues: $1.EventScope.values)
+    ..aOS(1, _omitFieldNames ? '' : 'channel')
+    ..pPS(2, _omitFieldNames ? '' : 'actions')
+    ..aOS(3, _omitFieldNames ? '' : 'listen')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -761,25 +759,25 @@ class RealtimeDeclaration extends $pb.GeneratedMessage {
   static RealtimeDeclaration? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get entity => $_getSZ(0);
+  $core.String get channel => $_getSZ(0);
   @$pb.TagNumber(1)
-  set entity($core.String value) => $_setString(0, value);
+  set channel($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasEntity() => $_has(0);
+  $core.bool hasChannel() => $_has(0);
   @$pb.TagNumber(1)
-  void clearEntity() => $_clearField(1);
+  void clearChannel() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $pb.PbList<$core.String> get events => $_getList(1);
+  $pb.PbList<$core.String> get actions => $_getList(1);
 
   @$pb.TagNumber(3)
-  $1.EventScope get scope => $_getN(2);
+  $core.String get listen => $_getSZ(2);
   @$pb.TagNumber(3)
-  set scope($1.EventScope value) => $_setField(3, value);
+  set listen($core.String value) => $_setString(2, value);
   @$pb.TagNumber(3)
-  $core.bool hasScope() => $_has(2);
+  $core.bool hasListen() => $_has(2);
   @$pb.TagNumber(3)
-  void clearScope() => $_clearField(3);
+  void clearListen() => $_clearField(3);
 }
 
 class StorageDeclaration extends $pb.GeneratedMessage {

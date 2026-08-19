@@ -30,53 +30,64 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+
 import { Size } from "@scribe/core/contracts/common/size.ts";
 import {
-  defineStorage,
-  file,
-  type FileSpec,
-  image,
-  type ImageSpec,
+  type FileResource,
+  type ImageResource,
   type PathArgs,
-  type StorageFolder,
+  Storage,
+  StorageVisibility,
 } from "@scribe/storage/mod.ts";
 
-export const userStorage: StorageFolder<
-  { avatar: ImageSpec; issue: FileSpec },
-  PathArgs<"users/{account}">
-> = defineStorage({
-  path: "users/{account}",
-  access: { read: "anyone", write: "users" },
-  resources: {
-    avatar: image({
-      extensions: ["png", "jpg", "jpeg"],
-      maxSize: Size.megabytes(10),
-    }),
-    issue: file({
-      extensions: ["png", "jpg", "jpeg", "json"],
-      maxSize: Size.megabytes(10),
-      read: "admins",
-    }),
-  },
-});
+const AVATAR = { extensions: ["png", "jpg", "jpeg"], maxSize: Size.megabytes(10) };
+const ISSUE = { extensions: ["png", "jpg", "jpeg", "json"], maxSize: Size.megabytes(10) };
 
-export const adminStorage: StorageFolder<
-  { avatar: ImageSpec },
-  PathArgs<"admin/{account}">
-> = defineStorage({
-  path: "admin/{account}",
-  access: { read: "admins", write: "admins" },
-  resources: {
-    avatar: image({
-      extensions: ["png", "jpg", "jpeg"],
-      maxSize: Size.megabytes(10),
-    }),
-  },
-});
+/** Everything a user account stores under its own identifier. */
+export const userStorage: Storage<"users/{userId}"> = Storage.public("users/{userId}");
 
+/** The branch of a user's folder a URL alone reads nothing of. */
+export const userPrivateStorage: Storage<"users/{userId}/private"> = userStorage.child(
+  "private",
+  StorageVisibility.Private,
+);
+
+/** Everything an admin account stores under its own identifier. */
+export const adminStorage: Storage<"admin/{adminId}"> = Storage.private("admin/{adminId}");
+
+/** The picture shown for a user, readable by anyone holding its URL. */
+export const userAvatar: ImageResource<PathArgs<"users/{userId}">> = userStorage.image(
+  "avatar",
+  AVATAR,
+);
+
+/** What a user attaches when reporting a problem, kept out of the open bucket. */
+export const userIssue: FileResource<PathArgs<"users/{userId}/private">> = userPrivateStorage
+  .file("issue", ISSUE);
+
+/** The picture shown for an admin, behind the admin gateway like the rest of that bucket. */
+export const adminAvatar: ImageResource<PathArgs<"admin/{adminId}">> = adminStorage.image(
+  "avatar",
+  AVATAR,
+);
+
+/**
+ * The storage a route reaches for an account, whichever kind of account it is.
+ *
+ * The declarations above are what a route may also import one by one. They are gathered here so
+ * that a test harness has a single object to swap, which is what `installAccountStorageMock`
+ * does.
+ */
 export class AccountStorage {
-  readonly user: typeof userStorage = userStorage;
-  readonly admin: typeof adminStorage = adminStorage;
+  /** The picture shown for a user. */
+  readonly userAvatar: typeof userAvatar = userAvatar;
+
+  /** What a user attaches when reporting a problem. */
+  readonly userIssue: typeof userIssue = userIssue;
+
+  /** The picture shown for an admin. */
+  readonly adminAvatar: typeof adminAvatar = adminAvatar;
 }
 
+/** The one instance a route reaches, and the one a test harness swaps. */
 export const accountStorage: AccountStorage = new AccountStorage();

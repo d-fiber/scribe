@@ -38,81 +38,32 @@ import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegen
 import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Failure, FailureJson, Json, JsonJson } from "../../../../protocol/common_pb.ts";
 import { file_scribe_protocol_common } from "../../../../protocol/common_pb.ts";
-import type { EventScope, EventScopeJson } from "../../../../protocol/broadcast_pb.ts";
-import { file_scribe_protocol_broadcast } from "../../../../protocol/broadcast_pb.ts";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file scribe/host/packages/realtime/protocol/realtime.proto.
  */
 export const file_scribe_host_packages_realtime_protocol_realtime: GenFile = /*@__PURE__*/
-  fileDesc("CjVzY3JpYmUvaG9zdC9wYWNrYWdlcy9yZWFsdGltZS9wcm90b2NvbC9yZWFsdGltZS5wcm90bxIac2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEiSgoGVGFyZ2V0EiQKBXNjb3BlGAEgASgOMhUuc2NyaWJlLnYxLkV2ZW50U2NvcGUSCwoDaWRzGAIgAygJEg0KBXRvcGljGAMgASgJIocBChBCcm9hZGNhc3RSZXF1ZXN0Eg4KBmVudGl0eRgBIAEoCRINCgVldmVudBgCIAEoCRIyCgZ0YXJnZXQYAyABKAsyIi5zY3JpYmUuY2xpZW50cy5yZWFsdGltZS52MS5UYXJnZXQSIAoHcGF5bG9hZBgEIAEoCzIPLnNjcmliZS52MS5Kc29uIkcKD0Jyb2FkY2FzdFJlc3VsdBIRCglkZWxpdmVyZWQYASABKA0SIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSI7ChZUb3BpY01lbWJlcnNoaXBSZXF1ZXN0Eg0KBXRvcGljGAEgASgJEhIKCm1lbWJlcl9pZHMYAiADKAkiOgoVVG9waWNNZW1iZXJzaGlwUmVzdWx0EiEKBWVycm9yGAEgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUy2wIKCFJlYWx0aW1lEmYKCUJyb2FkY2FzdBIsLnNjcmliZS5jbGllbnRzLnJlYWx0aW1lLnYxLkJyb2FkY2FzdFJlcXVlc3QaKy5zY3JpYmUuY2xpZW50cy5yZWFsdGltZS52MS5Ccm9hZGNhc3RSZXN1bHQScgoJSm9pblRvcGljEjIuc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuVG9waWNNZW1iZXJzaGlwUmVxdWVzdBoxLnNjcmliZS5jbGllbnRzLnJlYWx0aW1lLnYxLlRvcGljTWVtYmVyc2hpcFJlc3VsdBJzCgpMZWF2ZVRvcGljEjIuc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuVG9waWNNZW1iZXJzaGlwUmVxdWVzdBoxLnNjcmliZS5jbGllbnRzLnJlYWx0aW1lLnYxLlRvcGljTWVtYmVyc2hpcFJlc3VsdGIGcHJvdG8z", [file_scribe_protocol_common, file_scribe_protocol_broadcast]);
-
-/**
- * @generated from message scribe.clients.realtime.v1.Target
- */
-export type Target = Message<"scribe.clients.realtime.v1.Target"> & {
-  /**
-   * @generated from field: scribe.v1.EventScope scope = 1;
-   */
-  scope: EventScope;
-
-  /**
-   * @generated from field: repeated string ids = 2;
-   */
-  ids: string[];
-
-  /**
-   * @generated from field: string topic = 3;
-   */
-  topic: string;
-};
-
-/**
- * @generated from message scribe.clients.realtime.v1.Target
- */
-export type TargetJson = {
-  /**
-   * @generated from field: scribe.v1.EventScope scope = 1;
-   */
-  scope?: EventScopeJson;
-
-  /**
-   * @generated from field: repeated string ids = 2;
-   */
-  ids?: string[];
-
-  /**
-   * @generated from field: string topic = 3;
-   */
-  topic?: string;
-};
-
-/**
- * Describes the message scribe.clients.realtime.v1.Target.
- * Use `create(TargetSchema)` to create a new message.
- */
-export const TargetSchema: GenMessage<Target, {jsonType: TargetJson}> = /*@__PURE__*/
-  messageDesc(file_scribe_host_packages_realtime_protocol_realtime, 0);
+  fileDesc("CjVzY3JpYmUvaG9zdC9wYWNrYWdlcy9yZWFsdGltZS9wcm90b2NvbC9yZWFsdGltZS5wcm90bxIac2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEiaAoQQnJvYWRjYXN0UmVxdWVzdBIPCgdjaGFubmVsGAEgASgJEg4KBmFjdGlvbhgCIAEoCRIRCgllbnRpdHlfaWQYAyABKAkSIAoHcGF5bG9hZBgEIAEoCzIPLnNjcmliZS52MS5Kc29uIkcKD0Jyb2FkY2FzdFJlc3VsdBIRCglkZWxpdmVyZWQYASABKA0SIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSI0CgxHcmFudFJlcXVlc3QSDwoHY2hhbm5lbBgBIAEoCRITCgthY2NvdW50X2lkcxgCIAMoCSIwCgtHcmFudFJlc3VsdBIhCgVlcnJvchgBIAEoCzISLnNjcmliZS52MS5GYWlsdXJlMqsCCghSZWFsdGltZRJmCglCcm9hZGNhc3QSLC5zY3JpYmUuY2xpZW50cy5yZWFsdGltZS52MS5Ccm9hZGNhc3RSZXF1ZXN0Gisuc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuQnJvYWRjYXN0UmVzdWx0EloKBUdyYW50Eiguc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXF1ZXN0Gicuc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXN1bHQSWwoGUmV2b2tlEiguc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXF1ZXN0Gicuc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXN1bHRiBnByb3RvMw", [file_scribe_protocol_common]);
 
 /**
  * @generated from message scribe.clients.realtime.v1.BroadcastRequest
  */
 export type BroadcastRequest = Message<"scribe.clients.realtime.v1.BroadcastRequest"> & {
   /**
-   * @generated from field: string entity = 1;
+   * @generated from field: string channel = 1;
    */
-  entity: string;
+  channel: string;
 
   /**
-   * @generated from field: string event = 2;
+   * @generated from field: string action = 2;
    */
-  event: string;
+  action: string;
 
   /**
-   * @generated from field: scribe.clients.realtime.v1.Target target = 3;
+   * @generated from field: string entity_id = 3;
    */
-  target?: Target | undefined;
+  entityId: string;
 
   /**
    * @generated from field: scribe.v1.Json payload = 4;
@@ -125,19 +76,19 @@ export type BroadcastRequest = Message<"scribe.clients.realtime.v1.BroadcastRequ
  */
 export type BroadcastRequestJson = {
   /**
-   * @generated from field: string entity = 1;
+   * @generated from field: string channel = 1;
    */
-  entity?: string;
+  channel?: string;
 
   /**
-   * @generated from field: string event = 2;
+   * @generated from field: string action = 2;
    */
-  event?: string;
+  action?: string;
 
   /**
-   * @generated from field: scribe.clients.realtime.v1.Target target = 3;
+   * @generated from field: string entity_id = 3;
    */
-  target?: TargetJson;
+  entityId?: string;
 
   /**
    * @generated from field: scribe.v1.Json payload = 4;
@@ -150,7 +101,7 @@ export type BroadcastRequestJson = {
  * Use `create(BroadcastRequestSchema)` to create a new message.
  */
 export const BroadcastRequestSchema: GenMessage<BroadcastRequest, {jsonType: BroadcastRequestJson}> = /*@__PURE__*/
-  messageDesc(file_scribe_host_packages_realtime_protocol_realtime, 1);
+  messageDesc(file_scribe_host_packages_realtime_protocol_realtime, 0);
 
 /**
  * @generated from message scribe.clients.realtime.v1.BroadcastResult
@@ -187,49 +138,49 @@ export type BroadcastResultJson = {
  * Use `create(BroadcastResultSchema)` to create a new message.
  */
 export const BroadcastResultSchema: GenMessage<BroadcastResult, {jsonType: BroadcastResultJson}> = /*@__PURE__*/
+  messageDesc(file_scribe_host_packages_realtime_protocol_realtime, 1);
+
+/**
+ * @generated from message scribe.clients.realtime.v1.GrantRequest
+ */
+export type GrantRequest = Message<"scribe.clients.realtime.v1.GrantRequest"> & {
+  /**
+   * @generated from field: string channel = 1;
+   */
+  channel: string;
+
+  /**
+   * @generated from field: repeated string account_ids = 2;
+   */
+  accountIds: string[];
+};
+
+/**
+ * @generated from message scribe.clients.realtime.v1.GrantRequest
+ */
+export type GrantRequestJson = {
+  /**
+   * @generated from field: string channel = 1;
+   */
+  channel?: string;
+
+  /**
+   * @generated from field: repeated string account_ids = 2;
+   */
+  accountIds?: string[];
+};
+
+/**
+ * Describes the message scribe.clients.realtime.v1.GrantRequest.
+ * Use `create(GrantRequestSchema)` to create a new message.
+ */
+export const GrantRequestSchema: GenMessage<GrantRequest, {jsonType: GrantRequestJson}> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_realtime_protocol_realtime, 2);
 
 /**
- * @generated from message scribe.clients.realtime.v1.TopicMembershipRequest
+ * @generated from message scribe.clients.realtime.v1.GrantResult
  */
-export type TopicMembershipRequest = Message<"scribe.clients.realtime.v1.TopicMembershipRequest"> & {
-  /**
-   * @generated from field: string topic = 1;
-   */
-  topic: string;
-
-  /**
-   * @generated from field: repeated string member_ids = 2;
-   */
-  memberIds: string[];
-};
-
-/**
- * @generated from message scribe.clients.realtime.v1.TopicMembershipRequest
- */
-export type TopicMembershipRequestJson = {
-  /**
-   * @generated from field: string topic = 1;
-   */
-  topic?: string;
-
-  /**
-   * @generated from field: repeated string member_ids = 2;
-   */
-  memberIds?: string[];
-};
-
-/**
- * Describes the message scribe.clients.realtime.v1.TopicMembershipRequest.
- * Use `create(TopicMembershipRequestSchema)` to create a new message.
- */
-export const TopicMembershipRequestSchema: GenMessage<TopicMembershipRequest, {jsonType: TopicMembershipRequestJson}> = /*@__PURE__*/
-  messageDesc(file_scribe_host_packages_realtime_protocol_realtime, 3);
-
-/**
- * @generated from message scribe.clients.realtime.v1.TopicMembershipResult
- */
-export type TopicMembershipResult = Message<"scribe.clients.realtime.v1.TopicMembershipResult"> & {
+export type GrantResult = Message<"scribe.clients.realtime.v1.GrantResult"> & {
   /**
    * @generated from field: scribe.v1.Failure error = 1;
    */
@@ -237,9 +188,9 @@ export type TopicMembershipResult = Message<"scribe.clients.realtime.v1.TopicMem
 };
 
 /**
- * @generated from message scribe.clients.realtime.v1.TopicMembershipResult
+ * @generated from message scribe.clients.realtime.v1.GrantResult
  */
-export type TopicMembershipResultJson = {
+export type GrantResultJson = {
   /**
    * @generated from field: scribe.v1.Failure error = 1;
    */
@@ -247,11 +198,11 @@ export type TopicMembershipResultJson = {
 };
 
 /**
- * Describes the message scribe.clients.realtime.v1.TopicMembershipResult.
- * Use `create(TopicMembershipResultSchema)` to create a new message.
+ * Describes the message scribe.clients.realtime.v1.GrantResult.
+ * Use `create(GrantResultSchema)` to create a new message.
  */
-export const TopicMembershipResultSchema: GenMessage<TopicMembershipResult, {jsonType: TopicMembershipResultJson}> = /*@__PURE__*/
-  messageDesc(file_scribe_host_packages_realtime_protocol_realtime, 4);
+export const GrantResultSchema: GenMessage<GrantResult, {jsonType: GrantResultJson}> = /*@__PURE__*/
+  messageDesc(file_scribe_host_packages_realtime_protocol_realtime, 3);
 
 /**
  * @generated from service scribe.clients.realtime.v1.Realtime
@@ -266,20 +217,20 @@ export const Realtime: GenService<{
     output: typeof BroadcastResultSchema;
   },
   /**
-   * @generated from rpc scribe.clients.realtime.v1.Realtime.JoinTopic
+   * @generated from rpc scribe.clients.realtime.v1.Realtime.Grant
    */
-  joinTopic: {
+  grant: {
     methodKind: "unary";
-    input: typeof TopicMembershipRequestSchema;
-    output: typeof TopicMembershipResultSchema;
+    input: typeof GrantRequestSchema;
+    output: typeof GrantResultSchema;
   },
   /**
-   * @generated from rpc scribe.clients.realtime.v1.Realtime.LeaveTopic
+   * @generated from rpc scribe.clients.realtime.v1.Realtime.Revoke
    */
-  leaveTopic: {
+  revoke: {
     methodKind: "unary";
-    input: typeof TopicMembershipRequestSchema;
-    output: typeof TopicMembershipResultSchema;
+    input: typeof GrantRequestSchema;
+    output: typeof GrantResultSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_packages_realtime_protocol_realtime, 0);

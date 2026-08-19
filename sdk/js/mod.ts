@@ -53,7 +53,7 @@ export {
   SocialProvider,
 } from "./gen/schema/enums.ts";
 
-export { Caller, EventScope, Need } from "./src/contracts/access.ts";
+export { Caller, Listen, Need } from "./src/contracts/access.ts";
 export type { RouteMethod } from "./src/contracts/access.ts";
 export { emptyPagination, pagination } from "./src/contracts/pagination.ts";
 export type { Pagination } from "./src/contracts/pagination.ts";

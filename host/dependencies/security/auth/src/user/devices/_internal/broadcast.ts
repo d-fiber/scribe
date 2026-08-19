@@ -31,52 +31,65 @@
 // LICENSE file, the LICENSE file governs.
 
 import { AccountRole } from "@scribe/core/contracts/account.ts";
-import { defineRealtime, event } from "@scribe/realtime/mod.ts";
+import { Realtime } from "@scribe/realtime/mod.ts";
 
-const devices = defineRealtime({
-  entity: "devices",
-  scopes: ["to"],
-  events: {
-    inserted: event("insert"),
-    updated: event("update"),
-    deleted: event("delete"),
-    signedOut: event("sign_out"),
-  },
-});
+/** What a device event carries to the account the device belongs to. */
+export interface DeviceEvent {
+  /** The identifier of the device the event is about. */
+  deviceId: string;
+}
 
+/**
+ * The two channels devices are announced on, one per family of accounts.
+ *
+ * They are declared apart rather than sharing one name because the two families are addressed
+ * by the same subject in a token: a single channel would let whichever persona holds that
+ * subject hear the other's devices.
+ */
+const CHANNELS: Readonly<Record<AccountRole, Realtime<DeviceEvent>>> = {
+  [AccountRole.User]: Realtime.granted<DeviceEvent>("user_device", { key: "deviceId" }),
+  [AccountRole.Admin]: Realtime.granted<DeviceEvent>("admin_device", { key: "deviceId" }),
+};
+
+/** Announces what happens to the devices of one family of accounts. */
 export class DeviceBroadcast {
-  constructor(readonly kind: AccountRole) {}
+  /** Which family of accounts this instance announces to. */
+  readonly kind: AccountRole;
 
+  constructor(kind: AccountRole) {
+    this.kind = kind;
+  }
+
+  /** Announces that `deviceId` was added to `accountId`. */
   insert(accountId: string, deviceId: string): Promise<boolean> {
-    return this.#emit(devices.inserted, accountId, deviceId);
+    return this.#channel().to(accountId).insert({ deviceId });
   }
 
+  /** Announces that `deviceId` changed on `accountId`. */
   update(accountId: string, deviceId: string): Promise<boolean> {
-    return this.#emit(devices.updated, accountId, deviceId);
+    return this.#channel().to(accountId).update({ deviceId });
   }
 
+  /** Announces that `deviceId` was removed from `accountId`. */
   delete(accountId: string, deviceId: string): Promise<boolean> {
-    return this.#emit(devices.deleted, accountId, deviceId);
+    return this.#channel().to(accountId).delete({ deviceId });
   }
 
+  /** Announces that `deviceId` was signed out of `accountId`. */
   signOut(accountId: string, deviceId: string): Promise<boolean> {
-    return this.#emit(devices.signedOut, accountId, deviceId);
+    return this.#channel().to(accountId).emit("sign_out", { deviceId });
   }
 
-  #emit(
-    target: { readonly to: { admin: DeviceEmit; user: DeviceEmit } },
-    accountId: string,
-    deviceId: string,
-  ): Promise<boolean> {
-    return this.kind === AccountRole.Admin
-      ? target.to.admin(deviceId, accountId)
-      : target.to.user(deviceId, accountId);
+  #channel(): Realtime<DeviceEvent> {
+    return CHANNELS[this.kind];
   }
 }
 
-type DeviceEmit = (id: string, accountId: string) => Promise<boolean>;
-
+/** One broadcaster per family of accounts, ready to use. */
 export class DeviceBroadcasts {
+  /** Announces to the devices of a user. */
   static readonly user: DeviceBroadcast = new DeviceBroadcast(AccountRole.User);
+
+  /** Announces to the devices of an admin. */
   static readonly admin: DeviceBroadcast = new DeviceBroadcast(AccountRole.Admin);
 }

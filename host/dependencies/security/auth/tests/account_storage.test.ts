@@ -30,15 +30,20 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+
+import "@scribe/core/testing/settings.ts";
 import { OK } from "@scribe/core/contracts/result.ts";
 import type { StorageImage } from "@scribe/storage/mod.ts";
 import { accountStorage } from "@scribe/host/dependencies/security/auth/src/user/storage/account_storage.ts";
 import { assertEquals } from "@std/assert";
-import { createAccountStorageMock, installAccountStorageMock } from "@scribe/host/dependencies/security/auth/testing/account_storage.ts";
+import {
+  createAccountStorageMock,
+  installAccountStorageMock,
+} from "@scribe/host/dependencies/security/auth/testing/account_storage.ts";
 
 const uploadedImage: StorageImage = {
-  path: "admin/a.png",
-  url: "https://example.com/admin/a.png",
+  path: "admin/a1/avatar",
+  url: "https://example.com/admin/a1/avatar",
   blurHash: null,
 };
 
@@ -46,29 +51,43 @@ Deno.test(
   "account storage automock: when() configures a method inherited from ImageResource",
   async () => {
     const mock = createAccountStorageMock();
-    mock.when("admin.avatar.upload", () => Promise.resolve(new OK(uploadedImage)));
+    mock.when("adminAvatar.upload", () => Promise.resolve(new OK(uploadedImage)));
     assertEquals(
-      await mock.target.admin.avatar.upload(new File([], "a.png")),
+      await mock.target.adminAvatar.upload(new File([], "a.png"), "a1"),
       new OK(uploadedImage),
     );
   },
 );
 
 Deno.test(
-  "installAccountStorageMock: swaps every kernel entity and restores them",
+  "installAccountStorageMock: swaps every declared resource and restores them",
   async () => {
-    const originalAdmin = accountStorage.admin;
-    const originalUser = accountStorage.user;
+    const originalAvatar = accountStorage.adminAvatar;
+    const originalIssue = accountStorage.userIssue;
     const mock = installAccountStorageMock();
-    mock.when("admin.avatar.upload", () => Promise.resolve(new OK(uploadedImage)));
+    mock.when("adminAvatar.upload", () => Promise.resolve(new OK(uploadedImage)));
 
     assertEquals(
-      await accountStorage.admin.avatar.upload(new File([], "a.png")),
+      await accountStorage.adminAvatar.upload(new File([], "a.png"), "a1"),
       new OK(uploadedImage),
     );
 
     mock.restore();
-    assertEquals(accountStorage.admin, originalAdmin);
-    assertEquals(accountStorage.user, originalUser);
+    assertEquals(accountStorage.adminAvatar, originalAvatar);
+    assertEquals(accountStorage.userIssue, originalIssue);
   },
 );
+
+Deno.test("account storage: a user avatar renders under the account it belongs to", () => {
+  assertEquals(
+    accountStorage.userAvatar.url("u1"),
+    "http://localhost:4000/storage/v1/object/public/public_bucket/users/u1/avatar",
+  );
+});
+
+Deno.test("account storage: a user issue lands in the private bucket", () => {
+  assertEquals(
+    accountStorage.userIssue.url("u1"),
+    "http://localhost:4001/storage/v1/object/private_bucket/users/u1/private/issue",
+  );
+});

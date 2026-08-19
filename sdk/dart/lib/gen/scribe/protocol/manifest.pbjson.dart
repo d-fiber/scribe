@@ -228,24 +228,16 @@ final $typed_data.Uint8List searcherDeclarationDescriptor = $convert.base64Decod
 const RealtimeDeclaration$json = {
   '1': 'RealtimeDeclaration',
   '2': [
-    {'1': 'entity', '3': 1, '4': 1, '5': 9, '10': 'entity'},
-    {'1': 'events', '3': 2, '4': 3, '5': 9, '10': 'events'},
-    {
-      '1': 'scope',
-      '3': 3,
-      '4': 1,
-      '5': 14,
-      '6': '.scribe.v1.EventScope',
-      '10': 'scope'
-    },
+    {'1': 'channel', '3': 1, '4': 1, '5': 9, '10': 'channel'},
+    {'1': 'actions', '3': 2, '4': 3, '5': 9, '10': 'actions'},
+    {'1': 'listen', '3': 3, '4': 1, '5': 9, '10': 'listen'},
   ],
 };
 
 /// Descriptor for `RealtimeDeclaration`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List realtimeDeclarationDescriptor = $convert.base64Decode(
-    'ChNSZWFsdGltZURlY2xhcmF0aW9uEhYKBmVudGl0eRgBIAEoCVIGZW50aXR5EhYKBmV2ZW50cx'
-    'gCIAMoCVIGZXZlbnRzEisKBXNjb3BlGAMgASgOMhUuc2NyaWJlLnYxLkV2ZW50U2NvcGVSBXNj'
-    'b3Bl');
+    'ChNSZWFsdGltZURlY2xhcmF0aW9uEhgKB2NoYW5uZWwYASABKAlSB2NoYW5uZWwSGAoHYWN0aW'
+    '9ucxgCIAMoCVIHYWN0aW9ucxIWCgZsaXN0ZW4YAyABKAlSBmxpc3Rlbg==');
 
 @$core.Deprecated('Use storageDeclarationDescriptor instead')
 const StorageDeclaration$json = {

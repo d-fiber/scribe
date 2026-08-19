@@ -15,19 +15,19 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'manifest.pb.dart' as $2;
+import 'manifest.pb.dart' as $1;
 import 'manifest.pbjson.dart';
 
 export 'manifest.pb.dart';
 
 abstract class RegistrationServiceBase extends $pb.GeneratedService {
-  $async.Future<$2.Manifest> describe(
-      $pb.ServerContext ctx, $2.HandshakeRequest request);
+  $async.Future<$1.Manifest> describe(
+      $pb.ServerContext ctx, $1.HandshakeRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
       case 'Describe':
-        return $2.HandshakeRequest();
+        return $1.HandshakeRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -37,7 +37,7 @@ abstract class RegistrationServiceBase extends $pb.GeneratedService {
       $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
       case 'Describe':
-        return describe(ctx, request as $2.HandshakeRequest);
+        return describe(ctx, request as $1.HandshakeRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

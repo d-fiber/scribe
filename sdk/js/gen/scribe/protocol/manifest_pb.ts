@@ -38,15 +38,13 @@ import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegen
 import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Caller, CallerJson, Json, JsonJson, Method, MethodJson, Need, NeedJson, Size, SizeJson, Time, TimeJson } from "./common_pb.ts";
 import { file_scribe_protocol_common } from "./common_pb.ts";
-import type { EventScope, EventScopeJson } from "./broadcast_pb.ts";
-import { file_scribe_protocol_broadcast } from "./broadcast_pb.ts";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file scribe/protocol/manifest.proto.
  */
 export const file_scribe_protocol_manifest: GenFile = /*@__PURE__*/
-  fileDesc("Ch5zY3JpYmUvcHJvdG9jb2wvbWFuaWZlc3QucHJvdG8SCXNjcmliZS52MSKFAQoLUmF0ZUxpbWl0ZXISDQoFbGltaXQYASABKA0SHwoGd2luZG93GAIgASgLMg8uc2NyaWJlLnYxLlRpbWUSIAoHcGVuYWx0eRgDIAEoCzIPLnNjcmliZS52MS5UaW1lEiQKC21heF9wZW5hbHR5GAQgASgLMg8uc2NyaWJlLnYxLlRpbWUipAIKBVJvdXRlEhAKCHJvdXRlX2lkGAEgASgJEiEKBm1ldGhvZBgCIAEoDjIRLnNjcmliZS52MS5NZXRob2QSDAoEcGF0aBgDIAEoCRIhCgZhY2Nlc3MYBSADKA4yES5zY3JpYmUudjEuQ2FsbGVyEioKCnJhdGVfbGltaXQYBiABKAsyFi5zY3JpYmUudjEuUmF0ZUxpbWl0ZXISHgoFbmVlZHMYByADKA4yDy5zY3JpYmUudjEuTmVlZBIYChB3ZWJob29rX3ZlcmlmaWVkGAggASgIEhYKDnJhdGVfbGltaXRfa2V5GAkgASgJEhwKFHJlcXVpcmVkX3Blcm1pc3Npb25zGAogAygJEgwKBG5vZGUYCyABKAlKBAgEEAVSBW1vdW50IkEKD05vZGVEZWNsYXJhdGlvbhIMCgRuYW1lGAEgASgJEg4KBnB1YmxpYxgCIAEoCBIQCghsb2dfc2luaxgDIAEoCCJDCg9Ib29rRGVjbGFyYXRpb24SDwoHaG9va19pZBgBIAEoCRINCgVldmVudBgCIAEoCRIQCghwcmlvcml0eRgDIAEoDSKJAQoQUXVldWVEZWNsYXJhdGlvbhIQCghxdWV1ZV9pZBgBIAEoCRIMCgRuYW1lGAIgASgJEhIKCmJhdGNoX3NpemUYAyABKA0SKwoSdmlzaWJpbGl0eV90aW1lb3V0GAQgASgLMg8uc2NyaWJlLnYxLlRpbWUSFAoMbWF4X2F0dGVtcHRzGAUgASgNIkIKD0Nyb25EZWNsYXJhdGlvbhIPCgdjcm9uX2lkGAEgASgJEgwKBG5hbWUYAiABKAkSEAoIc2NoZWR1bGUYAyABKAkiegoTU2VhcmNoZXJEZWNsYXJhdGlvbhIOCgZlbnRpdHkYASABKAkSDQoFaW5kZXgYAiABKAkSIQoIbWFwcGluZ3MYAyABKAsyDy5zY3JpYmUudjEuSnNvbhIhCghzZXR0aW5ncxgEIAEoCzIPLnNjcmliZS52MS5Kc29uIlsKE1JlYWx0aW1lRGVjbGFyYXRpb24SDgoGZW50aXR5GAEgASgJEg4KBmV2ZW50cxgCIAMoCRIkCgVzY29wZRgDIAEoDjIVLnNjcmliZS52MS5FdmVudFNjb3BlInIKElN0b3JhZ2VEZWNsYXJhdGlvbhIOCgZmb2xkZXIYASABKAkSFQoNcGF0aF90ZW1wbGF0ZRgCIAEoCRIhCghtYXhfc2l6ZRgDIAEoCzIPLnNjcmliZS52MS5TaXplEhIKCm1pbWVfdHlwZXMYBCADKAki0AMKCE1hbmlmZXN0EhgKEHByb3RvY29sX3ZlcnNpb24YASABKAkSFwoPd29ya2VyX2xhbmd1YWdlGAIgASgJEiAKBnJvdXRlcxgDIAMoCzIQLnNjcmliZS52MS5Sb3V0ZRIpCgVob29rcxgEIAMoCzIaLnNjcmliZS52MS5Ib29rRGVjbGFyYXRpb24SKwoGcXVldWVzGAUgAygLMhsuc2NyaWJlLnYxLlF1ZXVlRGVjbGFyYXRpb24SKQoFY3JvbnMYBiADKAsyGi5zY3JpYmUudjEuQ3JvbkRlY2xhcmF0aW9uEjEKCXNlYXJjaGVycxgHIAMoCzIeLnNjcmliZS52MS5TZWFyY2hlckRlY2xhcmF0aW9uEjEKCXJlYWx0aW1lcxgIIAMoCzIeLnNjcmliZS52MS5SZWFsdGltZURlY2xhcmF0aW9uEi8KCHN0b3JhZ2VzGAkgAygLMh0uc2NyaWJlLnYxLlN0b3JhZ2VEZWNsYXJhdGlvbhITCgtzZGtfdmVyc2lvbhgKIAEoCRIpCgVub2RlcxgLIAMoCzIaLnNjcmliZS52MS5Ob2RlRGVjbGFyYXRpb24SFQoNcm9vdF9sb2dfc2luaxgMIAEoCCJiChBIYW5kc2hha2VSZXF1ZXN0Eh0KFWhvc3RfcHJvdG9jb2xfdmVyc2lvbhgBIAEoCRIVCg1ob3N0X2VuZHBvaW50GAIgASgJEhgKEGNhcGFiaWxpdHlfdG9rZW4YAyABKAkyTAoMUmVnaXN0cmF0aW9uEjwKCERlc2NyaWJlEhsuc2NyaWJlLnYxLkhhbmRzaGFrZVJlcXVlc3QaEy5zY3JpYmUudjEuTWFuaWZlc3RiBnByb3RvMw", [file_scribe_protocol_common, file_scribe_protocol_broadcast]);
+  fileDesc("Ch5zY3JpYmUvcHJvdG9jb2wvbWFuaWZlc3QucHJvdG8SCXNjcmliZS52MSKFAQoLUmF0ZUxpbWl0ZXISDQoFbGltaXQYASABKA0SHwoGd2luZG93GAIgASgLMg8uc2NyaWJlLnYxLlRpbWUSIAoHcGVuYWx0eRgDIAEoCzIPLnNjcmliZS52MS5UaW1lEiQKC21heF9wZW5hbHR5GAQgASgLMg8uc2NyaWJlLnYxLlRpbWUipAIKBVJvdXRlEhAKCHJvdXRlX2lkGAEgASgJEiEKBm1ldGhvZBgCIAEoDjIRLnNjcmliZS52MS5NZXRob2QSDAoEcGF0aBgDIAEoCRIhCgZhY2Nlc3MYBSADKA4yES5zY3JpYmUudjEuQ2FsbGVyEioKCnJhdGVfbGltaXQYBiABKAsyFi5zY3JpYmUudjEuUmF0ZUxpbWl0ZXISHgoFbmVlZHMYByADKA4yDy5zY3JpYmUudjEuTmVlZBIYChB3ZWJob29rX3ZlcmlmaWVkGAggASgIEhYKDnJhdGVfbGltaXRfa2V5GAkgASgJEhwKFHJlcXVpcmVkX3Blcm1pc3Npb25zGAogAygJEgwKBG5vZGUYCyABKAlKBAgEEAVSBW1vdW50IkEKD05vZGVEZWNsYXJhdGlvbhIMCgRuYW1lGAEgASgJEg4KBnB1YmxpYxgCIAEoCBIQCghsb2dfc2luaxgDIAEoCCJDCg9Ib29rRGVjbGFyYXRpb24SDwoHaG9va19pZBgBIAEoCRINCgVldmVudBgCIAEoCRIQCghwcmlvcml0eRgDIAEoDSKJAQoQUXVldWVEZWNsYXJhdGlvbhIQCghxdWV1ZV9pZBgBIAEoCRIMCgRuYW1lGAIgASgJEhIKCmJhdGNoX3NpemUYAyABKA0SKwoSdmlzaWJpbGl0eV90aW1lb3V0GAQgASgLMg8uc2NyaWJlLnYxLlRpbWUSFAoMbWF4X2F0dGVtcHRzGAUgASgNIkIKD0Nyb25EZWNsYXJhdGlvbhIPCgdjcm9uX2lkGAEgASgJEgwKBG5hbWUYAiABKAkSEAoIc2NoZWR1bGUYAyABKAkiegoTU2VhcmNoZXJEZWNsYXJhdGlvbhIOCgZlbnRpdHkYASABKAkSDQoFaW5kZXgYAiABKAkSIQoIbWFwcGluZ3MYAyABKAsyDy5zY3JpYmUudjEuSnNvbhIhCghzZXR0aW5ncxgEIAEoCzIPLnNjcmliZS52MS5Kc29uIkcKE1JlYWx0aW1lRGVjbGFyYXRpb24SDwoHY2hhbm5lbBgBIAEoCRIPCgdhY3Rpb25zGAIgAygJEg4KBmxpc3RlbhgDIAEoCSJyChJTdG9yYWdlRGVjbGFyYXRpb24SDgoGZm9sZGVyGAEgASgJEhUKDXBhdGhfdGVtcGxhdGUYAiABKAkSIQoIbWF4X3NpemUYAyABKAsyDy5zY3JpYmUudjEuU2l6ZRISCgptaW1lX3R5cGVzGAQgAygJItADCghNYW5pZmVzdBIYChBwcm90b2NvbF92ZXJzaW9uGAEgASgJEhcKD3dvcmtlcl9sYW5ndWFnZRgCIAEoCRIgCgZyb3V0ZXMYAyADKAsyEC5zY3JpYmUudjEuUm91dGUSKQoFaG9va3MYBCADKAsyGi5zY3JpYmUudjEuSG9va0RlY2xhcmF0aW9uEisKBnF1ZXVlcxgFIAMoCzIbLnNjcmliZS52MS5RdWV1ZURlY2xhcmF0aW9uEikKBWNyb25zGAYgAygLMhouc2NyaWJlLnYxLkNyb25EZWNsYXJhdGlvbhIxCglzZWFyY2hlcnMYByADKAsyHi5zY3JpYmUudjEuU2VhcmNoZXJEZWNsYXJhdGlvbhIxCglyZWFsdGltZXMYCCADKAsyHi5zY3JpYmUudjEuUmVhbHRpbWVEZWNsYXJhdGlvbhIvCghzdG9yYWdlcxgJIAMoCzIdLnNjcmliZS52MS5TdG9yYWdlRGVjbGFyYXRpb24SEwoLc2RrX3ZlcnNpb24YCiABKAkSKQoFbm9kZXMYCyADKAsyGi5zY3JpYmUudjEuTm9kZURlY2xhcmF0aW9uEhUKDXJvb3RfbG9nX3NpbmsYDCABKAgiYgoQSGFuZHNoYWtlUmVxdWVzdBIdChVob3N0X3Byb3RvY29sX3ZlcnNpb24YASABKAkSFQoNaG9zdF9lbmRwb2ludBgCIAEoCRIYChBjYXBhYmlsaXR5X3Rva2VuGAMgASgJMkwKDFJlZ2lzdHJhdGlvbhI8CghEZXNjcmliZRIbLnNjcmliZS52MS5IYW5kc2hha2VSZXF1ZXN0GhMuc2NyaWJlLnYxLk1hbmlmZXN0YgZwcm90bzM", [file_scribe_protocol_common]);
 
 /**
  * @generated from message scribe.v1.RateLimiter
@@ -492,19 +490,19 @@ export const SearcherDeclarationSchema: GenMessage<SearcherDeclaration, {jsonTyp
  */
 export type RealtimeDeclaration = Message<"scribe.v1.RealtimeDeclaration"> & {
   /**
-   * @generated from field: string entity = 1;
+   * @generated from field: string channel = 1;
    */
-  entity: string;
+  channel: string;
 
   /**
-   * @generated from field: repeated string events = 2;
+   * @generated from field: repeated string actions = 2;
    */
-  events: string[];
+  actions: string[];
 
   /**
-   * @generated from field: scribe.v1.EventScope scope = 3;
+   * @generated from field: string listen = 3;
    */
-  scope: EventScope;
+  listen: string;
 };
 
 /**
@@ -512,19 +510,19 @@ export type RealtimeDeclaration = Message<"scribe.v1.RealtimeDeclaration"> & {
  */
 export type RealtimeDeclarationJson = {
   /**
-   * @generated from field: string entity = 1;
+   * @generated from field: string channel = 1;
    */
-  entity?: string;
+  channel?: string;
 
   /**
-   * @generated from field: repeated string events = 2;
+   * @generated from field: repeated string actions = 2;
    */
-  events?: string[];
+  actions?: string[];
 
   /**
-   * @generated from field: scribe.v1.EventScope scope = 3;
+   * @generated from field: string listen = 3;
    */
-  scope?: EventScopeJson;
+  listen?: string;
 };
 
 /**

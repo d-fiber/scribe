@@ -17,42 +17,13 @@ import 'dart:typed_data' as $typed_data;
 
 import '../../../../protocol/common.pbjson.dart' as $0;
 
-@$core.Deprecated('Use targetDescriptor instead')
-const Target$json = {
-  '1': 'Target',
-  '2': [
-    {
-      '1': 'scope',
-      '3': 1,
-      '4': 1,
-      '5': 14,
-      '6': '.scribe.v1.EventScope',
-      '10': 'scope'
-    },
-    {'1': 'ids', '3': 2, '4': 3, '5': 9, '10': 'ids'},
-    {'1': 'topic', '3': 3, '4': 1, '5': 9, '10': 'topic'},
-  ],
-};
-
-/// Descriptor for `Target`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List targetDescriptor = $convert.base64Decode(
-    'CgZUYXJnZXQSKwoFc2NvcGUYASABKA4yFS5zY3JpYmUudjEuRXZlbnRTY29wZVIFc2NvcGUSEA'
-    'oDaWRzGAIgAygJUgNpZHMSFAoFdG9waWMYAyABKAlSBXRvcGlj');
-
 @$core.Deprecated('Use broadcastRequestDescriptor instead')
 const BroadcastRequest$json = {
   '1': 'BroadcastRequest',
   '2': [
-    {'1': 'entity', '3': 1, '4': 1, '5': 9, '10': 'entity'},
-    {'1': 'event', '3': 2, '4': 1, '5': 9, '10': 'event'},
-    {
-      '1': 'target',
-      '3': 3,
-      '4': 1,
-      '5': 11,
-      '6': '.scribe.clients.realtime.v1.Target',
-      '10': 'target'
-    },
+    {'1': 'channel', '3': 1, '4': 1, '5': 9, '10': 'channel'},
+    {'1': 'action', '3': 2, '4': 1, '5': 9, '10': 'action'},
+    {'1': 'entity_id', '3': 3, '4': 1, '5': 9, '10': 'entityId'},
     {
       '1': 'payload',
       '3': 4,
@@ -66,10 +37,9 @@ const BroadcastRequest$json = {
 
 /// Descriptor for `BroadcastRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List broadcastRequestDescriptor = $convert.base64Decode(
-    'ChBCcm9hZGNhc3RSZXF1ZXN0EhYKBmVudGl0eRgBIAEoCVIGZW50aXR5EhQKBWV2ZW50GAIgAS'
-    'gJUgVldmVudBI6CgZ0YXJnZXQYAyABKAsyIi5zY3JpYmUuY2xpZW50cy5yZWFsdGltZS52MS5U'
-    'YXJnZXRSBnRhcmdldBIpCgdwYXlsb2FkGAQgASgLMg8uc2NyaWJlLnYxLkpzb25SB3BheWxvYW'
-    'Q=');
+    'ChBCcm9hZGNhc3RSZXF1ZXN0EhgKB2NoYW5uZWwYASABKAlSB2NoYW5uZWwSFgoGYWN0aW9uGA'
+    'IgASgJUgZhY3Rpb24SGwoJZW50aXR5X2lkGAMgASgJUghlbnRpdHlJZBIpCgdwYXlsb2FkGAQg'
+    'ASgLMg8uc2NyaWJlLnYxLkpzb25SB3BheWxvYWQ=');
 
 @$core.Deprecated('Use broadcastResultDescriptor instead')
 const BroadcastResult$json = {
@@ -92,24 +62,23 @@ final $typed_data.Uint8List broadcastResultDescriptor = $convert.base64Decode(
     'Cg9Ccm9hZGNhc3RSZXN1bHQSHAoJZGVsaXZlcmVkGAEgASgNUglkZWxpdmVyZWQSKAoFZXJyb3'
     'IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZVIFZXJyb3I=');
 
-@$core.Deprecated('Use topicMembershipRequestDescriptor instead')
-const TopicMembershipRequest$json = {
-  '1': 'TopicMembershipRequest',
+@$core.Deprecated('Use grantRequestDescriptor instead')
+const GrantRequest$json = {
+  '1': 'GrantRequest',
   '2': [
-    {'1': 'topic', '3': 1, '4': 1, '5': 9, '10': 'topic'},
-    {'1': 'member_ids', '3': 2, '4': 3, '5': 9, '10': 'memberIds'},
+    {'1': 'channel', '3': 1, '4': 1, '5': 9, '10': 'channel'},
+    {'1': 'account_ids', '3': 2, '4': 3, '5': 9, '10': 'accountIds'},
   ],
 };
 
-/// Descriptor for `TopicMembershipRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List topicMembershipRequestDescriptor =
-    $convert.base64Decode(
-        'ChZUb3BpY01lbWJlcnNoaXBSZXF1ZXN0EhQKBXRvcGljGAEgASgJUgV0b3BpYxIdCgptZW1iZX'
-        'JfaWRzGAIgAygJUgltZW1iZXJJZHM=');
+/// Descriptor for `GrantRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List grantRequestDescriptor = $convert.base64Decode(
+    'CgxHcmFudFJlcXVlc3QSGAoHY2hhbm5lbBgBIAEoCVIHY2hhbm5lbBIfCgthY2NvdW50X2lkcx'
+    'gCIAMoCVIKYWNjb3VudElkcw==');
 
-@$core.Deprecated('Use topicMembershipResultDescriptor instead')
-const TopicMembershipResult$json = {
-  '1': 'TopicMembershipResult',
+@$core.Deprecated('Use grantResultDescriptor instead')
+const GrantResult$json = {
+  '1': 'GrantResult',
   '2': [
     {
       '1': 'error',
@@ -122,10 +91,10 @@ const TopicMembershipResult$json = {
   ],
 };
 
-/// Descriptor for `TopicMembershipResult`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List topicMembershipResultDescriptor = $convert.base64Decode(
-    'ChVUb3BpY01lbWJlcnNoaXBSZXN1bHQSKAoFZXJyb3IYASABKAsyEi5zY3JpYmUudjEuRmFpbH'
-    'VyZVIFZXJyb3I=');
+/// Descriptor for `GrantResult`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List grantResultDescriptor = $convert.base64Decode(
+    'CgtHcmFudFJlc3VsdBIoCgVlcnJvchgBIAEoCzISLnNjcmliZS52MS5GYWlsdXJlUgVlcnJvcg'
+    '==');
 
 const $core.Map<$core.String, $core.dynamic> RealtimeServiceBase$json = {
   '1': 'Realtime',
@@ -136,14 +105,14 @@ const $core.Map<$core.String, $core.dynamic> RealtimeServiceBase$json = {
       '3': '.scribe.clients.realtime.v1.BroadcastResult'
     },
     {
-      '1': 'JoinTopic',
-      '2': '.scribe.clients.realtime.v1.TopicMembershipRequest',
-      '3': '.scribe.clients.realtime.v1.TopicMembershipResult'
+      '1': 'Grant',
+      '2': '.scribe.clients.realtime.v1.GrantRequest',
+      '3': '.scribe.clients.realtime.v1.GrantResult'
     },
     {
-      '1': 'LeaveTopic',
-      '2': '.scribe.clients.realtime.v1.TopicMembershipRequest',
-      '3': '.scribe.clients.realtime.v1.TopicMembershipResult'
+      '1': 'Revoke',
+      '2': '.scribe.clients.realtime.v1.GrantRequest',
+      '3': '.scribe.clients.realtime.v1.GrantResult'
     },
   ],
 };
@@ -152,22 +121,18 @@ const $core.Map<$core.String, $core.dynamic> RealtimeServiceBase$json = {
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
     RealtimeServiceBase$messageJson = {
   '.scribe.clients.realtime.v1.BroadcastRequest': BroadcastRequest$json,
-  '.scribe.clients.realtime.v1.Target': Target$json,
   '.scribe.v1.Json': $0.Json$json,
   '.scribe.clients.realtime.v1.BroadcastResult': BroadcastResult$json,
   '.scribe.v1.Failure': $0.Failure$json,
-  '.scribe.clients.realtime.v1.TopicMembershipRequest':
-      TopicMembershipRequest$json,
-  '.scribe.clients.realtime.v1.TopicMembershipResult':
-      TopicMembershipResult$json,
+  '.scribe.clients.realtime.v1.GrantRequest': GrantRequest$json,
+  '.scribe.clients.realtime.v1.GrantResult': GrantResult$json,
 };
 
 /// Descriptor for `Realtime`. Decode as a `google.protobuf.ServiceDescriptorProto`.
 final $typed_data.Uint8List realtimeServiceDescriptor = $convert.base64Decode(
     'CghSZWFsdGltZRJmCglCcm9hZGNhc3QSLC5zY3JpYmUuY2xpZW50cy5yZWFsdGltZS52MS5Ccm'
     '9hZGNhc3RSZXF1ZXN0Gisuc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuQnJvYWRjYXN0UmVz'
-    'dWx0EnIKCUpvaW5Ub3BpYxIyLnNjcmliZS5jbGllbnRzLnJlYWx0aW1lLnYxLlRvcGljTWVtYm'
-    'Vyc2hpcFJlcXVlc3QaMS5zY3JpYmUuY2xpZW50cy5yZWFsdGltZS52MS5Ub3BpY01lbWJlcnNo'
-    'aXBSZXN1bHQScwoKTGVhdmVUb3BpYxIyLnNjcmliZS5jbGllbnRzLnJlYWx0aW1lLnYxLlRvcG'
-    'ljTWVtYmVyc2hpcFJlcXVlc3QaMS5zY3JpYmUuY2xpZW50cy5yZWFsdGltZS52MS5Ub3BpY01l'
-    'bWJlcnNoaXBSZXN1bHQ=');
+    'dWx0EloKBUdyYW50Eiguc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXF1ZXN0Gi'
+    'cuc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXN1bHQSWwoGUmV2b2tlEiguc2Ny'
+    'aWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXF1ZXN0Gicuc2NyaWJlLmNsaWVudHMucm'
+    'VhbHRpbWUudjEuR3JhbnRSZXN1bHQ=');

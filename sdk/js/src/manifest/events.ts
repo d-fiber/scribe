@@ -30,7 +30,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { EventScope } from "../contracts/access.ts";
+import type { Listen } from "../contracts/access.ts";
 import type { Size, Time } from "../contracts/time.ts";
 
 export interface QueueMessage<T> {
@@ -83,9 +83,9 @@ export interface WorkerSearcher {
 }
 
 export interface WorkerRealtime {
-  readonly entity: string;
-  readonly events: readonly string[];
-  readonly scope: EventScope;
+  readonly channel: string;
+  readonly actions: readonly string[];
+  readonly listen: Listen;
 }
 
 export interface WorkerStorage {

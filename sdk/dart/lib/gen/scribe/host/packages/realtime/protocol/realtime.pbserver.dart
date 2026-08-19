@@ -15,27 +15,27 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'realtime.pb.dart' as $2;
+import 'realtime.pb.dart' as $1;
 import 'realtime.pbjson.dart';
 
 export 'realtime.pb.dart';
 
 abstract class RealtimeServiceBase extends $pb.GeneratedService {
-  $async.Future<$2.BroadcastResult> broadcast(
-      $pb.ServerContext ctx, $2.BroadcastRequest request);
-  $async.Future<$2.TopicMembershipResult> joinTopic(
-      $pb.ServerContext ctx, $2.TopicMembershipRequest request);
-  $async.Future<$2.TopicMembershipResult> leaveTopic(
-      $pb.ServerContext ctx, $2.TopicMembershipRequest request);
+  $async.Future<$1.BroadcastResult> broadcast(
+      $pb.ServerContext ctx, $1.BroadcastRequest request);
+  $async.Future<$1.GrantResult> grant(
+      $pb.ServerContext ctx, $1.GrantRequest request);
+  $async.Future<$1.GrantResult> revoke(
+      $pb.ServerContext ctx, $1.GrantRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
       case 'Broadcast':
-        return $2.BroadcastRequest();
-      case 'JoinTopic':
-        return $2.TopicMembershipRequest();
-      case 'LeaveTopic':
-        return $2.TopicMembershipRequest();
+        return $1.BroadcastRequest();
+      case 'Grant':
+        return $1.GrantRequest();
+      case 'Revoke':
+        return $1.GrantRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -45,11 +45,11 @@ abstract class RealtimeServiceBase extends $pb.GeneratedService {
       $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
       case 'Broadcast':
-        return broadcast(ctx, request as $2.BroadcastRequest);
-      case 'JoinTopic':
-        return joinTopic(ctx, request as $2.TopicMembershipRequest);
-      case 'LeaveTopic':
-        return leaveTopic(ctx, request as $2.TopicMembershipRequest);
+        return broadcast(ctx, request as $1.BroadcastRequest);
+      case 'Grant':
+        return grant(ctx, request as $1.GrantRequest);
+      case 'Revoke':
+        return revoke(ctx, request as $1.GrantRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

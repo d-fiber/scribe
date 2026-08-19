@@ -31,52 +31,41 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Realtime } from "../../gen/scribe/host/packages/realtime/protocol/realtime_pb.ts";
-import { type EventScope, encodeEventScope } from "../contracts/access.ts";
 import { encodeJson } from "../contracts/json.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";
 
 const CAPABILITY = "realtime";
 
-export interface BroadcastTarget {
-  readonly scope: EventScope;
-  readonly ids?: readonly string[];
-  readonly topic?: string;
-}
-
 export const realtime = {
   async broadcast(
-    entity: string,
-    event: string,
-    target: BroadcastTarget,
+    channel: string,
+    action: string,
+    entityId: string,
     payload: unknown,
   ): Promise<number> {
     const result = await host.client().call(Realtime.method.broadcast, {
-      entity,
-      event,
-      target: {
-        scope: encodeEventScope(target.scope),
-        ids: [...(target.ids ?? [])],
-        topic: target.topic ?? "",
-      },
+      channel,
+      action,
+      entityId,
       payload: encodeJson(payload),
     });
     raiseOn(CAPABILITY, result.error);
     return result.delivered;
   },
 
-  async joinTopic(topic: string, memberIds: readonly string[]): Promise<void> {
-    const result = await host.client().call(Realtime.method.joinTopic, {
-      topic,
-      memberIds: [...memberIds],
+  async grant(channel: string, accountIds: readonly string[]): Promise<void> {
+    const result = await host.client().call(Realtime.method.grant, {
+      channel,
+      accountIds: [...accountIds],
     });
     raiseOn(CAPABILITY, result.error);
   },
 
-  async leaveTopic(topic: string, memberIds: readonly string[]): Promise<void> {
-    const result = await host.client().call(Realtime.method.leaveTopic, {
-      topic,
-      memberIds: [...memberIds],
+  async revoke(channel: string, accountIds: readonly string[]): Promise<void> {
+    const result = await host.client().call(Realtime.method.revoke, {
+      channel,
+      accountIds: [...accountIds],
     });
     raiseOn(CAPABILITY, result.error);
   },

@@ -35,8 +35,6 @@ import {
   Method as ProtoMethod,
   Need as ProtoNeed,
 } from "../../gen/scribe/protocol/common_pb.ts";
-import { EventScope as ProtoEventScope } from "../../gen/scribe/protocol/broadcast_pb.ts";
-
 export enum Caller {
   Anonymous = "anonymous",
   User = "user",
@@ -51,11 +49,16 @@ export enum Need {
   Location = "location",
 }
 
-export enum EventScope {
-  Admin = "admin",
-  User = "user",
-  Admins = "admins",
-  Users = "users",
+/** How open a realtime channel's own broadcast is, before any grant is written. */
+export enum Listen {
+  /** Nobody hears the broadcast without a grant written for them. */
+  Granted = "granted",
+
+  /** Any caller holding a session hears the broadcast. */
+  Authenticated = "authenticated",
+
+  /** Any caller hears the broadcast, session or not. */
+  Public = "public",
 }
 
 export type RouteMethod = "get" | "post" | "put" | "patch" | "delete";
@@ -82,13 +85,6 @@ const needs: Record<Need, ProtoNeed> = {
   [Need.Location]: ProtoNeed.LOCATION,
 };
 
-const scopes: Record<EventScope, ProtoEventScope> = {
-  [EventScope.Admin]: ProtoEventScope.ADMIN,
-  [EventScope.User]: ProtoEventScope.USER,
-  [EventScope.Admins]: ProtoEventScope.ADMINS,
-  [EventScope.Users]: ProtoEventScope.USERS,
-};
-
 export function callersOf(declared: Caller | readonly Caller[]): readonly Caller[] {
   return Array.isArray(declared) ? declared : [declared as Caller];
 }
@@ -111,8 +107,4 @@ export function decodeMethod(method: ProtoMethod): RouteMethod {
 
 export function encodeNeed(need: Need): ProtoNeed {
   return needs[need];
-}
-
-export function encodeEventScope(scope: EventScope): ProtoEventScope {
-  return scopes[scope];
 }

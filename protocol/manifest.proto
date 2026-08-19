@@ -35,7 +35,6 @@ syntax = "proto3";
 package scribe.v1;
 
 import "scribe/protocol/common.proto";
-import "scribe/protocol/broadcast.proto";
 
 message RateLimiter {
   uint32 limit = 1;
@@ -94,9 +93,9 @@ message SearcherDeclaration {
 }
 
 message RealtimeDeclaration {
-  string entity = 1;
-  repeated string events = 2;
-  EventScope scope = 3;
+  string channel = 1;
+  repeated string actions = 2;
+  string listen = 3;
 }
 
 message StorageDeclaration {

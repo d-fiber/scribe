@@ -15,95 +15,21 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../../../../protocol/broadcast.pbenum.dart' as $1;
 import '../../../../protocol/common.pb.dart' as $0;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
-class Target extends $pb.GeneratedMessage {
-  factory Target({
-    $1.EventScope? scope,
-    $core.Iterable<$core.String>? ids,
-    $core.String? topic,
-  }) {
-    final result = create();
-    if (scope != null) result.scope = scope;
-    if (ids != null) result.ids.addAll(ids);
-    if (topic != null) result.topic = topic;
-    return result;
-  }
-
-  Target._();
-
-  factory Target.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory Target.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'Target',
-      package: const $pb.PackageName(
-          _omitMessageNames ? '' : 'scribe.clients.realtime.v1'),
-      createEmptyInstance: create)
-    ..aE<$1.EventScope>(1, _omitFieldNames ? '' : 'scope',
-        enumValues: $1.EventScope.values)
-    ..pPS(2, _omitFieldNames ? '' : 'ids')
-    ..aOS(3, _omitFieldNames ? '' : 'topic')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Target clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Target copyWith(void Function(Target) updates) =>
-      super.copyWith((message) => updates(message as Target)) as Target;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static Target create() => Target._();
-  @$core.override
-  Target createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static Target getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Target>(create);
-  static Target? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $1.EventScope get scope => $_getN(0);
-  @$pb.TagNumber(1)
-  set scope($1.EventScope value) => $_setField(1, value);
-  @$pb.TagNumber(1)
-  $core.bool hasScope() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearScope() => $_clearField(1);
-
-  @$pb.TagNumber(2)
-  $pb.PbList<$core.String> get ids => $_getList(1);
-
-  @$pb.TagNumber(3)
-  $core.String get topic => $_getSZ(2);
-  @$pb.TagNumber(3)
-  set topic($core.String value) => $_setString(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasTopic() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearTopic() => $_clearField(3);
-}
-
 class BroadcastRequest extends $pb.GeneratedMessage {
   factory BroadcastRequest({
-    $core.String? entity,
-    $core.String? event,
-    Target? target,
+    $core.String? channel,
+    $core.String? action,
+    $core.String? entityId,
     $0.Json? payload,
   }) {
     final result = create();
-    if (entity != null) result.entity = entity;
-    if (event != null) result.event = event;
-    if (target != null) result.target = target;
+    if (channel != null) result.channel = channel;
+    if (action != null) result.action = action;
+    if (entityId != null) result.entityId = entityId;
     if (payload != null) result.payload = payload;
     return result;
   }
@@ -122,9 +48,9 @@ class BroadcastRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'scribe.clients.realtime.v1'),
       createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'entity')
-    ..aOS(2, _omitFieldNames ? '' : 'event')
-    ..aOM<Target>(3, _omitFieldNames ? '' : 'target', subBuilder: Target.create)
+    ..aOS(1, _omitFieldNames ? '' : 'channel')
+    ..aOS(2, _omitFieldNames ? '' : 'action')
+    ..aOS(3, _omitFieldNames ? '' : 'entityId')
     ..aOM<$0.Json>(4, _omitFieldNames ? '' : 'payload',
         subBuilder: $0.Json.create)
     ..hasRequiredFields = false;
@@ -149,33 +75,31 @@ class BroadcastRequest extends $pb.GeneratedMessage {
   static BroadcastRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get entity => $_getSZ(0);
+  $core.String get channel => $_getSZ(0);
   @$pb.TagNumber(1)
-  set entity($core.String value) => $_setString(0, value);
+  set channel($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasEntity() => $_has(0);
+  $core.bool hasChannel() => $_has(0);
   @$pb.TagNumber(1)
-  void clearEntity() => $_clearField(1);
+  void clearChannel() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get event => $_getSZ(1);
+  $core.String get action => $_getSZ(1);
   @$pb.TagNumber(2)
-  set event($core.String value) => $_setString(1, value);
+  set action($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
-  $core.bool hasEvent() => $_has(1);
+  $core.bool hasAction() => $_has(1);
   @$pb.TagNumber(2)
-  void clearEvent() => $_clearField(2);
+  void clearAction() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  Target get target => $_getN(2);
+  $core.String get entityId => $_getSZ(2);
   @$pb.TagNumber(3)
-  set target(Target value) => $_setField(3, value);
+  set entityId($core.String value) => $_setString(2, value);
   @$pb.TagNumber(3)
-  $core.bool hasTarget() => $_has(2);
+  $core.bool hasEntityId() => $_has(2);
   @$pb.TagNumber(3)
-  void clearTarget() => $_clearField(3);
-  @$pb.TagNumber(3)
-  Target ensureTarget() => $_ensure(2);
+  void clearEntityId() => $_clearField(3);
 
   @$pb.TagNumber(4)
   $0.Json get payload => $_getN(3);
@@ -259,70 +183,69 @@ class BroadcastResult extends $pb.GeneratedMessage {
   $0.Failure ensureError() => $_ensure(1);
 }
 
-class TopicMembershipRequest extends $pb.GeneratedMessage {
-  factory TopicMembershipRequest({
-    $core.String? topic,
-    $core.Iterable<$core.String>? memberIds,
+class GrantRequest extends $pb.GeneratedMessage {
+  factory GrantRequest({
+    $core.String? channel,
+    $core.Iterable<$core.String>? accountIds,
   }) {
     final result = create();
-    if (topic != null) result.topic = topic;
-    if (memberIds != null) result.memberIds.addAll(memberIds);
+    if (channel != null) result.channel = channel;
+    if (accountIds != null) result.accountIds.addAll(accountIds);
     return result;
   }
 
-  TopicMembershipRequest._();
+  GrantRequest._();
 
-  factory TopicMembershipRequest.fromBuffer($core.List<$core.int> data,
+  factory GrantRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory TopicMembershipRequest.fromJson($core.String json,
+  factory GrantRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'TopicMembershipRequest',
+      _omitMessageNames ? '' : 'GrantRequest',
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'scribe.clients.realtime.v1'),
       createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'topic')
-    ..pPS(2, _omitFieldNames ? '' : 'memberIds')
+    ..aOS(1, _omitFieldNames ? '' : 'channel')
+    ..pPS(2, _omitFieldNames ? '' : 'accountIds')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  TopicMembershipRequest clone() => deepCopy();
+  GrantRequest clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  TopicMembershipRequest copyWith(
-          void Function(TopicMembershipRequest) updates) =>
-      super.copyWith((message) => updates(message as TopicMembershipRequest))
-          as TopicMembershipRequest;
+  GrantRequest copyWith(void Function(GrantRequest) updates) =>
+      super.copyWith((message) => updates(message as GrantRequest))
+          as GrantRequest;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static TopicMembershipRequest create() => TopicMembershipRequest._();
+  static GrantRequest create() => GrantRequest._();
   @$core.override
-  TopicMembershipRequest createEmptyInstance() => create();
+  GrantRequest createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static TopicMembershipRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<TopicMembershipRequest>(create);
-  static TopicMembershipRequest? _defaultInstance;
+  static GrantRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GrantRequest>(create);
+  static GrantRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get topic => $_getSZ(0);
+  $core.String get channel => $_getSZ(0);
   @$pb.TagNumber(1)
-  set topic($core.String value) => $_setString(0, value);
+  set channel($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasTopic() => $_has(0);
+  $core.bool hasChannel() => $_has(0);
   @$pb.TagNumber(1)
-  void clearTopic() => $_clearField(1);
+  void clearChannel() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $pb.PbList<$core.String> get memberIds => $_getList(1);
+  $pb.PbList<$core.String> get accountIds => $_getList(1);
 }
 
-class TopicMembershipResult extends $pb.GeneratedMessage {
-  factory TopicMembershipResult({
+class GrantResult extends $pb.GeneratedMessage {
+  factory GrantResult({
     $0.Failure? error,
   }) {
     final result = create();
@@ -330,17 +253,17 @@ class TopicMembershipResult extends $pb.GeneratedMessage {
     return result;
   }
 
-  TopicMembershipResult._();
+  GrantResult._();
 
-  factory TopicMembershipResult.fromBuffer($core.List<$core.int> data,
+  factory GrantResult.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory TopicMembershipResult.fromJson($core.String json,
+  factory GrantResult.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'TopicMembershipResult',
+      _omitMessageNames ? '' : 'GrantResult',
       package: const $pb.PackageName(
           _omitMessageNames ? '' : 'scribe.clients.realtime.v1'),
       createEmptyInstance: create)
@@ -349,24 +272,23 @@ class TopicMembershipResult extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  TopicMembershipResult clone() => deepCopy();
+  GrantResult clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  TopicMembershipResult copyWith(
-          void Function(TopicMembershipResult) updates) =>
-      super.copyWith((message) => updates(message as TopicMembershipResult))
-          as TopicMembershipResult;
+  GrantResult copyWith(void Function(GrantResult) updates) =>
+      super.copyWith((message) => updates(message as GrantResult))
+          as GrantResult;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static TopicMembershipResult create() => TopicMembershipResult._();
+  static GrantResult create() => GrantResult._();
   @$core.override
-  TopicMembershipResult createEmptyInstance() => create();
+  GrantResult createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static TopicMembershipResult getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<TopicMembershipResult>(create);
-  static TopicMembershipResult? _defaultInstance;
+  static GrantResult getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GrantResult>(create);
+  static GrantResult? _defaultInstance;
 
   @$pb.TagNumber(1)
   $0.Failure get error => $_getN(0);
@@ -389,14 +311,14 @@ class RealtimeApi {
           $pb.ClientContext? ctx, BroadcastRequest request) =>
       _client.invoke<BroadcastResult>(
           ctx, 'Realtime', 'Broadcast', request, BroadcastResult());
-  $async.Future<TopicMembershipResult> joinTopic(
-          $pb.ClientContext? ctx, TopicMembershipRequest request) =>
-      _client.invoke<TopicMembershipResult>(
-          ctx, 'Realtime', 'JoinTopic', request, TopicMembershipResult());
-  $async.Future<TopicMembershipResult> leaveTopic(
-          $pb.ClientContext? ctx, TopicMembershipRequest request) =>
-      _client.invoke<TopicMembershipResult>(
-          ctx, 'Realtime', 'LeaveTopic', request, TopicMembershipResult());
+  $async.Future<GrantResult> grant(
+          $pb.ClientContext? ctx, GrantRequest request) =>
+      _client.invoke<GrantResult>(
+          ctx, 'Realtime', 'Grant', request, GrantResult());
+  $async.Future<GrantResult> revoke(
+          $pb.ClientContext? ctx, GrantRequest request) =>
+      _client.invoke<GrantResult>(
+          ctx, 'Realtime', 'Revoke', request, GrantResult());
 }
 
 const $core.bool _omitFieldNames =

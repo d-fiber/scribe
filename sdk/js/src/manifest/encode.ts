@@ -43,7 +43,6 @@ import {
 import {
   callersOf,
   encodeCaller,
-  encodeEventScope,
   encodeMethod,
   encodeNeed,
 } from "../contracts/access.ts";
@@ -89,9 +88,9 @@ export function describeWorker(worker: WorkerDefinition): Manifest {
       settings: encodeJson(searcher.settings ?? {}),
     })),
     realtimes: worker.realtimes.map((realtime) => ({
-      entity: realtime.entity,
-      events: [...realtime.events],
-      scope: encodeEventScope(realtime.scope),
+      channel: realtime.channel,
+      actions: [...realtime.actions],
+      listen: realtime.listen,
     })),
     storages: worker.storages.map((storage) => ({
       folder: storage.folder,
