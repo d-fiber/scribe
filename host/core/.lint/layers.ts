@@ -80,6 +80,7 @@ const SPECIFIER_PREFIXES = ["@scribe/core/", "@scribe/host/"] as const;
 const PACKAGE_PREFIXES = [
   "@scribe/foundation/",
   "@scribe/realtime/",
+  "@scribe/search/",
   "@scribe/storage/",
 ] as const;
 const PACKAGE_LAYER = "packages";

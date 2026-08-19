@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from scribe/host/dependencies/features/searcher/protocol/searcher.proto.
+// Generated from scribe/host/packages/search/protocol/search.proto.
 
 // @dart = 3.3
 

@@ -34,11 +34,9 @@ import { DevopsClient } from "@scribe/host/dependencies/features/devops/devops.t
 import { Messagings } from "@scribe/host/dependencies/features/messagings/messagings.ts";
 import type { RecommendationService } from "@scribe/host/dependencies/features/recommendation/recommendation.ts";
 import { RecommendationClient } from "@scribe/host/dependencies/features/recommendation/recommendation.ts";
-import { searcher } from "@scribe/host/dependencies/features/searcher/mod.ts";
 
 export class FeaturesClient {
   readonly messagings: Messagings = new Messagings();
   readonly devops: DevopsClient = new DevopsClient();
   readonly recommendation: RecommendationService = new RecommendationClient();
-  readonly search = searcher;
 }

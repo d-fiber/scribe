@@ -151,11 +151,8 @@ export { recommendation } from "./src/capabilities/recommendation.ts";
 export type { FilterBuilder } from "./src/capabilities/rest/filter.ts";
 export { rest, RestQuery } from "./src/capabilities/rest/query.ts";
 export type { Page } from "./src/capabilities/rest/query.ts";
-export { searcher } from "./src/capabilities/searcher.ts";
-export type {
-  SearchOptions,
-  SearchOutcome
-} from "./src/capabilities/searcher.ts";
+export { search } from "./src/capabilities/search.ts";
+export type { SearchPage } from "./src/capabilities/search.ts";
 export { auth, rbac, vpn } from "./src/capabilities/security.ts";
 export type {
   Account,

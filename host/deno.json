@@ -4,6 +4,7 @@
     "./dependencies",
     "./packages/foundation",
     "./packages/realtime",
+    "./packages/search",
     "./packages/storage"
   ],
   "tasks": {
@@ -28,6 +29,12 @@
     "storage:e2e:reset": "deno task storage:e2e:compose down -v && rm -rf packages/storage/e2e_tests/.postgres",
     "test:e2e:storage": "deno test --allow-env --allow-sys --allow-read --allow-net --env-file=tests/.env.test packages/storage/e2e_tests/objects.e2e.ts packages/storage/e2e_tests/visibility.e2e.ts",
     "test:e2e:realtime": "deno test --allow-env --allow-sys --allow-read --allow-net --env-file=tests/.env.test packages/realtime/e2e_tests/listening.e2e.ts packages/realtime/e2e_tests/payload.e2e.ts",
+    "search:e2e:render": "deno run --allow-read --allow-write packages/search/e2e_tests/render.ts",
+    "search:e2e:compose": "docker compose --profile search --project-directory packages/search/e2e_tests --env-file packages/search/e2e_tests/e2e.env -f packages/search/e2e_tests/.generated/valkery.yaml -f packages/search/e2e_tests/.generated/database.yaml -f packages/search/e2e_tests/.generated/search.yaml -f packages/search/e2e_tests/.generated/search_overlay.yaml -f packages/search/e2e_tests/compose.override.yaml",
+    "search:e2e:up": "deno task search:e2e:render && deno task search:e2e:compose up -d --build --wait",
+    "search:e2e:down": "deno task search:e2e:compose down -v",
+    "search:e2e:reset": "deno task search:e2e:compose down -v && rm -rf packages/search/e2e_tests/.postgres",
+    "test:e2e:search": "deno test --allow-env --allow-sys --allow-read --allow-net --env-file=tests/.env.test packages/search/e2e_tests/indexing.e2e.ts packages/search/e2e_tests/backlog.e2e.ts",
     "preview:hosting": "deno run --config deno.json --allow-net --allow-env --allow-read --env-file=tests/.env.test --watch api/internal/hosting/_preview.ts",
     "docs:install": "cd api/public/docs && npm install",
     "docs": "cd api/public/docs && npm run dev"
@@ -58,6 +65,7 @@
     "@scribe/host/": "./",
     "@scribe/foundation/": "./packages/foundation/",
     "@scribe/realtime/": "./packages/realtime/",
+    "@scribe/search/": "./packages/search/",
     "@scribe/storage/": "./packages/storage/",
     "@scribe/protocol/": "../protocol/",
     "@scribe/sdk": "../sdk/js/mod.ts",

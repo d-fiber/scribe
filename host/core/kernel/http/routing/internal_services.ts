@@ -36,7 +36,6 @@ export const InternalService = {
   Gotrue: "gotrue",
   Messaging: "messaging",
   Queue: "queue",
-  Searcher: "searcher",
   Vpn: "vpn",
 } as const;
 

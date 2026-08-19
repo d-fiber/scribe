@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from scribe/host/dependencies/features/searcher/protocol/searcher.proto.
+// Generated from scribe/host/packages/search/protocol/search.proto.
 
 // @dart = 3.3
 
@@ -15,24 +15,25 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'searcher.pb.dart' as $1;
-import 'searcher.pbjson.dart';
+import 'search.pb.dart' as $1;
+import 'search.pbjson.dart';
 
-export 'searcher.pb.dart';
+export 'search.pb.dart';
 
-abstract class SearcherServiceBase extends $pb.GeneratedService {
-  $async.Future<$1.AddResult> add($pb.ServerContext ctx, $1.AddRequest request);
-  $async.Future<$1.DeleteResult> delete(
-      $pb.ServerContext ctx, $1.DeleteRequest request);
+abstract class SearchServiceBase extends $pb.GeneratedService {
+  $async.Future<$1.QueueResult> add(
+      $pb.ServerContext ctx, $1.QueueRequest request);
+  $async.Future<$1.QueueResult> delete(
+      $pb.ServerContext ctx, $1.QueueRequest request);
   $async.Future<$1.SearchResult> search(
       $pb.ServerContext ctx, $1.SearchRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
       case 'Add':
-        return $1.AddRequest();
+        return $1.QueueRequest();
       case 'Delete':
-        return $1.DeleteRequest();
+        return $1.QueueRequest();
       case 'Search':
         return $1.SearchRequest();
       default:
@@ -44,9 +45,9 @@ abstract class SearcherServiceBase extends $pb.GeneratedService {
       $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
       case 'Add':
-        return add(ctx, request as $1.AddRequest);
+        return add(ctx, request as $1.QueueRequest);
       case 'Delete':
-        return delete(ctx, request as $1.DeleteRequest);
+        return delete(ctx, request as $1.QueueRequest);
       case 'Search':
         return search(ctx, request as $1.SearchRequest);
       default:
@@ -54,7 +55,7 @@ abstract class SearcherServiceBase extends $pb.GeneratedService {
     }
   }
 
-  $core.Map<$core.String, $core.dynamic> get $json => SearcherServiceBase$json;
+  $core.Map<$core.String, $core.dynamic> get $json => SearchServiceBase$json;
   $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
-      get $messageJson => SearcherServiceBase$messageJson;
+      get $messageJson => SearchServiceBase$messageJson;
 }

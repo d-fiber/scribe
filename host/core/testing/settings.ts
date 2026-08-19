@@ -37,6 +37,7 @@ import { firewallSettings } from "@scribe/core/runtime/support/settings/firewall
 import { httpSettings } from "@scribe/core/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
 import { queueSettings } from "@scribe/foundation/src/queue/settings.ts";
+import { searchSettings } from "@scribe/search/src/settings.ts";
 import { storageSettings } from "@scribe/storage/src/settings.ts";
 
 function env(key: string, fallback: string): string {
@@ -72,6 +73,9 @@ export function installTestSettings(): void {
     serviceRoleKey: env("SUPABASE_SERVICE_ROLE_KEY", "service"),
     publicBaseUrl: env("APP_URL", "http://localhost"),
     privateBaseUrl: env("ADMIN_URL", "http://localhost"),
+  });
+  searchSettings.use({
+    clusterUrl: env("OPENSEARCH_URL", "http://localhost:9200"),
   });
 }
 
