@@ -36,7 +36,8 @@ set -eu
 REPOSITORY="${SCRIBE_REPOSITORY:-d-fiber/scribe}"
 TAG="${SCRIBE_TOOLS_TAG:-tools-latest}"
 BRANCH="${SCRIBE_BRANCH:-main}"
-TOOLS="scribe docs"
+TOOLS="scribe docs scribedev"
+TOOLS_REPOSITORY="${SCRIBEDEV_REPOSITORY:-d-fiber/scribe_dev_tools}"
 
 say() { printf '%s\n' "$*"; }
 fail() { printf '%s\n' "$*" >&2; exit 1; }
@@ -116,19 +117,31 @@ fetch() {
     asset="$tool-$PLATFORM$EXTENSION"
     target="$destination/$tool$EXTENSION"
 
-    say "  $asset"
+    case "$tool" in
+      scribedev)
+        from="$TOOLS_REPOSITORY"
+        at="latest"
+        url="https://github.com/$from/releases/latest/download/$asset"
+        ;;
+      *)
+        from="$REPOSITORY"
+        at="$TAG"
+        url="https://github.com/$from/releases/download/$TAG/$asset"
+        ;;
+    esac
+
+    say "  $asset from $from"
     rm -f "$target"
 
     if have gh; then
-      gh release download "$TAG" \
-        --repo "$REPOSITORY" \
-        --pattern "$asset" \
-        --output "$target"
+      if [ "$at" = latest ]; then
+        gh release download --repo "$from" --pattern "$asset" --output "$target"
+      else
+        gh release download "$at" --repo "$from" --pattern "$asset" --output "$target"
+      fi
     elif have curl; then
-      curl -fsSL \
-        -o "$target" \
-        "https://github.com/$REPOSITORY/releases/download/$TAG/$asset" \
-        || fail "Could not download $asset. While $REPOSITORY is private this needs the GitHub CLI: https://cli.github.com"
+      curl -fsSL -o "$target" "$url" \
+        || fail "Could not download $asset. While $from is private this needs the GitHub CLI: https://cli.github.com"
     else
       fail "Needs curl, or the GitHub CLI while the repository is private"
     fi
