@@ -31,8 +31,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { vpn, VpnError } from "./client.ts";
-import { PendingToken, PendingTokenPurpose } from "@scribe/host/dependencies/security/auth/src/_core/pending_token.ts";
-import { AccountRole } from "@scribe/core/contracts/account.ts";
+import { PendingToken, PendingTokenPurpose } from "@scribe/auth/src/pending_token.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { Env } from "@scribe/host/env.ts";
 
@@ -72,7 +71,7 @@ export class VpnAccessLink {
   }
 
   static async issue(adminId: string): Promise<string | null> {
-    const token = await _token.issue(adminId, AccountRole.Admin, null);
+    const token = await _token.issue(adminId, "admin", null);
     if (!token) return null;
 
     return `${Env.SUPABASE_URL}/functions/v1/hosting/vpn#token=${
@@ -87,7 +86,7 @@ export class VpnAccessLink {
     identity: { firstName: string | null; lastName: string | null },
   ): Promise<VpnConfigurationResult> {
     const payload = await _token.payload(token.trim());
-    if (!payload || payload.role !== AccountRole.Admin) {
+    if (!payload || payload.role !== "admin") {
       return new Failure(VpnAccessError.InvalidOrExpiredToken);
     }
 
@@ -114,7 +113,7 @@ export class VpnAccessLink {
   static async ownerOf(token: string): Promise<string | null> {
     const trimmed = token.trim();
     const payload = await _token.payload(trimmed);
-    if (!payload || payload.role !== AccountRole.Admin) return null;
+    if (!payload || payload.role !== "admin") return null;
     if (!(await _token.exists(trimmed))) return null;
     return payload.identifier;
   }

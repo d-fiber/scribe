@@ -79,6 +79,7 @@ const SPECIFIER_PREFIXES = ["@scribe/core/", "@scribe/host/"] as const;
  */
 const PACKAGE_PREFIXES = [
   "@scribe/audience/",
+  "@scribe/auth/",
   "@scribe/dynamic_links/",
   "@scribe/foundation/",
   "@scribe/realtime/",
@@ -152,8 +153,7 @@ export default {
           if (insidePackage && isHostSpecifier(source)) {
             ctx.report({
               node,
-              message:
-                `core cannot import "${source}": the package must stand alone, ` +
+              message: `core cannot import "${source}": the package must stand alone, ` +
                 `without the host's modules. Declare a port in contracts/ and let the host wire it.`,
             });
             return;
@@ -162,8 +162,7 @@ export default {
           if (isHostEntry(source) && !HOST_CONSUMERS.includes(from!)) {
             ctx.report({
               node,
-              message:
-                `"${from}/" cannot import "@scribe/core/host.ts": the host entry point is reserved for ` +
+              message: `"${from}/" cannot import "@scribe/core/host.ts": the host entry point is reserved for ` +
                 `${HOST_CONSUMERS.join(", ")}. Import "@scribe/core/mod.ts" instead.`,
             });
             return;
@@ -175,8 +174,7 @@ export default {
           if (!allowed.includes(to)) {
             ctx.report({
               node,
-              message:
-                `"${from}/" cannot import "${to}/": that import goes back up the layers. ` +
+              message: `"${from}/" cannot import "${to}/": that import goes back up the layers. ` +
                 `${from}/ may only depend on ${allowed.join(", ") || "nothing"}.`,
             });
           }

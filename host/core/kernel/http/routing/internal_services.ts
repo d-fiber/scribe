@@ -32,7 +32,6 @@
 
 export const InternalService = {
   AuthConfirm: "auth/confirm",
-  AuthIntra: "auth/intra",
   Gotrue: "gotrue",
   Messaging: "messaging",
   Queue: "queue",

@@ -38,6 +38,7 @@ import { httpSettings } from "@scribe/core/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
 import { queueSettings } from "@scribe/foundation/src/queue/settings.ts";
 import { searchSettings } from "@scribe/search/src/settings.ts";
+import { authSettings } from "@scribe/auth/src/settings.ts";
 import { storageSettings } from "@scribe/storage/src/settings.ts";
 
 function env(key: string, fallback: string): string {
@@ -67,6 +68,17 @@ export function installTestSettings(): void {
   httpSettings.use({
     port: Number(env("PORT", "3000")),
     maxInflightBodyBytes: Number(env("API_MAX_INFLIGHT_BODY_MB", "256")) * 1024 * 1024,
+  });
+  authSettings.use({
+    jwtSecret: env("JWT_SECRET", "test-jwt-secret"),
+    pendingTokenSecret: env("PENDING_TOKEN_SECRET", "test-pending-token-secret"),
+    googleClientId: env("GOOGLE_CLIENT_ID", ""),
+    googleClientSecret: env("GOOGLE_CLIENT_SECRET", ""),
+    appleClientId: env("APPLE_CLIENT_ID", ""),
+    appleClientSecret: env("APPLE_CLIENT_SECRET", ""),
+    twilioAccountSid: env("TWILIO_ACCOUNT_SID", ""),
+    twilioAuthToken: env("TWILIO_AUTH_TOKEN", ""),
+    twilioMessageServiceSid: env("TWILIO_MESSAGE_SERVICE_SID", ""),
   });
   storageSettings.use({
     apiUrl: env("SUPABASE_STORAGE_INTERNAL_URL", "http://localhost:5000"),

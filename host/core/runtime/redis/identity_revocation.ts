@@ -43,7 +43,7 @@ export const IDENTITY_CACHE_KEY = "identity:jwt";
  * wild are stale, so this marker forces those tokens back through GoTrue until
  * they expire. It must therefore outlive the longest access token GoTrue
  * issues, which `GOTRUE_JWT_EXP` sets to 3600 in
- * `dependencies/security/auth/ops/docker-compose.yaml`. Raise this to match if
+ * `packages/auth/ops/docker-compose.yaml`. Raise this to match if
  * that value ever grows: a window shorter than the token lifetime lets a
  * demoted account keep its old claims, while one that is too long only costs
  * an HTTP call per cache miss.

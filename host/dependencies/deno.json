@@ -5,9 +5,6 @@
     ".": "./clients.ts",
     "./features": "./features/features.ts",
     "./geospatial": "./geospatial/geocoder.ts",
-    "./security/auth": "./security/auth/mod.ts",
-    "./security/auth/testing": "./security/auth/testing/mock.ts",
-    "./security/auth/testing/account_storage": "./security/auth/testing/account_storage.ts",
     "./security/rbac": "./security/rbac/mod.ts",
     "./security/vpn": "./security/vpn/mod.ts",
     "./security/vpn/testing": "./security/vpn/testing/mock.ts"

@@ -31,11 +31,9 @@
 // LICENSE file, the LICENSE file governs.
 
 import { FeaturesClient } from "@scribe/host/dependencies/features/features.ts";
-import { auth, type AuthClient } from "@scribe/host/dependencies/security/auth/mod.ts";
 import { type AdminVpnService, vpn } from "@scribe/host/dependencies/security/vpn/mod.ts";
 
 class SecurityClient {
-  readonly auth: AuthClient = auth;
   readonly vpn: AdminVpnService = vpn;
 }
 

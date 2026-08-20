@@ -1,5 +1,0 @@
-services:
-  auth:
-    environment:
-      GOTRUE_DB_CONN_MAX_POOL_SIZE: "{{auth_db_pool}}"
-      GOMAXPROCS: "{{auth_gomaxprocs}}"

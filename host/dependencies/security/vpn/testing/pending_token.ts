@@ -40,9 +40,9 @@ import "@scribe/core/testing/settings.ts";
 // `purpose` is a free string on purpose: a test that checks a foreign-purpose
 // token is refused must be able to sign one this module can never produce.
 
-import { PendingTokenPurpose } from "@scribe/host/dependencies/security/auth/src/_core/pending_token.ts";
+import type { AccountRole } from "@scribe/auth/contracts/role.ts";
+import { PendingTokenPurpose } from "@scribe/auth/src/pending_token.ts";
 import { toHex } from "@scribe/core/runtime/support/crypto/hash.ts";
-import type { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Env } from "@scribe/host/env.ts";
 
 export interface ForgedTokenOptions {

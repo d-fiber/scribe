@@ -36,7 +36,7 @@ const SDK_ROOT = new URL("../../", import.meta.url).pathname;
 
 const SDK_SQL_DIRS = [
   `${SDK_ROOT}core/db/init`,
-  `${SDK_ROOT}dependencies/security/auth/db/init`,
+  `${SDK_ROOT}packages/auth/db/init`,
   `${SDK_ROOT}dependencies/security/vpn/db/init`,
 ];
 
@@ -107,8 +107,25 @@ export function registerAccountCascadeTests(label: string, extraRoots: string[] 
   Deno.test(`${label}: pending-token cleanup is scheduled`, async () => {
     const sql = await allSql(roots);
     assert(
-      sql.includes("cleanup-otp-pending-tokens"),
-      "without a scheduled purge, internal_t__otp_pending_tokens grows unbounded",
+      sql.includes("cleanup-pending-tokens"),
+      "without a scheduled purge, __pending_tokens__ grows unbounded",
+    );
+  });
+
+  Deno.test(`${label}: an account of any role cascades into what hangs off it`, async () => {
+    const sql = await allSql(roots);
+    const references = [
+      ...sql.matchAll(
+        /references public\.__accounts__\s*\([^)]*\)((?: on delete (?:cascade|set null|restrict))?)/g,
+      ),
+    ];
+
+    assert(references.length > 0, "no reference to the accounts table found, the test is testing nothing");
+
+    assertEquals(
+      references.filter((match) => match[1].trim() === "").map((match) => match[0]),
+      [],
+      "these references have no delete action: the row would outlive the account",
     );
   });
 }
