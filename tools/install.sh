@@ -110,8 +110,10 @@ locate_or_clone() {
 }
 
 fetch() {
-  destination="$ROOT/tools/$PLATFORM"
+  destination="$ROOT/tools"
   mkdir -p "$destination"
+
+  printf '%s\n' "$PLATFORM" > "$destination/.platform"
 
   for tool in $TOOLS; do
     asset="$tool-$PLATFORM$EXTENSION"
@@ -158,11 +160,15 @@ main() {
   fetch
 
   say ""
-  say "Ready. The tools are in $ROOT/tools/$PLATFORM"
-  ls -lh "$ROOT/tools/$PLATFORM"
+  say "Ready. The tools are in $ROOT/tools"
+  ls -lh "$ROOT/tools"
+  say ""
+  say "They carry no platform in their path, so a link into your PATH is the same"
+  say "line on every machine:"
+  say "  ln -sfn $ROOT/tools/scribedev ~/.local/bin/scribedev"
   say ""
   say "They are deliberately not committed, so run this again after pulling a"
-  say "release that rebuilt them."
+  say "release that rebuilt them. tools/.platform says which build is in there."
 }
 
 main "$@"

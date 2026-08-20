@@ -1,9 +1,9 @@
 .DS_Store
 .env
 
-/tools/linux/
-/tools/macos/
-/tools/windows/
+/tools/*
+!/tools/install.sh
+!/tools/.gitkeep
 
 /postgres/
 /storage/
