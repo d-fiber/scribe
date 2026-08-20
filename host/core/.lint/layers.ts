@@ -78,8 +78,11 @@ const SPECIFIER_PREFIXES = ["@scribe/core/", "@scribe/host/"] as const;
  * package has to be added here to be seen as one.
  */
 const PACKAGE_PREFIXES = [
+  "@scribe/audience/",
+  "@scribe/dynamic_links/",
   "@scribe/foundation/",
   "@scribe/realtime/",
+  "@scribe/remote_configs/",
   "@scribe/search/",
   "@scribe/storage/",
 ] as const;

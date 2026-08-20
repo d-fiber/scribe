@@ -30,13 +30,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { DevopsClient } from "@scribe/host/dependencies/features/devops/devops.ts";
 import { Messagings } from "@scribe/host/dependencies/features/messagings/messagings.ts";
 import type { RecommendationService } from "@scribe/host/dependencies/features/recommendation/recommendation.ts";
 import { RecommendationClient } from "@scribe/host/dependencies/features/recommendation/recommendation.ts";
 
 export class FeaturesClient {
   readonly messagings: Messagings = new Messagings();
-  readonly devops: DevopsClient = new DevopsClient();
   readonly recommendation: RecommendationService = new RecommendationClient();
 }

@@ -20,47 +20,6 @@ import 'devops.pbjson.dart';
 
 export 'devops.pb.dart';
 
-abstract class DynamicLinksServiceBase extends $pb.GeneratedService {
-  $async.Future<$1.LinkResult> add(
-      $pb.ServerContext ctx, $1.AddLinkRequest request);
-  $async.Future<$1.LinkResult> update(
-      $pb.ServerContext ctx, $1.UpdateLinkRequest request);
-  $async.Future<$1.LinkResult> remove(
-      $pb.ServerContext ctx, $1.RemoveLinkRequest request);
-
-  $pb.GeneratedMessage createRequest($core.String methodName) {
-    switch (methodName) {
-      case 'Add':
-        return $1.AddLinkRequest();
-      case 'Update':
-        return $1.UpdateLinkRequest();
-      case 'Remove':
-        return $1.RemoveLinkRequest();
-      default:
-        throw $core.ArgumentError('Unknown method: $methodName');
-    }
-  }
-
-  $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx,
-      $core.String methodName, $pb.GeneratedMessage request) {
-    switch (methodName) {
-      case 'Add':
-        return add(ctx, request as $1.AddLinkRequest);
-      case 'Update':
-        return update(ctx, request as $1.UpdateLinkRequest);
-      case 'Remove':
-        return remove(ctx, request as $1.RemoveLinkRequest);
-      default:
-        throw $core.ArgumentError('Unknown method: $methodName');
-    }
-  }
-
-  $core.Map<$core.String, $core.dynamic> get $json =>
-      DynamicLinksServiceBase$json;
-  $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
-      get $messageJson => DynamicLinksServiceBase$messageJson;
-}
-
 abstract class RemoteConfigsServiceBase extends $pb.GeneratedService {
   $async.Future<$1.RemoteConfigResult> get(
       $pb.ServerContext ctx, $1.RemoteConfigRequest request);

@@ -136,7 +136,7 @@ export type {
 
 export { cache } from "./src/capabilities/cache.ts";
 export { host } from "./src/capabilities/channel.ts";
-export { dynamicLinks, remoteConfigs } from "./src/capabilities/devops.ts";
+export { remoteConfigs } from "./src/capabilities/devops.ts";
 export { CapabilityError } from "./src/capabilities/error.ts";
 export { hooks, queue } from "./src/capabilities/event_driven.ts";
 export { geospatial } from "./src/capabilities/geospatial.ts";

@@ -88,13 +88,6 @@ create type public.campaign_audience as enum (
   'admin'
 );
 
-create type public.remote_config_audience as enum (
-  'public',
-  'authenticated',
-  'user',
-  'admin'
-);
-
 create type public.social_provider as enum (
   'google',
   'apple'

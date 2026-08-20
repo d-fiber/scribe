@@ -30,7 +30,6 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { DevopsClient } from "@scribe/host/dependencies/features/devops/devops.ts";
 import { FeaturesClient } from "@scribe/host/dependencies/features/features.ts";
 import { auth, type AuthClient } from "@scribe/host/dependencies/security/auth/mod.ts";
 import { type AdminVpnService, vpn } from "@scribe/host/dependencies/security/vpn/mod.ts";
@@ -41,7 +40,6 @@ class SecurityClient {
 }
 
 class Clients {
-  readonly devops: DevopsClient = new DevopsClient();
   readonly features: FeaturesClient = new FeaturesClient();
   readonly security: SecurityClient = new SecurityClient();
 }

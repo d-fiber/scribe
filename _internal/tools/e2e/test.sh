@@ -37,7 +37,7 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
 SCOPE="e2e:test"
 
 usage() {
-  echo "usage: $(basename "$0") <foundation|realtime|storage>" >&2
+  echo "usage: $(basename "$0") <foundation|realtime|storage|dynamic_links|audience|remote_configs>" >&2
   exit 64
 }
 
@@ -48,6 +48,9 @@ case "$PACKAGE" in
   foundation) TASK="test:e2e" ;;
   realtime) TASK="test:e2e:realtime" ;;
   storage) TASK="test:e2e:storage" ;;
+  dynamic_links) TASK="test:e2e:dynamic_links" ;;
+  audience) TASK="test:e2e:audience" ;;
+  remote_configs) TASK="test:e2e:remote_configs" ;;
   *) usage ;;
 esac
 

@@ -36,32 +36,6 @@ package scribe.clients.devops.v1;
 
 import "scribe/protocol/common.proto";
 
-message DynamicLink {
-  string id = 1;
-  string slug = 2;
-  string target_url = 3;
-  scribe.v1.Json metadata = 4;
-  int64 expires_at = 5;
-}
-
-message AddLinkRequest {
-  DynamicLink link = 1;
-}
-
-message UpdateLinkRequest {
-  DynamicLink link = 1;
-}
-
-message RemoveLinkRequest {
-  string id = 1;
-  string slug = 2;
-}
-
-message LinkResult {
-  DynamicLink link = 1;
-  scribe.v1.Failure error = 2;
-}
-
 message RemoteConfigRequest {
   string key = 1;
   string platform = 2;
@@ -71,12 +45,6 @@ message RemoteConfigRequest {
 message RemoteConfigResult {
   scribe.v1.Json value = 1;
   scribe.v1.Failure error = 2;
-}
-
-service DynamicLinks {
-  rpc Add(AddLinkRequest) returns (LinkResult);
-  rpc Update(UpdateLinkRequest) returns (LinkResult);
-  rpc Remove(RemoveLinkRequest) returns (LinkResult);
 }
 
 service RemoteConfigs {

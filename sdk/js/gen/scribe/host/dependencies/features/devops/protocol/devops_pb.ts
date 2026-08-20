@@ -44,202 +44,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/host/dependencies/features/devops/protocol/devops.proto.
  */
 export const file_scribe_host_dependencies_features_devops_protocol_devops: GenFile = /*@__PURE__*/
-  fileDesc("Cj5zY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvZmVhdHVyZXMvZGV2b3BzL3Byb3RvY29sL2Rldm9wcy5wcm90bxIYc2NyaWJlLmNsaWVudHMuZGV2b3BzLnYxInIKC0R5bmFtaWNMaW5rEgoKAmlkGAEgASgJEgwKBHNsdWcYAiABKAkSEgoKdGFyZ2V0X3VybBgDIAEoCRIhCghtZXRhZGF0YRgEIAEoCzIPLnNjcmliZS52MS5Kc29uEhIKCmV4cGlyZXNfYXQYBSABKAMiRQoOQWRkTGlua1JlcXVlc3QSMwoEbGluaxgBIAEoCzIlLnNjcmliZS5jbGllbnRzLmRldm9wcy52MS5EeW5hbWljTGluayJIChFVcGRhdGVMaW5rUmVxdWVzdBIzCgRsaW5rGAEgASgLMiUuc2NyaWJlLmNsaWVudHMuZGV2b3BzLnYxLkR5bmFtaWNMaW5rIi0KEVJlbW92ZUxpbmtSZXF1ZXN0EgoKAmlkGAEgASgJEgwKBHNsdWcYAiABKAkiZAoKTGlua1Jlc3VsdBIzCgRsaW5rGAEgASgLMiUuc2NyaWJlLmNsaWVudHMuZGV2b3BzLnYxLkR5bmFtaWNMaW5rEiEKBWVycm9yGAIgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUiSQoTUmVtb3RlQ29uZmlnUmVxdWVzdBILCgNrZXkYASABKAkSEAoIcGxhdGZvcm0YAiABKAkSEwoLYXBwX3ZlcnNpb24YAyABKAkiVwoSUmVtb3RlQ29uZmlnUmVzdWx0Eh4KBXZhbHVlGAEgASgLMg8uc2NyaWJlLnYxLkpzb24SIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZTKfAgoMRHluYW1pY0xpbmtzElUKA0FkZBIoLnNjcmliZS5jbGllbnRzLmRldm9wcy52MS5BZGRMaW5rUmVxdWVzdBokLnNjcmliZS5jbGllbnRzLmRldm9wcy52MS5MaW5rUmVzdWx0ElsKBlVwZGF0ZRIrLnNjcmliZS5jbGllbnRzLmRldm9wcy52MS5VcGRhdGVMaW5rUmVxdWVzdBokLnNjcmliZS5jbGllbnRzLmRldm9wcy52MS5MaW5rUmVzdWx0ElsKBlJlbW92ZRIrLnNjcmliZS5jbGllbnRzLmRldm9wcy52MS5SZW1vdmVMaW5rUmVxdWVzdBokLnNjcmliZS5jbGllbnRzLmRldm9wcy52MS5MaW5rUmVzdWx0MnMKDVJlbW90ZUNvbmZpZ3MSYgoDR2V0Ei0uc2NyaWJlLmNsaWVudHMuZGV2b3BzLnYxLlJlbW90ZUNvbmZpZ1JlcXVlc3QaLC5zY3JpYmUuY2xpZW50cy5kZXZvcHMudjEuUmVtb3RlQ29uZmlnUmVzdWx0YgZwcm90bzM", [file_scribe_protocol_common]);
-
-/**
- * @generated from message scribe.clients.devops.v1.DynamicLink
- */
-export type DynamicLink = Message<"scribe.clients.devops.v1.DynamicLink"> & {
-  /**
-   * @generated from field: string id = 1;
-   */
-  id: string;
-
-  /**
-   * @generated from field: string slug = 2;
-   */
-  slug: string;
-
-  /**
-   * @generated from field: string target_url = 3;
-   */
-  targetUrl: string;
-
-  /**
-   * @generated from field: scribe.v1.Json metadata = 4;
-   */
-  metadata?: Json | undefined;
-
-  /**
-   * @generated from field: int64 expires_at = 5;
-   */
-  expiresAt: bigint;
-};
-
-/**
- * @generated from message scribe.clients.devops.v1.DynamicLink
- */
-export type DynamicLinkJson = {
-  /**
-   * @generated from field: string id = 1;
-   */
-  id?: string;
-
-  /**
-   * @generated from field: string slug = 2;
-   */
-  slug?: string;
-
-  /**
-   * @generated from field: string target_url = 3;
-   */
-  targetUrl?: string;
-
-  /**
-   * @generated from field: scribe.v1.Json metadata = 4;
-   */
-  metadata?: JsonJson;
-
-  /**
-   * @generated from field: int64 expires_at = 5;
-   */
-  expiresAt?: string;
-};
-
-/**
- * Describes the message scribe.clients.devops.v1.DynamicLink.
- * Use `create(DynamicLinkSchema)` to create a new message.
- */
-export const DynamicLinkSchema: GenMessage<DynamicLink, {jsonType: DynamicLinkJson}> = /*@__PURE__*/
-  messageDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 0);
-
-/**
- * @generated from message scribe.clients.devops.v1.AddLinkRequest
- */
-export type AddLinkRequest = Message<"scribe.clients.devops.v1.AddLinkRequest"> & {
-  /**
-   * @generated from field: scribe.clients.devops.v1.DynamicLink link = 1;
-   */
-  link?: DynamicLink | undefined;
-};
-
-/**
- * @generated from message scribe.clients.devops.v1.AddLinkRequest
- */
-export type AddLinkRequestJson = {
-  /**
-   * @generated from field: scribe.clients.devops.v1.DynamicLink link = 1;
-   */
-  link?: DynamicLinkJson;
-};
-
-/**
- * Describes the message scribe.clients.devops.v1.AddLinkRequest.
- * Use `create(AddLinkRequestSchema)` to create a new message.
- */
-export const AddLinkRequestSchema: GenMessage<AddLinkRequest, {jsonType: AddLinkRequestJson}> = /*@__PURE__*/
-  messageDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 1);
-
-/**
- * @generated from message scribe.clients.devops.v1.UpdateLinkRequest
- */
-export type UpdateLinkRequest = Message<"scribe.clients.devops.v1.UpdateLinkRequest"> & {
-  /**
-   * @generated from field: scribe.clients.devops.v1.DynamicLink link = 1;
-   */
-  link?: DynamicLink | undefined;
-};
-
-/**
- * @generated from message scribe.clients.devops.v1.UpdateLinkRequest
- */
-export type UpdateLinkRequestJson = {
-  /**
-   * @generated from field: scribe.clients.devops.v1.DynamicLink link = 1;
-   */
-  link?: DynamicLinkJson;
-};
-
-/**
- * Describes the message scribe.clients.devops.v1.UpdateLinkRequest.
- * Use `create(UpdateLinkRequestSchema)` to create a new message.
- */
-export const UpdateLinkRequestSchema: GenMessage<UpdateLinkRequest, {jsonType: UpdateLinkRequestJson}> = /*@__PURE__*/
-  messageDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 2);
-
-/**
- * @generated from message scribe.clients.devops.v1.RemoveLinkRequest
- */
-export type RemoveLinkRequest = Message<"scribe.clients.devops.v1.RemoveLinkRequest"> & {
-  /**
-   * @generated from field: string id = 1;
-   */
-  id: string;
-
-  /**
-   * @generated from field: string slug = 2;
-   */
-  slug: string;
-};
-
-/**
- * @generated from message scribe.clients.devops.v1.RemoveLinkRequest
- */
-export type RemoveLinkRequestJson = {
-  /**
-   * @generated from field: string id = 1;
-   */
-  id?: string;
-
-  /**
-   * @generated from field: string slug = 2;
-   */
-  slug?: string;
-};
-
-/**
- * Describes the message scribe.clients.devops.v1.RemoveLinkRequest.
- * Use `create(RemoveLinkRequestSchema)` to create a new message.
- */
-export const RemoveLinkRequestSchema: GenMessage<RemoveLinkRequest, {jsonType: RemoveLinkRequestJson}> = /*@__PURE__*/
-  messageDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 3);
-
-/**
- * @generated from message scribe.clients.devops.v1.LinkResult
- */
-export type LinkResult = Message<"scribe.clients.devops.v1.LinkResult"> & {
-  /**
-   * @generated from field: scribe.clients.devops.v1.DynamicLink link = 1;
-   */
-  link?: DynamicLink | undefined;
-
-  /**
-   * @generated from field: scribe.v1.Failure error = 2;
-   */
-  error?: Failure | undefined;
-};
-
-/**
- * @generated from message scribe.clients.devops.v1.LinkResult
- */
-export type LinkResultJson = {
-  /**
-   * @generated from field: scribe.clients.devops.v1.DynamicLink link = 1;
-   */
-  link?: DynamicLinkJson;
-
-  /**
-   * @generated from field: scribe.v1.Failure error = 2;
-   */
-  error?: FailureJson;
-};
-
-/**
- * Describes the message scribe.clients.devops.v1.LinkResult.
- * Use `create(LinkResultSchema)` to create a new message.
- */
-export const LinkResultSchema: GenMessage<LinkResult, {jsonType: LinkResultJson}> = /*@__PURE__*/
-  messageDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 4);
+  fileDesc("Cj5zY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvZmVhdHVyZXMvZGV2b3BzL3Byb3RvY29sL2Rldm9wcy5wcm90bxIYc2NyaWJlLmNsaWVudHMuZGV2b3BzLnYxIkkKE1JlbW90ZUNvbmZpZ1JlcXVlc3QSCwoDa2V5GAEgASgJEhAKCHBsYXRmb3JtGAIgASgJEhMKC2FwcF92ZXJzaW9uGAMgASgJIlcKElJlbW90ZUNvbmZpZ1Jlc3VsdBIeCgV2YWx1ZRgBIAEoCzIPLnNjcmliZS52MS5Kc29uEiEKBWVycm9yGAIgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUycwoNUmVtb3RlQ29uZmlncxJiCgNHZXQSLS5zY3JpYmUuY2xpZW50cy5kZXZvcHMudjEuUmVtb3RlQ29uZmlnUmVxdWVzdBosLnNjcmliZS5jbGllbnRzLmRldm9wcy52MS5SZW1vdGVDb25maWdSZXN1bHRiBnByb3RvMw", [file_scribe_protocol_common]);
 
 /**
  * @generated from message scribe.clients.devops.v1.RemoteConfigRequest
@@ -286,7 +91,7 @@ export type RemoteConfigRequestJson = {
  * Use `create(RemoteConfigRequestSchema)` to create a new message.
  */
 export const RemoteConfigRequestSchema: GenMessage<RemoteConfigRequest, {jsonType: RemoteConfigRequestJson}> = /*@__PURE__*/
-  messageDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 5);
+  messageDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 0);
 
 /**
  * @generated from message scribe.clients.devops.v1.RemoteConfigResult
@@ -323,38 +128,7 @@ export type RemoteConfigResultJson = {
  * Use `create(RemoteConfigResultSchema)` to create a new message.
  */
 export const RemoteConfigResultSchema: GenMessage<RemoteConfigResult, {jsonType: RemoteConfigResultJson}> = /*@__PURE__*/
-  messageDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 6);
-
-/**
- * @generated from service scribe.clients.devops.v1.DynamicLinks
- */
-export const DynamicLinks: GenService<{
-  /**
-   * @generated from rpc scribe.clients.devops.v1.DynamicLinks.Add
-   */
-  add: {
-    methodKind: "unary";
-    input: typeof AddLinkRequestSchema;
-    output: typeof LinkResultSchema;
-  },
-  /**
-   * @generated from rpc scribe.clients.devops.v1.DynamicLinks.Update
-   */
-  update: {
-    methodKind: "unary";
-    input: typeof UpdateLinkRequestSchema;
-    output: typeof LinkResultSchema;
-  },
-  /**
-   * @generated from rpc scribe.clients.devops.v1.DynamicLinks.Remove
-   */
-  remove: {
-    methodKind: "unary";
-    input: typeof RemoveLinkRequestSchema;
-    output: typeof LinkResultSchema;
-  },
-}> = /*@__PURE__*/
-  serviceDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 0);
+  messageDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 1);
 
 /**
  * @generated from service scribe.clients.devops.v1.RemoteConfigs
@@ -369,5 +143,5 @@ export const RemoteConfigs: GenService<{
     output: typeof RemoteConfigResultSchema;
   },
 }> = /*@__PURE__*/
-  serviceDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 1);
+  serviceDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 0);
 

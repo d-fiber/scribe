@@ -30,73 +30,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import {
-  type DynamicLink,
-  DynamicLinks,
-  RemoteConfigs,
-} from "../../gen/scribe/host/dependencies/features/devops/protocol/devops_pb.ts";
-import { decodeJson, encodeJson } from "../contracts/json.ts";
+import { RemoteConfigs } from "../../gen/scribe/host/dependencies/features/devops/protocol/devops_pb.ts";
+import { decodeJson } from "../contracts/json.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";
-
-export interface DynamicLinkInput {
-  readonly id?: string;
-  readonly slug: string;
-  readonly targetUrl: string;
-  readonly metadata?: unknown;
-  readonly expiresAt?: number;
-}
-
-export interface DynamicLinkRecord {
-  readonly id: string;
-  readonly slug: string;
-  readonly targetUrl: string;
-  readonly metadata: unknown;
-  readonly expiresAt: number;
-}
-
-function linkOf(link: DynamicLink | undefined): DynamicLinkRecord | null {
-  if (!link) return null;
-  return {
-    id: link.id,
-    slug: link.slug,
-    targetUrl: link.targetUrl,
-    metadata: decodeJson(link.metadata),
-    expiresAt: Number(link.expiresAt),
-  };
-}
-
-function payloadOf(input: DynamicLinkInput) {
-  return {
-    id: input.id ?? "",
-    slug: input.slug,
-    targetUrl: input.targetUrl,
-    metadata: encodeJson(input.metadata ?? {}),
-    expiresAt: BigInt(input.expiresAt ?? 0),
-  };
-}
-
-export const dynamicLinks = {
-  async add(input: DynamicLinkInput): Promise<DynamicLinkRecord | null> {
-    const result = await host.client().call(DynamicLinks.method.add, { link: payloadOf(input) });
-    raiseOn("dynamic-links", result.error);
-    return linkOf(result.link);
-  },
-
-  async update(input: DynamicLinkInput): Promise<DynamicLinkRecord | null> {
-    const result = await host.client().call(DynamicLinks.method.update, { link: payloadOf(input) });
-    raiseOn("dynamic-links", result.error);
-    return linkOf(result.link);
-  },
-
-  async remove(reference: { id?: string; slug?: string }): Promise<void> {
-    const result = await host.client().call(DynamicLinks.method.remove, {
-      id: reference.id ?? "",
-      slug: reference.slug ?? "",
-    });
-    raiseOn("dynamic-links", result.error);
-  },
-};
 
 export const remoteConfigs = {
   async get<T>(key: string, platform = "", appVersion = ""): Promise<T | null> {
