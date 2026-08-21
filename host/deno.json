@@ -2,7 +2,7 @@
   "workspace": [
     "./core",
     "./dependencies",
-    "./pkg/alchemy",
+    "./alchemy",
     "./pkg/builder",
     "./pkg/packages/audience",
     "./pkg/packages/auth",
@@ -96,7 +96,7 @@
     "@opensearch-project/opensearch": "npm:@opensearch-project/opensearch@2",
     "@react-email/components": "npm:@react-email/components@0",
     "@react-email/render": "npm:@react-email/render@1",
-    "@scribe/alchemy": "./pkg/alchemy/mod.ts",
+    "@scribe/alchemy": "./alchemy/mod.ts",
     "@scribe/audience/": "./pkg/packages/audience/",
     "@scribe/auth/": "./pkg/packages/auth/",
     "@scribe/builder": "./pkg/builder/mod.ts",
