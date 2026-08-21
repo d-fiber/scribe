@@ -2,13 +2,15 @@
 
 ## The license, in one paragraph
 
-scribe is source-available, not open source. It is published under the
-[PolyForm Shield License 1.0.0](LICENSE). You may read it, run it, change it,
-and build commercial products on top of it. The one thing you may not do is use
-it to compete with scribe itself, or with anything Fiber provides using it.
+scribe is published under the [Mozilla Public License 2.0](LICENSE). You may
+read it, run it, change it, distribute it, and combine it with files under any
+other licence, a proprietary one included, and licence that larger work on your
+own terms.
 
-Building your backend on scribe and selling that product is fine. Repackaging
-scribe as a rival framework, or offering it as a hosted service, is not.
+What you owe in return is per file: the source of every file covered by these
+terms that you distribute, including the ones you changed, stays available under
+the same terms. Every file carries the notice that says so, and it survives being
+copied into somebody else's tree.
 
 ## Contributor License Agreement
 
