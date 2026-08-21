@@ -1,0 +1,6 @@
+{
+  "name": "@scribe/alchemy",
+  "exports": {
+    ".": "./mod.ts"
+  }
+}
