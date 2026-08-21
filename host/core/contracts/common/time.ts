@@ -34,42 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export class Time {
-  readonly #ms: number;
+/**
+ * Re-exported from `@scribe/alchemy`, which is where this now lives.
+ *
+ * @remarks
+ * The vocabulary a package writes against is published on its own, so a package author reaches it
+ * without a framework checkout. This file keeps the path the framework already imports.
+ */
 
-  private constructor(ms: number) {
-    this.#ms = ms;
-  }
-
-  get value(): number {
-    return this.#ms / 1000;
-  }
-
-  get ms(): number {
-    return this.#ms;
-  }
-
-  valueOf(): number {
-    return this.value;
-  }
-
-  toString(): string {
-    return String(this.value);
-  }
-
-  static seconds(n: number): Time {
-    return new Time(n * 1_000);
-  }
-  static minutes(n: number): Time {
-    return new Time(n * 60_000);
-  }
-  static hours(n: number): Time {
-    return new Time(n * 3_600_000);
-  }
-  static days(n: number): Time {
-    return new Time(n * 86_400_000);
-  }
-  static ms(n: number): Time {
-    return new Time(n);
-  }
-}
+export { Time } from "@scribe/alchemy";

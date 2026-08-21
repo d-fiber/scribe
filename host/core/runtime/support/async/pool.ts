@@ -34,21 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export async function runPooled<T>(
-  items: readonly T[],
-  limit: number,
-  run: (item: T) => Promise<void>,
-): Promise<void> {
-  if (items.length === 0) return;
+/**
+ * Re-exported from `@scribe/alchemy`, which is where this now lives.
+ *
+ * @remarks
+ * The vocabulary a package writes against is published on its own, so a package author reaches it
+ * without a framework checkout. This file keeps the path the framework already imports.
+ */
 
-  const workers = Math.max(1, Math.min(limit, items.length));
-  let cursor = 0;
-
-  await Promise.all(
-    Array.from({ length: workers }, async () => {
-      while (cursor < items.length) {
-        await run(items[cursor++]);
-      }
-    }),
-  );
-}
+export { runPooled } from "@scribe/alchemy";

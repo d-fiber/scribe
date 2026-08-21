@@ -34,47 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-const KILOBYTE = 1024;
-const MEGABYTE = 1024 * KILOBYTE;
-const GIGABYTE = 1024 * MEGABYTE;
+/**
+ * Re-exported from `@scribe/alchemy`, which is where this now lives.
+ *
+ * @remarks
+ * The vocabulary a package writes against is published on its own, so a package author reaches it
+ * without a framework checkout. This file keeps the path the framework already imports.
+ */
 
-export class Size {
-  readonly #bytes: number;
-
-  private constructor(bytes: number) {
-    this.#bytes = bytes;
-  }
-
-  get value(): number {
-    return this.#bytes;
-  }
-
-  get kb(): number {
-    return this.#bytes / KILOBYTE;
-  }
-
-  get mb(): number {
-    return this.#bytes / MEGABYTE;
-  }
-
-  valueOf(): number {
-    return this.value;
-  }
-
-  toString(): string {
-    return String(this.value);
-  }
-
-  static bytes(n: number): Size {
-    return new Size(n);
-  }
-  static kilobytes(n: number): Size {
-    return new Size(n * KILOBYTE);
-  }
-  static megabytes(n: number): Size {
-    return new Size(n * MEGABYTE);
-  }
-  static gigabytes(n: number): Size {
-    return new Size(n * GIGABYTE);
-  }
-}
+export { Size } from "@scribe/alchemy";

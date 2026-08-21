@@ -34,12 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export interface Location {
-  lat: number;
-  lng: number;
-}
+/**
+ * Re-exported from `@scribe/alchemy`, which is where this now lives.
+ *
+ * @remarks
+ * The vocabulary a package writes against is published on its own, so a package author reaches it
+ * without a framework checkout. This file keeps the path the framework already imports.
+ */
 
-export interface RequestIpLocation {
-  city: string;
-  country: string;
-}
+export type { Location, RequestIpLocation } from "@scribe/alchemy";

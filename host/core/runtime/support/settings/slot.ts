@@ -34,28 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export class SettingsSlot<T> {
-  readonly #name: string;
-  #value: T | null = null;
+/**
+ * Re-exported from `@scribe/alchemy`, which is where this now lives.
+ *
+ * @remarks
+ * The vocabulary a package writes against is published on its own, so a package author reaches it
+ * without a framework checkout. This file keeps the path the framework already imports.
+ */
 
-  constructor(name: string) {
-    this.#name = name;
-  }
-
-  use(value: T): void {
-    this.#value = value;
-  }
-
-  get(): T {
-    if (this.#value === null) {
-      throw new Error(
-        `[settings] "${this.#name}" was never configured: call ${this.#name}Settings.use(...) at boot.`,
-      );
-    }
-    return this.#value;
-  }
-
-  get configured(): boolean {
-    return this.#value !== null;
-  }
-}
+export { Slot as SettingsSlot } from "@scribe/alchemy";

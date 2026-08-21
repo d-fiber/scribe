@@ -34,22 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export class ExponentialBackoff {
-  readonly #baseMs: number;
-  readonly #maxMs: number;
-  readonly #factor: number;
+/**
+ * Re-exported from `@scribe/alchemy`, which is where this now lives.
+ *
+ * @remarks
+ * The vocabulary a package writes against is published on its own, so a package author reaches it
+ * without a framework checkout. This file keeps the path the framework already imports.
+ */
 
-  constructor(baseMs: number, maxMs: number, factor = 2) {
-    this.#baseMs = baseMs;
-    this.#maxMs = maxMs;
-    this.#factor = factor;
-  }
-
-  delayFor(attempt: number): number {
-    if (attempt <= 1) return Math.min(this.#baseMs, this.#maxMs);
-    return Math.min(
-      this.#baseMs * this.#factor ** (attempt - 1),
-      this.#maxMs,
-    );
-  }
-}
+export { ExponentialBackoff } from "@scribe/alchemy";

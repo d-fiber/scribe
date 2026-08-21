@@ -34,36 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export class DeadlineExceededError extends Error {}
+/**
+ * Re-exported from `@scribe/alchemy`, which is where this now lives.
+ *
+ * @remarks
+ * The vocabulary a package writes against is published on its own, so a package author reaches it
+ * without a framework checkout. This file keeps the path the framework already imports.
+ */
 
-export function withDeadline<R>(
-  scope: string,
-  timeoutMs: number,
-  call: Promise<R>,
-): Promise<R> {
-  let timer: ReturnType<typeof setTimeout>;
-
-  const deadline = new Promise<never>((_, reject) => {
-    timer = setTimeout(
-      () =>
-        reject(
-          new DeadlineExceededError(`[${scope}] exceeded ${timeoutMs}ms`),
-        ),
-      timeoutMs,
-    );
-  });
-
-  return Promise.race([call, deadline])
-    .catch((error) => {
-      if (error instanceof DeadlineExceededError) {
-        call.catch((late) =>
-          console.error(
-            `[${scope}] settled after its deadline was already treated as a failure:`,
-            late,
-          )
-        );
-      }
-      throw error;
-    })
-    .finally(() => clearTimeout(timer));
-}
+export { DeadlineExceededError, withDeadline } from "@scribe/alchemy";

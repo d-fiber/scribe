@@ -34,32 +34,13 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export interface Pagination<T> {
-  items: T[];
-  pagination: {
-    offset: number;
-    total: number;
-    has_more: boolean;
-  };
-}
+/**
+ * Re-exported from `@scribe/alchemy`, which is where this now lives.
+ *
+ * @remarks
+ * The vocabulary a package writes against is published on its own, so a package author reaches it
+ * without a framework checkout. This file keeps the path the framework already imports.
+ */
 
-export function emptyPagination<T>(): Pagination<T> {
-  return { items: [], pagination: { offset: 0, total: 0, has_more: false } };
-}
-
-export function pagination<T>(
-  rows: T[],
-  offset: number,
-  size: number,
-): Pagination<T> {
-  const has_more = rows.length > size;
-  const items = has_more ? rows.slice(0, size) : rows;
-  return {
-    items,
-    pagination: {
-      offset,
-      total: offset + items.length + (has_more ? 1 : 0),
-      has_more,
-    },
-  };
-}
+export { emptyPagination, pagination } from "@scribe/alchemy";
+export type { Pagination } from "@scribe/alchemy";

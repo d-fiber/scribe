@@ -34,43 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export class Semaphore {
-  readonly #limit: number;
-  readonly #waiting: Array<() => void> = [];
-  #inFlight = 0;
+/**
+ * Re-exported from `@scribe/alchemy`, which is where this now lives.
+ *
+ * @remarks
+ * The vocabulary a package writes against is published on its own, so a package author reaches it
+ * without a framework checkout. This file keeps the path the framework already imports.
+ */
 
-  constructor(limit: number) {
-    this.#limit = Math.max(1, limit);
-  }
-
-  get inFlight(): number {
-    return this.#inFlight;
-  }
-
-  get waiting(): number {
-    return this.#waiting.length;
-  }
-
-  acquire(): Promise<void> {
-    if (this.#inFlight < this.#limit) {
-      this.#inFlight++;
-      return Promise.resolve();
-    }
-    return new Promise<void>((resolve) => this.#waiting.push(resolve));
-  }
-
-  release(): void {
-    const next = this.#waiting.shift();
-    if (next) next();
-    else this.#inFlight = Math.max(0, this.#inFlight - 1);
-  }
-
-  async run<R>(call: () => Promise<R>): Promise<R> {
-    await this.acquire();
-    try {
-      return await call();
-    } finally {
-      this.release();
-    }
-  }
-}
+export { Semaphore } from "@scribe/alchemy";

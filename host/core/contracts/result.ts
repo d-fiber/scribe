@@ -34,20 +34,13 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export class OK<T = void> {
-  readonly ok = true as const;
-  readonly data: T;
-  constructor(data?: T) {
-    this.data = data as T;
-  }
-}
+/**
+ * Re-exported from `@scribe/alchemy`, which is where this now lives.
+ *
+ * @remarks
+ * The vocabulary a package writes against is published on its own, so a package author reaches it
+ * without a framework checkout. This file keeps the path the framework already imports.
+ */
 
-export class Failure<T = void> {
-  readonly ok = false as const;
-  readonly error: T;
-  constructor(error?: T) {
-    this.error = error as T;
-  }
-}
-
-export type Result<T, T2> = OK<T> | Failure<T2>;
+export { Failure, OK } from "@scribe/alchemy";
+export type { Result } from "@scribe/alchemy";
