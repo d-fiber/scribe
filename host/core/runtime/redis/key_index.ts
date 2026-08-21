@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { kv } from "@scribe/foundation/src/redis/mod.ts";
+import { kv } from "@scribe/foundation/lib/src/redis/mod.ts";
 
 /**
  * A Redis set that names the cache entries belonging to one subject.

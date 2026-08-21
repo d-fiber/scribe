@@ -44,8 +44,8 @@ import {
 import { TtlLru } from "@scribe/core/runtime/support/cache/ttl_lru.ts";
 import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
 import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
-import { get } from "@scribe/foundation/src/http/mod.ts";
-import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
+import { get } from "@scribe/foundation/lib/src/http/mod.ts";
+import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 import type { JWTPayload } from "jose";
 
 export interface ResolvedJwtIdentity {

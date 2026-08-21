@@ -33,7 +33,7 @@
 //
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
-import { kv } from "@scribe/foundation/src/redis/mod.ts";
+import { kv } from "@scribe/foundation/lib/src/redis/mod.ts";
 
 /** What a claim does when Redis cannot answer. */
 export type WhenUnavailable = "allow" | "refuse";

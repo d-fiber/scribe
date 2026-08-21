@@ -51,8 +51,8 @@ import {
   RecommendationUpsertUserError,
 } from "@scribe/host/dependencies/features/recommendation/recommendation.ts";
 import { Env } from "@scribe/host/env.ts";
-import { currentClient } from "@scribe/foundation/src/http/run_with_client.ts";
-import type { Response } from "@scribe/foundation/src/http/response/response.ts";
+import { currentClient } from "@scribe/foundation/lib/src/http/run_with_client.ts";
+import type { Response } from "@scribe/foundation/lib/src/http/response/response.ts";
 
 const TIMEOUT_MS = 5_000;
 

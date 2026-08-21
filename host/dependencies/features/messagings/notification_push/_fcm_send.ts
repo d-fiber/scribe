@@ -35,8 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Env } from "@scribe/host/env.ts";
-import { post } from "@scribe/foundation/src/http/mod.ts";
-import type { Response as HttpResponse } from "@scribe/foundation/src/http/response/response.ts";
+import { post } from "@scribe/foundation/lib/src/http/mod.ts";
+import type { Response as HttpResponse } from "@scribe/foundation/lib/src/http/response/response.ts";
 import { fcmAccessToken } from "./_fcm_token.ts";
 
 export type FcmMessage = {

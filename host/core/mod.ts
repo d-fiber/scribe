@@ -51,11 +51,11 @@ export { RbacIdentity, RequestIdentity } from "./kernel/identity/request_identit
 export { Arr, Nested } from "./kernel/validation/schema.ts";
 export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema } from "./kernel/validation/schema.ts";
 
-export { Queue } from "@scribe/foundation/src/queue/mod.ts";
-export { at, Cron, cronExpression, every } from "@scribe/foundation/src/cron/mod.ts";
-export { Hook } from "@scribe/foundation/src/hook/mod.ts";
-export { Isolate } from "@scribe/foundation/src/isolate/mod.ts";
-export { Valkery } from "@scribe/foundation/src/valkery/mod.ts";
+export { Queue } from "@scribe/foundation/lib/src/queue/mod.ts";
+export { at, Cron, cronExpression, every } from "@scribe/foundation/lib/src/cron/mod.ts";
+export { Hook } from "@scribe/foundation/lib/src/hook/mod.ts";
+export { Isolate } from "@scribe/foundation/lib/src/isolate/mod.ts";
+export { Valkery } from "@scribe/foundation/lib/src/valkery/mod.ts";
 export { RequestScope } from "./runtime/scope.ts";
-export { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
-export type { RateLimitOptions, RateLimitOutcome } from "@scribe/foundation/src/rate_limit/mod.ts";
+export { RateLimit } from "@scribe/foundation/lib/src/rate_limit/mod.ts";
+export type { RateLimitOptions, RateLimitOutcome } from "@scribe/foundation/lib/src/rate_limit/mod.ts";

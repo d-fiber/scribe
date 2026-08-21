@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { MailError, MailSenderSmtp, MailStatus } from "@scribe/host/dependencies/features/messagings/mail/send.ts";
-import type { Row } from "@scribe/foundation/testing/database.ts";
+import type { Row } from "@scribe/foundation/tests/testing/database.ts";
 import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { installMock } from "@scribe/core/testing/install.ts";
 import nodemailer from "nodemailer";

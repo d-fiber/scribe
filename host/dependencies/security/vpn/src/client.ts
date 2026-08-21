@@ -35,14 +35,14 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { currentClient } from "@scribe/foundation/src/http/run_with_client.ts";
-import type { Response as HttpResponse } from "@scribe/foundation/src/http/response/response.ts";
+import { currentClient } from "@scribe/foundation/lib/src/http/run_with_client.ts";
+import type { Response as HttpResponse } from "@scribe/foundation/lib/src/http/response/response.ts";
 import type { Pagination } from "@scribe/core/contracts/pagination.ts";
 import { pagination as paginate } from "@scribe/core/contracts/pagination.ts";
 import type { Result } from "@scribe/core/contracts/result.ts";
 import { Failure, OK } from "@scribe/core/contracts/result.ts";
 import { Env } from "@scribe/host/env.ts";
-import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
+import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 
 export interface Vpn {
   id: string;

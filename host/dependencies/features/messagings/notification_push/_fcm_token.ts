@@ -35,8 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { post } from "@scribe/foundation/src/http/mod.ts";
-import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
+import { post } from "@scribe/foundation/lib/src/http/mod.ts";
+import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 import { Env } from "@scribe/host/env.ts";
 import { importPKCS8, SignJWT } from "jose";
 

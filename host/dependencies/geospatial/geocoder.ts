@@ -35,9 +35,9 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Env } from "@scribe/host/env.ts";
-import { get } from "@scribe/foundation/src/http/mod.ts";
+import { get } from "@scribe/foundation/lib/src/http/mod.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
+import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 
 const BASE_URL = "https://maps.googleapis.com/maps/api/geocode/json";
 const TIMEOUT_MS = 5_000;

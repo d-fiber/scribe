@@ -39,10 +39,10 @@
 // connection is attempted and `--allow-net` isn't required (see `.claude/testing.md`).
 
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { RateLimit } from "@scribe/foundation/src/rate_limit/mod.ts";
-import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
+import { RateLimit } from "@scribe/foundation/lib/src/rate_limit/mod.ts";
+import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 import { assertEquals } from "@std/assert";
-import { installRateLimiterMock, installValkeryMock } from "@scribe/foundation/testing/valkery.ts";
+import { installRateLimiterMock, installValkeryMock } from "@scribe/foundation/tests/testing/valkery.ts";
 
 const LIMIT = new RateLimit({
   key: "x",

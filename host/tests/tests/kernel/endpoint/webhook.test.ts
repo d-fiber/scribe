@@ -49,7 +49,7 @@ import {
   CLAIM_TTL_S,
   claimWebhookId,
 } from "@scribe/core/kernel/endpoint/webhook/replay.ts";
-import { kv, type Kv } from "@scribe/foundation/src/redis/mod.ts";
+import { kv, type Kv } from "@scribe/foundation/lib/src/redis/mod.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 import { assert, assertEquals, assertFalse } from "@std/assert";
 import { stub } from "@std/testing/mock";

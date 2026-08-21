@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Env } from "@scribe/host/env.ts";
-import { post } from "@scribe/foundation/src/http/mod.ts";
+import { post } from "@scribe/foundation/lib/src/http/mod.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import type { SmsContent } from "../entities.ts";
 import { SmsError, type SmsSenderService } from "./send.ts";

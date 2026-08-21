@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { assertEquals } from "@std/assert";
-import { FakePostgrestClient } from "@scribe/foundation/testing/database.ts";
+import { FakePostgrestClient } from "@scribe/foundation/tests/testing/database.ts";
 
 Deno.test("FakePostgrestClient: neq/gt/gte/lt/lte filters", async () => {
   const db = new FakePostgrestClient({

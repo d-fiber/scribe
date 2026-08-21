@@ -36,7 +36,7 @@
 
 import type { AdminRbac, AdminRbacSource } from "@scribe/core/contracts/rbac.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { Valkery } from "@scribe/foundation/src/valkery/valkery.ts";
+import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 
 export class AdminRbacResolver {
   private static readonly _cache = new Valkery<AdminRbac>({ key: "identity:rbac", ttl: Time.minutes(5) });

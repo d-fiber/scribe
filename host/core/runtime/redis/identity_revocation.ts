@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { KeyIndex } from "@scribe/core/runtime/redis/key_index.ts";
-import { kv } from "@scribe/foundation/src/redis/mod.ts";
+import { kv } from "@scribe/foundation/lib/src/redis/mod.ts";
 
 export const IDENTITY_CACHE_KEY = "identity:jwt";
 

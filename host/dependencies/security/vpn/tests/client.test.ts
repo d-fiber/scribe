@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { AdminVpnClient, type Vpn, VpnError } from "@scribe/host/dependencies/security/vpn/mod.ts";
-import { installValkeryMock } from "@scribe/foundation/testing/valkery.ts";
+import { installValkeryMock } from "@scribe/foundation/tests/testing/valkery.ts";
 import { assert, assertEquals } from "@std/assert";
 import { stub } from "@std/testing/mock";
 

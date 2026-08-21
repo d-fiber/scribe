@@ -46,9 +46,9 @@ import {
   type Event,
 } from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/hook/hook_pb.ts";
 import { Time } from "@scribe/core/contracts/common/time.ts";
-import { hookRegistry } from "@scribe/foundation/src/hook/mod.ts";
-import { QueuePublisher } from "@scribe/foundation/src/queue/core/producer.ts";
-import { queueRegistry } from "@scribe/foundation/src/queue/mod.ts";
+import { hookRegistry } from "@scribe/foundation/lib/src/hook/mod.ts";
+import { QueuePublisher } from "@scribe/foundation/lib/src/queue/core/producer.ts";
+import { queueRegistry } from "@scribe/foundation/lib/src/queue/mod.ts";
 import { decodeJson } from "../json.ts";
 
 function describe(cause: unknown): string {

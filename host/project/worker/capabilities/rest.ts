@@ -47,17 +47,17 @@ import {
   type QueryResult,
   QueryResultSchema,
 } from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/database/database_pb.ts";
-import { PostgrestClients } from "@scribe/foundation/src/database/client.ts";
-import { ownerOf } from "@scribe/foundation/src/database/schema.ts";
+import { PostgrestClients } from "@scribe/foundation/lib/src/database/client.ts";
+import { ownerOf } from "@scribe/foundation/lib/src/database/schema.ts";
 import {
   assertPlainColumn,
   keywordLiteral,
   quoteFilterList,
   quoteFilterLiteral,
   UnsafeFilterError,
-} from "@scribe/foundation/src/database/query/literal.ts";
-import { ownerScope } from "@scribe/foundation/src/database/query/scope.ts";
-import { AMBIGUITY_PROBE } from "@scribe/foundation/src/database/query/state.ts";
+} from "@scribe/foundation/lib/src/database/query/literal.ts";
+import { ownerScope } from "@scribe/foundation/lib/src/database/query/scope.ts";
+import { AMBIGUITY_PROBE } from "@scribe/foundation/lib/src/database/query/state.ts";
 import { decodeJson, encodeJson } from "../json.ts";
 
 function applyOperator(builder: any, filter: Filter): any {

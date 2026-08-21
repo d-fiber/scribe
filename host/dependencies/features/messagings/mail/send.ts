@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTMailsRow } from "@scribe/foundation/src/database/gen/rows.ts";
-import { database } from "@scribe/foundation/src/database/database.ts";
+import type { InternalTMailsRow } from "@scribe/foundation/lib/src/database/gen/rows.ts";
+import { database } from "@scribe/foundation/lib/src/database/database.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
 import { Env } from "@scribe/host/env.ts";

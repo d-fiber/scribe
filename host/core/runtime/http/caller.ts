@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { RateLimit, RateLimitOutcome } from "@scribe/foundation/src/rate_limit/mod.ts";
+import type { RateLimit, RateLimitOutcome } from "@scribe/foundation/lib/src/rate_limit/mod.ts";
 import { currentIdentity } from "@scribe/core/runtime/http/accessors/identity.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
 

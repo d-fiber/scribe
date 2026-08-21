@@ -41,7 +41,7 @@ import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
 import type { RouteDescriptor } from "@scribe/core/kernel/http/routing/descriptor.ts";
 import { mountDescriptors } from "@scribe/core/kernel/http/routing/descriptor_mount.ts";
 import { callEndpoint } from "@scribe/core/testing/kernel/endpoint.ts";
-import { installRateLimiterMock } from "@scribe/foundation/testing/valkery.ts";
+import { installRateLimiterMock } from "@scribe/foundation/tests/testing/valkery.ts";
 import { assertEquals } from "@std/assert";
 import { Hono } from "hono";
 

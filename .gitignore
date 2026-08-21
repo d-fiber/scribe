@@ -20,14 +20,14 @@ sdk/dart/pubspec.lock
 __pycache__/
 host/pkg/packages/audience/e2e_tests/.generated/
 host/pkg/packages/dynamic_links/e2e_tests/.generated/
-host/pkg/packages/foundation/e2e_tests/.generated/
+host/pkg/packages/foundation/tests/e2e/.generated/
 host/pkg/packages/realtime/e2e_tests/.generated/
 host/pkg/packages/remote_configs/e2e_tests/.generated/
 host/pkg/packages/search/e2e_tests/.generated/
 host/pkg/packages/storage/e2e_tests/.generated/
 host/pkg/packages/audience/e2e_tests/.postgres/
 host/pkg/packages/dynamic_links/e2e_tests/.postgres/
-host/pkg/packages/foundation/e2e_tests/.postgres/
+host/pkg/packages/foundation/tests/e2e/.postgres/
 host/pkg/packages/realtime/e2e_tests/.postgres/
 host/pkg/packages/remote_configs/e2e_tests/.postgres/
 host/pkg/packages/search/e2e_tests/.postgres/

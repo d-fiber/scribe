@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Tables } from "@scribe/foundation/src/database/gen/tables.ts";
+import { Tables } from "@scribe/foundation/lib/src/database/gen/tables.ts";
 import type { AdminRbacSource } from "@scribe/core/contracts/rbac.ts";
-import { PostgrestClients } from "@scribe/foundation/src/database/client.ts";
+import { PostgrestClients } from "@scribe/foundation/lib/src/database/client.ts";
 
 export class DatabaseAdminRbacSource implements AdminRbacSource {
   #db: Tables | null = null;

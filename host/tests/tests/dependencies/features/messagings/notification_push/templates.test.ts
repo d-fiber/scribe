@@ -40,7 +40,7 @@ import {
   PushTemplateError,
   PushTemplateRepository,
 } from "@scribe/host/dependencies/features/messagings/notification_push/push.ts";
-import type { Row } from "@scribe/foundation/testing/database.ts";
+import type { Row } from "@scribe/foundation/tests/testing/database.ts";
 import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { assert, assertEquals } from "@std/assert";
 

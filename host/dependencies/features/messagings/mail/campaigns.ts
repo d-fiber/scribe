@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { InternalTEmailCampaignsRow } from "@scribe/foundation/src/database/gen/rows.ts";
-import { database } from "@scribe/foundation/src/database/database.ts";
+import type { InternalTEmailCampaignsRow } from "@scribe/foundation/lib/src/database/gen/rows.ts";
+import { database } from "@scribe/foundation/lib/src/database/database.ts";
 import {
   CampaignAudience,
   type DeviceOs,
@@ -43,7 +43,7 @@ import {
 } from "@scribe/core/contracts/enums.ts";
 import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
 import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
-import type { CronTimezone } from "@scribe/foundation/src/cron/timezone.ts";
+import type { CronTimezone } from "@scribe/foundation/lib/src/cron/timezone.ts";
 import { Cron } from "croner";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
