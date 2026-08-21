@@ -45,7 +45,7 @@ import {
   type SetRequest,
   type SetResult,
   SetResultSchema,
-} from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/valkery/valkery_pb.ts";
+} from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/valkery/valkery_pb.ts";
 import { kv } from "@scribe/foundation/src/redis/mod.ts";
 import { decodeJson, encodeJson } from "../json.ts";
 

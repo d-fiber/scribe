@@ -46,7 +46,7 @@ import {
   type Query,
   type QueryResult,
   QueryResultSchema,
-} from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/database/database_pb.ts";
+} from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/database/database_pb.ts";
 import { PostgrestClients } from "@scribe/foundation/src/database/client.ts";
 import { ownerOf } from "@scribe/foundation/src/database/schema.ts";
 import {

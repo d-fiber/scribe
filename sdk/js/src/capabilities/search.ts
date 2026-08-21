@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Search } from "../../gen/scribe/host/packages/search/protocol/search_pb.ts";
+import { Search } from "../../gen/scribe/host/pkg/packages/search/protocol/search_pb.ts";
 import { decodeJson, encodeJson } from "../contracts/json.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";

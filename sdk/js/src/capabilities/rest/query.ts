@@ -45,7 +45,7 @@ import {
   RangeSchema,
   Database,
   type QueryResult,
-} from "../../../gen/scribe/host/packages/foundation/protocol/database/database_pb.ts";
+} from "../../../gen/scribe/host/pkg/packages/foundation/protocol/database/database_pb.ts";
 import { decodeJson, encodeJson } from "../../contracts/json.ts";
 import { host } from "../channel.ts";
 import { raiseOn } from "../error.ts";

@@ -35,10 +35,10 @@
 // LICENSE file, the LICENSE file governs.
 
 import { TransportFailure, UnaryServer } from "@scribe/sdk";
-import { Valkery } from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/valkery/valkery_pb.ts";
-import { Queue } from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/queue/queue_pb.ts";
-import { Hook } from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/hook/hook_pb.ts";
-import { Database } from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/database/database_pb.ts";
+import { Valkery } from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/valkery/valkery_pb.ts";
+import { Queue } from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/queue/queue_pb.ts";
+import { Hook } from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/hook/hook_pb.ts";
+import { Database } from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/database/database_pb.ts";
 import { Logging } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 import { CapabilityTokens } from "./capability_tokens.ts";
 import { cacheDelete, cacheGet, cacheSet } from "./capabilities/cache.ts";
