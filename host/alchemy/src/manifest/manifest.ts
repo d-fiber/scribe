@@ -51,6 +51,16 @@ export interface Manifest {
   /** The version this copy of the package publishes. */
   readonly version: Version;
 
+  /**
+   * The framework versions this package accepts, as its manifest wrote them.
+   *
+   * @remarks
+   * It is what the package says it was written against, checked before anything resolves. Without
+   * it a package would take whichever checkout is on hand and fail at type check, where nothing
+   * points back at the version that caused it.
+   */
+  readonly scribe: Constraint;
+
   /** The packages this one may import, each against the versions it accepts. */
   readonly dependencies: ReadonlyMap<string, Constraint>;
 }

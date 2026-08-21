@@ -40,6 +40,7 @@ import { chainOf, ManifestError, manifestFrom, manifestSource } from "../src/dec
 import { VersionError } from "@scribe/alchemy";
 
 const WHERE = "audiences/package.yaml";
+const ENVIRONMENT = 'environment:\n  scribe: "^3.0.0"\n';
 
 Deno.test("a manifest reads into what a package says about itself", () => {
   const declared = manifestFrom(
@@ -47,6 +48,7 @@ Deno.test("a manifest reads into what a package says about itself", () => {
 description: Broadcasts a row's life to the callers a channel lets in.
 version: 1.2.0
 
+${ENVIRONMENT}
 dependencies:
   audiences: "^1.0.0"
 `,
@@ -60,6 +62,7 @@ dependencies:
     "the manifest lost its description",
   );
   assertEquals(declared.version.toString(), "1.2.0", "the manifest lost its version");
+  assertEquals(declared.scribe.toString(), "^3.0.0", "the manifest lost the framework it runs on");
   assertEquals(
     declared.dependencies.get("audiences")?.toString(),
     "^1.0.0",
@@ -67,8 +70,8 @@ dependencies:
   );
 });
 
-Deno.test("a manifest holding only a name and a version is enough", () => {
-  const declared = manifestFrom("name: audiences\nversion: 0.1.0\n", WHERE);
+Deno.test("a manifest holding only a name, a version and a framework is enough", () => {
+  const declared = manifestFrom(`name: audiences\nversion: 0.1.0\n${ENVIRONMENT}`, WHERE);
 
   assertEquals(declared.name, "audiences", "the manifest lost its name");
   assertEquals(declared.description, DEFAULT_DESCRIPTION, "a package nobody described was described anyway");
@@ -97,7 +100,7 @@ Deno.test("a manifest carrying a key nothing reads is refused", () => {
 
 Deno.test("a manifest holding its dependencies as a word is refused", () => {
   assertThrows(
-    () => manifestFrom("name: audiences\nversion: 1.0.0\ndependencies: audience\n", WHERE),
+    () => manifestFrom(`name: audiences\nversion: 1.0.0\n${ENVIRONMENT}dependencies: audience\n`, WHERE),
     ManifestError,
     "other than a block",
   );
@@ -105,15 +108,31 @@ Deno.test("a manifest holding its dependencies as a word is refused", () => {
 
 Deno.test("a manifest holding a constraint as something other than a word is refused", () => {
   assertThrows(
-    () => manifestFrom("name: realtime\nversion: 1.0.0\ndependencies:\n  audiences:\n    - 1\n", WHERE),
+    () => manifestFrom(`name: realtime\nversion: 1.0.0\n${ENVIRONMENT}dependencies:\n  audiences:\n    - 1\n`, WHERE),
     ManifestError,
     "other than a word",
   );
 });
 
+Deno.test("a manifest that names no framework is refused", () => {
+  assertThrows(
+    () => manifestFrom("name: audiences\nversion: 1.0.0\n", WHERE),
+    ManifestError,
+    'has no "environment:"',
+  );
+});
+
+Deno.test("a key beside the framework in the environment block is refused", () => {
+  assertThrows(
+    () => manifestFrom('name: audiences\nversion: 1.0.0\nenvironment:\n  deno: "^2.0.0"\n', WHERE),
+    ManifestError,
+    "which means nothing",
+  );
+});
+
 Deno.test("a name the chain refuses is refused in the manifest too", () => {
   assertThrows(
-    () => manifestFrom("name: Audiences\nversion: 1.0.0\n", WHERE),
+    () => manifestFrom(`name: Audiences\nversion: 1.0.0\n${ENVIRONMENT}`, WHERE),
     DeclarationError,
     "cannot name",
   );
@@ -140,6 +159,7 @@ Deno.test("a manifest written back as typescript reads into the same manifest", 
 description: Broadcasts a row's life to the callers a channel lets in.
 version: 1.2.0
 
+${ENVIRONMENT}
 dependencies:
   audiences: "^1.0.0"
 `;
@@ -158,10 +178,11 @@ dependencies:
   );
 });
 
-Deno.test("a manifest with nothing but a name and a version writes the shortest chain", () => {
+Deno.test("a manifest with nothing but a name, a version and a framework writes the shortest chain", () => {
   assertEquals(
-    chainOf(manifestFrom("name: audiences\nversion: 1.0.0\n", WHERE)),
-    `Package.named("audiences").describedAs(${JSON.stringify(DEFAULT_DESCRIPTION)}).version("1.0.0").build()`,
+    chainOf(manifestFrom(`name: audiences\nversion: 1.0.0\n${ENVIRONMENT}`, WHERE)),
+    `Package.named("audiences").describedAs(${JSON.stringify(DEFAULT_DESCRIPTION)})` +
+      `.version("1.0.0").runsOn("^3.0.0").build()`,
     "the chain says more than the manifest did",
   );
 });

@@ -44,7 +44,10 @@ import type { Manifest } from "@scribe/alchemy";
 /** Raised when a manifest cannot be read. */
 export class ManifestError extends ScribeError {}
 
-const KEYS = new Set(["name", "description", "version", "dependencies"]);
+const KEYS = new Set(["name", "description", "version", "environment", "dependencies"]);
+
+/** The key, inside `environment:`, naming the framework a package is written against. */
+const FRAMEWORK = "scribe";
 
 /**
  * The manifest `source` spells, where `source` is the text of a `package.yaml`.
@@ -55,7 +58,7 @@ const KEYS = new Set(["name", "description", "version", "dependencies"]);
  * constraint are therefore refused with the same sentence whether they were written in YAML or in
  * TypeScript.
  *
- * Four keys and no more. Everything a package used to write down about its own tree is read off
+ * Five keys and no more. Everything a package used to write down about its own tree is read off
  * that tree instead.
  *
  * @param where - The path the text came from, named in whatever is thrown.
@@ -78,10 +81,11 @@ export function manifestFrom(source: string, where: string): Manifest {
   const describing: AwaitingVersion = description === null ? named : named.describedAs(description);
 
   const versioned = describing.version(text(document, "version", where));
+  const running = versioned.runsOn(framework(document, where));
 
   const dependencies = mapping(document, "dependencies", where);
   return (
-    dependencies === null ? versioned : versioned.dependsOn(dependencies as Dependencies)
+    dependencies === null ? running : running.dependsOn(dependencies as Dependencies)
   ).build();
 }
 
@@ -108,6 +112,7 @@ export function chainOf(manifest: Manifest): string {
     `Package.named(${JSON.stringify(manifest.name)})`,
     `.describedAs(${JSON.stringify(manifest.description)})`,
     `.version(${JSON.stringify(String(manifest.version))})`,
+    `.runsOn(${JSON.stringify(String(manifest.scribe))})`,
   ];
 
   if (manifest.dependencies.size > 0) {
@@ -119,6 +124,33 @@ export function chainOf(manifest: Manifest): string {
 
   steps.push(".build()");
   return steps.join("");
+}
+
+function framework(document: Record<string, unknown>, where: string): string {
+  const value = document["environment"];
+  if (value === undefined || value === null) {
+    throw new ManifestError(
+      `${where} has no "environment:". A package names the framework it was written against, so ` +
+        `that a checkout it cannot run on is refused before anything is resolved:\n\n` +
+        `environment:\n  ${FRAMEWORK}: "^1.0.0"`,
+    );
+  }
+  if (typeof value !== "object" || Array.isArray(value)) {
+    throw new ManifestError(
+      `${where} holds "environment:" as something other than a block of names and versions.`,
+    );
+  }
+
+  const block = value as Record<string, unknown>;
+  for (const key of Object.keys(block)) {
+    if (key === FRAMEWORK) continue;
+    throw new ManifestError(
+      `${where} holds "environment.${key}:", which means nothing. The block names ` +
+        `"${FRAMEWORK}:" and nothing else.`,
+    );
+  }
+
+  return text(block, FRAMEWORK, `${where}, under "environment:"`);
 }
 
 function read(source: string, where: string): Record<string, unknown> {

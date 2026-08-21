@@ -41,6 +41,7 @@ Deno.test("a manifest carries what the chain gave it", () => {
   const declared = Package.named("realtime")
     .describedAs("Broadcasts a row's life to the callers a channel lets in.")
     .version("1.2.0")
+    .runsOn("^3.0.0")
     .dependsOn({ audiences: "^1.0.0" })
     .build();
 
@@ -51,6 +52,7 @@ Deno.test("a manifest carries what the chain gave it", () => {
     "the manifest lost its description",
   );
   assertEquals(declared.version.toString(), "1.2.0", "the manifest lost its version");
+  assertEquals(declared.scribe.toString(), "^3.0.0", "the manifest lost the framework it runs on");
   assertEquals(
     declared.dependencies.get("audiences")?.toString(),
     "^1.0.0",
@@ -58,8 +60,8 @@ Deno.test("a manifest carries what the chain gave it", () => {
   );
 });
 
-Deno.test("a package that says nothing beyond its version is a package", () => {
-  const declared = Package.named("audiences").version("1.0.0").build();
+Deno.test("a package that says nothing beyond its version and its framework is a package", () => {
+  const declared = Package.named("audiences").version("1.0.0").runsOn("^3.0.0").build();
 
   assertEquals(declared.dependencies.size, 0, "a package that asks for nothing carries a dependency");
   assertEquals(declared.description, DEFAULT_DESCRIPTION, "a package nobody described was described anyway");
@@ -93,9 +95,13 @@ Deno.test("a version that is not three numbers is refused", () => {
   assertThrows(() => Package.named("realtime").version("1.2"), VersionError, "is not a version");
 });
 
+Deno.test("a framework constraint that cannot be read is refused", () => {
+  assertThrows(() => Package.named("realtime").version("1.0.0").runsOn("3.x"), VersionError, "is not a bound");
+});
+
 Deno.test("a package cannot ask for itself", () => {
   assertThrows(
-    () => Package.named("realtime").version("1.0.0").dependsOn({ realtime: "^1.0.0" }),
+    () => Package.named("realtime").version("1.0.0").runsOn("^3.0.0").dependsOn({ realtime: "^1.0.0" }),
     DeclarationError,
     "asks for itself",
   );
@@ -103,7 +109,7 @@ Deno.test("a package cannot ask for itself", () => {
 
 Deno.test("a dependency on something that cannot name a package is refused", () => {
   assertThrows(
-    () => Package.named("realtime").version("1.0.0").dependsOn({ Audiences: "^1.0.0" }),
+    () => Package.named("realtime").version("1.0.0").runsOn("^3.0.0").dependsOn({ Audiences: "^1.0.0" }),
     DeclarationError,
     "cannot name a package",
   );

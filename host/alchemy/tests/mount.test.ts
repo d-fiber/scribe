@@ -37,7 +37,7 @@
 import { assertEquals } from "@std/assert";
 import { mount, Package } from "../mod.ts";
 
-const realtime = Package.named("realtime").version("1.2.0").build();
+const realtime = Package.named("realtime").version("1.2.0").runsOn("^3.0.0").build();
 
 Deno.test("mounting keeps the manifest it was given", () => {
   const mounted = mount(realtime, {});

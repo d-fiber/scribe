@@ -73,6 +73,7 @@ export { DeclarationError, DEFAULT_DESCRIPTION, Package } from "./src/manifest/p
 export type {
   AwaitingDependencies,
   AwaitingDescription,
+  AwaitingFramework,
   AwaitingVersion,
   Buildable,
   Dependencies,

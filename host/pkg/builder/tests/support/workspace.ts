@@ -45,6 +45,9 @@ export interface WrittenPackage {
   /** The version its manifest publishes, `1.0.0` when the test does not care. */
   readonly version?: string;
 
+  /** The framework versions it accepts, `^1.0.0` when the test does not care. */
+  readonly scribe?: string;
+
   /** The packages it asks for, from a name to the constraint it accepts. */
   readonly dependencies?: Readonly<Record<string, string>>;
 
@@ -83,6 +86,7 @@ export function manifestText(name: string, written: WrittenPackage = {}): string
   const lines = [`name: ${name}`];
   if (written.description !== undefined) lines.push(`description: ${written.description}`);
   lines.push(`version: ${written.version ?? "1.0.0"}`);
+  lines.push("", "environment:", `  scribe: "${written.scribe ?? "^1.0.0"}"`);
 
   if (written.dependencies !== undefined) {
     lines.push("", "dependencies:");

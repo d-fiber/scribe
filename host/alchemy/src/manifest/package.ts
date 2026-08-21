@@ -73,6 +73,20 @@ export interface AwaitingDependencies extends Buildable {
   dependsOn(dependencies: Dependencies): Buildable;
 }
 
+/** The point where the framework is the only thing that may follow. */
+export interface AwaitingFramework {
+  /**
+   * Declares the framework versions this package accepts.
+   *
+   * @remarks
+   * It is a step of its own rather than a value the build may skip, because a package that named
+   * no framework would resolve against whichever checkout is on hand.
+   *
+   * @throws {ConstraintError} When `constraint` cannot be read as one.
+   */
+  runsOn(constraint: string): AwaitingDependencies;
+}
+
 /** The point where the version is the only thing that may follow. */
 export interface AwaitingVersion {
   /**
@@ -80,7 +94,7 @@ export interface AwaitingVersion {
    *
    * @throws {VersionError} When `version` is not three numbers separated by dots.
    */
-  version(version: string): AwaitingDependencies;
+  version(version: string): AwaitingFramework;
 }
 
 /** The point right after the name, where a package may say what it is for. */
@@ -109,14 +123,17 @@ export interface AwaitingDescription extends AwaitingVersion {
  * Package.named("realtime")
  *   .describedAs("Broadcasts a row's life to the callers a channel lets in.")
  *   .version("1.2.0")
+ *   .runsOn("^3.0.0")
  *   .dependsOn({ audiences: "^1.0.0" })
  *   .build();
  * ```
  */
-export class Package implements AwaitingDescription, AwaitingVersion, AwaitingDependencies, Buildable {
+export class Package
+  implements AwaitingDescription, AwaitingVersion, AwaitingFramework, AwaitingDependencies, Buildable {
   readonly #name: string;
   #description: string = DEFAULT_DESCRIPTION;
   #version: Version | null = null;
+  #scribe: Constraint | null = null;
   #dependencies: Map<string, Constraint> = new Map();
 
   private constructor(name: string) {
@@ -145,8 +162,13 @@ export class Package implements AwaitingDescription, AwaitingVersion, AwaitingDe
     return this;
   }
 
-  version(version: string): AwaitingDependencies {
+  version(version: string): AwaitingFramework {
     this.#version = Version.parse(version);
+    return this;
+  }
+
+  runsOn(constraint: string): AwaitingDependencies {
+    this.#scribe = Constraint.parse(constraint);
     return this;
   }
 
@@ -168,11 +190,15 @@ export class Package implements AwaitingDescription, AwaitingVersion, AwaitingDe
     if (this.#version === null) {
       throw new DeclarationError(`"${this.#name}" has no version.`);
     }
+    if (this.#scribe === null) {
+      throw new DeclarationError(`"${this.#name}" names no framework it runs on.`);
+    }
 
     return Object.freeze({
       name: this.#name,
       description: this.#description,
       version: this.#version,
+      scribe: this.#scribe,
       dependencies: new Map(this.#dependencies),
     });
   }
