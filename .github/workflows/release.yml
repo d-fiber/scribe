@@ -28,7 +28,7 @@ jobs:
           ssh-key: ${{ secrets.RELEASE_PUSH_KEY }}
           persist-credentials: true
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
 
