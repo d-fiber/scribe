@@ -4,6 +4,19 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 4.0.0 (2026-08-21)
+
+Component versions: @scribe/core 2.0.2, @dependencies/core 0.1.11
+
+### Breaking
+
+- bring the builder up to 2.0.0, without its language half (13bff05a)
+- take foundation in with the layout every package has to have (e04223c8)
+
+### Documentation
+
+- drop the security policy, which no repository here carries (4cac13b5)
+
 ## 3.0.1 (2026-08-21)
 
 Component versions: @scribe/core 2.0.1
