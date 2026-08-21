@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { join } from "@std/path";
-import type { Provided } from "../declaration/declaration.ts";
+import type { Provided } from "../declaration/discovered.ts";
 import {
   entryOf,
   LIBRARY_DIRECTORY,

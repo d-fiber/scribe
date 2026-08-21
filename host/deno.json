@@ -98,7 +98,6 @@
     "@scribe/alchemy": "./alchemy/mod.ts",
     "@scribe/audience/": "./pkg/packages/audience/",
     "@scribe/auth/": "./pkg/packages/auth/",
-    "@scribe/builder": "./pkg/builder/mod.ts",
     "@scribe/builder/tools": "./pkg/builder/tools.ts",
     "@scribe/core/": "./core/",
     "@scribe/dynamic_links/": "./pkg/packages/dynamic_links/",

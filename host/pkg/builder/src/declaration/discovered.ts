@@ -34,26 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Constraint } from "../version/constraint.ts";
-import type { Version } from "../version/version.ts";
-
-/** A step a package runs at one of the three moments of its life. */
-export type LifecycleStep = () => void | Promise<void>;
-
-/** What a package says about itself, and the whole of what its manifest holds. */
-export interface Manifest {
-  /** The name the package is mounted, imported and written into `config.yaml` under. */
-  readonly name: string;
-
-  /** What the package is for, in one sentence, as its manifest puts it. */
-  readonly description: string;
-
-  /** The version this copy of the package publishes. */
-  readonly version: Version;
-
-  /** The packages this one may import, each against the versions it accepts. */
-  readonly dependencies: ReadonlyMap<string, Constraint>;
-}
+import type { Manifest } from "@scribe/alchemy";
 
 /** The directories a package poses on the machine, each relative to the package. */
 export interface Provided {
@@ -101,65 +82,4 @@ export interface Declaration extends Manifest {
    * workspace, so no package carries a version of something it does not own.
    */
   readonly imports: ReadonlySet<string>;
-}
-
-/**
- * The three moments a package runs at, as its entry file exports them.
- *
- * @remarks
- * They are read off the module rather than declared in the manifest, because a manifest holds
- * values and these are functions. Each one is optional, and a package that exports none simply
- * never runs outside the calls its consumers make.
- */
-export interface Lifecycle {
-  /** What is wired as soon as the entry is imported, because it needs nothing to be running. */
-  readonly wires?: LifecycleStep;
-
-  /** What runs once the process can reach the database, after boot. */
-  readonly starts?: LifecycleStep;
-
-  /** What runs when the process is asked to stop. */
-  readonly stops?: LifecycleStep;
-
-  /**
-   * Whatever else the entry exports, which is the package's own surface and none of this concern.
-   *
-   * @remarks
-   * It is here because the three steps above are all optional, and TypeScript refuses a value that
-   * shares no property with a type whose properties are all optional. Without this, a package whose
-   * entry runs at no moment could not be handed over at all, which is most of them.
-   */
-  readonly [exported: string]: unknown;
-}
-
-/** A package the host has on hand, with the steps its entry offered. */
-export interface MountedPackage {
-  /** What the manifest declared. */
-  readonly manifest: Manifest;
-
-  /** What is wired at import, or null when the entry exports nothing for it. */
-  readonly wires: LifecycleStep | null;
-
-  /** What runs after boot, or null when the entry exports nothing for it. */
-  readonly starts: LifecycleStep | null;
-
-  /** What runs at shutdown, or null when the entry exports nothing for it. */
-  readonly stops: LifecycleStep | null;
-}
-
-/**
- * The package `manifest` describes, with whichever steps `entry` happens to export.
- *
- * @remarks
- * This is what the generated registrations call, once per mounted package. Reading the steps here
- * rather than at each call site means a package that exports none and a package that exports all
- * three are handed to the host in the same shape.
- */
-export function mount(manifest: Manifest, entry: Lifecycle): MountedPackage {
-  return {
-    manifest,
-    wires: entry.wires ?? null,
-    starts: entry.starts ?? null,
-    stops: entry.stops ?? null,
-  };
 }

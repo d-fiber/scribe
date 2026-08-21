@@ -35,14 +35,14 @@
 // LICENSE file, the LICENSE file governs.
 
 import { parse } from "@std/yaml";
-import { BuilderError } from "../errors.ts";
-import { DRIVER } from "../workspace/scope.ts";
-import type { AwaitingVersion, Dependencies } from "./builder.ts";
-import { Package } from "./builder.ts";
-import type { Manifest } from "./declaration.ts";
+import { ScribeError } from "@scribe/alchemy";
+import { LANGUAGE } from "../workspace/scope.ts";
+import type { AwaitingVersion, Dependencies } from "@scribe/alchemy";
+import { Package } from "@scribe/alchemy";
+import type { Manifest } from "@scribe/alchemy";
 
 /** Raised when a manifest cannot be read. */
-export class ManifestError extends BuilderError {}
+export class ManifestError extends ScribeError {}
 
 const KEYS = new Set(["name", "description", "version", "dependencies"]);
 
@@ -93,7 +93,7 @@ export function manifestFrom(source: string, where: string): Manifest {
  * the form the generated registrations are written in, so nothing at runtime has to parse YAML.
  */
 export function manifestSource(manifest: Manifest): string {
-  return `import { Package } from ${JSON.stringify(DRIVER)};\n\nexport default ${chainOf(manifest)};\n`;
+  return `import { Package } from ${JSON.stringify(LANGUAGE)};\n\nexport default ${chainOf(manifest)};\n`;
 }
 
 /**

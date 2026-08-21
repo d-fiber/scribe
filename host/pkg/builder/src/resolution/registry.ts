@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Constraint } from "../version/constraint.ts";
-import type { Version } from "../version/version.ts";
+import type { Constraint } from "@scribe/alchemy";
+import type { Version } from "@scribe/alchemy";
 import type { DiscoveredPackage } from "../workspace/discovery.ts";
 
 /** Where resolution learns which versions of a package exist, and what each of them asks for. */

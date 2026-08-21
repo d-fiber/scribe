@@ -41,8 +41,12 @@ export const SCOPE = "@scribe/";
  * The specifier every package declares itself with.
  *
  * @remarks
- * It is not a dependency and never appears in a `needs`, for the same reason the language a package
- * is written in does not: a package that could decline the driver could not declare itself, so
+ * It is not a dependency and never appears in a manifest, for the same reason the language a
+ * package is written in does not: a package that could decline it could not declare itself, so
  * asking each one to write it down would be a line with no decision behind it.
+ *
+ * It names the language rather than this program. What the generated registrations import is the
+ * chain and the mount, and both live in `@scribe/alchemy`; nothing they do needs the half that
+ * reads a tree.
  */
-export const DRIVER: string = `${SCOPE}builder`;
+export const LANGUAGE: string = `${SCOPE}alchemy`;

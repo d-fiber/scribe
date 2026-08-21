@@ -34,13 +34,13 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { BuilderError } from "../errors.ts";
-import type { Constraint } from "../version/constraint.ts";
-import type { Version } from "../version/version.ts";
+import { ScribeError } from "@scribe/alchemy";
+import type { Constraint } from "@scribe/alchemy";
+import type { Version } from "@scribe/alchemy";
 import type { Registry } from "./registry.ts";
 
 /** Raised when no set of versions answers every constraint at once. */
-export class ResolutionError extends BuilderError {}
+export class ResolutionError extends ScribeError {}
 
 /** One package resolution settled on, and how it got into the answer. */
 export interface ResolvedPackage {

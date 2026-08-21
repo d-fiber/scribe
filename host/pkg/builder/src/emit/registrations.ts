@@ -36,15 +36,15 @@
 
 import { dirname, join } from "@std/path";
 import { chainOf } from "../declaration/manifest.ts";
-import { BuilderError } from "../errors.ts";
+import { ScribeError } from "@scribe/alchemy";
 import type { Resolution } from "../resolution/solver.ts";
 import type { DiscoveredPackage } from "../workspace/discovery.ts";
-import { DRIVER } from "../workspace/scope.ts";
+import { LANGUAGE } from "../workspace/scope.ts";
 import { entryOf } from "../workspace/layout.ts";
 import { specifierFrom } from "./paths.ts";
 
 /** Raised when the packages cannot be put in an order the host can start them in. */
-export class EmissionError extends BuilderError {}
+export class EmissionError extends ScribeError {}
 
 /**
  * The source of the file the host imports to reach every mounted package.
@@ -73,7 +73,7 @@ export function registrationsSource(
   const ordered = dependenciesFirst(resolution, found);
 
   const lines: string[] = [
-    `import { mount, Package } from ${JSON.stringify(DRIVER)};`,
+    `import { mount, Package } from ${JSON.stringify(LANGUAGE)};`,
   ];
   for (const name of ordered) {
     const entry = join(found.get(name)!.directory, entryOf(name));

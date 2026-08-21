@@ -35,15 +35,15 @@
 // LICENSE file, the LICENSE file governs.
 
 import { join } from "@std/path";
-import type { Declaration } from "../declaration/declaration.ts";
+import type { Declaration } from "../declaration/discovered.ts";
 import { manifestFrom } from "../declaration/manifest.ts";
-import { BuilderError } from "../errors.ts";
+import { ScribeError } from "@scribe/alchemy";
 import { detectExports, detectProvided } from "./detect.ts";
 import { outsideOf } from "./imports.ts";
 import { MANIFEST_FILE } from "./layout.ts";
 
 /** Raised when a directory carries a manifest that cannot be read. */
-export class DiscoveryError extends BuilderError {}
+export class DiscoveryError extends ScribeError {}
 
 /** A package found on disk, with what its manifest says and what its tree adds. */
 export interface DiscoveredPackage {

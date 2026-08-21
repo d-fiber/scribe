@@ -46,7 +46,7 @@
  * writing a package and reading what is wrong with one are its `pkg create` and `pkg check`.
  */
 
-export type { Declaration, Provided } from "./src/declaration/declaration.ts";
+export type { Declaration, Provided } from "./src/declaration/discovered.ts";
 export { chainOf, ManifestError, manifestFrom, manifestSource } from "./src/declaration/manifest.ts";
 
 export { discover, DiscoveryError, loadDeclaration } from "./src/workspace/discovery.ts";
@@ -63,7 +63,7 @@ export {
   TESTING_DIRECTORY,
   TESTS_DIRECTORY,
 } from "./src/workspace/layout.ts";
-export { DRIVER, SCOPE } from "./src/workspace/scope.ts";
+export { LANGUAGE, SCOPE } from "./src/workspace/scope.ts";
 
 export { WorkspaceRegistry } from "./src/resolution/registry.ts";
 export type { Registry } from "./src/resolution/registry.ts";

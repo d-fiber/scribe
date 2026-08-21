@@ -36,7 +36,7 @@
 
 import { dirname, join } from "@std/path";
 import type { DiscoveredPackage } from "../workspace/discovery.ts";
-import { DRIVER, SCOPE } from "../workspace/scope.ts";
+import { LANGUAGE, SCOPE } from "../workspace/scope.ts";
 import { specifierFrom } from "./paths.ts";
 
 /** One directory of code, with the packages the map lets it reach. */
@@ -62,7 +62,7 @@ export interface ImportMapOptions {
   readonly consumers?: readonly Consumer[];
 
   /**
-   * The absolute path of the driver's surface, which every package reaches to declare itself.
+   * The absolute path of the language's surface, which every package reaches to declare itself.
    *
    * @remarks
    * It is a path and never a registry specifier, because the half that writes the registrations
@@ -71,7 +71,7 @@ export interface ImportMapOptions {
    *
    * Left out when the packages are read for something other than a run.
    */
-  readonly driver?: string;
+  readonly language?: string;
 
   /**
    * What answers each specifier the workspace allows outside the framework.
@@ -89,7 +89,7 @@ export interface ImportMap {
   /**
    * What resolves from anywhere.
    *
-   * It holds the driver and nothing else. Every package declares itself with it, so putting it in
+   * It holds the language and nothing else. Every package declares itself with it, so putting it in
    * a scope would mean writing the same grant once per package; everything else is scoped to the
    * directory that earned it, and a specifier written where it was not declared falls back on
    * nothing.
@@ -145,8 +145,8 @@ export function importMapFor(
   }
 
   const imports: Record<string, string> = {};
-  if (options.driver !== undefined) {
-    imports[DRIVER] = specifierFrom(from, options.driver);
+  if (options.language !== undefined) {
+    imports[LANGUAGE] = specifierFrom(from, options.language);
   }
 
   return { imports, scopes: sortedScopes(scopes) };

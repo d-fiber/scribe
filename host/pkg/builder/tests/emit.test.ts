@@ -36,7 +36,7 @@
 
 import { assertEquals } from "@std/assert";
 import { join } from "@std/path";
-import { Constraint } from "../src/version/constraint.ts";
+import { Constraint } from "@scribe/alchemy";
 import { discover } from "../src/workspace/discovery.ts";
 import { WorkspaceRegistry } from "../src/resolution/registry.ts";
 import { resolve } from "../src/resolution/solver.ts";
@@ -77,14 +77,14 @@ Deno.test("the import map grants a package what it declared, inside its own scop
   });
 });
 
-Deno.test("the import map grants nothing from anywhere but the driver", async () => {
+Deno.test("the import map grants nothing from anywhere but the language", async () => {
   await inTemporaryRoot(async (root) => {
     await chain(root);
     const map = importMapFor(await discover([root]), join(root, ".scribe", "imports.json"), {
-      driver: join(root, "builder", "mod.ts"),
+      language: join(root, "alchemy", "mod.ts"),
     });
 
-    assertEquals(map.imports, { "@scribe/builder": "../builder/mod.ts" }, "something else resolves from anywhere");
+    assertEquals(map.imports, { "@scribe/alchemy": "../alchemy/mod.ts" }, "something else resolves from anywhere");
   });
 });
 

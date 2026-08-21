@@ -37,8 +37,8 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import type { Registry } from "../src/resolution/registry.ts";
 import { ResolutionError, resolve } from "../src/resolution/solver.ts";
-import { Constraint } from "../src/version/constraint.ts";
-import { Version } from "../src/version/version.ts";
+import { Constraint } from "@scribe/alchemy";
+import { Version } from "@scribe/alchemy";
 
 type Catalogue = Record<string, Record<string, Record<string, string>>>;
 

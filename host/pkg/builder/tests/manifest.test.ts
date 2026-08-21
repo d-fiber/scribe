@@ -35,9 +35,9 @@
 // LICENSE file, the LICENSE file governs.
 
 import { assertEquals, assertThrows } from "@std/assert";
-import { DeclarationError, DEFAULT_DESCRIPTION } from "../src/declaration/builder.ts";
+import { DeclarationError, DEFAULT_DESCRIPTION } from "@scribe/alchemy";
 import { chainOf, ManifestError, manifestFrom, manifestSource } from "../src/declaration/manifest.ts";
-import { VersionError } from "../src/version/version.ts";
+import { VersionError } from "@scribe/alchemy";
 
 const WHERE = "audiences/package.yaml";
 
@@ -146,7 +146,7 @@ dependencies:
   const written = manifestSource(manifestFrom(source, WHERE));
 
   assertEquals(
-    written.includes('import { Package } from "@scribe/builder";'),
+    written.includes('import { Package } from "@scribe/alchemy";'),
     true,
     `no import: ${written}`,
   );

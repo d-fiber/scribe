@@ -38,7 +38,7 @@ import { join } from "@std/path";
 import type { Resolution } from "../resolution/solver.ts";
 import { resolve } from "../resolution/solver.ts";
 import { WorkspaceRegistry } from "../resolution/registry.ts";
-import { Constraint } from "../version/constraint.ts";
+import { Constraint } from "@scribe/alchemy";
 import type { DiscoveredPackage } from "../workspace/discovery.ts";
 import { discover } from "../workspace/discovery.ts";
 import { writeImportMap } from "./import_map.ts";
@@ -73,8 +73,8 @@ export interface Emission {
    */
   readonly consumers?: readonly string[];
 
-  /** The absolute path of the driver's surface, which every package reaches to declare itself. */
-  readonly driver?: string;
+  /** The absolute path of the language's surface, which every package reaches to declare itself. */
+  readonly language?: string;
 
   /** What answers each specifier the workspace allows outside the framework. */
   readonly imports?: ReadonlyMap<string, string>;
@@ -102,7 +102,7 @@ export async function emit(asked: Emission): Promise<Resolution> {
 
   await writeImportMap(mounted, join(asked.into, "imports.json"), {
     consumers: (asked.consumers ?? []).map((directory) => ({ directory, may })),
-    driver: asked.driver,
+    language: asked.language,
     imports: asked.imports,
   });
   await writeResolution(resolution, packages, join(asked.into, "resolution.json"));
