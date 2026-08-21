@@ -59,7 +59,7 @@ case "$PACKAGE" in
 esac
 
 echo "[$SCOPE] running the $PACKAGE suite against the stack that is already up"
-echo "[$SCOPE] start it with host/packages/_internal/tools/e2e/up.sh $PACKAGE"
+echo "[$SCOPE] start it with host/pkg/packages/tool/e2e/up.sh $PACKAGE"
 echo ""
 
 (cd "$ROOT/host" && deno task "$TASK")

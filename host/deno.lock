@@ -21,8 +21,10 @@
     "jsr:@std/internal@^1.0.14": "1.0.14",
     "jsr:@std/io@0.225.2": "0.225.2",
     "jsr:@std/media-types@1": "1.1.0",
+    "jsr:@std/path@1": "1.1.6",
     "jsr:@std/path@^1.0.8": "1.1.6",
     "jsr:@std/testing@1": "1.0.19",
+    "jsr:@std/yaml@1": "1.2.0",
     "npm:@bufbuild/protobuf@2": "2.14.0",
     "npm:@jsquash/webp@1": "1.5.0",
     "npm:@opensearch-project/opensearch@2": "2.13.0",
@@ -52,7 +54,7 @@
         "jsr:@std/crypto",
         "jsr:@std/encoding",
         "jsr:@std/fmt",
-        "jsr:@std/path"
+        "jsr:@std/path@^1.0.8"
       ]
     },
     "@hono/hono@4.12.24": {
@@ -139,6 +141,9 @@
         "jsr:@std/async",
         "jsr:@std/data-structures"
       ]
+    },
+    "@std/yaml@1.2.0": {
+      "integrity": "20beb41e4983ba3437dbefac62b14061ab058e8a187596f19d28ff9035f6e6cf"
     }
   },
   "npm": {
@@ -750,7 +755,9 @@
       "jsr:@panva/jose@6",
       "jsr:@std/assert@1",
       "jsr:@std/media-types@1",
+      "jsr:@std/path@1",
       "jsr:@std/testing@1",
+      "jsr:@std/yaml@1",
       "npm:@bufbuild/protobuf@2",
       "npm:@jsquash/webp@1",
       "npm:@opensearch-project/opensearch@2",

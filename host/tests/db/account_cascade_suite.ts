@@ -40,7 +40,7 @@ const SDK_ROOT = new URL("../../", import.meta.url).pathname;
 
 const SDK_SQL_DIRS = [
   `${SDK_ROOT}core/db/init`,
-  `${SDK_ROOT}packages/auth/db/init`,
+  `${SDK_ROOT}pkg/packages/auth/db/init`,
   `${SDK_ROOT}dependencies/security/vpn/db/init`,
 ];
 

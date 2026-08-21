@@ -1,0 +1,7 @@
+{
+  "name": "@scribe/builder",
+  "exports": {
+    ".": "./mod.ts",
+    "./tools": "./tools.ts"
+  }
+}
