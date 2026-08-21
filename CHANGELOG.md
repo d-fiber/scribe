@@ -4,6 +4,35 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 3.0.0 (2026-08-21)
+
+Component versions: @scribe/core 2.0.0, @dependencies/core 0.1.10, protocol 2.0.2, @scribe/sdk 0.1.6
+
+### Breaking
+
+- take the packages and the builder into host/pkg (df5ff937)
+- put scribe under the Mozilla Public License 2.0 (0f0b57b0)
+- put the tools in tools/, without a platform in the path (a1546a10)
+- move auth out of dependencies and into its own package (edf6b636)
+- serve dynamic links and remote configs from packages (706affae)
+- key a rate limit on its caller, from foundation (91c120d4)
+- move the searcher module out to the search package (6d199372)
+- declare realtime by channel and storage by visibility (47a8980b)
+
+### Added
+
+- install scribedev alongside the tools scribe builds (98eba670)
+- start the trigger runner with the server (17b927ea)
+
+### Changed
+
+- regenerate the stubs where their sources now sit (a06cb12c)
+
+### Tooling
+
+- exempt the address human commits are signed with (54b2474c)
+- replace the sdk CLI with scripts the repo carries (3f6aac4c)
+
 ## 2.0.2 (2026-08-18)
 
 Component versions: @scribe/core 1.0.2, @dependencies/core 0.1.9
