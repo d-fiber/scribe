@@ -34,24 +34,28 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-
-import { Failure, OK } from "@scribe/core/contracts/result.ts";
 import type { Size } from "@scribe/core/contracts/common/size.ts";
+import { Failure, OK } from "@scribe/core/contracts/result.ts";
 import { bucketOf } from "../bucket/registry.ts";
 import { forgetObjects, objectsUnder } from "../db/objects.ts";
 import type { StorageObjectRow } from "../db/tables.ts";
 import { pathSegment, StoragePathError } from "../path/segment.ts";
-import { parseTemplate, type PathArgs, renderTemplate, type TemplateSegment } from "../path/template.ts";
+import {
+    parseTemplate,
+    type PathArgs,
+    renderTemplate,
+    type TemplateSegment,
+} from "../path/template.ts";
 import { FileResource } from "../resources/file.ts";
 import { ImageResource } from "../resources/image.ts";
 import { VideoResource } from "../resources/video.ts";
 import type { StorageResourceConfig } from "../runtime/config.ts";
 import {
-  StorageListError,
-  type StorageListResult,
-  type StorageObject,
-  StorageRemoveError,
-  type StorageRemoveResult,
+    StorageListError,
+    type StorageListResult,
+    type StorageObject,
+    StorageRemoveError,
+    type StorageRemoveResult,
 } from "../runtime/result.ts";
 import { declareStorage } from "./registry.ts";
 import { objectUrl, StorageVisibility } from "./visibility.ts";
@@ -83,7 +87,7 @@ export interface StorageMediaSpec {
  * ```
  *
  * `P` is the template accumulated down the tree, and everything else derives from it: the
- * arguments an upload takes are `PathArgs<P>`, one string per `{…}`, in the order the template
+ * arguments an upload takes are `PathArgs<P>`, one string per `{...}`, in the order the template
  * writes them. A call that forgets a segment does not compile, which is the whole point of
  * carrying the template in the type rather than a count of arguments.
  *
@@ -141,9 +145,17 @@ export class Storage<P extends string> {
     return Storage.#folder(path, StorageVisibility.Private);
   }
 
-  static #folder<P extends string>(path: P, visibility: StorageVisibility): Storage<P> {
+  static #folder<P extends string>(
+    path: P,
+    visibility: StorageVisibility,
+  ): Storage<P> {
     const template = parseTemplate(path);
-    return new Storage<P>(path, visibility, template.segments, template.argNames);
+    return new Storage<P>(
+      path,
+      visibility,
+      template.segments,
+      template.argNames,
+    );
   }
 
   /**
@@ -253,7 +265,10 @@ export class Storage<P extends string> {
     }
   }
 
-  #leaf(name: string, spec: StorageMediaSpec): StorageResourceConfig<PathArgs<P>> {
+  #leaf(
+    name: string,
+    spec: StorageMediaSpec,
+  ): StorageResourceConfig<PathArgs<P>> {
     const leaf = pathSegment(name);
     this.#claim(leaf);
     declareStorage(`${this.path}/${leaf}`, this.visibility);
@@ -263,7 +278,8 @@ export class Storage<P extends string> {
       visibility: this.visibility,
       extensions: spec.extensions,
       maxSize: spec.maxSize,
-      path: (...args: PathArgs<P>) => `${renderTemplate(segments, args)}/${leaf}`,
+      path: (...args: PathArgs<P>) =>
+        `${renderTemplate(segments, args)}/${leaf}`,
     };
   }
 
@@ -301,7 +317,9 @@ function objectOf(row: StorageObjectRow): StorageObject {
   };
 }
 
-async function removeByBucket(objects: readonly StorageObjectRow[]): Promise<boolean> {
+async function removeByBucket(
+  objects: readonly StorageObjectRow[],
+): Promise<boolean> {
   const grouped = new Map<StorageVisibility, string[]>();
 
   for (const object of objects) {

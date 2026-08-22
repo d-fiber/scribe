@@ -39,7 +39,7 @@ const SDK_MARKER = "/scribe/";
 const PROJECT_PREFIXES = ["@app/", "@generated/"] as const;
 
 const SEAM_HINT =
-  'wrap it in `try { await import("…") } catch` with a defined fallback, ' +
+  'wrap it in `try { await import("...") } catch` with a defined fallback, ' +
   "the way the other seams do";
 
 function projectPrefixOf(source: string): string | null {
