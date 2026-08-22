@@ -4,6 +4,22 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 5.0.0 (2026-08-22)
+
+Component versions: @scribe/core 2.0.3
+
+### Breaking
+
+- answer on one domain, named in config.yaml (c710a4cb)
+
+### Documentation
+
+- say what scribe is at the root of the repository (073132dc)
+
+### Tooling
+
+- run the formatter over what it had not seen (01139f56)
+
 ## 4.0.0 (2026-08-21)
 
 Component versions: @scribe/core 2.0.2, @dependencies/core 0.1.11
