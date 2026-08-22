@@ -1,6 +1,7 @@
 name: "{{name}}"
-url: "https://{{host}}.example.com"
 email: "dev@{{host}}.example.com"
+
+dashboard: ""
 
 sdk: "{{sdk}}"
 
@@ -16,6 +17,7 @@ dependencies:
 worker: false
 
 api:
+  url: ""
   config:
     origins:
       - "https://{{host}}.example.com"

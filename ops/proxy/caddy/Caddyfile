@@ -21,9 +21,15 @@
     }
 }
 
-{$APP_DOMAIN} {
+{$API_DOMAIN:http://api.invalid} {
+    log {
+        output stderr
+        format json
+        level ERROR
+    }
     import security_headers DENY
     import compression
+
     @public_assets {
         path /assets/*
     }
@@ -42,14 +48,7 @@
             header_up X-Real-IP {remote_host}
         }
     }
-    @browser {
-        header Accept *text/html*
-        not path /functions/v1/hosting/*
-        not path /storage/v1/object/public/*
-    }
-    handle @browser {
-        redir {$MAIN_DOMAIN} 301
-    }
+
     @app_api {
         path /v1/app/* /realtime/v1/* /functions/v1/hosting/* /storage/v1/object/public/*
     }
@@ -59,105 +58,15 @@
             header_up X-Real-IP {remote_host}
         }
     }
-    handle {
-        respond 403
-    }
-}
 
-{$ADMIN_DOMAIN} {
-    log {
-        output stderr
-        format json
-        level DEBUG
-    }
-    import security_headers DENY
-    import compression
-    @browser {
-        header Accept *text/html*
-        not path /functions/v1/hosting/*
-    }
-    handle @browser {
-        redir {$MAIN_DOMAIN} 301
-    }
     @admin_api {
         import ip_vpn
-        path /v1/admin/* /realtime/v1/* /storage/v1/* /functions/v1/hosting/*
+        not path /storage/v1/object/public/*
+        path /v1/admin/* /storage/v1/*
     }
     handle @admin_api {
         reverse_proxy kong:8000 {
             header_up X-Real-IP {remote_host}
-        }
-    }
-    handle {
-        respond 403
-    }
-}
-
-{$INTRA_DOMAIN} {
-    log {
-        output stderr
-        format json
-        level DEBUG
-    }
-    import security_headers SAMEORIGIN
-    import compression
-
-    handle / {
-        redir {$MAIN_DOMAIN} permanent
-    }
-
-    @vpn_only {
-        import ip_vpn
-        path \
-            /developers/docs \
-            /developers/docs/* \
-            /logo-dark.png \
-            /logo-light.png
-    }
-    handle @vpn_only {
-        handle /developers/docs {
-            redir * /developers/docs/ 301
-        }
-        handle /developers/docs/admin* {
-            forward_auth http://api:3000 {
-                uri /auth/intra
-                header_up X-Real-IP {remote_host}
-                header_up X-Required-Permission developers:docs:admin
-            }
-            uri strip_prefix /developers/docs/admin
-            root * /srv/docs/admin
-            try_files {path} /index.html
-            file_server
-        }
-        handle /developers/docs/app* {
-            forward_auth http://api:3000 {
-                uri /auth/intra
-                header_up X-Real-IP {remote_host}
-                header_up X-Required-Permission developers:docs:app
-            }
-            uri strip_prefix /developers/docs/app
-            root * /srv/docs/app
-            try_files {path} /index.html
-            file_server
-        }
-        handle /developers/docs/* {
-            forward_auth http://api:3000 {
-                uri /auth/intra
-                header_up X-Real-IP {remote_host}
-                header_up X-Required-Permission developers:docs
-            }
-            uri strip_prefix /developers/docs
-            root * /srv/docs/landing
-            try_files {path} /index.html
-            file_server
-        }
-        handle /logo-dark.png {
-            root * /srv/docs/admin
-            file_server
-        }
-        handle /logo-light.png {
-            root * /srv/docs/admin
-            file_server
         }
     }
 
@@ -239,27 +148,23 @@
         reverse_proxy studio:3000
     }
 
-    @vpn_catchall {
-        import ip_vpn
-        not path /developers*
+    handle {
+        respond 404
     }
-    handle @vpn_catchall {
-        forward_auth http://api:3000 {
-            uri /auth/intra
-            header_up X-Real-IP {remote_host}
-            header_up X-Required-Permission vpn
-        }
-        reverse_proxy host.docker.internal:51821
-    }
+}
 
-    @has_parent {
-        path_regexp parent ^(/.+)/[^/]+$
+{$DASHBOARD_DOMAIN:http://dashboard.invalid} {
+    log {
+        output stderr
+        format json
+        level ERROR
     }
-    handle @has_parent {
-        redir * {http.regexp.parent.1} 302
-    }
+    import security_headers DENY
+    import compression
 
     handle {
-        redir * / 302
+        root * /srv/dashboard
+        try_files {path} /index.html
+        file_server
     }
 }

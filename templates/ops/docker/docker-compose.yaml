@@ -14,17 +14,11 @@ services:
       - "{{sdk_root}}/ops/proxy/caddy:/etc/caddy:z"
       - "caddy_data:/data"
       - "caddy_config:/config"
-      - "./{{alchemy_dir}}/docs/dist/landing:/srv/docs/landing"
-      - "./{{alchemy_dir}}/docs/dist/admin:/srv/docs/admin"
-      - "./{{alchemy_dir}}/docs/dist/app:/srv/docs/app"
-      - "./{{alchemy_dir}}/docs/admin.yaml:/srv/docs/admin/admin.yaml:ro"
-      - "./{{alchemy_dir}}/docs/app.yaml:/srv/docs/app/app.yaml:ro"
+      - "{{sdk_root}}/web/dashboard:/srv/dashboard:ro"
       - "./assets:/srv/public-assets:ro"
     environment:
-      MAIN_DOMAIN: ${MAIN_URL}
-      ADMIN_DOMAIN: ${ADMIN_URL}
-      INTRA_DOMAIN: ${INTRA_URL}
-      APP_DOMAIN: ${APP_URL}
+      API_DOMAIN: "{{api_url}}"
+      DASHBOARD_DOMAIN: "{{dashboard}}"
       DASHBOARD_BASIC_AUTH: ${DASHBOARD_BASIC_AUTH}
       ACME_EMAIL: ${ACME_EMAIL}
     command:
