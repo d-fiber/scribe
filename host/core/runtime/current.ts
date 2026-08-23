@@ -34,82 +34,37 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Current } from "@scribe/alchemy";
-import "./current.ts";
+import { AsyncLocalStorage } from "node:async_hooks";
+import { type CurrentDriver, type CurrentStore, Currents } from "@scribe/alchemy";
 
-interface RequestState {
-  req: Request;
-  bodyBytes: Uint8Array;
-  cache: Map<string, unknown>;
-  peerAddress: string | null;
+/** One store, kept in the call tree the runtime tracks for us. */
+class AsyncLocalStore<T> implements CurrentStore<T> {
+  /** What holds the value for the duration of a call tree. */
+  readonly #storage = new AsyncLocalStorage<T>();
+
+  run<R>(value: T, body: () => R): R {
+    return this.#storage.run(value, body);
+  }
+
+  get(): T | null {
+    return this.#storage.getStore() ?? null;
+  }
 }
 
-const storage = new Current<RequestState>("RequestScope");
-
-function activeState(): RequestState {
-  const store = storage.get();
-  if (!store) throw new Error("RequestScope not initialized");
-  return store;
+/**
+ * What opens a store on the runtime this host runs on.
+ *
+ * @remarks
+ * The vocabulary declares a port rather than reaching for `node:async_hooks` itself, because
+ * what carries a value down a call tree is a property of the runtime and not of the language a
+ * package is written in. This is the one implementation the framework ships, and filling the
+ * port here rather than at boot is deliberate: anything that reads a scope imports this module
+ * on the way, so a test that never boots still finds the port filled.
+ */
+class AsyncLocalCurrents implements CurrentDriver {
+  open<T>(): CurrentStore<T> {
+    return new AsyncLocalStore<T>();
+  }
 }
 
-export interface RequestScopeCache {
-  get<T>(key: string): T | undefined;
-  set<T>(key: string, value: T): void;
-}
-
-export interface RequestScopeApi {
-  run<T>(
-    req: Request,
-    bodyBytes: Uint8Array,
-    handler: () => T,
-    peerAddress?: string | null,
-  ): T;
-  get(): Request;
-  peer(): string | null;
-  set(req: Request, bodyBytes: Uint8Array): void;
-  getBodyBytes(): Uint8Array | null;
-  readonly cache: RequestScopeCache;
-}
-
-export const RequestScope: RequestScopeApi = {
-  run<T>(
-    req: Request,
-    bodyBytes: Uint8Array,
-    handler: () => T,
-    peerAddress: string | null = null,
-  ): T {
-    return storage.run(
-      { req, bodyBytes, cache: new Map(), peerAddress },
-      handler,
-    );
-  },
-
-  get(): Request {
-    return activeState().req;
-  },
-
-  peer(): string | null {
-    return storage.get()?.peerAddress ?? null;
-  },
-
-  set(req: Request, bodyBytes: Uint8Array): void {
-    const state = activeState();
-    state.req = req;
-    state.bodyBytes = bodyBytes;
-    state.cache.clear();
-  },
-
-  getBodyBytes(): Uint8Array | null {
-    return storage.get()?.bodyBytes ?? null;
-  },
-
-  cache: {
-    get<T>(key: string): T | undefined {
-      return storage.get()?.cache.get(key) as T | undefined;
-    },
-
-    set<T>(key: string, value: T): void {
-      storage.get()?.cache.set(key, value);
-    },
-  },
-};
+Currents.use(new AsyncLocalCurrents());
