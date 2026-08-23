@@ -160,6 +160,32 @@ function applyFilters(builder: any, where: FilterGroup | undefined): any {
   return current;
 }
 
+/** Whether `where` names anything at all, at any depth. */
+function namesSomething(where: FilterGroup | undefined): boolean {
+  if (!where) return false;
+  if (where.filters.length > 0) return true;
+  return where.groups.some(namesSomething);
+}
+
+/**
+ * Whether `query` is a write that would reach every row of its table.
+ *
+ * @remarks
+ * A worker sends what it means, and an update or a delete carrying no predicate means the whole
+ * table. That is almost always a filter somebody forgot to build rather than a table somebody
+ * meant to empty, so it is refused here: the two are indistinguishable once the statement has
+ * run, and only one of them is recoverable.
+ *
+ * An owned table is already bounded by the owner filter, so the question only arises where no
+ * column says who a row belongs to.
+ */
+function reachesEveryRow(query: Query): boolean {
+  if (query.operation !== Operation.UPDATE && query.operation !== Operation.DELETE) return false;
+  if (namesSomething(query.where)) return false;
+
+  return ownerFilter(query) === null;
+}
+
 function ownerFilter(query: Query): Filter | null {
   const column = ownerOf(query.table);
   if (column === null) return null;
@@ -256,6 +282,17 @@ async function runRpc(query: Query): Promise<QueryResult> {
  */
 export async function executeQuery(query: Query): Promise<QueryResult> {
   if (query.operation === Operation.RPC) return runRpc(query);
+
+  if (reachesEveryRow(query)) {
+    return create(QueryResultSchema, {
+      error: {
+        code: "unbounded_write",
+        message:
+          `refusing to ${Operation[query.operation].toLowerCase()} every row of "${query.table}": `
+          + "the query names no row, and no column says who a row belongs to.",
+      },
+    });
+  }
 
   const db = PostgrestClients.service() as any;
 
