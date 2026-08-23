@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { json } from "@scribe/alchemy";
 import { jwtPayloadUnverified } from "@scribe/core/runtime/support/crypto/jwt_payload.ts";
 import { resolveClientIp } from "@scribe/core/runtime/http/ip/mod.ts";
 import { MAX_BODY_BYTES } from "@scribe/core/runtime/http/limits.ts";
@@ -130,7 +131,7 @@ class RequestReader {
     const bytes = this.bytes();
     if (!bytes) return null;
     try {
-      return JSON.parse(new TextDecoder().decode(bytes));
+      return json.decode(new TextDecoder().decode(bytes));
     } catch {
       return null;
     }
