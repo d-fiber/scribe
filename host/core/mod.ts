@@ -37,8 +37,6 @@
 export { Failure, Ok } from "@scribe/alchemy";
 export type { Result } from "@scribe/alchemy";
 export { Pagination } from "@scribe/alchemy";
-export { SignOutScope } from "./contracts/account.ts";
-export type { AccountDevice, Session } from "./contracts/account.ts";
 
 export { ApiEndpoint } from "./kernel/endpoint/api.ts";
 export type { ApiContext } from "./kernel/endpoint/api.ts";
