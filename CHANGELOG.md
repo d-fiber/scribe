@@ -4,6 +4,14 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 6.0.0 (2026-08-23)
+
+Component versions: @scribe/core 3.0.0, @dependencies/core 0.1.12
+
+### Breaking
+
+- bring alchemy up to 2.1.23 and write what it publishes (96ed0199)
+
 ## 5.0.0 (2026-08-22)
 
 Component versions: @scribe/core 2.0.3
