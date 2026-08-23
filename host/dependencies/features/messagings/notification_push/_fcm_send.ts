@@ -34,9 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { Duration } from "@scribe/alchemy";
 import { Env } from "@scribe/host/env.ts";
 import { post } from "@scribe/foundation/lib/src/http/mod.ts";
-import type { Response as HttpResponse } from "@scribe/foundation/lib/src/http/response/response.ts";
+import type { HttpResponse } from "@scribe/alchemy/http";
 import { fcmAccessToken } from "./_fcm_token.ts";
 
 export type FcmMessage = {
@@ -84,7 +85,7 @@ function send(message: FcmMessage, accessToken: string): Promise<HttpResponse> {
           data: message.data,
         },
       }),
-      timeout: 10_000,
+      timeout: Duration.seconds(10),
     },
   );
 }

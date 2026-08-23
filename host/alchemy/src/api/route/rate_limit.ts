@@ -61,4 +61,14 @@ export interface RateLimit {
 
   /** The longest a caller is ever held out, however many times it went over. */
   maxPenalty?: Duration;
+
+  /**
+   * Whether a caller is let through when the count cannot be reached. Let through when left out.
+   *
+   * @remarks
+   * It is declared here rather than decided by the host because the answer differs by endpoint:
+   * a read that is merely expensive is better served than refused during an outage, and a sign-in
+   * attempt is not.
+   */
+  failOpen?: boolean;
 }

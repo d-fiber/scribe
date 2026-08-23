@@ -148,7 +148,7 @@ export abstract class BaseClient implements Client {
     }
     if (options.encoding) request.encoding = options.encoding;
     request.timeoutMs = (options.timeout ?? DEFAULT_REQUEST_TIMEOUT).inMilliseconds;
-    request.followRedirects = (options.redirect ?? DEFAULT_REDIRECT) === "follow";
+    request.redirect = options.redirect ?? DEFAULT_REDIRECT;
     if (options.maxRedirects !== undefined) request.maxRedirects = options.maxRedirects;
     _applyBody(request, options.body ?? null);
 

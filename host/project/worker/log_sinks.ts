@@ -35,21 +35,22 @@
 // LICENSE file, the LICENSE file governs.
 
 import { create } from "@bufbuild/protobuf";
-import type { LogEntry, LogRouting } from "@scribe/core/contracts/logging.ts";
+import type { LoggedEntry } from "@scribe/alchemy/observe";
+import type { LogRouting } from "@scribe/core/contracts/logging.ts";
 import { firstSegmentOf } from "@scribe/core/runtime/http/pathname.ts";
-import { LogEntrySchema, LogLevel } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
+import { LogEntrySchema, LogLevel as ProtoLogLevel } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 import type { Manifest } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import { encodeJson } from "./json.ts";
 import type { WorkerClient } from "./worker_client.ts";
 
-const LEVELS: Record<LogEntry["level"], LogLevel> = {
-  debug: LogLevel.DEBUG,
-  info: LogLevel.INFO,
-  warn: LogLevel.WARN,
-  error: LogLevel.ERROR,
+const LEVELS: Record<LoggedEntry["level"], ProtoLogLevel> = {
+  debug: ProtoLogLevel.DEBUG,
+  info: ProtoLogLevel.INFO,
+  warn: ProtoLogLevel.WARN,
+  error: ProtoLogLevel.ERROR,
 };
 
-function wireEntry(entry: LogEntry): ReturnType<typeof create<typeof LogEntrySchema>> {
+function wireEntry(entry: LoggedEntry): ReturnType<typeof create<typeof LogEntrySchema>> {
   return create(LogEntrySchema, {
     level: LEVELS[entry.level],
     action: entry.action,
@@ -103,7 +104,7 @@ export class WorkerLogSinks implements LogRouting {
     return this.#root;
   }
 
-  async deliver(node: string | null, entries: readonly LogEntry[]): Promise<void> {
+  async deliver(node: string | null, entries: readonly LoggedEntry[]): Promise<void> {
     const target = node !== null && this.#withSink.has(node) ? node : null;
 
     await this.#client.deliverLogs(target, entries.map(wireEntry));

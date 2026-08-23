@@ -34,19 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Duration } from "@scribe/alchemy";
+import { type Duration, rateLimit } from "@scribe/alchemy";
+import type { RateLimit } from "@scribe/alchemy/route";
 import { firstSegmentOf } from "@scribe/core/runtime/http/pathname.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
-import { RateLimit, SHARED_ADDRESS_MAX_PENALTY, SHARED_ADDRESS_STRIKE_MEMORY } from "@scribe/foundation/lib/src/rate_limit/mod.ts";
+import { SHARED_ADDRESS_MAX_PENALTY, SHARED_ADDRESS_STRIKE_MEMORY } from "@scribe/foundation/lib/src/rate_limit/mod.ts";
 import { CallerKind, requestCaller } from "@scribe/core/runtime/http/caller.ts";
-
-export interface RateLimiter {
-  limit: number;
-  window: Duration;
-  penalty: Duration;
-  maxPenalty?: Duration;
-  failOpen?: boolean;
-}
 
 /** The shorter of `declared` and `cap`, and `cap` when nothing was declared. */
 function shorter(declared: Duration | undefined, cap: Duration): Duration {
@@ -76,12 +69,12 @@ export function rateLimitPrefix(): string {
  * it, so the penalty of such a bucket is capped whatever the route asked for. A route cannot make
  * that call itself: it declares one limit and serves both kinds of caller.
  */
-export async function withinRateLimit(key: string, limiter: RateLimiter): Promise<boolean> {
+export async function withinRateLimit(key: string, limiter: RateLimit): Promise<boolean> {
   const caller = requestCaller();
   if (caller === null) return limiter.failOpen ?? true;
 
   const shared = caller.kind === CallerKind.Address;
-  const limit = new RateLimit({
+  const limit = rateLimit({
     ...limiter,
     key,
     maxPenalty: shared ? shorter(limiter.maxPenalty, SHARED_ADDRESS_MAX_PENALTY) : limiter.maxPenalty,

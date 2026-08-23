@@ -34,19 +34,18 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { type Caller, callersOf, isAllowed } from "./access.ts";
+import type { Caller, RateLimit } from "@scribe/alchemy/route";
+import { callersOf } from "@scribe/alchemy/route";
+import { isAllowed } from "./access.ts";
 import { ApiContext } from "./context.ts";
-import { type RateLimiter, withinRateLimit } from "./rate_limit.ts";
+import { withinRateLimit } from "./rate_limit.ts";
 import { RouteEndpoint } from "./route.ts";
 
-export { ListOf, Nested, Required } from "@scribe/alchemy";
-export { Caller } from "./access.ts";
 export { ApiContext } from "./context.ts";
-export type { RateLimiter } from "./rate_limit.ts";
 export { RouteEndpoint } from "./route.ts";
 
 export abstract class ApiEndpoint extends RouteEndpoint {
-  protected abstract rateLimit(): RateLimiter;
+  protected abstract rateLimit(): RateLimit;
 
   protected abstract access(): Caller | readonly Caller[];
 
@@ -54,13 +53,17 @@ export abstract class ApiEndpoint extends RouteEndpoint {
     return false;
   }
 
+  /**
+   * Answers the request once the caller cleared the access check and the rate limit.
+   *
+   * @remarks
+   * Both checks reach Redis and neither needs the other's answer, so they travel together. A
+   * refused caller therefore spends a rate limit token, which is the half of the trade we want:
+   * a flood of invalid tokens used to be answered without ever being counted.
+   */
   protected async execute(): Promise<Response> {
     const callers = callersOf(this.access());
 
-    // Both of these reach Redis and neither needs the other's answer, so they
-    // travel together. The cost is that a refused caller now spends a rate
-    // limit token, which is the desirable half of the trade: a flood of
-    // invalid tokens used to be answered without ever being counted.
     const [allowed, withinLimit] = await Promise.all([
       isAllowed(callers, this.webhookVerified()),
       withinRateLimit(this.rateLimitKey(), this.rateLimit()),

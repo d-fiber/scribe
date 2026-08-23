@@ -34,9 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { SessionAdmin, SessionUser } from "@scribe/core/contracts/account.ts";
+import type { RequestUser } from "@scribe/alchemy/route";
 import { Duration } from "@scribe/alchemy";
-import { Caller } from "@scribe/core/kernel/endpoint/access.ts";
 import { ServerResponse } from "@scribe/alchemy/route";
 import type { RouteDescriptor } from "@scribe/core/kernel/http/routing/descriptor.ts";
 import { mountDescriptors } from "@scribe/core/kernel/http/routing/descriptor_mount.ts";
@@ -45,13 +44,21 @@ import { installRateLimiterMock } from "@scribe/foundation/tests/testing/valkery
 import { assertEquals } from "@std/assert";
 import { Hono } from "hono";
 
-const anAdmin: SessionAdmin = {
-  id: "admin-1",
-  email: "admin@test.io",
-  rules: { role: "editor", permissions: ["brand:read"] },
+const anEditor: RequestUser = {
+  id: "editor-1",
+  caller: "authenticated",
+  role: "editor",
+  permissions: ["brand:read"],
+  claims: {},
 };
 
-const aUser: SessionUser = { id: "user-1", email: "user@test.io" };
+const aCaller: RequestUser = {
+  id: "caller-1",
+  caller: "authenticated",
+  role: "",
+  permissions: [],
+  claims: {},
+};
 
 let reached: string | null = null;
 
@@ -59,7 +66,7 @@ function aRoute(overrides: Partial<RouteDescriptor> = {}): RouteDescriptor {
   return {
     method: "get",
     path: "/brands/:brandId",
-    access: Caller.Admin,
+    access: "authenticated",
     rateLimit: { limit: 10, window: Duration.minutes(1), penalty: Duration.minutes(1) },
     rateLimitKey: "descriptor-mount:read-brand",
     requiredPermissions: ["brand:read"],
@@ -77,7 +84,7 @@ function appOf(descriptor: RouteDescriptor): Hono {
   return app;
 }
 
-function call(app: Hono, identity?: SessionAdmin | SessionUser) {
+function call(app: Hono, identity?: RequestUser) {
   return callEndpoint(
     async () => await app.request("/brands/42", { method: "GET" }),
     {},
@@ -98,14 +105,25 @@ Deno.test("mountDescriptors: an anonymous caller never reaches the handler", asy
   }
 });
 
-Deno.test("mountDescriptors: access is checked before permissions, so a user gets 401 and not 403", async () => {
+Deno.test("mountDescriptors: access is checked before permissions, so an unproved call gets 401 and not 403", async () => {
   reached = null;
   const limiter = installRateLimiterMock();
   try {
-    const result = await call(appOf(aRoute()), aUser);
+    const result = await call(appOf(aRoute({ access: "service" })), aCaller);
 
     assertEquals(result.status, 401, "you cannot lack a permission you were never asked for");
     assertEquals(reached, null);
+  } finally {
+    limiter.restore();
+  }
+});
+
+Deno.test("mountDescriptors: a session is a session, so an administrator answers a route open to any of them", async () => {
+  reached = null;
+  const limiter = installRateLimiterMock();
+  try {
+    assertEquals((await call(appOf(aRoute()), anEditor)).status, 200);
+    assertEquals(reached, "42");
   } finally {
     limiter.restore();
   }
@@ -115,7 +133,7 @@ Deno.test("mountDescriptors: an admin missing the declared permission is forbidd
   reached = null;
   const limiter = installRateLimiterMock();
   try {
-    const result = await call(appOf(aRoute({ requiredPermissions: ["brand:publish"] })), anAdmin);
+    const result = await call(appOf(aRoute({ requiredPermissions: ["brand:publish"] })), anEditor);
 
     assertEquals(result.status, 403);
     assertEquals(result.body.code, "not_permitted");
@@ -130,7 +148,7 @@ Deno.test("mountDescriptors: every declared permission is required, not just one
   const limiter = installRateLimiterMock();
   try {
     const app = appOf(aRoute({ requiredPermissions: ["brand:read", "brand:publish"] }));
-    const result = await call(app, anAdmin);
+    const result = await call(app, anEditor);
 
     assertEquals(result.status, 403);
     assertEquals(reached, null);
@@ -147,7 +165,7 @@ Deno.test("mountDescriptors: the rate limit is spent after access, never before"
     strikes: 1,
   });
   try {
-    const result = await call(appOf(aRoute()), anAdmin);
+    const result = await call(appOf(aRoute()), anEditor);
 
     assertEquals(result.status, 429);
     assertEquals(reached, null);
@@ -160,7 +178,7 @@ Deno.test("mountDescriptors: a route that clears the three checks receives its p
   reached = null;
   const limiter = installRateLimiterMock();
   try {
-    const result = await call(appOf(aRoute()), anAdmin);
+    const result = await call(appOf(aRoute()), anEditor);
 
     assertEquals(result.status, 200);
     assertEquals(reached, "42", "the handler reads Hono's params, it never sees the Context");
@@ -174,7 +192,7 @@ Deno.test("mountDescriptors: declaring no permission asks for none", async () =>
   reached = null;
   const limiter = installRateLimiterMock();
   try {
-    const result = await call(appOf(aRoute({ requiredPermissions: undefined })), anAdmin);
+    const result = await call(appOf(aRoute({ requiredPermissions: undefined })), anEditor);
 
     assertEquals(result.status, 200);
     assertEquals(reached, "42");

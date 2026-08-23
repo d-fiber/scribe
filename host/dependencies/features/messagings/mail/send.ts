@@ -40,7 +40,8 @@ import { Pagination } from "@scribe/alchemy";
 import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
 import { Env } from "@scribe/host/env.ts";
 import nodemailer from "nodemailer";
-import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
+import type { PageRequest } from "@scribe/alchemy";
+import { DEFAULT_PAGE_SIZE } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import type { EmailTemplateId } from "./templates.ts";
 
@@ -95,7 +96,7 @@ export interface EmailContent {
   readonly attachments?: EmailAttachment[];
 }
 
-export interface MailListOptions extends ListOptions {
+export interface MailListOptions extends PageRequest {
   readonly recipient?: string;
 }
 

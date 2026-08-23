@@ -34,8 +34,20 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { DEAD_STREAM, DEDICATED_STREAM, SHARED_CONSUMER, SHARED_STREAM, sanitize, subjectOf } from "@scribe/foundation/lib/src/queue/core/naming.ts";
-import { AckPolicy, type JetStreamManager, RetentionPolicy, StorageType } from "@nats-io/jetstream";
+import {
+  DEAD_STREAM,
+  DEDICATED_STREAM,
+  sanitize,
+  SHARED_CONSUMER,
+  SHARED_STREAM,
+  subjectOf,
+} from "@scribe/foundation/lib/src/queue/core/naming.ts";
+import {
+  AckPolicy,
+  type JetStreamManager,
+  RetentionPolicy,
+  StorageType,
+} from "@nats-io/jetstream";
 import type { TopologyPlan } from "./plan.ts";
 
 /**
@@ -126,7 +138,9 @@ export class TopologyProvisioner {
     }
 
     const widened: Record<string, number> = {};
-    if ((existing.config.ack_wait ?? 0) < ackWaitNs) widened.ack_wait = ackWaitNs;
+    if ((existing.config.ack_wait ?? 0) < ackWaitNs) {
+      widened.ack_wait = ackWaitNs;
+    }
     if ((existing.config.max_deliver ?? 0) < plan.maxDeliver) {
       widened.max_deliver = plan.maxDeliver;
     }
@@ -136,7 +150,9 @@ export class TopologyProvisioner {
       await this.#manager.consumers.update(stream, durable, widened);
     } catch (error) {
       console.error(
-        `[queue] could not widen "${stream}/${durable}" to ${JSON.stringify(widened)}:`,
+        `[queue] could not widen "${stream}/${durable}" to ${
+          JSON.stringify(widened)
+        }:`,
         error,
       );
     }

@@ -55,19 +55,19 @@ export class LinkTemplateError extends Error {
 /** One part of a parsed template. */
 type Segment =
   | {
-      /** A part the template spells out, the same for every link declared with it. */
-      readonly kind: "literal";
+    /** A part the template spells out, the same for every link declared with it. */
+    readonly kind: "literal";
 
-      /** The text that part carries. */
-      readonly value: string;
-    }
+    /** The text that part carries. */
+    readonly value: string;
+  }
   | {
-      /** A part a caller fills in, one parameter per occurrence. */
-      readonly kind: "param";
+    /** A part a caller fills in, one parameter per occurrence. */
+    readonly kind: "param";
 
-      /** The name the placeholder was written with, which no other placeholder may reuse. */
-      readonly name: string;
-    };
+    /** The name the placeholder was written with, which no other placeholder may reuse. */
+    readonly name: string;
+  };
 
 /**
  * A route or an address with holes in it, and the parameters that fill them.
@@ -109,8 +109,9 @@ export class LinkTemplate {
       }
 
       const literal = pattern.slice(cursor, match.index);
-      if (literal.length > 0)
+      if (literal.length > 0) {
         segments.push({ kind: "literal", value: literal });
+      }
 
       segments.push({ kind: "param", name });
       names.push(name);

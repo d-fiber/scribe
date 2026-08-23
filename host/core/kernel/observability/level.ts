@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { LogLevel } from "@scribe/core/contracts/logging.ts";
+import type { LoggedLevel } from "@scribe/alchemy/observe";
 
 /**
  * The level a status code deserves.
@@ -42,7 +42,7 @@ import type { LogLevel } from "@scribe/core/contracts/logging.ts";
  * A refusal the caller brought on itself is a `warn`, not an `error`: the host
  * did its job. Only the 5xx range says something went wrong here.
  */
-export function levelForStatus(status: number): LogLevel {
+export function levelForStatus(status: number): LoggedLevel {
   if (status >= 500) return "error";
   if (status >= 400) return "warn";
   return "info";

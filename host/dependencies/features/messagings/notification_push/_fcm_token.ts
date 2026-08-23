@@ -66,7 +66,7 @@ async function _mint(): Promise<string | null> {
         grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
         assertion,
       },
-      timeout: 5000,
+      timeout: Duration.seconds(5),
     });
     if (!res.ok) return null;
 

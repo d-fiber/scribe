@@ -40,7 +40,7 @@ import { Duration } from "@scribe/alchemy";
 import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 
 const BASE_URL = "https://maps.googleapis.com/maps/api/geocode/json";
-const TIMEOUT_MS = 5_000;
+const TIMEOUT: Duration = Duration.seconds(5);
 const CACHE_TTL = Duration.days(30);
 
 export interface GeoAddress {
@@ -145,7 +145,7 @@ class GeocoderClient {
     const url = `${BASE_URL}?${queryParam}&key=${Env.GEOCODING_API_KEY}`;
 
     try {
-      const res = await get(url, { timeout: TIMEOUT_MS });
+      const res = await get(url, { timeout: TIMEOUT });
       const data = res.json<{ status?: string; results?: _GoogleGeocodingResult[] }>();
 
       if (data.status !== "OK" || !data.results?.length) return null;

@@ -52,7 +52,14 @@ export interface RateLimitOptions {
   /** How long a caller that went over is refused for. */
   readonly penalty: Duration;
 
-  /** The longest a penalty may grow to when a caller keeps going over. Unbounded when left out. */
+  /**
+   * The longest a penalty may grow to when a caller keeps going over.
+   *
+   * @remarks
+   * A limit that leaves it out takes whatever ceiling the driver applies, which is not the same
+   * number everywhere: what is a sensible cap depends on how the counter is kept and on how long
+   * a deployment is willing to hold somebody out.
+   */
   readonly maxPenalty?: Duration;
 
   /** How long a strike is remembered, which is what makes a penalty grow. */
@@ -99,6 +106,15 @@ export type RateLimitOutcome =
  */
 export interface RateLimiter {
   /**
+   * The prefix this limit was opened with, which is what names it in a log.
+   *
+   * @remarks
+   * Code that is handed a limiter and not the options has no other way of saying which limit it
+   * refused or could not measure, and a line that names none of them is one nobody can trace.
+   */
+  readonly key: string;
+
+  /**
    * Counts one call from the caller `prefix` and `suffix` name, and says whether it is allowed.
    *
    * @param prefix - What the caller is grouped by, an endpoint or a tenant. Empty for none.
@@ -141,6 +157,10 @@ class DeferredRateLimiter implements RateLimiter {
 
   constructor(options: RateLimitOptions) {
     this.#options = options;
+  }
+
+  get key(): string {
+    return this.#options.key;
   }
 
   check(prefix?: string, suffix?: string): Future<RateLimitOutcome> {

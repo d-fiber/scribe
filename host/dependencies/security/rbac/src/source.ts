@@ -35,19 +35,28 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Tables } from "@scribe/foundation/lib/src/database/gen/tables.ts";
-import type { AdminRbacSource } from "@scribe/core/contracts/rbac.ts";
+import type { GrantSource } from "@scribe/core/contracts/grants.ts";
 import { PostgrestClients } from "@scribe/foundation/lib/src/database/client.ts";
 
-export class DatabaseAdminRbacSource implements AdminRbacSource {
+/**
+ * What a deployment grants an account, read from the tables the base schema ships.
+ *
+ * @remarks
+ * The tables it reads are still called `admin_users` and `admin_users_role_permissions`. That is
+ * the one place the word survives, and it survives in the schema rather than in the framework:
+ * renaming a column is a migration every deployment has to run, and nothing above this line reads
+ * the word any more.
+ */
+export class DatabaseGrantSource implements GrantSource {
   #db: Tables | null = null;
 
-  async roleOf(adminId: string): Promise<string | null> {
-    const admin = await this.#database()
+  async roleOf(accountId: string): Promise<string | null> {
+    const granted = await this.#database()
       .internal_t__admin_users()
       .select((s) => ({ role: s.role }))
-      .where((f) => f.admin_id.eq(adminId))
+      .where((f) => f.admin_id.eq(accountId))
       .getOne();
-    return admin?.role ?? null;
+    return granted?.role ?? null;
   }
 
   async permissionsOf(role: string): Promise<string[]> {
@@ -59,9 +68,14 @@ export class DatabaseAdminRbacSource implements AdminRbacSource {
     return permissions.map((p) => p.permission);
   }
 
-  // Building a client here instead of asking the factory would read the environment directly,
-  // and so would step around the settings slot a test fills — the calls would go to the real
-  // rest instance rather than to the mock, without anything saying so.
+  /**
+   * The tables this reads, built once.
+   *
+   * @remarks
+   * Building a client here instead of asking the factory would read the environment directly, and
+   * so would step around the settings slot a test fills: the calls would go to the real rest
+   * instance rather than to the mock, without anything saying so.
+   */
   #database(): Tables {
     return (this.#db ??= new Tables(PostgrestClients.service()));
   }

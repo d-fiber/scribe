@@ -34,12 +34,13 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { RequestUser } from "@scribe/alchemy/route";
 import { assertEquals, assertRejects } from "@std/assert";
 import { currentIdentity } from "@scribe/core/runtime/http/accessors/identity.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
 import { CapabilityTokens, UnknownCapabilityToken } from "@scribe/host/project/worker/capability_tokens.ts";
 
-const ADMIN = { id: "admin-1", email: "admin@example.com", rules: { role: "owner", permissions: [] } };
+const CALLER: RequestUser = { id: "caller-1", caller: "authenticated", role: "owner", permissions: [], claims: {} };
 
 function grant() {
   return {
@@ -47,7 +48,7 @@ function grant() {
       headers: { "user-agent": "conformance" },
     }),
     bodyBytes: new TextEncoder().encode(`{"name":"Fiber"}`),
-    identity: ADMIN,
+    identity: CALLER,
     traceId: "trace-1",
     invocationId: "inv-1",
   };
@@ -63,7 +64,7 @@ Deno.test("a capability token replays the identity of the invocation that issued
       agent: request.userAgent(),
     }));
 
-  assertEquals(seen.id, "admin-1");
+  assertEquals(seen.id, "caller-1");
   assertEquals(seen.path, "/admin/brand");
   assertEquals(seen.agent, "conformance");
 

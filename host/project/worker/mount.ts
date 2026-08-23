@@ -44,8 +44,10 @@ import type {
 } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import type { Reply } from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
 import { Duration } from "@scribe/alchemy";
-import { Caller, isAllowed } from "@scribe/core/kernel/endpoint/access.ts";
-import { type RateLimiter, withinRateLimit } from "@scribe/core/kernel/endpoint/rate_limit.ts";
+import type { Caller } from "@scribe/alchemy/route";
+import { isAllowed } from "@scribe/core/kernel/endpoint/access.ts";
+import type { RateLimit } from "@scribe/alchemy/route";
+import { withinRateLimit } from "@scribe/core/kernel/endpoint/rate_limit.ts";
 import { ServerResponse } from "@scribe/alchemy/route";
 import { RbacIdentity } from "@scribe/core/kernel/identity/request_identity.ts";
 import { currentIdentity } from "@scribe/core/runtime/http/accessors/identity.ts";
@@ -57,13 +59,22 @@ import type { WorkerClient } from "./worker_client.ts";
 
 type HonoMethod = "get" | "post" | "put" | "patch" | "delete";
 
+/**
+ * What each caller of the protocol is, in the vocabulary the host reasons with.
+ *
+ * @remarks
+ * `USER` and `ADMIN` are the same answer, because both name somebody holding a session and the
+ * difference between them is a word a deployment chose. A route that wants more than a session
+ * says so in its required permissions, which is the only thing this layer can check without
+ * deciding for every deployment which populations exist.
+ */
 const callers: Record<ProtoCaller, Caller> = {
-  [ProtoCaller.UNSPECIFIED]: Caller.Anonymous,
-  [ProtoCaller.ANONYMOUS]: Caller.Anonymous,
-  [ProtoCaller.USER]: Caller.User,
-  [ProtoCaller.ADMIN]: Caller.Admin,
-  [ProtoCaller.SERVICE]: Caller.Service,
-  [ProtoCaller.WEBHOOK]: Caller.Webhook,
+  [ProtoCaller.UNSPECIFIED]: "anonymous",
+  [ProtoCaller.ANONYMOUS]: "anonymous",
+  [ProtoCaller.USER]: "authenticated",
+  [ProtoCaller.ADMIN]: "authenticated",
+  [ProtoCaller.SERVICE]: "service",
+  [ProtoCaller.WEBHOOK]: "webhook",
 };
 
 const methods: Record<ProtoMethod, HonoMethod> = {
@@ -84,18 +95,13 @@ export class NodeMountError extends Error {
   }
 }
 
-function limiterOf(limiter: ProtoRateLimiter | undefined): RateLimiter {
+function limiterOf(limiter: ProtoRateLimiter | undefined): RateLimit {
   return {
     limit: limiter?.limit ?? 0,
     window: Duration.milliseconds(Number(limiter?.window?.millis ?? 0n)),
     penalty: Duration.milliseconds(Number(limiter?.penalty?.millis ?? 0n)),
     maxPenalty: limiter?.maxPenalty ? Duration.milliseconds(Number(limiter.maxPenalty.millis)) : undefined,
   };
-}
-
-async function grantsAll(required: readonly string[]): Promise<boolean> {
-  const granted = await RbacIdentity.permissions();
-  return required.every((permission) => granted.includes(permission));
 }
 
 function responseOf(reply: Reply): Response {
@@ -111,11 +117,8 @@ function responseOf(reply: Reply): Response {
 }
 
 async function serve(route: Route, client: WorkerClient, c: Context): Promise<Response> {
-  const declared = route.access.map((caller) => callers[caller] ?? Caller.Anonymous);
+  const declared = route.access.map((caller) => callers[caller]);
 
-  // The rate limit is independent of who the caller is, so it rides alongside
-  // the identity lookup rather than waiting for it. The permission check does
-  // depend on the resolved identity, so it stays behind.
   const [allowed, withinLimit] = await Promise.all([
     isAllowed(declared, route.webhookVerified),
     withinRateLimit(route.rateLimitKey, limiterOf(route.rateLimit)),
@@ -123,7 +126,7 @@ async function serve(route: Route, client: WorkerClient, c: Context): Promise<Re
 
   if (!allowed) return ServerResponse.unauthorized();
 
-  if (route.requiredPermissions.length > 0 && !(await grantsAll(route.requiredPermissions))) {
+  if (route.requiredPermissions.length > 0 && !(await RbacIdentity.grants(route.requiredPermissions))) {
     return ServerResponse.forbidden({
       code: "not_permitted",
       message: "You do not have the required permission to perform this action.",

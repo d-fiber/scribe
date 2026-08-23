@@ -34,9 +34,5 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+/** How many rows a listing answers with when the caller names no size. */
 export const DEFAULT_PAGE_SIZE = 30;
-
-export interface ListOptions {
-  readonly offset?: number;
-  readonly size?: number;
-}

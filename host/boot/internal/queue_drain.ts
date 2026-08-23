@@ -35,12 +35,13 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Duration } from "@scribe/alchemy";
-import { ApiContext, RateLimiter } from "@scribe/core/kernel/endpoint/api.ts";
+import type { RateLimit } from "@scribe/alchemy/route";
+import { ApiContext } from "@scribe/core/kernel/endpoint/api.ts";
 import { ServiceEndpoint } from "@scribe/core/kernel/endpoint/service.ts";
 import { queueStatus } from "@scribe/foundation/lib/src/queue/core/status.ts";
 import { queueRunner } from "@scribe/foundation/lib/src/queue/runner/queue_runner.ts";
 
-const _RATE_LIMIT: RateLimiter = {
+const _RATE_LIMIT: RateLimit = {
   limit: 1000,
   window: Duration.minutes(1),
   penalty: Duration.minutes(1),
@@ -48,7 +49,7 @@ const _RATE_LIMIT: RateLimiter = {
 };
 
 export class QueueDrainEndpoint extends ServiceEndpoint {
-  protected override rateLimit(): RateLimiter {
+  protected override rateLimit(): RateLimit {
     return _RATE_LIMIT;
   }
 
@@ -65,7 +66,7 @@ export class QueueDrainOneEndpoint extends ServiceEndpoint {
     this.#name = name;
   }
 
-  protected override rateLimit(): RateLimiter {
+  protected override rateLimit(): RateLimit {
     return _RATE_LIMIT;
   }
 
@@ -82,7 +83,7 @@ export class QueueDrainOneEndpoint extends ServiceEndpoint {
 }
 
 export class QueueStatusEndpoint extends ServiceEndpoint {
-  protected override rateLimit(): RateLimiter {
+  protected override rateLimit(): RateLimit {
     return _RATE_LIMIT;
   }
 

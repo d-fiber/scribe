@@ -36,6 +36,22 @@
 
 import type { List, UnmodifiableList } from "./list.ts";
 
+/**
+ * What a caller asks for when it wants one page of a longer list.
+ *
+ * @remarks
+ * It is the other half of {@link Pagination}: this is the question, that is the answer. Both
+ * fields are optional because a caller that names neither wants the first page at whatever size
+ * the thing it is asking has decided, and a size nobody chose is not the same as a size of zero.
+ */
+export interface PageRequest {
+  /** How many items to skip before the page starts. From the beginning when left out. */
+  readonly offset?: number;
+
+  /** How many items the page holds at most. The default of whatever is asked, when left out. */
+  readonly size?: number;
+}
+
 /** The shape a page takes once it has left the process, which is not the shape it has inside. */
 export interface PaginationJson<T> {
   /** The rows of this page, in the order they were read. */

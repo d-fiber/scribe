@@ -34,9 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { PageRequest } from "@scribe/alchemy";
 import { Duration } from "@scribe/alchemy";
 import { currentClient } from "@scribe/foundation/lib/src/http/run_with_client.ts";
-import type { Response as HttpResponse } from "@scribe/foundation/lib/src/http/response/response.ts";
+import type { HttpResponse } from "@scribe/alchemy/http";
 import { Pagination } from "@scribe/alchemy";
 import type { Result } from "@scribe/alchemy";
 import { Failure, Ok, okay } from "@scribe/alchemy";
@@ -63,12 +64,7 @@ export enum VpnError {
   Unexpected = "unexpected",
 }
 
-interface VpnPaginationOptions {
-  readonly offset?: number;
-  readonly size?: number;
-}
-
-const _TIMEOUT_MS = 5_000;
+const _TIMEOUT: Duration = Duration.seconds(5);
 const _SESSION_TTL = 3_600;
 const _DEFAULT_PAGE_SIZE = 30;
 
@@ -110,7 +106,7 @@ class _VpnSession {
       res = await client.post(`${this.baseUrl}/api/session`, {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ password: this.password }),
-        timeout: _TIMEOUT_MS,
+        timeout: _TIMEOUT,
       });
     } finally {
       client.close();
@@ -135,7 +131,7 @@ export interface AdminVpnService {
   getByOwner(name: string): Promise<Result<Vpn, VpnError>>;
   disableAll(name: string): Promise<Result<void, VpnError>>;
   pagination(
-    options?: VpnPaginationOptions,
+    options?: PageRequest,
   ): Promise<Result<Pagination<Vpn>, VpnError>>;
   create(name: string): Promise<Result<Vpn, VpnError>>;
   delete(vpnId: string): Promise<Result<void, VpnError>>;
@@ -186,7 +182,7 @@ export class AdminVpnClient implements AdminVpnService {
   }
 
   async pagination(
-    options?: VpnPaginationOptions,
+    options?: PageRequest,
   ): Promise<Result<Pagination<Vpn>, VpnError>> {
     const list = await this.#list();
     if (!list.ok) return new Failure(VpnError.Unexpected);
@@ -329,7 +325,7 @@ export class AdminVpnClient implements AdminVpnService {
       const options = {
         headers: this.#session.headers(cookie, init.headers),
         body: init.body ?? null,
-        timeout: _TIMEOUT_MS,
+        timeout: _TIMEOUT,
       };
 
       try {

@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { RequestIdentityCache, type RequestUser } from "@scribe/core/runtime/http/accessors/identity.ts";
+import type { RequestUser } from "@scribe/alchemy/route";
+import { RequestIdentityCache } from "@scribe/core/runtime/http/accessors/identity.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 
 const FALLBACK_TTL_MS = 300_000;
@@ -42,7 +43,7 @@ const FALLBACK_TTL_MS = 300_000;
 export interface CapabilityGrant {
   readonly request: Request;
   readonly bodyBytes: Uint8Array;
-  readonly identity: RequestUser;
+  readonly identity: RequestUser | null;
   readonly traceId: string;
   readonly invocationId: string;
 }

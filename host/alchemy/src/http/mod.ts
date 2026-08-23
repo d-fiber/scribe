@@ -63,6 +63,7 @@ export { ByteStream } from "./byte_stream.ts";
 export { ClientException } from "./exception.ts";
 
 export { BaseRequest } from "./request/base_request.ts";
+export type { Redirect } from "./request/base_request.ts";
 export { MultipartFile } from "./request/multipart_file.ts";
 export { MultipartRequest } from "./request/multipart_request.ts";
 export { HttpRequest } from "./request/request.ts";

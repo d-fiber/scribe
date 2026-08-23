@@ -34,66 +34,31 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { ByteStream } from "../byte_stream.ts";
+/** What a deployment grants one account. */
+export interface Grants {
+  /** What the deployment calls this account, in one word. */
+  readonly role: string;
 
-/** One file inside a {@link MultipartRequest}. */
-export class MultipartFile {
-  /** The form field this file is sent under. */
-  readonly field: string;
+  /** What the account may do beyond what the role already says. */
+  readonly permissions: string[];
+}
 
-  /** How many bytes the file holds. */
-  readonly length: number;
+/**
+ * Where a deployment keeps what it grants.
+ *
+ * @remarks
+ * The two questions are asked separately because a role is a fact about one account and the
+ * permissions are a fact about the role, so a deployment that has ten thousand accounts and
+ * six roles answers the second one from six rows.
+ *
+ * Nothing here reads what a role is called. A deployment that has one role, or a hundred, or
+ * none at all is the same to this: the word travels to the endpoint that declared it and this
+ * layer only carries it.
+ */
+export interface GrantSource {
+  /** What `accountId` is called, or null when the deployment grants it nothing. */
+  roleOf(accountId: string): Promise<string | null>;
 
-  /** The name the server is told, or `null` to send none. */
-  readonly filename: string | null;
-
-  /** The media type the server is told. */
-  readonly contentType: string;
-
-  readonly #stream: ByteStream;
-  #finalized = false;
-
-  constructor(
-    field: string,
-    stream: ByteStream,
-    length: number,
-    options: { filename?: string | null; contentType?: string } = {},
-  ) {
-    this.field = field;
-    this.length = length;
-    this.filename = options.filename ?? null;
-    this.contentType = options.contentType ?? "application/octet-stream";
-    this.#stream = stream;
-  }
-
-  /** A file made of bytes already in hand. */
-  static fromBytes(
-    field: string,
-    bytes: Uint8Array,
-    options: { filename?: string | null; contentType?: string } = {},
-  ): MultipartFile {
-    return new MultipartFile(field, ByteStream.fromBytes(bytes), bytes.length, options);
-  }
-
-  /** A file made of text, encoded utf-8. */
-  static fromString(
-    field: string,
-    value: string,
-    options: { filename?: string | null; contentType?: string } = {},
-  ): MultipartFile {
-    const bytes = new TextEncoder().encode(value);
-    return MultipartFile.fromBytes(field, bytes, {
-      contentType: "text/plain; charset=utf-8",
-      ...options,
-    });
-  }
-
-  /** Hands the bytes over, once. */
-  finalize(): ByteStream {
-    if (this.#finalized) {
-      throw new Error("Can't finalize a finalized MultipartFile.");
-    }
-    this.#finalized = true;
-    return this.#stream;
-  }
+  /** What `role` may do. Empty when it may do nothing beyond what its name says. */
+  permissionsOf(role: string): Promise<string[]>;
 }

@@ -34,28 +34,30 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Caller } from "@scribe/alchemy/route";
 import { RequestIdentity } from "@scribe/core/kernel/identity/request_identity.ts";
 import { InternalSecretFirewall } from "@scribe/core/kernel/identity/firewall/internal.ts";
 
-export enum Caller {
-  Anonymous = "anonymous",
-  User = "user",
-  Admin = "admin",
-  Service = "service",
-  Webhook = "webhook",
-}
-
-export function callersOf(
-  declared: Caller | readonly Caller[],
-): readonly Caller[] {
-  return Array.isArray(declared) ? declared : [declared as Caller];
-}
-
+/**
+ * Whether any of `callers` is satisfied by the call being answered.
+ *
+ * @remarks
+ * The four ways of proving a call come from the vocabulary, and what proves them lives here,
+ * because each one reaches something only a running host has: the session behind the bearer, the
+ * internal secret, the signature a webhook was verified with.
+ *
+ * A route naming several callers is answered when any one of them holds, which is why an
+ * `anonymous` in the list makes the rest moot.
+ *
+ * `authenticated` is somebody holding a session, an administrator included. Being an administrator
+ * is a fact about the account and not a way of proving a call, so it is checked where roles and
+ * permissions are, never here.
+ */
 export async function isAllowed(
   callers: readonly Caller[],
   webhookVerified: boolean,
 ): Promise<boolean> {
-  if (callers.includes(Caller.Anonymous)) return true;
+  if (callers.includes("anonymous")) return true;
 
   for (const caller of callers) {
     if (await satisfies(caller, webhookVerified)) return true;
@@ -64,17 +66,16 @@ export async function isAllowed(
   return false;
 }
 
+/** Whether this one way of proving a call is satisfied by the call being answered. */
 function satisfies(caller: Caller, webhookVerified: boolean): Promise<boolean> {
   switch (caller) {
-    case Caller.Anonymous:
+    case "anonymous":
       return Promise.resolve(true);
-    case Caller.Webhook:
+    case "webhook":
       return Promise.resolve(webhookVerified);
-    case Caller.Service:
+    case "service":
       return Promise.resolve(InternalSecretFirewall.verify());
-    case Caller.User:
-      return RequestIdentity.isUser();
-    case Caller.Admin:
-      return RequestIdentity.isAdmin();
+    case "authenticated":
+      return RequestIdentity.isConnected();
   }
 }

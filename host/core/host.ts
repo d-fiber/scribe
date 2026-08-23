@@ -34,15 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export { serve, serveFunction, forward } from "./kernel/http/serve/mod.ts";
+export { forward, serve, serveFunction } from "./kernel/http/serve/mod.ts";
 export { logger } from "./kernel/observability/logger.ts";
-export {
-  INTERNAL_SERVICES,
-  InternalService,
-} from "./kernel/http/routing/internal_services.ts";
+export { INTERNAL_SERVICES, InternalService } from "./kernel/http/routing/internal_services.ts";
 export { resolveIdentity } from "./kernel/identity/middleware.ts";
-export { AdminRbacResolver } from "./runtime/support/ports/rbac_resolver.ts";
-export type { AdminRbac, AdminRbacSource } from "./contracts/rbac.ts";
+export { GrantsResolver } from "./runtime/support/ports/grants.ts";
+export type { Grants, GrantSource } from "./contracts/grants.ts";
 
 export { cronRegistry } from "@scribe/foundation/lib/src/cron/core/registry.ts";
 export { cronRunner } from "@scribe/foundation/lib/src/cron/runner/cron_runner.ts";
@@ -51,8 +48,8 @@ export { queueRunner } from "@scribe/foundation/lib/src/queue/runner/queue_runne
 export { hookRegistry } from "@scribe/foundation/lib/src/hook/core/registry.ts";
 export {
   type Extension,
+  type ExtensionImporter,
   ExtensionRegistry,
   extensions,
-  type ExtensionImporter,
   OptionalExtension,
 } from "./runtime/support/extensions/mod.ts";

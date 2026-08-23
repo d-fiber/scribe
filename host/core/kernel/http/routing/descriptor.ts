@@ -34,10 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Caller } from "@scribe/core/kernel/endpoint/access.ts";
-import type { RateLimiter } from "@scribe/core/kernel/endpoint/rate_limit.ts";
-
-export type RouteMethod = "get" | "post" | "put" | "patch" | "delete";
+import type { Caller, RateLimit, RouteMethod } from "@scribe/alchemy/route";
 
 export interface RouteInvocation {
   readonly pathParams: Readonly<Record<string, string>>;
@@ -49,7 +46,7 @@ export interface RouteDescriptor {
   readonly method: RouteMethod;
   readonly path: string;
   readonly access: Caller | readonly Caller[];
-  readonly rateLimit: RateLimiter;
+  readonly rateLimit: RateLimit;
   readonly rateLimitKey: string;
   readonly requiredPermissions?: readonly string[];
   readonly webhookVerified?: boolean;

@@ -35,19 +35,19 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Duration } from "@scribe/alchemy";
-import { ApiEndpoint, Caller, type RateLimiter } from "../api.ts";
+import type { Caller } from "@scribe/alchemy/route";
+import type { RateLimit } from "@scribe/alchemy/route";
+import { ApiEndpoint } from "../api.ts";
 import { verifyWebhook } from "./firewall.ts";
 
-export { Caller } from "../access.ts";
 export type { ApiContext } from "../context.ts";
-export type { RateLimiter } from "../rate_limit.ts";
 
 export abstract class WebhookEndpoint extends ApiEndpoint {
   #raw = "";
   #verified = false;
 
   protected access(): Caller | readonly Caller[] {
-    return Caller.Webhook;
+    return "webhook";
   }
 
   protected override webhookVerified(): boolean {
@@ -60,7 +60,7 @@ export abstract class WebhookEndpoint extends ApiEndpoint {
     return this.#raw;
   }
 
-  protected rateLimit(): RateLimiter {
+  protected rateLimit(): RateLimit {
     return {
       limit: 5000,
       window: Duration.minutes(1),

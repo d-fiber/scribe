@@ -97,6 +97,8 @@ export { MemoryHook, MemoryHooks } from "./memory/hook.ts";
 export { MemoryCrons } from "./memory/cron.ts";
 export { MemoryTrigger, MemoryTriggers } from "./memory/trigger.ts";
 export { MemoryRateLimiter, MemoryRateLimiters } from "./memory/rate_limit.ts";
+export { MemoryClient } from "./memory/http.ts";
+export type { MemoryAnswer } from "./memory/http.ts";
 
 export { checkCacheDriver } from "./conformity/cache.ts";
 export { FixedNow } from "./memory/now.ts";

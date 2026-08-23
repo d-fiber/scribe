@@ -34,25 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export type LogLevel = "debug" | "info" | "warn" | "error";
-
-export interface LogEntry {
-  readonly level: LogLevel;
-  readonly action: string;
-  readonly actorType?: string;
-  readonly actorId?: string;
-  readonly metadata?: Record<string, unknown>;
-  readonly timestamp: number;
-
-  /**
-   * The node this entry belongs to, or `null` when it belongs to none.
-   *
-   * A cron pass, a queue drain and the boot sequence all belong to none: they
-   * are the host acting on its own account rather than serving one of the
-   * project's nodes.
-   */
-  readonly node?: string | null;
-}
+import type { LoggedEntry } from "@scribe/alchemy/observe";
 
 /**
  * Where the project decided its own entries should go, when it decided at all.
@@ -86,5 +68,5 @@ export interface LogRouting {
   claims(node: string | null): boolean;
 
   /** Hands a batch to the sink that claimed it. */
-  deliver(node: string | null, entries: readonly LogEntry[]): Promise<void>;
+  deliver(node: string | null, entries: readonly LoggedEntry[]): Promise<void>;
 }

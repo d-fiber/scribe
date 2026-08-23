@@ -49,7 +49,7 @@ import { Duration } from "../../../mod.ts";
 const CALL: Invoked = {
   invocationId: "call-1",
   traceId: "trace-1",
-  user: { id: "ada", email: "", caller: "authenticated", role: "member", permissions: [] },
+  user: { id: "ada", caller: "authenticated", role: "member", permissions: [], claims: {} },
   method: "POST",
   path: "/app/favorites",
   ip: "127.0.0.1",

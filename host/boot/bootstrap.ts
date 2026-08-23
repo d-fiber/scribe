@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Env } from "@scribe/host/env.ts";
-import { OptionalExtension, extensions } from "@scribe/core/runtime/support/extensions/mod.ts";
+import { extensions, OptionalExtension } from "@scribe/core/runtime/support/extensions/mod.ts";
 import { cacheSettings } from "@scribe/foundation/lib/src/valkery/settings.ts";
 import { databaseSettings } from "@scribe/foundation/lib/src/database/settings.ts";
 import { deviceSettings } from "@scribe/core/runtime/support/settings/device.ts";
@@ -43,6 +43,8 @@ import { firewallSettings } from "@scribe/core/runtime/support/settings/firewall
 import { httpSettings } from "@scribe/core/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
 import { queueSettings } from "@scribe/foundation/lib/src/queue/settings.ts";
+import { RateLimiters } from "@scribe/alchemy";
+import { RedisRateLimiters } from "@scribe/foundation/lib/src/rate_limit/mod.ts";
 import { workerSettings } from "@scribe/core/runtime/support/settings/worker.ts";
 import { EXTENSION_CRON, EXTENSION_QUEUE } from "./extensions.ts";
 
@@ -78,6 +80,8 @@ identitySettings.use({
 firewallSettings.use({ internalSecret: Env.INTERNAL_SECRET });
 deviceSettings.use({ payloadPrivateKeyHex: Env.DEVICE_PAYLOAD_PRIVATE_KEY });
 httpSettings.use({ port: Env.PORT, maxInflightBodyBytes: maxInflightBodyBytes() });
+
+RateLimiters.use(new RedisRateLimiters());
 
 const WORKER_CALLBACK_PORT = 4747;
 

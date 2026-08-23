@@ -36,7 +36,15 @@
 
 import { create } from "@bufbuild/protobuf";
 import { Caller as ProtoCaller, Method as ProtoMethod, Need } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
-import { DeviceSchema, IdentitySchema, InvocationSchema, IpLocationSchema, LocalizationSchema, RequestSchema, type Invocation } from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
+import {
+  DeviceSchema,
+  IdentitySchema,
+  type Invocation,
+  InvocationSchema,
+  IpLocationSchema,
+  LocalizationSchema,
+  RequestSchema,
+} from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
 import type { Route } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import { requestDevice } from "@scribe/core/runtime/device/mod.ts";
 import { currentIdentity } from "@scribe/core/runtime/http/accessors/identity.ts";
@@ -93,18 +101,23 @@ function queryOf(): Record<string, string> {
   return query;
 }
 
+/**
+ * Who is calling, written the way the protocol carries it.
+ *
+ * @remarks
+ * Every proved session goes over as `USER`, which is the protocol's word for somebody holding
+ * one. `ADMIN` is never produced: what a caller is called is a word the deployment chose, and it
+ * travels in `rules.role` where the worker can read it, rather than being collapsed into one of
+ * two values this framework would have to define.
+ */
 function identityOf() {
   const identity = currentIdentity();
   if (!identity) return create(IdentitySchema, { caller: ProtoCaller.ANONYMOUS });
 
-  const admin = "rules" in identity;
   return create(IdentitySchema, {
     id: identity.id,
-    email: identity.email ?? "",
-    caller: admin ? ProtoCaller.ADMIN : ProtoCaller.USER,
-    rules: admin
-      ? { role: identity.rules.role, permissions: [...identity.rules.permissions] }
-      : undefined,
+    caller: ProtoCaller.USER,
+    rules: { role: identity.role, permissions: [...identity.permissions] },
   });
 }
 

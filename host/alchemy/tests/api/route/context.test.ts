@@ -67,7 +67,7 @@ Deno.test("a call nobody signed answers no identity rather than an empty one", (
 
 Deno.test("the identity of a signed call is read without walking into it", () => {
   const ctx = new InvocationContext(invoked({
-    user: { id: "ada", email: "ada@bench.local", caller: "authenticated", role: "member", permissions: [] },
+    user: { id: "ada", caller: "authenticated", role: "member", permissions: [], claims: { email: "ada@bench.local" } },
   }));
 
   expect(ctx.id, equals("ada"));

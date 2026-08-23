@@ -48,17 +48,33 @@ export interface RequestUser {
   /** What identifies them, and what an owned row is keyed on. */
   readonly id: string;
 
-  /** Where they can be written to. It is empty when nothing was verified. */
-  readonly email: string;
-
-  /** Which sort of caller they are. */
+  /** How this call was proved. */
   readonly caller: Caller;
 
-  /** What they are, in one word, as the framework decided it. */
+  /**
+   * What this deployment calls them, in one word, or empty when it calls them nothing.
+   *
+   * @remarks
+   * It is an open string and not a list of names, because who a deployment has is not something
+   * this layer can enumerate: an author, a moderator, a support agent, a tenant owner. Nothing
+   * here reads it. What reads it is the deployment, which is the only side that knows what the
+   * word means.
+   */
   readonly role: string;
 
   /** What they are allowed to do beyond what the role already says. */
   readonly permissions: UnmodifiableList<string>;
+
+  /**
+   * Everything else whatever proved this call asserted about them, as it arrived.
+   *
+   * @remarks
+   * An address, a telephone number, a tenant, a plan, whether a factor was verified: which of
+   * those exist and which of them matter is a fact about a deployment. Naming any of them here
+   * would make one of them the way an account is reached and the rest an afterthought, so none
+   * of them is named and all of them are carried.
+   */
+  readonly claims: Readonly<Record<string, unknown>>;
 }
 
 /** Where a call came from, as an address was resolved. */

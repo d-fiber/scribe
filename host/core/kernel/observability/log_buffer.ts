@@ -34,13 +34,13 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { LogEntry } from "@scribe/core/contracts/logging.ts";
+import type { LoggedEntry } from "@scribe/alchemy/observe";
 
 /** The entries of `batch`, gathered under the node each one belongs to. */
 function groupByNode(
-  batch: readonly LogEntry[],
-): Map<string | null, LogEntry[]> {
-  const grouped = new Map<string | null, LogEntry[]>();
+  batch: readonly LoggedEntry[],
+): Map<string | null, LoggedEntry[]> {
+  const grouped = new Map<string | null, LoggedEntry[]>();
 
   for (const entry of batch) {
     const node = entry.node ?? null;
@@ -87,14 +87,14 @@ const LINGER_MS = 1_000;
 export class LogBuffer {
   readonly #publish: (
     node: string | null,
-    entries: readonly LogEntry[],
+    entries: readonly LoggedEntry[],
   ) => Promise<unknown>;
 
-  #entries: LogEntry[] = [];
+  #entries: LoggedEntry[] = [];
   #timer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
-    publish: (node: string | null, entries: readonly LogEntry[]) => Promise<unknown>,
+    publish: (node: string | null, entries: readonly LoggedEntry[]) => Promise<unknown>,
   ) {
     this.#publish = publish;
   }
@@ -111,7 +111,7 @@ export class LogBuffer {
    * batch. A caller under a runtime that suspends on idle passes what it gets
    * to `waitUntil`, so the process stays alive long enough to publish.
    */
-  record(entry: LogEntry): Promise<void> | null {
+  record(entry: LoggedEntry): Promise<void> | null {
     this.#entries.push(entry);
 
     if (this.#entries.length >= MAX_BUFFERED) return this.flush();

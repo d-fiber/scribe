@@ -35,9 +35,9 @@
 // LICENSE file, the LICENSE file governs.
 
 import { assertEquals } from "@std/assert";
-import { type DiscoveredLogSink, type LoggedEntry, LogSink, Node, ScribeServer } from "@scribe/sdk";
+import { type DiscoveredLogSink, LogSink, Node, ScribeServer } from "@scribe/sdk";
 import type { Manifest } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
-import type { LogEntry } from "@scribe/core/contracts/logging.ts";
+import type { LoggedEntry } from "@scribe/alchemy/observe";
 import { WorkerLogSinks } from "@scribe/host/project/worker/log_sinks.ts";
 import { WorkerClient } from "@scribe/host/project/worker/worker_client.ts";
 
@@ -82,8 +82,18 @@ const APP_SINK: DiscoveredLogSink = {
   module: { AppLogs },
 };
 
-function entry(action: string, node: string | null): LogEntry {
-  return { level: "info", action, node, metadata: { method: "GET", status: 200 }, timestamp: 1 };
+function entry(action: string, node: string | null): LoggedEntry {
+  return {
+    actorType: null,
+    actorId: null,
+    traceId: null,
+    invocationId: null,
+    level: "info",
+    action,
+    node,
+    metadata: { method: "GET", status: 200 },
+    timestamp: 1,
+  };
 }
 
 /**
@@ -182,10 +192,14 @@ Deno.test("the metadata of an exchange survives the crossing", async () => {
 
 Deno.test("the preview of a failed response crosses with the rest of the metadata", async () => {
   const { sinks } = await attach([ROOT_SINK]);
-  const failed: LogEntry = {
+  const failed: LoggedEntry = {
     level: "warn",
     action: "/brand",
     node: null,
+    actorType: null,
+    actorId: null,
+    traceId: null,
+    invocationId: null,
     metadata: { method: "GET", status: 404, preview: '{"error":"no such brand"}' },
     timestamp: 1,
   };

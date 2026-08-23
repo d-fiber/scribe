@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { AdminRbacResolver } from "@scribe/core/runtime/support/ports/rbac_resolver.ts";
-import { DatabaseAdminRbacSource } from "./mod.ts";
+import { GrantsResolver } from "@scribe/core/runtime/support/ports/grants.ts";
+import { DatabaseGrantSource } from "./mod.ts";
 
 /**
  * What this module hands the framework when it is mounted.
@@ -45,4 +45,4 @@ import { DatabaseAdminRbacSource } from "./mod.ts";
  * emits an import of this file for every mounted module, and nothing else
  * names it.
  */
-AdminRbacResolver.use(new DatabaseAdminRbacSource());
+GrantsResolver.use(new DatabaseGrantSource());

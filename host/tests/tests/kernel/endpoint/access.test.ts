@@ -35,14 +35,15 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Duration } from "@scribe/alchemy";
-import { ApiContext, ApiEndpoint, Caller } from "@scribe/core/kernel/endpoint/api.ts";
+import type { Caller } from "@scribe/alchemy/route";
+import { ApiContext, ApiEndpoint } from "@scribe/core/kernel/endpoint/api.ts";
 import { callEndpoint } from "@scribe/core/testing/kernel/endpoint.ts";
 import { installRateLimiterMock } from "@scribe/foundation/tests/testing/valkery.ts";
 import { assertEquals } from "@std/assert";
 
 class UnsignedWebhookEndpoint extends ApiEndpoint {
   protected access(): Caller {
-    return Caller.Webhook;
+    return "webhook";
   }
 
   protected rateLimit() {
@@ -60,7 +61,7 @@ class UnsignedWebhookEndpoint extends ApiEndpoint {
 
 class OpenEndpoint extends ApiEndpoint {
   protected access(): Caller {
-    return Caller.Anonymous;
+    return "anonymous";
   }
 
   protected rateLimit() {
@@ -76,7 +77,7 @@ class OpenEndpoint extends ApiEndpoint {
   }
 }
 
-Deno.test("declaring Caller.Webhook does not by itself open an endpoint", async () => {
+Deno.test("declaring a webhook caller does not by itself open an endpoint", async () => {
   const limiter = installRateLimiterMock();
   try {
     const result = await callEndpoint(() => UnsignedWebhookEndpoint.handle());
@@ -84,14 +85,14 @@ Deno.test("declaring Caller.Webhook does not by itself open an endpoint", async 
     assertEquals(
       result.status,
       401,
-      "only WebhookEndpoint, which checks the signature, may satisfy Caller.Webhook",
+      "only WebhookEndpoint, which checks the signature, may satisfy a webhook caller",
     );
   } finally {
     limiter.restore();
   }
 });
 
-Deno.test("Caller.Anonymous stays open, it declares no proof at all", async () => {
+Deno.test("an anonymous caller stays open, it declares no proof at all", async () => {
   const limiter = installRateLimiterMock();
   try {
     const result = await callEndpoint(() => OpenEndpoint.handle());

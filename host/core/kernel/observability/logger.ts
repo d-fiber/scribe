@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import "@scribe/core/runtime/support/edge_runtime_shim.ts";
-import type { LogLevel } from "@scribe/core/contracts/logging.ts";
+import type { LoggedLevel } from "@scribe/alchemy/observe";
 import { previewOf } from "@scribe/core/kernel/observability/body_preview.ts";
 import { levelForStatus } from "@scribe/core/kernel/observability/level.ts";
 import { LogRoutes } from "@scribe/core/kernel/observability/log_routing.ts";
@@ -59,7 +59,7 @@ function ship(
   method: string,
   route: string,
   status: number,
-  level: LogLevel,
+  level: LoggedLevel,
   node: string | null,
   preview: string,
 ): void {
@@ -68,6 +68,10 @@ function ship(
       level,
       action: route,
       node,
+      actorType: null,
+      actorId: null,
+      traceId: null,
+      invocationId: null,
       // The preview is left out entirely rather than sent empty: it exists on
       // failures alone, and an empty string in every other entry would be a
       // field a sink has to check before it can use it.

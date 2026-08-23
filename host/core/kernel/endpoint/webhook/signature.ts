@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { fromBase64Url } from "@scribe/core/runtime/support/crypto/base64url.ts";
+import { fromBase64 } from "@scribe/core/runtime/support/crypto/base64.ts";
 import type { SignedWebhookRequest } from "./signed_request.ts";
 
 const SECRET_PREFIX = "whsec_";
@@ -45,7 +45,7 @@ export async function importSigningKey(
   const encoded = secret.split(SECRET_PREFIX)[1];
   if (!encoded) return null;
 
-  const keyBytes = fromBase64Url(encoded);
+  const keyBytes = fromBase64(encoded);
   if (keyBytes === null) return null;
 
   return await crypto.subtle.importKey(
@@ -66,7 +66,7 @@ export async function matchesAnyCandidate(
   );
 
   for (const candidate of signed.candidateSignatures) {
-    const signatureBytes = fromBase64Url(candidate);
+    const signatureBytes = fromBase64(candidate);
     if (signatureBytes === null) continue;
 
     if (await crypto.subtle.verify("HMAC", key, signatureBytes, message)) {

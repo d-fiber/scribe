@@ -34,11 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { LogEntry } from "@scribe/core/contracts/logging.ts";
+import type { LoggedEntry } from "@scribe/alchemy/observe";
 import { LogBuffer } from "@scribe/core/kernel/observability/log_buffer.ts";
 import { LogRoutes } from "@scribe/core/kernel/observability/log_routing.ts";
-
-export type { LogEntry };
 
 /**
  * Sends a node's entries to the sink that node declared, or drops them.
@@ -51,7 +49,7 @@ export type { LogEntry };
  */
 function publishLogs(
   node: string | null,
-  entries: readonly LogEntry[],
+  entries: readonly LoggedEntry[],
 ): Promise<unknown> {
   const routing = LogRoutes.current;
   if (!routing.claims(node)) return Promise.resolve();

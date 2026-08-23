@@ -66,14 +66,14 @@ export type { UuidSource } from "./src/value/uuid.ts";
 export type { Expando, Finalizer, WeakReference } from "./src/value/weak.ts";
 
 export { Pagination } from "./src/value/pagination.ts";
-export type { PaginationJson } from "./src/value/pagination.ts";
+export type { PageRequest, PaginationJson } from "./src/value/pagination.ts";
 export { Failure, Ok, okay } from "./src/value/result.ts";
 export type { Result } from "./src/value/result.ts";
 
 export { BindingError, Slot } from "./src/bind/slot.ts";
 
 export { base64, base64Url, hex, json, utf8 } from "./src/value/convert.ts";
-export type { Codec } from "./src/value/convert.ts";
+export type { BytesCodec, Codec } from "./src/value/convert.ts";
 
 export { ExponentialBackoff } from "./src/async/backoff.ts";
 export { TimeoutException, withDeadline } from "./src/async/deadline.ts";

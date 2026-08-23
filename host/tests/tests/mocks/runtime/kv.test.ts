@@ -38,18 +38,14 @@
 // module load time, but the `ioredis` client itself is `lazyConnect: true`, so no real
 // connection is attempted and `--allow-net` isn't required (see `.claude/testing.md`).
 
-import { Duration } from "@scribe/alchemy";
-import { RateLimit } from "@scribe/foundation/lib/src/rate_limit/mod.ts";
+import { Duration, rateLimit, RateLimiters } from "@scribe/alchemy";
 import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 import { assertEquals } from "@std/assert";
 import { installRateLimiterMock, installValkeryMock } from "@scribe/foundation/tests/testing/valkery.ts";
 
-const LIMIT = new RateLimit({
-  key: "x",
-  limit: 10,
-  window: Duration.seconds(60),
-  penalty: Duration.seconds(60),
-});
+function aLimit() {
+  return rateLimit({ key: "x", limit: 10, window: Duration.seconds(60), penalty: Duration.seconds(60) });
+}
 
 Deno.test(
   "installValkeryMock: a Valkery subclass reads/writes against an in-memory store, restore() puts Redis back",
@@ -104,23 +100,21 @@ Deno.test(
 );
 
 Deno.test(
-  "installRateLimiterMock: defaults to an ok result and restore() puts the real check back",
+  "installRateLimiterMock: defaults to an ok result and restore() empties a port nothing had filled",
   async () => {
-    const original = RateLimit.prototype.check;
     const mock = installRateLimiterMock();
 
-    const result = await LIMIT.check();
-    assertEquals(result, { ok: true, remaining: 999 });
+    assertEquals(await aLimit().check(), { ok: true, remaining: 999 });
 
     mock.restore();
-    assertEquals(RateLimit.prototype.check, original);
+    assertEquals(RateLimiters.configured, false);
   },
 );
 
 Deno.test("installRateLimiterMock: accepts a custom result", async () => {
   const mock = installRateLimiterMock({ ok: false, retryAfter: 30, strikes: 1 });
 
-  const result = await LIMIT.check();
+  const result = await aLimit().check();
 
   assertEquals(result, { ok: false, retryAfter: 30, strikes: 1 });
   mock.restore();

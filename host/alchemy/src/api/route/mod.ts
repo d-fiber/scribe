@@ -62,6 +62,8 @@ export type { Invoked, IpLocation, RequestUser } from "./context.ts";
 export { Delete, Endpoint, Get, Patch, Post, Put } from "./endpoint.ts";
 export type { EndpointDocumentation } from "./endpoint.ts";
 
+export { HtmlPage } from "./page.ts";
+
 export { jsonReply, ServerResponse } from "./response.ts";
 export type { ErrorResponder, FixedErrorResponder, SuccessResponder } from "./response.ts";
 

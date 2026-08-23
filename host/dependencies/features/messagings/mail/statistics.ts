@@ -38,7 +38,8 @@ import type { InternalTMailStatisticsRow } from "@scribe/foundation/lib/src/data
 import { database } from "@scribe/foundation/lib/src/database/database.ts";
 import { Pagination } from "@scribe/alchemy";
 import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
-import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
+import type { PageRequest } from "@scribe/alchemy";
+import { DEFAULT_PAGE_SIZE } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import type { MailId } from "./send.ts";
 
@@ -76,7 +77,7 @@ export interface MailStatisticService {
   get(id: MailStatisticId): Promise<Result<MailStatistic, MailStatisticError>>;
   list(
     mailId: MailId,
-    options?: ListOptions,
+    options?: PageRequest,
   ): Promise<Result<Pagination<MailStatistic>, MailStatisticError>>;
   record(
     input: RecordMailStatisticInput,
@@ -102,7 +103,7 @@ export class MailStatisticRepository extends Repository<MailStatisticError> impl
 
   list(
     mailId: MailId,
-    options?: ListOptions,
+    options?: PageRequest,
   ): Promise<Result<Pagination<MailStatistic>, MailStatisticError>> {
     return this.guard(async () => {
       const offset = options?.offset ?? 0;

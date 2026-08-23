@@ -46,6 +46,9 @@ import { ScribeError } from "../../error/scribe_error.ts";
  * afterwards, and the fields stop accepting writes. Without that, a request reused after a
  * redirect or a retry would send a stream somebody has already drained.
  */
+/** What a client does when the answer to a request is a redirect. */
+export type Redirect = "error" | "follow" | "manual";
+
 export abstract class BaseRequest {
   /** The method, upper-cased. */
   readonly method: string;
@@ -56,7 +59,7 @@ export abstract class BaseRequest {
   readonly #headers = new Headers();
 
   #finalized = false;
-  #followRedirects = true;
+  #redirect: Redirect = "follow";
   #maxRedirects = 5;
   #persistentConnection = true;
   /** How long the client waits for this exchange, or null for no limit. */
@@ -80,13 +83,28 @@ export abstract class BaseRequest {
   /** How many bytes the body holds, or `null` when that is not known ahead of time. */
   abstract get contentLength(): number | null;
 
-  /** Whether the client should follow a redirect on this request's behalf. */
+  /**
+   * What the client does with a redirect on this request's behalf.
+   *
+   * @remarks
+   * The three answers are not two: `error` refuses the exchange, `manual` hands the redirect
+   * back as an answer of its own, and only `follow` walks it. A request that carried a boolean
+   * collapsed the first two, and the client then had to guess which one the caller meant.
+   */
+  get redirect(): Redirect {
+    return this.#redirect;
+  }
+  set redirect(value: Redirect) {
+    this.#checkFinalized();
+    this.#redirect = value;
+  }
+
+  /** Whether {@link redirect} walks a redirect rather than refusing it or handing it back. */
   get followRedirects(): boolean {
-    return this.#followRedirects;
+    return this.#redirect === "follow";
   }
   set followRedirects(value: boolean) {
-    this.#checkFinalized();
-    this.#followRedirects = value;
+    this.redirect = value ? "follow" : "manual";
   }
 
   /** How many redirects are followed before the client gives up. */

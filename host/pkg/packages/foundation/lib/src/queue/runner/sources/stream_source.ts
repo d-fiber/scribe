@@ -34,7 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { DEDICATED_STREAM, SHARED_CONSUMER, SHARED_STREAM, sanitize } from "@scribe/foundation/lib/src/queue/core/naming.ts";
+import {
+  DEDICATED_STREAM,
+  sanitize,
+  SHARED_CONSUMER,
+  SHARED_STREAM,
+} from "@scribe/foundation/lib/src/queue/core/naming.ts";
 import { topology } from "@scribe/foundation/lib/src/queue/core/topology/topology.ts";
 import type { RegisteredQueue } from "@scribe/foundation/lib/src/queue/core/declaration.ts";
 import type { JsMsg } from "@nats-io/jetstream";
@@ -82,7 +87,9 @@ export class StreamSource {
   }
 
   static forQueue(queue: RegisteredQueue): StreamSource {
-    return queue.dedicated ? StreamSource.dedicated(queue) : StreamSource.shared();
+    return queue.dedicated
+      ? StreamSource.dedicated(queue)
+      : StreamSource.shared();
   }
 
   fetch(count: number): Promise<JsMsg[]> {

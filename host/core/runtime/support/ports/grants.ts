@@ -34,53 +34,44 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-/**
- * A stream of bytes, with the two ways of draining it that a caller ever wants.
- *
- * It wraps a `ReadableStream` rather than replacing it: {@link stream} hands the underlying
- * one back, so anything that already speaks the platform's streams keeps working.
- */
-export class ByteStream {
-  /** The underlying stream. */
-  readonly stream: ReadableStream<Uint8Array>;
+import type { Grants, GrantSource } from "@scribe/core/contracts/grants.ts";
+import { Duration } from "@scribe/alchemy";
+import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 
-  constructor(stream: ReadableStream<Uint8Array>) {
-    this.stream = stream;
+export class GrantsResolver {
+  private static readonly _cache = new Valkery<Grants>({ key: "identity:grants", ttl: Duration.minutes(5) });
+  private static _source: GrantSource | null = null;
+
+  static use(source: GrantSource): void {
+    this._source = source;
   }
 
-  /** A stream carrying `bytes` and nothing else. */
-  static fromBytes(bytes: Uint8Array): ByteStream {
-    return new ByteStream(
-      new ReadableStream<Uint8Array>({
-        start(controller) {
-          controller.enqueue(bytes);
-          controller.close();
-        },
-      }),
-    );
+  static async resolve(accountId: string): Promise<Grants | null> {
+    const cached = await this._cache.get(accountId);
+    if (cached !== null) return cached;
+
+    const source = this._requireSource();
+    const role = await source.roleOf(accountId);
+    if (role === null) return null;
+
+    const rbac: Grants = {
+      role,
+      permissions: await source.permissionsOf(role),
+    };
+    await this._cache.add(accountId, rbac);
+    return rbac;
   }
 
-  /** Collects the whole stream into one buffer. */
-  async toBytes(): Promise<Uint8Array> {
-    const chunks: Uint8Array[] = [];
-    let total = 0;
+  static invalidate(accountId?: string): Promise<void> {
+    return accountId ? this._cache.delete(accountId) : this._cache.clear();
+  }
 
-    for await (const chunk of this.stream) {
-      chunks.push(chunk);
-      total += chunk.length;
+  private static _requireSource(): GrantSource {
+    if (this._source === null) {
+      throw new Error(
+        "[grants] no GrantSource registered: call GrantsResolver.use() at boot.",
+      );
     }
-
-    const collected = new Uint8Array(total);
-    let at = 0;
-    for (const chunk of chunks) {
-      collected.set(chunk, at);
-      at += chunk.length;
-    }
-    return collected;
-  }
-
-  /** Collects the whole stream and decodes it, utf-8 unless told otherwise. */
-  async bytesToString(encoding = "utf-8"): Promise<string> {
-    return new TextDecoder(encoding).decode(await this.toBytes());
+    return this._source;
   }
 }

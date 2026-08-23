@@ -36,7 +36,8 @@
 
 import "@scribe/core/testing/settings.ts";
 import type { RequestDevice } from "@scribe/core/contracts/device.ts";
-import { RequestIdentityCache, type RequestUser } from "@scribe/core/runtime/http/accessors/identity.ts";
+import type { RequestUser } from "@scribe/alchemy/route";
+import { RequestIdentityCache } from "@scribe/core/runtime/http/accessors/identity.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 import { fakeDevice } from "../runtime/device.ts";
 
@@ -47,7 +48,7 @@ export interface ApiCallOptions {
   readonly headers?: Record<string, string>;
   readonly method?: string;
   readonly path?: string;
-  readonly identity?: RequestUser;
+  readonly identity?: RequestUser | null;
   readonly token?: string;
 }
 

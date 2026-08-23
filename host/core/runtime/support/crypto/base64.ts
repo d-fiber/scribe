@@ -34,23 +34,53 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { AccountRole, AccountRoleSource } from "@scribe/core/contracts/account.ts";
+import { base64, base64Url, json } from "@scribe/alchemy";
 
-let source: AccountRoleSource | null = null;
+/**
+ * The bytes `value` spells, or null when it does not spell any.
+ *
+ * @remarks
+ * The decoding is the vocabulary's, which refuses `+`, `/` and padding rather than reading them as
+ * the other alphabet's spelling of the same bytes. That matters here because what arrives is a
+ * token: one that has two texts is one a replay guard keyed on the text would hold in one spelling
+ * and let through in the other.
+ *
+ * What this adds is the answer on failure. Everything that reads a token here is deciding whether
+ * to refuse a call, not telling whoever wrote the input what is wrong with it, so a refusal reads
+ * better as an absent value than as an exception every caller has to catch the same way.
+ */
+export function fromBase64Url(value: string): Uint8Array<ArrayBuffer> | null {
+  try {
+    return base64Url.decode(value);
+  } catch {
+    return null;
+  }
+}
 
-export const AccountRoles: {
-  use(next: AccountRoleSource): void;
-  withId(id: string): Promise<AccountRole | null>;
-} = {
-  use(next: AccountRoleSource): void {
-    source = next;
-  },
+/**
+ * The bytes `value` spells in standard base64, or null when it does not spell any.
+ *
+ * @remarks
+ * It is the padded alphabet with `+` and `/`, which is what a webhook secret and a webhook
+ * signature are written in. They are not tokens carried in an address, so the alphabet
+ * {@link fromBase64Url} reads would refuse exactly the spelling those arrive in.
+ */
+export function fromBase64(value: string): Uint8Array<ArrayBuffer> | null {
+  try {
+    return base64.decode(value);
+  } catch {
+    return null;
+  }
+}
 
-  withId(id: string): Promise<AccountRole | null> {
-    if (!source) {
-      console.error("[account-roles] no AccountRoleSource registered: denying.");
-      return Promise.resolve(null);
-    }
-    return source.withId(id);
-  },
-};
+/** What `value` spells once decoded and read as JSON, or null when either step fails. */
+export function jsonFromBase64Url(value: string): unknown | null {
+  const bytes = fromBase64Url(value);
+  if (bytes === null) return null;
+
+  try {
+    return json.decode(new TextDecoder().decode(bytes));
+  } catch {
+    return null;
+  }
+}

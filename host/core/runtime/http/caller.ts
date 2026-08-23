@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { RateLimit, RateLimitOutcome } from "@scribe/foundation/lib/src/rate_limit/mod.ts";
+import type { RateLimiter, RateLimitOutcome } from "@scribe/alchemy";
 import { currentIdentity } from "@scribe/core/runtime/http/accessors/identity.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
 
@@ -100,7 +100,7 @@ function suffixOf(caller: RequestCaller, subject: string): string {
  * chose for a hit it cannot measure, rather than joining a bucket shared with every other unnamed
  * caller.
  */
-export function checkCaller(limit: RateLimit, subject: string = ""): Promise<RateLimitOutcome> {
+export function checkCaller(limit: RateLimiter, subject: string = ""): Promise<RateLimitOutcome> {
   const caller = requestCaller();
   if (caller === null) {
     console.error(`[rate-limit] no caller to attribute "${limit.key}" to, and no bucket to record`);
@@ -111,9 +111,9 @@ export function checkCaller(limit: RateLimit, subject: string = ""): Promise<Rat
 }
 
 /** Whether whoever is calling is serving a penalty on `limit`, for `subject` when there is one. */
-export function callerBlocked(limit: RateLimit, subject: string = ""): Promise<boolean> {
+export function callerBlocked(limit: RateLimiter, subject: string = ""): Promise<boolean> {
   const caller = requestCaller();
-  if (caller === null) return Promise.resolve(!limit.failOpen);
+  if (caller === null) return Promise.resolve(!limit.unmeasured().ok);
 
   return limit.isBlocked("", suffixOf(caller, subject));
 }

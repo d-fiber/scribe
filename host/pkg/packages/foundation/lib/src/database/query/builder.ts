@@ -76,19 +76,6 @@ export class DatabaseQueryError extends Error {
   }
 }
 
-export class OwnerScopeError extends Error {
-  constructor(
-    readonly table: string,
-    readonly column: string,
-  ) {
-    super(
-      `${table} is owned by "${column}" and the caller is not an admin: refusing an unscoped query. ` +
-        `Call .unscoped() if crossing owners is deliberate and authorised upstream.`,
-    );
-    this.name = "OwnerScopeError";
-  }
-}
-
 /**
  * A PostgREST client, or a way to get one when it is first needed.
  *
@@ -126,8 +113,9 @@ export class TypedQueryBuilder<
    * the boot filled the settings still works.
    */
   get #db(): any {
-    return (this.#client ??=
-      typeof this.#source === "function" ? this.#source() : this.#source);
+    return (this.#client ??= typeof this.#source === "function"
+      ? this.#source()
+      : this.#source);
   }
 
   #constrainsOwner(): boolean {
@@ -137,18 +125,13 @@ export class TypedQueryBuilder<
     );
   }
 
-  #decide(ownerAlreadyBound: boolean): ScopeDecision {
-    if (this.#state.unscoped) return OPEN_SCOPE;
-
-    const decision = ownerScope(this.#table);
-    if (decision.kind !== "denied") return decision;
-    if (ownerAlreadyBound) return OPEN_SCOPE;
-
-    throw new OwnerScopeError(this.#table, decision.column);
+  /** What this query is allowed to see, once the caller and the table have both been read. */
+  #decide(): ScopeDecision {
+    return this.#state.unscoped ? OPEN_SCOPE : ownerScope(this.#table);
   }
 
   #scoped(): { state: QueryState; owned: boolean } {
-    const decision = this.#decide(this.#constrainsOwner());
+    const decision = this.#decide();
     if (decision.kind !== "scoped") return { state: this.#state, owned: false };
 
     return {
@@ -202,7 +185,7 @@ export class TypedQueryBuilder<
   }
 
   #owned<T extends Partial<Row>>(data: T | T[]): T | T[] {
-    const decision = this.#decide(this.#carriesOwner(data));
+    const decision = this.#decide();
     if (decision.kind !== "scoped") return data;
 
     const withOwner = (row: T): T => {

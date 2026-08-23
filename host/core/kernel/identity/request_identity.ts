@@ -34,15 +34,16 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { SessionAdmin, SessionUser } from "@scribe/core/contracts/account.ts";
-import { AccountRole } from "@scribe/core/contracts/account.ts";
+import type { RequestUser } from "@scribe/alchemy/route";
 import { request } from "@scribe/core/runtime/http/request.ts";
-import { AdminRbacResolver } from "@scribe/core/runtime/support/ports/rbac_resolver.ts";
+import { GrantsResolver } from "@scribe/core/runtime/support/ports/grants.ts";
 import { JwtIdentityResolver } from "./resolver/jwt_resolver.ts";
-import { RequestIdentityCache, type RequestUser } from "@scribe/core/runtime/http/accessors/identity.ts";
+import { RequestIdentityCache, type ResolvedIdentity } from "@scribe/core/runtime/http/accessors/identity.ts";
 
+/** How many dot-separated parts a JSON web token is made of. */
 const JWT_SEGMENTS = 3;
 
+/** The bearer token of the request, when it is shaped like a token at all. */
 function _bearerJwt(): string | null {
   const jwt = request.token();
   if (jwt === null) return null;
@@ -54,92 +55,77 @@ function _bearerJwt(): string | null {
   return wellFormed ? jwt : null;
 }
 
-function _isAdminUser(user: RequestUser): user is SessionAdmin {
-  return user !== null && "rules" in user;
-}
-
-async function _resolveUserFromJwt(): Promise<RequestUser> {
+/** Who the bearer token names, with what the deployment grants them, or null when it names nobody. */
+async function _resolveFromJwt(): Promise<ResolvedIdentity> {
   const jwt = _bearerJwt();
   if (!jwt) return null;
 
   const identity = await JwtIdentityResolver.resolveIdentity(jwt);
   if (identity === null) return null;
 
-  if (!identity.isAdmin) {
-    const user: SessionUser = { id: identity.id, email: identity.email };
-    return user;
-  }
+  const granted = await GrantsResolver.resolve(identity.id);
 
-  return await _resolveAdmin(identity.id, identity.email);
-}
-
-async function _resolveAdmin(
-  id: string,
-  email: string | null,
-): Promise<SessionAdmin | null> {
-  if (email === null) {
-    console.error(
-      `[request-identity] admin "${id}" has no email, refusing the identity`,
-    );
-    return null;
-  }
-
-  const rbac = await AdminRbacResolver.resolve(id);
-  if (rbac === null) return null;
-
-  return {
-    id,
-    email,
-    rules: { role: rbac.role, permissions: rbac.permissions },
+  const user: RequestUser = {
+    id: identity.id,
+    caller: "authenticated",
+    role: granted?.role ?? "",
+    permissions: granted?.permissions ?? [],
+    claims: identity.claims,
   };
+  return user;
 }
 
-function _currentUser(): Promise<RequestUser> {
-  return RequestIdentityCache.remember(_resolveUserFromJwt);
+/** Who is calling, resolved once per request and remembered for the rest of it. */
+function _currentUser(): Promise<ResolvedIdentity> {
+  return RequestIdentityCache.remember(_resolveFromJwt);
 }
 
-export function invalidateAdminRbac(id?: string): Promise<void> {
-  return AdminRbacResolver.invalidate(id);
+/** Forgets what a deployment grants `id`, or what it grants everybody when `id` is left out. */
+export function invalidateGrants(id?: string): Promise<void> {
+  return GrantsResolver.invalidate(id);
 }
 
+/**
+ * Who is calling, as far as anything can be told about them.
+ *
+ * @remarks
+ * There is one kind of caller here and not two. Whether somebody is an administrator, an author
+ * or a tenant owner is a word a deployment chose, and it travels as {@link role}. A framework
+ * that told them apart would be deciding, for every deployment at once, which words exist.
+ */
 export class RequestIdentity {
+  /** Whether anything proved this call at all. */
   static async isConnected(): Promise<boolean> {
     return (await _currentUser()) !== null;
   }
 
-  static async isAdmin(): Promise<boolean> {
-    return _isAdminUser(await _currentUser());
-  }
-
-  static async isUser(): Promise<boolean> {
-    const user = await _currentUser();
-    return user !== null && !_isAdminUser(user);
-  }
-
+  /** What identifies the caller, or null when nothing proved the call. */
   static async userId(): Promise<string | null> {
-    const user = await _currentUser();
-    return user?.id ?? null;
+    return (await _currentUser())?.id ?? null;
   }
 
-  static async role(): Promise<AccountRole | null> {
-    const user = await _currentUser();
-    if (user === null) return null;
-    return _isAdminUser(user) ? AccountRole.Admin : AccountRole.User;
+  /** What the deployment calls the caller, or null when it calls them nothing. */
+  static async role(): Promise<string | null> {
+    const role = (await _currentUser())?.role ?? "";
+    return role === "" ? null : role;
   }
 
-  static get current(): RequestUser {
+  /** Who was already resolved on this request, without resolving anybody. */
+  static get current(): ResolvedIdentity {
     return RequestIdentityCache.resolved() ?? null;
   }
 }
 
+/** What the caller is allowed to do, read the same way whoever is calling. */
 export class RbacIdentity extends RequestIdentity {
-  static async adminRole(): Promise<string | null> {
-    const user = await _currentUser();
-    return _isAdminUser(user) ? user.rules.role : null;
+  /** Every permission the caller holds. Empty when nothing proved the call. */
+  static async permissions(): Promise<string[]> {
+    return (await _currentUser())?.permissions.slice() ?? [];
   }
 
-  static async permissions(): Promise<string[]> {
-    const user = await _currentUser();
-    return _isAdminUser(user) ? user.rules.permissions : [];
+  /** Whether the caller holds every one of `required`. */
+  static async grants(required: readonly string[]): Promise<boolean> {
+    const held = await this.permissions();
+    return required.every((permission) => held.includes(permission));
   }
 }

@@ -47,7 +47,7 @@ import { installLocationResolver } from "@scribe/core/runtime/http/accessors/loc
 
 export type { IpLocation };
 
-const _TIMEOUT_MS = 3_000;
+const _TIMEOUT: Duration = Duration.seconds(3);
 const _EMPTY_LOCATION: IpLocation = { city: "", country: "" };
 
 export class GeolocationResolver {
@@ -88,7 +88,7 @@ export class GeolocationResolver {
 
       const res = await get(url, {
         headers: { Accept: "application/json" },
-        timeout: _TIMEOUT_MS,
+        timeout: _TIMEOUT,
       });
       if (!res.ok) return null;
 

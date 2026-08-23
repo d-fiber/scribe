@@ -34,7 +34,6 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { AccountRole } from "@scribe/core/contracts/account.ts";
 import { Duration } from "@scribe/alchemy";
 import { JwtVerifier } from "@scribe/core/kernel/identity/resolver/jwt_verifier.ts";
 import { IDENTITY_CACHE_KEY, IdentityRevocation } from "@scribe/core/runtime/redis/identity_revocation.ts";
@@ -45,10 +44,21 @@ import { get } from "@scribe/foundation/lib/src/http/mod.ts";
 import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 import type { JWTPayload } from "jose";
 
+/** Who a bearer token names, and everything it asserts about them. */
 export interface ResolvedJwtIdentity {
+  /** What the token names as the subject, which is what an owned row is keyed on. */
   readonly id: string;
-  readonly email: string | null;
-  readonly isAdmin: boolean;
+
+  /**
+   * Everything else the token asserted, as it arrived.
+   *
+   * @remarks
+   * The framework reads none of it. An address, a telephone number, a tenant, whatever the
+   * identity provider was told to put in `app_metadata`: which of those exist and what any of
+   * them means is a fact about a deployment, and reading one here would make this framework
+   * decide it for all of them.
+   */
+  readonly claims: Readonly<Record<string, unknown>>;
 }
 
 /**
@@ -63,7 +73,7 @@ interface _CachedJwtIdentity extends ResolvedJwtIdentity {
   readonly exp: number | null;
 }
 
-const _FETCH_TIMEOUT_MS = 5_000;
+const _FETCH_TIMEOUT: Duration = Duration.seconds(5);
 
 /**
  * How long this process answers from its own memory before asking Redis again.
@@ -94,23 +104,14 @@ function _expired(exp: number | null): boolean {
   return exp !== null && exp <= Date.now() / 1_000;
 }
 
-function _roleOf(appMetadata: unknown): unknown {
-  return typeof appMetadata === "object" && appMetadata !== null
-    ? (appMetadata as Record<string, unknown>).role
-    : undefined;
-}
-
+/** Who the identity service says the token names, when it was asked directly. */
 function _parseGoTrueUser(
   raw: Record<string, unknown>,
 ): ResolvedJwtIdentity | null {
-  const { id, email, app_metadata } = raw;
+  const { id, ...claims } = raw;
   if (typeof id !== "string" || !id) return null;
 
-  return {
-    id,
-    email: typeof email === "string" && email ? email : null,
-    isAdmin: _roleOf(app_metadata) === AccountRole.Admin,
-  };
+  return { id, claims };
 }
 
 /**
@@ -121,18 +122,12 @@ function _parseGoTrueUser(
  * nothing but freshness, which {@link IdentityRevocation.recheckRequired}
  * asks for by name when it is actually needed.
  */
+/** Who the token says it names, read from the token alone, without asking anybody. */
 function _identityFromClaims(payload: JWTPayload): ResolvedJwtIdentity | null {
-  const { sub, email, app_metadata } = payload as JWTPayload & {
-    email?: unknown;
-    app_metadata?: unknown;
-  };
+  const { sub, ...claims } = payload;
   if (typeof sub !== "string" || !sub) return null;
 
-  return {
-    id: sub,
-    email: typeof email === "string" && email ? email : null,
-    isAdmin: _roleOf(app_metadata) === AccountRole.Admin,
-  };
+  return { id: sub, claims };
 }
 
 export class JwtIdentityResolver {
@@ -254,7 +249,7 @@ export class JwtIdentityResolver {
           apikey: identitySettings.get().anonKey,
           Authorization: `Bearer ${jwt}`,
         },
-        timeout: _FETCH_TIMEOUT_MS,
+        timeout: _FETCH_TIMEOUT,
       });
       return res.ok ? res.json<Record<string, unknown>>() : null;
     } catch {

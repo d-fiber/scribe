@@ -45,7 +45,8 @@ import {
   parseFormBytes,
 } from "@scribe/alchemy/body";
 import { requestDevice } from "@scribe/core/runtime/device/mod.ts";
-import { currentIdentity, type RequestUser } from "@scribe/core/runtime/http/accessors/identity.ts";
+import type { RequestUser } from "@scribe/alchemy/route";
+import { currentIdentity } from "@scribe/core/runtime/http/accessors/identity.ts";
 import { currentLocation } from "@scribe/core/runtime/http/accessors/location.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";

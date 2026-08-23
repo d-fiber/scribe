@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { Duration } from "@scribe/alchemy";
 import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
 import type {
   GorseFeedback,
@@ -42,12 +43,19 @@ import type {
   RecommendationOptions,
   RecommendationService,
 } from "@scribe/host/dependencies/features/recommendation/recommendation.ts";
-import { RecommendationDeleteItemError, RecommendationDeleteUserError, RecommendationFeedbackError, RecommendationRecommendError, RecommendationUpsertItemError, RecommendationUpsertUserError } from "@scribe/host/dependencies/features/recommendation/recommendation.ts";
+import {
+  RecommendationDeleteItemError,
+  RecommendationDeleteUserError,
+  RecommendationFeedbackError,
+  RecommendationRecommendError,
+  RecommendationUpsertItemError,
+  RecommendationUpsertUserError,
+} from "@scribe/host/dependencies/features/recommendation/recommendation.ts";
 import { Env } from "@scribe/host/env.ts";
 import { currentClient } from "@scribe/foundation/lib/src/http/run_with_client.ts";
-import type { Response } from "@scribe/foundation/lib/src/http/response/response.ts";
+import type { HttpResponse } from "@scribe/alchemy/http";
 
-const TIMEOUT_MS = 5_000;
+const TIMEOUT: Duration = Duration.seconds(5);
 
 export class RecommendationClient implements RecommendationService {
   async upsertUser(
@@ -141,7 +149,7 @@ export class RecommendationClient implements RecommendationService {
     method: "GET" | "POST" | "DELETE",
     path: string,
     body?: unknown,
-  ): Promise<Response> {
+  ): Promise<HttpResponse> {
     const client = currentClient();
     const url = `${Env.GORSE_URL}${path}`;
     const options = {
@@ -150,7 +158,7 @@ export class RecommendationClient implements RecommendationService {
         ...(body === undefined ? {} : { "content-type": "application/json" }),
       },
       body: body === undefined ? null : JSON.stringify(body),
-      timeout: TIMEOUT_MS,
+      timeout: TIMEOUT,
     };
 
     try {

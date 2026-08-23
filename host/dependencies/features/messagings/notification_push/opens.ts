@@ -38,7 +38,8 @@ import type { InternalTNotificationPushOpensRow } from "@scribe/foundation/lib/s
 import { database } from "@scribe/foundation/lib/src/database/database.ts";
 import { Pagination } from "@scribe/alchemy";
 import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
-import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
+import type { PageRequest } from "@scribe/alchemy";
+import { DEFAULT_PAGE_SIZE } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import type { PushNotificationId } from "./send.ts";
 
@@ -68,7 +69,7 @@ export interface PushNotificationOpenService {
   ): Promise<Result<PushNotificationOpen, PushNotificationOpenError>>;
   list(
     pushId: PushNotificationId,
-    options?: ListOptions,
+    options?: PageRequest,
   ): Promise<Result<Pagination<PushNotificationOpen>, PushNotificationOpenError>>;
   record(pushId: PushNotificationId): Promise<Result<void, PushNotificationOpenError>>;
   remove(id: PushNotificationOpenId): Promise<Result<void, PushNotificationOpenError>>;
@@ -95,7 +96,7 @@ export class PushNotificationOpenRepository extends Repository<PushNotificationO
 
   list(
     pushId: PushNotificationId,
-    options?: ListOptions,
+    options?: PageRequest,
   ): Promise<Result<Pagination<PushNotificationOpen>, PushNotificationOpenError>> {
     return this.guard(async () => {
       const offset = options?.offset ?? 0;

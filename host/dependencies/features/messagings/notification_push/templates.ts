@@ -38,7 +38,8 @@ import type { InternalTPushTemplatesRow } from "@scribe/foundation/lib/src/datab
 import { database } from "@scribe/foundation/lib/src/database/database.ts";
 import { Pagination } from "@scribe/alchemy";
 import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
-import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
+import type { PageRequest } from "@scribe/alchemy";
+import { DEFAULT_PAGE_SIZE } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 
 type PushTemplateRow = Pick<
@@ -77,7 +78,7 @@ export enum PushTemplateError {
 export interface PushTemplateService {
   getById(id: PushTemplateId): Promise<Result<PushTemplate, PushTemplateError>>;
   getByName(name: string): Promise<Result<PushTemplate, PushTemplateError>>;
-  list(options?: ListOptions): Promise<Result<Pagination<PushTemplate>, PushTemplateError>>;
+  list(options?: PageRequest): Promise<Result<Pagination<PushTemplate>, PushTemplateError>>;
   create(input: CreatePushTemplateInput): Promise<Result<PushTemplate, PushTemplateError>>;
   update(
     id: PushTemplateId,
@@ -109,7 +110,7 @@ export class PushTemplateRepository extends Repository<PushTemplateError> implem
     });
   }
 
-  list(options?: ListOptions): Promise<Result<Pagination<PushTemplate>, PushTemplateError>> {
+  list(options?: PageRequest): Promise<Result<Pagination<PushTemplate>, PushTemplateError>> {
     return this.guard(async () => {
       const offset = options?.offset ?? 0;
       const size = options?.size ?? DEFAULT_PAGE_SIZE;

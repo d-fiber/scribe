@@ -94,6 +94,8 @@ class OpensInMemory implements CacheDriver {
 }
 
 class RefusesEverybody implements RateLimiter {
+  readonly key = "refuses-everybody";
+
   check(): Promise<RateLimitOutcome> {
     return Promise.resolve({ ok: false, retryAfter: 30, strikes: 2 });
   }

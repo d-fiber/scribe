@@ -41,7 +41,8 @@ import { Pagination } from "@scribe/alchemy";
 import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
 import type { CronTimezone } from "@scribe/foundation/lib/src/cron/timezone.ts";
 import { Cron } from "croner";
-import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
+import type { PageRequest } from "@scribe/alchemy";
+import { DEFAULT_PAGE_SIZE } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import type { EmailTemplateId } from "./templates.ts";
 
@@ -118,7 +119,7 @@ export interface CreateEmailCampaignInput {
 
 export type UpdateEmailCampaignInput = Partial<CreateEmailCampaignInput>;
 
-export interface CampaignListOptions extends ListOptions {
+export interface CampaignListOptions extends PageRequest {
   readonly activeOnly?: boolean;
 }
 
@@ -165,8 +166,9 @@ export function nextRunOf(
 }
 
 function isValidSchedule(schedule: EmailCampaignSchedule): boolean {
-  if (schedule.kind === "once")
+  if (schedule.kind === "once") {
     return Number.isSafeInteger(schedule.at) && schedule.at > 0;
+  }
 
   try {
     return (
@@ -208,10 +210,7 @@ function buildFilters(
   return { ...(base ?? {}), ...extraFilters };
 }
 
-export class EmailCampaignRepository
-  extends Repository<EmailCampaignError>
-  implements EmailCampaignService
-{
+export class EmailCampaignRepository extends Repository<EmailCampaignError> implements EmailCampaignService {
   protected override get backendError(): EmailCampaignError {
     return EmailCampaignError.Backend;
   }
@@ -219,9 +218,7 @@ export class EmailCampaignRepository
   get(id: EmailCampaignId): Promise<Result<EmailCampaign, EmailCampaignError>> {
     return this.guard(async () => {
       const row = await this.#row(id);
-      return row
-        ? new Ok(this.#domain(row))
-        : new Failure(EmailCampaignError.NotFound);
+      return row ? new Ok(this.#domain(row)) : new Failure(EmailCampaignError.NotFound);
     });
   }
 
@@ -312,9 +309,7 @@ export class EmailCampaignRepository
         is_active: input.isActive ?? true,
       });
 
-      return row
-        ? new Ok(this.#domain(row))
-        : new Failure(EmailCampaignError.Backend);
+      return row ? new Ok(this.#domain(row)) : new Failure(EmailCampaignError.Backend);
     });
   }
 
@@ -400,17 +395,17 @@ export class EmailCampaignRepository
   #scheduleColumns(schedule: EmailCampaignSchedule): Record<string, unknown> {
     return schedule.kind === "once"
       ? {
-          schedule_kind: "once",
-          scheduled_at: schedule.at,
-          cron_expression: null,
-          schedule_timezone: "UTC",
-        }
+        schedule_kind: "once",
+        scheduled_at: schedule.at,
+        cron_expression: null,
+        schedule_timezone: "UTC",
+      }
       : {
-          schedule_kind: "cron",
-          scheduled_at: null,
-          cron_expression: schedule.expression,
-          schedule_timezone: schedule.timezone,
-        };
+        schedule_kind: "cron",
+        scheduled_at: null,
+        cron_expression: schedule.expression,
+        schedule_timezone: schedule.timezone,
+      };
   }
 
   #patch(
@@ -441,13 +436,11 @@ export class EmailCampaignRepository
   }
 
   #schedule(row: EmailCampaignRow): EmailCampaignSchedule {
-    return row.schedule_kind === "once"
-      ? { kind: "once", at: row.scheduled_at as number }
-      : {
-          kind: "cron",
-          expression: row.cron_expression as string,
-          timezone: row.schedule_timezone as CronTimezone,
-        };
+    return row.schedule_kind === "once" ? { kind: "once", at: row.scheduled_at as number } : {
+      kind: "cron",
+      expression: row.cron_expression as string,
+      timezone: row.schedule_timezone as CronTimezone,
+    };
   }
 
   #domain(row: EmailCampaignRow): EmailCampaign {

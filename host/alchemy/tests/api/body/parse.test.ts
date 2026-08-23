@@ -35,11 +35,28 @@
 // LICENSE file, the LICENSE file governs.
 
 import { equals, expect } from "../../../src/test/mod.ts";
-import { parseBodyBytes } from "../../../src/api/body/parse.ts";
+import { parseBodyBytes, parseFormBytes } from "../../../src/api/body/parse.ts";
 import { ListOf, Nested, Required } from "../../../src/api/body/markers.ts";
 
 function sent(body: unknown): Uint8Array {
   return new TextEncoder().encode(JSON.stringify(body));
+}
+
+interface SentForm {
+  bytes: Uint8Array;
+  contentType: string;
+}
+
+async function filled(entries: [string, string | File][]): Promise<SentForm> {
+  const form = new FormData();
+  for (const [name, value] of entries) form.append(name, value);
+
+  const carrier = new Response(form);
+
+  return {
+    bytes: new Uint8Array(await carrier.arrayBuffer()),
+    contentType: carrier.headers.get("content-type") ?? "",
+  };
 }
 
 Deno.test("a text field left out is absent rather than empty", () => {
@@ -93,4 +110,48 @@ Deno.test("a body that is not JSON at all is refused rather than half read", () 
 
 Deno.test("no body at all is refused when anything was declared mandatory", () => {
   expect(parseBodyBytes({ note: Required(String) }, null), equals(null));
+});
+
+Deno.test("a form reads a name sent twice as a list", async () => {
+  const form = await filled([["tags", "a"], ["tags", "b"]]);
+
+  expect(await parseFormBytes({ tags: ListOf(String) }, form.bytes, form.contentType), equals({ tags: ["a", "b"] }));
+});
+
+Deno.test("a form carries a list of shapes as JSON in one field", async () => {
+  const form = await filled([["members", '[{"id":"a"},{"id":"b"}]']]);
+
+  expect(
+    await parseFormBytes({ members: ListOf(Nested({ id: Required(String) })) }, form.bytes, form.contentType),
+    equals({ members: [{ id: "a" }, { id: "b" }] }),
+  );
+});
+
+Deno.test("a form field holding text that is not JSON answers nothing rather than throwing", async () => {
+  const form = await filled([["members", "{ not json"]]);
+
+  expect(
+    await parseFormBytes({ members: ListOf(Nested({ id: String })) }, form.bytes, form.contentType),
+    equals({ members: null }),
+  );
+});
+
+Deno.test("a mandatory form field left out refuses the form", async () => {
+  const form = await filled([["other", "x"]]);
+
+  expect(await parseFormBytes({ name: Required(String) }, form.bytes, form.contentType), equals(null));
+});
+
+Deno.test("a mandatory form field sent empty is taken, as it is on a body", async () => {
+  const form = await filled([["name", ""]]);
+
+  expect(await parseFormBytes({ name: Required(String) }, form.bytes, form.contentType), equals({ name: "" }));
+});
+
+Deno.test("a file sent through a form is carried untouched", async () => {
+  const form = await filled([["avatar", new File(["x"], "avatar.png", { type: "image/png" })]]);
+
+  const read = await parseFormBytes({ avatar: Required(File) }, form.bytes, form.contentType);
+
+  expect(read?.avatar.name, equals("avatar.png"));
 });

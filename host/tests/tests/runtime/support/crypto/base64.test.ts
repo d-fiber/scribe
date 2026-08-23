@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { fromBase64Url, jsonFromBase64Url } from "@scribe/core/runtime/support/crypto/base64url.ts";
+import { fromBase64, fromBase64Url, jsonFromBase64Url } from "@scribe/core/runtime/support/crypto/base64.ts";
 import { jwtPayloadUnverified } from "@scribe/core/runtime/support/crypto/jwt_payload.ts";
 import { assert, assertEquals } from "@std/assert";
 
@@ -76,8 +76,26 @@ Deno.test("fromBase64Url yields null instead of throwing on garbage", () => {
   assertEquals(fromBase64Url("not base64 at all !!"), null);
 });
 
+Deno.test("fromBase64Url refuses the standard spelling of the same bytes", () => {
+  const standard = btoa(String.fromCharCode(0xff, 0xfe, 0xfd, 0x03, 0xef));
+
+  assert(/[+/=]/.test(standard), "this sample must actually carry a character the url alphabet drops");
+  assertEquals(fromBase64Url(standard), null);
+});
+
+Deno.test("fromBase64 reads the padded alphabet a webhook secret arrives in", () => {
+  const bytes = new Uint8Array([0xff, 0xfe, 0xfd, 0x03, 0xef]);
+  const standard = btoa(String.fromCharCode(...bytes));
+
+  assertEquals(Array.from(fromBase64(standard)!), Array.from(bytes));
+});
+
+Deno.test("fromBase64 yields null instead of throwing on garbage", () => {
+  assertEquals(fromBase64("not base64 at all !!"), null);
+});
+
 Deno.test("jsonFromBase64Url yields null on both failure modes", () => {
-  assertEquals(jsonFromBase64Url(base64Url("{\"a\":1}")), { a: 1 });
+  assertEquals(jsonFromBase64Url(base64Url('{"a":1}')), { a: 1 });
   assertEquals(jsonFromBase64Url(base64Url("not json")), null);
   assertEquals(jsonFromBase64Url("!!!"), null);
 });
@@ -105,6 +123,6 @@ Deno.test("jwtPayloadUnverified refuses anything that is not three segments", ()
 
 Deno.test("jwtPayloadUnverified refuses a payload that is not a JSON object", () => {
   assertEquals(jwtPayloadUnverified(`h.${base64Url("42")}.sig`), null);
-  assertEquals(jwtPayloadUnverified(`h.${base64Url("\"text\"")}.sig`), null);
+  assertEquals(jwtPayloadUnverified(`h.${base64Url('"text"')}.sig`), null);
   assertEquals(jwtPayloadUnverified("h.!!!.sig"), null);
 });

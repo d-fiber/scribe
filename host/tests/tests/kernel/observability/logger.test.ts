@@ -36,14 +36,15 @@
 
 import { assertEquals } from "@std/assert";
 import { Hono } from "hono";
-import type { LogEntry, LogRouting } from "@scribe/core/contracts/logging.ts";
+import type { LoggedEntry } from "@scribe/alchemy/observe";
+import type { LogRouting } from "@scribe/core/contracts/logging.ts";
 import { logger } from "@scribe/core/kernel/observability/logger.ts";
 import { LogRoutes } from "@scribe/core/kernel/observability/log_routing.ts";
 import { logBuffer } from "@scribe/core/kernel/observability/log_delivery.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 
 /** What the routing below was handed, flattened across deliveries. */
-const taken: LogEntry[] = [];
+const taken: LoggedEntry[] = [];
 
 /**
  * A routing that claims everything and keeps it.
@@ -67,7 +68,7 @@ const capturing: LogRouting = {
  * The flush is explicit because the buffer lingers a second before publishing
  * on its own, which a test has no reason to wait for.
  */
-async function exchange(response: () => Response): Promise<LogEntry> {
+async function exchange(response: () => Response): Promise<LoggedEntry> {
   taken.length = 0;
   LogRoutes.use(capturing);
 

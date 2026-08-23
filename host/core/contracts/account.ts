@@ -43,65 +43,72 @@ export enum SignOutScope {
   Global = "global",
 }
 
-export enum AccountRole {
-  Admin = "admin",
-  User = "user",
-}
-
-export type SessionUser = {
-  id: string;
-  email: string | null;
-};
-
-export interface Rules {
-  role: string;
-  permissions: string[];
-}
-
-export type SessionAdmin = {
-  id: string;
-  email: string;
-  rules: Rules;
-};
-
+/** What an identity service hands back once it has let somebody in. */
 export type Session = {
+  /** The bearer token calls are made with. */
   access_token: string;
+
+  /** What is exchanged for a new access token once this one lapses. */
   refresh_token: string;
+
+  /** How many seconds the access token is good for. */
   expires_in: number;
+
+  /** What kind of token the access token is, which is `bearer` everywhere so far. */
   token_type: string;
-  user?: SessionUser | SessionAdmin;
+
+  /** Who was let in, as the identity service describes them, when it says at all. */
+  user?: { id: string; [claim: string]: unknown };
 };
 
-export interface UserDevice {
+/**
+ * One device an account has been seen on.
+ *
+ * @remarks
+ * There is one shape and not one per kind of account. What a deployment records about a device is
+ * the same fact whoever is holding it, and having two shapes meant every reader had to know which
+ * population a row came from before it could read it.
+ *
+ * `location` is absent when nothing placed the device, which is the usual case for anything that
+ * did not ask for the permission.
+ */
+export interface AccountDevice {
+  /** What identifies this row. */
   id: string;
+
+  /** What the device calls itself, which is what two sessions on one handset share. */
   device_id: string;
+
+  /** Which kind of client is installed on it. */
   client: ClientType;
+
+  /** Which operating system it runs. */
   os: DeviceOs;
+
+  /** What the manufacturer calls it. */
   model: string;
+
+  /** Whether it is a real device rather than a simulator. */
   is_physical_device: boolean;
+
+  /** How big a screen it is, in one word. */
   device_category: DeviceCategory;
+
+  /** What a push is addressed to, or null when nothing may be pushed to it. */
   notification_token: string | null;
+
+  /** Where it was last placed, or null when nothing placed it. */
   location: LatLng | null;
-  ip: string;
-  city: string;
-  country: string;
-  metadata: Metadata;
-}
 
-export interface AdminDevice {
-  id: string;
-  device_id: string;
-  client: ClientType;
-  os: DeviceOs;
-  model: string;
-  is_physical_device: boolean;
-  device_category: DeviceCategory;
+  /** The address it was last seen from. */
   ip: string;
-  city: string;
-  country: string;
-  metadata: Metadata;
-}
 
-export interface AccountRoleSource {
-  withId(id: string): Promise<AccountRole | null>;
+  /** The city that address resolved to. */
+  city: string;
+
+  /** The country that address resolved to. */
+  country: string;
+
+  /** Everything else the deployment records about it. */
+  metadata: Metadata;
 }

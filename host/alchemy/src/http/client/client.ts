@@ -37,7 +37,7 @@
 import type { Future } from "../../async/future.ts";
 import { Duration } from "../../value/duration.ts";
 import { Bytes } from "../../value/bytes.ts";
-import type { BaseRequest } from "../request/base_request.ts";
+import type { BaseRequest, Redirect } from "../request/base_request.ts";
 import type { HttpResponse } from "../response/response.ts";
 import type { StreamedResponse } from "../response/streamed_response.ts";
 
@@ -92,7 +92,7 @@ export interface RequestOptions {
    * carries whatever headers the request set, this call's own credentials included, to a host the
    * caller never named.
    */
-  readonly redirect?: "error" | "follow" | "manual";
+  readonly redirect?: Redirect;
 
   /** How many redirects to follow before giving up, when `redirect` is `"follow"`. */
   readonly maxRedirects?: number;
@@ -111,7 +111,7 @@ export interface RequestOptions {
 export const DEFAULT_REQUEST_TIMEOUT: Duration = Duration.seconds(30);
 
 /** What happens to a redirect when nothing said otherwise. */
-export const DEFAULT_REDIRECT: "error" | "follow" | "manual" = "error";
+export const DEFAULT_REDIRECT: Redirect = "error";
 
 /** The most of a body that is read when nothing said otherwise. */
 export const DEFAULT_MAX_RESPONSE: Bytes = Bytes.megabytes(8);

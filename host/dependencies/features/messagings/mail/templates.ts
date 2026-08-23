@@ -38,7 +38,8 @@ import type { InternalTEmailTemplatesRow } from "@scribe/foundation/lib/src/data
 import { database } from "@scribe/foundation/lib/src/database/database.ts";
 import { Pagination } from "@scribe/alchemy";
 import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
-import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
+import type { PageRequest } from "@scribe/alchemy";
+import { DEFAULT_PAGE_SIZE } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 
 type EmailTemplateRow = Pick<
@@ -77,7 +78,7 @@ export enum EmailTemplateError {
 export interface EmailTemplateService {
   getById(id: EmailTemplateId): Promise<Result<EmailTemplate, EmailTemplateError>>;
   getByName(name: string): Promise<Result<EmailTemplate, EmailTemplateError>>;
-  list(options?: ListOptions): Promise<Result<Pagination<EmailTemplate>, EmailTemplateError>>;
+  list(options?: PageRequest): Promise<Result<Pagination<EmailTemplate>, EmailTemplateError>>;
   create(input: CreateEmailTemplateInput): Promise<Result<EmailTemplate, EmailTemplateError>>;
   update(
     id: EmailTemplateId,
@@ -113,7 +114,7 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
     });
   }
 
-  list(options?: ListOptions): Promise<Result<Pagination<EmailTemplate>, EmailTemplateError>> {
+  list(options?: PageRequest): Promise<Result<Pagination<EmailTemplate>, EmailTemplateError>> {
     return this.guard(async () => {
       const offset = options?.offset ?? 0;
       const size = options?.size ?? DEFAULT_PAGE_SIZE;

@@ -34,33 +34,31 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type {
-  SessionAdmin,
-  SessionUser,
-} from "@scribe/core/contracts/account.ts";
+import type { RequestUser } from "@scribe/alchemy/route";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 
-export type RequestUser = SessionUser | SessionAdmin | null;
+/** Who is calling, or null when nothing proved a call. */
+export type ResolvedIdentity = RequestUser | null;
 
 const _RESOLVED_KEY = "identity:user:resolved";
 const _PENDING_KEY = "identity:user:pending";
 
 export class RequestIdentityCache {
-  static resolved(): RequestUser | undefined {
-    return RequestScope.cache.get<RequestUser>(_RESOLVED_KEY);
+  static resolved(): ResolvedIdentity | undefined {
+    return RequestScope.cache.get<ResolvedIdentity>(_RESOLVED_KEY);
   }
 
-  static seed(user: RequestUser): void {
+  static seed(user: ResolvedIdentity): void {
     RequestScope.cache.set(_RESOLVED_KEY, user);
   }
 
   static async remember(
-    resolve: () => Promise<RequestUser>,
-  ): Promise<RequestUser> {
+    resolve: () => Promise<ResolvedIdentity>,
+  ): Promise<ResolvedIdentity> {
     const resolved = this.resolved();
     if (resolved !== undefined) return resolved;
 
-    const pending = RequestScope.cache.get<Promise<RequestUser>>(_PENDING_KEY);
+    const pending = RequestScope.cache.get<Promise<ResolvedIdentity>>(_PENDING_KEY);
     if (pending !== undefined) {
       const user = await pending;
       RequestScope.cache.set(_RESOLVED_KEY, user);
@@ -75,6 +73,6 @@ export class RequestIdentityCache {
   }
 }
 
-export function currentIdentity(): RequestUser {
+export function currentIdentity(): ResolvedIdentity {
   return RequestIdentityCache.resolved() ?? null;
 }

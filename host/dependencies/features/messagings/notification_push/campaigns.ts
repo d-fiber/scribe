@@ -41,7 +41,8 @@ import { Pagination } from "@scribe/alchemy";
 import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
 import type { CronTimezone } from "@scribe/foundation/lib/src/cron/timezone.ts";
 import { Cron } from "croner";
-import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
+import type { PageRequest } from "@scribe/alchemy";
+import { DEFAULT_PAGE_SIZE } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import type { PushTemplateId } from "./templates.ts";
 
@@ -112,7 +113,7 @@ export interface CreatePushCampaignInput {
 
 export type UpdatePushCampaignInput = Partial<CreatePushCampaignInput>;
 
-export interface PushCampaignListOptions extends ListOptions {
+export interface PushCampaignListOptions extends PageRequest {
   readonly activeOnly?: boolean;
 }
 

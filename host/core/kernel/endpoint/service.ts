@@ -38,19 +38,17 @@ import { Duration } from "@scribe/alchemy";
 import { InternalSecretFirewall } from "@scribe/core/kernel/identity/firewall/internal.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
 import { ApiEndpoint } from "./api.ts";
-import { Caller } from "./access.ts";
-import type { RateLimiter } from "./rate_limit.ts";
+import type { Caller } from "@scribe/alchemy/route";
+import type { RateLimit } from "@scribe/alchemy/route";
 
-export { Caller } from "./access.ts";
 export type { ApiContext } from "./context.ts";
-export type { RateLimiter } from "./rate_limit.ts";
 
 export abstract class ServiceEndpoint extends ApiEndpoint {
   protected access(): Caller | readonly Caller[] {
-    return Caller.Service;
+    return "service";
   }
 
-  protected rateLimit(): RateLimiter {
+  protected rateLimit(): RateLimit {
     return {
       limit: 5000,
       window: Duration.minutes(1),
@@ -60,10 +58,12 @@ export abstract class ServiceEndpoint extends ApiEndpoint {
   }
 
   protected override execute(): Promise<Response> {
-    if (!InternalSecretFirewall.verify())
+    if (!InternalSecretFirewall.verify()) {
       return Promise.resolve(this.response.unauthorized());
-    if (request.isBodyTooLarge())
+    }
+    if (request.isBodyTooLarge()) {
       return Promise.resolve(this.response.payloadTooLarge());
+    }
     return super.execute();
   }
 }

@@ -34,39 +34,47 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { BaseClient } from "@scribe/foundation/lib/src/http/base_client.ts";
-import { ByteStream } from "@scribe/foundation/lib/src/http/byte_stream.ts";
-import type { BaseRequest } from "@scribe/foundation/lib/src/http/request/base_request.ts";
-import { StreamedResponse } from "@scribe/foundation/lib/src/http/response/streamed_response.ts";
+import { BaseClient } from "../../http/client/base_client.ts";
+import { ByteStream } from "../../http/byte_stream.ts";
+import type { BaseRequest } from "../../http/request/base_request.ts";
+import { StreamedResponse } from "../../http/response/streamed_response.ts";
 
-/** What a {@link RecordingClient} answers, and how many times it has been closed. */
-export interface RecordedAnswer {
+/** The one answer a {@link MemoryClient} gives back, whatever it is handed. */
+export interface MemoryAnswer {
+  /** The status to answer with. Defaults to 200. */
   readonly status?: number;
+
+  /** The body to answer with, encoded as UTF-8. Defaults to `ok`. */
   readonly body?: string;
+
+  /** The headers to answer with. Defaults to none. */
   readonly headers?: HeadersInit;
 }
 
 /**
  * A client that answers from memory and keeps every request it was handed.
  *
- * It implements `send` and nothing else, so a test that exercises the convenience methods, the
- * one-off functions or `runWithClient` exercises the real derivation rather than a copy of it.
+ * @remarks
+ * It fills in `send` and nothing else, so a test that exercises the convenience methods, the
+ * one-off functions or the client a scope carries exercises the real derivation rather than a
+ * copy of it.
  */
-export class RecordingClient extends BaseClient {
+export class MemoryClient extends BaseClient {
   /** Every request this client was handed, in order. */
   readonly seen: BaseRequest[] = [];
 
   /** How many times this client has been closed. */
   closed = 0;
 
-  readonly #answer: RecordedAnswer;
+  /** What this client answers with. */
+  readonly #answer: MemoryAnswer;
 
-  constructor(answer: RecordedAnswer = {}) {
+  constructor(answer: MemoryAnswer = {}) {
     super();
     this.#answer = answer;
   }
 
-  /** The one request this client was handed, when a test expects exactly one. */
+  /** The one request this client was handed, for a case that expects exactly one. */
   get only(): BaseRequest {
     if (this.seen.length !== 1) {
       throw new Error(`Expected one request, got ${this.seen.length}.`);

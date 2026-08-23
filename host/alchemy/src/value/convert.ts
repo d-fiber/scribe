@@ -59,6 +59,23 @@ export interface Codec<S, T> {
 }
 
 /**
+ * A codec that writes bytes as text and reads them back.
+ *
+ * @remarks
+ * It is not `Codec<Uint8Array, string>` because the two sides are not the same type. Anything may
+ * be handed in, whatever buffer it sits on, while what comes back is always a fresh array over an
+ * `ArrayBuffer`. Saying so is what lets a caller pass the answer somewhere that will not take a
+ * view over a buffer it may be sharing.
+ */
+export interface BytesCodec {
+  /** `input` written the encoded way. */
+  encode(input: Uint8Array): string;
+
+  /** The bytes `encoded` holds, in an array of their own. */
+  decode(encoded: string): Uint8Array<ArrayBuffer>;
+}
+
+/**
  * Bytes written in hexadecimal, two lowercase characters per byte.
  *
  * @remarks
@@ -71,7 +88,7 @@ export interface Codec<S, T> {
  * const read = hex.decode(written);
  * ```
  */
-export const hex: Codec<Uint8Array, string> = {
+export const hex: BytesCodec = {
   encode(input: Uint8Array | ArrayBuffer): string {
     const view = input instanceof Uint8Array ? input : new Uint8Array(input);
     return Array.from(view)
@@ -131,7 +148,7 @@ const PER_CHARACTER = 6;
  * It is what carries bytes through anything that only accepts text: a header, a JSON field, a
  * column declared as text.
  */
-export const base64: Codec<Uint8Array, string> = {
+export const base64: BytesCodec = {
   encode(input: Uint8Array): string {
     let bits = 0;
     let held = 0;
@@ -204,7 +221,7 @@ export const base64: Codec<Uint8Array, string> = {
  * `+` and `/` mean something inside an address, so this writes `-` and `_` instead and leaves the
  * padding off. It is what a token in a path or a query is carried as.
  */
-export const base64Url: Codec<Uint8Array, string> = {
+export const base64Url: BytesCodec = {
   encode(input: Uint8Array): string {
     return base64.encode(input).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   },

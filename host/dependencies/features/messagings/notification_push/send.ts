@@ -38,7 +38,8 @@ import type { InternalTNotificationPushesRow } from "@scribe/foundation/lib/src/
 import { database } from "@scribe/foundation/lib/src/database/database.ts";
 import { Pagination } from "@scribe/alchemy";
 import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
-import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
+import type { PageRequest } from "@scribe/alchemy";
+import { DEFAULT_PAGE_SIZE } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import { fcmSend } from "./_fcm_send.ts";
 
@@ -91,7 +92,7 @@ export interface PushNotificationSenderService {
   ): Promise<Result<PushNotification, PushNotificationSendError>>;
   list(
     notificationId: string,
-    options?: ListOptions,
+    options?: PageRequest,
   ): Promise<Result<Pagination<PushNotification>, PushNotificationSendError>>;
   remove(
     pushId: PushNotificationId,
@@ -149,7 +150,7 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
 
   list(
     notificationId: string,
-    options?: ListOptions,
+    options?: PageRequest,
   ): Promise<Result<Pagination<PushNotification>, PushNotificationSendError>> {
     return this.guard(async () => {
       const offset = options?.offset ?? 0;

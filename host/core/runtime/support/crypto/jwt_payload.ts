@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { jsonFromBase64Url } from "./base64url.ts";
+import { jsonFromBase64Url } from "./base64.ts";
 
 const JWT_SEGMENTS = 3;
 
@@ -45,7 +45,5 @@ export function jwtPayloadUnverified(
   if (segments.length !== JWT_SEGMENTS) return null;
 
   const payload = jsonFromBase64Url(segments[1]);
-  return typeof payload === "object" && payload !== null
-    ? payload as Record<string, unknown>
-    : null;
+  return typeof payload === "object" && payload !== null ? payload as Record<string, unknown> : null;
 }

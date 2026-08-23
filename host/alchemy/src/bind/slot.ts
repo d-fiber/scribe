@@ -97,6 +97,18 @@ export class Slot<T> {
   }
 
   /**
+   * Empties this slot, so reading it throws again.
+   *
+   * @remarks
+   * It exists for a test that filled a slot the host had not filled, and has to leave the process
+   * as it found it. Putting a value back is {@link use}; there is no value that means empty, which
+   * is why emptying is a call of its own.
+   */
+  clear(): void {
+    this.#value = null;
+  }
+
+  /**
    * What was put in.
    *
    * @throws {BindingError} When nothing has been put in yet.

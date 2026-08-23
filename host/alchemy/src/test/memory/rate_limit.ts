@@ -76,6 +76,11 @@ export class MemoryRateLimiter implements RateLimiter {
     this.#options = options;
   }
 
+  /** The prefix this limiter was opened with. */
+  get key(): string {
+    return this.#options.key;
+  }
+
   check(prefix = "", suffix = ""): Future<RateLimitOutcome> {
     const at = Now.get().millisecondsSinceEpoch();
     const held = this.#of(prefix, suffix, at);

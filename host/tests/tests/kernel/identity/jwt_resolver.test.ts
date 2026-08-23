@@ -38,7 +38,7 @@ import "@scribe/core/testing/settings.ts";
 import { JwtIdentityResolver } from "@scribe/core/kernel/identity/resolver/jwt_resolver.ts";
 import { JwtVerifier } from "@scribe/core/kernel/identity/resolver/jwt_verifier.ts";
 import { IdentityRevocation } from "@scribe/core/runtime/redis/identity_revocation.ts";
-import { kv, type Kv } from "@scribe/foundation/lib/src/redis/mod.ts";
+import { type Kv, kv } from "@scribe/foundation/lib/src/redis/mod.ts";
 import { installValkeryMock } from "@scribe/foundation/tests/testing/valkery.ts";
 import { installMock } from "@scribe/core/testing/install.ts";
 import { assert, assertEquals } from "@std/assert";
@@ -226,8 +226,8 @@ Deno.test("the identity is read from the claims, without asking GoTrue", async (
     const identity = await JwtIdentityResolver.resolveIdentity(ADMIN_JWT);
 
     assertEquals(identity?.id, "a1");
-    assertEquals(identity?.email, "a@x.io");
-    assertEquals(identity?.isAdmin, true);
+    assertEquals(identity?.claims.email, "a@x.io");
+    assertEquals(identity?.claims.app_metadata, { role: "admin" });
     assertEquals(
       h.calls.gotrue,
       0,
@@ -254,11 +254,10 @@ Deno.test("a revoked user is resolved against GoTrue until the marker lapses", a
 
     assertEquals(h.calls.gotrue, 1);
     assertEquals(
-      identity?.isAdmin,
-      false,
-      "the claims still say admin: a revocation is exactly the case where they cannot be trusted",
+      identity?.claims.email,
+      "fresh@x.io",
+      "the claims of the token are stale: a revocation is exactly the case where they cannot be trusted",
     );
-    assertEquals(identity?.email, "fresh@x.io");
   } finally {
     h.restore();
   }

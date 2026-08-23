@@ -160,23 +160,12 @@ function applyFilters(builder: any, where: FilterGroup | undefined): any {
   return current;
 }
 
-function constrainsOwner(query: Query, column: string): boolean {
-  return (query.where?.filters ?? []).some((filter) => filter.column === column);
-}
-
 function ownerFilter(query: Query): Filter | null {
   const column = ownerOf(query.table);
   if (column === null) return null;
 
   const decision = ownerScope(query.table);
   if (decision.kind === "open") return null;
-
-  if (decision.kind === "denied") {
-    if (constrainsOwner(query, decision.column)) return null;
-    throw new Error(
-      `${query.table} is owned by "${decision.column}" and the caller cannot cross owners.`,
-    );
-  }
 
   return create(FilterSchema, {
     column: decision.column,
