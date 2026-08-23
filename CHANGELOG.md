@@ -4,6 +4,15 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 9.0.0 (2026-08-23)
+
+Component versions: @scribe/core 5.0.1
+
+### Breaking
+
+- drop the socle tables nothing reads (ec19f824)
+- drop the account policy the socle had no business holding (05dc3f51)
+
 ## 8.0.0 (2026-08-23)
 
 Component versions: @scribe/core 5.0.0
