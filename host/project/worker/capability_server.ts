@@ -44,24 +44,24 @@ import { CapabilityTokens } from "./capability_tokens.ts";
 import { cacheDelete, cacheGet, cacheSet } from "./capabilities/cache.ts";
 import { hookEmit, queuePush } from "./capabilities/event_driven.ts";
 import { shipLogs } from "./capabilities/logging.ts";
-import { executeQuery } from "./capabilities/rest.ts";
+import { executeQueries, executeQuery } from "./capabilities/rest.ts";
 
 export function capabilityServer(): UnaryServer {
   const server = new UnaryServer()
-    .on(Database.method.execute, (query, call) =>
-      CapabilityTokens.run(call.capabilityToken, () => executeQuery(query)))
-    .on(Valkery.method.get, (request, call) =>
-      CapabilityTokens.run(call.capabilityToken, () => cacheGet(request)))
-    .on(Valkery.method.set, (request, call) =>
-      CapabilityTokens.run(call.capabilityToken, () => cacheSet(request)))
-    .on(Valkery.method.delete, (request, call) =>
-      CapabilityTokens.run(call.capabilityToken, () => cacheDelete(request)))
-    .on(Queue.method.push, (request, call) =>
-      CapabilityTokens.run(call.capabilityToken, () => queuePush(request)))
-    .on(Hook.method.emit, (event, call) =>
-      CapabilityTokens.run(call.capabilityToken, () => hookEmit(event)))
-    .on(Logging.method.ship, (batch, call) =>
-      CapabilityTokens.run(call.capabilityToken, () => shipLogs(batch)));
+    .on(Database.method.execute, (query, call) => CapabilityTokens.run(call.capabilityToken, () => executeQuery(query)))
+    .on(
+      Database.method.executeBatch,
+      (batch, call) => CapabilityTokens.run(call.capabilityToken, () => executeQueries(batch)),
+    )
+    .on(Valkery.method.get, (request, call) => CapabilityTokens.run(call.capabilityToken, () => cacheGet(request)))
+    .on(Valkery.method.set, (request, call) => CapabilityTokens.run(call.capabilityToken, () => cacheSet(request)))
+    .on(
+      Valkery.method.delete,
+      (request, call) => CapabilityTokens.run(call.capabilityToken, () => cacheDelete(request)),
+    )
+    .on(Queue.method.push, (request, call) => CapabilityTokens.run(call.capabilityToken, () => queuePush(request)))
+    .on(Hook.method.emit, (event, call) => CapabilityTokens.run(call.capabilityToken, () => hookEmit(event)))
+    .on(Logging.method.ship, (batch, call) => CapabilityTokens.run(call.capabilityToken, () => shipLogs(batch)));
 
   // Anything the contract declares and the loop above did not wire answers a
   // named 501 rather than a 404. Listing those procedures would mean importing

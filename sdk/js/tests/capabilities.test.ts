@@ -35,12 +35,12 @@
 // LICENSE file, the LICENSE file governs.
 
 import { assertEquals, assertRejects } from "@std/assert";
-import { CallScope, CapabilityError, cache, host, rest, UnaryServer } from "../mod.ts";
+import { cache, CallScope, CapabilityError, host, rest, UnaryServer } from "../mod.ts";
 import {
+  Database,
   FilterOperator,
   Operation,
   type Query,
-  Database,
 } from "../gen/scribe/host/pkg/packages/foundation/protocol/database/database_pb.ts";
 import { Valkery } from "../gen/scribe/host/pkg/packages/foundation/protocol/valkery/valkery_pb.ts";
 import { decodeJson, encodeJson } from "../src/contracts/json.ts";
@@ -161,4 +161,88 @@ Deno.test("calling a capability before the handshake says so instead of hanging"
   host.disconnect();
 
   await assertRejects(() => rest.from<Brand>("brands").rows());
+});
+
+async function withCountingHost(
+  run: (calls: { execute: number; batch: number }) => Promise<void>,
+): Promise<void> {
+  const calls = { execute: 0, batch: 0 };
+
+  const server = new UnaryServer()
+    .on(Database.method.execute, () => {
+      calls.execute += 1;
+      return { data: encodeJson([{ id: "1", name: "Fiber", admin_id: "a" }]), count: 1n };
+    })
+    .on(Database.method.executeBatch, (batch) => {
+      calls.batch += 1;
+      return {
+        results: batch.queries.map((query) => ({
+          data: encodeJson([{ id: query.table, name: "Fiber", admin_id: "a" }]),
+          count: 1n,
+        })),
+      };
+    });
+
+  const listener = Deno.serve({ port: 0, onListen: () => {} }, (request) => server.handle(request));
+  host.connect(`http://127.0.0.1:${(listener.addr as Deno.NetAddr).port}`);
+
+  try {
+    await run(calls);
+  } finally {
+    host.disconnect();
+    await listener.shutdown();
+  }
+}
+
+const SCOPE = { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", node: "" };
+
+Deno.test("three reads read one at a time pay one round trip each", async () => {
+  await withCountingHost(async (calls) => {
+    await CallScope.run(SCOPE, async () => {
+      await rest.from<Brand>("brands").rows();
+      await rest.from<Brand>("labels").rows();
+      await rest.from<Brand>("stores").rows();
+    });
+
+    assertEquals(calls.execute, 3);
+    assertEquals(calls.batch, 0);
+  });
+});
+
+Deno.test("the same three reads given together pay one round trip in total", async () => {
+  await withCountingHost(async (calls) => {
+    const answers = await CallScope.run(SCOPE, () =>
+      rest.all([
+        rest.from<Brand>("brands"),
+        rest.from<Brand>("labels"),
+        rest.from<Brand>("stores"),
+      ]));
+
+    assertEquals(calls.batch, 1);
+    assertEquals(calls.execute, 0);
+    assertEquals(answers.map((rows) => rows[0].id), ["brands", "labels", "stores"]);
+  });
+});
+
+Deno.test("a batch answers its queries in the order they were given, not the order they finished", async () => {
+  await withCountingHost(async () => {
+    const answers = await CallScope.run(SCOPE, () =>
+      rest.all([
+        rest.from<Brand>("z_last").select("id"),
+        rest.from<Brand>("a_first").select("id"),
+      ]));
+
+    assertEquals(answers[0][0].id, "z_last");
+    assertEquals(answers[1][0].id, "a_first");
+  });
+});
+
+Deno.test("a batch of nothing reaches the host not at all", async () => {
+  await withCountingHost(async (calls) => {
+    const answers = await CallScope.run(SCOPE, () => rest.all([]));
+
+    assertEquals(answers.length, 0);
+    assertEquals(calls.batch, 0);
+    assertEquals(calls.execute, 0);
+  });
 });

@@ -48,7 +48,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/host/pkg/packages/foundation/protocol/database/database.proto.
  */
 export const file_scribe_host_pkg_packages_foundation_protocol_database_database: GenFile = /*@__PURE__*/
-  fileDesc("CkRzY3JpYmUvaG9zdC9wa2cvcGFja2FnZXMvZm91bmRhdGlvbi9wcm90b2NvbC9kYXRhYmFzZS9kYXRhYmFzZS5wcm90bxIac2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEihwEKBkZpbHRlchIOCgZjb2x1bW4YASABKAkSPAoIb3BlcmF0b3IYAiABKA4yKi5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5GaWx0ZXJPcGVyYXRvchIeCgV2YWx1ZRgDIAEoCzIPLnNjcmliZS52MS5Kc29uEg8KB25lZ2F0ZWQYBCABKAgikAEKC0ZpbHRlckdyb3VwEjMKB2ZpbHRlcnMYASADKAsyIi5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5GaWx0ZXISNwoGZ3JvdXBzGAIgAygLMicuc2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEuRmlsdGVyR3JvdXASEwoLZGlzanVuY3Rpb24YAyABKAgiQAoFT3JkZXISDgoGY29sdW1uGAEgASgJEhIKCmRlc2NlbmRpbmcYAiABKAgSEwoLbnVsbHNfZmlyc3QYAyABKAgiJgoFUmFuZ2USDQoFbGltaXQYASABKA0SDgoGb2Zmc2V0GAIgASgNIo0DCgVRdWVyeRINCgV0YWJsZRgBIAEoCRI4CglvcGVyYXRpb24YAiABKA4yJS5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5PcGVyYXRpb24SDgoGc2VsZWN0GAMgAygJEjYKBXdoZXJlGAQgASgLMicuc2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEuRmlsdGVyR3JvdXASMAoFb3JkZXIYBSADKAsyIS5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5PcmRlchIwCgVyYW5nZRgGIAEoCzIhLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLlJhbmdlEg4KBnNpbmdsZRgHIAEoCBITCgtjb3VudF9leGFjdBgIIAEoCBIgCgdwYXlsb2FkGAkgASgLMg8uc2NyaWJlLnYxLkpzb24SEwoLb25fY29uZmxpY3QYCiADKAkSEAoIcnBjX25hbWUYCyABKAkSIQoIcnBjX2FyZ3MYDCABKAsyDy5zY3JpYmUudjEuSnNvbiJeCgtRdWVyeVJlc3VsdBIdCgRkYXRhGAEgASgLMg8uc2NyaWJlLnYxLkpzb24SDQoFY291bnQYAiABKAQSIQoFZXJyb3IYAyABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSqnAQoJT3BlcmF0aW9uEhkKFU9QRVJBVElPTl9VTlNQRUNJRklFRBAAEhQKEE9QRVJBVElPTl9TRUxFQ1QQARIUChBPUEVSQVRJT05fSU5TRVJUEAISFAoQT1BFUkFUSU9OX1VQREFURRADEhQKEE9QRVJBVElPTl9VUFNFUlQQBBIUChBPUEVSQVRJT05fREVMRVRFEAUSEQoNT1BFUkFUSU9OX1JQQxAGKqgDCg5GaWx0ZXJPcGVyYXRvchIfChtGSUxURVJfT1BFUkFUT1JfVU5TUEVDSUZJRUQQABIWChJGSUxURVJfT1BFUkFUT1JfRVEQARIXChNGSUxURVJfT1BFUkFUT1JfTkVREAISFgoSRklMVEVSX09QRVJBVE9SX0dUEAMSFwoTRklMVEVSX09QRVJBVE9SX0dURRAEEhYKEkZJTFRFUl9PUEVSQVRPUl9MVBAFEhcKE0ZJTFRFUl9PUEVSQVRPUl9MVEUQBhIYChRGSUxURVJfT1BFUkFUT1JfTElLRRAHEhkKFUZJTFRFUl9PUEVSQVRPUl9JTElLRRAIEhYKEkZJTFRFUl9PUEVSQVRPUl9JThAJEhYKEkZJTFRFUl9PUEVSQVRPUl9JUxAKEhwKGEZJTFRFUl9PUEVSQVRPUl9DT05UQUlOUxALEiAKHEZJTFRFUl9PUEVSQVRPUl9DT05UQUlORURfQlkQDBIcChhGSUxURVJfT1BFUkFUT1JfT1ZFUkxBUFMQDRIfChtGSUxURVJfT1BFUkFUT1JfVEVYVF9TRUFSQ0gQDjJhCghEYXRhYmFzZRJVCgdFeGVjdXRlEiEuc2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEuUXVlcnkaJy5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5RdWVyeVJlc3VsdGIGcHJvdG8z", [file_scribe_protocol_common]);
+  fileDesc("CkRzY3JpYmUvaG9zdC9wa2cvcGFja2FnZXMvZm91bmRhdGlvbi9wcm90b2NvbC9kYXRhYmFzZS9kYXRhYmFzZS5wcm90bxIac2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEihwEKBkZpbHRlchIOCgZjb2x1bW4YASABKAkSPAoIb3BlcmF0b3IYAiABKA4yKi5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5GaWx0ZXJPcGVyYXRvchIeCgV2YWx1ZRgDIAEoCzIPLnNjcmliZS52MS5Kc29uEg8KB25lZ2F0ZWQYBCABKAgikAEKC0ZpbHRlckdyb3VwEjMKB2ZpbHRlcnMYASADKAsyIi5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5GaWx0ZXISNwoGZ3JvdXBzGAIgAygLMicuc2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEuRmlsdGVyR3JvdXASEwoLZGlzanVuY3Rpb24YAyABKAgiQAoFT3JkZXISDgoGY29sdW1uGAEgASgJEhIKCmRlc2NlbmRpbmcYAiABKAgSEwoLbnVsbHNfZmlyc3QYAyABKAgiJgoFUmFuZ2USDQoFbGltaXQYASABKA0SDgoGb2Zmc2V0GAIgASgNIo0DCgVRdWVyeRINCgV0YWJsZRgBIAEoCRI4CglvcGVyYXRpb24YAiABKA4yJS5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5PcGVyYXRpb24SDgoGc2VsZWN0GAMgAygJEjYKBXdoZXJlGAQgASgLMicuc2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEuRmlsdGVyR3JvdXASMAoFb3JkZXIYBSADKAsyIS5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5PcmRlchIwCgVyYW5nZRgGIAEoCzIhLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLlJhbmdlEg4KBnNpbmdsZRgHIAEoCBITCgtjb3VudF9leGFjdBgIIAEoCBIgCgdwYXlsb2FkGAkgASgLMg8uc2NyaWJlLnYxLkpzb24SEwoLb25fY29uZmxpY3QYCiADKAkSEAoIcnBjX25hbWUYCyABKAkSIQoIcnBjX2FyZ3MYDCABKAsyDy5zY3JpYmUudjEuSnNvbiJeCgtRdWVyeVJlc3VsdBIdCgRkYXRhGAEgASgLMg8uc2NyaWJlLnYxLkpzb24SDQoFY291bnQYAiABKAQSIQoFZXJyb3IYAyABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJACgpRdWVyeUJhdGNoEjIKB3F1ZXJpZXMYASADKAsyIS5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5RdWVyeSJMChBRdWVyeVJlc3VsdEJhdGNoEjgKB3Jlc3VsdHMYASADKAsyJy5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5RdWVyeVJlc3VsdCqnAQoJT3BlcmF0aW9uEhkKFU9QRVJBVElPTl9VTlNQRUNJRklFRBAAEhQKEE9QRVJBVElPTl9TRUxFQ1QQARIUChBPUEVSQVRJT05fSU5TRVJUEAISFAoQT1BFUkFUSU9OX1VQREFURRADEhQKEE9QRVJBVElPTl9VUFNFUlQQBBIUChBPUEVSQVRJT05fREVMRVRFEAUSEQoNT1BFUkFUSU9OX1JQQxAGKqgDCg5GaWx0ZXJPcGVyYXRvchIfChtGSUxURVJfT1BFUkFUT1JfVU5TUEVDSUZJRUQQABIWChJGSUxURVJfT1BFUkFUT1JfRVEQARIXChNGSUxURVJfT1BFUkFUT1JfTkVREAISFgoSRklMVEVSX09QRVJBVE9SX0dUEAMSFwoTRklMVEVSX09QRVJBVE9SX0dURRAEEhYKEkZJTFRFUl9PUEVSQVRPUl9MVBAFEhcKE0ZJTFRFUl9PUEVSQVRPUl9MVEUQBhIYChRGSUxURVJfT1BFUkFUT1JfTElLRRAHEhkKFUZJTFRFUl9PUEVSQVRPUl9JTElLRRAIEhYKEkZJTFRFUl9PUEVSQVRPUl9JThAJEhYKEkZJTFRFUl9PUEVSQVRPUl9JUxAKEhwKGEZJTFRFUl9PUEVSQVRPUl9DT05UQUlOUxALEiAKHEZJTFRFUl9PUEVSQVRPUl9DT05UQUlORURfQlkQDBIcChhGSUxURVJfT1BFUkFUT1JfT1ZFUkxBUFMQDRIfChtGSUxURVJfT1BFUkFUT1JfVEVYVF9TRUFSQ0gQDjLHAQoIRGF0YWJhc2USVQoHRXhlY3V0ZRIhLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLlF1ZXJ5Gicuc2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEuUXVlcnlSZXN1bHQSZAoMRXhlY3V0ZUJhdGNoEiYuc2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEuUXVlcnlCYXRjaBosLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLlF1ZXJ5UmVzdWx0QmF0Y2hiBnByb3RvMw", [file_scribe_protocol_common]);
 
 /**
  * @generated from message scribe.clients.database.v1.Filter
@@ -423,6 +423,60 @@ export const QueryResultSchema: GenMessage<QueryResult, {jsonType: QueryResultJs
   messageDesc(file_scribe_host_pkg_packages_foundation_protocol_database_database, 5);
 
 /**
+ * @generated from message scribe.clients.database.v1.QueryBatch
+ */
+export type QueryBatch = Message<"scribe.clients.database.v1.QueryBatch"> & {
+  /**
+   * @generated from field: repeated scribe.clients.database.v1.Query queries = 1;
+   */
+  queries: Query[];
+};
+
+/**
+ * @generated from message scribe.clients.database.v1.QueryBatch
+ */
+export type QueryBatchJson = {
+  /**
+   * @generated from field: repeated scribe.clients.database.v1.Query queries = 1;
+   */
+  queries?: QueryJson[];
+};
+
+/**
+ * Describes the message scribe.clients.database.v1.QueryBatch.
+ * Use `create(QueryBatchSchema)` to create a new message.
+ */
+export const QueryBatchSchema: GenMessage<QueryBatch, {jsonType: QueryBatchJson}> = /*@__PURE__*/
+  messageDesc(file_scribe_host_pkg_packages_foundation_protocol_database_database, 6);
+
+/**
+ * @generated from message scribe.clients.database.v1.QueryResultBatch
+ */
+export type QueryResultBatch = Message<"scribe.clients.database.v1.QueryResultBatch"> & {
+  /**
+   * @generated from field: repeated scribe.clients.database.v1.QueryResult results = 1;
+   */
+  results: QueryResult[];
+};
+
+/**
+ * @generated from message scribe.clients.database.v1.QueryResultBatch
+ */
+export type QueryResultBatchJson = {
+  /**
+   * @generated from field: repeated scribe.clients.database.v1.QueryResult results = 1;
+   */
+  results?: QueryResultJson[];
+};
+
+/**
+ * Describes the message scribe.clients.database.v1.QueryResultBatch.
+ * Use `create(QueryResultBatchSchema)` to create a new message.
+ */
+export const QueryResultBatchSchema: GenMessage<QueryResultBatch, {jsonType: QueryResultBatchJson}> = /*@__PURE__*/
+  messageDesc(file_scribe_host_pkg_packages_foundation_protocol_database_database, 7);
+
+/**
  * @generated from enum scribe.clients.database.v1.Operation
  */
 export enum Operation {
@@ -575,6 +629,14 @@ export const Database: GenService<{
     methodKind: "unary";
     input: typeof QuerySchema;
     output: typeof QueryResultSchema;
+  },
+  /**
+   * @generated from rpc scribe.clients.database.v1.Database.ExecuteBatch
+   */
+  executeBatch: {
+    methodKind: "unary";
+    input: typeof QueryBatchSchema;
+    output: typeof QueryResultBatchSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_pkg_packages_foundation_protocol_database_database, 0);

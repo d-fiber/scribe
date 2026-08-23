@@ -595,6 +595,104 @@ class QueryResult extends $pb.GeneratedMessage {
   $0.Failure ensureError() => $_ensure(2);
 }
 
+class QueryBatch extends $pb.GeneratedMessage {
+  factory QueryBatch({
+    $core.Iterable<Query>? queries,
+  }) {
+    final result = create();
+    if (queries != null) result.queries.addAll(queries);
+    return result;
+  }
+
+  QueryBatch._();
+
+  factory QueryBatch.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory QueryBatch.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'QueryBatch',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'scribe.clients.database.v1'),
+      createEmptyInstance: create)
+    ..pPM<Query>(1, _omitFieldNames ? '' : 'queries', subBuilder: Query.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  QueryBatch clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  QueryBatch copyWith(void Function(QueryBatch) updates) =>
+      super.copyWith((message) => updates(message as QueryBatch)) as QueryBatch;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static QueryBatch create() => QueryBatch._();
+  @$core.override
+  QueryBatch createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static QueryBatch getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<QueryBatch>(create);
+  static QueryBatch? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<Query> get queries => $_getList(0);
+}
+
+class QueryResultBatch extends $pb.GeneratedMessage {
+  factory QueryResultBatch({
+    $core.Iterable<QueryResult>? results,
+  }) {
+    final result = create();
+    if (results != null) result.results.addAll(results);
+    return result;
+  }
+
+  QueryResultBatch._();
+
+  factory QueryResultBatch.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory QueryResultBatch.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'QueryResultBatch',
+      package: const $pb.PackageName(
+          _omitMessageNames ? '' : 'scribe.clients.database.v1'),
+      createEmptyInstance: create)
+    ..pPM<QueryResult>(1, _omitFieldNames ? '' : 'results',
+        subBuilder: QueryResult.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  QueryResultBatch clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  QueryResultBatch copyWith(void Function(QueryResultBatch) updates) =>
+      super.copyWith((message) => updates(message as QueryResultBatch))
+          as QueryResultBatch;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static QueryResultBatch create() => QueryResultBatch._();
+  @$core.override
+  QueryResultBatch createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static QueryResultBatch getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<QueryResultBatch>(create);
+  static QueryResultBatch? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<QueryResult> get results => $_getList(0);
+}
+
 class DatabaseApi {
   final $pb.RpcClient _client;
 
@@ -603,6 +701,10 @@ class DatabaseApi {
   $async.Future<QueryResult> execute($pb.ClientContext? ctx, Query request) =>
       _client.invoke<QueryResult>(
           ctx, 'Database', 'Execute', request, QueryResult());
+  $async.Future<QueryResultBatch> executeBatch(
+          $pb.ClientContext? ctx, QueryBatch request) =>
+      _client.invoke<QueryResultBatch>(
+          ctx, 'Database', 'ExecuteBatch', request, QueryResultBatch());
 }
 
 const $core.bool _omitFieldNames =

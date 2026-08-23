@@ -34,7 +34,14 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { UnsafeFilterError, assertPlainColumn, isFilterKeyword, keywordLiteral, quoteFilterList, quoteFilterLiteral } from "@scribe/foundation/lib/src/database/query/literal.ts";
+import {
+  assertPlainColumn,
+  isFilterKeyword,
+  keywordLiteral,
+  quoteFilterList,
+  quoteFilterLiteral,
+  UnsafeFilterError,
+} from "@scribe/foundation/lib/src/database/query/literal.ts";
 import { assert, assertEquals, assertThrows } from "@std/assert";
 
 const RESERVED = [",", ".", ":", "*", "(", ")"];

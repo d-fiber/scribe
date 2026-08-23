@@ -23,11 +23,15 @@ export 'database.pb.dart';
 abstract class DatabaseServiceBase extends $pb.GeneratedService {
   $async.Future<$1.QueryResult> execute(
       $pb.ServerContext ctx, $1.Query request);
+  $async.Future<$1.QueryResultBatch> executeBatch(
+      $pb.ServerContext ctx, $1.QueryBatch request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
       case 'Execute':
         return $1.Query();
+      case 'ExecuteBatch':
+        return $1.QueryBatch();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -38,6 +42,8 @@ abstract class DatabaseServiceBase extends $pb.GeneratedService {
     switch (methodName) {
       case 'Execute':
         return execute(ctx, request as $1.Query);
+      case 'ExecuteBatch':
+        return executeBatch(ctx, request as $1.QueryBatch);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

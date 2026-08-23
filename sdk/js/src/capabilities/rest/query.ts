@@ -34,17 +34,18 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { create } from "@bufbuild/protobuf";
+import { create, type MessageInitShape } from "@bufbuild/protobuf";
 import {
+  Database,
   type Filter,
   type FilterGroup,
   FilterGroupSchema,
   Operation,
   type Order,
   OrderSchema,
-  RangeSchema,
-  Database,
   type QueryResult,
+  type QuerySchema,
+  RangeSchema,
 } from "../../../gen/scribe/host/pkg/packages/foundation/protocol/database/database_pb.ts";
 import { decodeJson, encodeJson } from "../../contracts/json.ts";
 import { host } from "../channel.ts";
@@ -177,33 +178,86 @@ export class RestQuery<Row extends object> {
     payload?: unknown,
     onConflict: readonly string[] = [],
   ): Promise<QueryResult> {
-    const result = await host.client().call(Database.method.execute, {
-      table: this.table,
-      operation,
-      select: [...this.state.select],
-      where: create(FilterGroupSchema, {
-        filters: [...this.state.where],
-        groups: [...this.state.groups],
-      }),
-      order: [...this.state.order],
-      range: create(RangeSchema, {
-        limit: this.state.limit,
-        offset: this.state.offset,
-      }),
-      single: this.state.single,
-      countExact: this.state.countExact,
-      payload: payload === undefined ? undefined : encodeJson(payload),
-      onConflict: [...onConflict],
-    });
+    const result = await host.client().call(
+      Database.method.execute,
+      described(this, operation, payload, onConflict),
+    );
 
     raiseOn(CAPABILITY, result.error);
     return result;
   }
 }
 
+/** The wire description of `query`, as both a single call and a batch entry send it. */
+function described<Row extends object>(
+  query: RestQuery<Row>,
+  operation: Operation,
+  payload?: unknown,
+  onConflict: readonly string[] = [],
+): MessageInitShape<typeof QuerySchema> {
+  return {
+    table: query.table,
+    operation,
+    select: [...query.state.select],
+    where: create(FilterGroupSchema, {
+      filters: [...query.state.where],
+      groups: [...query.state.groups],
+    }),
+    order: [...query.state.order],
+    range: create(RangeSchema, {
+      limit: query.state.limit,
+      offset: query.state.offset,
+    }),
+    single: query.state.single,
+    countExact: query.state.countExact,
+    payload: payload === undefined ? undefined : encodeJson(payload),
+    onConflict: [...onConflict],
+  };
+}
+
+/** The rows each query of a batch answers, one array per query, in the order they were given. */
+// deno-lint-ignore no-explicit-any -- RestQuery is invariant in Row, so no concrete supertype accepts every instantiation.
+export type BatchRows<Q extends readonly RestQuery<any>[]> = {
+  [K in keyof Q]: Q[K] extends RestQuery<infer Row> ? readonly Row[] : never;
+};
+
 export const rest = {
   from<Row extends object>(table: string): RestQuery<Row> {
     return new RestQuery<Row>(table);
+  },
+
+  /**
+   * The rows every query of `queries` matches, read in one call to the host.
+   *
+   * @remarks
+   * Three reads written as three `rows()` calls pay three round trips to the host, and on the
+   * worker path that hop costs more than the read itself. Given together they pay one.
+   *
+   * The host runs them concurrently, so this is for queries that do not read what another one in
+   * the same batch writes.
+   *
+   * @throws {CapabilityError} When any query of the batch was refused. The first refusal raises,
+   * so a batch either answers every row or none.
+   *
+   * @example
+   * ```ts
+   * const [brands, users] = await rest.all([
+   *   rest.from<Brand>("brands").select("id"),
+   *   rest.from<User>("users").where((u) => u.active.is(true)),
+   * ]);
+   * ```
+   */
+  // deno-lint-ignore no-explicit-any -- see BatchRows: RestQuery is invariant in Row.
+  async all<const Q extends readonly RestQuery<any>[]>(queries: Q): Promise<BatchRows<Q>> {
+    if (queries.length === 0) return [] as unknown as BatchRows<Q>;
+
+    const batch = await host.client().call(Database.method.executeBatch, {
+      queries: queries.map((query) => described(query, Operation.SELECT)),
+    });
+
+    for (const result of batch.results) raiseOn(CAPABILITY, result.error);
+
+    return batch.results.map((result) => decodeJson<unknown[]>(result.data) ?? []) as BatchRows<Q>;
   },
 
   async rpc<T = unknown>(name: string, args: Record<string, unknown> = {}): Promise<T | null> {

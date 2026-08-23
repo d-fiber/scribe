@@ -37,10 +37,28 @@
 // deno-lint-ignore-file no-explicit-any
 
 import { create } from "@bufbuild/protobuf";
-import { FilterOperator, FilterSchema, Operation, QueryResultSchema, type Filter, type FilterGroup, type Query, type QueryResult } from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/database/database_pb.ts";
+import {
+  type Filter,
+  type FilterGroup,
+  FilterOperator,
+  FilterSchema,
+  Operation,
+  type Query,
+  type QueryBatch,
+  type QueryResult,
+  type QueryResultBatch,
+  QueryResultBatchSchema,
+  QueryResultSchema,
+} from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/database/database_pb.ts";
 import { PostgrestClients } from "@scribe/foundation/lib/src/database/client.ts";
 import { ownerOf } from "@scribe/foundation/lib/src/database/schema.ts";
-import { UnsafeFilterError, assertPlainColumn, keywordLiteral, quoteFilterList, quoteFilterLiteral } from "@scribe/foundation/lib/src/database/query/literal.ts";
+import {
+  assertPlainColumn,
+  keywordLiteral,
+  quoteFilterList,
+  quoteFilterLiteral,
+  UnsafeFilterError,
+} from "@scribe/foundation/lib/src/database/query/literal.ts";
 import { ownerScope } from "@scribe/foundation/lib/src/database/query/scope.ts";
 import { AMBIGUITY_PROBE } from "@scribe/foundation/lib/src/database/query/state.ts";
 import { decodeJson, encodeJson } from "../json.ts";
@@ -241,6 +259,12 @@ async function runRpc(query: Query): Promise<QueryResult> {
   });
 }
 
+/**
+ * The result of `query`, run against PostgREST under the service role.
+ *
+ * @throws {Error} When the caller owns a different row than the one `query` reaches. Owner scoping
+ * is decided here, in TypeScript, and never by a row level security policy.
+ */
 export async function executeQuery(query: Query): Promise<QueryResult> {
   if (query.operation === Operation.RPC) return runRpc(query);
 
@@ -259,4 +283,33 @@ export async function executeQuery(query: Query): Promise<QueryResult> {
     count: BigInt(count ?? 0),
     error: error ? { code: error.code ?? "query_failed", message: error.message } : undefined,
   });
+}
+
+function refused(cause: unknown): QueryResult {
+  return create(QueryResultSchema, {
+    error: {
+      code: "query_refused",
+      message: cause instanceof Error ? cause.message : String(cause),
+    },
+  });
+}
+
+/**
+ * The results of every query in `batch`, in the order the batch listed them.
+ *
+ * @remarks
+ * The queries run concurrently, so a batch is for queries that do not read what another one in the
+ * same batch writes. What it buys is the round trip: a worker that reads three times pays one hop
+ * to the host instead of three, and the hop is what a request on this path spends most of its time
+ * in.
+ *
+ * A query the owner check refuses answers a `query_refused` entry rather than sinking the batch,
+ * because the caller asked for several answers and the ones it may have are still worth returning.
+ */
+export async function executeQueries(batch: QueryBatch): Promise<QueryResultBatch> {
+  const results = await Promise.all(
+    batch.queries.map((query) => executeQuery(query).catch(refused)),
+  );
+
+  return create(QueryResultBatchSchema, { results });
 }

@@ -266,6 +266,46 @@ final $typed_data.Uint8List queryResultDescriptor = $convert.base64Decode(
     '91bnQYAiABKARSBWNvdW50EigKBWVycm9yGAMgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmVSBWVy'
     'cm9y');
 
+@$core.Deprecated('Use queryBatchDescriptor instead')
+const QueryBatch$json = {
+  '1': 'QueryBatch',
+  '2': [
+    {
+      '1': 'queries',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.scribe.clients.database.v1.Query',
+      '10': 'queries'
+    },
+  ],
+};
+
+/// Descriptor for `QueryBatch`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List queryBatchDescriptor = $convert.base64Decode(
+    'CgpRdWVyeUJhdGNoEjsKB3F1ZXJpZXMYASADKAsyIS5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS'
+    '52MS5RdWVyeVIHcXVlcmllcw==');
+
+@$core.Deprecated('Use queryResultBatchDescriptor instead')
+const QueryResultBatch$json = {
+  '1': 'QueryResultBatch',
+  '2': [
+    {
+      '1': 'results',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.scribe.clients.database.v1.QueryResult',
+      '10': 'results'
+    },
+  ],
+};
+
+/// Descriptor for `QueryResultBatch`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List queryResultBatchDescriptor = $convert.base64Decode(
+    'ChBRdWVyeVJlc3VsdEJhdGNoEkEKB3Jlc3VsdHMYASADKAsyJy5zY3JpYmUuY2xpZW50cy5kYX'
+    'RhYmFzZS52MS5RdWVyeVJlc3VsdFIHcmVzdWx0cw==');
+
 const $core.Map<$core.String, $core.dynamic> DatabaseServiceBase$json = {
   '1': 'Database',
   '2': [
@@ -273,6 +313,11 @@ const $core.Map<$core.String, $core.dynamic> DatabaseServiceBase$json = {
       '1': 'Execute',
       '2': '.scribe.clients.database.v1.Query',
       '3': '.scribe.clients.database.v1.QueryResult'
+    },
+    {
+      '1': 'ExecuteBatch',
+      '2': '.scribe.clients.database.v1.QueryBatch',
+      '3': '.scribe.clients.database.v1.QueryResultBatch'
     },
   ],
 };
@@ -288,9 +333,13 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.scribe.clients.database.v1.Range': Range$json,
   '.scribe.clients.database.v1.QueryResult': QueryResult$json,
   '.scribe.v1.Failure': $0.Failure$json,
+  '.scribe.clients.database.v1.QueryBatch': QueryBatch$json,
+  '.scribe.clients.database.v1.QueryResultBatch': QueryResultBatch$json,
 };
 
 /// Descriptor for `Database`. Decode as a `google.protobuf.ServiceDescriptorProto`.
 final $typed_data.Uint8List databaseServiceDescriptor = $convert.base64Decode(
     'CghEYXRhYmFzZRJVCgdFeGVjdXRlEiEuc2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEuUXVlcn'
-    'kaJy5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5RdWVyeVJlc3VsdA==');
+    'kaJy5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5RdWVyeVJlc3VsdBJkCgxFeGVjdXRlQmF0'
+    'Y2gSJi5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5RdWVyeUJhdGNoGiwuc2NyaWJlLmNsaW'
+    'VudHMuZGF0YWJhc2UudjEuUXVlcnlSZXN1bHRCYXRjaA==');
