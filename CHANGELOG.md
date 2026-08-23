@@ -4,6 +4,28 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 7.0.0 (2026-08-23)
+
+Component versions: @scribe/core 4.0.0, @dependencies/core 1.0.0, @scribe/sdk 0.1.7
+
+### Breaking
+
+- move the framework onto the vocabulary alchemy publishes (1afa0f3f)
+
+### Added
+
+- let the rest capability carry several queries at once (994eb1f8)
+
+### Changed
+
+- carry the request scope on the vocabulary's store (7fcbe315)
+- read json through the codec instead of calling JSON.parse (7e33ecfa)
+- answer with the responder the vocabulary publishes (aeb30ac1)
+
+### Tooling
+
+- drop three barrels nothing imported (5ca009d5)
+
 ## 6.0.0 (2026-08-23)
 
 Component versions: @scribe/core 3.0.0, @dependencies/core 0.1.12

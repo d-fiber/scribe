@@ -36,7 +36,7 @@
 
 export const PROTOCOL_VERSION = "2.0.2";
 
-export const SDK_VERSION = "0.1.6";
+export const SDK_VERSION = "0.1.7";
 
 export const WORKER_LANGUAGE = "js";
 
