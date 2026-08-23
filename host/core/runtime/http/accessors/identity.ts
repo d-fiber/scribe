@@ -76,3 +76,36 @@ export class RequestIdentityCache {
 export function currentIdentity(): ResolvedIdentity {
   return RequestIdentityCache.resolved() ?? null;
 }
+
+/**
+ * Who is calling, told apart from nobody having asked.
+ *
+ * @remarks
+ * `ResolvedIdentity` folds two opposite facts into `null`: a resolution that ran and proved
+ * nobody, and a path where nothing ever resolved. A reader that treats them alike either refuses
+ * an anonymous caller or opens a table to a background job, and both are wrong. Everything that
+ * only wants the identifier keeps using {@link currentIdentity}, which is why this sits beside it
+ * rather than replacing it.
+ */
+export type EffectivePrincipal =
+  | { readonly kind: "unproven" }
+  | { readonly kind: "anonymous" }
+  | { readonly kind: "identified"; readonly user: RequestUser };
+
+const _UNPROVEN: EffectivePrincipal = { kind: "unproven" };
+const _ANONYMOUS: EffectivePrincipal = { kind: "anonymous" };
+
+/**
+ * What this call proved about who is making it.
+ *
+ * @remarks
+ * `unproven` is a path that never resolved an identity: a queue worker, a cron body, a trigger
+ * handler, a webhook endpoint. It is not an anonymous caller, it is nobody having asked, and what
+ * to do about it belongs to whoever is reading.
+ */
+export function currentPrincipal(): EffectivePrincipal {
+  const resolved = RequestIdentityCache.resolved();
+  if (resolved === undefined) return _UNPROVEN;
+  if (resolved === null) return _ANONYMOUS;
+  return { kind: "identified", user: resolved };
+}
