@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export { SettingsSlot } from "./slot.ts";
+export { Slot } from "@scribe/alchemy";
 export { deviceSettings } from "./device.ts";
 export { firewallSettings } from "./firewall.ts";
 export { httpSettings } from "./http.ts";

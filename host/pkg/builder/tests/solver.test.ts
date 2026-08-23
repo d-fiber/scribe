@@ -60,9 +60,9 @@ class Shelf implements Registry {
   dependenciesOf(
     name: string,
     version: Version,
-  ): ReadonlyMap<string, Constraint> {
+  ): Readonly<Record<string, Constraint>> {
     const asked = this.#catalogue[name]?.[version.toString()] ?? {};
-    return new Map(
+    return Object.fromEntries(
       Object.entries(asked).map(([dependency, constraint]) => [
         dependency,
         Constraint.parse(constraint),

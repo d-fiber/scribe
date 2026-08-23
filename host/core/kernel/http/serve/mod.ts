@@ -38,11 +38,7 @@ import { readBoundedBody } from "@scribe/core/kernel/http/serve/body_reader.ts";
 import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
 import { pathnameOf, stripPrefix } from "@scribe/core/runtime/http/pathname.ts";
 import { rewriteRequest } from "@scribe/core/kernel/http/serve/request_rewrite.ts";
-import {
-  admitBody,
-  inflightBodyBytes,
-  releaseBody,
-} from "@scribe/core/kernel/http/serve/body_admission.ts";
+import { admitBody, inflightBodyBytes, releaseBody } from "@scribe/core/kernel/http/serve/body_admission.ts";
 import { logger } from "@scribe/core/kernel/observability/logger.ts";
 import "@scribe/core/kernel/location/ip_location.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";

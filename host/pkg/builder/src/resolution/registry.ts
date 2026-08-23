@@ -50,7 +50,7 @@ export interface Registry {
   dependenciesOf(
     name: string,
     version: Version,
-  ): ReadonlyMap<string, Constraint>;
+  ): Readonly<Record<string, Constraint>>;
 }
 
 /**
@@ -83,7 +83,7 @@ export class WorkspaceRegistry implements Registry {
   dependenciesOf(
     name: string,
     _version: Version,
-  ): ReadonlyMap<string, Constraint> {
-    return this.#packages.get(name)?.declaration.dependencies ?? new Map();
+  ): Readonly<Record<string, Constraint>> {
+    return this.#packages.get(name)?.declaration.dependencies ?? {};
   }
 }

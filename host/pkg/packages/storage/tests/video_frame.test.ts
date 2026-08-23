@@ -36,11 +36,7 @@
 
 import "@scribe/core/testing/settings.ts";
 import { assertEquals } from "@std/assert";
-import {
-  extractPosterFrame,
-  FRAME_SIZE,
-  pickPosterFrame,
-} from "@scribe/storage/src/media/video_frame.ts";
+import { FRAME_SIZE, extractPosterFrame, pickPosterFrame } from "@scribe/storage/src/media/video_frame.ts";
 
 const FRAME_BYTES = FRAME_SIZE * FRAME_SIZE * 4;
 

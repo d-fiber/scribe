@@ -34,9 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Semaphore } from "@scribe/core/runtime/support/async/semaphore.ts";
+import { Semaphore } from "@scribe/alchemy";
 import { sleep } from "@scribe/core/runtime/support/async/sleep.ts";
 import { assert, assertEquals } from "@std/assert";
+import { Duration } from "@scribe/alchemy";
 
 Deno.test("Semaphore lets through up to its limit without waiting", async () => {
   const gate = new Semaphore(3);
@@ -51,18 +52,18 @@ Deno.test("Semaphore lets through up to its limit without waiting", async () => 
 
 Deno.test("Semaphore queues the callers past its limit", async () => {
   const gate = new Semaphore(1);
-  await gate.acquire();
+  const held = await gate.acquire();
 
   let admitted = false;
   const pending = gate.acquire().then(() => {
     admitted = true;
   });
 
-  await sleep(1);
+  await sleep(Duration.milliseconds(1));
   assertEquals(admitted, false);
   assertEquals(gate.waiting, 1);
 
-  gate.release();
+  held();
   await pending;
   assert(admitted);
 });
@@ -84,7 +85,7 @@ Deno.test("Semaphore.run never lets the peak exceed the limit", async () => {
       gate.run(async () => {
         inFlight++;
         peak = Math.max(peak, inFlight);
-        await sleep(1);
+        await sleep(Duration.milliseconds(1));
         inFlight--;
       })),
   );
@@ -102,11 +103,13 @@ Deno.test("Semaphore.run releases its slot even when the call throws", async () 
   assertEquals(gate.inFlight, 1);
 });
 
-Deno.test("Semaphore.release never drives the counter below zero", () => {
+Deno.test("giving the same place back twice gives back one place, not two", async () => {
   const gate = new Semaphore(2);
+  const first = await gate.acquire();
+  await gate.acquire();
 
-  gate.release();
-  gate.release();
+  first();
+  first();
 
-  assertEquals(gate.inFlight, 0);
+  assertEquals(gate.inFlight, 1);
 });

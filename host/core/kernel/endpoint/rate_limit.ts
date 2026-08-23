@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Time } from "@scribe/core/contracts/common/time.ts";
+import type { Duration } from "@scribe/alchemy";
 import { firstSegmentOf } from "@scribe/core/runtime/http/pathname.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
 import { RateLimit, SHARED_ADDRESS_MAX_PENALTY, SHARED_ADDRESS_STRIKE_MEMORY } from "@scribe/foundation/lib/src/rate_limit/mod.ts";
@@ -42,15 +42,15 @@ import { CallerKind, requestCaller } from "@scribe/core/runtime/http/caller.ts";
 
 export interface RateLimiter {
   limit: number;
-  window: Time;
-  penalty: Time;
-  maxPenalty?: Time;
+  window: Duration;
+  penalty: Duration;
+  maxPenalty?: Duration;
   failOpen?: boolean;
 }
 
 /** The shorter of `declared` and `cap`, and `cap` when nothing was declared. */
-function shorter(declared: Time | undefined, cap: Time): Time {
-  return declared !== undefined && declared.value < cap.value ? declared : cap;
+function shorter(declared: Duration | undefined, cap: Duration): Duration {
+  return declared !== undefined && declared.inSeconds < cap.inSeconds ? declared : cap;
 }
 
 /**

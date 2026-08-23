@@ -95,12 +95,12 @@ export class QueuePublisher<TJob> {
   }
 
   async push(data: TJob, opts: PushOptions = {}): Promise<string> {
-    if (opts.delay && opts.delay.ms > 0) {
+    if (opts.delay && opts.delay.inMilliseconds > 0) {
       return await pushDelayed(
         this.queue.name,
         this.queue.subject,
         data,
-        opts.delay.ms,
+        opts.delay.inMilliseconds,
       );
     }
 

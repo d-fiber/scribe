@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Time } from "@scribe/core/contracts/common/time.ts";
+import { Duration } from "@scribe/alchemy";
 import { InternalSecretFirewall } from "@scribe/core/kernel/identity/firewall/internal.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
 import { ApiEndpoint } from "./api.ts";
@@ -53,9 +53,9 @@ export abstract class ServiceEndpoint extends ApiEndpoint {
   protected rateLimit(): RateLimiter {
     return {
       limit: 5000,
-      window: Time.minutes(1),
-      penalty: Time.minutes(1),
-      maxPenalty: Time.hours(1),
+      window: Duration.minutes(1),
+      penalty: Duration.minutes(1),
+      maxPenalty: Duration.hours(1),
     };
   }
 

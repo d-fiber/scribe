@@ -35,8 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { WorkerSettings } from "@scribe/core/contracts/settings.ts";
-import { SettingsSlot } from "./slot.ts";
+import { Slot } from "@scribe/alchemy";
 
-export const workerSettings: SettingsSlot<WorkerSettings> = new SettingsSlot<WorkerSettings>(
+export const workerSettings: Slot<WorkerSettings> = new Slot<WorkerSettings>(
   "worker",
 );

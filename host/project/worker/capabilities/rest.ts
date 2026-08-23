@@ -37,25 +37,10 @@
 // deno-lint-ignore-file no-explicit-any
 
 import { create } from "@bufbuild/protobuf";
-import {
-  type Filter,
-  type FilterGroup,
-  FilterOperator,
-  FilterSchema,
-  Operation,
-  type Query,
-  type QueryResult,
-  QueryResultSchema,
-} from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/database/database_pb.ts";
+import { FilterOperator, FilterSchema, Operation, QueryResultSchema, type Filter, type FilterGroup, type Query, type QueryResult } from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/database/database_pb.ts";
 import { PostgrestClients } from "@scribe/foundation/lib/src/database/client.ts";
 import { ownerOf } from "@scribe/foundation/lib/src/database/schema.ts";
-import {
-  assertPlainColumn,
-  keywordLiteral,
-  quoteFilterList,
-  quoteFilterLiteral,
-  UnsafeFilterError,
-} from "@scribe/foundation/lib/src/database/query/literal.ts";
+import { UnsafeFilterError, assertPlainColumn, keywordLiteral, quoteFilterList, quoteFilterLiteral } from "@scribe/foundation/lib/src/database/query/literal.ts";
 import { ownerScope } from "@scribe/foundation/lib/src/database/query/scope.ts";
 import { AMBIGUITY_PROBE } from "@scribe/foundation/lib/src/database/query/state.ts";
 import { decodeJson, encodeJson } from "../json.ts";

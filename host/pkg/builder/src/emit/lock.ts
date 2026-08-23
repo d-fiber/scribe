@@ -65,11 +65,13 @@ export function lockText(
     lines.push(`    version: ${resolved.version}`);
     lines.push(`    dependency: ${resolved.direct ? "direct" : "transitive"}`);
 
-    const dependencies = found.get(resolved.name)?.declaration.dependencies ?? new Map();
-    if (dependencies.size === 0) continue;
+    const dependencies = found.get(resolved.name)?.declaration.dependencies ?? {};
+    if (Object.keys(dependencies).length === 0) continue;
 
     lines.push("    needs:");
-    for (const [name, constraint] of [...dependencies].sort(([left], [right]) => left.localeCompare(right))) {
+    for (
+      const [name, constraint] of Object.entries(dependencies).sort(([left], [right]) => left.localeCompare(right))
+    ) {
       lines.push(`      ${name}: "${constraint}"`);
     }
   }

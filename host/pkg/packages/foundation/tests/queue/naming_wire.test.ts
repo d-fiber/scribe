@@ -34,19 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import {
-  DEAD_STREAM,
-  deadSubjectOf,
-  DEDICATED_STREAM,
-  sanitize,
-  SHARED_CONSUMER,
-  SHARED_STREAM,
-  subjectOf,
-} from "@scribe/foundation/lib/src/queue/core/naming.ts";
-import {
-  decode,
-  encode,
-} from "@scribe/foundation/lib/src/queue/core/wire.ts";
+import { DEAD_STREAM, DEDICATED_STREAM, SHARED_CONSUMER, SHARED_STREAM, deadSubjectOf, sanitize, subjectOf } from "@scribe/foundation/lib/src/queue/core/naming.ts";
+import { decode, encode } from "@scribe/foundation/lib/src/queue/core/wire.ts";
 import { assertEquals, assertNotEquals } from "@std/assert";
 
 Deno.test("sanitize keeps what NATS accepts and folds the rest", () => {

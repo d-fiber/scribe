@@ -34,39 +34,40 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { ExponentialBackoff } from "@scribe/core/runtime/support/async/backoff.ts";
-import { runPooled } from "@scribe/core/runtime/support/async/pool.ts";
+import { ExponentialBackoff } from "@scribe/alchemy";
+import { runPooled } from "@scribe/alchemy";
 import { sleep } from "@scribe/core/runtime/support/async/sleep.ts";
 import { assert, assertEquals } from "@std/assert";
+import { Duration } from "@scribe/alchemy";
 
 Deno.test("ExponentialBackoff doubles from the base and stops at the ceiling", () => {
-  const backoff = new ExponentialBackoff(1_000, 30_000);
+  const backoff = new ExponentialBackoff(Duration.milliseconds(1_000), Duration.milliseconds(30_000));
 
-  assertEquals(backoff.delayFor(1), 1_000);
-  assertEquals(backoff.delayFor(2), 2_000);
-  assertEquals(backoff.delayFor(3), 4_000);
-  assertEquals(backoff.delayFor(6), 30_000);
-  assertEquals(backoff.delayFor(50), 30_000);
+  assertEquals(backoff.delayFor(1).inMilliseconds, 1_000);
+  assertEquals(backoff.delayFor(2).inMilliseconds, 2_000);
+  assertEquals(backoff.delayFor(3).inMilliseconds, 4_000);
+  assertEquals(backoff.delayFor(6).inMilliseconds, 30_000);
+  assertEquals(backoff.delayFor(50).inMilliseconds, 30_000);
 });
 
 Deno.test("ExponentialBackoff never returns more than the ceiling, even at attempt 1", () => {
-  const backoff = new ExponentialBackoff(5_000, 1_000);
+  const backoff = new ExponentialBackoff(Duration.milliseconds(5_000), Duration.milliseconds(1_000));
 
-  assertEquals(backoff.delayFor(1), 1_000);
+  assertEquals(backoff.delayFor(1).inMilliseconds, 1_000);
 });
 
 Deno.test("ExponentialBackoff treats attempt 0 and negatives as the first attempt", () => {
-  const backoff = new ExponentialBackoff(500, 10_000);
+  const backoff = new ExponentialBackoff(Duration.milliseconds(500), Duration.milliseconds(10_000));
 
-  assertEquals(backoff.delayFor(0), 500);
-  assertEquals(backoff.delayFor(-3), 500);
+  assertEquals(backoff.delayFor(0).inMilliseconds, 500);
+  assertEquals(backoff.delayFor(-3).inMilliseconds, 500);
 });
 
 Deno.test("ExponentialBackoff honours a custom factor", () => {
-  const backoff = new ExponentialBackoff(100, 100_000, 3);
+  const backoff = new ExponentialBackoff(Duration.milliseconds(100), Duration.milliseconds(100_000), 3);
 
-  assertEquals(backoff.delayFor(2), 300);
-  assertEquals(backoff.delayFor(3), 900);
+  assertEquals(backoff.delayFor(2).inMilliseconds, 300);
+  assertEquals(backoff.delayFor(3).inMilliseconds, 900);
 });
 
 Deno.test("runPooled visits every item exactly once", async () => {
@@ -89,7 +90,7 @@ Deno.test("runPooled never exceeds the requested concurrency", async () => {
   await runPooled(Array.from({ length: 30 }, (_, i) => i), 3, async () => {
     inFlight++;
     peak = Math.max(peak, inFlight);
-    await sleep(1);
+    await sleep(Duration.milliseconds(1));
     inFlight--;
   });
 

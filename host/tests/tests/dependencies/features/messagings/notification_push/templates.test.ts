@@ -34,12 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import {
-  PushNotificationOpenError,
-  PushNotificationOpenRepository,
-  PushTemplateError,
-  PushTemplateRepository,
-} from "@scribe/host/dependencies/features/messagings/notification_push/push.ts";
+import { PushNotificationOpenError, PushNotificationOpenRepository, PushTemplateError, PushTemplateRepository } from "@scribe/host/dependencies/features/messagings/notification_push/push.ts";
 import type { Row } from "@scribe/foundation/tests/testing/database.ts";
 import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
 import { assert, assertEquals } from "@std/assert";
@@ -137,7 +132,7 @@ Deno.test("templates.create: data defaults to null rather than being omitted", a
   }
 });
 
-Deno.test("templates.update: an unknown id is NotFound, not a silent OK", async () => {
+Deno.test("templates.update: an unknown id is NotFound, not a silent Ok", async () => {
   const h = harness();
   try {
     const result = await h.templates.update(404, { title: "changed" });
@@ -165,7 +160,7 @@ Deno.test("templates.update: writes only the given fields", async () => {
   }
 });
 
-Deno.test("templates.remove: an unknown id is NotFound, not a silent OK", async () => {
+Deno.test("templates.remove: an unknown id is NotFound, not a silent Ok", async () => {
   const h = harness();
   try {
     const missing = await h.templates.remove(404);
@@ -216,7 +211,7 @@ Deno.test("opens.record: appends a row for the push", async () => {
   }
 });
 
-Deno.test("opens.remove: an unknown id is NotFound, not a silent OK", async () => {
+Deno.test("opens.remove: an unknown id is NotFound, not a silent Ok", async () => {
   const h = harness();
   try {
     const missing = await h.opens.remove(999);

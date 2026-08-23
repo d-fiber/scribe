@@ -34,7 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "../async/future.ts";
 import { Slot } from "../bind/slot.ts";
+import type { List } from "../value/list.ts";
+import type { Result } from "../value/result.ts";
 
 /** One table of a schema, as the package that owns the SQL declares it. */
 export interface TableShape {
@@ -63,7 +66,7 @@ export interface ColumnFilter<V> {
   eq(value: V): FilterSpec;
 
   /** Rows whose column is one of `values`. */
-  in(values: V[]): FilterSpec;
+  in(values: List<V>): FilterSpec;
 
   /** Rows whose column is `value`, null included, compared by identity rather than by equality. */
   is(value: V | null): FilterSpec;
@@ -91,7 +94,9 @@ export interface ColumnFilter<V> {
 }
 
 /** What a `where` is handed: one filter per column of the row. */
-export type Filters<Row> = { readonly [K in keyof Row & string]: ColumnFilter<Row[K]> };
+export type Filters<Row> = {
+  readonly [K in keyof Row & string]: ColumnFilter<Row[K]>;
+};
 
 /** What a projection is handed: each column of the row answers its own name. */
 export type Columns<Row> = { readonly [K in keyof Row & string]: K };
@@ -114,82 +119,74 @@ export interface OrderOptions {
  * Every method answers a new query rather than changing this one, so a query held in a constant
  * can be narrowed twice without the second narrowing seeing the first.
  *
- * Reading and writing refuse differently, and the difference is deliberate. A read that the
- * backend refused throws, because a caller asking for rows has no useful answer to give back. A
- * write answers false, because a caller that could not write usually has something else to do
- * about it.
+ * Reading and writing refuse differently, and the difference is deliberate. A read that the backend
+ * refused raises, because a caller asking for rows has no useful answer to give back. A write
+ * answers an outcome, because a caller that could not write has to know **why** before it decides
+ * whether to try again: a write refused by a constraint must never be replayed, and a write whose
+ * acknowledgement was lost usually must. A boolean folded those two together, and every caller that
+ * retried on false was retrying half of them wrongly.
  */
-export interface Query<Row extends object, Result = Row> {
-  /**
-   * Drops the owner scope, for a query whose authorisation was decided upstream.
-   *
-   * @remarks
-   * The scope narrows a query to the rows the caller owns. Dropping it is how a package reads
-   * across owners on purpose, and it is a decision worth seeing at the call site.
-   */
-  unscoped(): Query<Row, Result>;
-
+export interface Query<Row extends object, Answer = Row> {
   /** Narrows what comes back to the columns `project` names, under the names it gives them. */
   select<const Shape extends Record<string, keyof Row & string>>(
     project: (columns: Columns<Row>) => Shape,
   ): Query<Row, Projected<Row, Shape>>;
 
-  /**
-   * Narrows what comes back to `columns`, written as the backend reads them.
-   *
-   * @remarks
-   * This is the one place the wire shows through: `columns` is a selection string the backend
-   * parses, not something typed here. It exists for a projection that was compiled elsewhere, and
-   * a package that can write {@link select} should.
-   */
-  selectRaw<R extends object = Row>(columns: string): Query<Row, R>;
-
   /** Adds what `build` returns, kept in the order it was added. */
-  where(build: (filters: Filters<Row>) => FilterSpec | FilterSpec[]): Query<Row, Result>;
+  where(
+    build: (filters: Filters<Row>) => FilterSpec | List<FilterSpec>,
+  ): Query<Row, Answer>;
 
   /** Orders by `column`. */
-  order<K extends keyof Row & string>(column: K, options?: OrderOptions): Query<Row, Result>;
+  order<K extends keyof Row & string>(
+    column: K,
+    options?: OrderOptions,
+  ): Query<Row, Answer>;
 
   /** Asks for at most `count` rows. */
-  limit(count: number): Query<Row, Result>;
+  limit(count: number): Query<Row, Answer>;
 
   /** Asks for the rows from `from` to `to`, both included. */
-  range(from: number, to: number): Query<Row, Result>;
+  range(from: number, to: number): Query<Row, Answer>;
 
   /**
    * The rows this query matches.
    *
-   * @throws {DatabaseError} When the backend refused the query or could not be reached.
+   * @throws {Refusal} `denied` when the backend refused the query, `unavailable` when it could not
+   * be reached. The two are told apart because only the second is worth trying again.
    */
-  get(): Promise<Result[]>;
+  get(): Future<List<Answer>>;
 
   /**
    * The one row this query matches, or null when it matches none.
    *
-   * @throws {DatabaseError} When the backend refused the query or could not be reached.
+   * @throws {Refusal} `denied` when the backend refused the query, `unavailable` when it could not
+   * be reached.
    */
-  getOne(): Promise<Result | null>;
+  getOne(): Future<Answer | null>;
 
-  /** Writes one row or a batch, and answers whether it went through. */
-  insert(data: Partial<Row> | Partial<Row>[]): Promise<boolean>;
+  /** Writes one row or a batch, and answers how it went. */
+  insert(data: Partial<Row> | List<Partial<Row>>): Future<Result<number>>;
 
-  /** Writes one row and answers it back, or null when the write was refused. */
-  insertOne(data: Partial<Row>): Promise<Row | null>;
+  /** Writes one row and answers it back. */
+  insertOne(data: Partial<Row>): Future<Result<Row>>;
 
-  /** Writes `data` over every matched row, and answers whether it went through. */
-  update(data: Partial<Row>): Promise<boolean>;
+  /** Writes `data` over every matched row, and answers how many it touched. */
+  update(data: Partial<Row>): Future<Result<number>>;
 
-  /** Removes every matched row, and answers whether it went through. */
-  delete(): Promise<boolean>;
+  /** Removes every matched row, and answers how many it removed. */
+  delete(): Future<Result<number>>;
 
-  /** Removes one matched row and answers it back, or null when none was removed. */
-  deleteOne(): Promise<Row | null>;
+  /** Removes one matched row and answers it back. */
+  deleteOne(): Future<Result<Row>>;
 }
 
 /** What answers a query on a named table. */
 export interface DatabaseDriver {
   /** A query on `name`, typed by the schema the package declares. */
-  table<S extends DatabaseSchema, K extends keyof S & string>(name: K): Query<S[K]["row"] & object>;
+  table<S extends DatabaseSchema, K extends keyof S & string>(
+    name: K,
+  ): Query<S[K]["row"] & object>;
 }
 
 /**
@@ -199,28 +196,53 @@ export interface DatabaseDriver {
  * The host fills this once, at boot. A package declares its own schema, asks for a table by name,
  * and never names a driver.
  */
-export const Databases: Slot<DatabaseDriver> = new Slot<DatabaseDriver>("Databases");
+export const Databases: Slot<DatabaseDriver> = new Slot<DatabaseDriver>(
+  "Databases",
+);
 
 /**
- * A query on `name`, opened at the first call and not at the declaration.
+ * Every table `S` describes, each answering a query typed by the row it holds.
  *
  * @remarks
- * A table is usually held in a constant at module scope, which runs at import, before the host has
- * filled {@link Databases}. Nothing is reached until a row is asked for.
+ * It exists so the schema can be named once, at the top of a package, rather than at every call. A
+ * free type parameter cannot be inferred from a table name, so a function taking both had to be
+ * written `table<Schema, "users">("users")`, with the name given twice, and written `table("users")`
+ * it silently answered a query typed as nothing in particular.
  */
-export function table<S extends DatabaseSchema, K extends keyof S & string>(
-  name: K,
-): Query<S[K]["row"] & object> {
-  return deferred(() => Databases.get().table<S, K>(name));
+export interface Tables<S extends DatabaseSchema> {
+  /** A query on `name`, typed by the row `S` says that table holds. */
+  table<K extends keyof S & string>(name: K): Query<S[K]["row"] & object>;
 }
 
-function deferred<Row extends object, Result>(open: () => Query<Row, Result>): Query<Row, Result> {
-  const narrowed = <T>(build: (query: Query<Row, Result>) => T) => build(open());
+/**
+ * The tables of `S`, ready to be queried, without reaching the database.
+ *
+ * @remarks
+ * A package names its schema once and holds this at module scope, which runs at import, before the
+ * host has filled {@link Databases}. Nothing is reached until a row is asked for.
+ *
+ * @example
+ * ```ts
+ * const db = schema<AudienceSchema>();
+ *
+ * const held = await db.table("memberships").where((f) => f.account.is(accountId)).get();
+ * ```
+ */
+export function schema<S extends DatabaseSchema>(): Tables<S> {
+  return {
+    table<K extends keyof S & string>(name: K): Query<S[K]["row"] & object> {
+      return deferred<S[K]["row"] & object, S[K]["row"] & object>(() => Databases.get().table<S, K>(name));
+    },
+  };
+}
+
+function deferred<Row extends object, Answer>(
+  open: () => Query<Row, Answer>,
+): Query<Row, Answer> {
+  const narrowed = <T>(build: (query: Query<Row, Answer>) => T) => build(open());
 
   return {
-    unscoped: () => deferred(() => open().unscoped()),
     select: (project) => deferred(() => open().select(project)),
-    selectRaw: (columns) => deferred(() => open().selectRaw(columns)),
     where: (build) => deferred(() => open().where(build)),
     order: (column, options) => deferred(() => open().order(column, options)),
     limit: (count) => deferred(() => open().limit(count)),
@@ -232,5 +254,5 @@ function deferred<Row extends object, Result>(open: () => Query<Row, Result>): Q
     update: (data) => narrowed((query) => query.update(data)),
     delete: () => narrowed((query) => query.delete()),
     deleteOne: () => narrowed((query) => query.deleteOne()),
-  } as Query<Row, Result>;
+  };
 }

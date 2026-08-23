@@ -34,22 +34,21 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { RequestIpLocation } from "@scribe/core/contracts/common/location.ts";
+import type { IpLocation } from "@scribe/alchemy/route";
 import type { RequestDevice } from "@scribe/core/contracts/device.ts";
-import { parseBody, parseForm } from "@scribe/core/kernel/validation/body.ts";
-import type {
-  BodyFromSchema,
-  BodySchema,
-  FormFromSchema,
-  FormSchema,
-} from "@scribe/core/kernel/validation/schema.ts";
-import { requestDevice } from "@scribe/core/runtime/device/mod.ts";
 import {
-  currentIdentity,
-  type RequestUser,
-} from "@scribe/core/runtime/http/accessors/identity.ts";
+  type BodyFromSchema,
+  type BodySchema,
+  type FormFromSchema,
+  type FormSchema,
+  parseBodyBytes,
+  parseFormBytes,
+} from "@scribe/alchemy/body";
+import { requestDevice } from "@scribe/core/runtime/device/mod.ts";
+import { currentIdentity, type RequestUser } from "@scribe/core/runtime/http/accessors/identity.ts";
 import { currentLocation } from "@scribe/core/runtime/http/accessors/location.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
+import { RequestScope } from "@scribe/core/runtime/scope.ts";
 
 export class ApiContext {
   get user(): RequestUser | null {
@@ -61,11 +60,11 @@ export class ApiContext {
   }
 
   body<S extends BodySchema>(schema: S): BodyFromSchema<S> | null {
-    return parseBody(schema);
+    return parseBodyBytes(schema, request.bytes());
   }
 
   form<S extends FormSchema>(schema: S): Promise<FormFromSchema<S> | null> {
-    return parseForm(schema);
+    return parseFormBytes(schema, RequestScope.getBodyBytes(), request.header("content-type") ?? "");
   }
 
   raw(): unknown | null {
@@ -104,7 +103,7 @@ export class ApiContext {
     return requestDevice();
   }
 
-  location(): Promise<RequestIpLocation> {
+  location(): Promise<IpLocation> {
     return currentLocation();
   }
 }

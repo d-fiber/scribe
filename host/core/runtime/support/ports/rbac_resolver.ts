@@ -35,11 +35,11 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { AdminRbac, AdminRbacSource } from "@scribe/core/contracts/rbac.ts";
-import { Time } from "@scribe/core/contracts/common/time.ts";
+import { Duration } from "@scribe/alchemy";
 import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 
 export class AdminRbacResolver {
-  private static readonly _cache = new Valkery<AdminRbac>({ key: "identity:rbac", ttl: Time.minutes(5) });
+  private static readonly _cache = new Valkery<AdminRbac>({ key: "identity:rbac", ttl: Duration.minutes(5) });
   private static _source: AdminRbacSource | null = null;
 
   static use(source: AdminRbacSource): void {

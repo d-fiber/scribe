@@ -34,17 +34,21 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { AwaitingVersion, Dependencies, Manifest } from "@scribe/alchemy";
+import { Package, ScribeError } from "@scribe/alchemy";
 import { parse } from "@std/yaml";
-import { ScribeError } from "@scribe/alchemy";
 import { LANGUAGE } from "../workspace/scope.ts";
-import type { AwaitingVersion, Dependencies } from "@scribe/alchemy";
-import { Package } from "@scribe/alchemy";
-import type { Manifest } from "@scribe/alchemy";
 
 /** Raised when a manifest cannot be read. */
 export class ManifestError extends ScribeError {}
 
-const KEYS = new Set(["name", "description", "version", "environment", "dependencies"]);
+const KEYS = new Set([
+  "name",
+  "description",
+  "version",
+  "environment",
+  "dependencies",
+]);
 
 /** The key, inside `environment:`, naming the framework a package is written against. */
 const FRAMEWORK = "scribe";
@@ -115,9 +119,9 @@ export function chainOf(manifest: Manifest): string {
     `.runsOn(${JSON.stringify(String(manifest.scribe))})`,
   ];
 
-  if (manifest.dependencies.size > 0) {
+  if (Object.keys(manifest.dependencies).length > 0) {
     const asked = Object.fromEntries(
-      [...manifest.dependencies].map(([name, held]) => [name, String(held)]),
+      Object.entries(manifest.dependencies).map(([name, held]) => [name, String(held)]),
     );
     steps.push(`.dependsOn(${JSON.stringify(asked)})`);
   }

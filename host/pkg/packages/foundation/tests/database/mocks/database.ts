@@ -37,12 +37,7 @@
 import "@scribe/core/testing/settings.ts";
 import { Tables } from "@scribe/foundation/lib/src/database/gen/tables.ts";
 import type { PostgrestClient } from "@supabase/postgrest-js";
-import {
-  FakePostgrestClient,
-  type FakePostgrestSeed,
-  type Row,
-  type RpcHandler,
-} from "@scribe/foundation/tests/testing/database.ts";
+import { FakePostgrestClient, type FakePostgrestSeed, type Row, type RpcHandler } from "@scribe/foundation/tests/testing/database.ts";
 
 export class DatabaseMock {
   readonly db: FakePostgrestClient;

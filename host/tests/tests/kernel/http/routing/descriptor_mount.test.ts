@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { SessionAdmin, SessionUser } from "@scribe/core/contracts/account.ts";
-import { Time } from "@scribe/core/contracts/common/time.ts";
+import { Duration } from "@scribe/alchemy";
 import { Caller } from "@scribe/core/kernel/endpoint/access.ts";
 import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
 import type { RouteDescriptor } from "@scribe/core/kernel/http/routing/descriptor.ts";
@@ -60,7 +60,7 @@ function aRoute(overrides: Partial<RouteDescriptor> = {}): RouteDescriptor {
     method: "get",
     path: "/brands/:brandId",
     access: Caller.Admin,
-    rateLimit: { limit: 10, window: Time.minutes(1), penalty: Time.minutes(1) },
+    rateLimit: { limit: 10, window: Duration.minutes(1), penalty: Duration.minutes(1) },
     rateLimitKey: "descriptor-mount:read-brand",
     requiredPermissions: ["brand:read"],
     handler: (invocation) => {

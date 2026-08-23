@@ -36,7 +36,7 @@
 
 import { vpn, VpnError } from "./client.ts";
 import { PendingToken, PendingTokenPurpose } from "@scribe/auth/src/pending_token.ts";
-import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
+import { Failure, Ok, type Result } from "@scribe/alchemy";
 import { Env } from "@scribe/host/env.ts";
 
 export enum VpnAccessError {
@@ -108,7 +108,7 @@ export class VpnAccessLink {
     const configuration = await vpn.configuration(peer.data.id);
     if (!configuration.ok) return new Failure(VpnAccessError.Unexpected);
 
-    return new OK({
+    return new Ok({
       filename: _filenameFor(identity.firstName, identity.lastName),
       content: configuration.data,
     });

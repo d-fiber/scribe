@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { OK } from "@scribe/core/contracts/result.ts";
+import { Ok } from "@scribe/alchemy";
 import { clients } from "@scribe/host/dependencies/clients.ts";
 import { assertEquals } from "@std/assert";
 import { installPushMock } from "@scribe/host/tests/mocks/dependencies/features/messagings/notification_push.ts";
@@ -44,7 +44,7 @@ Deno.test(
   async () => {
     const original = clients.features.messagings.notificationPush.push;
     const mock = installPushMock();
-    mock.when("push.send", () => Promise.resolve(new OK([])));
+    mock.when("push.send", () => Promise.resolve(new Ok([])));
 
     const res = await clients.features.messagings.notificationPush.push.send("id", {
       title: "t",

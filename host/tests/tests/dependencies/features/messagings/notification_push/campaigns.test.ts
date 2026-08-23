@@ -34,11 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import {
-  isValidSchedule,
-  PushCampaignError,
-  PushCampaignRepository,
-} from "@scribe/host/dependencies/features/messagings/notification_push/push.ts";
+import { PushCampaignError, PushCampaignRepository, isValidSchedule } from "@scribe/host/dependencies/features/messagings/notification_push/push.ts";
 import { CronTimezone } from "@scribe/foundation/lib/src/cron/timezone.ts";
 import type { Row } from "@scribe/foundation/tests/testing/database.ts";
 import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
@@ -271,7 +267,7 @@ Deno.test("create: filters are serialised to the snake_case jsonb shape", async 
   }
 });
 
-Deno.test("update: an unknown id is NotFound, not a silent OK", async () => {
+Deno.test("update: an unknown id is NotFound, not a silent Ok", async () => {
   const h = harness();
   try {
     const result = await h.repository.update(404, { isActive: false });
@@ -370,7 +366,7 @@ Deno.test("markRan: an unknown campaign is NotFound", async () => {
   }
 });
 
-Deno.test("remove: an unknown id is NotFound, not a silent OK", async () => {
+Deno.test("remove: an unknown id is NotFound, not a silent Ok", async () => {
   const h = harness();
   try {
     const missing = await h.repository.remove(404);

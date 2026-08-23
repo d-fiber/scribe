@@ -36,8 +36,8 @@
 
 import type { InternalTEmailTemplatesRow } from "@scribe/foundation/lib/src/database/gen/rows.ts";
 import { database } from "@scribe/foundation/lib/src/database/database.ts";
-import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
-import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
+import { Pagination } from "@scribe/alchemy";
+import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 
@@ -98,7 +98,7 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
         .where((f) => f.email_template_id.eq(id))
         .getOne();
 
-      return row ? new OK(this.#domain(row)) : new Failure(EmailTemplateError.NotFound);
+      return row ? new Ok(this.#domain(row)) : new Failure(EmailTemplateError.NotFound);
     });
   }
 
@@ -109,7 +109,7 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
         .where((f) => f.name.eq(name))
         .getOne();
 
-      return row ? new OK(this.#domain(row)) : new Failure(EmailTemplateError.NotFound);
+      return row ? new Ok(this.#domain(row)) : new Failure(EmailTemplateError.NotFound);
     });
   }
 
@@ -131,7 +131,7 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
         .range(offset, offset + size)
         .get();
 
-      return new OK(pagination(rows.map((row) => this.#domain(row)), offset, size));
+      return new Ok(Pagination.of(rows.map((row) => this.#domain(row)), offset, size));
     });
   }
 
@@ -144,7 +144,7 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
         text: input.text,
       });
 
-      return row ? new OK(this.#domain(row)) : new Failure(EmailTemplateError.Backend);
+      return row ? new Ok(this.#domain(row)) : new Failure(EmailTemplateError.Backend);
     });
   }
 
@@ -158,7 +158,7 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
         .where((f) => f.email_template_id.eq(id))
         .update(this.#patch(input));
 
-      return ok ? new OK() : new Failure(EmailTemplateError.Backend);
+      return ok ? okay : new Failure(EmailTemplateError.Backend);
     });
   }
 
@@ -169,7 +169,7 @@ export class EmailTemplateRepository extends Repository<EmailTemplateError> impl
         .where((f) => f.email_template_id.eq(id))
         .delete();
 
-      return ok ? new OK() : new Failure(EmailTemplateError.Backend);
+      return ok ? okay : new Failure(EmailTemplateError.Backend);
     });
   }
 

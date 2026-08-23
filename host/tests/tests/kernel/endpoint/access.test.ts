@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Time } from "@scribe/core/contracts/common/time.ts";
+import { Duration } from "@scribe/alchemy";
 import { ApiContext, ApiEndpoint, Caller } from "@scribe/core/kernel/endpoint/api.ts";
 import { callEndpoint } from "@scribe/core/testing/kernel/endpoint.ts";
 import { installRateLimiterMock } from "@scribe/foundation/tests/testing/valkery.ts";
@@ -48,8 +48,8 @@ class UnsignedWebhookEndpoint extends ApiEndpoint {
   protected rateLimit() {
     return {
       limit: 10,
-      window: Time.minutes(1),
-      penalty: Time.minutes(1),
+      window: Duration.minutes(1),
+      penalty: Duration.minutes(1),
     };
   }
 
@@ -66,8 +66,8 @@ class OpenEndpoint extends ApiEndpoint {
   protected rateLimit() {
     return {
       limit: 10,
-      window: Time.minutes(1),
-      penalty: Time.minutes(1),
+      window: Duration.minutes(1),
+      penalty: Duration.minutes(1),
     };
   }
 

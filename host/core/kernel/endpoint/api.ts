@@ -39,7 +39,7 @@ import { ApiContext } from "./context.ts";
 import { type RateLimiter, withinRateLimit } from "./rate_limit.ts";
 import { RouteEndpoint } from "./route.ts";
 
-export { Arr, Nested, Required } from "@scribe/core/kernel/validation/schema.ts";
+export { ListOf, Nested, Required } from "@scribe/alchemy";
 export { Caller } from "./access.ts";
 export { ApiContext } from "./context.ts";
 export type { RateLimiter } from "./rate_limit.ts";

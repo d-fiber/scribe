@@ -34,7 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Time } from "../value/time.ts";
+import type { Future } from "../async/future.ts";
+import type { List, UnmodifiableList } from "../value/list.ts";
+import { Duration } from "../value/duration.ts";
+import { TimeoutException, withDeadline } from "../async/deadline.ts";
 import { Slot } from "../bind/slot.ts";
 
 /** What opening a cache takes. */
@@ -43,16 +46,44 @@ export interface CacheOptions {
   readonly key: string;
 
   /** How long an entry stays before it is forgotten. It stays until it is deleted when left out. */
-  readonly ttl?: Time;
+  readonly ttl?: Duration;
 
   /**
    * How eagerly an entry is recomputed before it expires, as a multiplier on its remaining life.
    *
    * Left out, an entry is recomputed when it is asked for after expiring, which lets several
-   * callers compute the same value at once.
+   * callers compute the same value at once. It only governs {@link Cache.upsert}, which is the one
+   * member handed a computation to run.
    */
   readonly beta?: number;
+
+  /**
+   * How long a single call to this cache has before it is treated as a failure.
+   *
+   * @remarks
+   * A cache that is **slow** is the case a contract usually forgets, and it is the one that takes a
+   * service down: a store answering in eight seconds is not refusing, so nothing gives up, requests
+   * pile onto the pool, and an outage of the thing one could do without becomes an outage of
+   * everything. {@link DEFAULT_CACHE_DEADLINE} when left out.
+   *
+   * What happens when it passes is {@link onTimeout}.
+   */
+  readonly deadline?: Duration;
+
+  /**
+   * What a call that ran out of time answers.
+   *
+   * @remarks
+   * `"miss"` treats a slow cache as an empty one, which is almost always right: the caller recomputes
+   * and carries on. `"throw"` raises a {@link TimeoutException}, which is what a caller wanting to
+   * know reaches for. `"miss"` when left out, and a write that times out raises either way, because
+   * answering nothing about a write says something untrue.
+   */
+  readonly onTimeout?: "miss" | "throw";
 }
+
+/** How long a call to a cache has when nothing said otherwise. */
+export const DEFAULT_CACHE_DEADLINE: Duration = Duration.milliseconds(250);
 
 /**
  * A store of values held under a name, forgotten after a while.
@@ -63,22 +94,22 @@ export interface CacheOptions {
  */
 export interface Cache<T> {
   /** What is held under `id`, or null when nothing is. */
-  get(id: string): Promise<T | null>;
+  get(id: string): Future<T | null>;
 
   /** What is held under each of `ids`, in the same order, with null where nothing is. */
-  getMany(ids: readonly string[]): Promise<(T | null)[]>;
+  getMany(ids: UnmodifiableList<string>): Future<(T | null)[]>;
 
   /** Holds `value` under `id`, over whatever was there. */
-  add(id: string, value: T): Promise<void>;
+  add(id: string, value: T): Future<void>;
 
   /** Holds each value under its identifier, over whatever was there. */
-  addMany(entries: readonly [string, T][]): Promise<void>;
+  addMany(entries: readonly [string, T][]): Future<void>;
 
   /** Forgets what is held under `id`, and does nothing when nothing is. */
-  delete(id: string): Promise<void>;
+  delete(id: string): Future<void>;
 
   /** Forgets what is held under each identifier. */
-  deleteMany(...ids: string[]): Promise<void>;
+  deleteMany(...ids: List<string>): Future<void>;
 
   /**
    * What is held under `id`, computing and holding it when nothing is.
@@ -87,10 +118,10 @@ export interface Cache<T> {
    * The whole point of asking for it this way is that the computation runs once even when several
    * callers ask at the same time. Doing it by hand with {@link get} and {@link add} does not.
    */
-  upsert(id: string, compute: () => Promise<T>): Promise<T>;
+  upsert(id: string, compute: () => Future<T>): Future<T>;
 
   /** Forgets everything this cache holds, or everything whose identifier matches `pattern`. */
-  clear(pattern?: string): Promise<void>;
+  clear(pattern?: string): Future<void>;
 }
 
 /** What opens a cache. */
@@ -128,36 +159,60 @@ class DeferredCache<T> implements Cache<T> {
     this.#options = options;
   }
 
-  get(id: string): Promise<T | null> {
-    return this.#store().get(id);
+  get(id: string): Future<T | null> {
+    return this.#read(() => this.#store().get(id));
   }
 
-  getMany(ids: readonly string[]): Promise<(T | null)[]> {
-    return this.#store().getMany(ids);
+  getMany(ids: UnmodifiableList<string>): Future<(T | null)[]> {
+    return this.#read(() => this.#store().getMany(ids), () => ids.map(() => null));
   }
 
-  add(id: string, value: T): Promise<void> {
-    return this.#store().add(id, value);
+  add(id: string, value: T): Future<void> {
+    return this.#write(() => this.#store().add(id, value));
   }
 
-  addMany(entries: readonly [string, T][]): Promise<void> {
-    return this.#store().addMany(entries);
+  addMany(entries: readonly [string, T][]): Future<void> {
+    return this.#write(() => this.#store().addMany(entries));
   }
 
-  delete(id: string): Promise<void> {
-    return this.#store().delete(id);
+  delete(id: string): Future<void> {
+    return this.#write(() => this.#store().delete(id));
   }
 
-  deleteMany(...ids: string[]): Promise<void> {
-    return this.#store().deleteMany(...ids);
+  deleteMany(...ids: List<string>): Future<void> {
+    return this.#write(() => this.#store().deleteMany(...ids));
   }
 
-  upsert(id: string, compute: () => Promise<T>): Promise<T> {
-    return this.#store().upsert(id, compute);
+  upsert(id: string, compute: () => Future<T>): Future<T> {
+    return this.#write(() => this.#store().upsert(id, compute));
   }
 
-  clear(pattern?: string): Promise<void> {
-    return this.#store().clear(pattern);
+  clear(pattern?: string): Future<void> {
+    return this.#write(() => this.#store().clear(pattern));
+  }
+
+  /** How long one call has, which is what the declaration said or the default. */
+  get #within(): Duration {
+    return this.#options.deadline ?? DEFAULT_CACHE_DEADLINE;
+  }
+
+  /**
+   * Runs a read against the deadline, answering `absent` when it passes and `onTimeout` says so.
+   *
+   * @param absent - What an entry that was not there looks like for this call.
+   */
+  async #read<R>(call: () => Future<R>, absent: () => R = () => null as R): Future<R> {
+    try {
+      return await withDeadline(`cache:${this.#options.key}`, this.#within, call());
+    } catch (raised) {
+      if (raised instanceof TimeoutException && this.#options.onTimeout !== "throw") return absent();
+      throw raised;
+    }
+  }
+
+  /** Runs a write against the deadline. A write that ran out of time always raises. */
+  #write<R>(call: () => Future<R>): Future<R> {
+    return withDeadline(`cache:${this.#options.key}`, this.#within, call());
   }
 
   #store(): Cache<T> {
@@ -174,7 +229,7 @@ class DeferredCache<T> implements Cache<T> {
  *
  * @example
  * ```ts
- * const members = cache<CachedMembership>({ key: "audience:member", ttl: Time.days(7) });
+ * const members = cache<CachedMembership>({ key: "audience:member", ttl: Duration.days(7) });
  * ```
  */
 export function cache<T>(options: CacheOptions): Cache<T> {

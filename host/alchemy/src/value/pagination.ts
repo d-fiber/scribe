@@ -34,32 +34,104 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export interface Pagination<T> {
-  items: T[];
+import type { List, UnmodifiableList } from "./list.ts";
+
+/** The shape a page takes once it has left the process, which is not the shape it has inside. */
+export interface PaginationJson<T> {
+  /** The rows of this page, in the order they were read. */
+  items: List<T>;
+
+  /** What a caller needs to ask for the next page. */
   pagination: {
+    /** How many rows were skipped to reach this page. */
     offset: number;
+
+    /** How many rows are known so far. It is a floor, not a count. */
     total: number;
+
+    /** Whether asking again past this page would answer anything. */
     has_more: boolean;
   };
 }
 
-export function emptyPagination<T>(): Pagination<T> {
-  return { items: [], pagination: { offset: 0, total: 0, has_more: false } };
-}
+/**
+ * A page of rows, and what a caller needs to ask for the next one.
+ *
+ * @remarks
+ * It is built one of two ways and never by hand, so a page cannot be assembled with a `total` that
+ * disagrees with the rows beside it.
+ *
+ * The fields are named the way everything here is named. The shape that goes out is another thing,
+ * and it lives in {@link toJson} alone, so a caller reading a page inside the process never has to
+ * know how it will be spelled on the way out.
+ */
+export class Pagination<T> {
+  /** The rows of this page, in the order they were read. */
+  readonly items: UnmodifiableList<T>;
 
-export function pagination<T>(
-  rows: T[],
-  offset: number,
-  size: number,
-): Pagination<T> {
-  const has_more = rows.length > size;
-  const items = has_more ? rows.slice(0, size) : rows;
-  return {
-    items,
-    pagination: {
-      offset,
-      total: offset + items.length + (has_more ? 1 : 0),
-      has_more,
-    },
-  };
+  /** How many rows were skipped to reach this page. */
+  readonly offset: number;
+
+  /**
+   * How many rows are known so far.
+   *
+   * @remarks
+   * It is a floor and not a count: it says how many have been seen up to and including this page,
+   * plus one when there is more. A true count would cost a scan of the table, and a caller that
+   * pages does not need one.
+   */
+  readonly total: number;
+
+  /** Whether asking again past this page would answer anything. */
+  readonly hasMore: boolean;
+
+  /**
+   * Builds a page from its four fields.
+   *
+   * It is private so a page comes from one of the two factories, which are the only two ways a page
+   * is ever known: it was read with one row to spare, or its total was counted.
+   */
+  private constructor(items: UnmodifiableList<T>, offset: number, total: number, hasMore: boolean) {
+    this.items = items;
+    this.offset = offset;
+    this.total = total;
+    this.hasMore = hasMore;
+  }
+
+  /**
+   * A page holding nothing.
+   *
+   * @remarks
+   * An endpoint answers this rather than an empty body, so a caller reads the same shape whether or
+   * not there was anything to send.
+   */
+  static empty<T>(): Pagination<T> {
+    return new Pagination<T>([], 0, 0, false);
+  }
+
+  /**
+   * The page `rows` holds.
+   *
+   * @remarks
+   * It expects `rows` to have been read one longer than `size`, and that extra row is the whole
+   * mechanism: its presence is what says there is a page after this one, and it is dropped rather
+   * than sent.
+   *
+   * @param rows - What was read, one longer than `size` when there is more.
+   * @param offset - How many rows were skipped to reach this page.
+   * @param size - How many rows a page holds.
+   */
+  static of<T>(rows: UnmodifiableList<T>, offset: number, size: number): Pagination<T> {
+    const hasMore = rows.length > size;
+    const items = hasMore ? rows.slice(0, size) : rows;
+    return new Pagination<T>(items, offset, offset + items.length + (hasMore ? 1 : 0), hasMore);
+  }
+
+  /** This page in the shape it goes out in. */
+  toJson(): PaginationJson<T> {
+    return {
+      items: [...this.items],
+      pagination: { offset: this.offset, total: this.total, has_more: this.hasMore },
+    };
+  }
 }

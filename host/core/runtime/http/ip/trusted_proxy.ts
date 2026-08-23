@@ -35,15 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { ipv4ToInt, normalizeIp } from "./address.ts";
-import {
-  contains,
-  IPV6_LOOPBACK,
-  IPV6_UNIQUE_LOCAL_PREFIXES,
-  LOOPBACK,
-  PRIVATE_A,
-  PRIVATE_B,
-  PRIVATE_C,
-} from "./ranges.ts";
+import { IPV6_LOOPBACK, IPV6_UNIQUE_LOCAL_PREFIXES, LOOPBACK, PRIVATE_A, PRIVATE_B, PRIVATE_C, contains } from "./ranges.ts";
 
 const TRUSTED_V4 = [LOOPBACK, PRIVATE_A, PRIVATE_B, PRIVATE_C];
 

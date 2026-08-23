@@ -34,10 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import {
-  type ProjectHost,
-  ProjectSlot,
-} from "@scribe/core/contracts/project_host.ts";
+import { ProjectSlot, type ProjectHost } from "@scribe/core/contracts/project_host.ts";
 
 interface SlotSpec {
   readonly load: () => Promise<unknown>;

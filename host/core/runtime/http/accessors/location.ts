@@ -34,14 +34,14 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { RequestIpLocation } from "@scribe/core/contracts/common/location.ts";
+import type { IpLocation } from "@scribe/alchemy/route";
 import { request } from "@scribe/core/runtime/http/request.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 
-export type LocationResolver = (ip: string) => Promise<RequestIpLocation>;
+export type LocationResolver = (ip: string) => Promise<IpLocation>;
 
 const _CACHE_KEY = "location:resolved";
-const _EMPTY: RequestIpLocation = { city: "", country: "" };
+const _EMPTY: IpLocation = { city: "", country: "" };
 
 let _resolver: LocationResolver | null = null;
 
@@ -49,8 +49,8 @@ export function installLocationResolver(resolver: LocationResolver): void {
   _resolver = resolver;
 }
 
-export function currentLocation(): Promise<RequestIpLocation> {
-  const cached = RequestScope.cache.get<Promise<RequestIpLocation>>(_CACHE_KEY);
+export function currentLocation(): Promise<IpLocation> {
+  const cached = RequestScope.cache.get<Promise<IpLocation>>(_CACHE_KEY);
   if (cached !== undefined) return cached;
 
   const pending = _resolver ? _resolver(request.ip()) : Promise.resolve(_EMPTY);

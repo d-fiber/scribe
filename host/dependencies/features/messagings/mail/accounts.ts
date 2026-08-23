@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { database } from "@scribe/foundation/lib/src/database/database.ts";
-import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
+import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
 import { Repository } from "./core/repository.ts";
 
 export const FOUNDATION_SMTP_ACCOUNTS = {
@@ -152,7 +152,7 @@ export class SmtpAccountRepository
         return new Failure(SmtpAccountError.Incomplete);
       }
 
-      return new OK({
+      return new Ok({
         name: row.name,
         host: row.host,
         port: row.port,
@@ -165,7 +165,7 @@ export class SmtpAccountRepository
   list(): Promise<Result<SmtpAccount[], SmtpAccountError>> {
     return this.guard(async () => {
       const rows = await this.#summaries("smtp_accounts_list");
-      return new OK(rows.map((row) => this.#domain(row)));
+      return new Ok(rows.map((row) => this.#domain(row)));
     });
   }
 
@@ -175,7 +175,7 @@ export class SmtpAccountRepository
         await this.#summaries("smtp_account_summary", { p_name: name })
       )[0];
       return row
-        ? new OK(this.#domain(row))
+        ? new Ok(this.#domain(row))
         : new Failure(SmtpAccountError.NotFound);
     });
   }
@@ -219,7 +219,7 @@ export class SmtpAccountRepository
       if (error) throw error;
 
       const failure = DELETE_FAILURES[data as unknown as DeleteOutcome];
-      return failure ? new Failure(failure) : new OK();
+      return failure ? new Failure(failure) : okay;
     });
   }
 
@@ -231,7 +231,7 @@ export class SmtpAccountRepository
       const { data, error } = await database.rpc(fn, args);
       if (error) throw error;
 
-      return data ? new OK() : new Failure(SmtpAccountError.NotFound);
+      return data ? okay : new Failure(SmtpAccountError.NotFound);
     });
   }
 

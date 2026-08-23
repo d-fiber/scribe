@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { OK, type Result } from "@scribe/core/contracts/result.ts";
-import { Failure } from "@scribe/core/contracts/result.ts";
+import { Ok, type Result } from "@scribe/alchemy";
+import { Failure } from "@scribe/alchemy";
 import { Env } from "@scribe/host/env.ts";
 import { FOUNDATION_SMTP_ACCOUNTS, SmtpAccountRepository, type SmtpAccountService } from "./accounts.ts";
 import { EmailCampaignRepository, type EmailCampaignService } from "./campaigns.ts";
@@ -79,17 +79,17 @@ export class MailClient {
   }
 
   async for(name: string): Promise<Result<MailSenderService, MailError>> {
-    if (name === FOUNDATION_SMTP_ACCOUNTS.account) return new OK(this.account);
-    if (name === FOUNDATION_SMTP_ACCOUNTS.noreply) return new OK(this.noreply);
+    if (name === FOUNDATION_SMTP_ACCOUNTS.account) return new Ok(this.account);
+    if (name === FOUNDATION_SMTP_ACCOUNTS.noreply) return new Ok(this.noreply);
 
     const cached = this.#senders.get(name);
-    if (cached) return new OK(cached);
+    if (cached) return new Ok(cached);
 
     const found = await this.accounts.credentials(name);
     if (!found.ok) return new Failure(MailError.AccountNotFound);
 
     const credentials = found.data;
-    return new OK(this.#sender(name, {
+    return new Ok(this.#sender(name, {
       host: credentials.host,
       port: credentials.port,
       user: credentials.username,

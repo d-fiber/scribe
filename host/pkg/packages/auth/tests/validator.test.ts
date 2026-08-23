@@ -34,13 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import {
-  AuthValidator,
-  EmailCheckStatus,
-  PasswordCheckStatus,
-  PasswordPresenceStatus,
-  PhoneCheckStatus,
-} from "@scribe/auth/src/validator.ts";
+import { AuthValidator, EmailCheckStatus, PasswordCheckStatus, PasswordPresenceStatus, PhoneCheckStatus } from "@scribe/auth/src/validator.ts";
 import { assertEquals } from "@std/assert";
 
 Deno.test("presence() does not apply the policy: a weak password gets through", () => {

@@ -37,8 +37,8 @@
 import type { InternalTPushCampaignsRow } from "@scribe/foundation/lib/src/database/gen/rows.ts";
 import { database } from "@scribe/foundation/lib/src/database/database.ts";
 import type { DeviceOs, Localization } from "@scribe/core/contracts/enums.ts";
-import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
-import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
+import { Pagination } from "@scribe/alchemy";
+import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
 import type { CronTimezone } from "@scribe/foundation/lib/src/cron/timezone.ts";
 import { Cron } from "croner";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
@@ -187,7 +187,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
   get(id: PushCampaignId): Promise<Result<PushCampaign, PushCampaignError>> {
     return this.guard(async () => {
       const row = await this.#row(id);
-      return row ? new OK(this.#domain(row)) : new Failure(PushCampaignError.NotFound);
+      return row ? new Ok(this.#domain(row)) : new Failure(PushCampaignError.NotFound);
     });
   }
 
@@ -218,8 +218,8 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
       if (options?.activeOnly) query = query.where((f) => f.is_active.eq(true));
 
       const rows = await query.range(offset, offset + size).get();
-      return new OK(
-        pagination(
+      return new Ok(
+        Pagination.of(
           rows.map((row) => this.#domain(row)),
           offset,
           size,
@@ -250,7 +250,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
         .order("next_run_at", { ascending: true })
         .get();
 
-      return new OK(rows.map((row) => this.#domain(row)));
+      return new Ok(rows.map((row) => this.#domain(row)));
     });
   }
 
@@ -267,7 +267,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
         is_active: input.isActive ?? true,
       });
 
-      return row ? new OK(this.#domain(row)) : new Failure(PushCampaignError.Backend);
+      return row ? new Ok(this.#domain(row)) : new Failure(PushCampaignError.Backend);
     });
   }
 
@@ -288,7 +288,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
         .where((f) => f.push_campaign_id.eq(id))
         .update(this.#patch(input, existing));
 
-      return ok ? new OK() : new Failure(PushCampaignError.Backend);
+      return ok ? okay : new Failure(PushCampaignError.Backend);
     });
   }
 
@@ -302,7 +302,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
         .where((f) => f.push_campaign_id.eq(id))
         .update({ is_active: isActive });
 
-      return ok ? new OK() : new Failure(PushCampaignError.Backend);
+      return ok ? okay : new Failure(PushCampaignError.Backend);
     });
   }
 
@@ -314,7 +314,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
       });
       if (error) throw error;
 
-      return data ? new OK() : new Failure(PushCampaignError.NotFound);
+      return data ? okay : new Failure(PushCampaignError.NotFound);
     });
   }
 
@@ -325,7 +325,7 @@ export class PushCampaignRepository extends Repository<PushCampaignError> implem
         .where((f) => f.push_campaign_id.eq(id))
         .deleteOne((s) => ({ push_campaign_id: s.push_campaign_id }));
 
-      return removed ? new OK() : new Failure(PushCampaignError.NotFound);
+      return removed ? okay : new Failure(PushCampaignError.NotFound);
     });
   }
 

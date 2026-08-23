@@ -35,12 +35,9 @@
 // LICENSE file, the LICENSE file governs.
 
 import { AccountRole } from "@scribe/core/contracts/account.ts";
-import { Time } from "@scribe/core/contracts/common/time.ts";
+import { Duration } from "@scribe/alchemy";
 import { JwtVerifier } from "@scribe/core/kernel/identity/resolver/jwt_verifier.ts";
-import {
-  IDENTITY_CACHE_KEY,
-  IdentityRevocation,
-} from "@scribe/core/runtime/redis/identity_revocation.ts";
+import { IDENTITY_CACHE_KEY, IdentityRevocation } from "@scribe/core/runtime/redis/identity_revocation.ts";
 import { TtlLru } from "@scribe/core/runtime/support/cache/ttl_lru.ts";
 import { sha256Hex } from "@scribe/core/runtime/support/crypto/hash.ts";
 import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
@@ -141,7 +138,7 @@ function _identityFromClaims(payload: JWTPayload): ResolvedJwtIdentity | null {
 export class JwtIdentityResolver {
   private static readonly _cache = new Valkery<_CachedJwtIdentity>({
     key: IDENTITY_CACHE_KEY,
-    ttl: Time.minutes(5),
+    ttl: Duration.minutes(5),
   });
 
   private static readonly _local = new TtlLru<_CachedJwtIdentity>({
@@ -208,7 +205,7 @@ export class JwtIdentityResolver {
     const revocable = await IdentityRevocation.remember(
       identity.id,
       cacheKey,
-      this._cache.ttl.value,
+      this._cache.ttl.inSeconds,
     );
     if (!revocable) {
       console.error(

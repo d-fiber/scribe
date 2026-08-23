@@ -129,7 +129,7 @@ export function importMapFor(
 
   for (const found of packages) {
     const granted = sorted({
-      ...reachable([...found.declaration.dependencies.keys()], surfaces),
+      ...reachable(Object.keys(found.declaration.dependencies), surfaces),
       ...answered(found.declaration.imports, options.imports),
     });
 

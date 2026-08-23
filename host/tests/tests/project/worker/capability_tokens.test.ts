@@ -37,10 +37,7 @@
 import { assertEquals, assertRejects } from "@std/assert";
 import { currentIdentity } from "@scribe/core/runtime/http/accessors/identity.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
-import {
-  CapabilityTokens,
-  UnknownCapabilityToken,
-} from "@scribe/host/project/worker/capability_tokens.ts";
+import { CapabilityTokens, UnknownCapabilityToken } from "@scribe/host/project/worker/capability_tokens.ts";
 
 const ADMIN = { id: "admin-1", email: "admin@example.com", rules: { role: "owner", permissions: [] } };
 

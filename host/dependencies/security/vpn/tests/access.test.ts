@@ -36,7 +36,7 @@
 
 import { PendingToken, PendingTokenPurpose } from "@scribe/auth/src/pending_token.ts";
 import { type Vpn, vpn, VpnAccessError, VpnAccessLink, VpnError } from "@scribe/host/dependencies/security/vpn/mod.ts";
-import { Failure, OK } from "@scribe/core/contracts/result.ts";
+import { Failure, Ok } from "@scribe/alchemy";
 import { installAuthMock } from "@scribe/auth/testing/mock.ts";
 import { installMock } from "@scribe/core/testing/install.ts";
 import { forgeToken } from "@scribe/host/dependencies/security/vpn/testing/pending_token.ts";
@@ -75,13 +75,13 @@ function installVpn(options: { owned?: boolean } = {}) {
       "getByOwner",
       () =>
         Promise.resolve(
-          owned ? new OK(peer()) : new Failure(VpnError.NotFound),
+          owned ? new Ok(peer()) : new Failure(VpnError.NotFound),
         ) as never,
     ),
     installMock(
       vpn,
       "configuration",
-      () => Promise.resolve(new OK(CONFIG)) as never,
+      () => Promise.resolve(new Ok(CONFIG)) as never,
     ),
   ];
   return { restore: () => mocks.forEach((m) => m.restore()) };

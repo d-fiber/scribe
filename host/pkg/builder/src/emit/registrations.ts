@@ -124,8 +124,7 @@ function dependenciesFirst(
 
     walking.add(name);
     for (
-      const dependency of found.get(name)?.declaration.dependencies.keys() ??
-        []
+      const dependency of Object.keys(found.get(name)?.declaration.dependencies ?? {})
     ) {
       if (mounted.has(dependency)) visit(dependency, [...trail, name]);
     }

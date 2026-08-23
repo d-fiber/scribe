@@ -34,8 +34,5 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export { ExponentialBackoff } from "./backoff.ts";
-export { DeadlineExceededError, withDeadline } from "./deadline.ts";
-export { runPooled } from "./pool.ts";
-export { Semaphore } from "./semaphore.ts";
+export { ExponentialBackoff, runPooled, Semaphore, TimeoutException, withDeadline } from "@scribe/alchemy";
 export { sleep } from "./sleep.ts";

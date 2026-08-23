@@ -35,8 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { FirewallSettings } from "@scribe/core/contracts/settings.ts";
-import { SettingsSlot } from "./slot.ts";
+import { Slot } from "@scribe/alchemy";
 
-export const firewallSettings: SettingsSlot<FirewallSettings> = new SettingsSlot<FirewallSettings>(
+export const firewallSettings: Slot<FirewallSettings> = new Slot<FirewallSettings>(
   "firewall",
 );

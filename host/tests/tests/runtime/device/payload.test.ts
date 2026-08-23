@@ -37,10 +37,7 @@
 import { ClientType, DeviceCategory, DeviceOs, DeviceThemeMode, Localization } from "@scribe/core/contracts/enums.ts";
 import { Env } from "@scribe/host/env.ts";
 import { decryptRequestDevice } from "@scribe/core/runtime/device/device.ts";
-import {
-  DEVICE_PAYLOAD_MAX_AGE_MS,
-  DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS,
-} from "@scribe/core/runtime/device/payload/freshness.ts";
+import { DEVICE_PAYLOAD_MAX_AGE_MS, DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS } from "@scribe/core/runtime/device/payload/freshness.ts";
 import { DevicePayloadValidator } from "@scribe/core/runtime/device/payload/validator.ts";
 import { installValkeryMock } from "@scribe/foundation/tests/testing/valkery.ts";
 import { assert, assertEquals } from "@std/assert";

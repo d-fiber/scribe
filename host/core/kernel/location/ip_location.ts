@@ -34,24 +34,24 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Time } from "@scribe/core/contracts/common/time.ts";
+import { Duration } from "@scribe/alchemy";
 import { get } from "@scribe/foundation/lib/src/http/mod.ts";
 import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 import { isPrivateIp } from "@scribe/core/runtime/http/ip/mod.ts";
-import type { GeolocationProvider, RequestIpLocation } from "./provider.ts";
+import type { GeolocationProvider, IpLocation } from "./provider.ts";
 import { DbIpProvider } from "./providers/db_ip_provider.ts";
 import { FreeIpApiProvider } from "./providers/free_ip_api_provider.ts";
 import { IpInfoProvider } from "./providers/ip_info_provider.ts";
 import { IpWhoProvider } from "./providers/ip_who_provider.ts";
 import { installLocationResolver } from "@scribe/core/runtime/http/accessors/location.ts";
 
-export type { RequestIpLocation };
+export type { IpLocation };
 
 const _TIMEOUT_MS = 3_000;
-const _EMPTY_LOCATION: RequestIpLocation = { city: "", country: "" };
+const _EMPTY_LOCATION: IpLocation = { city: "", country: "" };
 
 export class GeolocationResolver {
-  private static readonly _cache = new Valkery<RequestIpLocation>({ key: "ip:geo", ttl: Time.days(1) });
+  private static readonly _cache = new Valkery<IpLocation>({ key: "ip:geo", ttl: Duration.days(1) });
 
   private static readonly _providers: readonly GeolocationProvider[] = [
     new IpWhoProvider(),
@@ -60,14 +60,14 @@ export class GeolocationResolver {
     new IpInfoProvider(),
   ];
 
-  static locate(ip: string): Promise<RequestIpLocation> {
+  static locate(ip: string): Promise<IpLocation> {
     if (!ip || isPrivateIp(ip)) return Promise.resolve(_EMPTY_LOCATION);
     return this._cache.upsert(ip, () => this._resolveViaProviders(ip));
   }
 
   private static async _resolveViaProviders(
     ip: string,
-  ): Promise<RequestIpLocation> {
+  ): Promise<IpLocation> {
     for (const provider of this._providers) {
       const location = await this._tryProvider(provider, ip);
       if (location) return location;
@@ -78,7 +78,7 @@ export class GeolocationResolver {
   private static async _tryProvider(
     provider: GeolocationProvider,
     ip: string,
-  ): Promise<RequestIpLocation | null> {
+  ): Promise<IpLocation | null> {
     try {
       const url = provider.buildUrl(ip);
       if (!url.startsWith("https://")) {
@@ -99,7 +99,7 @@ export class GeolocationResolver {
   }
 }
 
-export function ipLocation(ip: string): Promise<RequestIpLocation> {
+export function ipLocation(ip: string): Promise<IpLocation> {
   return GeolocationResolver.locate(ip);
 }
 

@@ -34,10 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import {
-  RequestIdentityCache,
-  type RequestUser,
-} from "@scribe/core/runtime/http/accessors/identity.ts";
+import { RequestIdentityCache, type RequestUser } from "@scribe/core/runtime/http/accessors/identity.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 
 const FALLBACK_TTL_MS = 300_000;

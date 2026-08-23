@@ -35,17 +35,9 @@
 // LICENSE file, the LICENSE file governs.
 
 import { create } from "@bufbuild/protobuf";
-import {
-  type PushRequest,
-  type PushResult,
-  PushResultSchema,
-} from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/queue/queue_pb.ts";
-import {
-  type EmitResult,
-  EmitResultSchema,
-  type Event,
-} from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/hook/hook_pb.ts";
-import { Time } from "@scribe/core/contracts/common/time.ts";
+import { PushResultSchema, type PushRequest, type PushResult } from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/queue/queue_pb.ts";
+import { EmitResultSchema, type EmitResult, type Event } from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/hook/hook_pb.ts";
+import { Duration } from "@scribe/alchemy";
 import { hookRegistry } from "@scribe/foundation/lib/src/hook/mod.ts";
 import { QueuePublisher } from "@scribe/foundation/lib/src/queue/core/producer.ts";
 import { queueRegistry } from "@scribe/foundation/lib/src/queue/mod.ts";
@@ -72,7 +64,7 @@ export async function queuePush(request: PushRequest): Promise<PushResult> {
   try {
     const messageIds = await Promise.all(
       request.payloads.map((payload) =>
-        producer.push(decodeJson(payload), delay > 0 ? { delay: Time.ms(delay) } : {})
+        producer.push(decodeJson(payload), delay > 0 ? { delay: Duration.milliseconds(delay) } : {})
       ),
     );
     return create(PushResultSchema, { messageIds });

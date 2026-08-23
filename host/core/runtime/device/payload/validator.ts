@@ -35,19 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { RequestDevice } from "@scribe/core/contracts/device.ts";
-import {
-  ClientType,
-  DeviceCategory,
-  DeviceOs,
-  DeviceThemeMode,
-  Localization,
-} from "@scribe/core/contracts/enums.ts";
-import {
-  boundedString,
-  oneOf,
-  optionalBoundedString,
-  optionalSizedString,
-} from "./fields.ts";
+import { ClientType, DeviceCategory, DeviceOs, DeviceThemeMode, Localization } from "@scribe/core/contracts/enums.ts";
+import { boundedString, oneOf, optionalBoundedString, optionalSizedString } from "./fields.ts";
 import { isFresh } from "./freshness.ts";
 
 const MIN_NONCE_LENGTH = 16;

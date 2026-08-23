@@ -38,7 +38,7 @@
 // module load time, but the `ioredis` client itself is `lazyConnect: true`, so no real
 // connection is attempted and `--allow-net` isn't required (see `.claude/testing.md`).
 
-import { Time } from "@scribe/core/contracts/common/time.ts";
+import { Duration } from "@scribe/alchemy";
 import { RateLimit } from "@scribe/foundation/lib/src/rate_limit/mod.ts";
 import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 import { assertEquals } from "@std/assert";
@@ -47,15 +47,15 @@ import { installRateLimiterMock, installValkeryMock } from "@scribe/foundation/t
 const LIMIT = new RateLimit({
   key: "x",
   limit: 10,
-  window: Time.seconds(60),
-  penalty: Time.seconds(60),
+  window: Duration.seconds(60),
+  penalty: Duration.seconds(60),
 });
 
 Deno.test(
   "installValkeryMock: a Valkery subclass reads/writes against an in-memory store, restore() puts Redis back",
   async () => {
     const mock = installValkeryMock();
-    const cache = new Valkery<unknown>({ key: "test", ttl: Time.seconds(60) });
+    const cache = new Valkery<unknown>({ key: "test", ttl: Duration.seconds(60) });
 
     assertEquals(await cache.get("missing"), null);
     await cache.add("1", "a");
@@ -69,7 +69,7 @@ Deno.test(
   "installValkeryMock: upsert only calls fn once for a cached key",
   async () => {
     const mock = installValkeryMock();
-    const cache = new Valkery<unknown>({ key: "test", ttl: Time.seconds(60) });
+    const cache = new Valkery<unknown>({ key: "test", ttl: Duration.seconds(60) });
     let calls = 0;
     const fn = () => {
       calls++;
@@ -88,7 +88,7 @@ Deno.test(
   "installValkeryMock: clear with a prefix only clears matching keys",
   async () => {
     const mock = installValkeryMock();
-    const cache = new Valkery<unknown>({ key: "test", ttl: Time.seconds(60) });
+    const cache = new Valkery<unknown>({ key: "test", ttl: Duration.seconds(60) });
     await cache.add("brand:1", "a");
     await cache.add("brand:2", "b");
     await cache.add("store:1", "c");

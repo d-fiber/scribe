@@ -34,14 +34,14 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { AbstractGeolocationProvider, type RequestIpLocation } from "../provider.ts";
+import { AbstractGeolocationProvider, type IpLocation } from "../provider.ts";
 
 export class FreeIpApiProvider extends AbstractGeolocationProvider {
   buildUrl(ip: string): string {
     return `https://free.freeipapi.com/api/json/${encodeURIComponent(ip)}`;
   }
 
-  parse(data: unknown): RequestIpLocation | null {
+  parse(data: unknown): IpLocation | null {
     return this.location(this.field(data, "cityName"), this.field(data, "countryCode"));
   }
 }

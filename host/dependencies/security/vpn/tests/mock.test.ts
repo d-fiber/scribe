@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { assertEquals, assertThrows } from "@std/assert";
-import { OK } from "@scribe/core/contracts/result.ts";
+import { Ok } from "@scribe/alchemy";
 import { createVpnMock } from "@scribe/host/dependencies/security/vpn/testing/mock.ts";
 
 Deno.test("vpn automock: throws on an unconfigured call", () => {
@@ -45,7 +45,7 @@ Deno.test("vpn automock: throws on an unconfigured call", () => {
 
 Deno.test("vpn automock: when() configures a method and records calls", async () => {
   const mock = createVpnMock();
-  mock.when("configuration", () => Promise.resolve(new OK("[Interface]\nPrivateKey = fake")));
+  mock.when("configuration", () => Promise.resolve(new Ok("[Interface]\nPrivateKey = fake")));
 
   const config = await mock.target.configuration("client-1");
 

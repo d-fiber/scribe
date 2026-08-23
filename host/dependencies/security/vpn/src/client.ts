@@ -34,13 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Time } from "@scribe/core/contracts/common/time.ts";
+import { Duration } from "@scribe/alchemy";
 import { currentClient } from "@scribe/foundation/lib/src/http/run_with_client.ts";
 import type { Response as HttpResponse } from "@scribe/foundation/lib/src/http/response/response.ts";
-import type { Pagination } from "@scribe/core/contracts/pagination.ts";
-import { pagination as paginate } from "@scribe/core/contracts/pagination.ts";
-import type { Result } from "@scribe/core/contracts/result.ts";
-import { Failure, OK } from "@scribe/core/contracts/result.ts";
+import { Pagination } from "@scribe/alchemy";
+import type { Result } from "@scribe/alchemy";
+import { Failure, Ok, okay } from "@scribe/alchemy";
 import { Env } from "@scribe/host/env.ts";
 import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 
@@ -74,7 +73,7 @@ const _SESSION_TTL = 3_600;
 const _DEFAULT_PAGE_SIZE = 30;
 
 class _VpnSession {
-  readonly #cache = new Valkery<string>({ key: "vpn:session", ttl: Time.seconds(_SESSION_TTL) });
+  readonly #cache = new Valkery<string>({ key: "vpn:session", ttl: Duration.seconds(_SESSION_TTL) });
 
   constructor(
     private readonly baseUrl: string,
@@ -150,7 +149,7 @@ export interface AdminVpnService {
 
 export class AdminVpnClient implements AdminVpnService {
   readonly #session = new _VpnSession(Env.WG_EASY_URL, Env.WG_EASY_PASSWORD);
-  readonly #cache = new Valkery<Vpn[]>({ key: "vpn:list", ttl: Time.hours(24) });
+  readonly #cache = new Valkery<Vpn[]>({ key: "vpn:list", ttl: Duration.hours(24) });
 
   async get(vpnId: string): Promise<Result<Vpn, VpnError>> {
     const list = await this.#list();
@@ -158,7 +157,7 @@ export class AdminVpnClient implements AdminVpnService {
 
     const client = list.data.find((c) => c.id === vpnId);
     if (!client) return new Failure(VpnError.NotFound);
-    return new OK(client);
+    return new Ok(client);
   }
 
   async getByOwner(name: string): Promise<Result<Vpn, VpnError>> {
@@ -170,7 +169,7 @@ export class AdminVpnClient implements AdminVpnService {
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
     if (owned.length === 0) return new Failure(VpnError.NotFound);
-    return new OK(owned[0]);
+    return new Ok(owned[0]);
   }
 
   async disableAll(name: string): Promise<Result<void, VpnError>> {
@@ -183,7 +182,7 @@ export class AdminVpnClient implements AdminVpnService {
         return new Failure(VpnError.Unexpected);
       }
     }
-    return new OK();
+    return okay;
   }
 
   async pagination(
@@ -194,7 +193,7 @@ export class AdminVpnClient implements AdminVpnService {
 
     const offset = options?.offset ?? 0;
     const size = options?.size ?? _DEFAULT_PAGE_SIZE;
-    return new OK(paginate(list.data.slice(offset), offset, size));
+    return new Ok(Pagination.of(list.data.slice(offset), offset, size));
   }
 
   async create(name: string): Promise<Result<Vpn, VpnError>> {
@@ -216,7 +215,7 @@ export class AdminVpnClient implements AdminVpnService {
       (c) => c.name === name && !known.has(c.id),
     );
     if (created.length !== 1) return new Failure(VpnError.NotFound);
-    return new OK(created[0]);
+    return new Ok(created[0]);
   }
 
   async delete(vpnId: string): Promise<Result<void, VpnError>> {
@@ -229,7 +228,7 @@ export class AdminVpnClient implements AdminVpnService {
     if (res.statusCode === 404) return new Failure(VpnError.NotFound);
     if (!res.ok) return new Failure(VpnError.Unexpected);
     await this.#invalidateList();
-    return new OK();
+    return okay;
   }
 
   async deleteAll(name: string): Promise<Result<void, VpnError>> {
@@ -242,7 +241,7 @@ export class AdminVpnClient implements AdminVpnService {
         return new Failure(VpnError.Unexpected);
       }
     }
-    return new OK();
+    return okay;
   }
 
   async enable(vpnId: string): Promise<Result<void, VpnError>> {
@@ -255,7 +254,7 @@ export class AdminVpnClient implements AdminVpnService {
     if (res.statusCode === 404) return new Failure(VpnError.NotFound);
     if (!res.ok) return new Failure(VpnError.Unexpected);
     await this.#invalidateList();
-    return new OK();
+    return okay;
   }
 
   async disable(vpnId: string): Promise<Result<void, VpnError>> {
@@ -268,7 +267,7 @@ export class AdminVpnClient implements AdminVpnService {
     if (res.statusCode === 404) return new Failure(VpnError.NotFound);
     if (!res.ok) return new Failure(VpnError.Unexpected);
     await this.#invalidateList();
-    return new OK();
+    return okay;
   }
 
   async rename(vpnId: string, name: string): Promise<Result<void, VpnError>> {
@@ -283,7 +282,7 @@ export class AdminVpnClient implements AdminVpnService {
     if (res.statusCode === 404) return new Failure(VpnError.NotFound);
     if (!res.ok) return new Failure(VpnError.Unexpected);
     await this.#invalidateList();
-    return new OK();
+    return okay;
   }
 
   async configuration(vpnId: string): Promise<Result<string, VpnError>> {
@@ -292,7 +291,7 @@ export class AdminVpnClient implements AdminVpnService {
     );
     if (res.statusCode === 404) return new Failure(VpnError.NotFound);
     if (!res.ok) return new Failure(VpnError.Unexpected);
-    return new OK(res.body);
+    return new Ok(res.body);
   }
 
   async qrcode(vpnId: string): Promise<Result<string, VpnError>> {
@@ -301,7 +300,7 @@ export class AdminVpnClient implements AdminVpnService {
     );
     if (res.statusCode === 404) return new Failure(VpnError.NotFound);
     if (!res.ok) return new Failure(VpnError.Unexpected);
-    return new OK(res.body);
+    return new Ok(res.body);
   }
 
   async #list(): Promise<Result<Vpn[], void>> {
@@ -311,9 +310,9 @@ export class AdminVpnClient implements AdminVpnService {
         if (!res.ok) throw new Error(`wg-easy list failed: ${res.statusCode}`);
         return res.json<Vpn[]>();
       });
-      return new OK(data);
+      return new Ok(data);
     } catch {
-      return new Failure();
+      return new Failure(undefined);
     }
   }
 

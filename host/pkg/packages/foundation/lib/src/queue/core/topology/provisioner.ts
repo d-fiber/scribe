@@ -34,14 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import {
-  DEAD_STREAM,
-  DEDICATED_STREAM,
-  sanitize,
-  SHARED_CONSUMER,
-  SHARED_STREAM,
-  subjectOf,
-} from "@scribe/foundation/lib/src/queue/core/naming.ts";
+import { DEAD_STREAM, DEDICATED_STREAM, SHARED_CONSUMER, SHARED_STREAM, sanitize, subjectOf } from "@scribe/foundation/lib/src/queue/core/naming.ts";
 import { AckPolicy, type JetStreamManager, RetentionPolicy, StorageType } from "@nats-io/jetstream";
 import type { TopologyPlan } from "./plan.ts";
 

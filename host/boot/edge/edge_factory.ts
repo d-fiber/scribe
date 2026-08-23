@@ -39,10 +39,7 @@ import { AlgorithmTokenVerifier } from "./authorization/algorithm_token_verifier
 import { HmacTokenVerifier } from "./authorization/hmac_token_verifier.ts";
 import { JwksTokenVerifier } from "./authorization/jwks_token_verifier.ts";
 import { JwtRequestAuthorizer } from "./authorization/jwt_request_authorizer.ts";
-import {
-  OpenRequestAuthorizer,
-  type RequestAuthorizer,
-} from "./authorization/request_authorizer.ts";
+import { OpenRequestAuthorizer, type RequestAuthorizer } from "./authorization/request_authorizer.ts";
 import type { TokenVerifier } from "./authorization/token_verifier.ts";
 import { EdgeWorkerDispatcher } from "./dispatch/edge_worker_dispatcher.ts";
 import { EdgeConfig } from "./edge_config.ts";

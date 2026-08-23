@@ -34,13 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import {
-  firstSegmentOf,
-  originOf,
-  pathnameOf,
-  searchOf,
-  stripPrefix,
-} from "@scribe/core/runtime/http/pathname.ts";
+import { firstSegmentOf, originOf, pathnameOf, searchOf, stripPrefix } from "@scribe/core/runtime/http/pathname.ts";
 import { assertEquals } from "@std/assert";
 
 const ORIGIN = "http://api.test";

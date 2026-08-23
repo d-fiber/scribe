@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { ScribeError } from "../manifest/error.ts";
+import type { UnmodifiableList } from "../value/list.ts";
+import { ScribeError } from "../error/scribe_error.ts";
 
 /** Raised when two declarations take the same name. */
 export class DuplicateDeclarationError extends ScribeError {}
@@ -61,7 +62,10 @@ export class DuplicateDeclarationError extends ScribeError {}
  * ```
  */
 export class Registry<T> {
+  /** What is being declared, in one word, which is what every refusal of this registry names. */
   readonly #kind: string;
+
+  /** What has been declared, by the name it was declared under. */
   readonly #held = new Map<string, T>();
 
   /** Opens a registry for declarations of `kind`, which names them in whatever it refuses. */
@@ -94,12 +98,12 @@ export class Registry<T> {
   }
 
   /** Everything declared, in the order it was. */
-  all(): readonly T[] {
+  all(): UnmodifiableList<T> {
     return [...this.#held.values()];
   }
 
   /** The names taken, in the order they were. */
-  names(): readonly string[] {
+  names(): UnmodifiableList<string> {
     return [...this.#held.keys()];
   }
 

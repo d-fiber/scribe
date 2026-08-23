@@ -36,8 +36,8 @@
 
 import type { InternalTNotificationPushOpensRow } from "@scribe/foundation/lib/src/database/gen/rows.ts";
 import { database } from "@scribe/foundation/lib/src/database/database.ts";
-import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
-import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
+import { Pagination } from "@scribe/alchemy";
+import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import type { PushNotificationId } from "./send.ts";
@@ -89,7 +89,7 @@ export class PushNotificationOpenRepository extends Repository<PushNotificationO
         .where((f) => f.open_id.eq(id))
         .getOne();
 
-      return row ? new OK(this.#domain(row)) : new Failure(PushNotificationOpenError.NotFound);
+      return row ? new Ok(this.#domain(row)) : new Failure(PushNotificationOpenError.NotFound);
     });
   }
 
@@ -113,8 +113,8 @@ export class PushNotificationOpenRepository extends Repository<PushNotificationO
         .range(offset, offset + size)
         .get();
 
-      return new OK(
-        pagination(
+      return new Ok(
+        Pagination.of(
           rows.map((row) => this.#domain(row)),
           offset,
           size,
@@ -129,7 +129,7 @@ export class PushNotificationOpenRepository extends Repository<PushNotificationO
         .internal_t__notification_push_opens()
         .insertOne({ push_id: pushId });
 
-      return row ? new OK() : new Failure(PushNotificationOpenError.Backend);
+      return row ? okay : new Failure(PushNotificationOpenError.Backend);
     });
   }
 
@@ -140,7 +140,7 @@ export class PushNotificationOpenRepository extends Repository<PushNotificationO
         .where((f) => f.open_id.eq(id))
         .deleteOne((s) => ({ open_id: s.open_id }));
 
-      return removed ? new OK() : new Failure(PushNotificationOpenError.NotFound);
+      return removed ? okay : new Failure(PushNotificationOpenError.NotFound);
     });
   }
 

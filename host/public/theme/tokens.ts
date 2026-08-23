@@ -35,11 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { colors as defaultColors } from "./colors.ts";
-import {
-  fontFaceCss as defaultFontFaceCss,
-  fontFamily as defaultFontFamily,
-  fonts as defaultFonts,
-} from "./fonts.ts";
+import { fontFaceCss as defaultFontFaceCss, fontFamily as defaultFontFamily, fonts as defaultFonts } from "./fonts.ts";
 import { projectHost, ProjectSlot } from "@scribe/host/project/mod.ts";
 import { deepMerge } from "./merge.ts";
 import type { AppColors, AppFonts } from "./types.ts";

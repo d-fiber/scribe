@@ -34,12 +34,15 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { type Duration, Future } from "@scribe/alchemy";
+
 /**
- * Re-exported from `@scribe/alchemy`, which is where this now lives.
+ * Waits `held` and answers nothing.
  *
  * @remarks
- * The vocabulary a package writes against is published on its own, so a package author reaches it
- * without a framework checkout. This file keeps the path the framework already imports.
+ * It lives here rather than in `@scribe/alchemy`, which answers the same wait through
+ * `Future.delayed`. This file keeps the name the framework already imports.
  */
-
-export { sleep } from "@scribe/alchemy";
+export function sleep(held: Duration): Promise<void> {
+  return Future.delayed(held);
+}

@@ -35,10 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Context, Hono } from "hono";
-import {
-  Caller as ProtoCaller,
-  Method as ProtoMethod,
-} from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
+import { Caller as ProtoCaller, Method as ProtoMethod } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
 import type {
   Manifest,
   NodeDeclaration,
@@ -46,7 +43,7 @@ import type {
   Route,
 } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import type { Reply } from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
-import { Time } from "@scribe/core/contracts/common/time.ts";
+import { Duration } from "@scribe/alchemy";
 import { Caller, isAllowed } from "@scribe/core/kernel/endpoint/access.ts";
 import { type RateLimiter, withinRateLimit } from "@scribe/core/kernel/endpoint/rate_limit.ts";
 import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
@@ -90,9 +87,9 @@ export class NodeMountError extends Error {
 function limiterOf(limiter: ProtoRateLimiter | undefined): RateLimiter {
   return {
     limit: limiter?.limit ?? 0,
-    window: Time.ms(Number(limiter?.window?.millis ?? 0n)),
-    penalty: Time.ms(Number(limiter?.penalty?.millis ?? 0n)),
-    maxPenalty: limiter?.maxPenalty ? Time.ms(Number(limiter.maxPenalty.millis)) : undefined,
+    window: Duration.milliseconds(Number(limiter?.window?.millis ?? 0n)),
+    penalty: Duration.milliseconds(Number(limiter?.penalty?.millis ?? 0n)),
+    maxPenalty: limiter?.maxPenalty ? Duration.milliseconds(Number(limiter.maxPenalty.millis)) : undefined,
   };
 }
 

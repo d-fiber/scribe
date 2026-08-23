@@ -34,8 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Time } from "../value/time.ts";
 import { Slot } from "../bind/slot.ts";
+import type { Future } from "../async/future.ts";
+import type { Duration } from "../value/duration.ts";
 
 /** What opening a rate limit takes. */
 export interface RateLimitOptions {
@@ -46,16 +47,16 @@ export interface RateLimitOptions {
   readonly limit: number;
 
   /** The stretch of time the calls are counted over. */
-  readonly window: Time;
+  readonly window: Duration;
 
   /** How long a caller that went over is refused for. */
-  readonly penalty: Time;
+  readonly penalty: Duration;
 
   /** The longest a penalty may grow to when a caller keeps going over. Unbounded when left out. */
-  readonly maxPenalty?: Time;
+  readonly maxPenalty?: Duration;
 
   /** How long a strike is remembered, which is what makes a penalty grow. */
-  readonly strikeMemory?: Time;
+  readonly strikeMemory?: Duration;
 
   /**
    * Whether a caller is let through when the counter cannot be reached.
@@ -103,10 +104,10 @@ export interface RateLimiter {
    * @param prefix - What the caller is grouped by, an endpoint or a tenant. Empty for none.
    * @param suffix - What names the caller within that group, usually a hash of an identifier.
    */
-  check(prefix?: string, suffix?: string): Promise<RateLimitOutcome>;
+  check(prefix?: string, suffix?: string): Future<RateLimitOutcome>;
 
   /** Whether that caller is currently refused, without counting a call. */
-  isBlocked(prefix?: string, suffix?: string): Promise<boolean>;
+  isBlocked(prefix?: string, suffix?: string): Future<boolean>;
 
   /** The outcome to answer when a call was not counted at all, so a caller is never told it went over. */
   unmeasured(): RateLimitOutcome;
@@ -142,11 +143,11 @@ class DeferredRateLimiter implements RateLimiter {
     this.#options = options;
   }
 
-  check(prefix?: string, suffix?: string): Promise<RateLimitOutcome> {
+  check(prefix?: string, suffix?: string): Future<RateLimitOutcome> {
     return this.#limit().check(prefix, suffix);
   }
 
-  isBlocked(prefix?: string, suffix?: string): Promise<boolean> {
+  isBlocked(prefix?: string, suffix?: string): Future<boolean> {
     return this.#limit().isBlocked(prefix, suffix);
   }
 
@@ -155,7 +156,7 @@ class DeferredRateLimiter implements RateLimiter {
   }
 
   #limit(): RateLimiter {
-    return this.#opened ??= RateLimiters.get().open(this.#options);
+    return (this.#opened ??= RateLimiters.get().open(this.#options));
   }
 }
 

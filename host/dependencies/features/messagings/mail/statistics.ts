@@ -36,8 +36,8 @@
 
 import type { InternalTMailStatisticsRow } from "@scribe/foundation/lib/src/database/gen/rows.ts";
 import { database } from "@scribe/foundation/lib/src/database/database.ts";
-import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
-import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
+import { Pagination } from "@scribe/alchemy";
+import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import type { MailId } from "./send.ts";
@@ -96,7 +96,7 @@ export class MailStatisticRepository extends Repository<MailStatisticError> impl
         .where((f) => f.statistic_id.eq(id))
         .getOne();
 
-      return row ? new OK(this.#domain(row)) : new Failure(MailStatisticError.NotFound);
+      return row ? new Ok(this.#domain(row)) : new Failure(MailStatisticError.NotFound);
     });
   }
 
@@ -122,8 +122,8 @@ export class MailStatisticRepository extends Repository<MailStatisticError> impl
         .range(offset, offset + size)
         .get();
 
-      return new OK(
-        pagination(
+      return new Ok(
+        Pagination.of(
           rows.map((row) => this.#domain(row)),
           offset,
           size,
@@ -142,7 +142,7 @@ export class MailStatisticRepository extends Repository<MailStatisticError> impl
         user_agent: input.userAgent ?? null,
       });
 
-      return row ? new OK() : new Failure(MailStatisticError.Backend);
+      return row ? okay : new Failure(MailStatisticError.Backend);
     });
   }
 
@@ -153,7 +153,7 @@ export class MailStatisticRepository extends Repository<MailStatisticError> impl
         .where((f) => f.statistic_id.eq(id))
         .delete();
 
-      return ok ? new OK() : new Failure(MailStatisticError.Backend);
+      return ok ? okay : new Failure(MailStatisticError.Backend);
     });
   }
 

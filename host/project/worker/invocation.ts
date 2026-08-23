@@ -35,20 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import { create } from "@bufbuild/protobuf";
-import {
-  Caller as ProtoCaller,
-  Method as ProtoMethod,
-  Need,
-} from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
-import {
-  DeviceSchema,
-  IdentitySchema,
-  type Invocation,
-  InvocationSchema,
-  IpLocationSchema,
-  LocalizationSchema,
-  RequestSchema,
-} from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
+import { Caller as ProtoCaller, Method as ProtoMethod, Need } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
+import { DeviceSchema, IdentitySchema, InvocationSchema, IpLocationSchema, LocalizationSchema, RequestSchema, type Invocation } from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
 import type { Route } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import { requestDevice } from "@scribe/core/runtime/device/mod.ts";
 import { currentIdentity } from "@scribe/core/runtime/http/accessors/identity.ts";

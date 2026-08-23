@@ -35,10 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Env } from "@scribe/host/env.ts";
-import {
-  extensions,
-  OptionalExtension,
-} from "@scribe/core/runtime/support/extensions/mod.ts";
+import { OptionalExtension, extensions } from "@scribe/core/runtime/support/extensions/mod.ts";
 import { cacheSettings } from "@scribe/foundation/lib/src/valkery/settings.ts";
 import { databaseSettings } from "@scribe/foundation/lib/src/database/settings.ts";
 import { deviceSettings } from "@scribe/core/runtime/support/settings/device.ts";

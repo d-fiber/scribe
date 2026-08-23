@@ -34,29 +34,18 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Size } from "@scribe/core/contracts/common/size.ts";
-import { Failure, OK } from "@scribe/core/contracts/result.ts";
+import type { Bytes } from "@scribe/alchemy";
+import { Failure, Ok, okay } from "@scribe/alchemy";
 import { bucketOf } from "../bucket/registry.ts";
 import { forgetObjects, objectsUnder } from "../db/objects.ts";
 import type { StorageObjectRow } from "../db/tables.ts";
 import { pathSegment, StoragePathError } from "../path/segment.ts";
-import {
-    parseTemplate,
-    type PathArgs,
-    renderTemplate,
-    type TemplateSegment,
-} from "../path/template.ts";
+import { parseTemplate, renderTemplate, type PathArgs, type TemplateSegment } from "../path/template.ts";
 import { FileResource } from "../resources/file.ts";
 import { ImageResource } from "../resources/image.ts";
 import { VideoResource } from "../resources/video.ts";
 import type { StorageResourceConfig } from "../runtime/config.ts";
-import {
-    StorageListError,
-    type StorageListResult,
-    type StorageObject,
-    StorageRemoveError,
-    type StorageRemoveResult,
-} from "../runtime/result.ts";
+import { StorageListError, StorageRemoveError, type StorageListResult, type StorageObject, type StorageRemoveResult } from "../runtime/result.ts";
 import { declareStorage } from "./registry.ts";
 import { objectUrl, StorageVisibility } from "./visibility.ts";
 
@@ -69,7 +58,7 @@ export interface StorageMediaSpec {
   readonly extensions: readonly string[];
 
   /** The largest upload this resource takes, refused before the bytes reach a bucket. */
-  readonly maxSize: Size;
+  readonly maxSize: Bytes;
 }
 
 /**
@@ -77,10 +66,10 @@ export interface StorageMediaSpec {
  *
  * ```ts
  * export const users = Storage.public("users/{userId}");
- * export const avatar = users.image("avatar", { extensions: ["png"], maxSize: Size.megabytes(10) });
+ * export const avatar = users.image("avatar", { extensions: ["png"], maxSize: Bytes.megabytes(10) });
  *
  * export const docs = users.child("docs/{docId}");
- * export const contract = docs.file("contract", { extensions: ["pdf"], maxSize: Size.megabytes(20) });
+ * export const contract = docs.file("contract", { extensions: ["pdf"], maxSize: Bytes.megabytes(20) });
  *
  * await avatar.upload(file, userId);
  * await contract.upload(file, userId, docId);
@@ -231,7 +220,7 @@ export class Storage<P extends string> {
       );
     }
 
-    return new OK(page.objects.map(objectOf));
+    return new Ok(page.objects.map(objectOf));
   }
 
   /**
@@ -260,7 +249,7 @@ export class Storage<P extends string> {
         return new Failure(StorageRemoveError.IndexFailed);
       }
 
-      if (!page.full) return new OK();
+      if (!page.full) return okay;
       after = page.last ?? "";
     }
   }

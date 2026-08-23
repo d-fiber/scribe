@@ -35,17 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { AccountRow } from "@scribe/auth/contracts/account.ts";
-import {
-  compileRead,
-  Optional,
-  type ReadOf,
-  type ReadSelector,
-  readSelector,
-  Required,
-  type WriteOf,
-  type WriteSelector,
-  writeSelector,
-} from "@scribe/auth/src/declaration/columns.ts";
+import { Optional, Required, compileRead, readSelector, type ReadOf, type ReadSelector, type WriteOf, type WriteSelector, writeSelector } from "@scribe/auth/src/declaration/columns.ts";
 import { assertEquals } from "@std/assert";
 
 interface ProfileRow {

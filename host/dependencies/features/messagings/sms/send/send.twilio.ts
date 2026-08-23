@@ -36,7 +36,7 @@
 
 import { Env } from "@scribe/host/env.ts";
 import { post } from "@scribe/foundation/lib/src/http/mod.ts";
-import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
+import { Failure, okay, type Result } from "@scribe/alchemy";
 import type { SmsContent } from "../entities.ts";
 import { SmsError, type SmsSenderService } from "./send.ts";
 
@@ -70,7 +70,7 @@ export class SmsSenderTwilio implements SmsSenderService {
         },
       );
       if (!res.ok) return new Failure(SmsError.SendFailed);
-      return new OK();
+      return okay;
     } catch {
       return new Failure(SmsError.SendFailed);
     }

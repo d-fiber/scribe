@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { OK } from "@scribe/core/contracts/result.ts";
+import { okay } from "@scribe/alchemy";
 import { clients } from "@scribe/host/dependencies/clients.ts";
 import { assertEquals, assertThrows } from "@std/assert";
 import { createMailMock, installMailMock } from "@scribe/host/tests/mocks/dependencies/features/messagings/mail.ts";
@@ -48,7 +48,7 @@ Deno.test(
   "mail automock: when() configures a per-account sender method",
   async () => {
     const mock = createMailMock();
-    mock.when("account.deliver", () => Promise.resolve(new OK()));
+    mock.when("account.deliver", () => Promise.resolve(okay));
 
     const res = await mock.target.account.deliver(1, {
       subject: "x",
@@ -63,7 +63,7 @@ Deno.test(
   async () => {
     const original = clients.features.messagings.mail.statistics;
     const mock = installMailMock();
-    mock.when("statistics.record", () => Promise.resolve(new OK()));
+    mock.when("statistics.record", () => Promise.resolve(okay));
 
     const res = await clients.features.messagings.mail.statistics.record({
       mailId: 1,

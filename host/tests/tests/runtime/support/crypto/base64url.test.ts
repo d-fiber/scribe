@@ -34,10 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import {
-  fromBase64Url,
-  jsonFromBase64Url,
-} from "@scribe/core/runtime/support/crypto/base64url.ts";
+import { fromBase64Url, jsonFromBase64Url } from "@scribe/core/runtime/support/crypto/base64url.ts";
 import { jwtPayloadUnverified } from "@scribe/core/runtime/support/crypto/jwt_payload.ts";
 import { assert, assertEquals } from "@std/assert";
 

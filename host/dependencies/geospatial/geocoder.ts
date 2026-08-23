@@ -36,12 +36,12 @@
 
 import { Env } from "@scribe/host/env.ts";
 import { get } from "@scribe/foundation/lib/src/http/mod.ts";
-import { Time } from "@scribe/core/contracts/common/time.ts";
+import { Duration } from "@scribe/alchemy";
 import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 
 const BASE_URL = "https://maps.googleapis.com/maps/api/geocode/json";
 const TIMEOUT_MS = 5_000;
-const CACHE_TTL = Time.days(30);
+const CACHE_TTL = Duration.days(30);
 
 export interface GeoAddress {
   street: string;

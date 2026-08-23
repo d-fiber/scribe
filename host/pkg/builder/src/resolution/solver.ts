@@ -152,7 +152,7 @@ function search(
 
   for (const candidate of candidates) {
     const grown = [...requirements];
-    for (const [name, dependency] of registry.dependenciesOf(next, candidate)) {
+    for (const [name, dependency] of Object.entries(registry.dependenciesOf(next, candidate))) {
       grown.push({
         name,
         constraint: dependency,

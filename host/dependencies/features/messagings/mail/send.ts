@@ -36,8 +36,8 @@
 
 import type { InternalTMailsRow } from "@scribe/foundation/lib/src/database/gen/rows.ts";
 import { database } from "@scribe/foundation/lib/src/database/database.ts";
-import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
-import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
+import { Pagination } from "@scribe/alchemy";
+import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
 import { Env } from "@scribe/host/env.ts";
 import nodemailer from "nodemailer";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
@@ -177,7 +177,7 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
       if (!template) return new Failure(MailError.TemplateNotFound);
 
       const row = await this.#insert(to, template.email_template_id, data);
-      return row ? new OK(this.#domain(row)) : new Failure(MailError.Backend);
+      return row ? new Ok(this.#domain(row)) : new Failure(MailError.Backend);
     });
   }
 
@@ -191,7 +191,7 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
         null,
         content as unknown as Record<string, unknown>,
       );
-      return row ? new OK(this.#domain(row)) : new Failure(MailError.Backend);
+      return row ? new Ok(this.#domain(row)) : new Failure(MailError.Backend);
     });
   }
 
@@ -214,7 +214,7 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
           status: sent ? MailStatus.Sent : MailStatus.Failed,
         });
 
-      return sent ? new OK() : new Failure(MailError.SmtpFailed);
+      return sent ? okay : new Failure(MailError.SmtpFailed);
     });
   }
 
@@ -225,7 +225,7 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
         .where((f) => f.mail_id.eq(mailId))
         .getOne();
 
-      return row ? new OK(this.#domain(row)) : new Failure(MailError.NotFound);
+      return row ? new Ok(this.#domain(row)) : new Failure(MailError.NotFound);
     });
   }
 
@@ -236,7 +236,7 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
         .where((f) => f.tracking_token.eq(openToken))
         .getOne();
 
-      return row ? new OK(this.#domain(row)) : new Failure(MailError.NotFound);
+      return row ? new Ok(this.#domain(row)) : new Failure(MailError.NotFound);
     });
   }
 
@@ -268,8 +268,8 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
       }
 
       const rows = await query.range(offset, offset + size).get();
-      return new OK(
-        pagination(
+      return new Ok(
+        Pagination.of(
           rows.map((row) => this.#domain(row)),
           offset,
           size,
@@ -285,7 +285,7 @@ export class MailSenderSmtp extends Repository<MailError> implements MailSenderS
         .where((f) => f.mail_id.eq(mailId))
         .delete();
 
-      return ok ? new OK() : new Failure(MailError.Backend);
+      return ok ? okay : new Failure(MailError.Backend);
     });
   }
 

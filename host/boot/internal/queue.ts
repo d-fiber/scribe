@@ -42,11 +42,7 @@ import { queueRegistry } from "@scribe/foundation/lib/src/queue/core/registry.ts
 import { extensions } from "@scribe/core/runtime/support/extensions/mod.ts";
 import { EXTENSION_QUEUE } from "../extensions.ts";
 import { Hono } from "hono";
-import {
-  QueueDrainEndpoint,
-  QueueDrainOneEndpoint,
-  QueueStatusEndpoint,
-} from "./queue_drain.ts";
+import { QueueDrainEndpoint, QueueDrainOneEndpoint, QueueStatusEndpoint } from "./queue_drain.ts";
 
 await extensions.load(EXTENSION_QUEUE);
 console.info(queueRegistry.report());

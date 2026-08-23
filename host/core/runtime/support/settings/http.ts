@@ -35,8 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { HttpSettings } from "@scribe/core/contracts/settings.ts";
-import { SettingsSlot } from "./slot.ts";
+import { Slot } from "@scribe/alchemy";
 
-export const httpSettings: SettingsSlot<HttpSettings> = new SettingsSlot<HttpSettings>(
+export const httpSettings: Slot<HttpSettings> = new Slot<HttpSettings>(
   "http",
 );

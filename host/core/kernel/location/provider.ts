@@ -34,18 +34,18 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { RequestIpLocation } from "@scribe/core/contracts/common/location.ts";
+import type { IpLocation } from "@scribe/alchemy/route";
 
-export type { RequestIpLocation };
+export type { IpLocation };
 
 export interface GeolocationProvider {
   buildUrl(ip: string): string;
-  parse(data: unknown): RequestIpLocation | null;
+  parse(data: unknown): IpLocation | null;
 }
 
 export abstract class AbstractGeolocationProvider implements GeolocationProvider {
   abstract buildUrl(ip: string): string;
-  abstract parse(data: unknown): RequestIpLocation | null;
+  abstract parse(data: unknown): IpLocation | null;
 
   protected field(data: unknown, key: string): string {
     if (data === null || typeof data !== "object") return "";
@@ -53,7 +53,7 @@ export abstract class AbstractGeolocationProvider implements GeolocationProvider
     return typeof value === "string" ? value.trim() : "";
   }
 
-  protected location(city: string, country: string): RequestIpLocation | null {
+  protected location(city: string, country: string): IpLocation | null {
     if (!city && !country) return null;
     return { city: city.slice(0, 100), country: country.slice(0, 2) };
   }

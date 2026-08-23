@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Time } from "@scribe/core/contracts/common/time.ts";
+import { Duration } from "@scribe/alchemy";
 import { post } from "@scribe/foundation/lib/src/http/mod.ts";
 import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 import { Env } from "@scribe/host/env.ts";
@@ -43,7 +43,7 @@ import { importPKCS8, SignJWT } from "jose";
 const _TOKEN_URL = "https://oauth2.googleapis.com/token";
 const _SCOPE = "https://www.googleapis.com/auth/firebase.messaging";
 
-const _cache = new Valkery<string | null>({ key: "fcm:token", ttl: Time.seconds(3000) });
+const _cache = new Valkery<string | null>({ key: "fcm:token", ttl: Duration.seconds(3000) });
 
 async function _mint(): Promise<string | null> {
   try {

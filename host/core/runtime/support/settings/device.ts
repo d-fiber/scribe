@@ -35,8 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { DeviceSettings } from "@scribe/core/contracts/settings.ts";
-import { SettingsSlot } from "./slot.ts";
+import { Slot } from "@scribe/alchemy";
 
-export const deviceSettings: SettingsSlot<DeviceSettings> = new SettingsSlot<DeviceSettings>(
+export const deviceSettings: Slot<DeviceSettings> = new Slot<DeviceSettings>(
   "device",
 );

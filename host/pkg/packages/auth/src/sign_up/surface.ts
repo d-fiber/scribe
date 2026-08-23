@@ -36,14 +36,7 @@
 
 import { Channel } from "../../contracts/channel.ts";
 import type { WriteOf, WriteShape } from "../declaration/columns.ts";
-import {
-  EmailCredential,
-  type EmailCredentials,
-  PhoneCredential,
-  type PhoneCredentials,
-  SocialCredential,
-  type SocialCredentials,
-} from "./doors.ts";
+import { EmailCredential, PhoneCredential, SocialCredential, type EmailCredentials, type PhoneCredentials, type SocialCredentials } from "./doors.ts";
 import type { EmailSignUpError, PhoneSignUpError, SocialSignUpError } from "./errors.ts";
 import { SignUpDoor, type SignUpResult, type SignUpTarget } from "./runner.ts";
 

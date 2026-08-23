@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Result } from "@scribe/core/contracts/result.ts";
+import type { Result } from "@scribe/alchemy";
 
 export interface GorseEntity {
   readonly id: string;

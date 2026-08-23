@@ -34,21 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import {
-  importSigningKey,
-  matchesAnyCandidate,
-} from "@scribe/core/kernel/endpoint/webhook/signature.ts";
-import {
-  isFreshTimestamp,
-  MAX_TIMESTAMP_SKEW_S,
-  readSignedRequest,
-  type SignedWebhookRequest,
-} from "@scribe/core/kernel/endpoint/webhook/signed_request.ts";
+import { importSigningKey, matchesAnyCandidate } from "@scribe/core/kernel/endpoint/webhook/signature.ts";
+import { MAX_TIMESTAMP_SKEW_S, isFreshTimestamp, readSignedRequest, type SignedWebhookRequest } from "@scribe/core/kernel/endpoint/webhook/signed_request.ts";
 import "@scribe/core/testing/settings.ts";
-import {
-  CLAIM_TTL_S,
-  claimWebhookId,
-} from "@scribe/core/kernel/endpoint/webhook/replay.ts";
+import { CLAIM_TTL_S, claimWebhookId } from "@scribe/core/kernel/endpoint/webhook/replay.ts";
 import { kv, type Kv } from "@scribe/foundation/lib/src/redis/mod.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
 import { assert, assertEquals, assertFalse } from "@std/assert";

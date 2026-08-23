@@ -35,10 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { SmtpAccountError, SmtpAccountRepository } from "@scribe/host/dependencies/features/messagings/mail/accounts.ts";
-import {
-  MailStatisticError,
-  MailStatisticRepository,
-} from "@scribe/host/dependencies/features/messagings/mail/statistics.ts";
+import { MailStatisticError, MailStatisticRepository } from "@scribe/host/dependencies/features/messagings/mail/statistics.ts";
 import { EmailTemplateError, EmailTemplateRepository } from "@scribe/host/dependencies/features/messagings/mail/templates.ts";
 import type { Row } from "@scribe/foundation/tests/testing/database.ts";
 import { installDatabaseMock } from "@scribe/foundation/tests/database/mocks/install_database.ts";
@@ -158,7 +155,7 @@ Deno.test("templates: list paginates most recent first", async () => {
     const page = await new EmailTemplateRepository().list({ offset: 0, size: 2 });
     assert(page.ok);
     assertEquals(page.data.items.map((t) => t.name), ["c", "b"]);
-    assertEquals(page.data.pagination.has_more, true);
+    assertEquals(page.data.hasMore, true);
   } finally {
     database.restore();
   }

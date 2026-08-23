@@ -34,12 +34,39 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { hex } from "@scribe/alchemy";
+
 /**
- * Re-exported from `@scribe/alchemy`, which is where this now lives.
+ * `bytes` written as lower case hexadecimal, two characters per byte.
  *
  * @remarks
- * The vocabulary a package writes against is published on its own, so a package author reaches it
- * without a framework checkout. This file keeps the path the framework already imports.
+ * It takes a buffer as well as a view, because what `crypto.subtle.digest` answers is a buffer and
+ * every caller here comes from one. The codec of `@scribe/alchemy` is declared over views alone.
  */
+export function toHex(bytes: ArrayBuffer | Uint8Array): string {
+  return hex.encode(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes));
+}
 
-export { fromHex, sha256Hex, toHex } from "@scribe/alchemy";
+/**
+ * The bytes `encoded` spells.
+ *
+ * @throws {FormatException} When `encoded` is not lower case hexadecimal.
+ */
+export const fromHex = hex.decode;
+
+/**
+ * The SHA-256 of `input`, written as lower case hexadecimal.
+ *
+ * @remarks
+ * It lives here and not in `@scribe/alchemy` because it reaches `crypto.subtle`, and nothing
+ * published as the vocabulary a package writes against is allowed to reach anything that runs.
+ * A package that needs a digest asks the framework for one.
+ *
+ * @param input - What to digest, as text or as bytes.
+ */
+export async function sha256Hex(input: string | Uint8Array): Promise<string> {
+  const bytes = typeof input === "string" ? new TextEncoder().encode(input) : input;
+  const digest = await crypto.subtle.digest("SHA-256", bytes as BufferSource);
+
+  return hex.encode(new Uint8Array(digest));
+}

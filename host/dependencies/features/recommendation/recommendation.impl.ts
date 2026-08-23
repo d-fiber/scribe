@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
+import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
 import type {
   GorseFeedback,
   GorseItem,
@@ -42,14 +42,7 @@ import type {
   RecommendationOptions,
   RecommendationService,
 } from "@scribe/host/dependencies/features/recommendation/recommendation.ts";
-import {
-  RecommendationDeleteItemError,
-  RecommendationDeleteUserError,
-  RecommendationFeedbackError,
-  RecommendationRecommendError,
-  RecommendationUpsertItemError,
-  RecommendationUpsertUserError,
-} from "@scribe/host/dependencies/features/recommendation/recommendation.ts";
+import { RecommendationDeleteItemError, RecommendationDeleteUserError, RecommendationFeedbackError, RecommendationRecommendError, RecommendationUpsertItemError, RecommendationUpsertUserError } from "@scribe/host/dependencies/features/recommendation/recommendation.ts";
 import { Env } from "@scribe/host/env.ts";
 import { currentClient } from "@scribe/foundation/lib/src/http/run_with_client.ts";
 import type { Response } from "@scribe/foundation/lib/src/http/response/response.ts";
@@ -66,7 +59,7 @@ export class RecommendationClient implements RecommendationService {
       Comment: user.comment ?? "",
     });
     if (!res.ok) return new Failure(RecommendationUpsertUserError.Unexpected);
-    return new OK();
+    return okay;
   }
 
   async upsertItem(
@@ -81,7 +74,7 @@ export class RecommendationClient implements RecommendationService {
       Comment: item.comment ?? "",
     });
     if (!res.ok) return new Failure(RecommendationUpsertItemError.Unexpected);
-    return new OK();
+    return okay;
   }
 
   async deleteUser(
@@ -92,7 +85,7 @@ export class RecommendationClient implements RecommendationService {
       return new Failure(RecommendationDeleteUserError.NotFound);
     }
     if (!res.ok) return new Failure(RecommendationDeleteUserError.Unexpected);
-    return new OK();
+    return okay;
   }
 
   async deleteItem(
@@ -103,7 +96,7 @@ export class RecommendationClient implements RecommendationService {
       return new Failure(RecommendationDeleteItemError.NotFound);
     }
     if (!res.ok) return new Failure(RecommendationDeleteItemError.Unexpected);
-    return new OK();
+    return okay;
   }
 
   async insertFeedback(
@@ -121,7 +114,7 @@ export class RecommendationClient implements RecommendationService {
       })),
     );
     if (!res.ok) return new Failure(RecommendationFeedbackError.Unexpected);
-    return new OK();
+    return okay;
   }
 
   async recommend(
@@ -139,7 +132,7 @@ export class RecommendationClient implements RecommendationService {
       `/api/recommend/${encodeURIComponent(userId)}${query}`,
     );
     if (!res.ok) return new Failure(RecommendationRecommendError.Unexpected);
-    return new OK(res.json<string[]>());
+    return new Ok(res.json<string[]>());
   }
 
   // Gorse answers JSON everywhere and reads it everywhere, so the content type and the key are

@@ -36,8 +36,8 @@
 
 import type { InternalTNotificationPushesRow } from "@scribe/foundation/lib/src/database/gen/rows.ts";
 import { database } from "@scribe/foundation/lib/src/database/database.ts";
-import { type Pagination, pagination } from "@scribe/core/contracts/pagination.ts";
-import { Failure, OK, type Result } from "@scribe/core/contracts/result.ts";
+import { Pagination } from "@scribe/alchemy";
+import { Failure, Ok, okay, type Result } from "@scribe/alchemy";
 import { DEFAULT_PAGE_SIZE, type ListOptions } from "./core/list.ts";
 import { Repository } from "./core/repository.ts";
 import { fcmSend } from "./_fcm_send.ts";
@@ -123,7 +123,7 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
         .where((f) => f.notification_id.eq(notificationId))
         .get();
       if (existing.length > 0) {
-        return new OK(existing.map((row) => this.#domain(row)));
+        return new Ok(existing.map((row) => this.#domain(row)));
       }
 
       const notification = await database
@@ -134,7 +134,7 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
       if (!notification) return new Failure(PushNotificationSendError.NotFound);
 
       const rows = await this.#fanOut(notificationId, notification.user_id, content);
-      return new OK(rows.map((row) => this.#domain(row)));
+      return new Ok(rows.map((row) => this.#domain(row)));
     });
   }
 
@@ -143,7 +143,7 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
   ): Promise<Result<PushNotification, PushNotificationSendError>> {
     return this.guard(async () => {
       const row = await this.#row(pushId);
-      return row ? new OK(this.#domain(row)) : new Failure(PushNotificationSendError.NotFound);
+      return row ? new Ok(this.#domain(row)) : new Failure(PushNotificationSendError.NotFound);
     });
   }
 
@@ -171,8 +171,8 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
         .range(offset, offset + size)
         .get();
 
-      return new OK(
-        pagination(
+      return new Ok(
+        Pagination.of(
           rows.map((row) => this.#domain(row)),
           offset,
           size,
@@ -190,7 +190,7 @@ export class PushNotificationSenderFcm extends Repository<PushNotificationSendEr
         .where((f) => f.push_id.eq(pushId))
         .deleteOne((s) => ({ push_id: s.push_id }));
 
-      return removed ? new OK() : new Failure(PushNotificationSendError.NotFound);
+      return removed ? okay : new Failure(PushNotificationSendError.NotFound);
     });
   }
 
