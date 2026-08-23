@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
+import { ServerResponse } from "@scribe/alchemy/route";
 import type { EdgePlatform } from "../platform.ts";
 import type { WorkerDispatcher } from "./worker_dispatcher.ts";
 

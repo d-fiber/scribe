@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
+import { ServerResponse } from "@scribe/alchemy/route";
 import { Runtime } from "../lifecycle/runtime.ts";
 import type { RequestAuthorizer } from "./authorization/request_authorizer.ts";
 import type { WorkerDispatcher } from "./dispatch/worker_dispatcher.ts";

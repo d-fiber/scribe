@@ -38,7 +38,7 @@ import type { Context, Hono } from "hono";
 import { callersOf, isAllowed } from "@scribe/core/kernel/endpoint/access.ts";
 import { withinRateLimit } from "@scribe/core/kernel/endpoint/rate_limit.ts";
 import { RbacIdentity } from "@scribe/core/kernel/identity/request_identity.ts";
-import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
+import { ServerResponse } from "@scribe/alchemy/route";
 import type { RouteDescriptor } from "./descriptor.ts";
 
 async function grantsAll(required: readonly string[]): Promise<boolean> {

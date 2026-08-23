@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import "../bootstrap.ts";
-import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
+import { ServerResponse } from "@scribe/alchemy/route";
 import { Router } from "@scribe/core/kernel/http/routing/router.ts";
 import { serveFunction } from "@scribe/core/kernel/http/serve/mod.ts";
 import { queueRegistry } from "@scribe/foundation/lib/src/queue/core/registry.ts";

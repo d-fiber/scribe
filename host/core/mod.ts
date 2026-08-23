@@ -45,7 +45,7 @@ export type { ApiContext, RateLimiter } from "./kernel/endpoint/api.ts";
 export { ServiceEndpoint } from "./kernel/endpoint/service.ts";
 export { WebhookEndpoint } from "./kernel/endpoint/webhook/mod.ts";
 export { Router } from "./kernel/http/routing/router.ts";
-export { json, ServerResponse } from "./kernel/http/response/json.ts";
+export { jsonReply, ServerResponse } from "@scribe/alchemy/route";
 export { RbacIdentity, RequestIdentity } from "./kernel/identity/request_identity.ts";
 export { ListOf, Nested } from "@scribe/alchemy";
 export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema } from "@scribe/alchemy";

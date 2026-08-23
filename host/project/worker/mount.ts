@@ -46,7 +46,7 @@ import type { Reply } from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
 import { Duration } from "@scribe/alchemy";
 import { Caller, isAllowed } from "@scribe/core/kernel/endpoint/access.ts";
 import { type RateLimiter, withinRateLimit } from "@scribe/core/kernel/endpoint/rate_limit.ts";
-import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
+import { ServerResponse } from "@scribe/alchemy/route";
 import { RbacIdentity } from "@scribe/core/kernel/identity/request_identity.ts";
 import { currentIdentity } from "@scribe/core/runtime/http/accessors/identity.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";

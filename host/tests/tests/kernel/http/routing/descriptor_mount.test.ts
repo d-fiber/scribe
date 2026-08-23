@@ -37,7 +37,7 @@
 import type { SessionAdmin, SessionUser } from "@scribe/core/contracts/account.ts";
 import { Duration } from "@scribe/alchemy";
 import { Caller } from "@scribe/core/kernel/endpoint/access.ts";
-import { ServerResponse } from "@scribe/core/kernel/http/response/json.ts";
+import { ServerResponse } from "@scribe/alchemy/route";
 import type { RouteDescriptor } from "@scribe/core/kernel/http/routing/descriptor.ts";
 import { mountDescriptors } from "@scribe/core/kernel/http/routing/descriptor_mount.ts";
 import { callEndpoint } from "@scribe/core/testing/kernel/endpoint.ts";
