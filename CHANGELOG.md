@@ -4,6 +4,19 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 8.0.0 (2026-08-23)
+
+Component versions: @scribe/core 5.0.0
+
+### Changed
+
+- move the session and the row timestamps into the auth package (6658bfac)
+
+### Tooling
+
+- drop nine contracts nothing imported (0ec7ebeb)
+- refresh the packages copy the framework builds against (bee82ea8)
+
 ## 7.0.0 (2026-08-23)
 
 Component versions: @scribe/core 4.0.0, @dependencies/core 1.0.0, @scribe/sdk 0.1.7
