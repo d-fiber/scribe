@@ -45,12 +45,6 @@ create type public.localization as enum (
   'french'
 );
 
-create type public.avatar_type as enum (
-  'photo',
-  'text',
-  'placeholder'
-);
-
 create type public.device_os as enum (
   'android',
   'ios',
@@ -77,14 +71,6 @@ create type public.device_theme_mode as enum (
   'system',
   'light',
   'dark'
-);
-
-create type public.feedback_type as enum (
-  'very_satisfied',
-  'slightly_satisfied',
-  'neutral',
-  'slightly_dissatisfied',
-  'very_dissatisfied'
 );
 
 create type public.campaign_audience as enum (
