@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Realtime } from "../../gen/scribe/host/pkg/packages/realtime/protocol/realtime_pb.ts";
+import { Realtime } from "../../gen/scribe/host/packages/realtime/protocol/realtime_pb.ts";
 import { encodeJson } from "../contracts/json.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";

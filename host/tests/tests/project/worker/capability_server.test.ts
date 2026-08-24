@@ -37,7 +37,7 @@
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { fromBinary } from "@bufbuild/protobuf";
 import { FailureSchema } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
-import { Storage } from "@scribe/sdk/gen/scribe/host/pkg/packages/storage/protocol/storage_pb.ts";
+import { Storage } from "@scribe/sdk/gen/scribe/host/packages/storage/protocol/storage_pb.ts";
 import { procedurePath } from "@scribe/sdk/src/transport/wire.ts";
 import { capabilityServer } from "@scribe/host/project/worker/capability_server.ts";
 

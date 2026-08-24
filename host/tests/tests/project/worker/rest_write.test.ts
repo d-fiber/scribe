@@ -44,7 +44,7 @@ import { FakePostgrestClient } from "@scribe/foundation/tests/testing/database.t
 import {
   Operation,
   QuerySchema,
-} from "@scribe/sdk/gen/scribe/host/pkg/packages/foundation/protocol/database/database_pb.ts";
+} from "@scribe/sdk/gen/scribe/host/packages/foundation/protocol/database/database_pb.ts";
 import { executeQuery } from "@scribe/host/project/worker/capabilities/rest.ts";
 
 const UNOWNED = "t_email_templates";

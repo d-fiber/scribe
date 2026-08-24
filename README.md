@@ -37,7 +37,7 @@ opens with a line saying so and naming the command that rewrites it.
 ## What comes mounted
 
 A project mounts the packages it wants and gets nothing else. They live in
-[`scribe_packages`](https://github.com/d-fiber/scribe_packages), under `host/pkg/packages/`.
+[`scribe_packages`](https://github.com/d-fiber/scribe_packages), under `host/packages/`.
 
 | Package          | What it holds                                                                                                                                                                   |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -82,7 +82,7 @@ sh tools/install.sh
 | Repository                                                            | What it is                                                                    |
 | --------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | [`scribe`](https://github.com/d-fiber/scribe)                         | the framework, this one                                                       |
-| [`scribe_packages`](https://github.com/d-fiber/scribe_packages)       | the mountable packages, a submodule under `host/pkg/packages/`                |
+| [`scribe_packages`](https://github.com/d-fiber/scribe_packages)       | the mountable packages, a copy under `host/packages/`                         |
 | [`scribe_alchemy`](https://github.com/d-fiber/scribe_alchemy)         | the language the framework and its packages are both written in               |
 | [`scribe_pkg_builder`](https://github.com/d-fiber/scribe_pkg_builder) | what reads the packages, resolves them and writes the import map and the lock |
 | [`scribe_tools`](https://github.com/d-fiber/scribe_tools)             | `scribe`, the CLI a project is worked through                                 |
@@ -93,7 +93,8 @@ sh tools/install.sh
 ```
 host/core/        the primitive package: contracts, runtime, kernel, test harness
 host/alchemy/     the vocabulary a package is written out of
-host/pkg/         the builder, and the packages it resolves
+host/builder/     what reads a package or a project and writes what the chain obeys
+host/packages/    the mountable packages the builder resolves
 host/dependencies/ the modules that are not packages yet
 host/boot/        how the process starts, and the two runtimes
 host/project/     the fifteen points where a project reaches the framework
