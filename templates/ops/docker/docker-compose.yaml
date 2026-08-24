@@ -92,7 +92,7 @@ services:
       dockerfile: "Dockerfile.functions"
     restart: "unless-stopped"
     volumes:
-      - "{{sdk_root}}/host:/home/deno/functions:Z"
+      - "{{sdk_root}}/engine:/home/deno/functions:Z"
       - "./{{alchemy_dir}}/sdk/js:/home/deno/{{alchemy_dir}}/sdk/js:ro"
       - "./lib/extensions:/home/deno/lib/extensions:ro"
       - "./lib/public:/home/deno/lib/public:ro"
@@ -156,7 +156,7 @@ services:
     dns:
       - "8.8.8.8"
       - "1.1.1.1"
-    command: ["start", "--main-service", "/home/deno/functions/boot"]
+    command: ["start", "--main-service", "/home/deno/functions/shell/platform/edge"]
     depends_on:
       kong:
         condition: "service_healthy"
@@ -185,7 +185,7 @@ services:
       dockerfile: "Dockerfile.api"
     restart: "unless-stopped"
     volumes:
-      - "{{sdk_root}}/host:/app/scribe/host:ro"
+      - "{{sdk_root}}/engine:/app/scribe/engine:ro"
       - "{{sdk_root}}/sdk:/app/scribe/sdk:ro"
       - "./{{alchemy_dir}}/sdk/js:/app/{{alchemy_dir}}/sdk/js:ro"
       - "./lib/api:/app/lib/api:ro"
@@ -264,7 +264,7 @@ services:
       - "--no-lock"
       - "--config"
       - "/app/{{alchemy_dir}}/sdk/js/scribe.container.json"
-      - "/app/scribe/host/boot/server.ts"
+      - "/app/scribe/engine/shell/platform/server/main.ts"
     dns:
       - "8.8.8.8"
       - "1.1.1.1"

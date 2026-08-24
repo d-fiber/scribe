@@ -45,11 +45,11 @@ const ALLOWED: Record<string, readonly string[]> = {
   packages: ["contracts", "runtime", "packages"],
   kernel: ["contracts", "runtime", "packages"],
   testing: ["contracts", "runtime", "packages", "kernel", "testing"],
-  boot: ["contracts", "runtime", "packages", "kernel", "testing", "boot"],
-  tests: ["contracts", "runtime", "packages", "kernel", "testing", "boot", "tests"],
+  shell: ["contracts", "runtime", "packages", "kernel", "testing", "shell"],
+  tests: ["contracts", "runtime", "packages", "kernel", "testing", "shell", "tests"],
 };
 
-const HOST_CONSUMERS: readonly string[] = ["boot", "tests"];
+const HOST_CONSUMERS: readonly string[] = ["shell", "tests"];
 
 const PACKAGE_MARKER = "/scribe/engine/core/";
 const FUNCTIONS_MARKER = "/scribe/engine/";
