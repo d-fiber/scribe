@@ -1,8 +1,0 @@
-services:
-  - name: opensearch
-    weight: 1361
-    runtime: jvm
-    profile: search
-    min: 512Mi
-    dev: 1Gi
-    cpu_shares: 512

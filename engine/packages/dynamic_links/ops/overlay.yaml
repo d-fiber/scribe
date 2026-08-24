@@ -1,4 +1,0 @@
-services:
-  db:
-    volumes:
-      - "{{sdk_root}}/host/packages/dynamic_links/db/init:/docker-entrypoint-init-sql/modules/dynamic_links:ro"
