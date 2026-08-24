@@ -81,6 +81,9 @@ export async function checkCacheDriver(driver: CacheDriver): Future<void> {
     await answersOneStorePerKey(driver);
     await runsOneComputationHoweverManyAsk(driver);
     await forgetsWhatItIsToldTo(driver);
+    await takesTheDefaultWhenAnOptionIsLeftOut(driver, clock);
+    await neverPassesAWriteOffAsDoneWhenItIsNot(driver);
+    await carriesEveryOptionItWasOpenedWith(driver);
   } finally {
     if (before !== null) Now.use(before);
   }
@@ -161,4 +164,62 @@ async function forgetsWhatItIsToldTo(driver: CacheDriver): Future<void> {
   await held.add("kept", "one");
   await held.clear();
   must(await held.get("kept"), null, "clearing forgets everything");
+}
+
+/**
+ * Refuses a driver that reads an absent option as nothing rather than as the documented default.
+ *
+ * An option left out is not an option set to zero. A driver that forgets a ttl and stores
+ * forever, or one that treats it as expired at once, both compile and both pass every promise
+ * about a ttl that was given, which is why the case has to be about the one that was not.
+ */
+async function takesTheDefaultWhenAnOptionIsLeftOut(
+  driver: CacheDriver,
+  clock: FixedNow,
+): Future<void> {
+  const held = driver.open<string>({ key: "conformity:default" });
+
+  await held.add("ada", "one");
+  clock.pass(Duration.minutes(1));
+  must(await held.get("ada"), "one", "an entry whose declaration named no ttl is still there a minute later");
+}
+
+/**
+ * Refuses a driver that answers a write as done when the entry cannot be read back.
+ *
+ * It is the promise a store breaks most quietly: a write that returned without raising and a
+ * write that happened are two different facts, and a caller has no way to tell them apart
+ * afterwards except by reading.
+ */
+async function neverPassesAWriteOffAsDoneWhenItIsNot(driver: CacheDriver): Future<void> {
+  const held = driver.open<string>({ key: "conformity:written" });
+
+  await held.add("ada", "one");
+  must(await held.get("ada"), "one", "an add that returned is an add that happened");
+
+  await held.addMany([["a", "1"], ["b", "2"]]);
+  must(await held.getMany(["a", "b"]), ["1", "2"], "an addMany that returned is an addMany that happened");
+
+  const computed = await held.upsert("grace", () => Promise.resolve("two"));
+  must(computed, "two", "upsert answers what it computed");
+  must(await held.get("grace"), "two", "and what it computed is what it stored");
+}
+
+/**
+ * Refuses a driver that drops an option the port declares.
+ *
+ * A driver reads the options one field at a time, and nothing makes it read them all: a field
+ * the port gains, or one a driver never got round to, is dropped in silence and every promise
+ * about the fields it did read still holds. So the case opens one store per field the port
+ * declares and asks the driver to behave differently for each.
+ */
+async function carriesEveryOptionItWasOpenedWith(driver: CacheDriver): Future<void> {
+  const named = driver.open<string>({ key: "conformity:carried", ttl: Duration.hours(1) });
+  const other = driver.open<string>({ key: "conformity:carried:other", ttl: Duration.hours(1) });
+
+  await named.add("ada", "one");
+  must(await other.get("ada"), null, "two keys are two namespaces, whatever they were opened with");
+
+  const again = driver.open<string>({ key: "conformity:carried", ttl: Duration.hours(1) });
+  must(await again.get("ada"), "one", "opening a key twice reaches what the first one wrote");
 }

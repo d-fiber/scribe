@@ -35,6 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import { ScribeError } from "../error/scribe_error.ts";
+import { artefactPathProblem, NO_ARTEFACTS, normaliseArtefactPath } from "./artefacts.ts";
+import type { Artefacts, DatabaseArtefacts } from "./artefacts.ts";
 import { Constraint } from "./constraint.ts";
 import { Version } from "./version.ts";
 import type { Manifest } from "./manifest.ts";
@@ -56,21 +58,60 @@ export const DEFAULT_DESCRIPTION = "Say in one sentence what this package does."
 /** The packages a manifest asks for, from a package name to the constraint it accepts. */
 export type Dependencies = Readonly<Record<string, string>>;
 
+/** The SQL a package hands over, as a manifest writes the three paths. */
+export interface DatabaseDeclaration {
+  /** Where the SQL played once, at the build of the database container, is harvested from. */
+  readonly init?: string;
+
+  /** Where the SQL played at every start is harvested from. */
+  readonly migrations?: string;
+
+  /** Where the SQL played before anything else is harvested from. */
+  readonly provisioning?: string;
+}
+
+/** What a package hands the stack, as a manifest writes it. */
+export interface ArtefactsDeclaration {
+  /** The SQL this package poses, left out when it poses none. */
+  readonly db?: DatabaseDeclaration;
+
+  /** The directory holding the `.proto` files, left out when it speaks to no worker. */
+  readonly protocol?: string;
+
+  /** The ops directories this package contributes, one per service, in the order written. */
+  readonly ops?: readonly string[];
+}
+
 /** The last step, once everything required has been said. */
 export interface Buildable {
   /** The manifest, closed against further change. */
   build(): Manifest;
 }
 
+/** The point where a package may still say what it hands the stack. */
+export interface AwaitingArtefacts extends Buildable {
+  /**
+   * Declares the SQL, the `.proto` files and the ops this package hands the stack.
+   *
+   * @remarks
+   * A package that hands over none of them never takes this step, and its manifest says so by
+   * carrying no `scribe:` block. Nothing falls back on a conventional path.
+   *
+   * @throws {DeclarationError} When a path is absolute, when it climbs out of the package, when it
+   * is written empty, or when two ops entries name one place.
+   */
+  hands(artefacts: ArtefactsDeclaration): Buildable;
+}
+
 /** The point where a package may still say what it depends on. */
-export interface AwaitingDependencies extends Buildable {
+export interface AwaitingDependencies extends AwaitingArtefacts {
   /**
    * Declares the packages this one may import, and the versions it accepts of each.
    *
    * @throws {DeclarationError} When a name is not a package name, when the package asks for
    * itself, or when a constraint cannot be read.
    */
-  dependsOn(dependencies: Dependencies): Buildable;
+  dependsOn(dependencies: Dependencies): AwaitingArtefacts;
 }
 
 /** The point where the framework is the only thing that may follow. */
@@ -129,12 +170,19 @@ export interface AwaitingDescription extends AwaitingVersion {
  * ```
  */
 export class Package
-  implements AwaitingDescription, AwaitingVersion, AwaitingFramework, AwaitingDependencies, Buildable {
+  implements
+    AwaitingDescription,
+    AwaitingVersion,
+    AwaitingFramework,
+    AwaitingDependencies,
+    AwaitingArtefacts,
+    Buildable {
   readonly #name: string;
   #description: string = DEFAULT_DESCRIPTION;
   #version: Version | null = null;
   #scribe: Constraint | null = null;
   #dependencies: Map<string, Constraint> = new Map();
+  #artefacts: Artefacts = NO_ARTEFACTS;
 
   private constructor(name: string) {
     this.#name = name;
@@ -172,7 +220,7 @@ export class Package
     return this;
   }
 
-  dependsOn(dependencies: Dependencies): Buildable {
+  dependsOn(dependencies: Dependencies): AwaitingArtefacts {
     for (const [name, constraint] of Object.entries(dependencies)) {
       const problem = packageNameProblem(name);
       if (problem !== null) throw new DeclarationError(problem);
@@ -184,6 +232,47 @@ export class Package
       this.#dependencies.set(name, Constraint.parse(constraint));
     }
     return this;
+  }
+
+  hands(artefacts: ArtefactsDeclaration): Buildable {
+    this.#artefacts = Object.freeze({
+      db: this.#database(artefacts.db),
+      protocol: artefacts.protocol === undefined ? null : this.#path(artefacts.protocol, "scribe.protocol"),
+      ops: Object.freeze(this.#ops(artefacts.ops)),
+    });
+    return this;
+  }
+
+  #database(declared: DatabaseDeclaration | undefined): DatabaseArtefacts | null {
+    if (declared === undefined) return null;
+
+    const read = Object.freeze({
+      init: declared.init === undefined ? null : this.#path(declared.init, "scribe.db.init"),
+      migrations: declared.migrations === undefined ? null : this.#path(declared.migrations, "scribe.db.migrations"),
+      provisioning: declared.provisioning === undefined
+        ? null
+        : this.#path(declared.provisioning, "scribe.db.provisioning"),
+    });
+
+    return read.init === null && read.migrations === null && read.provisioning === null ? null : read;
+  }
+
+  #ops(declared: readonly string[] | undefined): string[] {
+    const found: string[] = [];
+    for (const [index, written] of (declared ?? []).entries()) {
+      const path = this.#path(written, `scribe.ops[${index}]`);
+      if (found.includes(path)) {
+        throw new DeclarationError(`"${this.#name}" names "${path}" twice under "scribe.ops:".`);
+      }
+      found.push(path);
+    }
+    return found;
+  }
+
+  #path(written: string, key: string): string {
+    const problem = artefactPathProblem(written);
+    if (problem !== null) throw new DeclarationError(`"${this.#name}", at "${key}:": ${problem}`);
+    return normaliseArtefactPath(written);
   }
 
   build(): Manifest {
@@ -200,6 +289,7 @@ export class Package
       version: this.#version,
       scribe: this.#scribe,
       dependencies: Object.freeze(Object.fromEntries(this.#dependencies)),
+      artefacts: this.#artefacts,
     });
   }
 }

@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { contains, equals, expect, having, isA, throwsA } from "../../src/test/mod.ts";
-import { DeclarationError, DEFAULT_DESCRIPTION, Package, VersionError } from "../../mod.ts";
+import { DeclarationError, DEFAULT_DESCRIPTION, handsOverNothing, Package, VersionError } from "../../mod.ts";
 
 Deno.test("a manifest carries what the chain gave it", () => {
   const declared = Package.named("realtime")
@@ -126,4 +126,81 @@ Deno.test("a dependency on something that cannot name a package is refused", () 
     () => Package.named("realtime").version("1.0.0").runsOn("^3.0.0").dependsOn({ Audiences: "^1.0.0" }),
     throwsA(having(isA(DeclarationError), (raised) => raised.message, "message", contains("cannot name a package"))),
   );
+});
+
+Deno.test("a package that hands the stack nothing declares nothing", () => {
+  const declared = Package.named("audiences").version("1.0.0").runsOn("^3.0.0").build();
+
+  expect(handsOverNothing(declared.artefacts), equals(true), "a package that took no step declared something");
+  expect(declared.artefacts.db, equals(null), "a package that took no step named a sql directory");
+  expect(declared.artefacts.protocol, equals(null), "a package that took no step named a protocol directory");
+  expect(declared.artefacts.ops.length, equals(0), "a package that took no step named a service");
+});
+
+Deno.test("a package carries what it said it hands the stack", () => {
+  const declared = Package.named("foundation")
+    .version("1.0.0")
+    .runsOn("^3.0.0")
+    .hands({
+      db: { init: "./db/init/", provisioning: "./db/provisioning/" },
+      protocol: "./protocol/",
+      ops: ["./ops/database/", "./ops/queue/"],
+    })
+    .build();
+
+  expect(declared.artefacts.db?.init, equals("db/init"), "the init directory was lost");
+  expect(declared.artefacts.db?.provisioning, equals("db/provisioning"), "the provisioning directory was lost");
+  expect(declared.artefacts.db?.migrations, equals(null), "a directory nobody named came back declared");
+  expect(declared.artefacts.protocol, equals("protocol"), "the protocol directory was lost");
+  expect([...declared.artefacts.ops], equals(["ops/database", "ops/queue"]), "the services were lost");
+});
+
+Deno.test("a db block naming no directory is the same as no db block", () => {
+  const declared = Package.named("audiences").version("1.0.0").runsOn("^3.0.0").hands({ db: {} }).build();
+
+  expect(declared.artefacts.db, equals(null), "an empty block declared a directory");
+});
+
+Deno.test("what a package hands the stack cannot be changed once it is built", () => {
+  const declared = Package.named("audiences").version("1.0.0").runsOn("^3.0.0").hands({ protocol: "./wire/" }).build();
+
+  expect(Object.isFrozen(declared.artefacts), equals(true), "the artefacts of a built manifest are writable");
+});
+
+Deno.test("an absolute path is refused", () => {
+  expect(
+    () => Package.named("audiences").version("1.0.0").runsOn("^3.0.0").hands({ protocol: "/srv/protocol" }),
+    throwsA(having(isA(DeclarationError), (raised) => raised.message, "message", contains("is an absolute path"))),
+  );
+});
+
+Deno.test("a path that climbs out of the package is refused", () => {
+  expect(
+    () => Package.named("audiences").version("1.0.0").runsOn("^3.0.0").hands({ protocol: "../auth/protocol" }),
+    throwsA(having(isA(DeclarationError), (raised) => raised.message, "message", contains("climbs out"))),
+  );
+});
+
+Deno.test("a path written empty is refused rather than read as the package itself", () => {
+  expect(
+    () => Package.named("audiences").version("1.0.0").runsOn("^3.0.0").hands({ protocol: "   " }),
+    throwsA(having(isA(DeclarationError), (raised) => raised.message, "message", contains("names nothing"))),
+  );
+});
+
+Deno.test("two spellings of one service are refused as the duplicate they are", () => {
+  expect(
+    () => Package.named("audiences").version("1.0.0").runsOn("^3.0.0").hands({ ops: ["./ops/queue/", "ops/queue"] }),
+    throwsA(having(isA(DeclarationError), (raised) => raised.message, "message", contains("twice"))),
+  );
+});
+
+Deno.test("a path that climbs and comes back stays inside the package", () => {
+  const declared = Package.named("audiences")
+    .version("1.0.0")
+    .runsOn("^3.0.0")
+    .hands({ protocol: "./ops/../protocol" })
+    .build();
+
+  expect(declared.artefacts.protocol, equals("protocol"), "the path was not read as the place it points at");
 });

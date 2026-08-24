@@ -34,27 +34,30 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { ARTEFACTS_KEY } from "./artefacts.ts";
 import type { UnmodifiableList } from "../value/list.ts";
 
 /** The file that makes a directory a package, and the only one it cannot do without. */
 export const MANIFEST = "package.yaml";
 
-/** The five keys a manifest holds, and there is no sixth. */
+/** The six keys a manifest holds, and there is no seventh. */
 export const MANIFEST_KEYS: UnmodifiableList<string> = [
   "name",
   "description",
   "version",
   "environment",
   "dependencies",
+  ARTEFACTS_KEY,
 ];
 
 /**
- * A directory a package may carry, and what it means when it does.
+ * A directory a package customarily carries, and what it means when it does.
  *
  * @remarks
- * None of them is required. What a package holds is read off its tree rather than declared in its
- * manifest, which is why the manifest has five keys and not twelve: a directory that is there is
- * the declaration.
+ * It describes the shape most packages settle on, and it decides nothing. What a package is made of
+ * is read off its tree; what it hands the stack is declared under `scribe:`, where the keys are
+ * ours and the paths are the package's, so a package may name these directories anything and put
+ * them anywhere inside itself.
  */
 export interface PackageDirectory {
   /** What the directory is called, at the root of the package. */
@@ -68,12 +71,13 @@ export interface PackageDirectory {
 }
 
 /**
- * What a directory has to hold to be a package, and what it may hold besides.
+ * What a directory has to hold to be a package, and what it customarily holds besides.
  *
  * @remarks
- * The list is closed, and that is the point. A directory nobody expected is not read, so a package
- * that puts its migrations somewhere of its own invention finds that nothing runs them, and finds
- * it late.
+ * Only `lib` is load-bearing. The rest is the layout a reader expects to find, not a list anything
+ * is looked up in: a package that puts its migrations somewhere of its own invention declares that
+ * place under `scribe:` and they run, and a package that puts them in `db/` without declaring them
+ * finds that nothing runs them.
  */
 export const PACKAGE_LAYOUT: UnmodifiableList<PackageDirectory> = [
   { name: "lib", holds: "the surface a project imports, and the code behind it", required: true },
