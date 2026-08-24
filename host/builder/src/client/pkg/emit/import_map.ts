@@ -36,8 +36,22 @@
 
 import { dirname, join } from "@std/path";
 import type { DiscoveredPackage } from "../workspace/discovery.ts";
-import { LANGUAGE, SCOPE } from "../workspace/scope.ts";
-import { specifierFrom } from "./paths.ts";
+import { LANGUAGE, SCOPE } from "../../../scope.ts";
+import { specifierFrom } from "../../../paths.ts";
+
+/**
+ * The directory holding what Deno reads, and nothing else.
+ *
+ * @remarks
+ * What the emission writes is read by three different things, and only one of them is a runtime.
+ * Giving Deno a directory of its own costs one segment and keeps its vocabulary out of the files a
+ * person opens: `resolution.json`, `registrations.ts` and `scribe.lock` say what was decided, and
+ * everything shaped for Deno sits under here.
+ */
+export const RUNTIME_DIRECTORY = ".deno";
+
+/** The import map Deno is handed, inside {@link RUNTIME_DIRECTORY}. */
+export const IMPORT_MAP_FILE = "imports.json";
 
 /** One directory of code, with the packages the map lets it reach. */
 export interface Consumer {

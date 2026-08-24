@@ -39,9 +39,9 @@ import { chainOf } from "../declaration/manifest.ts";
 import { ScribeError } from "@scribe/alchemy";
 import type { Resolution } from "../resolution/solver.ts";
 import type { DiscoveredPackage } from "../workspace/discovery.ts";
-import { LANGUAGE } from "../workspace/scope.ts";
+import { LANGUAGE } from "../../../scope.ts";
 import { entryOf } from "../workspace/layout.ts";
-import { specifierFrom } from "./paths.ts";
+import { specifierFrom } from "../../../paths.ts";
 
 /** Raised when the packages cannot be put in an order the host can start them in. */
 export class EmissionError extends ScribeError {}

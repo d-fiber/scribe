@@ -36,30 +36,16 @@
 
 import type { Manifest } from "@scribe/alchemy";
 
-/** The directories a package poses on the machine, each relative to the package. */
-export interface Provided {
-  /** Where the SQL played when the stack is built lives, or null when the package ships none. */
-  readonly sql: string | null;
-
-  /** Where the slices of the ops templates live, or null when the package starts no container. */
-  readonly ops: string | null;
-
-  /** Where the `.proto` files live, or null when the package speaks to no worker. */
-  readonly protocol: string | null;
-}
-
 /**
  * A package, as its manifest declares it and as its tree completes it.
  *
  * @remarks
- * Everything beyond the manifest is read off the directory rather than written down. A path that
- * has to be declared as well as laid out is a chance for the two to disagree, and the one that
- * loses is always the tree, since that is what actually runs.
+ * What a package is *made of* is read off the directory: its surface, and the specifiers it
+ * writes. What it *hands the stack* is declared, and arrives with the manifest under
+ * {@link Manifest.artefacts}, because nothing on a tree says whether a directory is meant to reach
+ * one.
  */
 export interface Declaration extends Manifest {
-  /** What the package poses on the machine, found by looking for it. */
-  readonly provides: Provided;
-
   /**
    * The public surface, from the entry a consumer writes to the file it resolves to.
    *

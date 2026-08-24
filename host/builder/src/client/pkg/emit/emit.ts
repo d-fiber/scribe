@@ -41,7 +41,7 @@ import { WorkspaceRegistry } from "../resolution/registry.ts";
 import { Constraint } from "@scribe/alchemy";
 import type { DiscoveredPackage } from "../workspace/discovery.ts";
 import { discover } from "../workspace/discovery.ts";
-import { writeImportMap } from "./import_map.ts";
+import { IMPORT_MAP_FILE, RUNTIME_DIRECTORY, writeImportMap } from "./import_map.ts";
 import { writeLock } from "./lock.ts";
 import { writeRegistrations } from "./registrations.ts";
 import { writeResolution } from "./resolution.ts";
@@ -84,8 +84,12 @@ export interface Emission {
  * Resolves what `asked` wants and writes the four files the rest of the toolchain obeys.
  *
  * @remarks
- * The four are `imports.json`, `resolution.json`, `registrations.ts` and `scribe.lock`, and what
- * they are called is settled here rather than by each caller: they are read by Deno, by the CLI
+ * Three of them are ours and sit at the top: `resolution.json`, what was decided; `registrations.ts`,
+ * what the host imports; `scribe.lock`, what we pinned. The fourth is Deno's, and it sits in
+ * {@link RUNTIME_DIRECTORY} under it, so that nothing shaped for a runtime is mixed in with what a
+ * person reads.
+ *
+ * What they are called is settled here rather than by each caller: they are read by Deno, by the CLI
  * that renders a project and by the host, none of which would agree on a name by accident.
  *
  * @returns What the project ends up with, so that a caller can say how many packages it got.
@@ -100,7 +104,7 @@ export async function emit(asked: Emission): Promise<Resolution> {
   const mounted = kept(packages, resolution.packages.map((entry) => entry.name));
   const may = [...wants.keys()];
 
-  await writeImportMap(mounted, join(asked.into, "imports.json"), {
+  await writeImportMap(mounted, join(asked.into, RUNTIME_DIRECTORY, IMPORT_MAP_FILE), {
     consumers: (asked.consumers ?? []).map((directory) => ({ directory, may })),
     language: asked.language,
     imports: asked.imports,

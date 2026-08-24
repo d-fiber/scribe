@@ -34,10 +34,17 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { AwaitingVersion, Dependencies, Manifest } from "@scribe/alchemy";
-import { Package, ScribeError } from "@scribe/alchemy";
+import type {
+  ArtefactsDeclaration,
+  AwaitingArtefacts,
+  AwaitingVersion,
+  DatabaseDeclaration,
+  Dependencies,
+  Manifest,
+} from "@scribe/alchemy";
+import { ARTEFACTS_KEY, ARTEFACTS_KEYS, DATABASE_KEYS, handsOverNothing, Package, ScribeError } from "@scribe/alchemy";
 import { parse } from "@std/yaml";
-import { LANGUAGE } from "../workspace/scope.ts";
+import { LANGUAGE } from "../../../scope.ts";
 
 /** Raised when a manifest cannot be read. */
 export class ManifestError extends ScribeError {}
@@ -48,6 +55,7 @@ const KEYS = new Set([
   "version",
   "environment",
   "dependencies",
+  ARTEFACTS_KEY,
 ]);
 
 /** The key, inside `environment:`, naming the framework a package is written against. */
@@ -62,8 +70,9 @@ const FRAMEWORK = "scribe";
  * constraint are therefore refused with the same sentence whether they were written in YAML or in
  * TypeScript.
  *
- * Five keys and no more. Everything a package used to write down about its own tree is read off
- * that tree instead.
+ * Six keys and no more. What a package is made of is read off its tree; what it hands the stack is
+ * declared under `${ARTEFACTS_KEY}:`, because nothing on a tree says whether a directory is meant
+ * to reach one.
  *
  * @param where - The path the text came from, named in whatever is thrown.
  * @throws {ManifestError} When the document is not a mapping, when a required key is missing, or
@@ -88,9 +97,10 @@ export function manifestFrom(source: string, where: string): Manifest {
   const running = versioned.runsOn(framework(document, where));
 
   const dependencies = mapping(document, "dependencies", where);
-  return (
-    dependencies === null ? running : running.dependsOn(dependencies as Dependencies)
-  ).build();
+  const asking: AwaitingArtefacts = dependencies === null ? running : running.dependsOn(dependencies as Dependencies);
+
+  const artefacts = handedOver(document, where);
+  return (artefacts === null ? asking : asking.hands(artefacts)).build();
 }
 
 /**
@@ -126,8 +136,112 @@ export function chainOf(manifest: Manifest): string {
     steps.push(`.dependsOn(${JSON.stringify(asked)})`);
   }
 
+  if (!handsOverNothing(manifest.artefacts)) {
+    steps.push(`.hands(${JSON.stringify(declarationOf(manifest))})`);
+  }
+
   steps.push(".build()");
   return steps.join("");
+}
+
+/**
+ * What the manifest hands the stack, in the shape the chain takes it back in.
+ *
+ * @remarks
+ * The manifest holds a null per path it never named, and the chain takes an absent key instead, so
+ * the two shapes are not the same object with a different type. Writing the nulls out would make a
+ * rebuilt manifest declare three paths where one was written.
+ */
+function declarationOf(manifest: Manifest): ArtefactsDeclaration {
+  const { db, protocol, ops } = manifest.artefacts;
+
+  return {
+    ...(db === null ? {} : {
+      db: {
+        ...(db.init === null ? {} : { init: db.init }),
+        ...(db.migrations === null ? {} : { migrations: db.migrations }),
+        ...(db.provisioning === null ? {} : { provisioning: db.provisioning }),
+      },
+    }),
+    ...(protocol === null ? {} : { protocol }),
+    ...(ops.length === 0 ? {} : { ops: [...ops] }),
+  };
+}
+
+/**
+ * What `document` hands the stack, or null when it carries no block at all.
+ *
+ * @remarks
+ * The paths themselves are refused by {@link Package}, so what is left here is the shape of the
+ * block: which keys it may carry, and what kind of thing each one holds.
+ */
+function handedOver(document: Record<string, unknown>, where: string): ArtefactsDeclaration | null {
+  const value = document[ARTEFACTS_KEY];
+  if (value === undefined || value === null) return null;
+  if (typeof value !== "object" || Array.isArray(value)) {
+    throw new ManifestError(`${where} holds "${ARTEFACTS_KEY}:" as something other than a block of paths.`);
+  }
+
+  const block = value as Record<string, unknown>;
+  for (const key of Object.keys(block)) {
+    if (ARTEFACTS_KEYS.includes(key)) continue;
+    throw new ManifestError(
+      `${where} holds "${ARTEFACTS_KEY}.${key}:", which means nothing. The block holds ` +
+        `${ARTEFACTS_KEYS.join(", ")}, and a package that hands over none of them leaves it out.`,
+    );
+  }
+
+  const declared: ArtefactsDeclaration = {
+    ...(block["db"] === undefined || block["db"] === null ? {} : { db: sqlOf(block["db"], where) }),
+    ...(block["protocol"] === undefined || block["protocol"] === null
+      ? {}
+      : { protocol: pathOf(block["protocol"], `${ARTEFACTS_KEY}.protocol`, where) }),
+    ...(block["ops"] === undefined || block["ops"] === null ? {} : { ops: opsOf(block["ops"], where) }),
+  };
+
+  return Object.keys(declared).length === 0 ? null : declared;
+}
+
+function sqlOf(value: unknown, where: string): DatabaseDeclaration {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new ManifestError(`${where} holds "${ARTEFACTS_KEY}.db:" as something other than a block of paths.`);
+  }
+
+  const block = value as Record<string, unknown>;
+  for (const key of Object.keys(block)) {
+    if (DATABASE_KEYS.includes(key)) continue;
+    throw new ManifestError(
+      `${where} holds "${ARTEFACTS_KEY}.db.${key}:", which means nothing. Postgres plays SQL at ` +
+        `three moments, and the block names them: ${DATABASE_KEYS.join(", ")}.`,
+    );
+  }
+
+  const read: Record<string, string> = {};
+  for (const key of DATABASE_KEYS) {
+    const held = block[key];
+    if (held === undefined || held === null) continue;
+    read[key] = pathOf(held, `${ARTEFACTS_KEY}.db.${key}`, where);
+  }
+
+  return read as DatabaseDeclaration;
+}
+
+function opsOf(value: unknown, where: string): string[] {
+  if (!Array.isArray(value)) {
+    throw new ManifestError(
+      `${where} holds "${ARTEFACTS_KEY}.ops:" as something other than a list. One entry per service, ` +
+        `each the directory holding that service's fragments.`,
+    );
+  }
+
+  return value.map((entry, index) => pathOf(entry, `${ARTEFACTS_KEY}.ops[${index}]`, where));
+}
+
+function pathOf(value: unknown, key: string, where: string): string {
+  if (typeof value !== "string") {
+    throw new ManifestError(`${where} holds "${key}:" as something other than a path.`);
+  }
+  return value;
 }
 
 function framework(document: Record<string, unknown>, where: string): string {

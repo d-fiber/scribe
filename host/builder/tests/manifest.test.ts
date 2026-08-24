@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { DeclarationError, DEFAULT_DESCRIPTION, VersionError } from "@scribe/alchemy";
+import { DeclarationError, DEFAULT_DESCRIPTION, handsOverNothing, VersionError } from "@scribe/alchemy";
 import { assertEquals, assertThrows } from "@std/assert";
-import { chainOf, ManifestError, manifestFrom, manifestSource } from "../src/declaration/manifest.ts";
+import { chainOf, ManifestError, manifestFrom, manifestSource } from "../src/client/pkg/declaration/manifest.ts";
 
 const WHERE = "audiences/package.yaml";
 const ENVIRONMENT = 'environment:\n  scribe: "^3.0.0"\n';
@@ -253,3 +253,141 @@ Deno.test(
     );
   },
 );
+
+const SOUND_ARTEFACTS = `scribe:
+  db:
+    init: ./db/init/
+    migrations: ./db/migrations/
+    provisioning: ./db/provisioning/
+  protocol: ./protocol/
+  ops:
+    - ./ops/listener/
+    - ./ops/reader/
+`;
+
+function withArtefacts(block: string): string {
+  return `name: audiences\nversion: 1.0.0\n${ENVIRONMENT}${block}`;
+}
+
+Deno.test("a manifest reads what a package hands the stack", () => {
+  const declared = manifestFrom(withArtefacts(SOUND_ARTEFACTS), WHERE);
+
+  assertEquals(declared.artefacts.db?.init, "db/init", "the init directory was lost");
+  assertEquals(declared.artefacts.db?.migrations, "db/migrations", "the migrations directory was lost");
+  assertEquals(declared.artefacts.db?.provisioning, "db/provisioning", "the provisioning directory was lost");
+  assertEquals(declared.artefacts.protocol, "protocol", "the protocol directory was lost");
+  assertEquals([...declared.artefacts.ops], ["ops/listener", "ops/reader"], "the services were lost");
+});
+
+Deno.test("a manifest with no scribe block hands the stack nothing", () => {
+  const declared = manifestFrom(withArtefacts(""), WHERE);
+
+  assertEquals(handsOverNothing(declared.artefacts), true, "a manifest that named nothing declared something");
+});
+
+Deno.test("two spellings of one path read as one place", () => {
+  const declared = manifestFrom(withArtefacts("scribe:\n  ops:\n    - ./ops/queue/\n"), WHERE);
+
+  assertEquals([...declared.artefacts.ops], ["ops/queue"], "the path kept the noise a person wrote");
+});
+
+Deno.test("a block with nothing under it hands over nothing, the way an empty dependencies does", () => {
+  const declared = manifestFrom(withArtefacts("scribe:\n  db:\n  ops: []\n  protocol: ./protocol/\n"), WHERE);
+
+  assertEquals(declared.artefacts.db, null, "an empty db block declared a directory");
+  assertEquals(declared.artefacts.ops.length, 0, "an empty ops list declared a service");
+  assertEquals(declared.artefacts.protocol, "protocol", "the protocol directory was lost");
+});
+
+Deno.test("a key the scribe block does not hold is refused by naming the ones it does", () => {
+  assertThrows(
+    () => manifestFrom(withArtefacts("scribe:\n  seeds: ./db/seeds/\n"), WHERE),
+    ManifestError,
+    '"scribe.seeds:", which means nothing',
+  );
+});
+
+Deno.test("a key the db block does not hold is refused by naming the three moments", () => {
+  assertThrows(
+    () => manifestFrom(withArtefacts("scribe:\n  db:\n    seed: ./db/seed/\n"), WHERE),
+    ManifestError,
+    '"scribe.db.seed:", which means nothing',
+  );
+});
+
+Deno.test("a scribe block that is not a block of paths is refused", () => {
+  assertThrows(
+    () => manifestFrom(withArtefacts("scribe: ./ops/\n"), WHERE),
+    ManifestError,
+    "something other than a block of paths",
+  );
+});
+
+Deno.test("ops written as one path instead of a list is refused", () => {
+  assertThrows(
+    () => manifestFrom(withArtefacts("scribe:\n  ops: ./ops/\n"), WHERE),
+    ManifestError,
+    "something other than a list",
+  );
+});
+
+Deno.test("an absolute path is refused", () => {
+  assertThrows(
+    () => manifestFrom(withArtefacts("scribe:\n  protocol: /srv/protocol/\n"), WHERE),
+    DeclarationError,
+    "is an absolute path",
+  );
+});
+
+Deno.test("a path that climbs out of the package is refused", () => {
+  assertThrows(
+    () => manifestFrom(withArtefacts("scribe:\n  protocol: ../auth/protocol/\n"), WHERE),
+    DeclarationError,
+    "climbs out of the package",
+  );
+});
+
+Deno.test("the same service named twice is refused", () => {
+  assertThrows(
+    () => manifestFrom(withArtefacts("scribe:\n  ops:\n    - ./ops/queue/\n    - ops/queue\n"), WHERE),
+    DeclarationError,
+    'names "ops/queue" twice',
+  );
+});
+
+Deno.test("a path written empty is refused rather than read as a directory", () => {
+  assertThrows(
+    () => manifestFrom(withArtefacts('scribe:\n  protocol: ""\n'), WHERE),
+    DeclarationError,
+    "names nothing",
+  );
+});
+
+Deno.test("the chain a manifest writes rebuilds the same artefacts", () => {
+  const declared = manifestFrom(withArtefacts(SOUND_ARTEFACTS), WHERE);
+  const written = chainOf(declared);
+
+  assertEquals(
+    written.includes(
+      '.hands({"db":{"init":"db/init","migrations":"db/migrations","provisioning":"db/provisioning"},' +
+        '"protocol":"protocol","ops":["ops/listener","ops/reader"]})',
+    ),
+    true,
+    `the artefacts were lost on the way to TypeScript: ${written}`,
+  );
+});
+
+Deno.test("a path the manifest never named is not written into the chain as a null", () => {
+  const written = chainOf(manifestFrom(withArtefacts("scribe:\n  db:\n    init: ./db/init/\n"), WHERE));
+
+  assertEquals(written.includes('.hands({"db":{"init":"db/init"}})'), true, `the chain says more: ${written}`);
+  assertEquals(written.includes("null"), false, `a path nobody wrote was rebuilt as a null: ${written}`);
+});
+
+Deno.test("a manifest that hands over nothing writes no hands step", () => {
+  assertEquals(
+    chainOf(manifestFrom(withArtefacts(""), WHERE)).includes(".hands("),
+    false,
+    "the chain declared a block the manifest never carried",
+  );
+});

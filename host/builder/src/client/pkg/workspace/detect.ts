@@ -35,32 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { join } from "@std/path";
-import type { Provided } from "../declaration/discovered.ts";
-import {
-  entryOf,
-  LIBRARY_DIRECTORY,
-  OPS_DIRECTORY,
-  PROTOCOL_DIRECTORY,
-  SQL_DIRECTORY,
-  TESTING_DIRECTORY,
-  TESTS_DIRECTORY,
-} from "./layout.ts";
-
-/**
- * What the package in `directory` poses on the machine, found by looking for it.
- *
- * @remarks
- * The three directories are conventions the toolchain already reads. Asking a package to name them
- * as well would put the same fact in two places, and the one that would be wrong is the manifest,
- * since the tree is what actually gets played.
- */
-export async function detectProvided(directory: string): Promise<Provided> {
-  return {
-    sql: (await isDirectory(join(directory, SQL_DIRECTORY))) ? SQL_DIRECTORY : null,
-    ops: (await isDirectory(join(directory, OPS_DIRECTORY))) ? OPS_DIRECTORY : null,
-    protocol: (await isDirectory(join(directory, PROTOCOL_DIRECTORY))) ? PROTOCOL_DIRECTORY : null,
-  };
-}
+import { entryOf, LIBRARY_DIRECTORY, TESTING_DIRECTORY, TESTS_DIRECTORY } from "./layout.ts";
 
 /**
  * The public surface of the package called `name` in `directory`.
@@ -104,12 +79,4 @@ async function filesIn(directory: string): Promise<string[]> {
   }
 
   return found.sort();
-}
-
-async function isDirectory(path: string): Promise<boolean> {
-  try {
-    return (await Deno.stat(path)).isDirectory;
-  } catch {
-    return false;
-  }
 }

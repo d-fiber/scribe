@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { dirname, join } from "@std/path";
-import { entryOf, MANIFEST_FILE } from "../../src/workspace/layout.ts";
+import { entryOf, MANIFEST_FILE } from "../../src/client/pkg/workspace/layout.ts";
 
 /** What a written package declares, beyond the name it is written under. */
 export interface WrittenPackage {
@@ -50,6 +50,20 @@ export interface WrittenPackage {
 
   /** The packages it asks for, from a name to the constraint it accepts. */
   readonly dependencies?: Readonly<Record<string, string>>;
+
+  /**
+   * What it hands the stack, left out when it hands over nothing.
+   *
+   * @remarks
+   * Writing a `db/` or an `ops/` under `files` does not hand it over. A package hands over what its
+   * manifest names and nothing else, so a fixture that wants the paths in the resolution names them
+   * here as well.
+   */
+  readonly artefacts?: {
+    readonly db?: Readonly<Record<string, string>>;
+    readonly protocol?: string;
+    readonly ops?: readonly string[];
+  };
 
   /**
    * The files it holds, from a path relative to the package to its text.
@@ -91,6 +105,20 @@ export function manifestText(name: string, written: WrittenPackage = {}): string
   if (written.dependencies !== undefined) {
     lines.push("", "dependencies:");
     for (const [held, value] of Object.entries(written.dependencies)) lines.push(`  ${held}: "${value}"`);
+  }
+
+  const artefacts = written.artefacts;
+  if (artefacts !== undefined) {
+    lines.push("", "scribe:");
+    if (artefacts.db !== undefined) {
+      lines.push("  db:");
+      for (const [moment, path] of Object.entries(artefacts.db)) lines.push(`    ${moment}: ${path}`);
+    }
+    if (artefacts.protocol !== undefined) lines.push(`  protocol: ${artefacts.protocol}`);
+    if (artefacts.ops !== undefined) {
+      lines.push("  ops:");
+      for (const path of artefacts.ops) lines.push(`    - ${path}`);
+    }
   }
 
   return `${lines.join("\n")}\n`;

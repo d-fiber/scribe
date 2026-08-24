@@ -36,9 +36,9 @@
 
 import { assertEquals, assertRejects } from "@std/assert";
 import { join } from "@std/path";
-import { discover, DiscoveryError, loadDeclaration } from "../src/workspace/discovery.ts";
-import { ManifestError } from "../src/declaration/manifest.ts";
-import { MANIFEST_FILE } from "../src/workspace/layout.ts";
+import { discover, DiscoveryError, loadDeclaration } from "../src/client/pkg/workspace/discovery.ts";
+import { ManifestError } from "../src/client/pkg/declaration/manifest.ts";
+import { MANIFEST_FILE } from "../src/client/pkg/workspace/layout.ts";
 import { inTemporaryRoot, writePackage } from "./support/workspace.ts";
 
 Deno.test("discovery finds a package by its manifest", async () => {

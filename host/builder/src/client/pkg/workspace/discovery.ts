@@ -38,7 +38,7 @@ import { join } from "@std/path";
 import type { Declaration } from "../declaration/discovered.ts";
 import { manifestFrom } from "../declaration/manifest.ts";
 import { ScribeError } from "@scribe/alchemy";
-import { detectExports, detectProvided } from "./detect.ts";
+import { detectExports } from "./detect.ts";
 import { outsideOf } from "./imports.ts";
 import { MANIFEST_FILE } from "./layout.ts";
 
@@ -95,7 +95,6 @@ export async function loadDeclaration(directory: string): Promise<Declaration> {
 
   return {
     ...manifest,
-    provides: await detectProvided(directory),
     exports: await detectExports(directory, manifest.name),
     imports: await outsideOf(directory),
   };

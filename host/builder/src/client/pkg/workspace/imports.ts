@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { join, relative } from "@std/path";
-import { SCOPE } from "./scope.ts";
+import { SCOPE } from "../../../scope.ts";
 
 const SPECIFIER = /(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)["']([^"']+)["']/g;
 

@@ -37,14 +37,14 @@
 import { assertEquals } from "@std/assert";
 import { join } from "@std/path";
 import { Constraint } from "@scribe/alchemy";
-import { discover } from "../src/workspace/discovery.ts";
-import { WorkspaceRegistry } from "../src/resolution/registry.ts";
-import { resolve } from "../src/resolution/solver.ts";
-import { emit } from "../src/emit/emit.ts";
-import { importMapFor } from "../src/emit/import_map.ts";
-import { lockText } from "../src/emit/lock.ts";
-import { registrationsSource } from "../src/emit/registrations.ts";
-import { resolutionDocument } from "../src/emit/resolution.ts";
+import { discover } from "../src/client/pkg/workspace/discovery.ts";
+import { WorkspaceRegistry } from "../src/client/pkg/resolution/registry.ts";
+import { resolve } from "../src/client/pkg/resolution/solver.ts";
+import { emit } from "../src/client/pkg/emit/emit.ts";
+import { IMPORT_MAP_FILE, importMapFor, RUNTIME_DIRECTORY } from "../src/client/pkg/emit/import_map.ts";
+import { lockText } from "../src/client/pkg/emit/lock.ts";
+import { registrationsSource } from "../src/client/pkg/emit/registrations.ts";
+import { resolutionDocument } from "../src/client/pkg/emit/resolution.ts";
 import { inTemporaryRoot, writePackage } from "./support/workspace.ts";
 
 async function chain(root: string): Promise<void> {
@@ -56,6 +56,7 @@ async function chain(root: string): Promise<void> {
       "lib/realtime.ts": 'import { mounted } from "@scribe/audiences";\nexport const hears = mounted;\n',
       "db/init/realtime.sql": "select 1;\n",
     },
+    artefacts: { db: { init: "./db/init/" } },
   });
 }
 
@@ -133,7 +134,7 @@ Deno.test("a package pulled in behind another lands in the resolution as transit
 
     assertEquals(document.packages.map((entry) => entry.name), ["audiences", "realtime"], "the closure is not both");
     assertEquals(document.packages[0].direct, false, "audiences came back direct");
-    assertEquals(document.packages[1].sql, "db/init", "the sql realtime provides was lost");
+    assertEquals(document.packages[1].sql.init, "db/init", "the sql realtime hands over was lost");
   });
 });
 
@@ -243,9 +244,32 @@ Deno.test("an emission writes the four files the toolchain reads", async () => {
       ["audiences", "realtime"],
       "the emission settled on something other than the closure",
     );
-    for (const file of ["imports.json", "resolution.json", "registrations.ts", "scribe.lock"]) {
+    for (const file of ["resolution.json", "registrations.ts", "scribe.lock"]) {
       assertEquals((await Deno.stat(join(into, file))).isFile, true, `${file} was not written`);
     }
+
+    assertEquals(
+      (await Deno.stat(join(into, RUNTIME_DIRECTORY, IMPORT_MAP_FILE))).isFile,
+      true,
+      "what Deno reads was not written where Deno is kept",
+    );
+  });
+});
+
+Deno.test("nothing shaped for Deno sits beside what a person reads", async () => {
+  await inTemporaryRoot(async (root) => {
+    await chain(root);
+    const into = join(root, ".scribe");
+    await emit({ roots: [root], into, wants: new Map([["realtime", Constraint.any()]]) });
+
+    const written: string[] = [];
+    for await (const entry of Deno.readDir(into)) written.push(entry.name);
+
+    assertEquals(
+      written.sort(),
+      [RUNTIME_DIRECTORY, "registrations.ts", "resolution.json", "scribe.lock"].sort(),
+      "the top of the directory holds something other than what was decided",
+    );
   });
 });
 
@@ -259,5 +283,49 @@ Deno.test("an emission with nothing named wants every package it found", async (
       ["audiences", "realtime"],
       "a package found under the roots was not wanted",
     );
+  });
+});
+
+Deno.test("a directory a package never declared hands nothing to the resolution", async () => {
+  await inTemporaryRoot(async (root) => {
+    await writePackage(root, "audiences", {
+      files: { "lib/audiences.ts": "export {};\n", "db/init/audiences.sql": "select 1;\n" },
+    });
+
+    const packages = await discover([root]);
+    const resolution = resolve(new Map([["audiences", Constraint.any()]]), new WorkspaceRegistry(packages));
+    const document = resolutionDocument(resolution, packages, join(root, ".scribe", "resolution.json"));
+
+    assertEquals(document.packages[0].sql.init, null, "a directory nobody declared reached a stack");
+  });
+});
+
+Deno.test("the resolution carries every path the manifest named, in the shape it named them", async () => {
+  await inTemporaryRoot(async (root) => {
+    await writePackage(root, "audiences", {
+      files: {
+        "lib/audiences.ts": "export {};\n",
+        "db/init/audiences.sql": "select 1;\n",
+        "db/provisioning/roles.sql": "select 1;\n",
+        "wire/audiences.proto": 'syntax = "proto3";\n',
+        "infra/listener/docker-compose.yaml": "services: {}\n",
+        "infra/reader/docker-compose.yaml": "services: {}\n",
+      },
+      artefacts: {
+        db: { init: "./db/init/", provisioning: "./db/provisioning/" },
+        protocol: "./wire/",
+        ops: ["./infra/listener/", "./infra/reader/"],
+      },
+    });
+
+    const packages = await discover([root]);
+    const resolution = resolve(new Map([["audiences", Constraint.any()]]), new WorkspaceRegistry(packages));
+    const emitted = resolutionDocument(resolution, packages, join(root, ".scribe", "resolution.json")).packages[0];
+
+    assertEquals(emitted.sql.init, "db/init", "the init directory was lost");
+    assertEquals(emitted.sql.provisioning, "db/provisioning", "the provisioning directory was lost");
+    assertEquals(emitted.sql.migrations, null, "a moment nobody named came back declared");
+    assertEquals(emitted.protocol, "wire", "a package that named its own protocol directory lost it");
+    assertEquals(emitted.ops, ["infra/listener", "infra/reader"], "the services were lost");
   });
 });

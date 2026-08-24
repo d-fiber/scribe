@@ -34,34 +34,44 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-/** The file whose presence makes a directory a package, and the only thing that says so. */
-export const MANIFEST_FILE = "package.yaml";
+import { SCOPE } from "../../scope.ts";
 
-/** The directory holding everything a package is made of. */
+/** The file whose presence makes a directory a project, and the only thing that says so. */
+export const MANIFEST_FILE = "project.yaml";
+
+/** The directory holding everything a project is made of. */
 export const LIBRARY_DIRECTORY = "lib";
 
-/** The directory holding the tests, which a package cannot be without. */
-export const TESTS_DIRECTORY = "tests";
+/** The directory, inside {@link LIBRARY_DIRECTORY}, the served surface is read off. */
+export const SOURCE_DIRECTORY = "src";
 
-/** The directory, inside {@link TESTS_DIRECTORY}, holding what a consumer imports to stub this package. */
-export const TESTING_DIRECTORY = "testing";
+/** The directory the tools write everything they derive into. */
+export const DERIVED_DIRECTORY = ".scribe";
 
-/** The directory holding the SQL played when the stack is built, when a package poses any. */
-export const SQL_DIRECTORY = "db/init";
-
-/** The directory holding the slices of the ops templates, when a package starts a container. */
-export const OPS_DIRECTORY = "ops";
-
-/** The directory holding the `.proto` files, when a package speaks to a worker. */
-export const PROTOCOL_DIRECTORY = "protocol";
+/** The route table, inside {@link DERIVED_DIRECTORY}. */
+export const ROUTES_FILE = "routes.ts";
 
 /**
- * The entry of the package called `name`, relative to the package.
+ * The specifier the worker SDK answers, which is what a generated route table names.
  *
  * @remarks
- * It is derived and never declared. A package has one way in, it is named after the package, and
- * the layout says where it sits, so a manifest that could point somewhere else would only be a
- * chance for the two to disagree.
+ * The table is read by the worker and by nothing else, so it names what the worker runs on. The
+ * two shapes it declares have to be the very classes the worker's own `compileNode` tests against,
+ * which is why this is the SDK rather than the language: a table typed against another copy of the
+ * same vocabulary would compile and then mount nothing.
+ */
+export const WORKER_SDK: string = `${SCOPE}sdk`;
+
+/** The tree the surface is read off, relative to the project. */
+export const SOURCE_PATH: string = `${LIBRARY_DIRECTORY}/${SOURCE_DIRECTORY}`;
+
+/**
+ * The entry of the project called `name`, relative to the project.
+ *
+ * @remarks
+ * It is derived and never declared, the way a package's is. A project has one way in, it is named
+ * after the project, and the layout says where it sits, so a manifest that could point somewhere
+ * else would only be a chance for the two to disagree.
  */
 export function entryOf(name: string): string {
   return `${LIBRARY_DIRECTORY}/${name}.ts`;

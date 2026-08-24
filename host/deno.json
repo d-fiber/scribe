@@ -99,6 +99,7 @@
     "@scribe/audience/": "./packages/audience/",
     "@scribe/auth/": "./packages/auth/",
     "@scribe/builder/tools": "./builder/tools.ts",
+    "@scribe/builder/project": "./builder/project.ts",
     "@scribe/core/": "./core/",
     "@scribe/dynamic_links/": "./packages/dynamic_links/",
     "@scribe/foundation/": "./packages/foundation/",
