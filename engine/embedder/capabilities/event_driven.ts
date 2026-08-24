@@ -41,7 +41,7 @@ import { Duration } from "@scribe/alchemy";
 import { hookRegistry } from "@scribe/foundation/lib/src/hook/mod.ts";
 import { QueuePublisher } from "@scribe/foundation/lib/src/queue/core/producer.ts";
 import { queueRegistry } from "@scribe/foundation/lib/src/queue/mod.ts";
-import { decodeJson } from "../json.ts";
+import { decodeJson } from "../control/json.ts";
 
 function describe(cause: unknown): string {
   return cause instanceof Error ? cause.message : String(cause);

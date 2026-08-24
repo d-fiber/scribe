@@ -41,7 +41,7 @@ import { firstSegmentOf } from "@scribe/core/runtime/http/pathname.ts";
 import { LogEntrySchema, LogLevel as ProtoLogLevel } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 import type { Manifest } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import { encodeJson } from "./json.ts";
-import type { WorkerClient } from "./worker_client.ts";
+import type { WorkerClient } from "./client.ts";
 
 const LEVELS: Record<LoggedEntry["level"], ProtoLogLevel> = {
   debug: ProtoLogLevel.DEBUG,

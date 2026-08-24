@@ -40,11 +40,11 @@ import { Queue } from "@scribe/sdk/gen/scribe/engine/packages/foundation/protoco
 import { Hook } from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/hook/hook_pb.ts";
 import { Database } from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/database/database_pb.ts";
 import { Logging } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
-import { CapabilityTokens } from "./capability_tokens.ts";
-import { cacheDelete, cacheGet, cacheSet } from "./capabilities/cache.ts";
-import { hookEmit, queuePush } from "./capabilities/event_driven.ts";
-import { shipLogs } from "./capabilities/logging.ts";
-import { executeQueries, executeQuery } from "./capabilities/rest.ts";
+import { CapabilityTokens } from "./tokens.ts";
+import { cacheDelete, cacheGet, cacheSet } from "./cache.ts";
+import { hookEmit, queuePush } from "./event_driven.ts";
+import { shipLogs } from "./logging.ts";
+import { executeQueries, executeQuery } from "./rest.ts";
 
 export function capabilityServer(): UnaryServer {
   const server = new UnaryServer()

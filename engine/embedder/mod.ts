@@ -34,38 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { assertEquals, assertStringIncludes } from "@std/assert";
-import { fromBinary } from "@bufbuild/protobuf";
-import { FailureSchema } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
-import { Storage } from "@scribe/sdk/gen/scribe/engine/packages/storage/protocol/storage_pb.ts";
-import { procedurePath } from "@scribe/sdk/src/transport/wire.ts";
-import { capabilityServer } from "@scribe/engine/project/worker/capability_server.ts";
+import type { ProjectHost } from "@scribe/core/contracts/project_host.ts";
+import { InProcessHost } from "./in_process.ts";
 
-/** Calls `path` on the host's capability server, the way a worker would. */
-async function call(path: string): Promise<{ status: number; code: string; message: string }> {
-  const response = await capabilityServer().handle(
-    new Request(new URL(path, "http://host.test"), { method: "POST", body: new Uint8Array() }),
-  );
-  const failure = fromBinary(FailureSchema, new Uint8Array(await response.arrayBuffer()));
+export { ProjectSlot } from "@scribe/core/contracts/project_host.ts";
+export type { ProjectHost } from "@scribe/core/contracts/project_host.ts";
+export { WorkerHost } from "./control/host.ts";
 
-  return { status: response.status, code: failure.code, message: failure.message };
-}
-
-Deno.test("a procedure the contract declares and the host does not wire answers a named 501", async () => {
-  // Storage stands for every module the host mounts without serving its
-  // capability. The point is not this service in particular: nothing lists
-  // them any more, so any unwired path takes the same road.
-  const path = procedurePath(Storage.method.upload);
-  const answer = await call(path);
-
-  assertEquals(answer.status, 501);
-  assertEquals(answer.code, "unimplemented");
-  assertStringIncludes(answer.message, path);
-});
-
-Deno.test("a path the contract does not declare takes the same road", async () => {
-  const answer = await call("/scribe.v1.Nope/Call");
-
-  assertEquals(answer.status, 501);
-  assertStringIncludes(answer.message, "/scribe.v1.Nope/Call");
-});
+export const projectHost: ProjectHost = new InProcessHost();

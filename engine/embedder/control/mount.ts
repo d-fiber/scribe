@@ -53,9 +53,9 @@ import { RbacIdentity } from "@scribe/core/kernel/identity/request_identity.ts";
 import { currentIdentity } from "@scribe/core/runtime/http/accessors/identity.ts";
 import { request } from "@scribe/core/runtime/http/request.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
-import { CapabilityTokens } from "./capability_tokens.ts";
+import { CapabilityTokens } from "../capabilities/tokens.ts";
 import { invocationOf } from "./invocation.ts";
-import type { WorkerClient } from "./worker_client.ts";
+import type { WorkerClient } from "./client.ts";
 
 type HonoMethod = "get" | "post" | "put" | "patch" | "delete";
 

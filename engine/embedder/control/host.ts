@@ -38,13 +38,13 @@ import { Hono } from "hono";
 import { majorOf, PROTOCOL_VERSION } from "@scribe/sdk";
 import type { Manifest, NodeDeclaration } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import { workerSettings } from "@scribe/core/runtime/support/settings/worker.ts";
-import { capabilityServer } from "./capability_server.ts";
-import { CapabilityTokens } from "./capability_tokens.ts";
+import { capabilityServer } from "../capabilities/server.ts";
+import { CapabilityTokens } from "../capabilities/tokens.ts";
 import { LogRoutes } from "@scribe/core/kernel/observability/log_routing.ts";
 import { WorkerLogSinks } from "./log_sinks.ts";
 import { mountManifest, NodeMountError } from "./mount.ts";
 import { NodeSurfaces } from "./node_surfaces.ts";
-import { WorkerClient } from "./worker_client.ts";
+import { WorkerClient } from "./client.ts";
 
 const BOOTSTRAP_TTL_MS = 86_400_000;
 

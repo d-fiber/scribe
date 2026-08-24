@@ -38,8 +38,8 @@ import { assertEquals } from "@std/assert";
 import { type DiscoveredLogSink, LogSink, Node, ScribeServer } from "@scribe/sdk";
 import type { Manifest } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import type { LoggedEntry } from "@scribe/alchemy/observe";
-import { WorkerLogSinks } from "@scribe/engine/project/worker/log_sinks.ts";
-import { WorkerClient } from "@scribe/engine/project/worker/worker_client.ts";
+import { WorkerLogSinks } from "@scribe/engine/embedder/control/log_sinks.ts";
+import { WorkerClient } from "@scribe/engine/embedder/control/client.ts";
 
 /**
  * What the project's sinks were handed, in order.

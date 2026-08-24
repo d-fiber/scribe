@@ -39,8 +39,8 @@ import { Hono } from "hono";
 import { Caller, Get, Node, NodeRoot, PROTOCOL_VERSION, ScribeServer, Time, type DiscoveredRoute, type InvocationContext, type RateLimiter } from "@scribe/sdk";
 import { installRateLimiterMock } from "@scribe/foundation/tests/testing/valkery.ts";
 import { RequestScope } from "@scribe/core/runtime/scope.ts";
-import { mountManifest } from "@scribe/engine/project/worker/mount.ts";
-import { WorkerClient } from "@scribe/engine/project/worker/worker_client.ts";
+import { mountManifest } from "@scribe/engine/embedder/control/mount.ts";
+import { WorkerClient } from "@scribe/engine/embedder/control/client.ts";
 
 const LIMIT: RateLimiter = { limit: 100, window: Time.minutes(1), penalty: Time.minutes(1) };
 

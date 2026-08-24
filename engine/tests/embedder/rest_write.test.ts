@@ -34,11 +34,44 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export { capabilityServer } from "./capability_server.ts";
-export { CapabilityTokens, UnknownCapabilityToken } from "./capability_tokens.ts";
-export type { CapabilityGrant } from "./capability_tokens.ts";
-export { mountManifest, NodeMountError } from "./mount.ts";
-export type { NodeResolver } from "./mount.ts";
-export { NodeSurfaces } from "./node_surfaces.ts";
-export { WorkerClient } from "./worker_client.ts";
-export { WorkerHost } from "./worker_host.ts";
+import "@scribe/core/testing/settings.ts";
+
+import { create } from "@bufbuild/protobuf";
+import { assertEquals } from "@std/assert";
+import { installMock } from "@scribe/core/testing/install.ts";
+import { PostgrestClients } from "@scribe/foundation/lib/src/database/client.ts";
+import { FakePostgrestClient } from "@scribe/foundation/tests/testing/database.ts";
+import {
+  Operation,
+  QuerySchema,
+} from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/database/database_pb.ts";
+import { executeQuery } from "@scribe/engine/embedder/capabilities/rest.ts";
+
+const UNOWNED = "t_email_templates";
+
+function seeded(): { fake: FakePostgrestClient; restore(): void } {
+  const fake = new FakePostgrestClient({
+    [UNOWNED]: [{ id: 1, name: "welcome" }, { id: 2, name: "reset" }],
+  });
+  const mock = installMock(
+    PostgrestClients as unknown as Record<string, unknown>,
+    "service",
+    (() => fake) as unknown as never,
+  );
+  return { fake, restore: () => mock.restore() };
+}
+
+Deno.test("a worker delete with no predicate at all is refused, not run", async () => {
+  const { fake, restore } = seeded();
+  try {
+    const answer = await executeQuery(
+      create(QuerySchema, { table: UNOWNED, operation: Operation.DELETE }),
+    );
+
+    assertEquals(fake.rows(UNOWNED).length, 2, "no row may be removed by a query naming none");
+    assertEquals(answer.error?.code, "unbounded_write");
+  } finally {
+    restore();
+  }
+});
+

@@ -61,7 +61,7 @@ import {
 } from "@scribe/foundation/lib/src/database/query/literal.ts";
 import { ownerScope } from "@scribe/foundation/lib/src/database/query/scope.ts";
 import { AMBIGUITY_PROBE } from "@scribe/foundation/lib/src/database/query/state.ts";
-import { decodeJson, encodeJson } from "../json.ts";
+import { decodeJson, encodeJson } from "../control/json.ts";
 
 function applyOperator(builder: any, filter: Filter): any {
   const value = decodeJson(filter.value);

@@ -49,7 +49,7 @@ async function grantsAll(required: readonly string[]): Promise<boolean> {
 async function serve(descriptor: RouteDescriptor, c: Context): Promise<Response> {
   const callers = callersOf(descriptor.access);
 
-  // Same reasoning as the worker routes in project/worker/mount.ts: the limiter
+  // Same reasoning as the worker routes in embedder/control/mount.ts: the limiter
   // does not need to know who is calling, so it runs alongside the lookup.
   const [allowed, withinLimit] = await Promise.all([
     isAllowed(callers, descriptor.webhookVerified ?? false),
