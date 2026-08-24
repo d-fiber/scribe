@@ -4,6 +4,19 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 10.0.0 (2026-08-24)
+
+Component versions: @scribe/core 5.0.3, @scribe/sdk 0.1.8
+
+### Breaking
+
+- move the packages and the builder out of host/pkg (7b682fed)
+
+### Fixed
+
+- recognise an unmapped specifier as a missing module (d433ddd5)
+- stop the boot when a required setting is absent (5d1fa043)
+
 ## 9.0.1 (2026-08-24)
 
 Component versions: @scribe/core 5.0.2
