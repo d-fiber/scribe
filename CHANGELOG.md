@@ -4,6 +4,18 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 9.0.1 (2026-08-24)
+
+Component versions: @scribe/core 5.0.2
+
+### Added
+
+- tell a caller nobody resolved apart from one who proved nobody (e7175b9f)
+
+### Security
+
+- refuse a worker write that names no row (65a5caae)
+
 ## 9.0.0 (2026-08-23)
 
 Component versions: @scribe/core 5.0.1
