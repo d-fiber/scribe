@@ -37,7 +37,7 @@ opens with a line saying so and naming the command that rewrites it.
 ## What comes mounted
 
 A project mounts the packages it wants and gets nothing else. They live in
-[`scribe_packages`](https://github.com/d-fiber/scribe_packages), under `host/packages/`.
+[`scribe_packages`](https://github.com/d-fiber/scribe_packages), under `engine/packages/`.
 
 | Package          | What it holds                                                                                                                                                                   |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -82,7 +82,7 @@ sh tools/install.sh
 | Repository                                                            | What it is                                                                    |
 | --------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | [`scribe`](https://github.com/d-fiber/scribe)                         | the framework, this one                                                       |
-| [`scribe_packages`](https://github.com/d-fiber/scribe_packages)       | the mountable packages, a copy under `host/packages/`                         |
+| [`scribe_packages`](https://github.com/d-fiber/scribe_packages)       | the mountable packages, a copy under `engine/packages/`                         |
 | [`scribe_alchemy`](https://github.com/d-fiber/scribe_alchemy)         | the language the framework and its packages are both written in               |
 | [`scribe_pkg_builder`](https://github.com/d-fiber/scribe_pkg_builder) | what reads the packages, resolves them and writes the import map and the lock |
 | [`scribe_tools`](https://github.com/d-fiber/scribe_tools)             | `scribe`, the CLI a project is worked through                                 |
@@ -91,14 +91,13 @@ sh tools/install.sh
 ## Layout
 
 ```
-host/core/        the primitive package: contracts, runtime, kernel, test harness
-host/alchemy/     the vocabulary a package is written out of
-host/builder/     what reads a package or a project and writes what the chain obeys
-host/packages/    the mountable packages the builder resolves
-host/dependencies/ the modules that are not packages yet
-host/boot/        how the process starts, and the two runtimes
-host/project/     the fifteen points where a project reaches the framework
-host/public/      mail rendering and the public pages
+engine/core/        the primitive package: contracts, runtime, kernel, test harness
+engine/alchemy/     the vocabulary a package is written out of
+engine/builder/     what reads a package or a project and writes what the chain obeys
+engine/packages/    the mountable packages the builder resolves
+engine/boot/        how the process starts, and the two runtimes
+engine/project/     the fifteen points where a project reaches the framework
+engine/public/      mail rendering and the public pages
 protocol/         the host to worker contract, and its version
 sdk/js/ sdk/dart/ what a worker is written against
 ops/ templates/   the containers, the gateway, and what `create` writes
@@ -113,7 +112,7 @@ has to pass. The framework reaches the project through fifteen dynamic imports, 
 fallback, so a project that provides nothing still boots.
 
 **The layers are checked by the machine, not by discipline.** Seven layers, one direction, and a
-lint rule in `host/core/.lint/layers.ts` that fails `deno lint` on anything reaching upward. A
+lint rule in `engine/core/.lint/layers.ts` that fails `deno lint` on anything reaching upward. A
 second rule gives directories a notion of private that TypeScript does not have: a file or an
 identifier prefixed `_` is visible only in its own directory and below.
 

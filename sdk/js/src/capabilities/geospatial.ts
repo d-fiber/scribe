@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Geospatial } from "../../gen/scribe/host/dependencies/geospatial/protocol/geospatial_pb.ts";
+import { Geospatial } from "../../gen/scribe/engine/dependencies/geospatial/protocol/geospatial_pb.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";
 

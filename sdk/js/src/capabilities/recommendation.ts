@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Recommendation } from "../../gen/scribe/host/dependencies/features/recommendation/protocol/recommendation_pb.ts";
+import { Recommendation } from "../../gen/scribe/engine/dependencies/features/recommendation/protocol/recommendation_pb.ts";
 import { encodeJson } from "../contracts/json.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";

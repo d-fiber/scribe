@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { RemoteConfigs } from "../../gen/scribe/host/dependencies/features/devops/protocol/devops_pb.ts";
+import { RemoteConfigs } from "../../gen/scribe/engine/dependencies/features/devops/protocol/devops_pb.ts";
 import { decodeJson } from "../contracts/json.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";

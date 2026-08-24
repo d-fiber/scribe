@@ -41,8 +41,8 @@ import {
   FilterOperator,
   Operation,
   type Query,
-} from "../gen/scribe/host/packages/foundation/protocol/database/database_pb.ts";
-import { Valkery } from "../gen/scribe/host/packages/foundation/protocol/valkery/valkery_pb.ts";
+} from "../gen/scribe/engine/packages/foundation/protocol/database/database_pb.ts";
+import { Valkery } from "../gen/scribe/engine/packages/foundation/protocol/valkery/valkery_pb.ts";
 import { decodeJson, encodeJson } from "../src/contracts/json.ts";
 
 interface Brand extends Record<string, unknown> {

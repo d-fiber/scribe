@@ -45,17 +45,17 @@ import {
   type Batch,
   type BatchOutcome,
   BatchOutcomeSchema,
-} from "../../gen/scribe/host/packages/foundation/protocol/queue/queue_pb.ts";
+} from "../../gen/scribe/engine/packages/foundation/protocol/queue/queue_pb.ts";
 import {
   type Event,
   type HandleResult,
   HandleResultSchema,
-} from "../../gen/scribe/host/packages/foundation/protocol/hook/hook_pb.ts";
+} from "../../gen/scribe/engine/packages/foundation/protocol/hook/hook_pb.ts";
 import {
   type CronOutcome,
   CronOutcomeSchema,
   type CronTrigger,
-} from "../../gen/scribe/host/packages/foundation/protocol/cron/cron_pb.ts";
+} from "../../gen/scribe/engine/packages/foundation/protocol/cron/cron_pb.ts";
 import {
   type LogDelivery,
   type LogDeliveryAck,

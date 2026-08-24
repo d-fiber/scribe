@@ -37,7 +37,7 @@
 import {
   Observability,
   SpanKind,
-} from "../../gen/scribe/host/dependencies/features/observability/protocol/observability_pb.ts";
+} from "../../gen/scribe/engine/dependencies/features/observability/protocol/observability_pb.ts";
 import { host } from "../capabilities/channel.ts";
 import { encodeJson } from "../contracts/json.ts";
 import { CallScope } from "../runtime/scope.ts";

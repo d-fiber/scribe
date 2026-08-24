@@ -44,26 +44,26 @@ say() {
   echo "[$SCOPE] $1"
 }
 
-[ -f "$ROOT/host/packages/foundation/deno.json" ] || {
-  echo "[$SCOPE] host/packages is empty, run \`git submodule update --init\` first." >&2
+[ -f "$ROOT/engine/packages/foundation/deno.json" ] || {
+  echo "[$SCOPE] engine/packages is empty, run \`git submodule update --init\` first." >&2
   exit 1
 }
 
-say "linting host"
-(cd "$ROOT/host" && deno lint)
+say "linting engine"
+(cd "$ROOT/engine" && deno lint)
 
-say "type checking host"
-(cd "$ROOT/host" && deno task check)
+say "type checking engine"
+(cd "$ROOT/engine" && deno task check)
 
 say "type checking sdk/js"
 (cd "$ROOT/sdk/js" && deno task check)
 
 echo ""
-say "the analyser is happy with host and sdk/js."
+say "the analyser is happy with engine and sdk/js."
 cat <<'EOF'
 
 A green run here does not promise a green CI. The runners resolve @types/node
-through host/deno.lock while a development machine resolves whatever its global
+through engine/deno.lock while a development machine resolves whatever its global
 cache holds, so the two disagree on the globals shared with Node. A timer handle
 annotated `number` passes here and fails there, which is why the repository
 writes `ReturnType<typeof setTimeout>` everywhere.

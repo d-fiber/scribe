@@ -38,9 +38,9 @@ import { assertEquals, assert } from "@std/assert";
 import { PROTOCOL_VERSION } from "../mod.ts";
 import { Registration } from "../gen/scribe/protocol/manifest_pb.ts";
 import { Worker as WorkerService } from "../gen/scribe/protocol/invocation_pb.ts";
-import { QueueDispatch } from "../gen/scribe/host/packages/foundation/protocol/queue/queue_pb.ts";
-import { HookDispatch } from "../gen/scribe/host/packages/foundation/protocol/hook/hook_pb.ts";
-import { CronDispatch } from "../gen/scribe/host/packages/foundation/protocol/cron/cron_pb.ts";
+import { QueueDispatch } from "../gen/scribe/engine/packages/foundation/protocol/queue/queue_pb.ts";
+import { HookDispatch } from "../gen/scribe/engine/packages/foundation/protocol/hook/hook_pb.ts";
+import { CronDispatch } from "../gen/scribe/engine/packages/foundation/protocol/cron/cron_pb.ts";
 import { LogDispatch } from "../gen/scribe/protocol/logs_pb.ts";
 import { procedurePath } from "../src/transport/wire.ts";
 

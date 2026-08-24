@@ -14,11 +14,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  host:
+  engine:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: host
+        working-directory: engine
 
     steps:
       - uses: actions/checkout@v4
@@ -123,7 +123,7 @@ jobs:
             echo ""
             echo "Dependabot does not read Deno, so this is the only place these show up."
             echo ""
-            for root in host sdk/js; do
+            for root in engine sdk/js; do
               echo "### $root"
               echo ""
               echo '```'
@@ -132,7 +132,7 @@ jobs:
               echo ""
             done
             echo "Imports pinned by URL are invisible here too. Today that is"
-            echo '`jose`, pinned to a fixed version of deno.land/x in host/deno.json.'
+            echo '`jose`, pinned to a fixed version of deno.land/x in engine/deno.json.'
           } >> "$GITHUB_STEP_SUMMARY"
 
   protocol:

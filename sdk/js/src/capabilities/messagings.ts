@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Messagings } from "../../gen/scribe/host/dependencies/features/messagings/protocol/messagings_pb.ts";
+import { Messagings } from "../../gen/scribe/engine/dependencies/features/messagings/protocol/messagings_pb.ts";
 import { encodeJson } from "../contracts/json.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";

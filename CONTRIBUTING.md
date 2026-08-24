@@ -80,10 +80,10 @@ the round trip.
 
 ## What CI will check
 
-    deno lint                     in host/
-    deno task check               in host/
-    deno task test                in host/
-    deno task test:net            in host/
+    deno lint                     in engine/
+    deno task check               in engine/
+    deno task test                in engine/
+    deno task test:net            in engine/
     deno task check && test       in sdk/js/
     python3 -m unittest ...       in .github/versioning/
     protoc                        on every .proto
@@ -101,8 +101,8 @@ public surface of each component between two revisions and decides on its own
 whether the change is a major, a minor or a patch. Removing an exported symbol
 or a protobuf field is a major, adding one is a minor.
 
-Four components carry their own version: `protocol/VERSION`, `host/core`,
-`host/dependencies` and `sdk/js`. The `VERSION` file at the root is the version
+Three components carry their own version: `protocol/VERSION`, `engine/core`
+and `sdk/js`. The `VERSION` file at the root is the version
 of scribe as a whole, and it moves by the strongest bump any component took. It
 is the number a project compares itself against when it checks for an update, so
 it is the one that matters to people who install scribe rather than work on it.
