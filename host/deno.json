@@ -1,7 +1,6 @@
 {
   "workspace": [
     "./core",
-    "./dependencies",
     "./packages/audience",
     "./packages/auth",
     "./packages/dynamic_links",

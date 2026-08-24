@@ -1,8 +1,0 @@
-services:
-  - name: gorse
-    weight: 661
-    runtime: go
-    profile: reco
-    min: 128Mi
-    dev: 256Mi
-    cpu_shares: 512

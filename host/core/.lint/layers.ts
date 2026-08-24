@@ -44,27 +44,9 @@ const ALLOWED: Record<string, readonly string[]> = {
   runtime: ["contracts", "packages"],
   packages: ["contracts", "runtime", "packages"],
   kernel: ["contracts", "runtime", "packages"],
-  testing: ["contracts", "runtime", "packages", "kernel", "dependencies", "testing"],
-  dependencies: ["contracts", "runtime", "packages", "dependencies"],
-  boot: [
-    "contracts",
-    "runtime",
-    "packages",
-    "kernel",
-    "testing",
-    "dependencies",
-    "boot",
-  ],
-  tests: [
-    "contracts",
-    "runtime",
-    "packages",
-    "kernel",
-    "testing",
-    "dependencies",
-    "boot",
-    "tests",
-  ],
+  testing: ["contracts", "runtime", "packages", "kernel", "testing"],
+  boot: ["contracts", "runtime", "packages", "kernel", "testing", "boot"],
+  tests: ["contracts", "runtime", "packages", "kernel", "testing", "boot", "tests"],
 };
 
 const HOST_CONSUMERS: readonly string[] = ["boot", "tests"];

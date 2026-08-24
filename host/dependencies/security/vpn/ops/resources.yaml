@@ -1,9 +1,0 @@
-services:
-  vpn-admins:
-    cpu_shares: 512
-    deploy:
-      resources:
-        limits:
-          memory: "{{vpn_admins_mem_limit}}"
-        reservations:
-          memory: "{{vpn_admins_mem_res}}"
