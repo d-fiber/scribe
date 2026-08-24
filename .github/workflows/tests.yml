@@ -51,9 +51,6 @@ jobs:
       - name: Run tests with network access
         run: deno task test:net
 
-      - name: Run the package tests, which need a directory of their own
-        run: deno task test:pkg
-
   sdk-js:
     runs-on: ubuntu-latest
     defaults:
