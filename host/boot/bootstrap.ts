@@ -34,7 +34,6 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Env } from "@scribe/host/env.ts";
 import { extensions, OptionalExtension } from "@scribe/core/runtime/support/extensions/mod.ts";
 import { cacheSettings } from "@scribe/foundation/lib/src/valkery/settings.ts";
 import { databaseSettings } from "@scribe/foundation/lib/src/database/settings.ts";
@@ -47,6 +46,26 @@ import { RateLimiters } from "@scribe/alchemy";
 import { RedisRateLimiters } from "@scribe/foundation/lib/src/rate_limit/mod.ts";
 import { workerSettings } from "@scribe/core/runtime/support/settings/worker.ts";
 import { EXTENSION_CRON, EXTENSION_QUEUE } from "./extensions.ts";
+
+/**
+ * The port the persistent runtime listens on when the deployment names none.
+ */
+const DEFAULT_PORT = 3000;
+
+/**
+ * The value `name` holds in the environment, refusing an absent or empty one.
+ *
+ * Only the deployment knows these, and this file is the one place that reads
+ * them: a process that starts without one would otherwise fail at the first
+ * call that needs it, in a stack that names the caller rather than the missing
+ * setting. Refusing here stops the container at boot, naming what it lacks.
+ */
+function required(name: string): string {
+  const value = Deno.env.get(name);
+  if (!value) throw new Error(`Missing required environment variable: ${name}`);
+
+  return value;
+}
 
 /**
  * What the body budget falls back to when the deployment names no figure.
@@ -64,22 +83,22 @@ function maxInflightBodyBytes(): number {
   return megabytes * 1024 * 1024;
 }
 
-cacheSettings.use({ redisUrl: Env.REDIS_URL });
-queueSettings.use({ natsUrl: Env.NATS_URL });
+cacheSettings.use({ redisUrl: required("REDIS_URL") });
+queueSettings.use({ natsUrl: required("NATS_URL") });
 databaseSettings.use({
-  restUrl: Env.SUPABASE_REST_INTERNAL_URL,
-  anonKey: Env.SUPABASE_ANON_KEY,
-  serviceRoleKey: Env.SUPABASE_SERVICE_ROLE_KEY,
+  restUrl: required("SUPABASE_REST_INTERNAL_URL"),
+  anonKey: required("SUPABASE_ANON_KEY"),
+  serviceRoleKey: required("SUPABASE_SERVICE_ROLE_KEY"),
 });
 identitySettings.use({
-  authUrl: Env.SUPABASE_AUTH_INTERNAL_URL,
-  anonKey: Env.SUPABASE_ANON_KEY,
-  serviceRoleKey: Env.SUPABASE_SERVICE_ROLE_KEY,
+  authUrl: required("SUPABASE_AUTH_INTERNAL_URL"),
+  anonKey: required("SUPABASE_ANON_KEY"),
+  serviceRoleKey: required("SUPABASE_SERVICE_ROLE_KEY"),
   jwtSecret: Deno.env.get("JWT_SECRET"),
 });
-firewallSettings.use({ internalSecret: Env.INTERNAL_SECRET });
-deviceSettings.use({ payloadPrivateKeyHex: Env.DEVICE_PAYLOAD_PRIVATE_KEY });
-httpSettings.use({ port: Env.PORT, maxInflightBodyBytes: maxInflightBodyBytes() });
+firewallSettings.use({ internalSecret: required("INTERNAL_SECRET") });
+deviceSettings.use({ payloadPrivateKeyHex: required("DEVICE_PAYLOAD_PRIVATE_KEY") });
+httpSettings.use({ port: Number(Deno.env.get("PORT") ?? DEFAULT_PORT), maxInflightBodyBytes: maxInflightBodyBytes() });
 
 RateLimiters.use(new RedisRateLimiters());
 
