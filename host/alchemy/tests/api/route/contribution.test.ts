@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isFalse, isTrue } from "../../../src/test/mod.ts";
-import { type Contribution, merge, NOTHING } from "../../../src/api/route/mount/contribution.ts";
+import { equals, expect, isFalse, isTrue } from "../../../test/mod.ts";
+import { type Contribution, merge, NOTHING } from "../../../api/route/mount/contribution.ts";
 import { Duration } from "../../../mod.ts";
 
 function layer(said: Partial<Contribution>): Contribution {

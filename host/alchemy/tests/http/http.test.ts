@@ -48,11 +48,11 @@ import {
   throwsA,
   verify,
   when,
-} from "../../src/test/mod.ts";
-import type { BaseRequest, Client } from "../../src/http/mod.ts";
-import { BaseClient, ByteStream, DEFAULT_REQUEST_TIMEOUT, StreamedResponse } from "../../src/http/mod.ts";
-import type { HttpResponse } from "../../src/http/mod.ts";
-import { Clients, http } from "../../src/http/mod.ts";
+} from "../../test/mod.ts";
+import type { BaseRequest, Client } from "../../http/mod.ts";
+import { BaseClient, ByteStream, DEFAULT_REQUEST_TIMEOUT, StreamedResponse } from "../../http/mod.ts";
+import type { HttpResponse } from "../../http/mod.ts";
+import { Clients, http } from "../../http/mod.ts";
 
 class Recording extends BaseClient {
   constructor(private readonly seen: BaseRequest[], private readonly status = 200) {

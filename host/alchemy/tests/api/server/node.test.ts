@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, having, isA, isFalse, isTrue, throwsA } from "../../../src/test/mod.ts";
-import { Node, Servers, standardNode, standardNodeNames } from "../../../src/api/server/mod.ts";
-import { type Caller, Middleware, type RateLimit } from "../../../src/api/route/mod.ts";
+import { contains, equals, expect, having, isA, isFalse, isTrue, throwsA } from "../../../test/mod.ts";
+import { Node, Servers, standardNode, standardNodeNames } from "../../../api/server/mod.ts";
+import { type Caller, Middleware, type RateLimit } from "../../../api/route/mod.ts";
 import { Duration } from "../../../mod.ts";
 
 class Throttled extends Middleware {

@@ -36,7 +36,7 @@
 
 import { assertEquals, assertRejects } from "@std/assert";
 import { join } from "@std/path";
-import { ApiError, type ProjectApi, scanApi } from "../src/client/project/api.ts";
+import { ApiError, type ProjectApi, scanApi } from "../client/project/api.ts";
 import { inTemporaryRoot } from "./support/workspace.ts";
 import { writeProject, writeSources } from "./support/project.ts";
 

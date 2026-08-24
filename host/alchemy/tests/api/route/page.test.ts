@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect } from "../../../src/test/mod.ts";
-import { HtmlPage } from "../../../src/api/route/mod.ts";
+import { contains, equals, expect } from "../../../test/mod.ts";
+import { HtmlPage } from "../../../api/route/mod.ts";
 
 const PAGE = "<!doctype html><title>Reset</title>";
 

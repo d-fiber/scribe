@@ -52,7 +52,7 @@ import {
   reset,
   throwsA,
   when,
-} from "../../src/test/mod.ts";
+} from "../../test/mod.ts";
 
 interface Store {
   get(id: string): Promise<string | null>;

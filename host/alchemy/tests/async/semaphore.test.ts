@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isTrue } from "../../src/test/mod.ts";
+import { equals, expect, isTrue } from "../../test/mod.ts";
 import { Duration, Future, Semaphore } from "../../mod.ts";
 
 Deno.test("Semaphore lets through up to its limit without waiting", async () => {

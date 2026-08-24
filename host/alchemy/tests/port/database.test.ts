@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isFalse, isTrue } from "../../src/test/mod.ts";
+import { equals, expect, isFalse, isTrue } from "../../test/mod.ts";
 import type { DatabaseDriver, DatabaseSchema, Query } from "../../mod.ts";
 import { Databases, Failure, Ok, Refusal, schema } from "../../mod.ts";
 

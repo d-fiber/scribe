@@ -45,7 +45,7 @@ import {
   isTrue,
   SequentialUuids,
   throwsA,
-} from "../../src/test/mod.ts";
+} from "../../test/mod.ts";
 import { DateTime, Duration, FormatException, Now, Uuid, Uuids } from "../../mod.ts";
 
 Deno.test("now reads the source in force, so a case decides what time it is", () => {

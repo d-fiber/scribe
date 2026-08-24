@@ -34,11 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, having, isA, isFalse, isTrue, throwsA } from "../../../src/test/mod.ts";
-import { compileNode, RoutingError } from "../../../src/api/route/mount/tree.ts";
-import type { DiscoveredRoute } from "../../../src/api/route/mount/discovery.ts";
-import type { Contribution } from "../../../src/api/route/mount/contribution.ts";
-import { NOTHING } from "../../../src/api/route/mount/contribution.ts";
+import { contains, equals, expect, having, isA, isFalse, isTrue, throwsA } from "../../../test/mod.ts";
+import { compileNode, RoutingError } from "../../../api/route/mount/tree.ts";
+import type { DiscoveredRoute } from "../../../api/route/mount/discovery.ts";
+import type { Contribution } from "../../../api/route/mount/contribution.ts";
+import { NOTHING } from "../../../api/route/mount/contribution.ts";
 import {
   type Caller,
   Get,
@@ -47,7 +47,7 @@ import {
   Middleware,
   Post,
   type RateLimit,
-} from "../../../src/api/route/mod.ts";
+} from "../../../api/route/mod.ts";
 import { Duration } from "../../../mod.ts";
 
 const CALL: Invoked = {

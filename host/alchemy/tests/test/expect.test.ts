@@ -54,7 +54,7 @@ import {
   same,
   throwsA,
   withMessage,
-} from "../../src/test/mod.ts";
+} from "../../test/mod.ts";
 
 class Held extends Error {}
 

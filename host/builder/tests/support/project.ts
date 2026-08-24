@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { dirname, join } from "@std/path";
-import { entryOf, LIBRARY_DIRECTORY, MANIFEST_FILE } from "../../src/client/project/layout.ts";
+import { entryOf, LIBRARY_DIRECTORY, MANIFEST_FILE } from "../../client/project/layout.ts";
 
 /** What a written project declares, beyond the name it is written under. */
 export interface WrittenProject {

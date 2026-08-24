@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, isFalse, isTrue } from "../../src/test/mod.ts";
+import { contains, equals, expect, isFalse, isTrue } from "../../test/mod.ts";
 import { foldFrames, framesOf, renderError, ScribeError } from "../../mod.ts";
 
 const STACK = [

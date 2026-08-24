@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect } from "../../../src/test/mod.ts";
-import { parseBodyBytes, parseFormBytes } from "../../../src/api/body/parse.ts";
-import { ListOf, Nested, Required } from "../../../src/api/body/markers.ts";
+import { equals, expect } from "../../../test/mod.ts";
+import { parseBodyBytes, parseFormBytes } from "../../../api/body/parse.ts";
+import { ListOf, Nested, Required } from "../../../api/body/markers.ts";
 
 function sent(body: unknown): Uint8Array {
   return new TextEncoder().encode(JSON.stringify(body));

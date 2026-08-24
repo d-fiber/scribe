@@ -60,7 +60,7 @@ export {
   segmentOf,
   SOURCE_EXTENSION,
   withoutExtension,
-} from "./src/client/project/conventions.ts";
+} from "./client/project/conventions.ts";
 export {
   DERIVED_DIRECTORY,
   entryOf,
@@ -70,8 +70,8 @@ export {
   SOURCE_DIRECTORY,
   SOURCE_PATH,
   WORKER_SDK,
-} from "./src/client/project/layout.ts";
-export { ApiError, scanApi } from "./src/client/project/api.ts";
-export type { ProjectApi, ScannedRoute, ScannedSink } from "./src/client/project/api.ts";
-export { routesSource, writeRoutes } from "./src/client/project/routes.ts";
-export type { RoutesEmission } from "./src/client/project/routes.ts";
+} from "./client/project/layout.ts";
+export { ApiError, scanApi } from "./client/project/api.ts";
+export type { ProjectApi, ScannedRoute, ScannedSink } from "./client/project/api.ts";
+export { routesSource, writeRoutes } from "./client/project/routes.ts";
+export type { RoutesEmission } from "./client/project/routes.ts";

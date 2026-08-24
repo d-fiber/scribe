@@ -1,7 +1,0 @@
-{
-  "name": "@scribe/builder",
-  "exports": {
-    "./tools": "./tools.ts",
-    "./project": "./project.ts"
-  }
-}

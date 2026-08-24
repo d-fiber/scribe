@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isFalse, isTrue } from "../../src/test/mod.ts";
+import { equals, expect, isFalse, isTrue } from "../../test/mod.ts";
 import {
   atLeast,
   isLoggedLevel,
@@ -44,7 +44,7 @@ import {
   Loggers,
   LogSink,
   severityOf,
-} from "../../src/observe/mod.ts";
+} from "../../observe/mod.ts";
 
 class Keeping extends LogSink {
   readonly seen: LoggedEntry[] = [];

@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isA, isFalse, isTrue, throwsA } from "../../src/test/mod.ts";
+import { equals, expect, isA, isFalse, isTrue, throwsA } from "../../test/mod.ts";
 import { Constraint, type LifecycleSteps, mount, Package } from "../../mod.ts";
 
 const realtime = Package.named("realtime").version("1.2.0").runsOn("^3.0.0").build();

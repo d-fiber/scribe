@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect } from "../../src/test/mod.ts";
+import { equals, expect } from "../../test/mod.ts";
 import { Duration, ExponentialBackoff } from "../../mod.ts";
 
 Deno.test("ExponentialBackoff doubles from the base and stops at the ceiling", () => {

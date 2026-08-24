@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, FixedNow, having, isA, isFalse, throwsA } from "../../src/test/mod.ts";
+import { contains, equals, expect, FixedNow, having, isA, isFalse, throwsA } from "../../test/mod.ts";
 import { DateTime, Duration, FormatException, Now, Stopwatch } from "../../mod.ts";
 
 Deno.test("a stopwatch counts what the case says passed, and nothing else", () => {

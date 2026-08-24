@@ -35,8 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import { assertEquals, assertThrows } from "@std/assert";
-import type { Registry } from "../src/client/pkg/resolution/registry.ts";
-import { ResolutionError, resolve } from "../src/client/pkg/resolution/solver.ts";
+import type { Registry } from "../client/pkg/resolution/registry.ts";
+import { ResolutionError, resolve } from "../client/pkg/resolution/solver.ts";
 import { Constraint } from "@scribe/alchemy";
 import { Version } from "@scribe/alchemy";
 

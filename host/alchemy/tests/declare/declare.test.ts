@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, having, isA, isFalse, isTrue, throwsA } from "../../src/test/mod.ts";
+import { contains, equals, expect, having, isA, isFalse, isTrue, throwsA } from "../../test/mod.ts";
 import { DuplicateDeclarationError, Registry, Slot } from "../../mod.ts";
 
 Deno.test("a registry hands back what was declared under a name", () => {

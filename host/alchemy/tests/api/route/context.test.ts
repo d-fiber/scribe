@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isFalse } from "../../../src/test/mod.ts";
-import { InvocationContext, type Invoked } from "../../../src/api/route/mod.ts";
+import { equals, expect, isFalse } from "../../../test/mod.ts";
+import { InvocationContext, type Invoked } from "../../../api/route/mod.ts";
 import { Required } from "../../../mod.ts";
 
 function invoked(over: Partial<Invoked> = {}): Invoked {

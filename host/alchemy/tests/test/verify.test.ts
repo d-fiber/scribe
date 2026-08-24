@@ -51,7 +51,7 @@ import {
   verifyNever,
   verifyNoMoreInteractions,
   when,
-} from "../../src/test/mod.ts";
+} from "../../test/mod.ts";
 
 interface Log {
   write(line: string): void;

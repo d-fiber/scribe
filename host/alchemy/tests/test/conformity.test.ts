@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { checkCacheDriver, expectLater, isA, MemoryCaches, throwsA } from "../../src/test/mod.ts";
-import { AssertionError } from "../../src/test/expect/error.ts";
+import { checkCacheDriver, expectLater, isA, MemoryCaches, throwsA } from "../../test/mod.ts";
+import { AssertionError } from "../../test/expect/error.ts";
 import type { Cache, CacheDriver, CacheOptions } from "../../mod.ts";
 
 class RunsEveryTime implements CacheDriver {

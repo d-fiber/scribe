@@ -37,14 +37,14 @@
 import { assertEquals } from "@std/assert";
 import { join } from "@std/path";
 import { Constraint } from "@scribe/alchemy";
-import { discover } from "../src/client/pkg/workspace/discovery.ts";
-import { WorkspaceRegistry } from "../src/client/pkg/resolution/registry.ts";
-import { resolve } from "../src/client/pkg/resolution/solver.ts";
-import { emit } from "../src/client/pkg/emit/emit.ts";
-import { IMPORT_MAP_FILE, importMapFor, RUNTIME_DIRECTORY } from "../src/client/pkg/emit/import_map.ts";
-import { lockText } from "../src/client/pkg/emit/lock.ts";
-import { registrationsSource } from "../src/client/pkg/emit/registrations.ts";
-import { resolutionDocument } from "../src/client/pkg/emit/resolution.ts";
+import { discover } from "../client/pkg/workspace/discovery.ts";
+import { WorkspaceRegistry } from "../client/pkg/resolution/registry.ts";
+import { resolve } from "../client/pkg/resolution/solver.ts";
+import { emit } from "../client/pkg/emit/emit.ts";
+import { IMPORT_MAP_FILE, importMapFor, RUNTIME_DIRECTORY } from "../client/pkg/emit/import_map.ts";
+import { lockText } from "../client/pkg/emit/lock.ts";
+import { registrationsSource } from "../client/pkg/emit/registrations.ts";
+import { resolutionDocument } from "../client/pkg/emit/resolution.ts";
 import { inTemporaryRoot, writePackage } from "./support/workspace.ts";
 
 async function chain(root: string): Promise<void> {

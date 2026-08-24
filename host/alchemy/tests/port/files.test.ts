@@ -47,7 +47,7 @@ import {
   MemoryFileSystemDriver,
   MissingFileError,
   throwsA,
-} from "../../src/test/mod.ts";
+} from "../../test/mod.ts";
 import { Bytes, FileSystems, ScribeError } from "../../mod.ts";
 
 function opened() {

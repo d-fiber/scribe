@@ -36,9 +36,9 @@
 
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { join } from "@std/path";
-import { scanApi } from "../src/client/project/api.ts";
-import { routesSource, writeRoutes } from "../src/client/project/routes.ts";
-import { DERIVED_DIRECTORY, ROUTES_FILE } from "../src/client/project/layout.ts";
+import { scanApi } from "../client/project/api.ts";
+import { routesSource, writeRoutes } from "../client/project/routes.ts";
+import { DERIVED_DIRECTORY, ROUTES_FILE } from "../client/project/layout.ts";
 import { inTemporaryRoot } from "./support/workspace.ts";
 import { writeProject, writeSources } from "./support/project.ts";
 

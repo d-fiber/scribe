@@ -46,32 +46,32 @@
  * writing a package and reading what is wrong with one are its `pkg create` and `pkg check`.
  */
 
-export type { Declaration } from "./src/client/pkg/declaration/discovered.ts";
-export { chainOf, ManifestError, manifestFrom, manifestSource } from "./src/client/pkg/declaration/manifest.ts";
+export type { Declaration } from "./client/pkg/declaration/discovered.ts";
+export { chainOf, ManifestError, manifestFrom, manifestSource } from "./client/pkg/declaration/manifest.ts";
 
-export { discover, DiscoveryError, loadDeclaration } from "./src/client/pkg/workspace/discovery.ts";
-export type { DiscoveredPackage } from "./src/client/pkg/workspace/discovery.ts";
-export { detectExports } from "./src/client/pkg/workspace/detect.ts";
-export { outsideOf } from "./src/client/pkg/workspace/imports.ts";
+export { discover, DiscoveryError, loadDeclaration } from "./client/pkg/workspace/discovery.ts";
+export type { DiscoveredPackage } from "./client/pkg/workspace/discovery.ts";
+export { detectExports } from "./client/pkg/workspace/detect.ts";
+export { outsideOf } from "./client/pkg/workspace/imports.ts";
 export {
   entryOf,
   LIBRARY_DIRECTORY,
   MANIFEST_FILE,
   TESTING_DIRECTORY,
   TESTS_DIRECTORY,
-} from "./src/client/pkg/workspace/layout.ts";
-export { LANGUAGE, SCOPE } from "./src/scope.ts";
+} from "./client/pkg/workspace/layout.ts";
+export { LANGUAGE, SCOPE } from "./scope.ts";
 
-export { WorkspaceRegistry } from "./src/client/pkg/resolution/registry.ts";
-export type { Registry } from "./src/client/pkg/resolution/registry.ts";
-export { ResolutionError, resolve } from "./src/client/pkg/resolution/solver.ts";
-export type { Resolution, ResolvedPackage } from "./src/client/pkg/resolution/solver.ts";
+export { WorkspaceRegistry } from "./client/pkg/resolution/registry.ts";
+export type { Registry } from "./client/pkg/resolution/registry.ts";
+export { ResolutionError, resolve } from "./client/pkg/resolution/solver.ts";
+export type { Resolution, ResolvedPackage } from "./client/pkg/resolution/solver.ts";
 
-export { IMPORT_MAP_FILE, importMapFor, RUNTIME_DIRECTORY, writeImportMap } from "./src/client/pkg/emit/import_map.ts";
-export type { Consumer, ImportMap, ImportMapOptions } from "./src/client/pkg/emit/import_map.ts";
-export { resolutionDocument, writeResolution } from "./src/client/pkg/emit/resolution.ts";
-export type { EmittedPackage, EmittedSql, ResolutionDocument } from "./src/client/pkg/emit/resolution.ts";
-export { emit } from "./src/client/pkg/emit/emit.ts";
-export type { Emission } from "./src/client/pkg/emit/emit.ts";
-export { EmissionError, registrationsSource, writeRegistrations } from "./src/client/pkg/emit/registrations.ts";
-export { lockText, writeLock } from "./src/client/pkg/emit/lock.ts";
+export { IMPORT_MAP_FILE, importMapFor, RUNTIME_DIRECTORY, writeImportMap } from "./client/pkg/emit/import_map.ts";
+export type { Consumer, ImportMap, ImportMapOptions } from "./client/pkg/emit/import_map.ts";
+export { resolutionDocument, writeResolution } from "./client/pkg/emit/resolution.ts";
+export type { EmittedPackage, EmittedSql, ResolutionDocument } from "./client/pkg/emit/resolution.ts";
+export { emit } from "./client/pkg/emit/emit.ts";
+export type { Emission } from "./client/pkg/emit/emit.ts";
+export { EmissionError, registrationsSource, writeRegistrations } from "./client/pkg/emit/registrations.ts";
+export { lockText, writeLock } from "./client/pkg/emit/lock.ts";

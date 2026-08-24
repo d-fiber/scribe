@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, expectLater, having, isA, throwsA } from "../../src/test/mod.ts";
+import { contains, equals, expect, expectLater, having, isA, throwsA } from "../../test/mod.ts";
 import { Duration, Future, unawaited } from "../../mod.ts";
 
 Deno.test("a delayed future settles with what it was given, after the wait", async () => {

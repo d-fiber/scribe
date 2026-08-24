@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect } from "../../src/test/mod.ts";
+import { equals, expect } from "../../test/mod.ts";
 import { Current, type CurrentDriver, Currents, type CurrentStore } from "../../mod.ts";
 
 function stacking(): CurrentDriver {

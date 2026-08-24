@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { dirname, join } from "@std/path";
-import { entryOf, MANIFEST_FILE } from "../../src/client/pkg/workspace/layout.ts";
+import { entryOf, MANIFEST_FILE } from "../../client/pkg/workspace/layout.ts";
 
 /** What a written package declares, beyond the name it is written under. */
 export interface WrittenPackage {

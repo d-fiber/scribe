@@ -36,7 +36,7 @@
 
 import { DeclarationError, DEFAULT_DESCRIPTION, handsOverNothing, VersionError } from "@scribe/alchemy";
 import { assertEquals, assertThrows } from "@std/assert";
-import { chainOf, ManifestError, manifestFrom, manifestSource } from "../src/client/pkg/declaration/manifest.ts";
+import { chainOf, ManifestError, manifestFrom, manifestSource } from "../client/pkg/declaration/manifest.ts";
 
 const WHERE = "audiences/package.yaml";
 const ENVIRONMENT = 'environment:\n  scribe: "^3.0.0"\n';

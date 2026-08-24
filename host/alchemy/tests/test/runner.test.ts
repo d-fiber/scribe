@@ -48,7 +48,7 @@ import {
   type TestRunner,
   throwsA,
   when,
-} from "../../src/test/mod.ts";
+} from "../../test/mod.ts";
 
 interface Clock {
   now(): number;
