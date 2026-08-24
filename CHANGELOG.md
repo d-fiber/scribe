@@ -4,6 +4,23 @@ Every entry comes from a commit subject. Versions are not written by hand:
 `.github/versioning/bump.py` compares the public surface of each component and
 decides what the change is worth.
 
+## 11.0.0 (2026-08-24)
+
+Component versions: @scribe/core 5.0.4
+
+### Breaking
+
+- drop the dependencies layer (a88a6b64)
+
+### Changed
+
+- flatten the host test tree (c5b1c2cb)
+- make alchemy and builder plain directories of the tree (515dd90b)
+
+### Tests
+
+- drop the mail and push suites (7ba8102c)
+
 ## 10.0.0 (2026-08-24)
 
 Component versions: @scribe/core 5.0.3, @scribe/sdk 0.1.8
