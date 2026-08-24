@@ -34,13 +34,29 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+/** What Deno sets on the error of an import it could not resolve. */
+const MISSING_MODULE_CODE = "ERR_MODULE_NOT_FOUND";
+
+/**
+ * The message fragments that answer for a thrown value carrying no code.
+ *
+ * They are a fallback rather than the test. Deno words the same failure three
+ * ways -- `Module not found` for a path it cannot find, `Import ... not a
+ * dependency` for a bare specifier, and that one gains `and not in import map`
+ * inside a workspace -- so matching on prose misses the case an unmounted
+ * project produces on every boot.
+ */
 const MISSING_MODULE_MARKERS = [
   "Module not found",
   "Cannot find module",
+  "not a dependency",
   "os error 2",
 ] as const;
 
+/** Whether `error` reports a module that is absent rather than one that threw. */
 export function isMissingModule(error: unknown): boolean {
+  if (error instanceof Error && (error as { code?: unknown }).code === MISSING_MODULE_CODE) return true;
+
   const message = error instanceof Error ? error.message : String(error);
   return MISSING_MODULE_MARKERS.some((marker) => message.includes(marker));
 }

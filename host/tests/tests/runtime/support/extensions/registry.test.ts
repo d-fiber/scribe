@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { ExtensionRegistry, type Extension } from "@scribe/core/runtime/support/extensions/registry.ts";
+import { type Extension, ExtensionRegistry } from "@scribe/core/runtime/support/extensions/registry.ts";
 import { isMissingModule } from "@scribe/core/runtime/support/extensions/missing_module.ts";
 import { OptionalExtension } from "@scribe/core/runtime/support/extensions/optional_extension.ts";
 import { assert, assertEquals, assertFalse, assertThrows } from "@std/assert";
@@ -105,7 +105,7 @@ Deno.test("ExtensionRegistry lists what it knows", () => {
 
 Deno.test("OptionalExtension swallows a missing module and yields null", async () => {
   const extension = new OptionalExtension("absent", () => {
-    throw new Error("Module not found \"file:///nope.ts\".");
+    throw new Error('Module not found "file:///nope.ts".');
   });
 
   assertEquals(await extension.load(), null);
@@ -134,4 +134,19 @@ Deno.test("isMissingModule recognises the shapes Deno reports", () => {
 
   assertFalse(isMissingModule(new TypeError("x is not a function")));
   assertFalse(isMissingModule(new Error("boom")));
+});
+
+Deno.test("isMissingModule recognises an unmapped specifier by its code", () => {
+  const unmapped = Object.assign(
+    new TypeError('Import "@app/extensions/event_driven/cron/cron.ts" not a dependency and not in import map'),
+    { code: "ERR_MODULE_NOT_FOUND" },
+  );
+
+  assert(isMissingModule(unmapped));
+});
+
+Deno.test("isMissingModule leaves a module that threw while evaluating alone", () => {
+  const broken = Object.assign(new TypeError("x is not a function"), { code: "ERR_INVALID_STATE" });
+
+  assertFalse(isMissingModule(broken));
 });
