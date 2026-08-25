@@ -106,21 +106,14 @@ export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema } from "./s
 
 export { cache } from "./src/capabilities/cache.ts";
 export { host } from "./src/capabilities/channel.ts";
-export { remoteConfigs } from "./src/capabilities/devops.ts";
 export { CapabilityError } from "./src/capabilities/error.ts";
 export { hooks, queue } from "./src/capabilities/event_driven.ts";
-export { geospatial } from "./src/capabilities/geospatial.ts";
-export { messagings } from "./src/capabilities/messagings.ts";
-export type { MailInput, PushInput, SmsInput } from "./src/capabilities/messagings.ts";
 export { realtime } from "./src/capabilities/realtime.ts";
-export { recommendation } from "./src/capabilities/recommendation.ts";
 export type { FilterBuilder } from "./src/capabilities/rest/filter.ts";
 export { rest, RestQuery } from "./src/capabilities/rest/query.ts";
 export type { Page } from "./src/capabilities/rest/query.ts";
 export { search } from "./src/capabilities/search.ts";
 export type { SearchPage } from "./src/capabilities/search.ts";
-export { auth, rbac, vpn } from "./src/capabilities/security.ts";
-export type { Account, SessionSummary, VpnPeer } from "./src/capabilities/security.ts";
 export { storage } from "./src/capabilities/storage.ts";
 export type { ObjectLocation, StoredObject } from "./src/capabilities/storage.ts";
 
@@ -138,7 +131,6 @@ export { log } from "./src/observability/logger.ts";
 export { loggedEntry, LogSink } from "./src/observability/log_sink.ts";
 export type { LoggedEntry, LoggedLevel } from "./src/observability/log_sink.ts";
 export { SinkRegistry } from "./src/observability/sink_registry.ts";
-export { trace } from "./src/observability/tracer.ts";
 
 export { UnaryClient } from "./src/transport/client.ts";
 export type { CallCredentials, Fetcher } from "./src/transport/client.ts";
