@@ -1,40 +1,36 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@hono/hono@4": "4.13.4",
-    "jsr:@nats-io/jetstream@3": "3.4.0",
+    "jsr:@hono/hono@4.13.4": "4.13.4",
+    "jsr:@nats-io/jetstream@3.4.0": "3.4.0",
     "jsr:@nats-io/nats-core@3.4.0": "3.4.0",
     "jsr:@nats-io/nkeys@2.0.3": "2.0.3",
     "jsr:@nats-io/nuid@3.0.0": "3.0.0",
-    "jsr:@nats-io/transport-deno@3": "3.4.0",
-    "jsr:@panva/jose@6": "6.2.10",
-    "jsr:@std/assert@1": "1.0.19",
+    "jsr:@nats-io/transport-deno@3.4.0": "3.4.0",
+    "jsr:@panva/jose@6.2.10": "6.2.10",
+    "jsr:@std/assert@1.0.19": "1.0.19",
     "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/async@^1.5.0": "1.5.0",
     "jsr:@std/bytes@^1.0.5": "1.0.6",
     "jsr:@std/data-structures@^1.1.2": "1.1.2",
     "jsr:@std/internal@^1.0.12": "1.0.14",
     "jsr:@std/io@0.225.2": "0.225.2",
-    "jsr:@std/media-types@1": "1.1.0",
-    "jsr:@std/testing@1": "1.0.20",
-    "npm:@bufbuild/protobuf@2": "2.14.0",
-    "npm:@jsquash/webp@1": "1.5.0",
-    "npm:@opensearch-project/opensearch@2": "2.13.0",
-    "npm:@react-email/components@0": "0.5.7_react@19.2.8_react-dom@19.2.7__react@19.2.8",
-    "npm:@react-email/render@1": "1.4.0_react@19.2.8_react-dom@19.2.7__react@19.2.8",
-    "npm:@supabase/postgrest-js@1": "1.21.4",
-    "npm:@supabase/supabase-js@2": "2.110.2",
-    "npm:bcryptjs@2": "2.4.3",
-    "npm:blurhash@2": "2.0.5",
-    "npm:croner@8": "8.1.2",
-    "npm:fast-png@6": "6.4.0",
-    "npm:ioredis@5": "5.11.1",
-    "npm:jpeg-js@0.4": "0.4.4",
-    "npm:libphonenumber-js@1": "1.13.9",
-    "npm:lucide-react@1": "1.34.0_react@19.2.8",
-    "npm:nodemailer@6": "6.10.1",
-    "npm:react-dom@19": "19.2.7_react@19.2.8",
-    "npm:react@19": "19.2.8",
+    "jsr:@std/media-types@1.1.0": "1.1.0",
+    "jsr:@std/testing@1.0.20": "1.0.20",
+    "npm:@bufbuild/protobuf@2.14.0": "2.14.0",
+    "npm:@jsquash/webp@1.5.0": "1.5.0",
+    "npm:@opensearch-project/opensearch@2.13.0": "2.13.0",
+    "npm:@react-email/components@0.5.7": "0.5.7_react@19.2.8_react-dom@19.2.7__react@19.2.8",
+    "npm:@supabase/postgrest-js@1.21.4": "1.21.4",
+    "npm:blurhash@2.0.5": "2.0.5",
+    "npm:croner@8.1.2": "8.1.2",
+    "npm:fast-png@6.4.0": "6.4.0",
+    "npm:ioredis@5.11.1": "5.11.1",
+    "npm:jpeg-js@0.4.4": "0.4.4",
+    "npm:libphonenumber-js@1.13.9": "1.13.9",
+    "npm:lucide-react@1.24.0": "1.24.0_react@19.2.8",
+    "npm:react-dom@19.2.7": "19.2.7_react@19.2.8",
+    "npm:react@19.2.8": "19.2.8",
     "npm:tweetnacl@1.0.3": "1.0.3"
   },
   "jsr": {
@@ -312,26 +308,11 @@
         "selderee"
       ]
     },
-    "@supabase/auth-js@2.110.2": {
-      "integrity": "sha512-Qj7a6EDP+AMMQFWqGv+qFa8r6re//dk+qQI5bA0KK+PZmnI3JPu97TDeNt6SMiQ2FkklP79hP2yDFYSnA989OA==",
-      "dependencies": [
-        "tslib"
-      ]
-    },
-    "@supabase/functions-js@2.110.2": {
-      "integrity": "sha512-ZjjqrXpxM9/rE+eAtZxiK45EWy9EBoJQ322Q5Y75LccYQNh212neHTgXP/o4MIzmH0LNXT8UzvTZtQOfOzyoeQ==",
-      "dependencies": [
-        "tslib"
-      ]
-    },
     "@supabase/node-fetch@2.6.15": {
       "integrity": "sha512-1ibVeYUacxWYi9i0cf5efil6adJ9WRyZBLivgjs+AUpewx1F3xPi7gLgaASI2SmIQxPoCEjAsLAzKPgMJVgOUQ==",
       "dependencies": [
         "whatwg-url"
       ]
-    },
-    "@supabase/phoenix@0.4.4": {
-      "integrity": "sha512-Gt0pqoXuIqX/8dvG0OKp/wMCobXNH3klNbUPBNyOfN0YA1IswrM3HyWFMOPk1Jy+BRaIyDPcFx4jLBwHNmlyfQ=="
     },
     "@supabase/postgrest-js@1.21.4": {
       "integrity": "sha512-TxZCIjxk6/dP9abAi89VQbWWMBbybpGWyvmIzTd79OeravM13OjR/YEYeyUOPcM1C3QyvXkvPZhUfItvmhY1IQ==",
@@ -339,44 +320,11 @@
         "@supabase/node-fetch"
       ]
     },
-    "@supabase/postgrest-js@2.110.2": {
-      "integrity": "sha512-++LBmcIMwCtgO4tISQUmo9+2xkRwHQqS8ZKMCnhXLe9P8k8YQRXuMoh/RiSzQSoev8gqet0W7yOboW0cUxnt0Q==",
-      "dependencies": [
-        "tslib"
-      ]
-    },
-    "@supabase/realtime-js@2.110.2": {
-      "integrity": "sha512-z3jTOTPgyn6E3r6dVOOQ10He4yAMB2czjFw7xVdX3s16MHElna5rY1gVaePs0NIo6xvtMYbtmOXlFaFt/ePLpg==",
-      "dependencies": [
-        "@supabase/phoenix",
-        "tslib"
-      ]
-    },
-    "@supabase/storage-js@2.110.2": {
-      "integrity": "sha512-EhsRSwSnmQefKJsAxoRUZ0hvHr92ECM8DDGAKR5z0HdoJx4heI60PjHUTruVNZxKX6XeobLGDyLud020Bw1iwg==",
-      "dependencies": [
-        "iceberg-js",
-        "tslib"
-      ]
-    },
-    "@supabase/supabase-js@2.110.2": {
-      "integrity": "sha512-r9q9w4ZQ6mOjh36aqUNFSisBF611vzpO8JphBESr2Q1SWvmGFQeI7Jq7Y+PaNMZ6Zszz+S2yTlJStCpnaMSnQg==",
-      "dependencies": [
-        "@supabase/auth-js",
-        "@supabase/functions-js",
-        "@supabase/postgrest-js@2.110.2",
-        "@supabase/realtime-js",
-        "@supabase/storage-js"
-      ]
-    },
     "@types/pako@2.0.4": {
       "integrity": "sha512-VWDCbrLeVXJM9fihYodcLiIv0ku+AlOa/TQ1SvYOaBuyrSKgEcro95LJyIsJ4vSo6BXIxOKxiJAat04CmST9Fw=="
     },
     "aws4@1.13.2": {
       "integrity": "sha512-lHe62zvbTB5eEABUVi/AwVh0ZKY9rMMDhmm+eeyuuUQbQ3+J+fONVQOZyj+DdrvD4BY33uYniyRJ4UJIaSKAfw=="
-    },
-    "bcryptjs@2.4.3": {
-      "integrity": "sha512-V/Hy/X9Vt7f3BbPJEi8BdVFMByHi+jNXrYkW3huaybV/kQ0KJg0Y6PkEMbn+zeT+i+SiKZ/HMqJGIIt4LZDqNQ=="
     },
     "blurhash@2.0.5": {
       "integrity": "sha512-cRygWd7kGBQO3VEhPiTgq4Wc43ctsM+o46urrmPOiuAe+07fzlSB9OJVdpgDL0jPqXUVQ9ht7aq7kxOeJHRK+w=="
@@ -460,9 +408,6 @@
         "entities"
       ]
     },
-    "iceberg-js@0.8.1": {
-      "integrity": "sha512-1dhVQZXhcHje7798IVM+xoo/1ZdVfzOMIc8/rgVSijRK38EDqOJoGula9N/8ZI5RD8QTxNQtK/Gozpr+qUqRRA=="
-    },
     "iobuffer@5.4.0": {
       "integrity": "sha512-DRebOWuqDvxunfkNJAlc3IzWIPD5xVxwUNbHr7xKB8E6aLJxIPfNX3CoMJghcFjpv6RWQsrcJbghtEwSPoJqMA=="
     },
@@ -491,8 +436,8 @@
     "libphonenumber-js@1.13.9": {
       "integrity": "sha512-VNS5vWMM7r0P66BYv+TQJATxExEgLxN+34hfHDVhDkUsGAE4cRg0shCNSLTXNKm7nIUscC7AfB51TjxEeF7msQ=="
     },
-    "lucide-react@1.34.0_react@19.2.8": {
-      "integrity": "sha512-vnjGJNI7Htk5+oWW8gXGuaLgwgAb0T6/iZbBrp9JCfRFwdNWZ0YTm3eyxjOLgwN6r8iyAf3UA70zNmBRBNv7yg==",
+    "lucide-react@1.24.0_react@19.2.8": {
+      "integrity": "sha512-YT6mBD8lGKkg4nM39enlm94/sfJIiW0YKUT60fBy4YK8tai31ylg1VhGNWxkpSKHo9UagfnZqwIff3HTDQwXeA==",
       "dependencies": [
         "react"
       ]
@@ -503,9 +448,6 @@
     },
     "ms@2.1.3": {
       "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA=="
-    },
-    "nodemailer@6.10.1": {
-      "integrity": "sha512-Z+iLaBGVaSjbIzQ4pX6XV41HrooLsQ10ZWPUehGmuantvzWoDVBnmsdUcOIDM1t+yPor5pDhVlDESgOMEGxhHA=="
     },
     "pako@2.2.0": {
       "integrity": "sha512-zJq6RP/5q+TO2OpFV3FHzlPnFjmkb7Nc99a5SNjJE+uu/PkpChs+NIZSSzbBoD+6kjiISXjfYdwj1ZRQ81dz/w=="
@@ -570,9 +512,6 @@
     "tr46@0.0.3": {
       "integrity": "sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw=="
     },
-    "tslib@2.8.1": {
-      "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="
-    },
     "tweetnacl@1.0.3": {
       "integrity": "sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw=="
     },
@@ -592,33 +531,28 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@hono/hono@4",
-      "jsr:@nats-io/jetstream@3",
-      "jsr:@nats-io/transport-deno@3",
-      "jsr:@panva/jose@6",
-      "jsr:@std/assert@1",
-      "jsr:@std/media-types@1",
-      "jsr:@std/path@1",
-      "jsr:@std/testing@1",
-      "jsr:@std/yaml@1",
-      "npm:@bufbuild/protobuf@2",
-      "npm:@jsquash/webp@1",
-      "npm:@opensearch-project/opensearch@2",
-      "npm:@react-email/components@0",
-      "npm:@react-email/render@1",
-      "npm:@supabase/postgrest-js@1",
-      "npm:@supabase/supabase-js@2",
-      "npm:bcryptjs@2",
-      "npm:blurhash@2",
-      "npm:croner@8",
-      "npm:fast-png@6",
-      "npm:ioredis@5",
-      "npm:jpeg-js@0.4",
-      "npm:libphonenumber-js@1",
-      "npm:lucide-react@1",
-      "npm:nodemailer@6",
-      "npm:react-dom@19",
-      "npm:react@19"
+      "jsr:@hono/hono@4.13.4",
+      "jsr:@nats-io/jetstream@3.4.0",
+      "jsr:@nats-io/transport-deno@3.4.0",
+      "jsr:@panva/jose@6.2.10",
+      "jsr:@std/assert@1.0.19",
+      "jsr:@std/media-types@1.1.0",
+      "jsr:@std/testing@1.0.20",
+      "npm:@bufbuild/protobuf@2.14.0",
+      "npm:@jsquash/webp@1.5.0",
+      "npm:@opensearch-project/opensearch@2.13.0",
+      "npm:@react-email/components@0.5.7",
+      "npm:@supabase/postgrest-js@1.21.4",
+      "npm:@types/react@19",
+      "npm:blurhash@2.0.5",
+      "npm:croner@8.1.2",
+      "npm:fast-png@6.4.0",
+      "npm:ioredis@5.11.1",
+      "npm:jpeg-js@0.4.4",
+      "npm:libphonenumber-js@1.13.9",
+      "npm:lucide-react@1.24.0",
+      "npm:react-dom@19.2.7",
+      "npm:react@19.2.8"
     ]
   }
 }
