@@ -39,7 +39,6 @@ set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
 SCOPE="gen:proto"
-PRESERVED="sdk/js/gen/schema/enums.ts"
 
 say() {
   echo "[$SCOPE] $1"
@@ -116,24 +115,11 @@ protoc -I "$STAGE" --descriptor_set_out=/dev/null "${SOURCES[@]}" \
   || fail "protoc rejected the contract."
 say "${#SOURCES[@]} .proto validated."
 
-KEPT=""
-if [ -f "$ROOT/$PRESERVED" ]; then
-  KEPT=$(mktemp)
-  cp "$ROOT/$PRESERVED" "$KEPT"
-fi
-
 generate js protoc-gen-es \
   "npm install --prefix sdk/js @bufbuild/protobuf @bufbuild/protoc-gen-es" \
   sdk/js/gen \
   "--es_out=$ROOT/sdk/js/gen" \
   "--es_opt=target=ts,import_extension=.ts,json_types=true"
-
-if [ -n "$KEPT" ]; then
-  mkdir -p "$(dirname "$ROOT/$PRESERVED")"
-  cp "$KEPT" "$ROOT/$PRESERVED"
-  rm -f "$KEPT"
-  say "restored $PRESERVED, which the js target wipes with its output directory."
-fi
 
 generate dart protoc-gen-dart \
   "dart pub global activate protoc_plugin" \

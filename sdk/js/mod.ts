@@ -37,19 +37,14 @@
 export { majorOf, PROTOCOL_VERSION, SDK_VERSION, speaksSameContract, WORKER_LANGUAGE } from "./src/protocol/version.ts";
 
 export {
-  AvatarType,
-  CampaignAudience,
   ClientType,
   DeviceCategory,
   DeviceOs,
   DeviceThemeMode,
   enumValues,
-  FeedbackType,
-  Gender,
   Localization,
-  RemoteConfigAudience,
   SocialProvider,
-} from "./gen/schema/enums.ts";
+} from "./src/contracts/enums.ts";
 
 export { Caller, Listen, Need } from "./src/contracts/access.ts";
 export type { RouteMethod } from "./src/contracts/access.ts";

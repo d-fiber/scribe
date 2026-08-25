@@ -34,79 +34,90 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-// This file is auto-generated do not edit manually.
-// Run: poppin gen code
-
+/**
+ * The values a string enum declares, in declaration order.
+ *
+ * Useful to check that a value received from a caller is one the enum admits, since
+ * TypeScript erases the enum type at runtime and leaves only the object.
+ */
 export function enumValues<T extends object>(e: T): T[keyof T][] {
   return Object.values(e) as T[keyof T][];
 }
 
-export enum AvatarType {
-  PHOTO = "photo",
-  TEXT = "text",
-  PLACEHOLDER = "placeholder",
-}
-
-export enum CampaignAudience {
-  USER = "user",
-  ADMIN = "admin",
-}
-
+/** The kind of program a call comes from. */
 export enum ClientType {
+  /** A native mobile or desktop application. */
   APP = "app",
+
+  /** A page loaded in a browser. */
   WEB = "web",
+
+  /** A program that runs without someone watching it, such as a job or a service. */
   SOFT = "soft",
 }
 
+/** The form factor a device reports for itself. */
 export enum DeviceCategory {
+  /** A handset. */
   PHONE = "phone",
+
+  /** A tablet. */
   TABLET = "tablet",
+
+  /** A laptop or a desktop machine. */
   DESKTOP = "desktop",
+
+  /** The device sent nothing the framework recognises. */
   UNKNOWN = "unknown",
 }
 
+/** The operating system a device runs. */
 export enum DeviceOs {
+  /** Android. */
   ANDROID = "android",
+
+  /** iOS and iPadOS. */
   IOS = "ios",
+
+  /** A Linux distribution. */
   LINUX = "linux",
+
+  /** macOS. */
   MACOS = "macos",
+
+  /** Windows. */
   WINDOWS = "windows",
+
+  /** The device sent nothing the framework recognises. */
   UNKNOWN = "unknown",
 }
 
+/** The colour scheme a device asks the interface to use. */
 export enum DeviceThemeMode {
+  /** Whatever the operating system is set to. */
   SYSTEM = "system",
+
+  /** The light scheme, whatever the operating system is set to. */
   LIGHT = "light",
+
+  /** The dark scheme, whatever the operating system is set to. */
   DARK = "dark",
 }
 
-export enum FeedbackType {
-  VERY_SATISFIED = "very_satisfied",
-  SLIGHTLY_SATISFIED = "slightly_satisfied",
-  NEUTRAL = "neutral",
-  SLIGHTLY_DISSATISFIED = "slightly_dissatisfied",
-  VERY_DISSATISFIED = "very_dissatisfied",
-}
-
-export enum Gender {
-  MALE = "male",
-  FEMALE = "female",
-  PREFER_NOT_TO_SAY = "prefer_not_to_say",
-}
-
+/** The language a device asks to be answered in. */
 export enum Localization {
+  /** English. */
   ENGLISH = "english",
+
+  /** French. */
   FRENCH = "french",
 }
 
-export enum RemoteConfigAudience {
-  PUBLIC = "public",
-  AUTHENTICATED = "authenticated",
-  USER = "user",
-  ADMIN = "admin",
-}
-
+/** An identity provider a caller can sign in or sign up through. */
 export enum SocialProvider {
+  /** Google, reached with a Google identity token. */
   GOOGLE = "google",
+
+  /** Apple, reached with an Apple identity token. */
   APPLE = "apple",
 }
