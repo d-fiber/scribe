@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/packages/foundation/protocol/cron/cron.proto.
  */
 export const file_scribe_host_packages_foundation_protocol_cron_cron: GenFile = /*@__PURE__*/
-  fileDesc("CjhzY3JpYmUvaG9zdC9wYWNrYWdlcy9mb3VuZGF0aW9uL3Byb3RvY29sL2Nyb24vY3Jvbi5wcm90bxIWc2NyaWJlLnJ1bnRpbWUuY3Jvbi52MSJyCgtDcm9uVHJpZ2dlchIPCgdjcm9uX2lkGAEgASgJEhAKCHRyYWNlX2lkGAIgASgJEhQKDHNjaGVkdWxlZF9hdBgDIAEoAxIQCghmaXJlZF9hdBgEIAEoAxIYChBjYXBhYmlsaXR5X3Rva2VuGAUgASgJIkMKC0Nyb25PdXRjb21lEhEKCWNvbXBsZXRlZBgBIAEoCBIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlMmMKDENyb25EaXNwYXRjaBJTCgdUcmlnZ2VyEiMuc2NyaWJlLnJ1bnRpbWUuY3Jvbi52MS5Dcm9uVHJpZ2dlchojLnNjcmliZS5ydW50aW1lLmNyb24udjEuQ3Jvbk91dGNvbWViBnByb3RvMw", [file_scribe_protocol_common]);
+  fileDesc(
+    "CjhzY3JpYmUvaG9zdC9wYWNrYWdlcy9mb3VuZGF0aW9uL3Byb3RvY29sL2Nyb24vY3Jvbi5wcm90bxIWc2NyaWJlLnJ1bnRpbWUuY3Jvbi52MSJyCgtDcm9uVHJpZ2dlchIPCgdjcm9uX2lkGAEgASgJEhAKCHRyYWNlX2lkGAIgASgJEhQKDHNjaGVkdWxlZF9hdBgDIAEoAxIQCghmaXJlZF9hdBgEIAEoAxIYChBjYXBhYmlsaXR5X3Rva2VuGAUgASgJIkMKC0Nyb25PdXRjb21lEhEKCWNvbXBsZXRlZBgBIAEoCBIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlMmMKDENyb25EaXNwYXRjaBJTCgdUcmlnZ2VyEiMuc2NyaWJlLnJ1bnRpbWUuY3Jvbi52MS5Dcm9uVHJpZ2dlchojLnNjcmliZS5ydW50aW1lLmNyb24udjEuQ3Jvbk91dGNvbWViBnByb3RvMw",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.runtime.cron.v1.CronTrigger
@@ -114,7 +117,7 @@ export type CronTriggerJson = {
  * Describes the message scribe.runtime.cron.v1.CronTrigger.
  * Use `create(CronTriggerSchema)` to create a new message.
  */
-export const CronTriggerSchema: GenMessage<CronTrigger, {jsonType: CronTriggerJson}> = /*@__PURE__*/
+export const CronTriggerSchema: GenMessage<CronTrigger, { jsonType: CronTriggerJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_cron_cron, 0);
 
 /**
@@ -151,7 +154,7 @@ export type CronOutcomeJson = {
  * Describes the message scribe.runtime.cron.v1.CronOutcome.
  * Use `create(CronOutcomeSchema)` to create a new message.
  */
-export const CronOutcomeSchema: GenMessage<CronOutcome, {jsonType: CronOutcomeJson}> = /*@__PURE__*/
+export const CronOutcomeSchema: GenMessage<CronOutcome, { jsonType: CronOutcomeJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_cron_cron, 1);
 
 /**
@@ -165,7 +168,6 @@ export const CronDispatch: GenService<{
     methodKind: "unary";
     input: typeof CronTriggerSchema;
     output: typeof CronOutcomeSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_packages_foundation_protocol_cron_cron, 0);
-

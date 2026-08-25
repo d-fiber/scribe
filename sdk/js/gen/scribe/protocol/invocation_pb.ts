@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/protocol/invocation.proto.
  */
 export const file_scribe_protocol_invocation: GenFile = /*@__PURE__*/
-  fileDesc("CiBzY3JpYmUvcHJvdG9jb2wvaW52b2NhdGlvbi5wcm90bxIJc2NyaWJlLnYxIioKBVJ1bGVzEgwKBHJvbGUYASABKAkSEwoLcGVybWlzc2lvbnMYAiADKAkiaQoISWRlbnRpdHkSCgoCaWQYASABKAkSDQoFZW1haWwYAiABKAkSIQoGY2FsbGVyGAMgASgOMhEuc2NyaWJlLnYxLkNhbGxlchIfCgVydWxlcxgEIAEoCzIQLnNjcmliZS52MS5SdWxlcyJCCgxMb2NhbGl6YXRpb24SEAoIbGFuZ3VhZ2UYASABKAkSDgoGcmVnaW9uGAIgASgJEhAKCHRpbWV6b25lGAMgASgJIrICCgZEZXZpY2USEQoJZGV2aWNlX2lkGAEgASgJEg4KBmNsaWVudBgCIAEoCRIKCgJvcxgDIAEoCRINCgVtb2RlbBgEIAEoCRITCgthcHBfdmVyc2lvbhgFIAEoCRIaChJpc19waHlzaWNhbF9kZXZpY2UYBiABKAgSFwoPZGV2aWNlX2NhdGVnb3J5GAcgASgJEhoKEm5vdGlmaWNhdGlvbl90b2tlbhgIIAEoCRIUCgxkZXZpY2VfdG9rZW4YCSABKAkSLQoMbG9jYWxpemF0aW9uGAogASgLMhcuc2NyaWJlLnYxLkxvY2FsaXphdGlvbhISCgp0aGVtZV9tb2RlGAsgASgJEg8KB2JpbmRpbmcYDCABKAkSCwoDaWF0GA0gASgDEg0KBW5vbmNlGA4gASgJIisKCklwTG9jYXRpb24SDAoEY2l0eRgBIAEoCRIPCgdjb3VudHJ5GAIgASgJIicKC0Nvb3JkaW5hdGVzEgsKA2xhdBgBIAEoARILCgNsbmcYAiABKAEipgMKB1JlcXVlc3QSIQoGbWV0aG9kGAEgASgOMhEuc2NyaWJlLnYxLk1ldGhvZBIMCgRwYXRoGAIgASgJEjcKC3BhdGhfcGFyYW1zGAMgAygLMiIuc2NyaWJlLnYxLlJlcXVlc3QuUGF0aFBhcmFtc0VudHJ5EiwKBXF1ZXJ5GAQgAygLMh0uc2NyaWJlLnYxLlJlcXVlc3QuUXVlcnlFbnRyeRIwCgdoZWFkZXJzGAUgAygLMh8uc2NyaWJlLnYxLlJlcXVlc3QuSGVhZGVyc0VudHJ5EgwKBGJvZHkYBiABKAwSCgoCaXAYByABKAkSEgoKdXNlcl9hZ2VudBgIIAEoCRISCgpzZXNzaW9uX2lkGAkgASgJGjEKD1BhdGhQYXJhbXNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBGiwKClF1ZXJ5RW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ARouCgxIZWFkZXJzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASL5AQoKSW52b2NhdGlvbhIVCg1pbnZvY2F0aW9uX2lkGAEgASgJEhAKCHRyYWNlX2lkGAIgASgJEhAKCHJvdXRlX2lkGAMgASgJEiMKB3JlcXVlc3QYBCABKAsyEi5zY3JpYmUudjEuUmVxdWVzdBIlCghpZGVudGl0eRgFIAEoCzITLnNjcmliZS52MS5JZGVudGl0eRIhCgZkZXZpY2UYBiABKAsyES5zY3JpYmUudjEuRGV2aWNlEicKCGxvY2F0aW9uGAcgASgLMhUuc2NyaWJlLnYxLklwTG9jYXRpb24SGAoQY2FwYWJpbGl0eV90b2tlbhgIIAEoCSLBAQoFUmVwbHkSFQoNaW52b2NhdGlvbl9pZBgBIAEoCRIOCgZzdGF0dXMYAiABKA0SLgoHaGVhZGVycxgDIAMoCzIdLnNjcmliZS52MS5SZXBseS5IZWFkZXJzRW50cnkSDAoEYm9keRgEIAEoDBIjCgdmYWlsdXJlGAUgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUaLgoMSGVhZGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEyOwoGV29ya2VyEjEKBkludm9rZRIVLnNjcmliZS52MS5JbnZvY2F0aW9uGhAuc2NyaWJlLnYxLlJlcGx5YgZwcm90bzM", [file_scribe_protocol_common]);
+  fileDesc(
+    "CiBzY3JpYmUvcHJvdG9jb2wvaW52b2NhdGlvbi5wcm90bxIJc2NyaWJlLnYxIioKBVJ1bGVzEgwKBHJvbGUYASABKAkSEwoLcGVybWlzc2lvbnMYAiADKAkiaQoISWRlbnRpdHkSCgoCaWQYASABKAkSDQoFZW1haWwYAiABKAkSIQoGY2FsbGVyGAMgASgOMhEuc2NyaWJlLnYxLkNhbGxlchIfCgVydWxlcxgEIAEoCzIQLnNjcmliZS52MS5SdWxlcyJCCgxMb2NhbGl6YXRpb24SEAoIbGFuZ3VhZ2UYASABKAkSDgoGcmVnaW9uGAIgASgJEhAKCHRpbWV6b25lGAMgASgJIrICCgZEZXZpY2USEQoJZGV2aWNlX2lkGAEgASgJEg4KBmNsaWVudBgCIAEoCRIKCgJvcxgDIAEoCRINCgVtb2RlbBgEIAEoCRITCgthcHBfdmVyc2lvbhgFIAEoCRIaChJpc19waHlzaWNhbF9kZXZpY2UYBiABKAgSFwoPZGV2aWNlX2NhdGVnb3J5GAcgASgJEhoKEm5vdGlmaWNhdGlvbl90b2tlbhgIIAEoCRIUCgxkZXZpY2VfdG9rZW4YCSABKAkSLQoMbG9jYWxpemF0aW9uGAogASgLMhcuc2NyaWJlLnYxLkxvY2FsaXphdGlvbhISCgp0aGVtZV9tb2RlGAsgASgJEg8KB2JpbmRpbmcYDCABKAkSCwoDaWF0GA0gASgDEg0KBW5vbmNlGA4gASgJIisKCklwTG9jYXRpb24SDAoEY2l0eRgBIAEoCRIPCgdjb3VudHJ5GAIgASgJIicKC0Nvb3JkaW5hdGVzEgsKA2xhdBgBIAEoARILCgNsbmcYAiABKAEipgMKB1JlcXVlc3QSIQoGbWV0aG9kGAEgASgOMhEuc2NyaWJlLnYxLk1ldGhvZBIMCgRwYXRoGAIgASgJEjcKC3BhdGhfcGFyYW1zGAMgAygLMiIuc2NyaWJlLnYxLlJlcXVlc3QuUGF0aFBhcmFtc0VudHJ5EiwKBXF1ZXJ5GAQgAygLMh0uc2NyaWJlLnYxLlJlcXVlc3QuUXVlcnlFbnRyeRIwCgdoZWFkZXJzGAUgAygLMh8uc2NyaWJlLnYxLlJlcXVlc3QuSGVhZGVyc0VudHJ5EgwKBGJvZHkYBiABKAwSCgoCaXAYByABKAkSEgoKdXNlcl9hZ2VudBgIIAEoCRISCgpzZXNzaW9uX2lkGAkgASgJGjEKD1BhdGhQYXJhbXNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBGiwKClF1ZXJ5RW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ARouCgxIZWFkZXJzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASL5AQoKSW52b2NhdGlvbhIVCg1pbnZvY2F0aW9uX2lkGAEgASgJEhAKCHRyYWNlX2lkGAIgASgJEhAKCHJvdXRlX2lkGAMgASgJEiMKB3JlcXVlc3QYBCABKAsyEi5zY3JpYmUudjEuUmVxdWVzdBIlCghpZGVudGl0eRgFIAEoCzITLnNjcmliZS52MS5JZGVudGl0eRIhCgZkZXZpY2UYBiABKAsyES5zY3JpYmUudjEuRGV2aWNlEicKCGxvY2F0aW9uGAcgASgLMhUuc2NyaWJlLnYxLklwTG9jYXRpb24SGAoQY2FwYWJpbGl0eV90b2tlbhgIIAEoCSLBAQoFUmVwbHkSFQoNaW52b2NhdGlvbl9pZBgBIAEoCRIOCgZzdGF0dXMYAiABKA0SLgoHaGVhZGVycxgDIAMoCzIdLnNjcmliZS52MS5SZXBseS5IZWFkZXJzRW50cnkSDAoEYm9keRgEIAEoDBIjCgdmYWlsdXJlGAUgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUaLgoMSGVhZGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEyOwoGV29ya2VyEjEKBkludm9rZRIVLnNjcmliZS52MS5JbnZvY2F0aW9uGhAuc2NyaWJlLnYxLlJlcGx5YgZwcm90bzM",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.v1.Rules
@@ -84,7 +87,7 @@ export type RulesJson = {
  * Describes the message scribe.v1.Rules.
  * Use `create(RulesSchema)` to create a new message.
  */
-export const RulesSchema: GenMessage<Rules, {jsonType: RulesJson}> = /*@__PURE__*/
+export const RulesSchema: GenMessage<Rules, { jsonType: RulesJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_invocation, 0);
 
 /**
@@ -141,7 +144,7 @@ export type IdentityJson = {
  * Describes the message scribe.v1.Identity.
  * Use `create(IdentitySchema)` to create a new message.
  */
-export const IdentitySchema: GenMessage<Identity, {jsonType: IdentityJson}> = /*@__PURE__*/
+export const IdentitySchema: GenMessage<Identity, { jsonType: IdentityJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_invocation, 1);
 
 /**
@@ -188,7 +191,7 @@ export type LocalizationJson = {
  * Describes the message scribe.v1.Localization.
  * Use `create(LocalizationSchema)` to create a new message.
  */
-export const LocalizationSchema: GenMessage<Localization, {jsonType: LocalizationJson}> = /*@__PURE__*/
+export const LocalizationSchema: GenMessage<Localization, { jsonType: LocalizationJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_invocation, 2);
 
 /**
@@ -345,7 +348,7 @@ export type DeviceJson = {
  * Describes the message scribe.v1.Device.
  * Use `create(DeviceSchema)` to create a new message.
  */
-export const DeviceSchema: GenMessage<Device, {jsonType: DeviceJson}> = /*@__PURE__*/
+export const DeviceSchema: GenMessage<Device, { jsonType: DeviceJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_invocation, 3);
 
 /**
@@ -382,7 +385,7 @@ export type IpLocationJson = {
  * Describes the message scribe.v1.IpLocation.
  * Use `create(IpLocationSchema)` to create a new message.
  */
-export const IpLocationSchema: GenMessage<IpLocation, {jsonType: IpLocationJson}> = /*@__PURE__*/
+export const IpLocationSchema: GenMessage<IpLocation, { jsonType: IpLocationJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_invocation, 4);
 
 /**
@@ -419,7 +422,7 @@ export type CoordinatesJson = {
  * Describes the message scribe.v1.Coordinates.
  * Use `create(CoordinatesSchema)` to create a new message.
  */
-export const CoordinatesSchema: GenMessage<Coordinates, {jsonType: CoordinatesJson}> = /*@__PURE__*/
+export const CoordinatesSchema: GenMessage<Coordinates, { jsonType: CoordinatesJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_invocation, 5);
 
 /**
@@ -526,7 +529,7 @@ export type RequestJson = {
  * Describes the message scribe.v1.Request.
  * Use `create(RequestSchema)` to create a new message.
  */
-export const RequestSchema: GenMessage<Request, {jsonType: RequestJson}> = /*@__PURE__*/
+export const RequestSchema: GenMessage<Request, { jsonType: RequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_invocation, 6);
 
 /**
@@ -623,7 +626,7 @@ export type InvocationJson = {
  * Describes the message scribe.v1.Invocation.
  * Use `create(InvocationSchema)` to create a new message.
  */
-export const InvocationSchema: GenMessage<Invocation, {jsonType: InvocationJson}> = /*@__PURE__*/
+export const InvocationSchema: GenMessage<Invocation, { jsonType: InvocationJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_invocation, 7);
 
 /**
@@ -690,7 +693,7 @@ export type ReplyJson = {
  * Describes the message scribe.v1.Reply.
  * Use `create(ReplySchema)` to create a new message.
  */
-export const ReplySchema: GenMessage<Reply, {jsonType: ReplyJson}> = /*@__PURE__*/
+export const ReplySchema: GenMessage<Reply, { jsonType: ReplyJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_invocation, 8);
 
 /**
@@ -704,7 +707,6 @@ export const Worker: GenService<{
     methodKind: "unary";
     input: typeof InvocationSchema;
     output: typeof ReplySchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_protocol_invocation, 0);
-

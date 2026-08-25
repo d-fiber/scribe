@@ -36,10 +36,7 @@
 
 import { create } from "@bufbuild/protobuf";
 import { TimeSchema } from "../../gen/scribe/protocol/common_pb.ts";
-import {
-  ObjectRefSchema,
-  Storage,
-} from "../../gen/scribe/engine/packages/storage/protocol/storage_pb.ts";
+import { ObjectRefSchema, Storage } from "../../gen/scribe/engine/packages/storage/protocol/storage_pb.ts";
 import type { Time } from "../contracts/time.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";

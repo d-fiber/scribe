@@ -34,7 +34,14 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { ipv4ToInt, isInSubnetPrefix, isPrivateIp, isTrustedProxy, normalizeIp, resolveClientIp } from "@scribe/runtime/http/ip/mod.ts";
+import {
+  ipv4ToInt,
+  isInSubnetPrefix,
+  isPrivateIp,
+  isTrustedProxy,
+  normalizeIp,
+  resolveClientIp,
+} from "@scribe/runtime/http/ip/mod.ts";
 import { request } from "@scribe/runtime/http/request.ts";
 import { RequestScope } from "@scribe/runtime/scope.ts";
 import { assert, assertEquals, assertFalse } from "@std/assert";

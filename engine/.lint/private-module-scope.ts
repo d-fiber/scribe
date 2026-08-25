@@ -56,7 +56,8 @@ export default {
           if (!isAllowedDir(dir)) {
             ctx.report({
               node,
-              message: `"${filename}" is a private module (starts with _) and can only be imported from its own directory or any of its subdirectories.`,
+              message:
+                `"${filename}" is a private module (starts with _) and can only be imported from its own directory or any of its subdirectories.`,
             });
           }
         }
@@ -83,7 +84,8 @@ export default {
             if (privateName?.startsWith("_")) {
               ctx.report({
                 node: specifier,
-                message: `"${privateName}" starts with _ and is private to its directory it cannot be used outside of its folder or its descendants.`,
+                message:
+                  `"${privateName}" starts with _ and is private to its directory it cannot be used outside of its folder or its descendants.`,
               });
             }
           }

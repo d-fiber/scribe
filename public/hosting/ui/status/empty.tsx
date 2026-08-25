@@ -68,9 +68,7 @@ export function makeAppEmpty(colors: AppColors, fonts: AppFonts) {
         )}
         <AppText.body1Strong label={title} align="center" />
         <AppSpacing.size4 />
-        {subtitle !== undefined && (
-          <AppText.body2 label={subtitle} color="secondary" align="center" />
-        )}
+        {subtitle !== undefined && <AppText.body2 label={subtitle} color="secondary" align="center" />}
         {footer !== undefined && (
           <>
             <AppSpacing.size12 />

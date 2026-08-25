@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/packages/auth/protocol/auth.proto.
  */
 export const file_scribe_host_packages_auth_protocol_auth: GenFile = /*@__PURE__*/
-  fileDesc("Ci1zY3JpYmUvaG9zdC9wYWNrYWdlcy9hdXRoL3Byb3RvY29sL2F1dGgucHJvdG8SFnNjcmliZS5jbGllbnRzLmF1dGgudjEiMgoOQWNjb3VudFJlcXVlc3QSEgoKYWNjb3VudF9pZBgBIAEoCRIMCgRyb2xlGAIgASgJItABCgdBY2NvdW50EgoKAmlkGAEgASgJEgwKBHJvbGUYAiABKAkSDQoFZW1haWwYAyABKAkSDQoFcGhvbmUYBCABKAkSFgoOZW1haWxfdmVyaWZpZWQYBSABKAgSFgoOcGhvbmVfdmVyaWZpZWQYBiABKAgSEgoKY3JlYXRlZF9hdBgHIAEoAxIoCgNiYW4YCCABKAsyGy5zY3JpYmUuY2xpZW50cy5hdXRoLnYxLkJhbhIfCgZmb2xkZWQYCSABKAsyDy5zY3JpYmUudjEuSnNvbiJkCg1BY2NvdW50UmVzdWx0EjAKB2FjY291bnQYASABKAsyHy5zY3JpYmUuY2xpZW50cy5hdXRoLnYxLkFjY291bnQSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSIzCgNCYW4SDQoFc2luY2UYASABKAMSDQoFdW50aWwYAiABKAMSDgoGcmVhc29uGAMgASgJIk4KCkJhblJlcXVlc3QSEgoKYWNjb3VudF9pZBgBIAEoCRIMCgRyb2xlGAIgASgJEg4KBmZvcl9tcxgDIAEoAxIOCgZyZWFzb24YBCABKAkiLgoJQmFuUmVzdWx0EiEKBWVycm9yGAEgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUiHgoOQmFuTGlzdFJlcXVlc3QSDAoEcm9sZRgBIAEoCSJJCglMaXN0ZWRCYW4SEgoKYWNjb3VudF9pZBgBIAEoCRIoCgNiYW4YAiABKAsyGy5zY3JpYmUuY2xpZW50cy5hdXRoLnYxLkJhbiJjCg1CYW5MaXN0UmVzdWx0Ei8KBGJhbnMYASADKAsyIS5zY3JpYmUuY2xpZW50cy5hdXRoLnYxLkxpc3RlZEJhbhIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIkQKDURldmljZVJlcXVlc3QSEgoKYWNjb3VudF9pZBgBIAEoCRIMCgRyb2xlGAIgASgJEhEKCWRldmljZV9pZBgDIAEoCSL9AQoGRGV2aWNlEgoKAmlkGAEgASgJEhEKCWRldmljZV9pZBgCIAEoCRIOCgZjbGllbnQYAyABKAkSCgoCb3MYBCABKAkSDQoFbW9kZWwYBSABKAkSEwoLYXBwX3ZlcnNpb24YBiABKAkSGgoSaXNfcGh5c2ljYWxfZGV2aWNlGAcgASgIEhcKD2RldmljZV9jYXRlZ29yeRgIIAEoCRIPCgd0cnVzdGVkGAkgASgIEgoKAmlwGAogASgJEgwKBGNpdHkYCyABKAkSDwoHY291bnRyeRgMIAEoCRISCgpjcmVhdGVkX2F0GA0gASgDEg8KB3NlZW5fYXQYDiABKAMiZgoQRGV2aWNlTGlzdFJlc3VsdBIvCgdkZXZpY2VzGAEgAygLMh4uc2NyaWJlLmNsaWVudHMuYXV0aC52MS5EZXZpY2USIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSI/CgpLaWNrUmVzdWx0Eg4KBmtpY2tlZBgBIAEoCBIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIkEKD1ZhbGlkYXRlUmVxdWVzdBIQCghwYXNzd29yZBgBIAEoCRINCgVlbWFpbBgCIAEoCRINCgVwaG9uZRgDIAEoCSIzCg5WYWxpZGF0ZVJlc3VsdBINCgV2YWxpZBgBIAEoCBISCgp2aW9sYXRpb25zGAIgAygJIhEKD1JvbGVMaXN0UmVxdWVzdCI9Cg5Sb2xlTGlzdFJlc3VsdBIrCgVyb2xlcxgBIAMoCzIcLnNjcmliZS5jbGllbnRzLmF1dGgudjEuUm9sZSI3CgRSb2xlEgwKBG5hbWUYASABKAkSEAoIY2hhbm5lbHMYAiADKAkSDwoHY3JlYXRlZBgDIAEoCTKNBwoEQXV0aBJbCgpHZXRBY2NvdW50EiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5BY2NvdW50UmVxdWVzdBolLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQWNjb3VudFJlc3VsdBJaCg1EZWxldGVBY2NvdW50EiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5BY2NvdW50UmVxdWVzdBohLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQmFuUmVzdWx0EkwKA0JhbhIiLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQmFuUmVxdWVzdBohLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQmFuUmVzdWx0ElIKBVVuYmFuEiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5BY2NvdW50UmVxdWVzdBohLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQmFuUmVzdWx0ElkKCExpc3RCYW5zEiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5CYW5MaXN0UmVxdWVzdBolLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQmFuTGlzdFJlc3VsdBJeCgtMaXN0RGV2aWNlcxIlLnNjcmliZS5jbGllbnRzLmF1dGgudjEuRGV2aWNlUmVxdWVzdBooLnNjcmliZS5jbGllbnRzLmF1dGgudjEuRGV2aWNlTGlzdFJlc3VsdBJXCgpLaWNrRGV2aWNlEiUuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5EZXZpY2VSZXF1ZXN0GiIuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5LaWNrUmVzdWx0ElsKDktpY2tBbGxEZXZpY2VzEiUuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5EZXZpY2VSZXF1ZXN0GiIuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5LaWNrUmVzdWx0ElwKCUxpc3RSb2xlcxInLnNjcmliZS5jbGllbnRzLmF1dGgudjEuUm9sZUxpc3RSZXF1ZXN0GiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5Sb2xlTGlzdFJlc3VsdBJbCghWYWxpZGF0ZRInLnNjcmliZS5jbGllbnRzLmF1dGgudjEuVmFsaWRhdGVSZXF1ZXN0GiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5WYWxpZGF0ZVJlc3VsdGIGcHJvdG8z", [file_scribe_protocol_common]);
+  fileDesc(
+    "Ci1zY3JpYmUvaG9zdC9wYWNrYWdlcy9hdXRoL3Byb3RvY29sL2F1dGgucHJvdG8SFnNjcmliZS5jbGllbnRzLmF1dGgudjEiMgoOQWNjb3VudFJlcXVlc3QSEgoKYWNjb3VudF9pZBgBIAEoCRIMCgRyb2xlGAIgASgJItABCgdBY2NvdW50EgoKAmlkGAEgASgJEgwKBHJvbGUYAiABKAkSDQoFZW1haWwYAyABKAkSDQoFcGhvbmUYBCABKAkSFgoOZW1haWxfdmVyaWZpZWQYBSABKAgSFgoOcGhvbmVfdmVyaWZpZWQYBiABKAgSEgoKY3JlYXRlZF9hdBgHIAEoAxIoCgNiYW4YCCABKAsyGy5zY3JpYmUuY2xpZW50cy5hdXRoLnYxLkJhbhIfCgZmb2xkZWQYCSABKAsyDy5zY3JpYmUudjEuSnNvbiJkCg1BY2NvdW50UmVzdWx0EjAKB2FjY291bnQYASABKAsyHy5zY3JpYmUuY2xpZW50cy5hdXRoLnYxLkFjY291bnQSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSIzCgNCYW4SDQoFc2luY2UYASABKAMSDQoFdW50aWwYAiABKAMSDgoGcmVhc29uGAMgASgJIk4KCkJhblJlcXVlc3QSEgoKYWNjb3VudF9pZBgBIAEoCRIMCgRyb2xlGAIgASgJEg4KBmZvcl9tcxgDIAEoAxIOCgZyZWFzb24YBCABKAkiLgoJQmFuUmVzdWx0EiEKBWVycm9yGAEgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUiHgoOQmFuTGlzdFJlcXVlc3QSDAoEcm9sZRgBIAEoCSJJCglMaXN0ZWRCYW4SEgoKYWNjb3VudF9pZBgBIAEoCRIoCgNiYW4YAiABKAsyGy5zY3JpYmUuY2xpZW50cy5hdXRoLnYxLkJhbiJjCg1CYW5MaXN0UmVzdWx0Ei8KBGJhbnMYASADKAsyIS5zY3JpYmUuY2xpZW50cy5hdXRoLnYxLkxpc3RlZEJhbhIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIkQKDURldmljZVJlcXVlc3QSEgoKYWNjb3VudF9pZBgBIAEoCRIMCgRyb2xlGAIgASgJEhEKCWRldmljZV9pZBgDIAEoCSL9AQoGRGV2aWNlEgoKAmlkGAEgASgJEhEKCWRldmljZV9pZBgCIAEoCRIOCgZjbGllbnQYAyABKAkSCgoCb3MYBCABKAkSDQoFbW9kZWwYBSABKAkSEwoLYXBwX3ZlcnNpb24YBiABKAkSGgoSaXNfcGh5c2ljYWxfZGV2aWNlGAcgASgIEhcKD2RldmljZV9jYXRlZ29yeRgIIAEoCRIPCgd0cnVzdGVkGAkgASgIEgoKAmlwGAogASgJEgwKBGNpdHkYCyABKAkSDwoHY291bnRyeRgMIAEoCRISCgpjcmVhdGVkX2F0GA0gASgDEg8KB3NlZW5fYXQYDiABKAMiZgoQRGV2aWNlTGlzdFJlc3VsdBIvCgdkZXZpY2VzGAEgAygLMh4uc2NyaWJlLmNsaWVudHMuYXV0aC52MS5EZXZpY2USIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSI/CgpLaWNrUmVzdWx0Eg4KBmtpY2tlZBgBIAEoCBIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIkEKD1ZhbGlkYXRlUmVxdWVzdBIQCghwYXNzd29yZBgBIAEoCRINCgVlbWFpbBgCIAEoCRINCgVwaG9uZRgDIAEoCSIzCg5WYWxpZGF0ZVJlc3VsdBINCgV2YWxpZBgBIAEoCBISCgp2aW9sYXRpb25zGAIgAygJIhEKD1JvbGVMaXN0UmVxdWVzdCI9Cg5Sb2xlTGlzdFJlc3VsdBIrCgVyb2xlcxgBIAMoCzIcLnNjcmliZS5jbGllbnRzLmF1dGgudjEuUm9sZSI3CgRSb2xlEgwKBG5hbWUYASABKAkSEAoIY2hhbm5lbHMYAiADKAkSDwoHY3JlYXRlZBgDIAEoCTKNBwoEQXV0aBJbCgpHZXRBY2NvdW50EiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5BY2NvdW50UmVxdWVzdBolLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQWNjb3VudFJlc3VsdBJaCg1EZWxldGVBY2NvdW50EiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5BY2NvdW50UmVxdWVzdBohLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQmFuUmVzdWx0EkwKA0JhbhIiLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQmFuUmVxdWVzdBohLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQmFuUmVzdWx0ElIKBVVuYmFuEiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5BY2NvdW50UmVxdWVzdBohLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQmFuUmVzdWx0ElkKCExpc3RCYW5zEiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5CYW5MaXN0UmVxdWVzdBolLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQmFuTGlzdFJlc3VsdBJeCgtMaXN0RGV2aWNlcxIlLnNjcmliZS5jbGllbnRzLmF1dGgudjEuRGV2aWNlUmVxdWVzdBooLnNjcmliZS5jbGllbnRzLmF1dGgudjEuRGV2aWNlTGlzdFJlc3VsdBJXCgpLaWNrRGV2aWNlEiUuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5EZXZpY2VSZXF1ZXN0GiIuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5LaWNrUmVzdWx0ElsKDktpY2tBbGxEZXZpY2VzEiUuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5EZXZpY2VSZXF1ZXN0GiIuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5LaWNrUmVzdWx0ElwKCUxpc3RSb2xlcxInLnNjcmliZS5jbGllbnRzLmF1dGgudjEuUm9sZUxpc3RSZXF1ZXN0GiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5Sb2xlTGlzdFJlc3VsdBJbCghWYWxpZGF0ZRInLnNjcmliZS5jbGllbnRzLmF1dGgudjEuVmFsaWRhdGVSZXF1ZXN0GiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5WYWxpZGF0ZVJlc3VsdGIGcHJvdG8z",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.clients.auth.v1.AccountRequest
@@ -84,7 +87,7 @@ export type AccountRequestJson = {
  * Describes the message scribe.clients.auth.v1.AccountRequest.
  * Use `create(AccountRequestSchema)` to create a new message.
  */
-export const AccountRequestSchema: GenMessage<AccountRequest, {jsonType: AccountRequestJson}> = /*@__PURE__*/
+export const AccountRequestSchema: GenMessage<AccountRequest, { jsonType: AccountRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 0);
 
 /**
@@ -191,7 +194,7 @@ export type AccountJson = {
  * Describes the message scribe.clients.auth.v1.Account.
  * Use `create(AccountSchema)` to create a new message.
  */
-export const AccountSchema: GenMessage<Account, {jsonType: AccountJson}> = /*@__PURE__*/
+export const AccountSchema: GenMessage<Account, { jsonType: AccountJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 1);
 
 /**
@@ -228,7 +231,7 @@ export type AccountResultJson = {
  * Describes the message scribe.clients.auth.v1.AccountResult.
  * Use `create(AccountResultSchema)` to create a new message.
  */
-export const AccountResultSchema: GenMessage<AccountResult, {jsonType: AccountResultJson}> = /*@__PURE__*/
+export const AccountResultSchema: GenMessage<AccountResult, { jsonType: AccountResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 2);
 
 /**
@@ -275,7 +278,7 @@ export type BanJson = {
  * Describes the message scribe.clients.auth.v1.Ban.
  * Use `create(BanSchema)` to create a new message.
  */
-export const BanSchema: GenMessage<Ban, {jsonType: BanJson}> = /*@__PURE__*/
+export const BanSchema: GenMessage<Ban, { jsonType: BanJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 3);
 
 /**
@@ -332,7 +335,7 @@ export type BanRequestJson = {
  * Describes the message scribe.clients.auth.v1.BanRequest.
  * Use `create(BanRequestSchema)` to create a new message.
  */
-export const BanRequestSchema: GenMessage<BanRequest, {jsonType: BanRequestJson}> = /*@__PURE__*/
+export const BanRequestSchema: GenMessage<BanRequest, { jsonType: BanRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 4);
 
 /**
@@ -359,7 +362,7 @@ export type BanResultJson = {
  * Describes the message scribe.clients.auth.v1.BanResult.
  * Use `create(BanResultSchema)` to create a new message.
  */
-export const BanResultSchema: GenMessage<BanResult, {jsonType: BanResultJson}> = /*@__PURE__*/
+export const BanResultSchema: GenMessage<BanResult, { jsonType: BanResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 5);
 
 /**
@@ -386,7 +389,7 @@ export type BanListRequestJson = {
  * Describes the message scribe.clients.auth.v1.BanListRequest.
  * Use `create(BanListRequestSchema)` to create a new message.
  */
-export const BanListRequestSchema: GenMessage<BanListRequest, {jsonType: BanListRequestJson}> = /*@__PURE__*/
+export const BanListRequestSchema: GenMessage<BanListRequest, { jsonType: BanListRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 6);
 
 /**
@@ -423,7 +426,7 @@ export type ListedBanJson = {
  * Describes the message scribe.clients.auth.v1.ListedBan.
  * Use `create(ListedBanSchema)` to create a new message.
  */
-export const ListedBanSchema: GenMessage<ListedBan, {jsonType: ListedBanJson}> = /*@__PURE__*/
+export const ListedBanSchema: GenMessage<ListedBan, { jsonType: ListedBanJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 7);
 
 /**
@@ -460,7 +463,7 @@ export type BanListResultJson = {
  * Describes the message scribe.clients.auth.v1.BanListResult.
  * Use `create(BanListResultSchema)` to create a new message.
  */
-export const BanListResultSchema: GenMessage<BanListResult, {jsonType: BanListResultJson}> = /*@__PURE__*/
+export const BanListResultSchema: GenMessage<BanListResult, { jsonType: BanListResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 8);
 
 /**
@@ -507,7 +510,7 @@ export type DeviceRequestJson = {
  * Describes the message scribe.clients.auth.v1.DeviceRequest.
  * Use `create(DeviceRequestSchema)` to create a new message.
  */
-export const DeviceRequestSchema: GenMessage<DeviceRequest, {jsonType: DeviceRequestJson}> = /*@__PURE__*/
+export const DeviceRequestSchema: GenMessage<DeviceRequest, { jsonType: DeviceRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 9);
 
 /**
@@ -664,7 +667,7 @@ export type DeviceJson = {
  * Describes the message scribe.clients.auth.v1.Device.
  * Use `create(DeviceSchema)` to create a new message.
  */
-export const DeviceSchema: GenMessage<Device, {jsonType: DeviceJson}> = /*@__PURE__*/
+export const DeviceSchema: GenMessage<Device, { jsonType: DeviceJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 10);
 
 /**
@@ -701,7 +704,7 @@ export type DeviceListResultJson = {
  * Describes the message scribe.clients.auth.v1.DeviceListResult.
  * Use `create(DeviceListResultSchema)` to create a new message.
  */
-export const DeviceListResultSchema: GenMessage<DeviceListResult, {jsonType: DeviceListResultJson}> = /*@__PURE__*/
+export const DeviceListResultSchema: GenMessage<DeviceListResult, { jsonType: DeviceListResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 11);
 
 /**
@@ -738,7 +741,7 @@ export type KickResultJson = {
  * Describes the message scribe.clients.auth.v1.KickResult.
  * Use `create(KickResultSchema)` to create a new message.
  */
-export const KickResultSchema: GenMessage<KickResult, {jsonType: KickResultJson}> = /*@__PURE__*/
+export const KickResultSchema: GenMessage<KickResult, { jsonType: KickResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 12);
 
 /**
@@ -785,7 +788,7 @@ export type ValidateRequestJson = {
  * Describes the message scribe.clients.auth.v1.ValidateRequest.
  * Use `create(ValidateRequestSchema)` to create a new message.
  */
-export const ValidateRequestSchema: GenMessage<ValidateRequest, {jsonType: ValidateRequestJson}> = /*@__PURE__*/
+export const ValidateRequestSchema: GenMessage<ValidateRequest, { jsonType: ValidateRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 13);
 
 /**
@@ -822,26 +825,24 @@ export type ValidateResultJson = {
  * Describes the message scribe.clients.auth.v1.ValidateResult.
  * Use `create(ValidateResultSchema)` to create a new message.
  */
-export const ValidateResultSchema: GenMessage<ValidateResult, {jsonType: ValidateResultJson}> = /*@__PURE__*/
+export const ValidateResultSchema: GenMessage<ValidateResult, { jsonType: ValidateResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 14);
 
 /**
  * @generated from message scribe.clients.auth.v1.RoleListRequest
  */
-export type RoleListRequest = Message<"scribe.clients.auth.v1.RoleListRequest"> & {
-};
+export type RoleListRequest = Message<"scribe.clients.auth.v1.RoleListRequest"> & {};
 
 /**
  * @generated from message scribe.clients.auth.v1.RoleListRequest
  */
-export type RoleListRequestJson = {
-};
+export type RoleListRequestJson = {};
 
 /**
  * Describes the message scribe.clients.auth.v1.RoleListRequest.
  * Use `create(RoleListRequestSchema)` to create a new message.
  */
-export const RoleListRequestSchema: GenMessage<RoleListRequest, {jsonType: RoleListRequestJson}> = /*@__PURE__*/
+export const RoleListRequestSchema: GenMessage<RoleListRequest, { jsonType: RoleListRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 15);
 
 /**
@@ -868,7 +869,7 @@ export type RoleListResultJson = {
  * Describes the message scribe.clients.auth.v1.RoleListResult.
  * Use `create(RoleListResultSchema)` to create a new message.
  */
-export const RoleListResultSchema: GenMessage<RoleListResult, {jsonType: RoleListResultJson}> = /*@__PURE__*/
+export const RoleListResultSchema: GenMessage<RoleListResult, { jsonType: RoleListResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 16);
 
 /**
@@ -915,7 +916,7 @@ export type RoleJson = {
  * Describes the message scribe.clients.auth.v1.Role.
  * Use `create(RoleSchema)` to create a new message.
  */
-export const RoleSchema: GenMessage<Role, {jsonType: RoleJson}> = /*@__PURE__*/
+export const RoleSchema: GenMessage<Role, { jsonType: RoleJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_auth_protocol_auth, 17);
 
 /**
@@ -929,7 +930,7 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof AccountRequestSchema;
     output: typeof AccountResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.auth.v1.Auth.DeleteAccount
    */
@@ -937,7 +938,7 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof AccountRequestSchema;
     output: typeof BanResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.auth.v1.Auth.Ban
    */
@@ -945,7 +946,7 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof BanRequestSchema;
     output: typeof BanResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.auth.v1.Auth.Unban
    */
@@ -953,7 +954,7 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof AccountRequestSchema;
     output: typeof BanResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.auth.v1.Auth.ListBans
    */
@@ -961,7 +962,7 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof BanListRequestSchema;
     output: typeof BanListResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.auth.v1.Auth.ListDevices
    */
@@ -969,7 +970,7 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof DeviceRequestSchema;
     output: typeof DeviceListResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.auth.v1.Auth.KickDevice
    */
@@ -977,7 +978,7 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof DeviceRequestSchema;
     output: typeof KickResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.auth.v1.Auth.KickAllDevices
    */
@@ -985,7 +986,7 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof DeviceRequestSchema;
     output: typeof KickResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.auth.v1.Auth.ListRoles
    */
@@ -993,7 +994,7 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof RoleListRequestSchema;
     output: typeof RoleListResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.auth.v1.Auth.Validate
    */
@@ -1001,7 +1002,6 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof ValidateRequestSchema;
     output: typeof ValidateResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_packages_auth_protocol_auth, 0);
-

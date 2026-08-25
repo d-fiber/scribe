@@ -36,11 +36,7 @@
 
 import { create } from "@bufbuild/protobuf";
 import { FailureSchema } from "../../gen/scribe/protocol/common_pb.ts";
-import {
-  type Invocation,
-  type Reply,
-  ReplySchema,
-} from "../../gen/scribe/protocol/invocation_pb.ts";
+import { type Invocation, type Reply, ReplySchema } from "../../gen/scribe/protocol/invocation_pb.ts";
 import {
   type Batch,
   type BatchOutcome,
@@ -56,11 +52,7 @@ import {
   CronOutcomeSchema,
   type CronTrigger,
 } from "../../gen/scribe/engine/packages/foundation/protocol/cron/cron_pb.ts";
-import {
-  type LogDelivery,
-  type LogDeliveryAck,
-  LogDeliveryAckSchema,
-} from "../../gen/scribe/protocol/logs_pb.ts";
+import { type LogDelivery, type LogDeliveryAck, LogDeliveryAckSchema } from "../../gen/scribe/protocol/logs_pb.ts";
 import { decodeJson, encodeJson } from "../contracts/json.ts";
 import { loggedEntry } from "../observability/log_sink.ts";
 import type { QueueMessage } from "../manifest/events.ts";

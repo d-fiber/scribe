@@ -46,7 +46,9 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/protocol/common.proto.
  */
 export const file_scribe_protocol_common: GenFile = /*@__PURE__*/
-  fileDesc("ChxzY3JpYmUvcHJvdG9jb2wvY29tbW9uLnByb3RvEglzY3JpYmUudjEiFgoEVGltZRIOCgZtaWxsaXMYASABKAMiFQoEU2l6ZRINCgVieXRlcxgBIAEoAyIoCgdGYWlsdXJlEgwKBGNvZGUYASABKAkSDwoHbWVzc2FnZRgCIAEoCSIVCgRKc29uEg0KBXZhbHVlGAEgASgMKoEBCgZDYWxsZXISFgoSQ0FMTEVSX1VOU1BFQ0lGSUVEEAASFAoQQ0FMTEVSX0FOT05ZTU9VUxABEg8KC0NBTExFUl9VU0VSEAISEAoMQ0FMTEVSX0FETUlOEAMSEgoOQ0FMTEVSX1NFUlZJQ0UQBBISCg5DQUxMRVJfV0VCSE9PSxAFKnYKBk1ldGhvZBIWChJNRVRIT0RfVU5TUEVDSUZJRUQQABIOCgpNRVRIT0RfR0VUEAESDwoLTUVUSE9EX1BPU1QQAhIOCgpNRVRIT0RfUFVUEAMSEAoMTUVUSE9EX1BBVENIEAQSEQoNTUVUSE9EX0RFTEVURRAFKkAKBE5lZWQSFAoQTkVFRF9VTlNQRUNJRklFRBAAEg8KC05FRURfREVWSUNFEAESEQoNTkVFRF9MT0NBVElPThACYgZwcm90bzM");
+  fileDesc(
+    "ChxzY3JpYmUvcHJvdG9jb2wvY29tbW9uLnByb3RvEglzY3JpYmUudjEiFgoEVGltZRIOCgZtaWxsaXMYASABKAMiFQoEU2l6ZRINCgVieXRlcxgBIAEoAyIoCgdGYWlsdXJlEgwKBGNvZGUYASABKAkSDwoHbWVzc2FnZRgCIAEoCSIVCgRKc29uEg0KBXZhbHVlGAEgASgMKoEBCgZDYWxsZXISFgoSQ0FMTEVSX1VOU1BFQ0lGSUVEEAASFAoQQ0FMTEVSX0FOT05ZTU9VUxABEg8KC0NBTExFUl9VU0VSEAISEAoMQ0FMTEVSX0FETUlOEAMSEgoOQ0FMTEVSX1NFUlZJQ0UQBBISCg5DQUxMRVJfV0VCSE9PSxAFKnYKBk1ldGhvZBIWChJNRVRIT0RfVU5TUEVDSUZJRUQQABIOCgpNRVRIT0RfR0VUEAESDwoLTUVUSE9EX1BPU1QQAhIOCgpNRVRIT0RfUFVUEAMSEAoMTUVUSE9EX1BBVENIEAQSEQoNTUVUSE9EX0RFTEVURRAFKkAKBE5lZWQSFAoQTkVFRF9VTlNQRUNJRklFRBAAEg8KC05FRURfREVWSUNFEAESEQoNTkVFRF9MT0NBVElPThACYgZwcm90bzM",
+  );
 
 /**
  * @generated from message scribe.v1.Time
@@ -72,7 +74,7 @@ export type TimeJson = {
  * Describes the message scribe.v1.Time.
  * Use `create(TimeSchema)` to create a new message.
  */
-export const TimeSchema: GenMessage<Time, {jsonType: TimeJson}> = /*@__PURE__*/
+export const TimeSchema: GenMessage<Time, { jsonType: TimeJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_common, 0);
 
 /**
@@ -99,7 +101,7 @@ export type SizeJson = {
  * Describes the message scribe.v1.Size.
  * Use `create(SizeSchema)` to create a new message.
  */
-export const SizeSchema: GenMessage<Size, {jsonType: SizeJson}> = /*@__PURE__*/
+export const SizeSchema: GenMessage<Size, { jsonType: SizeJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_common, 1);
 
 /**
@@ -136,7 +138,7 @@ export type FailureJson = {
  * Describes the message scribe.v1.Failure.
  * Use `create(FailureSchema)` to create a new message.
  */
-export const FailureSchema: GenMessage<Failure, {jsonType: FailureJson}> = /*@__PURE__*/
+export const FailureSchema: GenMessage<Failure, { jsonType: FailureJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_common, 2);
 
 /**
@@ -163,7 +165,7 @@ export type JsonJson = {
  * Describes the message scribe.v1.Json.
  * Use `create(JsonSchema)` to create a new message.
  */
-export const JsonSchema: GenMessage<Json, {jsonType: JsonJson}> = /*@__PURE__*/
+export const JsonSchema: GenMessage<Json, { jsonType: JsonJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_common, 3);
 
 /**
@@ -204,7 +206,13 @@ export enum Caller {
 /**
  * @generated from enum scribe.v1.Caller
  */
-export type CallerJson = "CALLER_UNSPECIFIED" | "CALLER_ANONYMOUS" | "CALLER_USER" | "CALLER_ADMIN" | "CALLER_SERVICE" | "CALLER_WEBHOOK";
+export type CallerJson =
+  | "CALLER_UNSPECIFIED"
+  | "CALLER_ANONYMOUS"
+  | "CALLER_USER"
+  | "CALLER_ADMIN"
+  | "CALLER_SERVICE"
+  | "CALLER_WEBHOOK";
 
 /**
  * Describes the enum scribe.v1.Caller.
@@ -250,7 +258,13 @@ export enum Method {
 /**
  * @generated from enum scribe.v1.Method
  */
-export type MethodJson = "METHOD_UNSPECIFIED" | "METHOD_GET" | "METHOD_POST" | "METHOD_PUT" | "METHOD_PATCH" | "METHOD_DELETE";
+export type MethodJson =
+  | "METHOD_UNSPECIFIED"
+  | "METHOD_GET"
+  | "METHOD_POST"
+  | "METHOD_PUT"
+  | "METHOD_PATCH"
+  | "METHOD_DELETE";
 
 /**
  * Describes the enum scribe.v1.Method.
@@ -288,4 +302,3 @@ export type NeedJson = "NEED_UNSPECIFIED" | "NEED_DEVICE" | "NEED_LOCATION";
  */
 export const NeedSchema: GenEnum<Need, NeedJson> = /*@__PURE__*/
   enumDesc(file_scribe_protocol_common, 2);
-

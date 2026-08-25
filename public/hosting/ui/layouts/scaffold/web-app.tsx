@@ -59,16 +59,13 @@ export interface WebAppParts {
 }
 
 function squareFavicon(fill: string): string {
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${FAVICON_VIEWBOX} ${FAVICON_VIEWBOX}">` +
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${FAVICON_VIEWBOX} ${FAVICON_VIEWBOX}">` +
     `<rect width="${FAVICON_VIEWBOX}" height="${FAVICON_VIEWBOX}" rx="${FAVICON_RADIUS}" fill="${fill}"/></svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
 function redirectScript(target: string): string {
-  return `window.addEventListener('load', function () { window.location.href = ${
-    JSON.stringify(target)
-  }; });`;
+  return `window.addEventListener('load', function () { window.location.href = ${JSON.stringify(target)}; });`;
 }
 
 export function makeWebApp({ App, colors }: WebAppParts) {

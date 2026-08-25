@@ -40,7 +40,20 @@
 
 import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
-import type { Caller, CallerJson, Json, JsonJson, Method, MethodJson, Need, NeedJson, Size, SizeJson, Time, TimeJson } from "./common_pb.ts";
+import type {
+  Caller,
+  CallerJson,
+  Json,
+  JsonJson,
+  Method,
+  MethodJson,
+  Need,
+  NeedJson,
+  Size,
+  SizeJson,
+  Time,
+  TimeJson,
+} from "./common_pb.ts";
 import { file_scribe_protocol_common } from "./common_pb.ts";
 import type { Message } from "@bufbuild/protobuf";
 
@@ -48,7 +61,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/protocol/manifest.proto.
  */
 export const file_scribe_protocol_manifest: GenFile = /*@__PURE__*/
-  fileDesc("Ch5zY3JpYmUvcHJvdG9jb2wvbWFuaWZlc3QucHJvdG8SCXNjcmliZS52MSKFAQoLUmF0ZUxpbWl0ZXISDQoFbGltaXQYASABKA0SHwoGd2luZG93GAIgASgLMg8uc2NyaWJlLnYxLlRpbWUSIAoHcGVuYWx0eRgDIAEoCzIPLnNjcmliZS52MS5UaW1lEiQKC21heF9wZW5hbHR5GAQgASgLMg8uc2NyaWJlLnYxLlRpbWUipAIKBVJvdXRlEhAKCHJvdXRlX2lkGAEgASgJEiEKBm1ldGhvZBgCIAEoDjIRLnNjcmliZS52MS5NZXRob2QSDAoEcGF0aBgDIAEoCRIhCgZhY2Nlc3MYBSADKA4yES5zY3JpYmUudjEuQ2FsbGVyEioKCnJhdGVfbGltaXQYBiABKAsyFi5zY3JpYmUudjEuUmF0ZUxpbWl0ZXISHgoFbmVlZHMYByADKA4yDy5zY3JpYmUudjEuTmVlZBIYChB3ZWJob29rX3ZlcmlmaWVkGAggASgIEhYKDnJhdGVfbGltaXRfa2V5GAkgASgJEhwKFHJlcXVpcmVkX3Blcm1pc3Npb25zGAogAygJEgwKBG5vZGUYCyABKAlKBAgEEAVSBW1vdW50IkEKD05vZGVEZWNsYXJhdGlvbhIMCgRuYW1lGAEgASgJEg4KBnB1YmxpYxgCIAEoCBIQCghsb2dfc2luaxgDIAEoCCJDCg9Ib29rRGVjbGFyYXRpb24SDwoHaG9va19pZBgBIAEoCRINCgVldmVudBgCIAEoCRIQCghwcmlvcml0eRgDIAEoDSKJAQoQUXVldWVEZWNsYXJhdGlvbhIQCghxdWV1ZV9pZBgBIAEoCRIMCgRuYW1lGAIgASgJEhIKCmJhdGNoX3NpemUYAyABKA0SKwoSdmlzaWJpbGl0eV90aW1lb3V0GAQgASgLMg8uc2NyaWJlLnYxLlRpbWUSFAoMbWF4X2F0dGVtcHRzGAUgASgNIkIKD0Nyb25EZWNsYXJhdGlvbhIPCgdjcm9uX2lkGAEgASgJEgwKBG5hbWUYAiABKAkSEAoIc2NoZWR1bGUYAyABKAkiegoTU2VhcmNoZXJEZWNsYXJhdGlvbhIOCgZlbnRpdHkYASABKAkSDQoFaW5kZXgYAiABKAkSIQoIbWFwcGluZ3MYAyABKAsyDy5zY3JpYmUudjEuSnNvbhIhCghzZXR0aW5ncxgEIAEoCzIPLnNjcmliZS52MS5Kc29uIkcKE1JlYWx0aW1lRGVjbGFyYXRpb24SDwoHY2hhbm5lbBgBIAEoCRIPCgdhY3Rpb25zGAIgAygJEg4KBmxpc3RlbhgDIAEoCSJyChJTdG9yYWdlRGVjbGFyYXRpb24SDgoGZm9sZGVyGAEgASgJEhUKDXBhdGhfdGVtcGxhdGUYAiABKAkSIQoIbWF4X3NpemUYAyABKAsyDy5zY3JpYmUudjEuU2l6ZRISCgptaW1lX3R5cGVzGAQgAygJItADCghNYW5pZmVzdBIYChBwcm90b2NvbF92ZXJzaW9uGAEgASgJEhcKD3dvcmtlcl9sYW5ndWFnZRgCIAEoCRIgCgZyb3V0ZXMYAyADKAsyEC5zY3JpYmUudjEuUm91dGUSKQoFaG9va3MYBCADKAsyGi5zY3JpYmUudjEuSG9va0RlY2xhcmF0aW9uEisKBnF1ZXVlcxgFIAMoCzIbLnNjcmliZS52MS5RdWV1ZURlY2xhcmF0aW9uEikKBWNyb25zGAYgAygLMhouc2NyaWJlLnYxLkNyb25EZWNsYXJhdGlvbhIxCglzZWFyY2hlcnMYByADKAsyHi5zY3JpYmUudjEuU2VhcmNoZXJEZWNsYXJhdGlvbhIxCglyZWFsdGltZXMYCCADKAsyHi5zY3JpYmUudjEuUmVhbHRpbWVEZWNsYXJhdGlvbhIvCghzdG9yYWdlcxgJIAMoCzIdLnNjcmliZS52MS5TdG9yYWdlRGVjbGFyYXRpb24SEwoLc2RrX3ZlcnNpb24YCiABKAkSKQoFbm9kZXMYCyADKAsyGi5zY3JpYmUudjEuTm9kZURlY2xhcmF0aW9uEhUKDXJvb3RfbG9nX3NpbmsYDCABKAgiYgoQSGFuZHNoYWtlUmVxdWVzdBIdChVob3N0X3Byb3RvY29sX3ZlcnNpb24YASABKAkSFQoNaG9zdF9lbmRwb2ludBgCIAEoCRIYChBjYXBhYmlsaXR5X3Rva2VuGAMgASgJMkwKDFJlZ2lzdHJhdGlvbhI8CghEZXNjcmliZRIbLnNjcmliZS52MS5IYW5kc2hha2VSZXF1ZXN0GhMuc2NyaWJlLnYxLk1hbmlmZXN0YgZwcm90bzM", [file_scribe_protocol_common]);
+  fileDesc(
+    "Ch5zY3JpYmUvcHJvdG9jb2wvbWFuaWZlc3QucHJvdG8SCXNjcmliZS52MSKFAQoLUmF0ZUxpbWl0ZXISDQoFbGltaXQYASABKA0SHwoGd2luZG93GAIgASgLMg8uc2NyaWJlLnYxLlRpbWUSIAoHcGVuYWx0eRgDIAEoCzIPLnNjcmliZS52MS5UaW1lEiQKC21heF9wZW5hbHR5GAQgASgLMg8uc2NyaWJlLnYxLlRpbWUipAIKBVJvdXRlEhAKCHJvdXRlX2lkGAEgASgJEiEKBm1ldGhvZBgCIAEoDjIRLnNjcmliZS52MS5NZXRob2QSDAoEcGF0aBgDIAEoCRIhCgZhY2Nlc3MYBSADKA4yES5zY3JpYmUudjEuQ2FsbGVyEioKCnJhdGVfbGltaXQYBiABKAsyFi5zY3JpYmUudjEuUmF0ZUxpbWl0ZXISHgoFbmVlZHMYByADKA4yDy5zY3JpYmUudjEuTmVlZBIYChB3ZWJob29rX3ZlcmlmaWVkGAggASgIEhYKDnJhdGVfbGltaXRfa2V5GAkgASgJEhwKFHJlcXVpcmVkX3Blcm1pc3Npb25zGAogAygJEgwKBG5vZGUYCyABKAlKBAgEEAVSBW1vdW50IkEKD05vZGVEZWNsYXJhdGlvbhIMCgRuYW1lGAEgASgJEg4KBnB1YmxpYxgCIAEoCBIQCghsb2dfc2luaxgDIAEoCCJDCg9Ib29rRGVjbGFyYXRpb24SDwoHaG9va19pZBgBIAEoCRINCgVldmVudBgCIAEoCRIQCghwcmlvcml0eRgDIAEoDSKJAQoQUXVldWVEZWNsYXJhdGlvbhIQCghxdWV1ZV9pZBgBIAEoCRIMCgRuYW1lGAIgASgJEhIKCmJhdGNoX3NpemUYAyABKA0SKwoSdmlzaWJpbGl0eV90aW1lb3V0GAQgASgLMg8uc2NyaWJlLnYxLlRpbWUSFAoMbWF4X2F0dGVtcHRzGAUgASgNIkIKD0Nyb25EZWNsYXJhdGlvbhIPCgdjcm9uX2lkGAEgASgJEgwKBG5hbWUYAiABKAkSEAoIc2NoZWR1bGUYAyABKAkiegoTU2VhcmNoZXJEZWNsYXJhdGlvbhIOCgZlbnRpdHkYASABKAkSDQoFaW5kZXgYAiABKAkSIQoIbWFwcGluZ3MYAyABKAsyDy5zY3JpYmUudjEuSnNvbhIhCghzZXR0aW5ncxgEIAEoCzIPLnNjcmliZS52MS5Kc29uIkcKE1JlYWx0aW1lRGVjbGFyYXRpb24SDwoHY2hhbm5lbBgBIAEoCRIPCgdhY3Rpb25zGAIgAygJEg4KBmxpc3RlbhgDIAEoCSJyChJTdG9yYWdlRGVjbGFyYXRpb24SDgoGZm9sZGVyGAEgASgJEhUKDXBhdGhfdGVtcGxhdGUYAiABKAkSIQoIbWF4X3NpemUYAyABKAsyDy5zY3JpYmUudjEuU2l6ZRISCgptaW1lX3R5cGVzGAQgAygJItADCghNYW5pZmVzdBIYChBwcm90b2NvbF92ZXJzaW9uGAEgASgJEhcKD3dvcmtlcl9sYW5ndWFnZRgCIAEoCRIgCgZyb3V0ZXMYAyADKAsyEC5zY3JpYmUudjEuUm91dGUSKQoFaG9va3MYBCADKAsyGi5zY3JpYmUudjEuSG9va0RlY2xhcmF0aW9uEisKBnF1ZXVlcxgFIAMoCzIbLnNjcmliZS52MS5RdWV1ZURlY2xhcmF0aW9uEikKBWNyb25zGAYgAygLMhouc2NyaWJlLnYxLkNyb25EZWNsYXJhdGlvbhIxCglzZWFyY2hlcnMYByADKAsyHi5zY3JpYmUudjEuU2VhcmNoZXJEZWNsYXJhdGlvbhIxCglyZWFsdGltZXMYCCADKAsyHi5zY3JpYmUudjEuUmVhbHRpbWVEZWNsYXJhdGlvbhIvCghzdG9yYWdlcxgJIAMoCzIdLnNjcmliZS52MS5TdG9yYWdlRGVjbGFyYXRpb24SEwoLc2RrX3ZlcnNpb24YCiABKAkSKQoFbm9kZXMYCyADKAsyGi5zY3JpYmUudjEuTm9kZURlY2xhcmF0aW9uEhUKDXJvb3RfbG9nX3NpbmsYDCABKAgiYgoQSGFuZHNoYWtlUmVxdWVzdBIdChVob3N0X3Byb3RvY29sX3ZlcnNpb24YASABKAkSFQoNaG9zdF9lbmRwb2ludBgCIAEoCRIYChBjYXBhYmlsaXR5X3Rva2VuGAMgASgJMkwKDFJlZ2lzdHJhdGlvbhI8CghEZXNjcmliZRIbLnNjcmliZS52MS5IYW5kc2hha2VSZXF1ZXN0GhMuc2NyaWJlLnYxLk1hbmlmZXN0YgZwcm90bzM",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.v1.RateLimiter
@@ -104,7 +120,7 @@ export type RateLimiterJson = {
  * Describes the message scribe.v1.RateLimiter.
  * Use `create(RateLimiterSchema)` to create a new message.
  */
-export const RateLimiterSchema: GenMessage<RateLimiter, {jsonType: RateLimiterJson}> = /*@__PURE__*/
+export const RateLimiterSchema: GenMessage<RateLimiter, { jsonType: RateLimiterJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_manifest, 0);
 
 /**
@@ -221,7 +237,7 @@ export type RouteJson = {
  * Describes the message scribe.v1.Route.
  * Use `create(RouteSchema)` to create a new message.
  */
-export const RouteSchema: GenMessage<Route, {jsonType: RouteJson}> = /*@__PURE__*/
+export const RouteSchema: GenMessage<Route, { jsonType: RouteJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_manifest, 1);
 
 /**
@@ -268,7 +284,7 @@ export type NodeDeclarationJson = {
  * Describes the message scribe.v1.NodeDeclaration.
  * Use `create(NodeDeclarationSchema)` to create a new message.
  */
-export const NodeDeclarationSchema: GenMessage<NodeDeclaration, {jsonType: NodeDeclarationJson}> = /*@__PURE__*/
+export const NodeDeclarationSchema: GenMessage<NodeDeclaration, { jsonType: NodeDeclarationJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_manifest, 2);
 
 /**
@@ -315,7 +331,7 @@ export type HookDeclarationJson = {
  * Describes the message scribe.v1.HookDeclaration.
  * Use `create(HookDeclarationSchema)` to create a new message.
  */
-export const HookDeclarationSchema: GenMessage<HookDeclaration, {jsonType: HookDeclarationJson}> = /*@__PURE__*/
+export const HookDeclarationSchema: GenMessage<HookDeclaration, { jsonType: HookDeclarationJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_manifest, 3);
 
 /**
@@ -382,7 +398,7 @@ export type QueueDeclarationJson = {
  * Describes the message scribe.v1.QueueDeclaration.
  * Use `create(QueueDeclarationSchema)` to create a new message.
  */
-export const QueueDeclarationSchema: GenMessage<QueueDeclaration, {jsonType: QueueDeclarationJson}> = /*@__PURE__*/
+export const QueueDeclarationSchema: GenMessage<QueueDeclaration, { jsonType: QueueDeclarationJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_manifest, 4);
 
 /**
@@ -429,7 +445,7 @@ export type CronDeclarationJson = {
  * Describes the message scribe.v1.CronDeclaration.
  * Use `create(CronDeclarationSchema)` to create a new message.
  */
-export const CronDeclarationSchema: GenMessage<CronDeclaration, {jsonType: CronDeclarationJson}> = /*@__PURE__*/
+export const CronDeclarationSchema: GenMessage<CronDeclaration, { jsonType: CronDeclarationJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_manifest, 5);
 
 /**
@@ -486,7 +502,10 @@ export type SearcherDeclarationJson = {
  * Describes the message scribe.v1.SearcherDeclaration.
  * Use `create(SearcherDeclarationSchema)` to create a new message.
  */
-export const SearcherDeclarationSchema: GenMessage<SearcherDeclaration, {jsonType: SearcherDeclarationJson}> = /*@__PURE__*/
+export const SearcherDeclarationSchema: GenMessage<
+  SearcherDeclaration,
+  { jsonType: SearcherDeclarationJson }
+> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_manifest, 6);
 
 /**
@@ -533,7 +552,10 @@ export type RealtimeDeclarationJson = {
  * Describes the message scribe.v1.RealtimeDeclaration.
  * Use `create(RealtimeDeclarationSchema)` to create a new message.
  */
-export const RealtimeDeclarationSchema: GenMessage<RealtimeDeclaration, {jsonType: RealtimeDeclarationJson}> = /*@__PURE__*/
+export const RealtimeDeclarationSchema: GenMessage<
+  RealtimeDeclaration,
+  { jsonType: RealtimeDeclarationJson }
+> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_manifest, 7);
 
 /**
@@ -590,7 +612,10 @@ export type StorageDeclarationJson = {
  * Describes the message scribe.v1.StorageDeclaration.
  * Use `create(StorageDeclarationSchema)` to create a new message.
  */
-export const StorageDeclarationSchema: GenMessage<StorageDeclaration, {jsonType: StorageDeclarationJson}> = /*@__PURE__*/
+export const StorageDeclarationSchema: GenMessage<
+  StorageDeclaration,
+  { jsonType: StorageDeclarationJson }
+> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_manifest, 8);
 
 /**
@@ -727,7 +752,7 @@ export type ManifestJson = {
  * Describes the message scribe.v1.Manifest.
  * Use `create(ManifestSchema)` to create a new message.
  */
-export const ManifestSchema: GenMessage<Manifest, {jsonType: ManifestJson}> = /*@__PURE__*/
+export const ManifestSchema: GenMessage<Manifest, { jsonType: ManifestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_manifest, 9);
 
 /**
@@ -774,7 +799,7 @@ export type HandshakeRequestJson = {
  * Describes the message scribe.v1.HandshakeRequest.
  * Use `create(HandshakeRequestSchema)` to create a new message.
  */
-export const HandshakeRequestSchema: GenMessage<HandshakeRequest, {jsonType: HandshakeRequestJson}> = /*@__PURE__*/
+export const HandshakeRequestSchema: GenMessage<HandshakeRequest, { jsonType: HandshakeRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_manifest, 10);
 
 /**
@@ -788,7 +813,6 @@ export const Registration: GenService<{
     methodKind: "unary";
     input: typeof HandshakeRequestSchema;
     output: typeof ManifestSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_protocol_manifest, 0);
-

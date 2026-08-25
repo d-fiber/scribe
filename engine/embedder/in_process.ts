@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { ProjectSlot, type ProjectHost } from "@scribe/contracts/project_host.ts";
+import { type ProjectHost, ProjectSlot } from "@scribe/contracts/project_host.ts";
 
 interface SlotSpec {
   readonly load: () => Promise<unknown>;
@@ -55,8 +55,7 @@ const SLOTS: Record<ProjectSlot, SlotSpec> = {
     degradesSilently: false,
   },
   [ProjectSlot.GotrueEmailContext]: {
-    load: () =>
-      import("@app/api/internal/gotrue/email/resolve_app_user_context.ts"),
+    load: () => import("@app/api/internal/gotrue/email/resolve_app_user_context.ts"),
     degradesSilently: false,
   },
   [ProjectSlot.MailTemplates]: {

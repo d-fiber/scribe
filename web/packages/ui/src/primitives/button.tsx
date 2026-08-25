@@ -139,9 +139,7 @@ function make(variant: VariantKey) {
       width: isFlexible ? "100%" : undefined,
     };
 
-    const content = (
-      <AppText.body2Strong label={label} color={v.fgColor} as="span" />
-    );
+    const content = <AppText.body2Strong label={label} color={v.fgColor} as="span" />;
 
     if (href) {
       return (

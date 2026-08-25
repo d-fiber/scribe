@@ -2,13 +2,12 @@
 
 A complete backend you install, not a framework you assemble.
 
-A project built on scribe writes no authentication, no account management, no mail, no file storage,
-no search, no realtime, no queue, no cron, no HTTP gateway and no observability. All of it is here
-already, wired together, with its SQL schema, its containers and its migrations. The project writes
-its own domain, and nothing else.
+A project built on scribe writes no authentication, no account management, no mail, no file storage, no search, no
+realtime, no queue, no cron, no HTTP gateway and no observability. All of it is here already, wired together, with its
+SQL schema, its containers and its migrations. The project writes its own domain, and nothing else.
 
-This is the contract Flutter makes, moved to the backend. You do not build the rendering engine, you
-write widgets. Here you do not build the HTTP pipeline, you write endpoints.
+This is the contract Flutter makes, moved to the backend. You do not build the rendering engine, you write widgets. Here
+you do not build the HTTP pipeline, you write endpoints.
 
 | Flutter                                                    | scribe                                                 |
 | ---------------------------------------------------------- | ------------------------------------------------------ |
@@ -28,11 +27,10 @@ my-project/
   scribe/         this repository, the version the project runs on
 ```
 
-`config.yaml` is the source of truth for configuration, the SQL is the source of truth for the
-schema, and everything else is derived from those two: the enums, the row and table types, the
-relations, the environment accessors, the route table the worker reads, the OpenAPI documents, the
-Kong configuration and the Docker compose file. None of it is edited by hand. Every generated file
-opens with a line saying so and naming the command that rewrites it.
+`config.yaml` is the source of truth for configuration, the SQL is the source of truth for the schema, and everything
+else is derived from those two: the enums, the row and table types, the relations, the environment accessors, the route
+table the worker reads, the OpenAPI documents, the Kong configuration and the Docker compose file. None of it is edited
+by hand. Every generated file opens with a line saying so and naming the command that rewrites it.
 
 ## What comes mounted
 
@@ -50,20 +48,19 @@ A project mounts the packages it wants and gets nothing else. They live in
 | `remote_configs` | the keys a project names in code, with their default and their lifetime                                                                                                         |
 | `audience`       | the named set somebody belongs to, and the right that follows from it                                                                                                           |
 
-The other seven reach `foundation` rather than reaching the host, which is why it is the one that
-cannot be left out.
+The other seven reach `foundation` rather than reaching the host, which is why it is the one that cannot be left out.
 
 ## What runs
 
-The rendered stack is a Docker compose file, sized from `config.yaml`. Caddy terminates TLS, Kong
-routes, and three Deno services answer: the API, the functions runtime and the worker. `foundation`
-brings Postgres with dbmate and PostgREST, Valkey and NATS. A package that needs a container of its
-own brings it when it is mounted, which is how `search` adds OpenSearch and `storage` adds imgproxy.
+The rendered stack is a Docker compose file, sized from `config.yaml`. Caddy terminates TLS, Kong routes, and three Deno
+services answer: the API, the functions runtime and the worker. `foundation` brings Postgres with dbmate and PostgREST,
+Valkey and NATS. A package that needs a container of its own brings it when it is mounted, which is how `search` adds
+OpenSearch and `storage` adds imgproxy.
 
 ## The one command
 
-`scribe` writes the project, rewrites everything derived from what it declares, sizes and renders
-the stack, keeps the secrets, and moves this checkout up or down a version.
+`scribe` writes the project, rewrites everything derived from what it declares, sizes and renders the stack, keeps the
+secrets, and moves this checkout up or down a version.
 
 ```sh
 scribe create my-project
@@ -82,7 +79,7 @@ sh tools/install.sh
 | Repository                                                            | What it is                                                                    |
 | --------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | [`scribe`](https://github.com/d-fiber/scribe)                         | the framework, this one                                                       |
-| [`scribe_packages`](https://github.com/d-fiber/scribe_packages)       | the mountable packages, a copy under `engine/packages/`                         |
+| [`scribe_packages`](https://github.com/d-fiber/scribe_packages)       | the mountable packages, a copy under `engine/packages/`                       |
 | [`scribe_alchemy`](https://github.com/d-fiber/scribe_alchemy)         | the language the framework and its packages are both written in               |
 | [`scribe_pkg_builder`](https://github.com/d-fiber/scribe_pkg_builder) | what reads the packages, resolves them and writes the import map and the lock |
 | [`scribe_tools`](https://github.com/d-fiber/scribe_tools)             | `scribe`, the CLI a project is worked through                                 |
@@ -109,23 +106,21 @@ web/                the documentation portal
 
 ## The rules that hold it together
 
-**The direction of dependency does not negotiate.** `lib/` depends on `scribe/`, and `scribe/`
-depends on nothing. Removing a project and running `deno check`, `deno lint` and `deno task test`
-has to pass. The framework reaches the project through fifteen dynamic imports, each with a defined
-fallback, so a project that provides nothing still boots.
+**The direction of dependency does not negotiate.** `lib/` depends on `scribe/`, and `scribe/` depends on nothing.
+Removing a project and running `deno check`, `deno lint` and `deno task test` has to pass. The framework reaches the
+project through fifteen dynamic imports, each with a defined fallback, so a project that provides nothing still boots.
 
-**The layers are checked by the machine, not by discipline.** Seven layers, one direction, and a
-lint rule in `engine/.lint/layers.ts` that fails `deno lint` on anything reaching upward. A
-second rule gives directories a notion of private that TypeScript does not have: a file or an
-identifier prefixed `_` is visible only in its own directory and below.
+**The layers are checked by the machine, not by discipline.** Seven layers, one direction, and a lint rule in
+`engine/.lint/layers.ts` that fails `deno lint` on anything reaching upward. A second rule gives directories a notion of
+private that TypeScript does not have: a file or an identifier prefixed `_` is visible only in its own directory and
+below.
 
-**A project extends, it never modifies.** There is no `if (project === ...)` anywhere. A project
-mounts routers, declares optional extensions, registers hooks and queue runners, adds its columns
-with `ALTER TABLE`, and overrides the fallbacks it wants to replace.
+**A project extends, it never modifies.** There is no `if (project === ...)` anywhere. A project mounts routers,
+declares optional extensions, registers hooks and queue runners, adds its columns with `ALTER TABLE`, and overrides the
+fallbacks it wants to replace.
 
-**One way to do each thing.** One duration type, one size type, one data access surface, one router
-shape, one endpoint shape, three event primitives and never a fourth. When a second way appears it
-is deleted, not deprecated.
+**One way to do each thing.** One duration type, one size type, one data access surface, one router shape, one endpoint
+shape, three event primitives and never a fourth. When a second way appears it is deleted, not deprecated.
 
 ## Working on it
 

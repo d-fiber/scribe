@@ -59,10 +59,8 @@ const FIELD_RULES: readonly FieldRule[] = [
       payload.notification_token,
       MAX_NOTIFICATION_TOKEN_LENGTH,
     ),
-  (payload) =>
-    optionalBoundedString(payload.device_token, MAX_DEVICE_TOKEN_LENGTH),
-  (payload) =>
-    optionalSizedString(payload.nonce, MIN_NONCE_LENGTH, MAX_NONCE_LENGTH),
+  (payload) => optionalBoundedString(payload.device_token, MAX_DEVICE_TOKEN_LENGTH),
+  (payload) => optionalSizedString(payload.nonce, MIN_NONCE_LENGTH, MAX_NONCE_LENGTH),
   (payload) => typeof payload.is_physical_device === "boolean",
   (payload) => oneOf(payload.client, ClientType),
   (payload) => oneOf(payload.os, DeviceOs),
@@ -79,8 +77,6 @@ export class DevicePayloadValidator {
     if (payload.binding !== expectedBinding) return null;
     if (!isFresh(payload.iat)) return null;
 
-    return FIELD_RULES.every((rule) => rule(payload))
-      ? (payload as RequestDevice)
-      : null;
+    return FIELD_RULES.every((rule) => rule(payload)) ? (payload as RequestDevice) : null;
   }
 }

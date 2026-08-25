@@ -287,9 +287,8 @@ export async function executeQuery(query: Query): Promise<QueryResult> {
     return create(QueryResultSchema, {
       error: {
         code: "unbounded_write",
-        message:
-          `refusing to ${Operation[query.operation].toLowerCase()} every row of "${query.table}": `
-          + "the query names no row, and no column says who a row belongs to.",
+        message: `refusing to ${Operation[query.operation].toLowerCase()} every row of "${query.table}": ` +
+          "the query names no row, and no column says who a row belongs to.",
       },
     });
   }

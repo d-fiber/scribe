@@ -34,7 +34,6 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-
 // The family comes from the CSS variable, which the project's tokens.css
 // overrides. The fallback is a system stack, never the typeface of one
 // particular project.

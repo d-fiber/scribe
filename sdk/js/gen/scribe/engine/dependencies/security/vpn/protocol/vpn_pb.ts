@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/dependencies/security/vpn/protocol/vpn.proto.
  */
 export const file_scribe_host_dependencies_security_vpn_protocol_vpn: GenFile = /*@__PURE__*/
-  fileDesc("CjhzY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvc2VjdXJpdHkvdnBuL3Byb3RvY29sL3Zwbi5wcm90bxIVc2NyaWJlLmNsaWVudHMudnBuLnYxIl8KA1ZwbhIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEg8KB2VuYWJsZWQYAyABKAgSEgoKY3JlYXRlZF9hdBgEIAEoAxIZChFsYXN0X2hhbmRzaGFrZV9hdBgFIAEoAyJXCglWcG5SZXN1bHQSJwoDdnBuGAEgASgLMhouc2NyaWJlLmNsaWVudHMudnBuLnYxLlZwbhIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIi8KClZvaWRSZXN1bHQSIQoFZXJyb3IYASABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSIYCgZWcG5SZWYSDgoGdnBuX2lkGAEgASgJIhgKCE93bmVyUmVmEgwKBG5hbWUYASABKAkiHQoNQ3JlYXRlUmVxdWVzdBIMCgRuYW1lGAEgASgJIi0KDVJlbmFtZVJlcXVlc3QSDgoGdnBuX2lkGAEgASgJEgwKBG5hbWUYAiABKAkiMQoRUGFnaW5hdGlvblJlcXVlc3QSDgoGb2Zmc2V0GAEgASgNEgwKBHNpemUYAiABKA0ibgoQUGFnaW5hdGlvblJlc3VsdBIoCgR2cG5zGAEgAygLMhouc2NyaWJlLmNsaWVudHMudnBuLnYxLlZwbhINCgV0b3RhbBgCIAEoBBIhCgVlcnJvchgDIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIk8KE0NvbmZpZ3VyYXRpb25SZXN1bHQSFQoNY29uZmlndXJhdGlvbhgBIAEoCRIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIkEKDFFyY29kZVJlc3VsdBIOCgZxcmNvZGUYASABKAkSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZTLbBwoIVnBuQWRtaW4SRgoDR2V0Eh0uc2NyaWJlLmNsaWVudHMudnBuLnYxLlZwblJlZhogLnNjcmliZS5jbGllbnRzLnZwbi52MS5WcG5SZXN1bHQSTwoKR2V0QnlPd25lchIfLnNjcmliZS5jbGllbnRzLnZwbi52MS5Pd25lclJlZhogLnNjcmliZS5jbGllbnRzLnZwbi52MS5WcG5SZXN1bHQSUAoGQ3JlYXRlEiQuc2NyaWJlLmNsaWVudHMudnBuLnYxLkNyZWF0ZVJlcXVlc3QaIC5zY3JpYmUuY2xpZW50cy52cG4udjEuVnBuUmVzdWx0EkoKBkRlbGV0ZRIdLnNjcmliZS5jbGllbnRzLnZwbi52MS5WcG5SZWYaIS5zY3JpYmUuY2xpZW50cy52cG4udjEuVm9pZFJlc3VsdBJPCglEZWxldGVBbGwSHy5zY3JpYmUuY2xpZW50cy52cG4udjEuT3duZXJSZWYaIS5zY3JpYmUuY2xpZW50cy52cG4udjEuVm9pZFJlc3VsdBJKCgZFbmFibGUSHS5zY3JpYmUuY2xpZW50cy52cG4udjEuVnBuUmVmGiEuc2NyaWJlLmNsaWVudHMudnBuLnYxLlZvaWRSZXN1bHQSSwoHRGlzYWJsZRIdLnNjcmliZS5jbGllbnRzLnZwbi52MS5WcG5SZWYaIS5zY3JpYmUuY2xpZW50cy52cG4udjEuVm9pZFJlc3VsdBJQCgpEaXNhYmxlQWxsEh8uc2NyaWJlLmNsaWVudHMudnBuLnYxLk93bmVyUmVmGiEuc2NyaWJlLmNsaWVudHMudnBuLnYxLlZvaWRSZXN1bHQSUQoGUmVuYW1lEiQuc2NyaWJlLmNsaWVudHMudnBuLnYxLlJlbmFtZVJlcXVlc3QaIS5zY3JpYmUuY2xpZW50cy52cG4udjEuVm9pZFJlc3VsdBJfCgpQYWdpbmF0aW9uEiguc2NyaWJlLmNsaWVudHMudnBuLnYxLlBhZ2luYXRpb25SZXF1ZXN0Gicuc2NyaWJlLmNsaWVudHMudnBuLnYxLlBhZ2luYXRpb25SZXN1bHQSWgoNQ29uZmlndXJhdGlvbhIdLnNjcmliZS5jbGllbnRzLnZwbi52MS5WcG5SZWYaKi5zY3JpYmUuY2xpZW50cy52cG4udjEuQ29uZmlndXJhdGlvblJlc3VsdBJMCgZRcmNvZGUSHS5zY3JpYmUuY2xpZW50cy52cG4udjEuVnBuUmVmGiMuc2NyaWJlLmNsaWVudHMudnBuLnYxLlFyY29kZVJlc3VsdGIGcHJvdG8z", [file_scribe_protocol_common]);
+  fileDesc(
+    "CjhzY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvc2VjdXJpdHkvdnBuL3Byb3RvY29sL3Zwbi5wcm90bxIVc2NyaWJlLmNsaWVudHMudnBuLnYxIl8KA1ZwbhIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEg8KB2VuYWJsZWQYAyABKAgSEgoKY3JlYXRlZF9hdBgEIAEoAxIZChFsYXN0X2hhbmRzaGFrZV9hdBgFIAEoAyJXCglWcG5SZXN1bHQSJwoDdnBuGAEgASgLMhouc2NyaWJlLmNsaWVudHMudnBuLnYxLlZwbhIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIi8KClZvaWRSZXN1bHQSIQoFZXJyb3IYASABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSIYCgZWcG5SZWYSDgoGdnBuX2lkGAEgASgJIhgKCE93bmVyUmVmEgwKBG5hbWUYASABKAkiHQoNQ3JlYXRlUmVxdWVzdBIMCgRuYW1lGAEgASgJIi0KDVJlbmFtZVJlcXVlc3QSDgoGdnBuX2lkGAEgASgJEgwKBG5hbWUYAiABKAkiMQoRUGFnaW5hdGlvblJlcXVlc3QSDgoGb2Zmc2V0GAEgASgNEgwKBHNpemUYAiABKA0ibgoQUGFnaW5hdGlvblJlc3VsdBIoCgR2cG5zGAEgAygLMhouc2NyaWJlLmNsaWVudHMudnBuLnYxLlZwbhINCgV0b3RhbBgCIAEoBBIhCgVlcnJvchgDIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIk8KE0NvbmZpZ3VyYXRpb25SZXN1bHQSFQoNY29uZmlndXJhdGlvbhgBIAEoCRIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIkEKDFFyY29kZVJlc3VsdBIOCgZxcmNvZGUYASABKAkSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZTLbBwoIVnBuQWRtaW4SRgoDR2V0Eh0uc2NyaWJlLmNsaWVudHMudnBuLnYxLlZwblJlZhogLnNjcmliZS5jbGllbnRzLnZwbi52MS5WcG5SZXN1bHQSTwoKR2V0QnlPd25lchIfLnNjcmliZS5jbGllbnRzLnZwbi52MS5Pd25lclJlZhogLnNjcmliZS5jbGllbnRzLnZwbi52MS5WcG5SZXN1bHQSUAoGQ3JlYXRlEiQuc2NyaWJlLmNsaWVudHMudnBuLnYxLkNyZWF0ZVJlcXVlc3QaIC5zY3JpYmUuY2xpZW50cy52cG4udjEuVnBuUmVzdWx0EkoKBkRlbGV0ZRIdLnNjcmliZS5jbGllbnRzLnZwbi52MS5WcG5SZWYaIS5zY3JpYmUuY2xpZW50cy52cG4udjEuVm9pZFJlc3VsdBJPCglEZWxldGVBbGwSHy5zY3JpYmUuY2xpZW50cy52cG4udjEuT3duZXJSZWYaIS5zY3JpYmUuY2xpZW50cy52cG4udjEuVm9pZFJlc3VsdBJKCgZFbmFibGUSHS5zY3JpYmUuY2xpZW50cy52cG4udjEuVnBuUmVmGiEuc2NyaWJlLmNsaWVudHMudnBuLnYxLlZvaWRSZXN1bHQSSwoHRGlzYWJsZRIdLnNjcmliZS5jbGllbnRzLnZwbi52MS5WcG5SZWYaIS5zY3JpYmUuY2xpZW50cy52cG4udjEuVm9pZFJlc3VsdBJQCgpEaXNhYmxlQWxsEh8uc2NyaWJlLmNsaWVudHMudnBuLnYxLk93bmVyUmVmGiEuc2NyaWJlLmNsaWVudHMudnBuLnYxLlZvaWRSZXN1bHQSUQoGUmVuYW1lEiQuc2NyaWJlLmNsaWVudHMudnBuLnYxLlJlbmFtZVJlcXVlc3QaIS5zY3JpYmUuY2xpZW50cy52cG4udjEuVm9pZFJlc3VsdBJfCgpQYWdpbmF0aW9uEiguc2NyaWJlLmNsaWVudHMudnBuLnYxLlBhZ2luYXRpb25SZXF1ZXN0Gicuc2NyaWJlLmNsaWVudHMudnBuLnYxLlBhZ2luYXRpb25SZXN1bHQSWgoNQ29uZmlndXJhdGlvbhIdLnNjcmliZS5jbGllbnRzLnZwbi52MS5WcG5SZWYaKi5zY3JpYmUuY2xpZW50cy52cG4udjEuQ29uZmlndXJhdGlvblJlc3VsdBJMCgZRcmNvZGUSHS5zY3JpYmUuY2xpZW50cy52cG4udjEuVnBuUmVmGiMuc2NyaWJlLmNsaWVudHMudnBuLnYxLlFyY29kZVJlc3VsdGIGcHJvdG8z",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.clients.vpn.v1.Vpn
@@ -114,7 +117,7 @@ export type VpnJson = {
  * Describes the message scribe.clients.vpn.v1.Vpn.
  * Use `create(VpnSchema)` to create a new message.
  */
-export const VpnSchema: GenMessage<Vpn, {jsonType: VpnJson}> = /*@__PURE__*/
+export const VpnSchema: GenMessage<Vpn, { jsonType: VpnJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_vpn_protocol_vpn, 0);
 
 /**
@@ -151,7 +154,7 @@ export type VpnResultJson = {
  * Describes the message scribe.clients.vpn.v1.VpnResult.
  * Use `create(VpnResultSchema)` to create a new message.
  */
-export const VpnResultSchema: GenMessage<VpnResult, {jsonType: VpnResultJson}> = /*@__PURE__*/
+export const VpnResultSchema: GenMessage<VpnResult, { jsonType: VpnResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_vpn_protocol_vpn, 1);
 
 /**
@@ -178,7 +181,7 @@ export type VoidResultJson = {
  * Describes the message scribe.clients.vpn.v1.VoidResult.
  * Use `create(VoidResultSchema)` to create a new message.
  */
-export const VoidResultSchema: GenMessage<VoidResult, {jsonType: VoidResultJson}> = /*@__PURE__*/
+export const VoidResultSchema: GenMessage<VoidResult, { jsonType: VoidResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_vpn_protocol_vpn, 2);
 
 /**
@@ -205,7 +208,7 @@ export type VpnRefJson = {
  * Describes the message scribe.clients.vpn.v1.VpnRef.
  * Use `create(VpnRefSchema)` to create a new message.
  */
-export const VpnRefSchema: GenMessage<VpnRef, {jsonType: VpnRefJson}> = /*@__PURE__*/
+export const VpnRefSchema: GenMessage<VpnRef, { jsonType: VpnRefJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_vpn_protocol_vpn, 3);
 
 /**
@@ -232,7 +235,7 @@ export type OwnerRefJson = {
  * Describes the message scribe.clients.vpn.v1.OwnerRef.
  * Use `create(OwnerRefSchema)` to create a new message.
  */
-export const OwnerRefSchema: GenMessage<OwnerRef, {jsonType: OwnerRefJson}> = /*@__PURE__*/
+export const OwnerRefSchema: GenMessage<OwnerRef, { jsonType: OwnerRefJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_vpn_protocol_vpn, 4);
 
 /**
@@ -259,7 +262,7 @@ export type CreateRequestJson = {
  * Describes the message scribe.clients.vpn.v1.CreateRequest.
  * Use `create(CreateRequestSchema)` to create a new message.
  */
-export const CreateRequestSchema: GenMessage<CreateRequest, {jsonType: CreateRequestJson}> = /*@__PURE__*/
+export const CreateRequestSchema: GenMessage<CreateRequest, { jsonType: CreateRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_vpn_protocol_vpn, 5);
 
 /**
@@ -296,7 +299,7 @@ export type RenameRequestJson = {
  * Describes the message scribe.clients.vpn.v1.RenameRequest.
  * Use `create(RenameRequestSchema)` to create a new message.
  */
-export const RenameRequestSchema: GenMessage<RenameRequest, {jsonType: RenameRequestJson}> = /*@__PURE__*/
+export const RenameRequestSchema: GenMessage<RenameRequest, { jsonType: RenameRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_vpn_protocol_vpn, 6);
 
 /**
@@ -333,7 +336,7 @@ export type PaginationRequestJson = {
  * Describes the message scribe.clients.vpn.v1.PaginationRequest.
  * Use `create(PaginationRequestSchema)` to create a new message.
  */
-export const PaginationRequestSchema: GenMessage<PaginationRequest, {jsonType: PaginationRequestJson}> = /*@__PURE__*/
+export const PaginationRequestSchema: GenMessage<PaginationRequest, { jsonType: PaginationRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_vpn_protocol_vpn, 7);
 
 /**
@@ -380,7 +383,7 @@ export type PaginationResultJson = {
  * Describes the message scribe.clients.vpn.v1.PaginationResult.
  * Use `create(PaginationResultSchema)` to create a new message.
  */
-export const PaginationResultSchema: GenMessage<PaginationResult, {jsonType: PaginationResultJson}> = /*@__PURE__*/
+export const PaginationResultSchema: GenMessage<PaginationResult, { jsonType: PaginationResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_vpn_protocol_vpn, 8);
 
 /**
@@ -417,7 +420,10 @@ export type ConfigurationResultJson = {
  * Describes the message scribe.clients.vpn.v1.ConfigurationResult.
  * Use `create(ConfigurationResultSchema)` to create a new message.
  */
-export const ConfigurationResultSchema: GenMessage<ConfigurationResult, {jsonType: ConfigurationResultJson}> = /*@__PURE__*/
+export const ConfigurationResultSchema: GenMessage<
+  ConfigurationResult,
+  { jsonType: ConfigurationResultJson }
+> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_vpn_protocol_vpn, 9);
 
 /**
@@ -454,7 +460,7 @@ export type QrcodeResultJson = {
  * Describes the message scribe.clients.vpn.v1.QrcodeResult.
  * Use `create(QrcodeResultSchema)` to create a new message.
  */
-export const QrcodeResultSchema: GenMessage<QrcodeResult, {jsonType: QrcodeResultJson}> = /*@__PURE__*/
+export const QrcodeResultSchema: GenMessage<QrcodeResult, { jsonType: QrcodeResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_vpn_protocol_vpn, 10);
 
 /**
@@ -468,7 +474,7 @@ export const VpnAdmin: GenService<{
     methodKind: "unary";
     input: typeof VpnRefSchema;
     output: typeof VpnResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.vpn.v1.VpnAdmin.GetByOwner
    */
@@ -476,7 +482,7 @@ export const VpnAdmin: GenService<{
     methodKind: "unary";
     input: typeof OwnerRefSchema;
     output: typeof VpnResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.vpn.v1.VpnAdmin.Create
    */
@@ -484,7 +490,7 @@ export const VpnAdmin: GenService<{
     methodKind: "unary";
     input: typeof CreateRequestSchema;
     output: typeof VpnResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.vpn.v1.VpnAdmin.Delete
    */
@@ -492,7 +498,7 @@ export const VpnAdmin: GenService<{
     methodKind: "unary";
     input: typeof VpnRefSchema;
     output: typeof VoidResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.vpn.v1.VpnAdmin.DeleteAll
    */
@@ -500,7 +506,7 @@ export const VpnAdmin: GenService<{
     methodKind: "unary";
     input: typeof OwnerRefSchema;
     output: typeof VoidResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.vpn.v1.VpnAdmin.Enable
    */
@@ -508,7 +514,7 @@ export const VpnAdmin: GenService<{
     methodKind: "unary";
     input: typeof VpnRefSchema;
     output: typeof VoidResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.vpn.v1.VpnAdmin.Disable
    */
@@ -516,7 +522,7 @@ export const VpnAdmin: GenService<{
     methodKind: "unary";
     input: typeof VpnRefSchema;
     output: typeof VoidResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.vpn.v1.VpnAdmin.DisableAll
    */
@@ -524,7 +530,7 @@ export const VpnAdmin: GenService<{
     methodKind: "unary";
     input: typeof OwnerRefSchema;
     output: typeof VoidResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.vpn.v1.VpnAdmin.Rename
    */
@@ -532,7 +538,7 @@ export const VpnAdmin: GenService<{
     methodKind: "unary";
     input: typeof RenameRequestSchema;
     output: typeof VoidResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.vpn.v1.VpnAdmin.Pagination
    */
@@ -540,7 +546,7 @@ export const VpnAdmin: GenService<{
     methodKind: "unary";
     input: typeof PaginationRequestSchema;
     output: typeof PaginationResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.vpn.v1.VpnAdmin.Configuration
    */
@@ -548,7 +554,7 @@ export const VpnAdmin: GenService<{
     methodKind: "unary";
     input: typeof VpnRefSchema;
     output: typeof ConfigurationResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.vpn.v1.VpnAdmin.Qrcode
    */
@@ -556,7 +562,6 @@ export const VpnAdmin: GenService<{
     methodKind: "unary";
     input: typeof VpnRefSchema;
     output: typeof QrcodeResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_dependencies_security_vpn_protocol_vpn, 0);
-

@@ -4,7 +4,7 @@
    Aucune valeur ici ne doit etre celle d'un projet en particulier. */
 
 :root {
-  --app-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --app-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   --app-action-primary: #2f6feb;
   --app-action-on-primary: #ffffff;

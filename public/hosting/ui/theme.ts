@@ -57,8 +57,7 @@ export function themeMode({
 }: ThemeRule): string {
   const rules = Object.entries(tokens)
     .map(
-      ([key, { dark }]) =>
-        `  [${attribute}="${key}"] { ${property}: ${dark} !important; }`,
+      ([key, { dark }]) => `  [${attribute}="${key}"] { ${property}: ${dark} !important; }`,
     )
     .join("\n");
 

@@ -62,9 +62,9 @@ export function makeAppSkeleton(colors: AppColors) {
   };
 
   const AppSkeletonStyle = [
-    `@keyframes app-skeleton-pulse { from { opacity: ${
-      pulseFromAlpha / opaqueAlpha
-    }; } to { opacity: ${pulseToAlpha / opaqueAlpha}; } }`,
+    `@keyframes app-skeleton-pulse { from { opacity: ${pulseFromAlpha / opaqueAlpha}; } to { opacity: ${
+      pulseToAlpha / opaqueAlpha
+    }; } }`,
     `[data-skeleton="block"] { animation: app-skeleton-pulse ${pulseDurationMs}ms ease-in-out infinite alternate; }`,
     `@media (prefers-reduced-motion: reduce) { [data-skeleton="block"] { animation: none; opacity: ${
       pulseFromAlpha / opaqueAlpha

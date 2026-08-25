@@ -34,10 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type {
-  BodyFieldCtor,
-  FormFieldCtor,
-} from "./field_types.ts";
+import type { BodyFieldCtor, FormFieldCtor } from "./field_types.ts";
 import { FieldResolverFactory } from "./field_resolvers/field_resolver_factory.ts";
 import { isRequiredEntry, unwrapFieldCtor } from "./markers.ts";
 

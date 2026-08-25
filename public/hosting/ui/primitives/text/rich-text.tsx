@@ -63,8 +63,7 @@ const iconGap = 12;
 export function makeAppRichText(colors: AppColors, fonts: AppFonts) {
   const textColors = makeTextColors(colors);
 
-  const AppRichTextStyle =
-    `[data-rich-icon] svg { width: ${iconFontRatio}em; height: ${iconFontRatio}em; }`;
+  const AppRichTextStyle = `[data-rich-icon] svg { width: ${iconFontRatio}em; height: ${iconFontRatio}em; }`;
 
   function separatorOf(item: AppRichTextItem, isLast: boolean): string {
     return isLast || item.text.endsWith(" ") ? "" : " ";
@@ -119,9 +118,7 @@ export function makeAppRichText(colors: AppColors, fonts: AppFonts) {
       color: textColors[color].light,
       opacity: isEnabled ? undefined : disabledAlpha / opaqueAlpha,
     };
-    const content = (
-      <Content item={item} separator={separatorOf(item, isLast)} />
-    );
+    const content = <Content item={item} separator={separatorOf(item, isLast)} />;
 
     if (item.href === undefined || !isEnabled) {
       return (

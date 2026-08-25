@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/protocol/logs.proto.
  */
 export const file_scribe_protocol_logs: GenFile = /*@__PURE__*/
-  fileDesc("ChpzY3JpYmUvcHJvdG9jb2wvbG9ncy5wcm90bxIJc2NyaWJlLnYxItEBCghMb2dFbnRyeRIiCgVsZXZlbBgBIAEoDjITLnNjcmliZS52MS5Mb2dMZXZlbBIOCgZhY3Rpb24YAiABKAkSEgoKYWN0b3JfdHlwZRgDIAEoCRIQCghhY3Rvcl9pZBgEIAEoCRIhCghtZXRhZGF0YRgFIAEoCzIPLnNjcmliZS52MS5Kc29uEhEKCXRpbWVzdGFtcBgGIAEoAxIQCgh0cmFjZV9pZBgHIAEoCRIVCg1pbnZvY2F0aW9uX2lkGAggASgJEgwKBG5vZGUYCSABKAkiMAoITG9nQmF0Y2gSJAoHZW50cmllcxgBIAMoCzITLnNjcmliZS52MS5Mb2dFbnRyeSIICgZMb2dBY2siQQoLTG9nRGVsaXZlcnkSDAoEbm9kZRgBIAEoCRIkCgdlbnRyaWVzGAIgAygLMhMuc2NyaWJlLnYxLkxvZ0VudHJ5IhAKDkxvZ0RlbGl2ZXJ5QWNrKncKCExvZ0xldmVsEhkKFUxPR19MRVZFTF9VTlNQRUNJRklFRBAAEhMKD0xPR19MRVZFTF9ERUJVRxABEhIKDkxPR19MRVZFTF9JTkZPEAISEgoOTE9HX0xFVkVMX1dBUk4QAxITCg9MT0dfTEVWRUxfRVJST1IQBDI5CgdMb2dnaW5nEi4KBFNoaXASEy5zY3JpYmUudjEuTG9nQmF0Y2gaES5zY3JpYmUudjEuTG9nQWNrMkoKC0xvZ0Rpc3BhdGNoEjsKBkhhbmRsZRIWLnNjcmliZS52MS5Mb2dEZWxpdmVyeRoZLnNjcmliZS52MS5Mb2dEZWxpdmVyeUFja2IGcHJvdG8z", [file_scribe_protocol_common]);
+  fileDesc(
+    "ChpzY3JpYmUvcHJvdG9jb2wvbG9ncy5wcm90bxIJc2NyaWJlLnYxItEBCghMb2dFbnRyeRIiCgVsZXZlbBgBIAEoDjITLnNjcmliZS52MS5Mb2dMZXZlbBIOCgZhY3Rpb24YAiABKAkSEgoKYWN0b3JfdHlwZRgDIAEoCRIQCghhY3Rvcl9pZBgEIAEoCRIhCghtZXRhZGF0YRgFIAEoCzIPLnNjcmliZS52MS5Kc29uEhEKCXRpbWVzdGFtcBgGIAEoAxIQCgh0cmFjZV9pZBgHIAEoCRIVCg1pbnZvY2F0aW9uX2lkGAggASgJEgwKBG5vZGUYCSABKAkiMAoITG9nQmF0Y2gSJAoHZW50cmllcxgBIAMoCzITLnNjcmliZS52MS5Mb2dFbnRyeSIICgZMb2dBY2siQQoLTG9nRGVsaXZlcnkSDAoEbm9kZRgBIAEoCRIkCgdlbnRyaWVzGAIgAygLMhMuc2NyaWJlLnYxLkxvZ0VudHJ5IhAKDkxvZ0RlbGl2ZXJ5QWNrKncKCExvZ0xldmVsEhkKFUxPR19MRVZFTF9VTlNQRUNJRklFRBAAEhMKD0xPR19MRVZFTF9ERUJVRxABEhIKDkxPR19MRVZFTF9JTkZPEAISEgoOTE9HX0xFVkVMX1dBUk4QAxITCg9MT0dfTEVWRUxfRVJST1IQBDI5CgdMb2dnaW5nEi4KBFNoaXASEy5zY3JpYmUudjEuTG9nQmF0Y2gaES5zY3JpYmUudjEuTG9nQWNrMkoKC0xvZ0Rpc3BhdGNoEjsKBkhhbmRsZRIWLnNjcmliZS52MS5Mb2dEZWxpdmVyeRoZLnNjcmliZS52MS5Mb2dEZWxpdmVyeUFja2IGcHJvdG8z",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.v1.LogEntry
@@ -154,7 +157,7 @@ export type LogEntryJson = {
  * Describes the message scribe.v1.LogEntry.
  * Use `create(LogEntrySchema)` to create a new message.
  */
-export const LogEntrySchema: GenMessage<LogEntry, {jsonType: LogEntryJson}> = /*@__PURE__*/
+export const LogEntrySchema: GenMessage<LogEntry, { jsonType: LogEntryJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_logs, 0);
 
 /**
@@ -181,26 +184,24 @@ export type LogBatchJson = {
  * Describes the message scribe.v1.LogBatch.
  * Use `create(LogBatchSchema)` to create a new message.
  */
-export const LogBatchSchema: GenMessage<LogBatch, {jsonType: LogBatchJson}> = /*@__PURE__*/
+export const LogBatchSchema: GenMessage<LogBatch, { jsonType: LogBatchJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_logs, 1);
 
 /**
  * @generated from message scribe.v1.LogAck
  */
-export type LogAck = Message<"scribe.v1.LogAck"> & {
-};
+export type LogAck = Message<"scribe.v1.LogAck"> & {};
 
 /**
  * @generated from message scribe.v1.LogAck
  */
-export type LogAckJson = {
-};
+export type LogAckJson = {};
 
 /**
  * Describes the message scribe.v1.LogAck.
  * Use `create(LogAckSchema)` to create a new message.
  */
-export const LogAckSchema: GenMessage<LogAck, {jsonType: LogAckJson}> = /*@__PURE__*/
+export const LogAckSchema: GenMessage<LogAck, { jsonType: LogAckJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_logs, 2);
 
 /**
@@ -237,26 +238,24 @@ export type LogDeliveryJson = {
  * Describes the message scribe.v1.LogDelivery.
  * Use `create(LogDeliverySchema)` to create a new message.
  */
-export const LogDeliverySchema: GenMessage<LogDelivery, {jsonType: LogDeliveryJson}> = /*@__PURE__*/
+export const LogDeliverySchema: GenMessage<LogDelivery, { jsonType: LogDeliveryJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_logs, 3);
 
 /**
  * @generated from message scribe.v1.LogDeliveryAck
  */
-export type LogDeliveryAck = Message<"scribe.v1.LogDeliveryAck"> & {
-};
+export type LogDeliveryAck = Message<"scribe.v1.LogDeliveryAck"> & {};
 
 /**
  * @generated from message scribe.v1.LogDeliveryAck
  */
-export type LogDeliveryAckJson = {
-};
+export type LogDeliveryAckJson = {};
 
 /**
  * Describes the message scribe.v1.LogDeliveryAck.
  * Use `create(LogDeliveryAckSchema)` to create a new message.
  */
-export const LogDeliveryAckSchema: GenMessage<LogDeliveryAck, {jsonType: LogDeliveryAckJson}> = /*@__PURE__*/
+export const LogDeliveryAckSchema: GenMessage<LogDeliveryAck, { jsonType: LogDeliveryAckJson }> = /*@__PURE__*/
   messageDesc(file_scribe_protocol_logs, 4);
 
 /**
@@ -292,7 +291,12 @@ export enum LogLevel {
 /**
  * @generated from enum scribe.v1.LogLevel
  */
-export type LogLevelJson = "LOG_LEVEL_UNSPECIFIED" | "LOG_LEVEL_DEBUG" | "LOG_LEVEL_INFO" | "LOG_LEVEL_WARN" | "LOG_LEVEL_ERROR";
+export type LogLevelJson =
+  | "LOG_LEVEL_UNSPECIFIED"
+  | "LOG_LEVEL_DEBUG"
+  | "LOG_LEVEL_INFO"
+  | "LOG_LEVEL_WARN"
+  | "LOG_LEVEL_ERROR";
 
 /**
  * Describes the enum scribe.v1.LogLevel.
@@ -314,7 +318,7 @@ export const Logging: GenService<{
     methodKind: "unary";
     input: typeof LogBatchSchema;
     output: typeof LogAckSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_protocol_logs, 0);
 
@@ -335,7 +339,6 @@ export const LogDispatch: GenService<{
     methodKind: "unary";
     input: typeof LogDeliverySchema;
     output: typeof LogDeliveryAckSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_protocol_logs, 1);
-

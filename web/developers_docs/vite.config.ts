@@ -39,13 +39,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { defineConfig } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
-import {
-  GENERATED_DOCS,
-  LANDING_MODE,
-  PROJECT_ROOT,
-  readManifest,
-  requireAssets,
-} from "./manifest.mjs";
+import { GENERATED_DOCS, LANDING_MODE, PROJECT_ROOT, readManifest, requireAssets } from "./manifest.mjs";
 
 type DocsSurface = {
   key: string;
@@ -89,9 +83,7 @@ export default defineConfig(({ mode }) => {
   // A variant carries only the spec it displays. The landing has none, and a
   // surface has its own. Copying the others makes the bundle heavier and
   // publishes one API on the domain of another.
-  const yamlSources = surface
-    ? [{ src: path.join(GENERATED_DOCS, surface.spec), rename: surface.spec }]
-    : [];
+  const yamlSources = surface ? [{ src: path.join(GENERATED_DOCS, surface.spec), rename: surface.spec }] : [];
 
   // The project's branding, shipped in every variant. `requireAssets()` fails
   // by naming the files that are missing, so the portal does not build on a
@@ -104,9 +96,7 @@ export default defineConfig(({ mode }) => {
   return {
     resolve: {
       alias: {
-        "@project/theme.css": fs.existsSync(PROJECT_THEME)
-          ? PROJECT_THEME
-          : THEME_FALLBACK,
+        "@project/theme.css": fs.existsSync(PROJECT_THEME) ? PROJECT_THEME : THEME_FALLBACK,
       },
     },
     define: {
@@ -129,8 +119,7 @@ export default defineConfig(({ mode }) => {
         transformIndexHtml: {
           order: "pre" as const,
           handler(html: string) {
-            const title =
-              surface?.title ?? `${manifest.appName} Developer Docs`;
+            const title = surface?.title ?? `${manifest.appName} Developer Docs`;
             return html.replaceAll("%VITE_TITLE%", title);
           },
         },
@@ -138,42 +127,41 @@ export default defineConfig(({ mode }) => {
       viteStaticCopy({ targets: assetTargets }),
       ...(isLanding
         ? [
-            {
-              name: "landing-entry",
-              transformIndexHtml: {
-                order: "pre" as const,
-                handler(html: string) {
-                  return html.replace("/src/main.tsx", "/src/landing/main.tsx");
-                },
+          {
+            name: "landing-entry",
+            transformIndexHtml: {
+              order: "pre" as const,
+              handler(html: string) {
+                return html.replace("/src/main.tsx", "/src/landing/main.tsx");
               },
             },
-          ]
+          },
+        ]
         : [
-            viteStaticCopy({
-              targets: yamlSources.map(({ src, rename }) => ({
-                src,
-                dest: ".",
-                rename,
-                transform: (content: string) =>
-                  substituteAppName(content, manifest),
-              })),
-            }),
-            {
-              name: "serve-yaml",
-              configureServer(server) {
-                for (const { src, rename } of yamlSources) {
-                  server.middlewares.use(`/${rename}`, (_req, res) => {
-                    const content = substituteAppName(
-                      fs.readFileSync(src, "utf-8"),
-                      manifest,
-                    );
-                    res.setHeader("Content-Type", "text/yaml");
-                    res.end(content);
-                  });
-                }
-              },
+          viteStaticCopy({
+            targets: yamlSources.map(({ src, rename }) => ({
+              src,
+              dest: ".",
+              rename,
+              transform: (content: string) => substituteAppName(content, manifest),
+            })),
+          }),
+          {
+            name: "serve-yaml",
+            configureServer(server) {
+              for (const { src, rename } of yamlSources) {
+                server.middlewares.use(`/${rename}`, (_req, res) => {
+                  const content = substituteAppName(
+                    fs.readFileSync(src, "utf-8"),
+                    manifest,
+                  );
+                  res.setHeader("Content-Type", "text/yaml");
+                  res.end(content);
+                });
+              }
             },
-          ]),
+          },
+        ]),
     ],
     server: {
       port: 3000,

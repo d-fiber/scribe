@@ -35,4 +35,3 @@
 // LICENSE file, the LICENSE file governs.
 
 export { Column as AppColumn, Row as AppRow } from "@react-email/components";
-

@@ -55,25 +55,24 @@ export interface AppProgressIndicatorProps {
 }
 
 export function makeAppProgressIndicator(colors: AppColors) {
-  const progressColors: Record<ProgressColor, { light: string; dark: string }> =
-    {
-      primary: {
-        light: colors.light.text.primary,
-        dark: colors.dark.text.primary,
-      },
-      onPrimary: {
-        light: colors.light.action.onPrimary,
-        dark: colors.dark.action.onPrimary,
-      },
-      actionPrimary: {
-        light: colors.light.action.primary,
-        dark: colors.dark.action.primary,
-      },
-      secondary: {
-        light: colors.light.text.secondary,
-        dark: colors.dark.text.secondary,
-      },
-    };
+  const progressColors: Record<ProgressColor, { light: string; dark: string }> = {
+    primary: {
+      light: colors.light.text.primary,
+      dark: colors.dark.text.primary,
+    },
+    onPrimary: {
+      light: colors.light.action.onPrimary,
+      dark: colors.dark.action.onPrimary,
+    },
+    actionPrimary: {
+      light: colors.light.action.primary,
+      dark: colors.dark.action.primary,
+    },
+    secondary: {
+      light: colors.light.text.secondary,
+      dark: colors.dark.text.secondary,
+    },
+  };
 
   const AppProgressIndicatorStyle = [
     "@keyframes app-progress-spin { to { transform: rotate(360deg); } }",

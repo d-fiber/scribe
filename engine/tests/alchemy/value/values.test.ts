@@ -34,7 +34,17 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, expectLater, having, isA, isFalse, isTrue, throwsA } from "@scribe/alchemy/test/mod.ts";
+import {
+  contains,
+  equals,
+  expect,
+  expectLater,
+  having,
+  isA,
+  isFalse,
+  isTrue,
+  throwsA,
+} from "@scribe/alchemy/test/mod.ts";
 import { Bytes, Completer, Duration, Failure, Ok, okay, Pagination, Refusal, Slot } from "@scribe/alchemy/mod.ts";
 
 Deno.test("a slot hands back what was put in it", () => {

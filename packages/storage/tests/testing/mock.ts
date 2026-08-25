@@ -34,7 +34,6 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-
 import "@scribe/testing/settings.ts";
 import type { InstalledMock } from "@scribe/testing/install.ts";
 import { StorageTransports } from "@scribe/storage/lib/src/bucket/registry.ts";

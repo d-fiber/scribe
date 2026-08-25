@@ -35,8 +35,5 @@
 // LICENSE file, the LICENSE file governs.
 
 export { decryptRequestDevice, requestDevice } from "./device.ts";
-export {
-  DEVICE_PAYLOAD_MAX_AGE_MS,
-  DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS,
-} from "./payload/freshness.ts";
+export { DEVICE_PAYLOAD_MAX_AGE_MS, DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS } from "./payload/freshness.ts";
 export { DevicePayloadValidator } from "./payload/validator.ts";

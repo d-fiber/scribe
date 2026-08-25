@@ -133,9 +133,7 @@ export function makeAppText(colors: AppColors, fonts: AppFonts) {
             textAlign: align,
             marginTop: 0,
             marginBottom: 0,
-            lineHeight: lineHeight !== undefined
-              ? `${lineHeight}px`
-              : undefined,
+            lineHeight: lineHeight !== undefined ? `${lineHeight}px` : undefined,
           }}
         >
           {label}

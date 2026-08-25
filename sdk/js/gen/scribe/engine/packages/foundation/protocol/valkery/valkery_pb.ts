@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/packages/foundation/protocol/valkery/valkery.proto.
  */
 export const file_scribe_host_packages_foundation_protocol_valkery_valkery: GenFile = /*@__PURE__*/
-  fileDesc("Cj5zY3JpYmUvaG9zdC9wYWNrYWdlcy9mb3VuZGF0aW9uL3Byb3RvY29sL3ZhbGtlcnkvdmFsa2VyeS5wcm90bxIZc2NyaWJlLnJ1bnRpbWUudmFsa2VyeS52MSIsCgpWYWxrZXJ5S2V5EhEKCW5hbWVzcGFjZRgBIAEoCRILCgNrZXkYAiABKAkiQAoKR2V0UmVxdWVzdBIyCgNrZXkYASABKAsyJS5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLlZhbGtlcnlLZXkiWwoJR2V0UmVzdWx0EgsKA2hpdBgBIAEoCBIeCgV2YWx1ZRgCIAEoCzIPLnNjcmliZS52MS5Kc29uEiEKBWVycm9yGAMgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUifgoKU2V0UmVxdWVzdBIyCgNrZXkYASABKAsyJS5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLlZhbGtlcnlLZXkSHgoFdmFsdWUYAiABKAsyDy5zY3JpYmUudjEuSnNvbhIcCgN0dGwYAyABKAsyDy5zY3JpYmUudjEuVGltZSIuCglTZXRSZXN1bHQSIQoFZXJyb3IYASABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJTCg1EZWxldGVSZXF1ZXN0EjIKA2tleRgBIAEoCzIlLnNjcmliZS5ydW50aW1lLnZhbGtlcnkudjEuVmFsa2VyeUtleRIOCgZwcmVmaXgYAiABKAgiQgoMRGVsZXRlUmVzdWx0Eg8KB2RlbGV0ZWQYASABKA0SIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZTKOAgoHVmFsa2VyeRJSCgNHZXQSJS5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLkdldFJlcXVlc3QaJC5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLkdldFJlc3VsdBJSCgNTZXQSJS5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLlNldFJlcXVlc3QaJC5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLlNldFJlc3VsdBJbCgZEZWxldGUSKC5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLkRlbGV0ZVJlcXVlc3QaJy5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLkRlbGV0ZVJlc3VsdGIGcHJvdG8z", [file_scribe_protocol_common]);
+  fileDesc(
+    "Cj5zY3JpYmUvaG9zdC9wYWNrYWdlcy9mb3VuZGF0aW9uL3Byb3RvY29sL3ZhbGtlcnkvdmFsa2VyeS5wcm90bxIZc2NyaWJlLnJ1bnRpbWUudmFsa2VyeS52MSIsCgpWYWxrZXJ5S2V5EhEKCW5hbWVzcGFjZRgBIAEoCRILCgNrZXkYAiABKAkiQAoKR2V0UmVxdWVzdBIyCgNrZXkYASABKAsyJS5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLlZhbGtlcnlLZXkiWwoJR2V0UmVzdWx0EgsKA2hpdBgBIAEoCBIeCgV2YWx1ZRgCIAEoCzIPLnNjcmliZS52MS5Kc29uEiEKBWVycm9yGAMgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUifgoKU2V0UmVxdWVzdBIyCgNrZXkYASABKAsyJS5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLlZhbGtlcnlLZXkSHgoFdmFsdWUYAiABKAsyDy5zY3JpYmUudjEuSnNvbhIcCgN0dGwYAyABKAsyDy5zY3JpYmUudjEuVGltZSIuCglTZXRSZXN1bHQSIQoFZXJyb3IYASABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJTCg1EZWxldGVSZXF1ZXN0EjIKA2tleRgBIAEoCzIlLnNjcmliZS5ydW50aW1lLnZhbGtlcnkudjEuVmFsa2VyeUtleRIOCgZwcmVmaXgYAiABKAgiQgoMRGVsZXRlUmVzdWx0Eg8KB2RlbGV0ZWQYASABKA0SIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZTKOAgoHVmFsa2VyeRJSCgNHZXQSJS5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLkdldFJlcXVlc3QaJC5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLkdldFJlc3VsdBJSCgNTZXQSJS5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLlNldFJlcXVlc3QaJC5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLlNldFJlc3VsdBJbCgZEZWxldGUSKC5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLkRlbGV0ZVJlcXVlc3QaJy5zY3JpYmUucnVudGltZS52YWxrZXJ5LnYxLkRlbGV0ZVJlc3VsdGIGcHJvdG8z",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.runtime.valkery.v1.ValkeryKey
@@ -84,7 +87,7 @@ export type ValkeryKeyJson = {
  * Describes the message scribe.runtime.valkery.v1.ValkeryKey.
  * Use `create(ValkeryKeySchema)` to create a new message.
  */
-export const ValkeryKeySchema: GenMessage<ValkeryKey, {jsonType: ValkeryKeyJson}> = /*@__PURE__*/
+export const ValkeryKeySchema: GenMessage<ValkeryKey, { jsonType: ValkeryKeyJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_valkery_valkery, 0);
 
 /**
@@ -111,7 +114,7 @@ export type GetRequestJson = {
  * Describes the message scribe.runtime.valkery.v1.GetRequest.
  * Use `create(GetRequestSchema)` to create a new message.
  */
-export const GetRequestSchema: GenMessage<GetRequest, {jsonType: GetRequestJson}> = /*@__PURE__*/
+export const GetRequestSchema: GenMessage<GetRequest, { jsonType: GetRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_valkery_valkery, 1);
 
 /**
@@ -158,7 +161,7 @@ export type GetResultJson = {
  * Describes the message scribe.runtime.valkery.v1.GetResult.
  * Use `create(GetResultSchema)` to create a new message.
  */
-export const GetResultSchema: GenMessage<GetResult, {jsonType: GetResultJson}> = /*@__PURE__*/
+export const GetResultSchema: GenMessage<GetResult, { jsonType: GetResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_valkery_valkery, 2);
 
 /**
@@ -205,7 +208,7 @@ export type SetRequestJson = {
  * Describes the message scribe.runtime.valkery.v1.SetRequest.
  * Use `create(SetRequestSchema)` to create a new message.
  */
-export const SetRequestSchema: GenMessage<SetRequest, {jsonType: SetRequestJson}> = /*@__PURE__*/
+export const SetRequestSchema: GenMessage<SetRequest, { jsonType: SetRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_valkery_valkery, 3);
 
 /**
@@ -232,7 +235,7 @@ export type SetResultJson = {
  * Describes the message scribe.runtime.valkery.v1.SetResult.
  * Use `create(SetResultSchema)` to create a new message.
  */
-export const SetResultSchema: GenMessage<SetResult, {jsonType: SetResultJson}> = /*@__PURE__*/
+export const SetResultSchema: GenMessage<SetResult, { jsonType: SetResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_valkery_valkery, 4);
 
 /**
@@ -269,7 +272,7 @@ export type DeleteRequestJson = {
  * Describes the message scribe.runtime.valkery.v1.DeleteRequest.
  * Use `create(DeleteRequestSchema)` to create a new message.
  */
-export const DeleteRequestSchema: GenMessage<DeleteRequest, {jsonType: DeleteRequestJson}> = /*@__PURE__*/
+export const DeleteRequestSchema: GenMessage<DeleteRequest, { jsonType: DeleteRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_valkery_valkery, 5);
 
 /**
@@ -306,7 +309,7 @@ export type DeleteResultJson = {
  * Describes the message scribe.runtime.valkery.v1.DeleteResult.
  * Use `create(DeleteResultSchema)` to create a new message.
  */
-export const DeleteResultSchema: GenMessage<DeleteResult, {jsonType: DeleteResultJson}> = /*@__PURE__*/
+export const DeleteResultSchema: GenMessage<DeleteResult, { jsonType: DeleteResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_valkery_valkery, 6);
 
 /**
@@ -320,7 +323,7 @@ export const Valkery: GenService<{
     methodKind: "unary";
     input: typeof GetRequestSchema;
     output: typeof GetResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.runtime.valkery.v1.Valkery.Set
    */
@@ -328,7 +331,7 @@ export const Valkery: GenService<{
     methodKind: "unary";
     input: typeof SetRequestSchema;
     output: typeof SetResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.runtime.valkery.v1.Valkery.Delete
    */
@@ -336,7 +339,6 @@ export const Valkery: GenService<{
     methodKind: "unary";
     input: typeof DeleteRequestSchema;
     output: typeof DeleteResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_packages_foundation_protocol_valkery_valkery, 0);
-

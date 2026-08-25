@@ -136,9 +136,11 @@ export class ScribeServer {
     const port = this.#options.port ?? env.number(PORT_SETTING, DEFAULT_PORT);
 
     console.log(
-      `[worker] ${definition.routes.length} routes on ${definition.nodes
-        .map((node) => `${node.name}${node.public ? "" : " (internal)"}`)
-        .join(", ")}`,
+      `[worker] ${definition.routes.length} routes on ${
+        definition.nodes
+          .map((node) => `${node.name}${node.public ? "" : " (internal)"}`)
+          .join(", ")
+      }`,
     );
 
     return serveWorker(definition, {

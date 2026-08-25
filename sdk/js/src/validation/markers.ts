@@ -34,12 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type {
-  BodyFieldCtor,
-  BodySchema,
-  FormFieldCtor,
-  ScalarCtor,
-} from "./field_types.ts";
+import type { BodyFieldCtor, BodySchema, FormFieldCtor, ScalarCtor } from "./field_types.ts";
 
 export interface ArrMarker<C> {
   readonly _arr: true;

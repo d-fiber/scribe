@@ -34,7 +34,6 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-
 import "@scribe/testing/settings.ts";
 import { assertEquals, assertThrows } from "@std/assert";
 import { Bytes, Storage, StoragePathError, StorageVisibility } from "@scribe/storage/lib/storage.ts";

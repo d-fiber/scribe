@@ -54,9 +54,7 @@ function tokenVerifier(config: EdgeConfig): TokenVerifier {
   ];
 
   return new AlgorithmTokenVerifier(
-    candidates.filter((verifier): verifier is TokenVerifier =>
-      verifier !== null
-    ),
+    candidates.filter((verifier): verifier is TokenVerifier => verifier !== null),
   );
 }
 

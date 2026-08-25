@@ -57,12 +57,14 @@ export interface GeocodedPlace {
   readonly address: PostalAddress;
 }
 
-function addressOf(address: {
-  street: string;
-  city: string;
-  postalCode: string;
-  country: string;
-} | undefined): PostalAddress {
+function addressOf(
+  address: {
+    street: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  } | undefined,
+): PostalAddress {
   return {
     street: address?.street ?? "",
     city: address?.city ?? "",

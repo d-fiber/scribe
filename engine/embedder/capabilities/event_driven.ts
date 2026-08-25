@@ -35,8 +35,16 @@
 // LICENSE file, the LICENSE file governs.
 
 import { create } from "@bufbuild/protobuf";
-import { PushResultSchema, type PushRequest, type PushResult } from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/queue/queue_pb.ts";
-import { EmitResultSchema, type EmitResult, type Event } from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/hook/hook_pb.ts";
+import {
+  type PushRequest,
+  type PushResult,
+  PushResultSchema,
+} from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/queue/queue_pb.ts";
+import {
+  type EmitResult,
+  EmitResultSchema,
+  type Event,
+} from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/hook/hook_pb.ts";
 import { Duration } from "@scribe/alchemy";
 import { hookRegistry } from "@scribe/foundation/lib/src/hook/hook_registry.ts";
 import { QueuePublisher } from "@scribe/foundation/lib/src/queue/queue.ts";

@@ -54,9 +54,7 @@ class FixedVerifier implements TokenVerifier {
 function request(init: { method?: string; authorization?: string } = {}) {
   return new Request("http://localhost/gotrue/email", {
     method: init.method ?? "POST",
-    headers: init.authorization
-      ? { authorization: init.authorization }
-      : undefined,
+    headers: init.authorization ? { authorization: init.authorization } : undefined,
   });
 }
 

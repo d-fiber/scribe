@@ -49,7 +49,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/dependencies/security/auth/protocol/auth.proto.
  */
 export const file_scribe_host_dependencies_security_auth_protocol_auth: GenFile = /*@__PURE__*/
-  fileDesc("CjpzY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvc2VjdXJpdHkvYXV0aC9wcm90b2NvbC9hdXRoLnByb3RvEhZzY3JpYmUuY2xpZW50cy5hdXRoLnYxIjAKDkFjY291bnRSZXF1ZXN0Eg8KB3VzZXJfaWQYASABKAkSDQoFZW1haWwYAiABKAkiyAEKB0FjY291bnQSCgoCaWQYASABKAkSDQoFZW1haWwYAiABKAkSDQoFcGhvbmUYAyABKAkSFwoPZW1haWxfY29uZmlybWVkGAQgASgIEhcKD3Bob25lX2NvbmZpcm1lZBgFIAEoCBIlCgxhcHBfbWV0YWRhdGEYBiABKAsyDy5zY3JpYmUudjEuSnNvbhImCg11c2VyX21ldGFkYXRhGAcgASgLMg8uc2NyaWJlLnYxLkpzb24SEgoKY3JlYXRlZF9hdBgIIAEoAyJkCg1BY2NvdW50UmVzdWx0EjAKB2FjY291bnQYASABKAsyHy5zY3JpYmUuY2xpZW50cy5hdXRoLnYxLkFjY291bnQSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJtChRVcGRhdGVBY2NvdW50UmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJEg0KBWVtYWlsGAIgASgJEg0KBXBob25lGAMgASgJEiYKDXVzZXJfbWV0YWRhdGEYBCABKAsyDy5zY3JpYmUudjEuSnNvbiI1ChREZWxldGVBY2NvdW50UmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJEgwKBHNvZnQYAiABKAgiOAoTRGVsZXRlQWNjb3VudFJlc3VsdBIhCgVlcnJvchgBIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIjUKDlNlc3Npb25SZXF1ZXN0EhIKCnNlc3Npb25faWQYASABKAkSDwoHdXNlcl9pZBgCIAEoCSJVCg5TZXNzaW9uU3VtbWFyeRIKCgJpZBgBIAEoCRIPCgd1c2VyX2lkGAIgASgJEhIKCmNyZWF0ZWRfYXQYAyABKAMSEgoKZXhwaXJlc19hdBgEIAEoAyJwChFTZXNzaW9uTGlzdFJlc3VsdBI4CghzZXNzaW9ucxgBIAMoCzImLnNjcmliZS5jbGllbnRzLmF1dGgudjEuU2Vzc2lvblN1bW1hcnkSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJFCg5TaWduT3V0UmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJEhIKCnNlc3Npb25faWQYAiABKAkSDgoGZ2xvYmFsGAMgASgIIjIKDVNpZ25PdXRSZXN1bHQSIQoFZXJyb3IYASABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJBCg9WYWxpZGF0ZVJlcXVlc3QSEAoIcGFzc3dvcmQYASABKAkSDQoFZW1haWwYAiABKAkSDQoFcGhvbmUYAyABKAkiMwoOVmFsaWRhdGVSZXN1bHQSDQoFdmFsaWQYASABKAgSEgoKdmlvbGF0aW9ucxgCIAMoCTLPBAoEQXV0aBJbCgpHZXRBY2NvdW50EiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5BY2NvdW50UmVxdWVzdBolLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQWNjb3VudFJlc3VsdBJkCg1VcGRhdGVBY2NvdW50Eiwuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5VcGRhdGVBY2NvdW50UmVxdWVzdBolLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQWNjb3VudFJlc3VsdBJqCg1EZWxldGVBY2NvdW50Eiwuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5EZWxldGVBY2NvdW50UmVxdWVzdBorLnNjcmliZS5jbGllbnRzLmF1dGgudjEuRGVsZXRlQWNjb3VudFJlc3VsdBJhCgxMaXN0U2Vzc2lvbnMSJi5zY3JpYmUuY2xpZW50cy5hdXRoLnYxLlNlc3Npb25SZXF1ZXN0Gikuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5TZXNzaW9uTGlzdFJlc3VsdBJYCgdTaWduT3V0EiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5TaWduT3V0UmVxdWVzdBolLnNjcmliZS5jbGllbnRzLmF1dGgudjEuU2lnbk91dFJlc3VsdBJbCghWYWxpZGF0ZRInLnNjcmliZS5jbGllbnRzLmF1dGgudjEuVmFsaWRhdGVSZXF1ZXN0GiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5WYWxpZGF0ZVJlc3VsdGIGcHJvdG8z", [file_scribe_protocol_common, file_scribe_protocol_invocation]);
+  fileDesc(
+    "CjpzY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvc2VjdXJpdHkvYXV0aC9wcm90b2NvbC9hdXRoLnByb3RvEhZzY3JpYmUuY2xpZW50cy5hdXRoLnYxIjAKDkFjY291bnRSZXF1ZXN0Eg8KB3VzZXJfaWQYASABKAkSDQoFZW1haWwYAiABKAkiyAEKB0FjY291bnQSCgoCaWQYASABKAkSDQoFZW1haWwYAiABKAkSDQoFcGhvbmUYAyABKAkSFwoPZW1haWxfY29uZmlybWVkGAQgASgIEhcKD3Bob25lX2NvbmZpcm1lZBgFIAEoCBIlCgxhcHBfbWV0YWRhdGEYBiABKAsyDy5zY3JpYmUudjEuSnNvbhImCg11c2VyX21ldGFkYXRhGAcgASgLMg8uc2NyaWJlLnYxLkpzb24SEgoKY3JlYXRlZF9hdBgIIAEoAyJkCg1BY2NvdW50UmVzdWx0EjAKB2FjY291bnQYASABKAsyHy5zY3JpYmUuY2xpZW50cy5hdXRoLnYxLkFjY291bnQSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJtChRVcGRhdGVBY2NvdW50UmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJEg0KBWVtYWlsGAIgASgJEg0KBXBob25lGAMgASgJEiYKDXVzZXJfbWV0YWRhdGEYBCABKAsyDy5zY3JpYmUudjEuSnNvbiI1ChREZWxldGVBY2NvdW50UmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJEgwKBHNvZnQYAiABKAgiOAoTRGVsZXRlQWNjb3VudFJlc3VsdBIhCgVlcnJvchgBIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIjUKDlNlc3Npb25SZXF1ZXN0EhIKCnNlc3Npb25faWQYASABKAkSDwoHdXNlcl9pZBgCIAEoCSJVCg5TZXNzaW9uU3VtbWFyeRIKCgJpZBgBIAEoCRIPCgd1c2VyX2lkGAIgASgJEhIKCmNyZWF0ZWRfYXQYAyABKAMSEgoKZXhwaXJlc19hdBgEIAEoAyJwChFTZXNzaW9uTGlzdFJlc3VsdBI4CghzZXNzaW9ucxgBIAMoCzImLnNjcmliZS5jbGllbnRzLmF1dGgudjEuU2Vzc2lvblN1bW1hcnkSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJFCg5TaWduT3V0UmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJEhIKCnNlc3Npb25faWQYAiABKAkSDgoGZ2xvYmFsGAMgASgIIjIKDVNpZ25PdXRSZXN1bHQSIQoFZXJyb3IYASABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJBCg9WYWxpZGF0ZVJlcXVlc3QSEAoIcGFzc3dvcmQYASABKAkSDQoFZW1haWwYAiABKAkSDQoFcGhvbmUYAyABKAkiMwoOVmFsaWRhdGVSZXN1bHQSDQoFdmFsaWQYASABKAgSEgoKdmlvbGF0aW9ucxgCIAMoCTLPBAoEQXV0aBJbCgpHZXRBY2NvdW50EiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5BY2NvdW50UmVxdWVzdBolLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQWNjb3VudFJlc3VsdBJkCg1VcGRhdGVBY2NvdW50Eiwuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5VcGRhdGVBY2NvdW50UmVxdWVzdBolLnNjcmliZS5jbGllbnRzLmF1dGgudjEuQWNjb3VudFJlc3VsdBJqCg1EZWxldGVBY2NvdW50Eiwuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5EZWxldGVBY2NvdW50UmVxdWVzdBorLnNjcmliZS5jbGllbnRzLmF1dGgudjEuRGVsZXRlQWNjb3VudFJlc3VsdBJhCgxMaXN0U2Vzc2lvbnMSJi5zY3JpYmUuY2xpZW50cy5hdXRoLnYxLlNlc3Npb25SZXF1ZXN0Gikuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5TZXNzaW9uTGlzdFJlc3VsdBJYCgdTaWduT3V0EiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5TaWduT3V0UmVxdWVzdBolLnNjcmliZS5jbGllbnRzLmF1dGgudjEuU2lnbk91dFJlc3VsdBJbCghWYWxpZGF0ZRInLnNjcmliZS5jbGllbnRzLmF1dGgudjEuVmFsaWRhdGVSZXF1ZXN0GiYuc2NyaWJlLmNsaWVudHMuYXV0aC52MS5WYWxpZGF0ZVJlc3VsdGIGcHJvdG8z",
+    [file_scribe_protocol_common, file_scribe_protocol_invocation],
+  );
 
 /**
  * @generated from message scribe.clients.auth.v1.AccountRequest
@@ -85,7 +88,7 @@ export type AccountRequestJson = {
  * Describes the message scribe.clients.auth.v1.AccountRequest.
  * Use `create(AccountRequestSchema)` to create a new message.
  */
-export const AccountRequestSchema: GenMessage<AccountRequest, {jsonType: AccountRequestJson}> = /*@__PURE__*/
+export const AccountRequestSchema: GenMessage<AccountRequest, { jsonType: AccountRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_auth_protocol_auth, 0);
 
 /**
@@ -182,7 +185,7 @@ export type AccountJson = {
  * Describes the message scribe.clients.auth.v1.Account.
  * Use `create(AccountSchema)` to create a new message.
  */
-export const AccountSchema: GenMessage<Account, {jsonType: AccountJson}> = /*@__PURE__*/
+export const AccountSchema: GenMessage<Account, { jsonType: AccountJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_auth_protocol_auth, 1);
 
 /**
@@ -219,7 +222,7 @@ export type AccountResultJson = {
  * Describes the message scribe.clients.auth.v1.AccountResult.
  * Use `create(AccountResultSchema)` to create a new message.
  */
-export const AccountResultSchema: GenMessage<AccountResult, {jsonType: AccountResultJson}> = /*@__PURE__*/
+export const AccountResultSchema: GenMessage<AccountResult, { jsonType: AccountResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_auth_protocol_auth, 2);
 
 /**
@@ -276,7 +279,10 @@ export type UpdateAccountRequestJson = {
  * Describes the message scribe.clients.auth.v1.UpdateAccountRequest.
  * Use `create(UpdateAccountRequestSchema)` to create a new message.
  */
-export const UpdateAccountRequestSchema: GenMessage<UpdateAccountRequest, {jsonType: UpdateAccountRequestJson}> = /*@__PURE__*/
+export const UpdateAccountRequestSchema: GenMessage<
+  UpdateAccountRequest,
+  { jsonType: UpdateAccountRequestJson }
+> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_auth_protocol_auth, 3);
 
 /**
@@ -313,7 +319,10 @@ export type DeleteAccountRequestJson = {
  * Describes the message scribe.clients.auth.v1.DeleteAccountRequest.
  * Use `create(DeleteAccountRequestSchema)` to create a new message.
  */
-export const DeleteAccountRequestSchema: GenMessage<DeleteAccountRequest, {jsonType: DeleteAccountRequestJson}> = /*@__PURE__*/
+export const DeleteAccountRequestSchema: GenMessage<
+  DeleteAccountRequest,
+  { jsonType: DeleteAccountRequestJson }
+> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_auth_protocol_auth, 4);
 
 /**
@@ -340,7 +349,10 @@ export type DeleteAccountResultJson = {
  * Describes the message scribe.clients.auth.v1.DeleteAccountResult.
  * Use `create(DeleteAccountResultSchema)` to create a new message.
  */
-export const DeleteAccountResultSchema: GenMessage<DeleteAccountResult, {jsonType: DeleteAccountResultJson}> = /*@__PURE__*/
+export const DeleteAccountResultSchema: GenMessage<
+  DeleteAccountResult,
+  { jsonType: DeleteAccountResultJson }
+> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_auth_protocol_auth, 5);
 
 /**
@@ -377,7 +389,7 @@ export type SessionRequestJson = {
  * Describes the message scribe.clients.auth.v1.SessionRequest.
  * Use `create(SessionRequestSchema)` to create a new message.
  */
-export const SessionRequestSchema: GenMessage<SessionRequest, {jsonType: SessionRequestJson}> = /*@__PURE__*/
+export const SessionRequestSchema: GenMessage<SessionRequest, { jsonType: SessionRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_auth_protocol_auth, 6);
 
 /**
@@ -434,7 +446,7 @@ export type SessionSummaryJson = {
  * Describes the message scribe.clients.auth.v1.SessionSummary.
  * Use `create(SessionSummarySchema)` to create a new message.
  */
-export const SessionSummarySchema: GenMessage<SessionSummary, {jsonType: SessionSummaryJson}> = /*@__PURE__*/
+export const SessionSummarySchema: GenMessage<SessionSummary, { jsonType: SessionSummaryJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_auth_protocol_auth, 7);
 
 /**
@@ -471,7 +483,7 @@ export type SessionListResultJson = {
  * Describes the message scribe.clients.auth.v1.SessionListResult.
  * Use `create(SessionListResultSchema)` to create a new message.
  */
-export const SessionListResultSchema: GenMessage<SessionListResult, {jsonType: SessionListResultJson}> = /*@__PURE__*/
+export const SessionListResultSchema: GenMessage<SessionListResult, { jsonType: SessionListResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_auth_protocol_auth, 8);
 
 /**
@@ -518,7 +530,7 @@ export type SignOutRequestJson = {
  * Describes the message scribe.clients.auth.v1.SignOutRequest.
  * Use `create(SignOutRequestSchema)` to create a new message.
  */
-export const SignOutRequestSchema: GenMessage<SignOutRequest, {jsonType: SignOutRequestJson}> = /*@__PURE__*/
+export const SignOutRequestSchema: GenMessage<SignOutRequest, { jsonType: SignOutRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_auth_protocol_auth, 9);
 
 /**
@@ -545,7 +557,7 @@ export type SignOutResultJson = {
  * Describes the message scribe.clients.auth.v1.SignOutResult.
  * Use `create(SignOutResultSchema)` to create a new message.
  */
-export const SignOutResultSchema: GenMessage<SignOutResult, {jsonType: SignOutResultJson}> = /*@__PURE__*/
+export const SignOutResultSchema: GenMessage<SignOutResult, { jsonType: SignOutResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_auth_protocol_auth, 10);
 
 /**
@@ -592,7 +604,7 @@ export type ValidateRequestJson = {
  * Describes the message scribe.clients.auth.v1.ValidateRequest.
  * Use `create(ValidateRequestSchema)` to create a new message.
  */
-export const ValidateRequestSchema: GenMessage<ValidateRequest, {jsonType: ValidateRequestJson}> = /*@__PURE__*/
+export const ValidateRequestSchema: GenMessage<ValidateRequest, { jsonType: ValidateRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_auth_protocol_auth, 11);
 
 /**
@@ -629,7 +641,7 @@ export type ValidateResultJson = {
  * Describes the message scribe.clients.auth.v1.ValidateResult.
  * Use `create(ValidateResultSchema)` to create a new message.
  */
-export const ValidateResultSchema: GenMessage<ValidateResult, {jsonType: ValidateResultJson}> = /*@__PURE__*/
+export const ValidateResultSchema: GenMessage<ValidateResult, { jsonType: ValidateResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_auth_protocol_auth, 12);
 
 /**
@@ -643,7 +655,7 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof AccountRequestSchema;
     output: typeof AccountResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.auth.v1.Auth.UpdateAccount
    */
@@ -651,7 +663,7 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof UpdateAccountRequestSchema;
     output: typeof AccountResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.auth.v1.Auth.DeleteAccount
    */
@@ -659,7 +671,7 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof DeleteAccountRequestSchema;
     output: typeof DeleteAccountResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.auth.v1.Auth.ListSessions
    */
@@ -667,7 +679,7 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof SessionRequestSchema;
     output: typeof SessionListResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.auth.v1.Auth.SignOut
    */
@@ -675,7 +687,7 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof SignOutRequestSchema;
     output: typeof SignOutResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.auth.v1.Auth.Validate
    */
@@ -683,7 +695,6 @@ export const Auth: GenService<{
     methodKind: "unary";
     input: typeof ValidateRequestSchema;
     output: typeof ValidateResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_dependencies_security_auth_protocol_auth, 0);
-

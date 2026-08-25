@@ -145,12 +145,12 @@ export function makeAppButton(colors: AppColors, fonts: AppFonts) {
     }),
     ...(Object.keys(borderTokens).length
       ? [
-          themeMode({
-            tokens: borderTokens,
-            attribute: "data-variant",
-            property: "border-color",
-          }),
-        ]
+        themeMode({
+          tokens: borderTokens,
+          attribute: "data-variant",
+          property: "border-color",
+        }),
+      ]
       : []),
   ].join("\n");
 

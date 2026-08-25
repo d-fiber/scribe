@@ -200,9 +200,7 @@ export function makeAppChip(colors: AppColors, fonts: AppFonts) {
       padding: `${padding.y}px ${padding.x}px`,
       borderRadius: radii[shape],
       backgroundColor: backgrounds[variant].light,
-      border: variant === "outline"
-        ? `1px solid ${l.outline.border}`
-        : "1px solid transparent",
+      border: variant === "outline" ? `1px solid ${l.outline.border}` : "1px solid transparent",
       boxSizing: "border-box",
       textDecoration: "none",
       ...fonts.body2,
@@ -210,9 +208,7 @@ export function makeAppChip(colors: AppColors, fonts: AppFonts) {
 
     const content = (
       <>
-        {prefix !== undefined && (
-          <Prefix prefix={prefix} size={size} color={color} />
-        )}
+        {prefix !== undefined && <Prefix prefix={prefix} size={size} color={color} />}
         {label}
         {deleteHref !== undefined && (
           <a

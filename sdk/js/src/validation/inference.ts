@@ -34,13 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type {
-  BodyFieldEntry,
-  BodySchema,
-  FormFieldEntry,
-  FormSchema,
-  ScalarCtor,
-} from "./field_types.ts";
+import type { BodyFieldEntry, BodySchema, FormFieldEntry, FormSchema, ScalarCtor } from "./field_types.ts";
 import type { ArrMarker, NestedMarker, RequiredMarker } from "./markers.ts";
 
 type IsRequired<E> = E extends RequiredMarker<unknown> ? true : false;

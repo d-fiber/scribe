@@ -34,8 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export type DeepPartial<T> = T extends object
-  ? { [K in keyof T]?: DeepPartial<T[K]> }
+export type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> }
   : T;
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {

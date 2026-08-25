@@ -66,18 +66,16 @@ export function makeAppTextField(colors: AppColors, fonts: AppFonts) {
 
       return (
         <Field label={label} requirement={requirement}>
-          {multiline
-            ? <textarea {...attributes} style={style} minLength={minLength} />
-            : (
-              <input
-                {...attributes}
-                style={style}
-                type={type}
-                autoComplete={autoComplete ?? "new-password"}
-                minLength={minLength}
-                pattern={pattern}
-              />
-            )}
+          {multiline ? <textarea {...attributes} style={style} minLength={minLength} /> : (
+            <input
+              {...attributes}
+              style={style}
+              type={type}
+              autoComplete={autoComplete ?? "new-password"}
+              minLength={minLength}
+              pattern={pattern}
+            />
+          )}
         </Field>
       );
     };

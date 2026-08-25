@@ -35,7 +35,14 @@
 // LICENSE file, the LICENSE file governs.
 
 import { equals, expect, expectLater, isA, isFalse, throwsA } from "@scribe/alchemy/test/mod.ts";
-import type { Cache, CacheDriver, CacheOptions, RateLimiter, RateLimiterDriver, RateLimitOutcome } from "@scribe/alchemy/mod.ts";
+import type {
+  Cache,
+  CacheDriver,
+  CacheOptions,
+  RateLimiter,
+  RateLimiterDriver,
+  RateLimitOutcome,
+} from "@scribe/alchemy/mod.ts";
 import { cache, Caches, Duration, rateLimit, RateLimiters, Slot, TimeoutException } from "@scribe/alchemy/mod.ts";
 
 class HeldInMemory<T> implements Cache<T> {

@@ -37,10 +37,7 @@
 import type { RequestAuthorizer } from "@scribe/shell/platform/edge/authorization/request_authorizer.ts";
 import type { WorkerDispatcher } from "@scribe/shell/platform/edge/dispatch/worker_dispatcher.ts";
 import { EdgeFunctionsRuntime } from "@scribe/shell/platform/edge/runtime.ts";
-import type {
-  ResolvedService,
-  ServiceResolver,
-} from "@scribe/shell/platform/edge/services/service_resolver.ts";
+import type { ResolvedService, ServiceResolver } from "@scribe/shell/platform/edge/services/service_resolver.ts";
 import { assertEquals } from "@std/assert";
 
 class StaticResolver implements ServiceResolver {

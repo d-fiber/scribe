@@ -93,9 +93,7 @@ export function AppSection(props: AppSectionProps) {
             }}
           >
             <div>
-              {row.prefix.icon && (
-                <div style={{ marginBottom: 4 }}>{row.prefix.icon}</div>
-              )}
+              {row.prefix.icon && <div style={{ marginBottom: 4 }}>{row.prefix.icon}</div>}
               <AppText.body2 label={row.prefix.title} color="primary" />
               {row.prefix.subtitle && (
                 <>

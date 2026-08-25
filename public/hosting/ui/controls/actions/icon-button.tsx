@@ -113,9 +113,7 @@ export function makeAppIconButton(colors: AppColors) {
             borderRadius: inputRadius[shape],
             backgroundColor: c.bg.light,
             color: c.fg.light,
-            border: c.border.light === "transparent"
-              ? "none"
-              : `1px solid ${c.border.light}`,
+            border: c.border.light === "transparent" ? "none" : `1px solid ${c.border.light}`,
             boxSizing: "border-box",
             textDecoration: "none",
           }}

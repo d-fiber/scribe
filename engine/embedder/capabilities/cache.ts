@@ -35,7 +35,17 @@
 // LICENSE file, the LICENSE file governs.
 
 import { create } from "@bufbuild/protobuf";
-import { DeleteResultSchema, GetResultSchema, SetResultSchema, type DeleteRequest, type DeleteResult, type GetRequest, type GetResult, type SetRequest, type SetResult } from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/valkery/valkery_pb.ts";
+import {
+  type DeleteRequest,
+  type DeleteResult,
+  DeleteResultSchema,
+  type GetRequest,
+  type GetResult,
+  GetResultSchema,
+  type SetRequest,
+  type SetResult,
+  SetResultSchema,
+} from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/valkery/valkery_pb.ts";
 import { kv } from "@scribe/foundation/lib/src/redis/kv.ts";
 import { decodeJson, encodeJson } from "../control/json.ts";
 

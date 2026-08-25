@@ -50,7 +50,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/dependencies/security/rbac/protocol/rbac.proto.
  */
 export const file_scribe_host_dependencies_security_rbac_protocol_rbac: GenFile = /*@__PURE__*/
-  fileDesc("CjpzY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvc2VjdXJpdHkvcmJhYy9wcm90b2NvbC9yYmFjLnByb3RvEhZzY3JpYmUuY2xpZW50cy5yYmFjLnYxIiAKDFJ1bGVzUmVxdWVzdBIQCghhZG1pbl9pZBgBIAEoCSJRCgtSdWxlc1Jlc3VsdBIfCgVydWxlcxgBIAEoCzIQLnNjcmliZS52MS5SdWxlcxIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIk8KEVBlcm1pc3Npb25SZXF1ZXN0EhAKCGFkbWluX2lkGAEgASgJEhMKC3Blcm1pc3Npb25zGAIgAygJEhMKC3JlcXVpcmVfYWxsGAMgASgIIjQKEFBlcm1pc3Npb25SZXN1bHQSDwoHZ3JhbnRlZBgBIAEoCBIPCgdtaXNzaW5nGAIgAygJMsMBCgRSYmFjElUKCEdldFJ1bGVzEiQuc2NyaWJlLmNsaWVudHMucmJhYy52MS5SdWxlc1JlcXVlc3QaIy5zY3JpYmUuY2xpZW50cy5yYmFjLnYxLlJ1bGVzUmVzdWx0EmQKDUhhc1Blcm1pc3Npb24SKS5zY3JpYmUuY2xpZW50cy5yYmFjLnYxLlBlcm1pc3Npb25SZXF1ZXN0Giguc2NyaWJlLmNsaWVudHMucmJhYy52MS5QZXJtaXNzaW9uUmVzdWx0YgZwcm90bzM", [file_scribe_protocol_common, file_scribe_protocol_invocation]);
+  fileDesc(
+    "CjpzY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvc2VjdXJpdHkvcmJhYy9wcm90b2NvbC9yYmFjLnByb3RvEhZzY3JpYmUuY2xpZW50cy5yYmFjLnYxIiAKDFJ1bGVzUmVxdWVzdBIQCghhZG1pbl9pZBgBIAEoCSJRCgtSdWxlc1Jlc3VsdBIfCgVydWxlcxgBIAEoCzIQLnNjcmliZS52MS5SdWxlcxIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIk8KEVBlcm1pc3Npb25SZXF1ZXN0EhAKCGFkbWluX2lkGAEgASgJEhMKC3Blcm1pc3Npb25zGAIgAygJEhMKC3JlcXVpcmVfYWxsGAMgASgIIjQKEFBlcm1pc3Npb25SZXN1bHQSDwoHZ3JhbnRlZBgBIAEoCBIPCgdtaXNzaW5nGAIgAygJMsMBCgRSYmFjElUKCEdldFJ1bGVzEiQuc2NyaWJlLmNsaWVudHMucmJhYy52MS5SdWxlc1JlcXVlc3QaIy5zY3JpYmUuY2xpZW50cy5yYmFjLnYxLlJ1bGVzUmVzdWx0EmQKDUhhc1Blcm1pc3Npb24SKS5zY3JpYmUuY2xpZW50cy5yYmFjLnYxLlBlcm1pc3Npb25SZXF1ZXN0Giguc2NyaWJlLmNsaWVudHMucmJhYy52MS5QZXJtaXNzaW9uUmVzdWx0YgZwcm90bzM",
+    [file_scribe_protocol_common, file_scribe_protocol_invocation],
+  );
 
 /**
  * @generated from message scribe.clients.rbac.v1.RulesRequest
@@ -76,7 +79,7 @@ export type RulesRequestJson = {
  * Describes the message scribe.clients.rbac.v1.RulesRequest.
  * Use `create(RulesRequestSchema)` to create a new message.
  */
-export const RulesRequestSchema: GenMessage<RulesRequest, {jsonType: RulesRequestJson}> = /*@__PURE__*/
+export const RulesRequestSchema: GenMessage<RulesRequest, { jsonType: RulesRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_rbac_protocol_rbac, 0);
 
 /**
@@ -113,7 +116,7 @@ export type RulesResultJson = {
  * Describes the message scribe.clients.rbac.v1.RulesResult.
  * Use `create(RulesResultSchema)` to create a new message.
  */
-export const RulesResultSchema: GenMessage<RulesResult, {jsonType: RulesResultJson}> = /*@__PURE__*/
+export const RulesResultSchema: GenMessage<RulesResult, { jsonType: RulesResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_rbac_protocol_rbac, 1);
 
 /**
@@ -160,7 +163,7 @@ export type PermissionRequestJson = {
  * Describes the message scribe.clients.rbac.v1.PermissionRequest.
  * Use `create(PermissionRequestSchema)` to create a new message.
  */
-export const PermissionRequestSchema: GenMessage<PermissionRequest, {jsonType: PermissionRequestJson}> = /*@__PURE__*/
+export const PermissionRequestSchema: GenMessage<PermissionRequest, { jsonType: PermissionRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_rbac_protocol_rbac, 2);
 
 /**
@@ -197,7 +200,7 @@ export type PermissionResultJson = {
  * Describes the message scribe.clients.rbac.v1.PermissionResult.
  * Use `create(PermissionResultSchema)` to create a new message.
  */
-export const PermissionResultSchema: GenMessage<PermissionResult, {jsonType: PermissionResultJson}> = /*@__PURE__*/
+export const PermissionResultSchema: GenMessage<PermissionResult, { jsonType: PermissionResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_security_rbac_protocol_rbac, 3);
 
 /**
@@ -211,7 +214,7 @@ export const Rbac: GenService<{
     methodKind: "unary";
     input: typeof RulesRequestSchema;
     output: typeof RulesResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.rbac.v1.Rbac.HasPermission
    */
@@ -219,7 +222,6 @@ export const Rbac: GenService<{
     methodKind: "unary";
     input: typeof PermissionRequestSchema;
     output: typeof PermissionResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_dependencies_security_rbac_protocol_rbac, 0);
-

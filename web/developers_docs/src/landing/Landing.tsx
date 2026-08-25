@@ -34,12 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import {
-  AppLinkText,
-  AppSeparator,
-  AppText,
-  useDarkMode,
-} from "@app/hosting-ui";
+import { AppLinkText, AppSeparator, AppText, useDarkMode } from "@app/hosting-ui";
 
 interface DocLink {
   label: string;

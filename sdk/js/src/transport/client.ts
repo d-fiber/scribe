@@ -35,12 +35,12 @@
 // LICENSE file, the LICENSE file governs.
 
 import {
+  create,
   type DescMessage,
   type DescMethodUnary,
+  fromBinary,
   type MessageInitShape,
   type MessageShape,
-  create,
-  fromBinary,
   toBinary,
 } from "@bufbuild/protobuf";
 import { FailureSchema } from "../../gen/scribe/protocol/common_pb.ts";

@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/dependencies/features/messagings/protocol/messagings.proto.
  */
 export const file_scribe_host_dependencies_features_messagings_protocol_messagings: GenFile = /*@__PURE__*/
-  fileDesc("CkZzY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvZmVhdHVyZXMvbWVzc2FnaW5ncy9wcm90b2NvbC9tZXNzYWdpbmdzLnByb3RvEhxzY3JpYmUuY2xpZW50cy5tZXNzYWdpbmdzLnYxIioKCVJlY2lwaWVudBIPCgdhZGRyZXNzGAEgASgJEgwKBG5hbWUYAiABKAkipQIKC01haWxSZXF1ZXN0Eg8KB2FjY291bnQYASABKAkSMwoCdG8YAiADKAsyJy5zY3JpYmUuY2xpZW50cy5tZXNzYWdpbmdzLnYxLlJlY2lwaWVudBIzCgJjYxgDIAMoCzInLnNjcmliZS5jbGllbnRzLm1lc3NhZ2luZ3MudjEuUmVjaXBpZW50EjQKA2JjYxgEIAMoCzInLnNjcmliZS5jbGllbnRzLm1lc3NhZ2luZ3MudjEuUmVjaXBpZW50Eg8KB3N1YmplY3QYBSABKAkSEAoIdGVtcGxhdGUYBiABKAkSJgoNdGVtcGxhdGVfZGF0YRgHIAEoCzIPLnNjcmliZS52MS5Kc29uEgwKBGh0bWwYCCABKAkSDAoEdGV4dBgJIAEoCSJDCgpNYWlsUmVzdWx0EhIKCm1lc3NhZ2VfaWQYASABKAkSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJgCgpTbXNSZXF1ZXN0EgoKAnRvGAEgASgJEhAKCHRlbXBsYXRlGAIgASgJEiYKDXRlbXBsYXRlX2RhdGEYAyABKAsyDy5zY3JpYmUudjEuSnNvbhIMCgRib2R5GAQgASgJIkIKCVNtc1Jlc3VsdBISCgptZXNzYWdlX2lkGAEgASgJEiEKBWVycm9yGAIgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUipQEKC1B1c2hSZXF1ZXN0Eg4KBnRva2VucxgBIAMoCRIQCgh1c2VyX2lkcxgCIAMoCRIQCgh0ZW1wbGF0ZRgDIAEoCRImCg10ZW1wbGF0ZV9kYXRhGAQgASgLMg8uc2NyaWJlLnYxLkpzb24SDQoFdGl0bGUYBSABKAkSDAoEYm9keRgGIAEoCRIdCgRkYXRhGAcgASgLMg8uc2NyaWJlLnYxLkpzb24iTQoKUHVzaFJlc3VsdBIMCgRzZW50GAEgASgNEg4KBmZhaWxlZBgCIAEoDRIhCgVlcnJvchgDIAEoCzISLnNjcmliZS52MS5GYWlsdXJlMqwCCgpNZXNzYWdpbmdzEl8KCFNlbmRNYWlsEikuc2NyaWJlLmNsaWVudHMubWVzc2FnaW5ncy52MS5NYWlsUmVxdWVzdBooLnNjcmliZS5jbGllbnRzLm1lc3NhZ2luZ3MudjEuTWFpbFJlc3VsdBJcCgdTZW5kU21zEiguc2NyaWJlLmNsaWVudHMubWVzc2FnaW5ncy52MS5TbXNSZXF1ZXN0Gicuc2NyaWJlLmNsaWVudHMubWVzc2FnaW5ncy52MS5TbXNSZXN1bHQSXwoIU2VuZFB1c2gSKS5zY3JpYmUuY2xpZW50cy5tZXNzYWdpbmdzLnYxLlB1c2hSZXF1ZXN0Giguc2NyaWJlLmNsaWVudHMubWVzc2FnaW5ncy52MS5QdXNoUmVzdWx0YgZwcm90bzM", [file_scribe_protocol_common]);
+  fileDesc(
+    "CkZzY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvZmVhdHVyZXMvbWVzc2FnaW5ncy9wcm90b2NvbC9tZXNzYWdpbmdzLnByb3RvEhxzY3JpYmUuY2xpZW50cy5tZXNzYWdpbmdzLnYxIioKCVJlY2lwaWVudBIPCgdhZGRyZXNzGAEgASgJEgwKBG5hbWUYAiABKAkipQIKC01haWxSZXF1ZXN0Eg8KB2FjY291bnQYASABKAkSMwoCdG8YAiADKAsyJy5zY3JpYmUuY2xpZW50cy5tZXNzYWdpbmdzLnYxLlJlY2lwaWVudBIzCgJjYxgDIAMoCzInLnNjcmliZS5jbGllbnRzLm1lc3NhZ2luZ3MudjEuUmVjaXBpZW50EjQKA2JjYxgEIAMoCzInLnNjcmliZS5jbGllbnRzLm1lc3NhZ2luZ3MudjEuUmVjaXBpZW50Eg8KB3N1YmplY3QYBSABKAkSEAoIdGVtcGxhdGUYBiABKAkSJgoNdGVtcGxhdGVfZGF0YRgHIAEoCzIPLnNjcmliZS52MS5Kc29uEgwKBGh0bWwYCCABKAkSDAoEdGV4dBgJIAEoCSJDCgpNYWlsUmVzdWx0EhIKCm1lc3NhZ2VfaWQYASABKAkSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJgCgpTbXNSZXF1ZXN0EgoKAnRvGAEgASgJEhAKCHRlbXBsYXRlGAIgASgJEiYKDXRlbXBsYXRlX2RhdGEYAyABKAsyDy5zY3JpYmUudjEuSnNvbhIMCgRib2R5GAQgASgJIkIKCVNtc1Jlc3VsdBISCgptZXNzYWdlX2lkGAEgASgJEiEKBWVycm9yGAIgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUipQEKC1B1c2hSZXF1ZXN0Eg4KBnRva2VucxgBIAMoCRIQCgh1c2VyX2lkcxgCIAMoCRIQCgh0ZW1wbGF0ZRgDIAEoCRImCg10ZW1wbGF0ZV9kYXRhGAQgASgLMg8uc2NyaWJlLnYxLkpzb24SDQoFdGl0bGUYBSABKAkSDAoEYm9keRgGIAEoCRIdCgRkYXRhGAcgASgLMg8uc2NyaWJlLnYxLkpzb24iTQoKUHVzaFJlc3VsdBIMCgRzZW50GAEgASgNEg4KBmZhaWxlZBgCIAEoDRIhCgVlcnJvchgDIAEoCzISLnNjcmliZS52MS5GYWlsdXJlMqwCCgpNZXNzYWdpbmdzEl8KCFNlbmRNYWlsEikuc2NyaWJlLmNsaWVudHMubWVzc2FnaW5ncy52MS5NYWlsUmVxdWVzdBooLnNjcmliZS5jbGllbnRzLm1lc3NhZ2luZ3MudjEuTWFpbFJlc3VsdBJcCgdTZW5kU21zEiguc2NyaWJlLmNsaWVudHMubWVzc2FnaW5ncy52MS5TbXNSZXF1ZXN0Gicuc2NyaWJlLmNsaWVudHMubWVzc2FnaW5ncy52MS5TbXNSZXN1bHQSXwoIU2VuZFB1c2gSKS5zY3JpYmUuY2xpZW50cy5tZXNzYWdpbmdzLnYxLlB1c2hSZXF1ZXN0Giguc2NyaWJlLmNsaWVudHMubWVzc2FnaW5ncy52MS5QdXNoUmVzdWx0YgZwcm90bzM",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.clients.messagings.v1.Recipient
@@ -84,7 +87,7 @@ export type RecipientJson = {
  * Describes the message scribe.clients.messagings.v1.Recipient.
  * Use `create(RecipientSchema)` to create a new message.
  */
-export const RecipientSchema: GenMessage<Recipient, {jsonType: RecipientJson}> = /*@__PURE__*/
+export const RecipientSchema: GenMessage<Recipient, { jsonType: RecipientJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_messagings_protocol_messagings, 0);
 
 /**
@@ -191,7 +194,7 @@ export type MailRequestJson = {
  * Describes the message scribe.clients.messagings.v1.MailRequest.
  * Use `create(MailRequestSchema)` to create a new message.
  */
-export const MailRequestSchema: GenMessage<MailRequest, {jsonType: MailRequestJson}> = /*@__PURE__*/
+export const MailRequestSchema: GenMessage<MailRequest, { jsonType: MailRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_messagings_protocol_messagings, 1);
 
 /**
@@ -228,7 +231,7 @@ export type MailResultJson = {
  * Describes the message scribe.clients.messagings.v1.MailResult.
  * Use `create(MailResultSchema)` to create a new message.
  */
-export const MailResultSchema: GenMessage<MailResult, {jsonType: MailResultJson}> = /*@__PURE__*/
+export const MailResultSchema: GenMessage<MailResult, { jsonType: MailResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_messagings_protocol_messagings, 2);
 
 /**
@@ -285,7 +288,7 @@ export type SmsRequestJson = {
  * Describes the message scribe.clients.messagings.v1.SmsRequest.
  * Use `create(SmsRequestSchema)` to create a new message.
  */
-export const SmsRequestSchema: GenMessage<SmsRequest, {jsonType: SmsRequestJson}> = /*@__PURE__*/
+export const SmsRequestSchema: GenMessage<SmsRequest, { jsonType: SmsRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_messagings_protocol_messagings, 3);
 
 /**
@@ -322,7 +325,7 @@ export type SmsResultJson = {
  * Describes the message scribe.clients.messagings.v1.SmsResult.
  * Use `create(SmsResultSchema)` to create a new message.
  */
-export const SmsResultSchema: GenMessage<SmsResult, {jsonType: SmsResultJson}> = /*@__PURE__*/
+export const SmsResultSchema: GenMessage<SmsResult, { jsonType: SmsResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_messagings_protocol_messagings, 4);
 
 /**
@@ -409,7 +412,7 @@ export type PushRequestJson = {
  * Describes the message scribe.clients.messagings.v1.PushRequest.
  * Use `create(PushRequestSchema)` to create a new message.
  */
-export const PushRequestSchema: GenMessage<PushRequest, {jsonType: PushRequestJson}> = /*@__PURE__*/
+export const PushRequestSchema: GenMessage<PushRequest, { jsonType: PushRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_messagings_protocol_messagings, 5);
 
 /**
@@ -456,7 +459,7 @@ export type PushResultJson = {
  * Describes the message scribe.clients.messagings.v1.PushResult.
  * Use `create(PushResultSchema)` to create a new message.
  */
-export const PushResultSchema: GenMessage<PushResult, {jsonType: PushResultJson}> = /*@__PURE__*/
+export const PushResultSchema: GenMessage<PushResult, { jsonType: PushResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_messagings_protocol_messagings, 6);
 
 /**
@@ -470,7 +473,7 @@ export const Messagings: GenService<{
     methodKind: "unary";
     input: typeof MailRequestSchema;
     output: typeof MailResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.messagings.v1.Messagings.SendSms
    */
@@ -478,7 +481,7 @@ export const Messagings: GenService<{
     methodKind: "unary";
     input: typeof SmsRequestSchema;
     output: typeof SmsResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.messagings.v1.Messagings.SendPush
    */
@@ -486,7 +489,6 @@ export const Messagings: GenService<{
     methodKind: "unary";
     input: typeof PushRequestSchema;
     output: typeof PushResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_dependencies_features_messagings_protocol_messagings, 0);
-

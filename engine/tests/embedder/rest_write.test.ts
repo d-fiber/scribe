@@ -74,4 +74,3 @@ Deno.test("a worker delete with no predicate at all is refused, not run", async 
     restore();
   }
 });
-

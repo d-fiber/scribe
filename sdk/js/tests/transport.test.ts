@@ -49,11 +49,7 @@ import {
   UnaryClient,
 } from "../mod.ts";
 import { Registration } from "../gen/scribe/protocol/manifest_pb.ts";
-import {
-  InvocationSchema,
-  RequestSchema,
-  Worker as WorkerService,
-} from "../gen/scribe/protocol/invocation_pb.ts";
+import { InvocationSchema, RequestSchema, Worker as WorkerService } from "../gen/scribe/protocol/invocation_pb.ts";
 import { FailureSchema, Method as ProtoMethod } from "../gen/scribe/protocol/common_pb.ts";
 
 const LIMIT: RateLimiter = { limit: 5, window: Time.minutes(1), penalty: Time.minutes(1) };

@@ -34,12 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import {
-    colors,
-    fontFaceCss,
-    fontFamily,
-    fonts,
-} from "@scribe/public/theme/tokens.ts";
+import { colors, fontFaceCss, fontFamily, fonts } from "@scribe/public/theme/tokens.ts";
 import { DesignSystem } from "@scribe/public/mail/ui/design-system.tsx";
 
 export const designSystem = new DesignSystem({

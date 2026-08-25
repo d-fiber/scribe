@@ -39,10 +39,7 @@ import {
   Auth,
 } from "../../gen/scribe/engine/dependencies/security/auth/protocol/auth_pb.ts";
 import { Rbac } from "../../gen/scribe/engine/dependencies/security/rbac/protocol/rbac_pb.ts";
-import {
-  type Vpn as ProtoVpn,
-  VpnAdmin,
-} from "../../gen/scribe/engine/dependencies/security/vpn/protocol/vpn_pb.ts";
+import { type Vpn as ProtoVpn, VpnAdmin } from "../../gen/scribe/engine/dependencies/security/vpn/protocol/vpn_pb.ts";
 import { decodeJson, encodeJson } from "../contracts/json.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";

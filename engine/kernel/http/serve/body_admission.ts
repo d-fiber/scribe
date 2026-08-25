@@ -100,7 +100,5 @@ function isMultipart(req: Request): boolean {
 function declaredSize(req: Request, ceiling: number): number | null {
   const declared = Number(req.headers.get("content-length") ?? 0);
 
-  return Number.isFinite(declared) && declared > 0 && declared <= ceiling
-    ? declared
-    : null;
+  return Number.isFinite(declared) && declared > 0 && declared <= ceiling ? declared : null;
 }

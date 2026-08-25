@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/dependencies/geospatial/protocol/geospatial.proto.
  */
 export const file_scribe_host_dependencies_geospatial_protocol_geospatial: GenFile = /*@__PURE__*/
-  fileDesc("Cj1zY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvZ2Vvc3BhdGlhbC9wcm90b2NvbC9nZW9zcGF0aWFsLnByb3RvEhxzY3JpYmUuY2xpZW50cy5nZW9zcGF0aWFsLnYxIk0KB0FkZHJlc3MSDgoGc3RyZWV0GAEgASgJEgwKBGNpdHkYAiABKAkSEwoLcG9zdGFsX2NvZGUYAyABKAkSDwoHY291bnRyeRgEIAEoCSInCgtDb29yZGluYXRlcxILCgNsYXQYASABKAESCwoDbG5nGAIgASgBIi8KDkdlb2NvZGVSZXF1ZXN0Eg0KBXF1ZXJ5GAEgASgJEg4KBnJlZ2lvbhgCIAEoCSKqAQoNR2VvY29kZVJlc3VsdBI+Cgtjb29yZGluYXRlcxgBIAEoCzIpLnNjcmliZS5jbGllbnRzLmdlb3NwYXRpYWwudjEuQ29vcmRpbmF0ZXMSNgoHYWRkcmVzcxgCIAEoCzIlLnNjcmliZS5jbGllbnRzLmdlb3NwYXRpYWwudjEuQWRkcmVzcxIhCgVlcnJvchgDIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIlcKFVJldmVyc2VHZW9jb2RlUmVxdWVzdBI+Cgtjb29yZGluYXRlcxgBIAEoCzIpLnNjcmliZS5jbGllbnRzLmdlb3NwYXRpYWwudjEuQ29vcmRpbmF0ZXMicQoUUmV2ZXJzZUdlb2NvZGVSZXN1bHQSNgoHYWRkcmVzcxgBIAEoCzIlLnNjcmliZS5jbGllbnRzLmdlb3NwYXRpYWwudjEuQWRkcmVzcxIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlMu0BCgpHZW9zcGF0aWFsEmQKB0dlb2NvZGUSLC5zY3JpYmUuY2xpZW50cy5nZW9zcGF0aWFsLnYxLkdlb2NvZGVSZXF1ZXN0Gisuc2NyaWJlLmNsaWVudHMuZ2Vvc3BhdGlhbC52MS5HZW9jb2RlUmVzdWx0EnkKDlJldmVyc2VHZW9jb2RlEjMuc2NyaWJlLmNsaWVudHMuZ2Vvc3BhdGlhbC52MS5SZXZlcnNlR2VvY29kZVJlcXVlc3QaMi5zY3JpYmUuY2xpZW50cy5nZW9zcGF0aWFsLnYxLlJldmVyc2VHZW9jb2RlUmVzdWx0YgZwcm90bzM", [file_scribe_protocol_common]);
+  fileDesc(
+    "Cj1zY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvZ2Vvc3BhdGlhbC9wcm90b2NvbC9nZW9zcGF0aWFsLnByb3RvEhxzY3JpYmUuY2xpZW50cy5nZW9zcGF0aWFsLnYxIk0KB0FkZHJlc3MSDgoGc3RyZWV0GAEgASgJEgwKBGNpdHkYAiABKAkSEwoLcG9zdGFsX2NvZGUYAyABKAkSDwoHY291bnRyeRgEIAEoCSInCgtDb29yZGluYXRlcxILCgNsYXQYASABKAESCwoDbG5nGAIgASgBIi8KDkdlb2NvZGVSZXF1ZXN0Eg0KBXF1ZXJ5GAEgASgJEg4KBnJlZ2lvbhgCIAEoCSKqAQoNR2VvY29kZVJlc3VsdBI+Cgtjb29yZGluYXRlcxgBIAEoCzIpLnNjcmliZS5jbGllbnRzLmdlb3NwYXRpYWwudjEuQ29vcmRpbmF0ZXMSNgoHYWRkcmVzcxgCIAEoCzIlLnNjcmliZS5jbGllbnRzLmdlb3NwYXRpYWwudjEuQWRkcmVzcxIhCgVlcnJvchgDIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIlcKFVJldmVyc2VHZW9jb2RlUmVxdWVzdBI+Cgtjb29yZGluYXRlcxgBIAEoCzIpLnNjcmliZS5jbGllbnRzLmdlb3NwYXRpYWwudjEuQ29vcmRpbmF0ZXMicQoUUmV2ZXJzZUdlb2NvZGVSZXN1bHQSNgoHYWRkcmVzcxgBIAEoCzIlLnNjcmliZS5jbGllbnRzLmdlb3NwYXRpYWwudjEuQWRkcmVzcxIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlMu0BCgpHZW9zcGF0aWFsEmQKB0dlb2NvZGUSLC5zY3JpYmUuY2xpZW50cy5nZW9zcGF0aWFsLnYxLkdlb2NvZGVSZXF1ZXN0Gisuc2NyaWJlLmNsaWVudHMuZ2Vvc3BhdGlhbC52MS5HZW9jb2RlUmVzdWx0EnkKDlJldmVyc2VHZW9jb2RlEjMuc2NyaWJlLmNsaWVudHMuZ2Vvc3BhdGlhbC52MS5SZXZlcnNlR2VvY29kZVJlcXVlc3QaMi5zY3JpYmUuY2xpZW50cy5nZW9zcGF0aWFsLnYxLlJldmVyc2VHZW9jb2RlUmVzdWx0YgZwcm90bzM",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.clients.geospatial.v1.Address
@@ -104,7 +107,7 @@ export type AddressJson = {
  * Describes the message scribe.clients.geospatial.v1.Address.
  * Use `create(AddressSchema)` to create a new message.
  */
-export const AddressSchema: GenMessage<Address, {jsonType: AddressJson}> = /*@__PURE__*/
+export const AddressSchema: GenMessage<Address, { jsonType: AddressJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_geospatial_protocol_geospatial, 0);
 
 /**
@@ -141,7 +144,7 @@ export type CoordinatesJson = {
  * Describes the message scribe.clients.geospatial.v1.Coordinates.
  * Use `create(CoordinatesSchema)` to create a new message.
  */
-export const CoordinatesSchema: GenMessage<Coordinates, {jsonType: CoordinatesJson}> = /*@__PURE__*/
+export const CoordinatesSchema: GenMessage<Coordinates, { jsonType: CoordinatesJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_geospatial_protocol_geospatial, 1);
 
 /**
@@ -178,7 +181,7 @@ export type GeocodeRequestJson = {
  * Describes the message scribe.clients.geospatial.v1.GeocodeRequest.
  * Use `create(GeocodeRequestSchema)` to create a new message.
  */
-export const GeocodeRequestSchema: GenMessage<GeocodeRequest, {jsonType: GeocodeRequestJson}> = /*@__PURE__*/
+export const GeocodeRequestSchema: GenMessage<GeocodeRequest, { jsonType: GeocodeRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_geospatial_protocol_geospatial, 2);
 
 /**
@@ -225,7 +228,7 @@ export type GeocodeResultJson = {
  * Describes the message scribe.clients.geospatial.v1.GeocodeResult.
  * Use `create(GeocodeResultSchema)` to create a new message.
  */
-export const GeocodeResultSchema: GenMessage<GeocodeResult, {jsonType: GeocodeResultJson}> = /*@__PURE__*/
+export const GeocodeResultSchema: GenMessage<GeocodeResult, { jsonType: GeocodeResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_geospatial_protocol_geospatial, 3);
 
 /**
@@ -252,7 +255,10 @@ export type ReverseGeocodeRequestJson = {
  * Describes the message scribe.clients.geospatial.v1.ReverseGeocodeRequest.
  * Use `create(ReverseGeocodeRequestSchema)` to create a new message.
  */
-export const ReverseGeocodeRequestSchema: GenMessage<ReverseGeocodeRequest, {jsonType: ReverseGeocodeRequestJson}> = /*@__PURE__*/
+export const ReverseGeocodeRequestSchema: GenMessage<
+  ReverseGeocodeRequest,
+  { jsonType: ReverseGeocodeRequestJson }
+> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_geospatial_protocol_geospatial, 4);
 
 /**
@@ -289,7 +295,10 @@ export type ReverseGeocodeResultJson = {
  * Describes the message scribe.clients.geospatial.v1.ReverseGeocodeResult.
  * Use `create(ReverseGeocodeResultSchema)` to create a new message.
  */
-export const ReverseGeocodeResultSchema: GenMessage<ReverseGeocodeResult, {jsonType: ReverseGeocodeResultJson}> = /*@__PURE__*/
+export const ReverseGeocodeResultSchema: GenMessage<
+  ReverseGeocodeResult,
+  { jsonType: ReverseGeocodeResultJson }
+> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_geospatial_protocol_geospatial, 5);
 
 /**
@@ -303,7 +312,7 @@ export const Geospatial: GenService<{
     methodKind: "unary";
     input: typeof GeocodeRequestSchema;
     output: typeof GeocodeResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.geospatial.v1.Geospatial.ReverseGeocode
    */
@@ -311,7 +320,6 @@ export const Geospatial: GenService<{
     methodKind: "unary";
     input: typeof ReverseGeocodeRequestSchema;
     output: typeof ReverseGeocodeResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_dependencies_geospatial_protocol_geospatial, 0);
-

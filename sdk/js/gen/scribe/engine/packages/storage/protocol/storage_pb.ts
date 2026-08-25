@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/packages/storage/protocol/storage.proto.
  */
 export const file_scribe_host_packages_storage_protocol_storage: GenFile = /*@__PURE__*/
-  fileDesc("CjNzY3JpYmUvaG9zdC9wYWNrYWdlcy9zdG9yYWdlL3Byb3RvY29sL3N0b3JhZ2UucHJvdG8SGXNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEipQEKCU9iamVjdFJlZhIOCgZmb2xkZXIYASABKAkSRQoJcGF0aF9hcmdzGAIgAygLMjIuc2NyaWJlLmNsaWVudHMuc3RvcmFnZS52MS5PYmplY3RSZWYuUGF0aEFyZ3NFbnRyeRIQCghmaWxlbmFtZRgDIAEoCRovCg1QYXRoQXJnc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEieQoNVXBsb2FkUmVxdWVzdBI0CgZvYmplY3QYASABKAsyJC5zY3JpYmUuY2xpZW50cy5zdG9yYWdlLnYxLk9iamVjdFJlZhIPCgdjb250ZW50GAIgASgMEhEKCW1pbWVfdHlwZRgDIAEoCRIOCgZ1cHNlcnQYBCABKAgiXgoMVXBsb2FkUmVzdWx0EgwKBHBhdGgYASABKAkSHQoEc2l6ZRgCIAEoCzIPLnNjcmliZS52MS5TaXplEiEKBWVycm9yGAMgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUiRgoNRGVsZXRlUmVxdWVzdBI1CgdvYmplY3RzGAEgAygLMiQuc2NyaWJlLmNsaWVudHMuc3RvcmFnZS52MS5PYmplY3RSZWYiQgoMRGVsZXRlUmVzdWx0Eg8KB2RlbGV0ZWQYASABKA0SIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJtChBTaWduZWRVcmxSZXF1ZXN0EjQKBm9iamVjdBgBIAEoCzIkLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuT2JqZWN0UmVmEiMKCmV4cGlyZXNfaW4YAiABKAsyDy5zY3JpYmUudjEuVGltZSJBCg9TaWduZWRVcmxSZXN1bHQSCwoDdXJsGAEgASgJEiEKBWVycm9yGAIgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUitgEKC0xpc3RSZXF1ZXN0Eg4KBmZvbGRlchgBIAEoCRJHCglwYXRoX2FyZ3MYAiADKAsyNC5zY3JpYmUuY2xpZW50cy5zdG9yYWdlLnYxLkxpc3RSZXF1ZXN0LlBhdGhBcmdzRW50cnkSDQoFbGltaXQYAyABKA0SDgoGb2Zmc2V0GAQgASgNGi8KDVBhdGhBcmdzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASJjCg1PYmplY3RTdW1tYXJ5EgwKBHBhdGgYASABKAkSHQoEc2l6ZRgCIAEoCzIPLnNjcmliZS52MS5TaXplEhEKCW1pbWVfdHlwZRgDIAEoCRISCgp1cGRhdGVkX2F0GAQgASgDImoKCkxpc3RSZXN1bHQSOQoHb2JqZWN0cxgBIAMoCzIoLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuT2JqZWN0U3VtbWFyeRIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlMoADCgdTdG9yYWdlElsKBlVwbG9hZBIoLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuVXBsb2FkUmVxdWVzdBonLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuVXBsb2FkUmVzdWx0ElsKBkRlbGV0ZRIoLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuRGVsZXRlUmVxdWVzdBonLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuRGVsZXRlUmVzdWx0EmQKCVNpZ25lZFVybBIrLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuU2lnbmVkVXJsUmVxdWVzdBoqLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuU2lnbmVkVXJsUmVzdWx0ElUKBExpc3QSJi5zY3JpYmUuY2xpZW50cy5zdG9yYWdlLnYxLkxpc3RSZXF1ZXN0GiUuc2NyaWJlLmNsaWVudHMuc3RvcmFnZS52MS5MaXN0UmVzdWx0YgZwcm90bzM", [file_scribe_protocol_common]);
+  fileDesc(
+    "CjNzY3JpYmUvaG9zdC9wYWNrYWdlcy9zdG9yYWdlL3Byb3RvY29sL3N0b3JhZ2UucHJvdG8SGXNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEipQEKCU9iamVjdFJlZhIOCgZmb2xkZXIYASABKAkSRQoJcGF0aF9hcmdzGAIgAygLMjIuc2NyaWJlLmNsaWVudHMuc3RvcmFnZS52MS5PYmplY3RSZWYuUGF0aEFyZ3NFbnRyeRIQCghmaWxlbmFtZRgDIAEoCRovCg1QYXRoQXJnc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEieQoNVXBsb2FkUmVxdWVzdBI0CgZvYmplY3QYASABKAsyJC5zY3JpYmUuY2xpZW50cy5zdG9yYWdlLnYxLk9iamVjdFJlZhIPCgdjb250ZW50GAIgASgMEhEKCW1pbWVfdHlwZRgDIAEoCRIOCgZ1cHNlcnQYBCABKAgiXgoMVXBsb2FkUmVzdWx0EgwKBHBhdGgYASABKAkSHQoEc2l6ZRgCIAEoCzIPLnNjcmliZS52MS5TaXplEiEKBWVycm9yGAMgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUiRgoNRGVsZXRlUmVxdWVzdBI1CgdvYmplY3RzGAEgAygLMiQuc2NyaWJlLmNsaWVudHMuc3RvcmFnZS52MS5PYmplY3RSZWYiQgoMRGVsZXRlUmVzdWx0Eg8KB2RlbGV0ZWQYASABKA0SIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJtChBTaWduZWRVcmxSZXF1ZXN0EjQKBm9iamVjdBgBIAEoCzIkLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuT2JqZWN0UmVmEiMKCmV4cGlyZXNfaW4YAiABKAsyDy5zY3JpYmUudjEuVGltZSJBCg9TaWduZWRVcmxSZXN1bHQSCwoDdXJsGAEgASgJEiEKBWVycm9yGAIgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUitgEKC0xpc3RSZXF1ZXN0Eg4KBmZvbGRlchgBIAEoCRJHCglwYXRoX2FyZ3MYAiADKAsyNC5zY3JpYmUuY2xpZW50cy5zdG9yYWdlLnYxLkxpc3RSZXF1ZXN0LlBhdGhBcmdzRW50cnkSDQoFbGltaXQYAyABKA0SDgoGb2Zmc2V0GAQgASgNGi8KDVBhdGhBcmdzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASJjCg1PYmplY3RTdW1tYXJ5EgwKBHBhdGgYASABKAkSHQoEc2l6ZRgCIAEoCzIPLnNjcmliZS52MS5TaXplEhEKCW1pbWVfdHlwZRgDIAEoCRISCgp1cGRhdGVkX2F0GAQgASgDImoKCkxpc3RSZXN1bHQSOQoHb2JqZWN0cxgBIAMoCzIoLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuT2JqZWN0U3VtbWFyeRIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlMoADCgdTdG9yYWdlElsKBlVwbG9hZBIoLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuVXBsb2FkUmVxdWVzdBonLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuVXBsb2FkUmVzdWx0ElsKBkRlbGV0ZRIoLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuRGVsZXRlUmVxdWVzdBonLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuRGVsZXRlUmVzdWx0EmQKCVNpZ25lZFVybBIrLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuU2lnbmVkVXJsUmVxdWVzdBoqLnNjcmliZS5jbGllbnRzLnN0b3JhZ2UudjEuU2lnbmVkVXJsUmVzdWx0ElUKBExpc3QSJi5zY3JpYmUuY2xpZW50cy5zdG9yYWdlLnYxLkxpc3RSZXF1ZXN0GiUuc2NyaWJlLmNsaWVudHMuc3RvcmFnZS52MS5MaXN0UmVzdWx0YgZwcm90bzM",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.clients.storage.v1.ObjectRef
@@ -94,7 +97,7 @@ export type ObjectRefJson = {
  * Describes the message scribe.clients.storage.v1.ObjectRef.
  * Use `create(ObjectRefSchema)` to create a new message.
  */
-export const ObjectRefSchema: GenMessage<ObjectRef, {jsonType: ObjectRefJson}> = /*@__PURE__*/
+export const ObjectRefSchema: GenMessage<ObjectRef, { jsonType: ObjectRefJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_storage_protocol_storage, 0);
 
 /**
@@ -151,7 +154,7 @@ export type UploadRequestJson = {
  * Describes the message scribe.clients.storage.v1.UploadRequest.
  * Use `create(UploadRequestSchema)` to create a new message.
  */
-export const UploadRequestSchema: GenMessage<UploadRequest, {jsonType: UploadRequestJson}> = /*@__PURE__*/
+export const UploadRequestSchema: GenMessage<UploadRequest, { jsonType: UploadRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_storage_protocol_storage, 1);
 
 /**
@@ -198,7 +201,7 @@ export type UploadResultJson = {
  * Describes the message scribe.clients.storage.v1.UploadResult.
  * Use `create(UploadResultSchema)` to create a new message.
  */
-export const UploadResultSchema: GenMessage<UploadResult, {jsonType: UploadResultJson}> = /*@__PURE__*/
+export const UploadResultSchema: GenMessage<UploadResult, { jsonType: UploadResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_storage_protocol_storage, 2);
 
 /**
@@ -225,7 +228,7 @@ export type DeleteRequestJson = {
  * Describes the message scribe.clients.storage.v1.DeleteRequest.
  * Use `create(DeleteRequestSchema)` to create a new message.
  */
-export const DeleteRequestSchema: GenMessage<DeleteRequest, {jsonType: DeleteRequestJson}> = /*@__PURE__*/
+export const DeleteRequestSchema: GenMessage<DeleteRequest, { jsonType: DeleteRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_storage_protocol_storage, 3);
 
 /**
@@ -262,7 +265,7 @@ export type DeleteResultJson = {
  * Describes the message scribe.clients.storage.v1.DeleteResult.
  * Use `create(DeleteResultSchema)` to create a new message.
  */
-export const DeleteResultSchema: GenMessage<DeleteResult, {jsonType: DeleteResultJson}> = /*@__PURE__*/
+export const DeleteResultSchema: GenMessage<DeleteResult, { jsonType: DeleteResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_storage_protocol_storage, 4);
 
 /**
@@ -299,7 +302,7 @@ export type SignedUrlRequestJson = {
  * Describes the message scribe.clients.storage.v1.SignedUrlRequest.
  * Use `create(SignedUrlRequestSchema)` to create a new message.
  */
-export const SignedUrlRequestSchema: GenMessage<SignedUrlRequest, {jsonType: SignedUrlRequestJson}> = /*@__PURE__*/
+export const SignedUrlRequestSchema: GenMessage<SignedUrlRequest, { jsonType: SignedUrlRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_storage_protocol_storage, 5);
 
 /**
@@ -336,7 +339,7 @@ export type SignedUrlResultJson = {
  * Describes the message scribe.clients.storage.v1.SignedUrlResult.
  * Use `create(SignedUrlResultSchema)` to create a new message.
  */
-export const SignedUrlResultSchema: GenMessage<SignedUrlResult, {jsonType: SignedUrlResultJson}> = /*@__PURE__*/
+export const SignedUrlResultSchema: GenMessage<SignedUrlResult, { jsonType: SignedUrlResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_storage_protocol_storage, 6);
 
 /**
@@ -393,7 +396,7 @@ export type ListRequestJson = {
  * Describes the message scribe.clients.storage.v1.ListRequest.
  * Use `create(ListRequestSchema)` to create a new message.
  */
-export const ListRequestSchema: GenMessage<ListRequest, {jsonType: ListRequestJson}> = /*@__PURE__*/
+export const ListRequestSchema: GenMessage<ListRequest, { jsonType: ListRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_storage_protocol_storage, 7);
 
 /**
@@ -450,7 +453,7 @@ export type ObjectSummaryJson = {
  * Describes the message scribe.clients.storage.v1.ObjectSummary.
  * Use `create(ObjectSummarySchema)` to create a new message.
  */
-export const ObjectSummarySchema: GenMessage<ObjectSummary, {jsonType: ObjectSummaryJson}> = /*@__PURE__*/
+export const ObjectSummarySchema: GenMessage<ObjectSummary, { jsonType: ObjectSummaryJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_storage_protocol_storage, 8);
 
 /**
@@ -487,7 +490,7 @@ export type ListResultJson = {
  * Describes the message scribe.clients.storage.v1.ListResult.
  * Use `create(ListResultSchema)` to create a new message.
  */
-export const ListResultSchema: GenMessage<ListResult, {jsonType: ListResultJson}> = /*@__PURE__*/
+export const ListResultSchema: GenMessage<ListResult, { jsonType: ListResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_storage_protocol_storage, 9);
 
 /**
@@ -501,7 +504,7 @@ export const Storage: GenService<{
     methodKind: "unary";
     input: typeof UploadRequestSchema;
     output: typeof UploadResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.storage.v1.Storage.Delete
    */
@@ -509,7 +512,7 @@ export const Storage: GenService<{
     methodKind: "unary";
     input: typeof DeleteRequestSchema;
     output: typeof DeleteResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.storage.v1.Storage.SignedUrl
    */
@@ -517,7 +520,7 @@ export const Storage: GenService<{
     methodKind: "unary";
     input: typeof SignedUrlRequestSchema;
     output: typeof SignedUrlResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.storage.v1.Storage.List
    */
@@ -525,7 +528,6 @@ export const Storage: GenService<{
     methodKind: "unary";
     input: typeof ListRequestSchema;
     output: typeof ListResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_packages_storage_protocol_storage, 0);
-

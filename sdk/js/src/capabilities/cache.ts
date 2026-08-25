@@ -36,10 +36,7 @@
 
 import { create } from "@bufbuild/protobuf";
 import { TimeSchema } from "../../gen/scribe/protocol/common_pb.ts";
-import {
-  Valkery,
-  ValkeryKeySchema,
-} from "../../gen/scribe/engine/packages/foundation/protocol/valkery/valkery_pb.ts";
+import { Valkery, ValkeryKeySchema } from "../../gen/scribe/engine/packages/foundation/protocol/valkery/valkery_pb.ts";
 import { decodeJson, encodeJson } from "../contracts/json.ts";
 import type { Time } from "../contracts/time.ts";
 import { host } from "./channel.ts";

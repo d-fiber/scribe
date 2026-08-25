@@ -48,11 +48,7 @@ import {
   Time,
 } from "../mod.ts";
 import { invoke } from "../src/runtime/dispatch.ts";
-import {
-  IdentitySchema,
-  InvocationSchema,
-  RequestSchema,
-} from "../gen/scribe/protocol/invocation_pb.ts";
+import { IdentitySchema, InvocationSchema, RequestSchema } from "../gen/scribe/protocol/invocation_pb.ts";
 import { Caller as ProtoCaller, Method as ProtoMethod } from "../gen/scribe/protocol/common_pb.ts";
 
 const LIMIT: RateLimiter = { limit: 10, window: Time.minutes(1), penalty: Time.minutes(1) };

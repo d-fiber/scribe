@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/packages/search/protocol/search.proto.
  */
 export const file_scribe_host_packages_search_protocol_search: GenFile = /*@__PURE__*/
-  fileDesc("CjFzY3JpYmUvaG9zdC9wYWNrYWdlcy9zZWFyY2gvcHJvdG9jb2wvc2VhcmNoLnByb3RvEhhzY3JpYmUuY2xpZW50cy5zZWFyY2gudjEiKgoMUXVldWVSZXF1ZXN0Eg0KBWluZGV4GAEgASgJEgsKA2lkcxgCIAMoCSJACgtRdWV1ZVJlc3VsdBIOCgZxdWV1ZWQYASABKAgSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSI/Cg1TZWFyY2hSZXF1ZXN0Eg0KBWluZGV4GAEgASgJEh8KBnBhcmFtcxgCIAEoCzIPLnNjcmliZS52MS5Kc29uIlAKDFNlYXJjaFJlc3VsdBIdCgRwYWdlGAEgASgLMg8uc2NyaWJlLnYxLkpzb24SIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZTKSAgoGU2VhcmNoElQKA0FkZBImLnNjcmliZS5jbGllbnRzLnNlYXJjaC52MS5RdWV1ZVJlcXVlc3QaJS5zY3JpYmUuY2xpZW50cy5zZWFyY2gudjEuUXVldWVSZXN1bHQSVwoGRGVsZXRlEiYuc2NyaWJlLmNsaWVudHMuc2VhcmNoLnYxLlF1ZXVlUmVxdWVzdBolLnNjcmliZS5jbGllbnRzLnNlYXJjaC52MS5RdWV1ZVJlc3VsdBJZCgZTZWFyY2gSJy5zY3JpYmUuY2xpZW50cy5zZWFyY2gudjEuU2VhcmNoUmVxdWVzdBomLnNjcmliZS5jbGllbnRzLnNlYXJjaC52MS5TZWFyY2hSZXN1bHRiBnByb3RvMw", [file_scribe_protocol_common]);
+  fileDesc(
+    "CjFzY3JpYmUvaG9zdC9wYWNrYWdlcy9zZWFyY2gvcHJvdG9jb2wvc2VhcmNoLnByb3RvEhhzY3JpYmUuY2xpZW50cy5zZWFyY2gudjEiKgoMUXVldWVSZXF1ZXN0Eg0KBWluZGV4GAEgASgJEgsKA2lkcxgCIAMoCSJACgtRdWV1ZVJlc3VsdBIOCgZxdWV1ZWQYASABKAgSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSI/Cg1TZWFyY2hSZXF1ZXN0Eg0KBWluZGV4GAEgASgJEh8KBnBhcmFtcxgCIAEoCzIPLnNjcmliZS52MS5Kc29uIlAKDFNlYXJjaFJlc3VsdBIdCgRwYWdlGAEgASgLMg8uc2NyaWJlLnYxLkpzb24SIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZTKSAgoGU2VhcmNoElQKA0FkZBImLnNjcmliZS5jbGllbnRzLnNlYXJjaC52MS5RdWV1ZVJlcXVlc3QaJS5zY3JpYmUuY2xpZW50cy5zZWFyY2gudjEuUXVldWVSZXN1bHQSVwoGRGVsZXRlEiYuc2NyaWJlLmNsaWVudHMuc2VhcmNoLnYxLlF1ZXVlUmVxdWVzdBolLnNjcmliZS5jbGllbnRzLnNlYXJjaC52MS5RdWV1ZVJlc3VsdBJZCgZTZWFyY2gSJy5zY3JpYmUuY2xpZW50cy5zZWFyY2gudjEuU2VhcmNoUmVxdWVzdBomLnNjcmliZS5jbGllbnRzLnNlYXJjaC52MS5TZWFyY2hSZXN1bHRiBnByb3RvMw",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.clients.search.v1.QueueRequest
@@ -84,7 +87,7 @@ export type QueueRequestJson = {
  * Describes the message scribe.clients.search.v1.QueueRequest.
  * Use `create(QueueRequestSchema)` to create a new message.
  */
-export const QueueRequestSchema: GenMessage<QueueRequest, {jsonType: QueueRequestJson}> = /*@__PURE__*/
+export const QueueRequestSchema: GenMessage<QueueRequest, { jsonType: QueueRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_search_protocol_search, 0);
 
 /**
@@ -121,7 +124,7 @@ export type QueueResultJson = {
  * Describes the message scribe.clients.search.v1.QueueResult.
  * Use `create(QueueResultSchema)` to create a new message.
  */
-export const QueueResultSchema: GenMessage<QueueResult, {jsonType: QueueResultJson}> = /*@__PURE__*/
+export const QueueResultSchema: GenMessage<QueueResult, { jsonType: QueueResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_search_protocol_search, 1);
 
 /**
@@ -158,7 +161,7 @@ export type SearchRequestJson = {
  * Describes the message scribe.clients.search.v1.SearchRequest.
  * Use `create(SearchRequestSchema)` to create a new message.
  */
-export const SearchRequestSchema: GenMessage<SearchRequest, {jsonType: SearchRequestJson}> = /*@__PURE__*/
+export const SearchRequestSchema: GenMessage<SearchRequest, { jsonType: SearchRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_search_protocol_search, 2);
 
 /**
@@ -195,7 +198,7 @@ export type SearchResultJson = {
  * Describes the message scribe.clients.search.v1.SearchResult.
  * Use `create(SearchResultSchema)` to create a new message.
  */
-export const SearchResultSchema: GenMessage<SearchResult, {jsonType: SearchResultJson}> = /*@__PURE__*/
+export const SearchResultSchema: GenMessage<SearchResult, { jsonType: SearchResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_search_protocol_search, 3);
 
 /**
@@ -209,7 +212,7 @@ export const Search: GenService<{
     methodKind: "unary";
     input: typeof QueueRequestSchema;
     output: typeof QueueResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.search.v1.Search.Delete
    */
@@ -217,7 +220,7 @@ export const Search: GenService<{
     methodKind: "unary";
     input: typeof QueueRequestSchema;
     output: typeof QueueResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.search.v1.Search.Search
    */
@@ -225,7 +228,6 @@ export const Search: GenService<{
     methodKind: "unary";
     input: typeof SearchRequestSchema;
     output: typeof SearchResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_packages_search_protocol_search, 0);
-

@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { assertEquals, assert } from "@std/assert";
+import { assert, assertEquals } from "@std/assert";
 import { PROTOCOL_VERSION } from "../mod.ts";
 import { Registration } from "../gen/scribe/protocol/manifest_pb.ts";
 import { Worker as WorkerService } from "../gen/scribe/protocol/invocation_pb.ts";

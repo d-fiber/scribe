@@ -299,7 +299,7 @@ Deno.test("rewriteRequest adds no query string when the request carried none", (
 });
 
 Deno.test("rewriteRequest sends only the view, not the buffer behind it", async () => {
-  const backing = new TextEncoder().encode("PADDING{\"kept\":true}");
+  const backing = new TextEncoder().encode('PADDING{"kept":true}');
   const view = backing.subarray(7);
 
   const rewritten = rewriteRequest(

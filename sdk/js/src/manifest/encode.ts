@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { create } from "@bufbuild/protobuf";
-import { TimeSchema, SizeSchema } from "../../gen/scribe/protocol/common_pb.ts";
+import { SizeSchema, TimeSchema } from "../../gen/scribe/protocol/common_pb.ts";
 import {
   type Manifest,
   ManifestSchema,
@@ -44,12 +44,7 @@ import {
   type Route as ProtoRoute,
   RouteSchema,
 } from "../../gen/scribe/protocol/manifest_pb.ts";
-import {
-  callersOf,
-  encodeCaller,
-  encodeMethod,
-  encodeNeed,
-} from "../contracts/access.ts";
+import { callersOf, encodeCaller, encodeMethod, encodeNeed } from "../contracts/access.ts";
 import { encodeJson } from "../contracts/json.ts";
 import type { RateLimiter } from "../contracts/rate_limit.ts";
 import type { Time } from "../contracts/time.ts";

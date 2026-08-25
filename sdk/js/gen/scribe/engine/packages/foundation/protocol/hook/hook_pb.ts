@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/packages/foundation/protocol/hook/hook.proto.
  */
 export const file_scribe_host_packages_foundation_protocol_hook_hook: GenFile = /*@__PURE__*/
-  fileDesc("CjhzY3JpYmUvaG9zdC9wYWNrYWdlcy9mb3VuZGF0aW9uL3Byb3RvY29sL2hvb2svaG9vay5wcm90bxIWc2NyaWJlLnJ1bnRpbWUuaG9vay52MSKJAQoFRXZlbnQSDwoHaG9va19pZBgBIAEoCRINCgVldmVudBgCIAEoCRIQCgh0cmFjZV9pZBgDIAEoCRIgCgdwYXlsb2FkGAQgASgLMg8uc2NyaWJlLnYxLkpzb24SEgoKZW1pdHRlZF9hdBgFIAEoAxIYChBjYXBhYmlsaXR5X3Rva2VuGAYgASgJIkAKCkVtaXRSZXN1bHQSDwoHaGFuZGxlZBgBIAEoDRIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlImQKDEhhbmRsZVJlc3VsdBIOCgZoYWx0ZWQYASABKAgSIQoIbXV0YXRpb24YAiABKAsyDy5zY3JpYmUudjEuSnNvbhIhCgVlcnJvchgDIAEoCzISLnNjcmliZS52MS5GYWlsdXJlMlEKBEhvb2sSSQoERW1pdBIdLnNjcmliZS5ydW50aW1lLmhvb2sudjEuRXZlbnQaIi5zY3JpYmUucnVudGltZS5ob29rLnYxLkVtaXRSZXN1bHQyXQoMSG9va0Rpc3BhdGNoEk0KBkhhbmRsZRIdLnNjcmliZS5ydW50aW1lLmhvb2sudjEuRXZlbnQaJC5zY3JpYmUucnVudGltZS5ob29rLnYxLkhhbmRsZVJlc3VsdGIGcHJvdG8z", [file_scribe_protocol_common]);
+  fileDesc(
+    "CjhzY3JpYmUvaG9zdC9wYWNrYWdlcy9mb3VuZGF0aW9uL3Byb3RvY29sL2hvb2svaG9vay5wcm90bxIWc2NyaWJlLnJ1bnRpbWUuaG9vay52MSKJAQoFRXZlbnQSDwoHaG9va19pZBgBIAEoCRINCgVldmVudBgCIAEoCRIQCgh0cmFjZV9pZBgDIAEoCRIgCgdwYXlsb2FkGAQgASgLMg8uc2NyaWJlLnYxLkpzb24SEgoKZW1pdHRlZF9hdBgFIAEoAxIYChBjYXBhYmlsaXR5X3Rva2VuGAYgASgJIkAKCkVtaXRSZXN1bHQSDwoHaGFuZGxlZBgBIAEoDRIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlImQKDEhhbmRsZVJlc3VsdBIOCgZoYWx0ZWQYASABKAgSIQoIbXV0YXRpb24YAiABKAsyDy5zY3JpYmUudjEuSnNvbhIhCgVlcnJvchgDIAEoCzISLnNjcmliZS52MS5GYWlsdXJlMlEKBEhvb2sSSQoERW1pdBIdLnNjcmliZS5ydW50aW1lLmhvb2sudjEuRXZlbnQaIi5zY3JpYmUucnVudGltZS5ob29rLnYxLkVtaXRSZXN1bHQyXQoMSG9va0Rpc3BhdGNoEk0KBkhhbmRsZRIdLnNjcmliZS5ydW50aW1lLmhvb2sudjEuRXZlbnQaJC5zY3JpYmUucnVudGltZS5ob29rLnYxLkhhbmRsZVJlc3VsdGIGcHJvdG8z",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.runtime.hook.v1.Event
@@ -124,7 +127,7 @@ export type EventJson = {
  * Describes the message scribe.runtime.hook.v1.Event.
  * Use `create(EventSchema)` to create a new message.
  */
-export const EventSchema: GenMessage<Event, {jsonType: EventJson}> = /*@__PURE__*/
+export const EventSchema: GenMessage<Event, { jsonType: EventJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_hook_hook, 0);
 
 /**
@@ -161,7 +164,7 @@ export type EmitResultJson = {
  * Describes the message scribe.runtime.hook.v1.EmitResult.
  * Use `create(EmitResultSchema)` to create a new message.
  */
-export const EmitResultSchema: GenMessage<EmitResult, {jsonType: EmitResultJson}> = /*@__PURE__*/
+export const EmitResultSchema: GenMessage<EmitResult, { jsonType: EmitResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_hook_hook, 1);
 
 /**
@@ -208,7 +211,7 @@ export type HandleResultJson = {
  * Describes the message scribe.runtime.hook.v1.HandleResult.
  * Use `create(HandleResultSchema)` to create a new message.
  */
-export const HandleResultSchema: GenMessage<HandleResult, {jsonType: HandleResultJson}> = /*@__PURE__*/
+export const HandleResultSchema: GenMessage<HandleResult, { jsonType: HandleResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_hook_hook, 2);
 
 /**
@@ -222,7 +225,7 @@ export const Hook: GenService<{
     methodKind: "unary";
     input: typeof EventSchema;
     output: typeof EmitResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_packages_foundation_protocol_hook_hook, 0);
 
@@ -237,7 +240,6 @@ export const HookDispatch: GenService<{
     methodKind: "unary";
     input: typeof EventSchema;
     output: typeof HandleResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_packages_foundation_protocol_hook_hook, 1);
-

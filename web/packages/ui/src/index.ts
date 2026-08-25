@@ -46,4 +46,3 @@ export { AppSeparator } from "./primitives/separator.tsx";
 export { AppSpacing } from "./primitives/spacing.tsx";
 export { AppText } from "./primitives/text.tsx";
 export type { TextAlign, TextColor } from "./primitives/text.tsx";
-

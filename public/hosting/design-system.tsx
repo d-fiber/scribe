@@ -35,12 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { DesignSystem } from "@scribe/public/hosting/ui/design-system.tsx";
-import {
-  colors,
-  fontFaceCss,
-  fontFamily,
-  fonts,
-} from "@scribe/public/theme/tokens.ts";
+import { colors, fontFaceCss, fontFamily, fonts } from "@scribe/public/theme/tokens.ts";
 
 export type { WebAppProps } from "@scribe/public/hosting/ui/layouts/scaffold/web-app.tsx";
 export type { AppIconName } from "@scribe/public/hosting/ui/primitives/media/icon.tsx";

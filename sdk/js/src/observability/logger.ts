@@ -35,16 +35,11 @@
 // LICENSE file, the LICENSE file governs.
 
 import { create } from "@bufbuild/protobuf";
-import {
-  type LogEntry,
-  LogEntrySchema,
-  LogLevel,
-  Logging,
-} from "../../gen/scribe/protocol/logs_pb.ts";
+import { type LogEntry, LogEntrySchema, Logging, LogLevel } from "../../gen/scribe/protocol/logs_pb.ts";
 import { encodeJson } from "../contracts/json.ts";
 import { CallScope } from "../runtime/scope.ts";
 import { host } from "../capabilities/channel.ts";
-import { type LogSink, loggedEntry } from "./log_sink.ts";
+import { loggedEntry, type LogSink } from "./log_sink.ts";
 import type { SinkRegistry } from "./sink_registry.ts";
 
 const BATCH_THRESHOLD = 25;

@@ -81,13 +81,9 @@ export function makeAppTextButton(colors: AppColors, fonts: AppFonts) {
 
     const content = (
       <>
-        {prefix !== undefined && (
-          <AppIcon name={prefix} size={affixIconSize} color={color} />
-        )}
+        {prefix !== undefined && <AppIcon name={prefix} size={affixIconSize} color={color} />}
         {label}
-        {suffix !== undefined && (
-          <AppIcon name={suffix} size={affixIconSize} color={color} />
-        )}
+        {suffix !== undefined && <AppIcon name={suffix} size={affixIconSize} color={color} />}
       </>
     );
 

@@ -40,9 +40,7 @@ const OCTET = /^(0|[1-9]\d{0,2})$/;
 export function normalizeIp(ip: string): string {
   const trimmed = ip.trim();
 
-  return trimmed.startsWith(IPV4_MAPPED_PREFIX)
-    ? trimmed.slice(IPV4_MAPPED_PREFIX.length)
-    : trimmed;
+  return trimmed.startsWith(IPV4_MAPPED_PREFIX) ? trimmed.slice(IPV4_MAPPED_PREFIX.length) : trimmed;
 }
 
 export function ipv4ToInt(ip: string): number | null {

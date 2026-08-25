@@ -74,9 +74,7 @@ export function makeAppTopSnackBar(colors: AppColors, fonts: AppFonts) {
     `@keyframes app-snack-bar {
   0% { transform: translateY(-100%); animation-timing-function: linear; }
   ${enterStop.toFixed(2)}% { transform: translateY(0); }
-  ${
-      holdStop.toFixed(2)
-    }% { transform: translateY(0); animation-timing-function: cubic-bezier(0.35, 0.91, 0.33, 0.97); }
+  ${holdStop.toFixed(2)}% { transform: translateY(0); animation-timing-function: cubic-bezier(0.35, 0.91, 0.33, 0.97); }
   100% { transform: translateY(-100%); }
 }`,
     `[data-snack-bar] { animation: app-snack-bar ${totalMs}ms forwards; }`,

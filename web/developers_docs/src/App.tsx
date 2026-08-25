@@ -125,8 +125,7 @@ export default function App() {
       img.className = "app-logo";
       img.src = isDark ? LOGO_DARK : LOGO_LIGHT;
       img.alt = APP_NAME;
-      img.style.cssText =
-        "height: 40px; width: auto; display: block; margin-bottom: 30px;";
+      img.style.cssText = "height: 40px; width: auto; display: block; margin-bottom: 30px;";
 
       target.insertBefore(img, target.firstChild);
       observer.disconnect();

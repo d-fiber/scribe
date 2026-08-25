@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/packages/foundation/protocol/database/database.proto.
  */
 export const file_scribe_host_packages_foundation_protocol_database_database: GenFile = /*@__PURE__*/
-  fileDesc("CkBzY3JpYmUvaG9zdC9wYWNrYWdlcy9mb3VuZGF0aW9uL3Byb3RvY29sL2RhdGFiYXNlL2RhdGFiYXNlLnByb3RvEhpzY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MSKHAQoGRmlsdGVyEg4KBmNvbHVtbhgBIAEoCRI8CghvcGVyYXRvchgCIAEoDjIqLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLkZpbHRlck9wZXJhdG9yEh4KBXZhbHVlGAMgASgLMg8uc2NyaWJlLnYxLkpzb24SDwoHbmVnYXRlZBgEIAEoCCKQAQoLRmlsdGVyR3JvdXASMwoHZmlsdGVycxgBIAMoCzIiLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLkZpbHRlchI3CgZncm91cHMYAiADKAsyJy5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5GaWx0ZXJHcm91cBITCgtkaXNqdW5jdGlvbhgDIAEoCCJACgVPcmRlchIOCgZjb2x1bW4YASABKAkSEgoKZGVzY2VuZGluZxgCIAEoCBITCgtudWxsc19maXJzdBgDIAEoCCImCgVSYW5nZRINCgVsaW1pdBgBIAEoDRIOCgZvZmZzZXQYAiABKA0ijQMKBVF1ZXJ5Eg0KBXRhYmxlGAEgASgJEjgKCW9wZXJhdGlvbhgCIAEoDjIlLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLk9wZXJhdGlvbhIOCgZzZWxlY3QYAyADKAkSNgoFd2hlcmUYBCABKAsyJy5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5GaWx0ZXJHcm91cBIwCgVvcmRlchgFIAMoCzIhLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLk9yZGVyEjAKBXJhbmdlGAYgASgLMiEuc2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEuUmFuZ2USDgoGc2luZ2xlGAcgASgIEhMKC2NvdW50X2V4YWN0GAggASgIEiAKB3BheWxvYWQYCSABKAsyDy5zY3JpYmUudjEuSnNvbhITCgtvbl9jb25mbGljdBgKIAMoCRIQCghycGNfbmFtZRgLIAEoCRIhCghycGNfYXJncxgMIAEoCzIPLnNjcmliZS52MS5Kc29uIl4KC1F1ZXJ5UmVzdWx0Eh0KBGRhdGEYASABKAsyDy5zY3JpYmUudjEuSnNvbhINCgVjb3VudBgCIAEoBBIhCgVlcnJvchgDIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIkAKClF1ZXJ5QmF0Y2gSMgoHcXVlcmllcxgBIAMoCzIhLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLlF1ZXJ5IkwKEFF1ZXJ5UmVzdWx0QmF0Y2gSOAoHcmVzdWx0cxgBIAMoCzInLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLlF1ZXJ5UmVzdWx0KqcBCglPcGVyYXRpb24SGQoVT1BFUkFUSU9OX1VOU1BFQ0lGSUVEEAASFAoQT1BFUkFUSU9OX1NFTEVDVBABEhQKEE9QRVJBVElPTl9JTlNFUlQQAhIUChBPUEVSQVRJT05fVVBEQVRFEAMSFAoQT1BFUkFUSU9OX1VQU0VSVBAEEhQKEE9QRVJBVElPTl9ERUxFVEUQBRIRCg1PUEVSQVRJT05fUlBDEAYqqAMKDkZpbHRlck9wZXJhdG9yEh8KG0ZJTFRFUl9PUEVSQVRPUl9VTlNQRUNJRklFRBAAEhYKEkZJTFRFUl9PUEVSQVRPUl9FURABEhcKE0ZJTFRFUl9PUEVSQVRPUl9ORVEQAhIWChJGSUxURVJfT1BFUkFUT1JfR1QQAxIXChNGSUxURVJfT1BFUkFUT1JfR1RFEAQSFgoSRklMVEVSX09QRVJBVE9SX0xUEAUSFwoTRklMVEVSX09QRVJBVE9SX0xURRAGEhgKFEZJTFRFUl9PUEVSQVRPUl9MSUtFEAcSGQoVRklMVEVSX09QRVJBVE9SX0lMSUtFEAgSFgoSRklMVEVSX09QRVJBVE9SX0lOEAkSFgoSRklMVEVSX09QRVJBVE9SX0lTEAoSHAoYRklMVEVSX09QRVJBVE9SX0NPTlRBSU5TEAsSIAocRklMVEVSX09QRVJBVE9SX0NPTlRBSU5FRF9CWRAMEhwKGEZJTFRFUl9PUEVSQVRPUl9PVkVSTEFQUxANEh8KG0ZJTFRFUl9PUEVSQVRPUl9URVhUX1NFQVJDSBAOMscBCghEYXRhYmFzZRJVCgdFeGVjdXRlEiEuc2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEuUXVlcnkaJy5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5RdWVyeVJlc3VsdBJkCgxFeGVjdXRlQmF0Y2gSJi5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5RdWVyeUJhdGNoGiwuc2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEuUXVlcnlSZXN1bHRCYXRjaGIGcHJvdG8z", [file_scribe_protocol_common]);
+  fileDesc(
+    "CkBzY3JpYmUvaG9zdC9wYWNrYWdlcy9mb3VuZGF0aW9uL3Byb3RvY29sL2RhdGFiYXNlL2RhdGFiYXNlLnByb3RvEhpzY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MSKHAQoGRmlsdGVyEg4KBmNvbHVtbhgBIAEoCRI8CghvcGVyYXRvchgCIAEoDjIqLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLkZpbHRlck9wZXJhdG9yEh4KBXZhbHVlGAMgASgLMg8uc2NyaWJlLnYxLkpzb24SDwoHbmVnYXRlZBgEIAEoCCKQAQoLRmlsdGVyR3JvdXASMwoHZmlsdGVycxgBIAMoCzIiLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLkZpbHRlchI3CgZncm91cHMYAiADKAsyJy5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5GaWx0ZXJHcm91cBITCgtkaXNqdW5jdGlvbhgDIAEoCCJACgVPcmRlchIOCgZjb2x1bW4YASABKAkSEgoKZGVzY2VuZGluZxgCIAEoCBITCgtudWxsc19maXJzdBgDIAEoCCImCgVSYW5nZRINCgVsaW1pdBgBIAEoDRIOCgZvZmZzZXQYAiABKA0ijQMKBVF1ZXJ5Eg0KBXRhYmxlGAEgASgJEjgKCW9wZXJhdGlvbhgCIAEoDjIlLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLk9wZXJhdGlvbhIOCgZzZWxlY3QYAyADKAkSNgoFd2hlcmUYBCABKAsyJy5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5GaWx0ZXJHcm91cBIwCgVvcmRlchgFIAMoCzIhLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLk9yZGVyEjAKBXJhbmdlGAYgASgLMiEuc2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEuUmFuZ2USDgoGc2luZ2xlGAcgASgIEhMKC2NvdW50X2V4YWN0GAggASgIEiAKB3BheWxvYWQYCSABKAsyDy5zY3JpYmUudjEuSnNvbhITCgtvbl9jb25mbGljdBgKIAMoCRIQCghycGNfbmFtZRgLIAEoCRIhCghycGNfYXJncxgMIAEoCzIPLnNjcmliZS52MS5Kc29uIl4KC1F1ZXJ5UmVzdWx0Eh0KBGRhdGEYASABKAsyDy5zY3JpYmUudjEuSnNvbhINCgVjb3VudBgCIAEoBBIhCgVlcnJvchgDIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIkAKClF1ZXJ5QmF0Y2gSMgoHcXVlcmllcxgBIAMoCzIhLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLlF1ZXJ5IkwKEFF1ZXJ5UmVzdWx0QmF0Y2gSOAoHcmVzdWx0cxgBIAMoCzInLnNjcmliZS5jbGllbnRzLmRhdGFiYXNlLnYxLlF1ZXJ5UmVzdWx0KqcBCglPcGVyYXRpb24SGQoVT1BFUkFUSU9OX1VOU1BFQ0lGSUVEEAASFAoQT1BFUkFUSU9OX1NFTEVDVBABEhQKEE9QRVJBVElPTl9JTlNFUlQQAhIUChBPUEVSQVRJT05fVVBEQVRFEAMSFAoQT1BFUkFUSU9OX1VQU0VSVBAEEhQKEE9QRVJBVElPTl9ERUxFVEUQBRIRCg1PUEVSQVRJT05fUlBDEAYqqAMKDkZpbHRlck9wZXJhdG9yEh8KG0ZJTFRFUl9PUEVSQVRPUl9VTlNQRUNJRklFRBAAEhYKEkZJTFRFUl9PUEVSQVRPUl9FURABEhcKE0ZJTFRFUl9PUEVSQVRPUl9ORVEQAhIWChJGSUxURVJfT1BFUkFUT1JfR1QQAxIXChNGSUxURVJfT1BFUkFUT1JfR1RFEAQSFgoSRklMVEVSX09QRVJBVE9SX0xUEAUSFwoTRklMVEVSX09QRVJBVE9SX0xURRAGEhgKFEZJTFRFUl9PUEVSQVRPUl9MSUtFEAcSGQoVRklMVEVSX09QRVJBVE9SX0lMSUtFEAgSFgoSRklMVEVSX09QRVJBVE9SX0lOEAkSFgoSRklMVEVSX09QRVJBVE9SX0lTEAoSHAoYRklMVEVSX09QRVJBVE9SX0NPTlRBSU5TEAsSIAocRklMVEVSX09QRVJBVE9SX0NPTlRBSU5FRF9CWRAMEhwKGEZJTFRFUl9PUEVSQVRPUl9PVkVSTEFQUxANEh8KG0ZJTFRFUl9PUEVSQVRPUl9URVhUX1NFQVJDSBAOMscBCghEYXRhYmFzZRJVCgdFeGVjdXRlEiEuc2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEuUXVlcnkaJy5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5RdWVyeVJlc3VsdBJkCgxFeGVjdXRlQmF0Y2gSJi5zY3JpYmUuY2xpZW50cy5kYXRhYmFzZS52MS5RdWVyeUJhdGNoGiwuc2NyaWJlLmNsaWVudHMuZGF0YWJhc2UudjEuUXVlcnlSZXN1bHRCYXRjaGIGcHJvdG8z",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.clients.database.v1.Filter
@@ -104,7 +107,7 @@ export type FilterJson = {
  * Describes the message scribe.clients.database.v1.Filter.
  * Use `create(FilterSchema)` to create a new message.
  */
-export const FilterSchema: GenMessage<Filter, {jsonType: FilterJson}> = /*@__PURE__*/
+export const FilterSchema: GenMessage<Filter, { jsonType: FilterJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_database_database, 0);
 
 /**
@@ -151,7 +154,7 @@ export type FilterGroupJson = {
  * Describes the message scribe.clients.database.v1.FilterGroup.
  * Use `create(FilterGroupSchema)` to create a new message.
  */
-export const FilterGroupSchema: GenMessage<FilterGroup, {jsonType: FilterGroupJson}> = /*@__PURE__*/
+export const FilterGroupSchema: GenMessage<FilterGroup, { jsonType: FilterGroupJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_database_database, 1);
 
 /**
@@ -198,7 +201,7 @@ export type OrderJson = {
  * Describes the message scribe.clients.database.v1.Order.
  * Use `create(OrderSchema)` to create a new message.
  */
-export const OrderSchema: GenMessage<Order, {jsonType: OrderJson}> = /*@__PURE__*/
+export const OrderSchema: GenMessage<Order, { jsonType: OrderJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_database_database, 2);
 
 /**
@@ -235,7 +238,7 @@ export type RangeJson = {
  * Describes the message scribe.clients.database.v1.Range.
  * Use `create(RangeSchema)` to create a new message.
  */
-export const RangeSchema: GenMessage<Range, {jsonType: RangeJson}> = /*@__PURE__*/
+export const RangeSchema: GenMessage<Range, { jsonType: RangeJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_database_database, 3);
 
 /**
@@ -372,7 +375,7 @@ export type QueryJson = {
  * Describes the message scribe.clients.database.v1.Query.
  * Use `create(QuerySchema)` to create a new message.
  */
-export const QuerySchema: GenMessage<Query, {jsonType: QueryJson}> = /*@__PURE__*/
+export const QuerySchema: GenMessage<Query, { jsonType: QueryJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_database_database, 4);
 
 /**
@@ -419,7 +422,7 @@ export type QueryResultJson = {
  * Describes the message scribe.clients.database.v1.QueryResult.
  * Use `create(QueryResultSchema)` to create a new message.
  */
-export const QueryResultSchema: GenMessage<QueryResult, {jsonType: QueryResultJson}> = /*@__PURE__*/
+export const QueryResultSchema: GenMessage<QueryResult, { jsonType: QueryResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_database_database, 5);
 
 /**
@@ -446,7 +449,7 @@ export type QueryBatchJson = {
  * Describes the message scribe.clients.database.v1.QueryBatch.
  * Use `create(QueryBatchSchema)` to create a new message.
  */
-export const QueryBatchSchema: GenMessage<QueryBatch, {jsonType: QueryBatchJson}> = /*@__PURE__*/
+export const QueryBatchSchema: GenMessage<QueryBatch, { jsonType: QueryBatchJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_database_database, 6);
 
 /**
@@ -473,7 +476,7 @@ export type QueryResultBatchJson = {
  * Describes the message scribe.clients.database.v1.QueryResultBatch.
  * Use `create(QueryResultBatchSchema)` to create a new message.
  */
-export const QueryResultBatchSchema: GenMessage<QueryResultBatch, {jsonType: QueryResultBatchJson}> = /*@__PURE__*/
+export const QueryResultBatchSchema: GenMessage<QueryResultBatch, { jsonType: QueryResultBatchJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_database_database, 7);
 
 /**
@@ -519,7 +522,14 @@ export enum Operation {
 /**
  * @generated from enum scribe.clients.database.v1.Operation
  */
-export type OperationJson = "OPERATION_UNSPECIFIED" | "OPERATION_SELECT" | "OPERATION_INSERT" | "OPERATION_UPDATE" | "OPERATION_UPSERT" | "OPERATION_DELETE" | "OPERATION_RPC";
+export type OperationJson =
+  | "OPERATION_UNSPECIFIED"
+  | "OPERATION_SELECT"
+  | "OPERATION_INSERT"
+  | "OPERATION_UPDATE"
+  | "OPERATION_UPSERT"
+  | "OPERATION_DELETE"
+  | "OPERATION_RPC";
 
 /**
  * Describes the enum scribe.clients.database.v1.Operation.
@@ -610,7 +620,22 @@ export enum FilterOperator {
 /**
  * @generated from enum scribe.clients.database.v1.FilterOperator
  */
-export type FilterOperatorJson = "FILTER_OPERATOR_UNSPECIFIED" | "FILTER_OPERATOR_EQ" | "FILTER_OPERATOR_NEQ" | "FILTER_OPERATOR_GT" | "FILTER_OPERATOR_GTE" | "FILTER_OPERATOR_LT" | "FILTER_OPERATOR_LTE" | "FILTER_OPERATOR_LIKE" | "FILTER_OPERATOR_ILIKE" | "FILTER_OPERATOR_IN" | "FILTER_OPERATOR_IS" | "FILTER_OPERATOR_CONTAINS" | "FILTER_OPERATOR_CONTAINED_BY" | "FILTER_OPERATOR_OVERLAPS" | "FILTER_OPERATOR_TEXT_SEARCH";
+export type FilterOperatorJson =
+  | "FILTER_OPERATOR_UNSPECIFIED"
+  | "FILTER_OPERATOR_EQ"
+  | "FILTER_OPERATOR_NEQ"
+  | "FILTER_OPERATOR_GT"
+  | "FILTER_OPERATOR_GTE"
+  | "FILTER_OPERATOR_LT"
+  | "FILTER_OPERATOR_LTE"
+  | "FILTER_OPERATOR_LIKE"
+  | "FILTER_OPERATOR_ILIKE"
+  | "FILTER_OPERATOR_IN"
+  | "FILTER_OPERATOR_IS"
+  | "FILTER_OPERATOR_CONTAINS"
+  | "FILTER_OPERATOR_CONTAINED_BY"
+  | "FILTER_OPERATOR_OVERLAPS"
+  | "FILTER_OPERATOR_TEXT_SEARCH";
 
 /**
  * Describes the enum scribe.clients.database.v1.FilterOperator.
@@ -629,7 +654,7 @@ export const Database: GenService<{
     methodKind: "unary";
     input: typeof QuerySchema;
     output: typeof QueryResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.database.v1.Database.ExecuteBatch
    */
@@ -637,7 +662,6 @@ export const Database: GenService<{
     methodKind: "unary";
     input: typeof QueryBatchSchema;
     output: typeof QueryResultBatchSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_packages_foundation_protocol_database_database, 0);
-

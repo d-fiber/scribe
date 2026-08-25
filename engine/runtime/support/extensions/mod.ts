@@ -35,8 +35,5 @@
 // LICENSE file, the LICENSE file governs.
 
 export { isMissingModule } from "./missing_module.ts";
-export {
-  type ExtensionImporter,
-  OptionalExtension,
-} from "./optional_extension.ts";
+export { type ExtensionImporter, OptionalExtension } from "./optional_extension.ts";
 export { type Extension, ExtensionRegistry, extensions } from "./registry.ts";

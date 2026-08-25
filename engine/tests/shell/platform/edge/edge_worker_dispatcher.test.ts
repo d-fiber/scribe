@@ -35,11 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { EdgeWorkerDispatcher } from "@scribe/shell/platform/edge/dispatch/edge_worker_dispatcher.ts";
-import type {
-  EdgePlatform,
-  EdgeWorker,
-  EdgeWorkerOptions,
-} from "@scribe/shell/platform/edge/platform.ts";
+import type { EdgePlatform, EdgeWorker, EdgeWorkerOptions } from "@scribe/shell/platform/edge/platform.ts";
 import { assert, assertEquals } from "@std/assert";
 
 const LIMITS = {

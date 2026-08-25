@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/dependencies/features/devops/protocol/devops.proto.
  */
 export const file_scribe_host_dependencies_features_devops_protocol_devops: GenFile = /*@__PURE__*/
-  fileDesc("Cj5zY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvZmVhdHVyZXMvZGV2b3BzL3Byb3RvY29sL2Rldm9wcy5wcm90bxIYc2NyaWJlLmNsaWVudHMuZGV2b3BzLnYxIkkKE1JlbW90ZUNvbmZpZ1JlcXVlc3QSCwoDa2V5GAEgASgJEhAKCHBsYXRmb3JtGAIgASgJEhMKC2FwcF92ZXJzaW9uGAMgASgJIlcKElJlbW90ZUNvbmZpZ1Jlc3VsdBIeCgV2YWx1ZRgBIAEoCzIPLnNjcmliZS52MS5Kc29uEiEKBWVycm9yGAIgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUycwoNUmVtb3RlQ29uZmlncxJiCgNHZXQSLS5zY3JpYmUuY2xpZW50cy5kZXZvcHMudjEuUmVtb3RlQ29uZmlnUmVxdWVzdBosLnNjcmliZS5jbGllbnRzLmRldm9wcy52MS5SZW1vdGVDb25maWdSZXN1bHRiBnByb3RvMw", [file_scribe_protocol_common]);
+  fileDesc(
+    "Cj5zY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvZmVhdHVyZXMvZGV2b3BzL3Byb3RvY29sL2Rldm9wcy5wcm90bxIYc2NyaWJlLmNsaWVudHMuZGV2b3BzLnYxIkkKE1JlbW90ZUNvbmZpZ1JlcXVlc3QSCwoDa2V5GAEgASgJEhAKCHBsYXRmb3JtGAIgASgJEhMKC2FwcF92ZXJzaW9uGAMgASgJIlcKElJlbW90ZUNvbmZpZ1Jlc3VsdBIeCgV2YWx1ZRgBIAEoCzIPLnNjcmliZS52MS5Kc29uEiEKBWVycm9yGAIgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUycwoNUmVtb3RlQ29uZmlncxJiCgNHZXQSLS5zY3JpYmUuY2xpZW50cy5kZXZvcHMudjEuUmVtb3RlQ29uZmlnUmVxdWVzdBosLnNjcmliZS5jbGllbnRzLmRldm9wcy52MS5SZW1vdGVDb25maWdSZXN1bHRiBnByb3RvMw",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.clients.devops.v1.RemoteConfigRequest
@@ -94,7 +97,10 @@ export type RemoteConfigRequestJson = {
  * Describes the message scribe.clients.devops.v1.RemoteConfigRequest.
  * Use `create(RemoteConfigRequestSchema)` to create a new message.
  */
-export const RemoteConfigRequestSchema: GenMessage<RemoteConfigRequest, {jsonType: RemoteConfigRequestJson}> = /*@__PURE__*/
+export const RemoteConfigRequestSchema: GenMessage<
+  RemoteConfigRequest,
+  { jsonType: RemoteConfigRequestJson }
+> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 0);
 
 /**
@@ -131,7 +137,10 @@ export type RemoteConfigResultJson = {
  * Describes the message scribe.clients.devops.v1.RemoteConfigResult.
  * Use `create(RemoteConfigResultSchema)` to create a new message.
  */
-export const RemoteConfigResultSchema: GenMessage<RemoteConfigResult, {jsonType: RemoteConfigResultJson}> = /*@__PURE__*/
+export const RemoteConfigResultSchema: GenMessage<
+  RemoteConfigResult,
+  { jsonType: RemoteConfigResultJson }
+> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 1);
 
 /**
@@ -145,7 +154,6 @@ export const RemoteConfigs: GenService<{
     methodKind: "unary";
     input: typeof RemoteConfigRequestSchema;
     output: typeof RemoteConfigResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_dependencies_features_devops_protocol_devops, 0);
-

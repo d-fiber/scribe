@@ -40,9 +40,7 @@ function bytesOnly(bodyBytes: Uint8Array): ArrayBuffer {
   const coversWholeBuffer = bodyBytes.byteOffset === 0 &&
     bodyBytes.byteLength === bodyBytes.buffer.byteLength;
 
-  return coversWholeBuffer
-    ? (bodyBytes.buffer as ArrayBuffer)
-    : (bodyBytes.slice().buffer as ArrayBuffer);
+  return coversWholeBuffer ? (bodyBytes.buffer as ArrayBuffer) : (bodyBytes.slice().buffer as ArrayBuffer);
 }
 
 export function rewriteRequest(
@@ -51,10 +49,7 @@ export function rewriteRequest(
   pathname: string,
 ): Request {
   const hasBody = req.method !== "GET" && req.method !== "HEAD";
-  const body: BodyInit | null =
-    hasBody && bodyBytes && bodyBytes.byteLength > 0
-      ? bytesOnly(bodyBytes)
-      : null;
+  const body: BodyInit | null = hasBody && bodyBytes && bodyBytes.byteLength > 0 ? bytesOnly(bodyBytes) : null;
   const target = (pathname || "/") + searchOf(req.url);
   return new Request(new URL(target, originOf(req.url)), {
     method: req.method,

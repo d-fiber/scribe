@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/dependencies/features/recommendation/protocol/recommendation.proto.
  */
 export const file_scribe_host_dependencies_features_recommendation_protocol_recommendation: GenFile = /*@__PURE__*/
-  fileDesc("Ck5zY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvZmVhdHVyZXMvcmVjb21tZW5kYXRpb24vcHJvdG9jb2wvcmVjb21tZW5kYXRpb24ucHJvdG8SIHNjcmliZS5jbGllbnRzLnJlY29tbWVuZGF0aW9uLnYxIkQKBFVzZXISCgoCaWQYASABKAkSHwoGbGFiZWxzGAIgASgLMg8uc2NyaWJlLnYxLkpzb24SDwoHY29tbWVudBgDIAEoCSJ+CgRJdGVtEgoKAmlkGAEgASgJEh8KBmxhYmVscxgCIAEoCzIPLnNjcmliZS52MS5Kc29uEg8KB2NvbW1lbnQYAyABKAkSEgoKY2F0ZWdvcmllcxgEIAMoCRIRCglpc19oaWRkZW4YBSABKAgSEQoJdGltZXN0YW1wGAYgASgJIlwKCEZlZWRiYWNrEgwKBHR5cGUYASABKAkSDwoHdXNlcl9pZBgCIAEoCRIPCgdpdGVtX2lkGAMgASgJEg0KBXZhbHVlGAQgASgBEhEKCXRpbWVzdGFtcBgFIAEoCSJJChFVcHNlcnRVc2VyUmVxdWVzdBI0CgR1c2VyGAEgASgLMiYuc2NyaWJlLmNsaWVudHMucmVjb21tZW5kYXRpb24udjEuVXNlciJJChFVcHNlcnRJdGVtUmVxdWVzdBI0CgRpdGVtGAEgASgLMiYuc2NyaWJlLmNsaWVudHMucmVjb21tZW5kYXRpb24udjEuSXRlbSIkChFEZWxldGVVc2VyUmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJIiQKEURlbGV0ZUl0ZW1SZXF1ZXN0Eg8KB2l0ZW1faWQYASABKAkiVQoVSW5zZXJ0RmVlZGJhY2tSZXF1ZXN0EjwKCGZlZWRiYWNrGAEgAygLMiouc2NyaWJlLmNsaWVudHMucmVjb21tZW5kYXRpb24udjEuRmVlZGJhY2siVAoQUmVjb21tZW5kUmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJEg0KBWNvdW50GAIgASgNEhAKCGNhdGVnb3J5GAMgASgJEg4KBm9mZnNldBgEIAEoDSJGCg9SZWNvbW1lbmRSZXN1bHQSEAoIaXRlbV9pZHMYASADKAkSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSIvCgpWb2lkUmVzdWx0EiEKBWVycm9yGAEgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUywQUKDlJlY29tbWVuZGF0aW9uEm8KClVwc2VydFVzZXISMy5zY3JpYmUuY2xpZW50cy5yZWNvbW1lbmRhdGlvbi52MS5VcHNlcnRVc2VyUmVxdWVzdBosLnNjcmliZS5jbGllbnRzLnJlY29tbWVuZGF0aW9uLnYxLlZvaWRSZXN1bHQSbwoKVXBzZXJ0SXRlbRIzLnNjcmliZS5jbGllbnRzLnJlY29tbWVuZGF0aW9uLnYxLlVwc2VydEl0ZW1SZXF1ZXN0Giwuc2NyaWJlLmNsaWVudHMucmVjb21tZW5kYXRpb24udjEuVm9pZFJlc3VsdBJvCgpEZWxldGVVc2VyEjMuc2NyaWJlLmNsaWVudHMucmVjb21tZW5kYXRpb24udjEuRGVsZXRlVXNlclJlcXVlc3QaLC5zY3JpYmUuY2xpZW50cy5yZWNvbW1lbmRhdGlvbi52MS5Wb2lkUmVzdWx0Em8KCkRlbGV0ZUl0ZW0SMy5zY3JpYmUuY2xpZW50cy5yZWNvbW1lbmRhdGlvbi52MS5EZWxldGVJdGVtUmVxdWVzdBosLnNjcmliZS5jbGllbnRzLnJlY29tbWVuZGF0aW9uLnYxLlZvaWRSZXN1bHQSdwoOSW5zZXJ0RmVlZGJhY2sSNy5zY3JpYmUuY2xpZW50cy5yZWNvbW1lbmRhdGlvbi52MS5JbnNlcnRGZWVkYmFja1JlcXVlc3QaLC5zY3JpYmUuY2xpZW50cy5yZWNvbW1lbmRhdGlvbi52MS5Wb2lkUmVzdWx0EnIKCVJlY29tbWVuZBIyLnNjcmliZS5jbGllbnRzLnJlY29tbWVuZGF0aW9uLnYxLlJlY29tbWVuZFJlcXVlc3QaMS5zY3JpYmUuY2xpZW50cy5yZWNvbW1lbmRhdGlvbi52MS5SZWNvbW1lbmRSZXN1bHRiBnByb3RvMw", [file_scribe_protocol_common]);
+  fileDesc(
+    "Ck5zY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvZmVhdHVyZXMvcmVjb21tZW5kYXRpb24vcHJvdG9jb2wvcmVjb21tZW5kYXRpb24ucHJvdG8SIHNjcmliZS5jbGllbnRzLnJlY29tbWVuZGF0aW9uLnYxIkQKBFVzZXISCgoCaWQYASABKAkSHwoGbGFiZWxzGAIgASgLMg8uc2NyaWJlLnYxLkpzb24SDwoHY29tbWVudBgDIAEoCSJ+CgRJdGVtEgoKAmlkGAEgASgJEh8KBmxhYmVscxgCIAEoCzIPLnNjcmliZS52MS5Kc29uEg8KB2NvbW1lbnQYAyABKAkSEgoKY2F0ZWdvcmllcxgEIAMoCRIRCglpc19oaWRkZW4YBSABKAgSEQoJdGltZXN0YW1wGAYgASgJIlwKCEZlZWRiYWNrEgwKBHR5cGUYASABKAkSDwoHdXNlcl9pZBgCIAEoCRIPCgdpdGVtX2lkGAMgASgJEg0KBXZhbHVlGAQgASgBEhEKCXRpbWVzdGFtcBgFIAEoCSJJChFVcHNlcnRVc2VyUmVxdWVzdBI0CgR1c2VyGAEgASgLMiYuc2NyaWJlLmNsaWVudHMucmVjb21tZW5kYXRpb24udjEuVXNlciJJChFVcHNlcnRJdGVtUmVxdWVzdBI0CgRpdGVtGAEgASgLMiYuc2NyaWJlLmNsaWVudHMucmVjb21tZW5kYXRpb24udjEuSXRlbSIkChFEZWxldGVVc2VyUmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJIiQKEURlbGV0ZUl0ZW1SZXF1ZXN0Eg8KB2l0ZW1faWQYASABKAkiVQoVSW5zZXJ0RmVlZGJhY2tSZXF1ZXN0EjwKCGZlZWRiYWNrGAEgAygLMiouc2NyaWJlLmNsaWVudHMucmVjb21tZW5kYXRpb24udjEuRmVlZGJhY2siVAoQUmVjb21tZW5kUmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJEg0KBWNvdW50GAIgASgNEhAKCGNhdGVnb3J5GAMgASgJEg4KBm9mZnNldBgEIAEoDSJGCg9SZWNvbW1lbmRSZXN1bHQSEAoIaXRlbV9pZHMYASADKAkSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSIvCgpWb2lkUmVzdWx0EiEKBWVycm9yGAEgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUywQUKDlJlY29tbWVuZGF0aW9uEm8KClVwc2VydFVzZXISMy5zY3JpYmUuY2xpZW50cy5yZWNvbW1lbmRhdGlvbi52MS5VcHNlcnRVc2VyUmVxdWVzdBosLnNjcmliZS5jbGllbnRzLnJlY29tbWVuZGF0aW9uLnYxLlZvaWRSZXN1bHQSbwoKVXBzZXJ0SXRlbRIzLnNjcmliZS5jbGllbnRzLnJlY29tbWVuZGF0aW9uLnYxLlVwc2VydEl0ZW1SZXF1ZXN0Giwuc2NyaWJlLmNsaWVudHMucmVjb21tZW5kYXRpb24udjEuVm9pZFJlc3VsdBJvCgpEZWxldGVVc2VyEjMuc2NyaWJlLmNsaWVudHMucmVjb21tZW5kYXRpb24udjEuRGVsZXRlVXNlclJlcXVlc3QaLC5zY3JpYmUuY2xpZW50cy5yZWNvbW1lbmRhdGlvbi52MS5Wb2lkUmVzdWx0Em8KCkRlbGV0ZUl0ZW0SMy5zY3JpYmUuY2xpZW50cy5yZWNvbW1lbmRhdGlvbi52MS5EZWxldGVJdGVtUmVxdWVzdBosLnNjcmliZS5jbGllbnRzLnJlY29tbWVuZGF0aW9uLnYxLlZvaWRSZXN1bHQSdwoOSW5zZXJ0RmVlZGJhY2sSNy5zY3JpYmUuY2xpZW50cy5yZWNvbW1lbmRhdGlvbi52MS5JbnNlcnRGZWVkYmFja1JlcXVlc3QaLC5zY3JpYmUuY2xpZW50cy5yZWNvbW1lbmRhdGlvbi52MS5Wb2lkUmVzdWx0EnIKCVJlY29tbWVuZBIyLnNjcmliZS5jbGllbnRzLnJlY29tbWVuZGF0aW9uLnYxLlJlY29tbWVuZFJlcXVlc3QaMS5zY3JpYmUuY2xpZW50cy5yZWNvbW1lbmRhdGlvbi52MS5SZWNvbW1lbmRSZXN1bHRiBnByb3RvMw",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.clients.recommendation.v1.User
@@ -94,7 +97,7 @@ export type UserJson = {
  * Describes the message scribe.clients.recommendation.v1.User.
  * Use `create(UserSchema)` to create a new message.
  */
-export const UserSchema: GenMessage<User, {jsonType: UserJson}> = /*@__PURE__*/
+export const UserSchema: GenMessage<User, { jsonType: UserJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_recommendation_protocol_recommendation, 0);
 
 /**
@@ -171,7 +174,7 @@ export type ItemJson = {
  * Describes the message scribe.clients.recommendation.v1.Item.
  * Use `create(ItemSchema)` to create a new message.
  */
-export const ItemSchema: GenMessage<Item, {jsonType: ItemJson}> = /*@__PURE__*/
+export const ItemSchema: GenMessage<Item, { jsonType: ItemJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_recommendation_protocol_recommendation, 1);
 
 /**
@@ -238,7 +241,7 @@ export type FeedbackJson = {
  * Describes the message scribe.clients.recommendation.v1.Feedback.
  * Use `create(FeedbackSchema)` to create a new message.
  */
-export const FeedbackSchema: GenMessage<Feedback, {jsonType: FeedbackJson}> = /*@__PURE__*/
+export const FeedbackSchema: GenMessage<Feedback, { jsonType: FeedbackJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_recommendation_protocol_recommendation, 2);
 
 /**
@@ -265,7 +268,7 @@ export type UpsertUserRequestJson = {
  * Describes the message scribe.clients.recommendation.v1.UpsertUserRequest.
  * Use `create(UpsertUserRequestSchema)` to create a new message.
  */
-export const UpsertUserRequestSchema: GenMessage<UpsertUserRequest, {jsonType: UpsertUserRequestJson}> = /*@__PURE__*/
+export const UpsertUserRequestSchema: GenMessage<UpsertUserRequest, { jsonType: UpsertUserRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_recommendation_protocol_recommendation, 3);
 
 /**
@@ -292,7 +295,7 @@ export type UpsertItemRequestJson = {
  * Describes the message scribe.clients.recommendation.v1.UpsertItemRequest.
  * Use `create(UpsertItemRequestSchema)` to create a new message.
  */
-export const UpsertItemRequestSchema: GenMessage<UpsertItemRequest, {jsonType: UpsertItemRequestJson}> = /*@__PURE__*/
+export const UpsertItemRequestSchema: GenMessage<UpsertItemRequest, { jsonType: UpsertItemRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_recommendation_protocol_recommendation, 4);
 
 /**
@@ -319,7 +322,7 @@ export type DeleteUserRequestJson = {
  * Describes the message scribe.clients.recommendation.v1.DeleteUserRequest.
  * Use `create(DeleteUserRequestSchema)` to create a new message.
  */
-export const DeleteUserRequestSchema: GenMessage<DeleteUserRequest, {jsonType: DeleteUserRequestJson}> = /*@__PURE__*/
+export const DeleteUserRequestSchema: GenMessage<DeleteUserRequest, { jsonType: DeleteUserRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_recommendation_protocol_recommendation, 5);
 
 /**
@@ -346,7 +349,7 @@ export type DeleteItemRequestJson = {
  * Describes the message scribe.clients.recommendation.v1.DeleteItemRequest.
  * Use `create(DeleteItemRequestSchema)` to create a new message.
  */
-export const DeleteItemRequestSchema: GenMessage<DeleteItemRequest, {jsonType: DeleteItemRequestJson}> = /*@__PURE__*/
+export const DeleteItemRequestSchema: GenMessage<DeleteItemRequest, { jsonType: DeleteItemRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_recommendation_protocol_recommendation, 6);
 
 /**
@@ -373,7 +376,10 @@ export type InsertFeedbackRequestJson = {
  * Describes the message scribe.clients.recommendation.v1.InsertFeedbackRequest.
  * Use `create(InsertFeedbackRequestSchema)` to create a new message.
  */
-export const InsertFeedbackRequestSchema: GenMessage<InsertFeedbackRequest, {jsonType: InsertFeedbackRequestJson}> = /*@__PURE__*/
+export const InsertFeedbackRequestSchema: GenMessage<
+  InsertFeedbackRequest,
+  { jsonType: InsertFeedbackRequestJson }
+> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_recommendation_protocol_recommendation, 7);
 
 /**
@@ -430,7 +436,7 @@ export type RecommendRequestJson = {
  * Describes the message scribe.clients.recommendation.v1.RecommendRequest.
  * Use `create(RecommendRequestSchema)` to create a new message.
  */
-export const RecommendRequestSchema: GenMessage<RecommendRequest, {jsonType: RecommendRequestJson}> = /*@__PURE__*/
+export const RecommendRequestSchema: GenMessage<RecommendRequest, { jsonType: RecommendRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_recommendation_protocol_recommendation, 8);
 
 /**
@@ -467,7 +473,7 @@ export type RecommendResultJson = {
  * Describes the message scribe.clients.recommendation.v1.RecommendResult.
  * Use `create(RecommendResultSchema)` to create a new message.
  */
-export const RecommendResultSchema: GenMessage<RecommendResult, {jsonType: RecommendResultJson}> = /*@__PURE__*/
+export const RecommendResultSchema: GenMessage<RecommendResult, { jsonType: RecommendResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_recommendation_protocol_recommendation, 9);
 
 /**
@@ -494,7 +500,7 @@ export type VoidResultJson = {
  * Describes the message scribe.clients.recommendation.v1.VoidResult.
  * Use `create(VoidResultSchema)` to create a new message.
  */
-export const VoidResultSchema: GenMessage<VoidResult, {jsonType: VoidResultJson}> = /*@__PURE__*/
+export const VoidResultSchema: GenMessage<VoidResult, { jsonType: VoidResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_recommendation_protocol_recommendation, 10);
 
 /**
@@ -508,7 +514,7 @@ export const Recommendation: GenService<{
     methodKind: "unary";
     input: typeof UpsertUserRequestSchema;
     output: typeof VoidResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.recommendation.v1.Recommendation.UpsertItem
    */
@@ -516,7 +522,7 @@ export const Recommendation: GenService<{
     methodKind: "unary";
     input: typeof UpsertItemRequestSchema;
     output: typeof VoidResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.recommendation.v1.Recommendation.DeleteUser
    */
@@ -524,7 +530,7 @@ export const Recommendation: GenService<{
     methodKind: "unary";
     input: typeof DeleteUserRequestSchema;
     output: typeof VoidResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.recommendation.v1.Recommendation.DeleteItem
    */
@@ -532,7 +538,7 @@ export const Recommendation: GenService<{
     methodKind: "unary";
     input: typeof DeleteItemRequestSchema;
     output: typeof VoidResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.recommendation.v1.Recommendation.InsertFeedback
    */
@@ -540,7 +546,7 @@ export const Recommendation: GenService<{
     methodKind: "unary";
     input: typeof InsertFeedbackRequestSchema;
     output: typeof VoidResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.recommendation.v1.Recommendation.Recommend
    */
@@ -548,7 +554,6 @@ export const Recommendation: GenService<{
     methodKind: "unary";
     input: typeof RecommendRequestSchema;
     output: typeof RecommendResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_dependencies_features_recommendation_protocol_recommendation, 0);
-

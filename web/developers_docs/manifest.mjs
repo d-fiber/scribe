@@ -41,8 +41,7 @@ import { fileURLToPath } from "node:url";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
-export const PROJECT_ROOT =
-  process.env.PROJECT_ROOT ?? path.resolve(HERE, "../../..");
+export const PROJECT_ROOT = process.env.PROJECT_ROOT ?? path.resolve(HERE, "../../..");
 
 export const GENERATED_DOCS = path.join(
   PROJECT_ROOT,

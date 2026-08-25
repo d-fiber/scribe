@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/packages/realtime/protocol/realtime.proto.
  */
 export const file_scribe_host_packages_realtime_protocol_realtime: GenFile = /*@__PURE__*/
-  fileDesc("CjVzY3JpYmUvaG9zdC9wYWNrYWdlcy9yZWFsdGltZS9wcm90b2NvbC9yZWFsdGltZS5wcm90bxIac2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEiaAoQQnJvYWRjYXN0UmVxdWVzdBIPCgdjaGFubmVsGAEgASgJEg4KBmFjdGlvbhgCIAEoCRIRCgllbnRpdHlfaWQYAyABKAkSIAoHcGF5bG9hZBgEIAEoCzIPLnNjcmliZS52MS5Kc29uIkcKD0Jyb2FkY2FzdFJlc3VsdBIRCglkZWxpdmVyZWQYASABKA0SIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSI0CgxHcmFudFJlcXVlc3QSDwoHY2hhbm5lbBgBIAEoCRITCgthY2NvdW50X2lkcxgCIAMoCSIwCgtHcmFudFJlc3VsdBIhCgVlcnJvchgBIAEoCzISLnNjcmliZS52MS5GYWlsdXJlMqsCCghSZWFsdGltZRJmCglCcm9hZGNhc3QSLC5zY3JpYmUuY2xpZW50cy5yZWFsdGltZS52MS5Ccm9hZGNhc3RSZXF1ZXN0Gisuc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuQnJvYWRjYXN0UmVzdWx0EloKBUdyYW50Eiguc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXF1ZXN0Gicuc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXN1bHQSWwoGUmV2b2tlEiguc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXF1ZXN0Gicuc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXN1bHRiBnByb3RvMw", [file_scribe_protocol_common]);
+  fileDesc(
+    "CjVzY3JpYmUvaG9zdC9wYWNrYWdlcy9yZWFsdGltZS9wcm90b2NvbC9yZWFsdGltZS5wcm90bxIac2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEiaAoQQnJvYWRjYXN0UmVxdWVzdBIPCgdjaGFubmVsGAEgASgJEg4KBmFjdGlvbhgCIAEoCRIRCgllbnRpdHlfaWQYAyABKAkSIAoHcGF5bG9hZBgEIAEoCzIPLnNjcmliZS52MS5Kc29uIkcKD0Jyb2FkY2FzdFJlc3VsdBIRCglkZWxpdmVyZWQYASABKA0SIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSI0CgxHcmFudFJlcXVlc3QSDwoHY2hhbm5lbBgBIAEoCRITCgthY2NvdW50X2lkcxgCIAMoCSIwCgtHcmFudFJlc3VsdBIhCgVlcnJvchgBIAEoCzISLnNjcmliZS52MS5GYWlsdXJlMqsCCghSZWFsdGltZRJmCglCcm9hZGNhc3QSLC5zY3JpYmUuY2xpZW50cy5yZWFsdGltZS52MS5Ccm9hZGNhc3RSZXF1ZXN0Gisuc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuQnJvYWRjYXN0UmVzdWx0EloKBUdyYW50Eiguc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXF1ZXN0Gicuc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXN1bHQSWwoGUmV2b2tlEiguc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXF1ZXN0Gicuc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuR3JhbnRSZXN1bHRiBnByb3RvMw",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.clients.realtime.v1.BroadcastRequest
@@ -104,7 +107,7 @@ export type BroadcastRequestJson = {
  * Describes the message scribe.clients.realtime.v1.BroadcastRequest.
  * Use `create(BroadcastRequestSchema)` to create a new message.
  */
-export const BroadcastRequestSchema: GenMessage<BroadcastRequest, {jsonType: BroadcastRequestJson}> = /*@__PURE__*/
+export const BroadcastRequestSchema: GenMessage<BroadcastRequest, { jsonType: BroadcastRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_realtime_protocol_realtime, 0);
 
 /**
@@ -141,7 +144,7 @@ export type BroadcastResultJson = {
  * Describes the message scribe.clients.realtime.v1.BroadcastResult.
  * Use `create(BroadcastResultSchema)` to create a new message.
  */
-export const BroadcastResultSchema: GenMessage<BroadcastResult, {jsonType: BroadcastResultJson}> = /*@__PURE__*/
+export const BroadcastResultSchema: GenMessage<BroadcastResult, { jsonType: BroadcastResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_realtime_protocol_realtime, 1);
 
 /**
@@ -178,7 +181,7 @@ export type GrantRequestJson = {
  * Describes the message scribe.clients.realtime.v1.GrantRequest.
  * Use `create(GrantRequestSchema)` to create a new message.
  */
-export const GrantRequestSchema: GenMessage<GrantRequest, {jsonType: GrantRequestJson}> = /*@__PURE__*/
+export const GrantRequestSchema: GenMessage<GrantRequest, { jsonType: GrantRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_realtime_protocol_realtime, 2);
 
 /**
@@ -205,7 +208,7 @@ export type GrantResultJson = {
  * Describes the message scribe.clients.realtime.v1.GrantResult.
  * Use `create(GrantResultSchema)` to create a new message.
  */
-export const GrantResultSchema: GenMessage<GrantResult, {jsonType: GrantResultJson}> = /*@__PURE__*/
+export const GrantResultSchema: GenMessage<GrantResult, { jsonType: GrantResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_realtime_protocol_realtime, 3);
 
 /**
@@ -219,7 +222,7 @@ export const Realtime: GenService<{
     methodKind: "unary";
     input: typeof BroadcastRequestSchema;
     output: typeof BroadcastResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.realtime.v1.Realtime.Grant
    */
@@ -227,7 +230,7 @@ export const Realtime: GenService<{
     methodKind: "unary";
     input: typeof GrantRequestSchema;
     output: typeof GrantResultSchema;
-  },
+  };
   /**
    * @generated from rpc scribe.clients.realtime.v1.Realtime.Revoke
    */
@@ -235,7 +238,6 @@ export const Realtime: GenService<{
     methodKind: "unary";
     input: typeof GrantRequestSchema;
     output: typeof GrantResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_packages_realtime_protocol_realtime, 0);
-

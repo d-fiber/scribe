@@ -38,9 +38,9 @@ import { assertEquals, assertThrows } from "@std/assert";
 import { create } from "@bufbuild/protobuf";
 import {
   describeWorker,
-  formatEntry,
   type DiscoveredLogSink,
   type DiscoveredModule,
+  formatEntry,
   type LoggedEntry,
   LogSink,
   Node,

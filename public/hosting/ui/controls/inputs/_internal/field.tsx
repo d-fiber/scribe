@@ -39,12 +39,7 @@ import type { AppColors, AppFonts } from "../../../types.ts";
 import { makeAppText } from "../../../primitives/text/text.tsx";
 import { themeMode } from "../../../theme.ts";
 import type { ControlSize, InputShape } from "../../_internal/sizes.ts";
-import {
-  inputFont,
-  inputHeight,
-  inputRadius,
-  textareaHeight,
-} from "../../_internal/sizes.ts";
+import { inputFont, inputHeight, inputRadius, textareaHeight } from "../../_internal/sizes.ts";
 
 export interface AppFieldProps {
   name: string;

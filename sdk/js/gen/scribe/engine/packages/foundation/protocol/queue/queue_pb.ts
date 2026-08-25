@@ -48,7 +48,10 @@ import type { Message as Message$1 } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/packages/foundation/protocol/queue/queue.proto.
  */
 export const file_scribe_host_packages_foundation_protocol_queue_queue: GenFile = /*@__PURE__*/
-  fileDesc("CjpzY3JpYmUvaG9zdC9wYWNrYWdlcy9mb3VuZGF0aW9uL3Byb3RvY29sL3F1ZXVlL3F1ZXVlLnByb3RvEhdzY3JpYmUucnVudGltZS5xdWV1ZS52MSJlCgdNZXNzYWdlEhIKCm1lc3NhZ2VfaWQYASABKAkSIAoHcGF5bG9hZBgCIAEoCzIPLnNjcmliZS52MS5Kc29uEg8KB2F0dGVtcHQYAyABKA0SEwoLZW5xdWV1ZWRfYXQYBCABKAMiYgoLUHVzaFJlcXVlc3QSEAoIcXVldWVfaWQYASABKAkSIQoIcGF5bG9hZHMYAiADKAsyDy5zY3JpYmUudjEuSnNvbhIeCgVkZWxheRgDIAEoCzIPLnNjcmliZS52MS5UaW1lIkQKClB1c2hSZXN1bHQSEwoLbWVzc2FnZV9pZHMYASADKAkSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJ5CgVCYXRjaBIQCghxdWV1ZV9pZBgBIAEoCRIQCgh0cmFjZV9pZBgCIAEoCRIyCghtZXNzYWdlcxgDIAMoCzIgLnNjcmliZS5ydW50aW1lLnF1ZXVlLnYxLk1lc3NhZ2USGAoQY2FwYWJpbGl0eV90b2tlbhgEIAEoCSJdCg5NZXNzYWdlT3V0Y29tZRISCgptZXNzYWdlX2lkGAEgASgJEhQKDGFja25vd2xlZGdlZBgCIAEoCBIhCgVlcnJvchgDIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIkkKDEJhdGNoT3V0Y29tZRI5CghvdXRjb21lcxgBIAMoCzInLnNjcmliZS5ydW50aW1lLnF1ZXVlLnYxLk1lc3NhZ2VPdXRjb21lMloKBVF1ZXVlElEKBFB1c2gSJC5zY3JpYmUucnVudGltZS5xdWV1ZS52MS5QdXNoUmVxdWVzdBojLnNjcmliZS5ydW50aW1lLnF1ZXVlLnYxLlB1c2hSZXN1bHQyYAoNUXVldWVEaXNwYXRjaBJPCgZIYW5kbGUSHi5zY3JpYmUucnVudGltZS5xdWV1ZS52MS5CYXRjaBolLnNjcmliZS5ydW50aW1lLnF1ZXVlLnYxLkJhdGNoT3V0Y29tZWIGcHJvdG8z", [file_scribe_protocol_common]);
+  fileDesc(
+    "CjpzY3JpYmUvaG9zdC9wYWNrYWdlcy9mb3VuZGF0aW9uL3Byb3RvY29sL3F1ZXVlL3F1ZXVlLnByb3RvEhdzY3JpYmUucnVudGltZS5xdWV1ZS52MSJlCgdNZXNzYWdlEhIKCm1lc3NhZ2VfaWQYASABKAkSIAoHcGF5bG9hZBgCIAEoCzIPLnNjcmliZS52MS5Kc29uEg8KB2F0dGVtcHQYAyABKA0SEwoLZW5xdWV1ZWRfYXQYBCABKAMiYgoLUHVzaFJlcXVlc3QSEAoIcXVldWVfaWQYASABKAkSIQoIcGF5bG9hZHMYAiADKAsyDy5zY3JpYmUudjEuSnNvbhIeCgVkZWxheRgDIAEoCzIPLnNjcmliZS52MS5UaW1lIkQKClB1c2hSZXN1bHQSEwoLbWVzc2FnZV9pZHMYASADKAkSIQoFZXJyb3IYAiABKAsyEi5zY3JpYmUudjEuRmFpbHVyZSJ5CgVCYXRjaBIQCghxdWV1ZV9pZBgBIAEoCRIQCgh0cmFjZV9pZBgCIAEoCRIyCghtZXNzYWdlcxgDIAMoCzIgLnNjcmliZS5ydW50aW1lLnF1ZXVlLnYxLk1lc3NhZ2USGAoQY2FwYWJpbGl0eV90b2tlbhgEIAEoCSJdCg5NZXNzYWdlT3V0Y29tZRISCgptZXNzYWdlX2lkGAEgASgJEhQKDGFja25vd2xlZGdlZBgCIAEoCBIhCgVlcnJvchgDIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIkkKDEJhdGNoT3V0Y29tZRI5CghvdXRjb21lcxgBIAMoCzInLnNjcmliZS5ydW50aW1lLnF1ZXVlLnYxLk1lc3NhZ2VPdXRjb21lMloKBVF1ZXVlElEKBFB1c2gSJC5zY3JpYmUucnVudGltZS5xdWV1ZS52MS5QdXNoUmVxdWVzdBojLnNjcmliZS5ydW50aW1lLnF1ZXVlLnYxLlB1c2hSZXN1bHQyYAoNUXVldWVEaXNwYXRjaBJPCgZIYW5kbGUSHi5zY3JpYmUucnVudGltZS5xdWV1ZS52MS5CYXRjaBolLnNjcmliZS5ydW50aW1lLnF1ZXVlLnYxLkJhdGNoT3V0Y29tZWIGcHJvdG8z",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.runtime.queue.v1.Message
@@ -104,7 +107,7 @@ export type MessageJson = {
  * Describes the message scribe.runtime.queue.v1.Message.
  * Use `create(MessageSchema)` to create a new message.
  */
-export const MessageSchema: GenMessage<Message, {jsonType: MessageJson}> = /*@__PURE__*/
+export const MessageSchema: GenMessage<Message, { jsonType: MessageJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_queue_queue, 0);
 
 /**
@@ -151,7 +154,7 @@ export type PushRequestJson = {
  * Describes the message scribe.runtime.queue.v1.PushRequest.
  * Use `create(PushRequestSchema)` to create a new message.
  */
-export const PushRequestSchema: GenMessage<PushRequest, {jsonType: PushRequestJson}> = /*@__PURE__*/
+export const PushRequestSchema: GenMessage<PushRequest, { jsonType: PushRequestJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_queue_queue, 1);
 
 /**
@@ -188,7 +191,7 @@ export type PushResultJson = {
  * Describes the message scribe.runtime.queue.v1.PushResult.
  * Use `create(PushResultSchema)` to create a new message.
  */
-export const PushResultSchema: GenMessage<PushResult, {jsonType: PushResultJson}> = /*@__PURE__*/
+export const PushResultSchema: GenMessage<PushResult, { jsonType: PushResultJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_queue_queue, 2);
 
 /**
@@ -245,7 +248,7 @@ export type BatchJson = {
  * Describes the message scribe.runtime.queue.v1.Batch.
  * Use `create(BatchSchema)` to create a new message.
  */
-export const BatchSchema: GenMessage<Batch, {jsonType: BatchJson}> = /*@__PURE__*/
+export const BatchSchema: GenMessage<Batch, { jsonType: BatchJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_queue_queue, 3);
 
 /**
@@ -292,7 +295,7 @@ export type MessageOutcomeJson = {
  * Describes the message scribe.runtime.queue.v1.MessageOutcome.
  * Use `create(MessageOutcomeSchema)` to create a new message.
  */
-export const MessageOutcomeSchema: GenMessage<MessageOutcome, {jsonType: MessageOutcomeJson}> = /*@__PURE__*/
+export const MessageOutcomeSchema: GenMessage<MessageOutcome, { jsonType: MessageOutcomeJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_queue_queue, 4);
 
 /**
@@ -319,7 +322,7 @@ export type BatchOutcomeJson = {
  * Describes the message scribe.runtime.queue.v1.BatchOutcome.
  * Use `create(BatchOutcomeSchema)` to create a new message.
  */
-export const BatchOutcomeSchema: GenMessage<BatchOutcome, {jsonType: BatchOutcomeJson}> = /*@__PURE__*/
+export const BatchOutcomeSchema: GenMessage<BatchOutcome, { jsonType: BatchOutcomeJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_packages_foundation_protocol_queue_queue, 5);
 
 /**
@@ -333,7 +336,7 @@ export const Queue: GenService<{
     methodKind: "unary";
     input: typeof PushRequestSchema;
     output: typeof PushResultSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_packages_foundation_protocol_queue_queue, 0);
 
@@ -348,7 +351,6 @@ export const QueueDispatch: GenService<{
     methodKind: "unary";
     input: typeof BatchSchema;
     output: typeof BatchOutcomeSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_packages_foundation_protocol_queue_queue, 1);
-

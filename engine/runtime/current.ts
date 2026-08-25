@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { AsyncLocalStorage } from "node:async_hooks";
-import { type CurrentDriver, type CurrentStore, Currents } from "@scribe/alchemy";
+import { type CurrentDriver, Currents, type CurrentStore } from "@scribe/alchemy";
 
 /** One store, kept in the call tree the runtime tracks for us. */
 class AsyncLocalStore<T> implements CurrentStore<T> {

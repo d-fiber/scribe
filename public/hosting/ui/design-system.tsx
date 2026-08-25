@@ -148,8 +148,7 @@ export class DesignSystem {
     const { AppLinkText, AppLinkTextStyle } = makeAppLinkText(colors, fonts);
     const { AppSeparator, AppSeparatorStyle } = makeAppSeparator(colors);
     const { AppSkeleton, AppSkeletonStyle } = makeAppSkeleton(colors);
-    const { AppProgressIndicator, AppProgressIndicatorStyle } =
-      makeAppProgressIndicator(colors);
+    const { AppProgressIndicator, AppProgressIndicatorStyle } = makeAppProgressIndicator(colors);
     const { AppEmpty } = makeAppEmpty(colors, fonts);
     const { AppTopSnackBar, AppTopSnackBarStyle } = makeAppTopSnackBar(
       colors,

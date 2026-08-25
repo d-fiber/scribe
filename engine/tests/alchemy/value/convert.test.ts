@@ -34,7 +34,18 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, fail, having, isA, isFalse, isTrue, lessThan, throwsA } from "@scribe/alchemy/test/mod.ts";
+import {
+  contains,
+  equals,
+  expect,
+  fail,
+  having,
+  isA,
+  isFalse,
+  isTrue,
+  lessThan,
+  throwsA,
+} from "@scribe/alchemy/test/mod.ts";
 import { base64, base64Url, FormatException, hex, json, utf8 } from "@scribe/alchemy/mod.ts";
 
 const BYTES = new Uint8Array([0, 1, 127, 128, 255]);

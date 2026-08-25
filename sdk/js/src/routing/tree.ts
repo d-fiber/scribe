@@ -118,9 +118,5 @@ export function compileNode(
 ): readonly MountedRoute[] {
   return discovered
     .filter((route) => route.node === node)
-    .flatMap((route) =>
-      endpointsOf(route).map((endpoint) =>
-        mountedRoute(node, routeOf(route, endpoint, inherited))
-      )
-    );
+    .flatMap((route) => endpointsOf(route).map((endpoint) => mountedRoute(node, routeOf(route, endpoint, inherited))));
 }

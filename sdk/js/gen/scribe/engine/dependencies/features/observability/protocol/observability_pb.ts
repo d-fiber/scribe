@@ -48,7 +48,10 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/engine/dependencies/features/observability/protocol/observability.proto.
  */
 export const file_scribe_host_dependencies_features_observability_protocol_observability: GenFile = /*@__PURE__*/
-  fileDesc("CkxzY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvZmVhdHVyZXMvb2JzZXJ2YWJpbGl0eS9wcm90b2NvbC9vYnNlcnZhYmlsaXR5LnByb3RvEh9zY3JpYmUuY2xpZW50cy5vYnNlcnZhYmlsaXR5LnYxIvYBCgRTcGFuEhAKCHRyYWNlX2lkGAEgASgJEg8KB3NwYW5faWQYAiABKAkSFgoOcGFyZW50X3NwYW5faWQYAyABKAkSDAoEbmFtZRgEIAEoCRI3CgRraW5kGAUgASgOMikuc2NyaWJlLmNsaWVudHMub2JzZXJ2YWJpbGl0eS52MS5TcGFuS2luZBISCgpzdGFydGVkX2F0GAYgASgDEhAKCGVuZGVkX2F0GAcgASgDEiMKCmF0dHJpYnV0ZXMYCCABKAsyDy5zY3JpYmUudjEuSnNvbhIhCgVlcnJvchgJIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIkEKCVNwYW5CYXRjaBI0CgVzcGFucxgBIAMoCzIlLnNjcmliZS5jbGllbnRzLm9ic2VydmFiaWxpdHkudjEuU3BhbiIJCgdTcGFuQWNrKmkKCFNwYW5LaW5kEhkKFVNQQU5fS0lORF9VTlNQRUNJRklFRBAAEhYKElNQQU5fS0lORF9JTlRFUk5BTBABEhQKEFNQQU5fS0lORF9DTElFTlQQAhIUChBTUEFOX0tJTkRfU0VSVkVSEAMybQoNT2JzZXJ2YWJpbGl0eRJcCgRTaGlwEiouc2NyaWJlLmNsaWVudHMub2JzZXJ2YWJpbGl0eS52MS5TcGFuQmF0Y2gaKC5zY3JpYmUuY2xpZW50cy5vYnNlcnZhYmlsaXR5LnYxLlNwYW5BY2tiBnByb3RvMw", [file_scribe_protocol_common]);
+  fileDesc(
+    "CkxzY3JpYmUvaG9zdC9kZXBlbmRlbmNpZXMvZmVhdHVyZXMvb2JzZXJ2YWJpbGl0eS9wcm90b2NvbC9vYnNlcnZhYmlsaXR5LnByb3RvEh9zY3JpYmUuY2xpZW50cy5vYnNlcnZhYmlsaXR5LnYxIvYBCgRTcGFuEhAKCHRyYWNlX2lkGAEgASgJEg8KB3NwYW5faWQYAiABKAkSFgoOcGFyZW50X3NwYW5faWQYAyABKAkSDAoEbmFtZRgEIAEoCRI3CgRraW5kGAUgASgOMikuc2NyaWJlLmNsaWVudHMub2JzZXJ2YWJpbGl0eS52MS5TcGFuS2luZBISCgpzdGFydGVkX2F0GAYgASgDEhAKCGVuZGVkX2F0GAcgASgDEiMKCmF0dHJpYnV0ZXMYCCABKAsyDy5zY3JpYmUudjEuSnNvbhIhCgVlcnJvchgJIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIkEKCVNwYW5CYXRjaBI0CgVzcGFucxgBIAMoCzIlLnNjcmliZS5jbGllbnRzLm9ic2VydmFiaWxpdHkudjEuU3BhbiIJCgdTcGFuQWNrKmkKCFNwYW5LaW5kEhkKFVNQQU5fS0lORF9VTlNQRUNJRklFRBAAEhYKElNQQU5fS0lORF9JTlRFUk5BTBABEhQKEFNQQU5fS0lORF9DTElFTlQQAhIUChBTUEFOX0tJTkRfU0VSVkVSEAMybQoNT2JzZXJ2YWJpbGl0eRJcCgRTaGlwEiouc2NyaWJlLmNsaWVudHMub2JzZXJ2YWJpbGl0eS52MS5TcGFuQmF0Y2gaKC5zY3JpYmUuY2xpZW50cy5vYnNlcnZhYmlsaXR5LnYxLlNwYW5BY2tiBnByb3RvMw",
+    [file_scribe_protocol_common],
+  );
 
 /**
  * @generated from message scribe.clients.observability.v1.Span
@@ -154,7 +157,7 @@ export type SpanJson = {
  * Describes the message scribe.clients.observability.v1.Span.
  * Use `create(SpanSchema)` to create a new message.
  */
-export const SpanSchema: GenMessage<Span, {jsonType: SpanJson}> = /*@__PURE__*/
+export const SpanSchema: GenMessage<Span, { jsonType: SpanJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_observability_protocol_observability, 0);
 
 /**
@@ -181,26 +184,24 @@ export type SpanBatchJson = {
  * Describes the message scribe.clients.observability.v1.SpanBatch.
  * Use `create(SpanBatchSchema)` to create a new message.
  */
-export const SpanBatchSchema: GenMessage<SpanBatch, {jsonType: SpanBatchJson}> = /*@__PURE__*/
+export const SpanBatchSchema: GenMessage<SpanBatch, { jsonType: SpanBatchJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_observability_protocol_observability, 1);
 
 /**
  * @generated from message scribe.clients.observability.v1.SpanAck
  */
-export type SpanAck = Message<"scribe.clients.observability.v1.SpanAck"> & {
-};
+export type SpanAck = Message<"scribe.clients.observability.v1.SpanAck"> & {};
 
 /**
  * @generated from message scribe.clients.observability.v1.SpanAck
  */
-export type SpanAckJson = {
-};
+export type SpanAckJson = {};
 
 /**
  * Describes the message scribe.clients.observability.v1.SpanAck.
  * Use `create(SpanAckSchema)` to create a new message.
  */
-export const SpanAckSchema: GenMessage<SpanAck, {jsonType: SpanAckJson}> = /*@__PURE__*/
+export const SpanAckSchema: GenMessage<SpanAck, { jsonType: SpanAckJson }> = /*@__PURE__*/
   messageDesc(file_scribe_host_dependencies_features_observability_protocol_observability, 2);
 
 /**
@@ -250,7 +251,6 @@ export const Observability: GenService<{
     methodKind: "unary";
     input: typeof SpanBatchSchema;
     output: typeof SpanAckSchema;
-  },
+  };
 }> = /*@__PURE__*/
   serviceDesc(file_scribe_host_dependencies_features_observability_protocol_observability, 0);
-

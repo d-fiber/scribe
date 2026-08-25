@@ -35,10 +35,15 @@
 // LICENSE file, the LICENSE file governs.
 
 import { importSigningKey, matchesAnyCandidate } from "@scribe/kernel/endpoint/webhook/signature.ts";
-import { MAX_TIMESTAMP_SKEW_S, isFreshTimestamp, readSignedRequest, type SignedWebhookRequest } from "@scribe/kernel/endpoint/webhook/signed_request.ts";
+import {
+  isFreshTimestamp,
+  MAX_TIMESTAMP_SKEW_S,
+  readSignedRequest,
+  type SignedWebhookRequest,
+} from "@scribe/kernel/endpoint/webhook/signed_request.ts";
 import "@scribe/testing/settings.ts";
 import { CLAIM_TTL_S, claimWebhookId } from "@scribe/kernel/endpoint/webhook/replay.ts";
-import { kv, type Kv } from "@scribe/foundation/lib/src/redis/kv.ts";
+import { type Kv, kv } from "@scribe/foundation/lib/src/redis/kv.ts";
 import { RequestScope } from "@scribe/runtime/scope.ts";
 import { assert, assertEquals, assertFalse } from "@std/assert";
 import { stub } from "@std/testing/mock";
