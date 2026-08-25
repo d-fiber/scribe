@@ -34,7 +34,6 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { utf8 } from "@scribe/alchemy";
 import type { Future } from "@scribe/alchemy";
 import { DEVICE_PAYLOAD_MAX_AGE_MS, DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS } from "./freshness.ts";
 import { PlaintextCache } from "./plaintext_cache.ts";
