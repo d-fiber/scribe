@@ -86,6 +86,10 @@ let declared: Promise<ProjectDeclarations> | null = null;
  *
  * A declaration file is run for its effect. Whatever it returns is dropped, because what it does
  * is register itself with the port that will read it.
+ *
+ * A kind the generated file does not carry is nothing to do. The CLI writes one function per kind
+ * a mounted package asked for, so this only happens when a package asks for a kind it never
+ * declared, and answering the empty set is closer to the truth than calling what is not there.
  */
 export async function runDeclarations(kind: DeclarationKind): Promise<void> {
   declared ??= import("@generated/declarations.ts")
@@ -96,5 +100,8 @@ export async function runDeclarations(kind: DeclarationKind): Promise<void> {
       throw raised;
     });
 
-  await (await declared)[kind]();
+  const bucket = (await declared)[kind];
+  if (typeof bucket !== "function") return;
+
+  await bucket();
 }
