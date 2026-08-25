@@ -34,16 +34,18 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { ClientType, DeviceCategory, DeviceOs, DeviceThemeMode, Localization } from "@scribe/core/contracts/enums.ts";
-import { Env } from "@scribe/engine/env.ts";
-import { decryptRequestDevice } from "@scribe/core/runtime/device/device.ts";
-import { DEVICE_PAYLOAD_MAX_AGE_MS, DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS } from "@scribe/core/runtime/device/payload/freshness.ts";
-import { DevicePayloadValidator } from "@scribe/core/runtime/device/payload/validator.ts";
-import { installValkeryMock } from "@scribe/foundation/tests/testing/valkery.ts";
+import "@scribe/testing/settings.ts";
+import { ClientType, DeviceCategory, DeviceOs, DeviceThemeMode, Localization } from "@scribe/contracts/enums.ts";
+import { decryptRequestDevice } from "@scribe/runtime/device/device.ts";
+import { DEVICE_PAYLOAD_MAX_AGE_MS, DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS } from "@scribe/runtime/device/payload/freshness.ts";
+import { DevicePayloadValidator } from "@scribe/runtime/device/payload/validator.ts";
+import { installValkeryMock } from "@scribe/foundation/tests/testing/cache.ts";
 import { assert, assertEquals } from "@std/assert";
 import { spy } from "@std/testing/mock";
 
 const BINDING = "user-1";
+
+const SERVER_PRIVATE_KEY_HEX = Deno.env.get("DEVICE_PAYLOAD_PRIVATE_KEY") ?? "";
 
 const _PKCS8_X25519_HEADER = new Uint8Array([
   0x30,
@@ -81,7 +83,7 @@ function nominalPayload(overrides: Record<string, unknown> = {}) {
 }
 
 async function serverPublicKey(): Promise<CryptoKey> {
-  const raw = (Env.DEVICE_PAYLOAD_PRIVATE_KEY.match(/.{2}/g) ?? []).map((b) => parseInt(b, 16));
+  const raw = (SERVER_PRIVATE_KEY_HEX.match(/.{2}/g) ?? []).map((b) => parseInt(b, 16));
   const pkcs8 = new Uint8Array(_PKCS8_X25519_HEADER.length + raw.length);
   pkcs8.set(_PKCS8_X25519_HEADER);
   pkcs8.set(raw, _PKCS8_X25519_HEADER.length);

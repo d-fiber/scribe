@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { assertEquals } from "@std/assert";
-import { installAllMock, installMock } from "@scribe/core/testing/install.ts";
+import { installAllMock, installMock } from "@scribe/testing/install.ts";
 
 Deno.test("installMock: swaps a value property and restore() puts the original back", () => {
   const target = { greet: () => "real" };

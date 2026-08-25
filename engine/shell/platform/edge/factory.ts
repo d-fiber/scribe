@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { INTERNAL_SERVICES } from "@scribe/core/kernel/http/routing/internal_services.ts";
+import { INTERNAL_SERVICES } from "@scribe/kernel/http/routing/internal_services.ts";
 import { AlgorithmTokenVerifier } from "./authorization/algorithm_token_verifier.ts";
 import { HmacTokenVerifier } from "./authorization/hmac_token_verifier.ts";
 import { JwksTokenVerifier } from "./authorization/jwks_token_verifier.ts";

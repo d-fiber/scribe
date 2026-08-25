@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, expectLater, having, isA, isTrue, throwsA } from "@scribe/engine/alchemy/test/mod.ts";
-import { Duration, Future, runPooled } from "@scribe/engine/alchemy/mod.ts";
+import { equals, expect, expectLater, having, isA, isTrue, throwsA } from "@scribe/alchemy/test/mod.ts";
+import { Duration, Future, runPooled } from "@scribe/alchemy/mod.ts";
 
 Deno.test("runPooled visits every item exactly once", async () => {
   const seen: number[] = [];

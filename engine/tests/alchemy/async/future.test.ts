@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, expectLater, having, isA, throwsA } from "@scribe/engine/alchemy/test/mod.ts";
-import { Duration, Future, unawaited } from "@scribe/engine/alchemy/mod.ts";
+import { contains, equals, expect, expectLater, having, isA, throwsA } from "@scribe/alchemy/test/mod.ts";
+import { Duration, Future, unawaited } from "@scribe/alchemy/mod.ts";
 
 Deno.test("a delayed future settles with what it was given, after the wait", async () => {
   expect(await Future.delayed(Duration.milliseconds(1), 42), equals(42));

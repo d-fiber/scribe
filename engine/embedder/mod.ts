@@ -34,11 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { ProjectHost } from "@scribe/core/contracts/project_host.ts";
+import type { ProjectHost } from "@scribe/contracts/project_host.ts";
 import { InProcessHost } from "./in_process.ts";
 
-export { ProjectSlot } from "@scribe/core/contracts/project_host.ts";
-export type { ProjectHost } from "@scribe/core/contracts/project_host.ts";
+export { ProjectSlot } from "@scribe/contracts/project_host.ts";
+export type { ProjectHost } from "@scribe/contracts/project_host.ts";
 export { WorkerHost } from "./control/host.ts";
 
 export const projectHost: ProjectHost = new InProcessHost();

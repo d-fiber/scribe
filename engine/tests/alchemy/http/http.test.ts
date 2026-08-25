@@ -48,11 +48,11 @@ import {
   throwsA,
   verify,
   when,
-} from "@scribe/engine/alchemy/test/mod.ts";
-import type { BaseRequest, Client } from "@scribe/engine/alchemy/http/mod.ts";
-import { BaseClient, ByteStream, DEFAULT_REQUEST_TIMEOUT, StreamedResponse } from "@scribe/engine/alchemy/http/mod.ts";
-import type { HttpResponse } from "@scribe/engine/alchemy/http/mod.ts";
-import { Clients, http } from "@scribe/engine/alchemy/http/mod.ts";
+} from "@scribe/alchemy/test/mod.ts";
+import type { BaseRequest, Client } from "@scribe/alchemy/http/mod.ts";
+import { BaseClient, ByteStream, DEFAULT_REQUEST_TIMEOUT, StreamedResponse } from "@scribe/alchemy/http/mod.ts";
+import type { HttpResponse } from "@scribe/alchemy/http/mod.ts";
+import { Clients, http } from "@scribe/alchemy/http/mod.ts";
 
 class Recording extends BaseClient {
   constructor(private readonly seen: BaseRequest[], private readonly status = 200) {

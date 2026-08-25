@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, isA } from "@scribe/engine/alchemy/test/mod.ts";
-import { Refusal, REFUSAL_KINDS, renderError, ScribeError } from "@scribe/engine/alchemy/mod.ts";
+import { contains, equals, expect, isA } from "@scribe/alchemy/test/mod.ts";
+import { Refusal, REFUSAL_KINDS, renderError, ScribeError } from "@scribe/alchemy/mod.ts";
 
 Deno.test("each way in carries the kind that matches what it says", () => {
   expect(Refusal.missing("nothing here").kind, equals("missing"));

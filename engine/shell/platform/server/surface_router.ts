@@ -35,8 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import { ServerResponse } from "@scribe/alchemy/route";
-import { forward } from "@scribe/core/kernel/http/serve/mod.ts";
-import { NodeSurfaces } from "@scribe/engine/embedder/control/node_surfaces.ts";
+import { forward } from "@scribe/kernel/http/serve/mod.ts";
+import { NodeSurfaces } from "@scribe/embedder/control/node_surfaces.ts";
 import type { Hono } from "hono";
 
 /**

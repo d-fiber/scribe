@@ -36,7 +36,7 @@
 
 import { create } from "@bufbuild/protobuf";
 import { DeleteResultSchema, GetResultSchema, SetResultSchema, type DeleteRequest, type DeleteResult, type GetRequest, type GetResult, type SetRequest, type SetResult } from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/valkery/valkery_pb.ts";
-import { kv } from "@scribe/foundation/lib/src/redis/mod.ts";
+import { kv } from "@scribe/foundation/lib/src/redis/kv.ts";
 import { decodeJson, encodeJson } from "../control/json.ts";
 
 const PREFIX = "worker";

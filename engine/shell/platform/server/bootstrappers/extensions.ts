@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { extensions } from "@scribe/core/runtime/support/extensions/mod.ts";
+import { extensions } from "@scribe/runtime/support/extensions/mod.ts";
 import { EXTENSION_CRON } from "../../../common/extensions.ts";
 import type { Bootstrapper } from "../../../common/bootstrapper.ts";
 

@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect } from "@scribe/engine/alchemy/test/mod.ts";
-import { parseBodyBytes, parseFormBytes } from "@scribe/engine/alchemy/api/body/parse.ts";
-import { ListOf, Nested, Required } from "@scribe/engine/alchemy/api/body/markers.ts";
+import { equals, expect } from "@scribe/alchemy/test/mod.ts";
+import { parseBodyBytes, parseFormBytes } from "@scribe/alchemy/api/body/parse.ts";
+import { ListOf, Nested, Required } from "@scribe/alchemy/api/body/markers.ts";
 
 function sent(body: unknown): Uint8Array {
   return new TextEncoder().encode(JSON.stringify(body));

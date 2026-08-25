@@ -50,17 +50,17 @@ import {
   QueryResultBatchSchema,
   QueryResultSchema,
 } from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/database/database_pb.ts";
-import { PostgrestClients } from "@scribe/foundation/lib/src/database/client.ts";
-import { ownerOf } from "@scribe/foundation/lib/src/database/schema.ts";
+import { PostgrestClients } from "@scribe/foundation/lib/src/database/postgrest_clients.ts";
+import { ownerOf } from "@scribe/foundation/lib/src/database/table_owners.ts";
 import {
   assertPlainColumn,
   keywordLiteral,
   quoteFilterList,
   quoteFilterLiteral,
   UnsafeFilterError,
-} from "@scribe/foundation/lib/src/database/query/literal.ts";
-import { ownerScope } from "@scribe/foundation/lib/src/database/query/scope.ts";
-import { AMBIGUITY_PROBE } from "@scribe/foundation/lib/src/database/query/state.ts";
+} from "@scribe/foundation/lib/src/database/query/filter_literal.ts";
+import { NOBODY, ownerScope } from "@scribe/foundation/lib/src/database/query/owner_scope.ts";
+import { AMBIGUITY_PROBE } from "@scribe/foundation/lib/src/database/query/query_state.ts";
 import { decodeJson, encodeJson } from "../control/json.ts";
 
 function applyOperator(builder: any, filter: Filter): any {
@@ -196,7 +196,7 @@ function ownerFilter(query: Query): Filter | null {
   return create(FilterSchema, {
     column: decision.column,
     operator: FilterOperator.EQ,
-    value: encodeJson(decision.id),
+    value: encodeJson(decision.kind === "scoped" ? decision.id : NOBODY),
   });
 }
 

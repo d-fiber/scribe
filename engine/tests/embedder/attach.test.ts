@@ -37,10 +37,10 @@
 import { assertEquals } from "@std/assert";
 import { Hono } from "hono";
 import { Caller, Get, Node, NodeRoot, PROTOCOL_VERSION, ScribeServer, Time, type DiscoveredRoute, type InvocationContext, type RateLimiter } from "@scribe/sdk";
-import { installRateLimiterMock } from "@scribe/foundation/tests/testing/valkery.ts";
-import { RequestScope } from "@scribe/core/runtime/scope.ts";
-import { mountManifest } from "@scribe/engine/embedder/control/mount.ts";
-import { WorkerClient } from "@scribe/engine/embedder/control/client.ts";
+import { installRateLimiterMock } from "@scribe/foundation/tests/testing/cache.ts";
+import { RequestScope } from "@scribe/runtime/scope.ts";
+import { mountManifest } from "@scribe/embedder/control/mount.ts";
+import { WorkerClient } from "@scribe/embedder/control/client.ts";
 
 const LIMIT: RateLimiter = { limit: 100, window: Time.minutes(1), penalty: Time.minutes(1) };
 

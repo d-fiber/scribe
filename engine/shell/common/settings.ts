@@ -34,38 +34,24 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { extensions, OptionalExtension } from "@scribe/core/runtime/support/extensions/mod.ts";
-import { cacheSettings } from "@scribe/foundation/lib/src/valkery/settings.ts";
-import { databaseSettings } from "@scribe/foundation/lib/src/database/settings.ts";
-import { deviceSettings } from "@scribe/core/runtime/support/settings/device.ts";
-import { firewallSettings } from "@scribe/core/runtime/support/settings/firewall.ts";
-import { httpSettings } from "@scribe/core/runtime/support/settings/http.ts";
-import { identitySettings } from "@scribe/core/runtime/support/settings/identity.ts";
-import { queueSettings } from "@scribe/foundation/lib/src/queue/settings.ts";
+import { extensions, OptionalExtension } from "@scribe/runtime/support/extensions/mod.ts";
+import { cacheSettings } from "@scribe/foundation/lib/src/cache/cache_settings.ts";
+import { databaseSettings } from "@scribe/foundation/lib/src/database/database_settings.ts";
+import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
+import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
+import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
+import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
+import { queueSettings } from "@scribe/foundation/lib/src/queue/queue_settings.ts";
+import { required } from "@scribe/foundation/lib/src/environment.ts";
 import { RateLimiters } from "@scribe/alchemy";
-import { RedisRateLimiters } from "@scribe/foundation/lib/src/rate_limit/mod.ts";
-import { workerSettings } from "@scribe/core/runtime/support/settings/worker.ts";
+import { RedisRateLimiters } from "@scribe/foundation/lib/src/rate_limit/redis_rate_limiter.ts";
+import { workerSettings } from "@scribe/runtime/support/settings/worker.ts";
 import { EXTENSION_CRON, EXTENSION_QUEUE } from "./extensions.ts";
 
 /**
  * The port the persistent runtime listens on when the deployment names none.
  */
 const DEFAULT_PORT = 3000;
-
-/**
- * The value `name` holds in the environment, refusing an absent or empty one.
- *
- * Only the deployment knows these, and this file is the one place that reads
- * them: a process that starts without one would otherwise fail at the first
- * call that needs it, in a stack that names the caller rather than the missing
- * setting. Refusing here stops the container at boot, naming what it lacks.
- */
-function required(name: string): string {
-  const value = Deno.env.get(name);
-  if (!value) throw new Error(`Missing required environment variable: ${name}`);
-
-  return value;
-}
 
 /**
  * What the body budget falls back to when the deployment names no figure.

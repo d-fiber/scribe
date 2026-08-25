@@ -35,8 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { RequestUser } from "@scribe/alchemy/route";
-import { RequestIdentityCache } from "@scribe/core/runtime/http/accessors/identity.ts";
-import { RequestScope } from "@scribe/core/runtime/scope.ts";
+import { RequestIdentityCache } from "@scribe/runtime/http/accessors/identity.ts";
+import { RequestScope } from "@scribe/runtime/scope.ts";
 
 const FALLBACK_TTL_MS = 300_000;
 

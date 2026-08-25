@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, having, isA, throwsA } from "@scribe/engine/alchemy/test/mod.ts";
-import { DeclarationError, DEFAULT_DESCRIPTION, handsOverNothing, Package, VersionError } from "@scribe/engine/alchemy/mod.ts";
+import { contains, equals, expect, having, isA, throwsA } from "@scribe/alchemy/test/mod.ts";
+import { DeclarationError, DEFAULT_DESCRIPTION, handsOverNothing, Package, VersionError } from "@scribe/alchemy/mod.ts";
 
 Deno.test("a manifest carries what the chain gave it", () => {
   const declared = Package.named("realtime")

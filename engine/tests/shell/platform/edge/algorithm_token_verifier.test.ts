@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { AlgorithmTokenVerifier } from "@scribe/engine/shell/platform/edge/authorization/algorithm_token_verifier.ts";
-import type { TokenVerifier } from "@scribe/engine/shell/platform/edge/authorization/token_verifier.ts";
+import { AlgorithmTokenVerifier } from "@scribe/shell/platform/edge/authorization/algorithm_token_verifier.ts";
+import type { TokenVerifier } from "@scribe/shell/platform/edge/authorization/token_verifier.ts";
 import { assert, assertEquals, assertFalse } from "@std/assert";
 
 function base64url(value: object): string {

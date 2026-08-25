@@ -36,9 +36,9 @@
 
 import type { RequestUser } from "@scribe/alchemy/route";
 import { assertEquals, assertRejects } from "@std/assert";
-import { currentIdentity } from "@scribe/core/runtime/http/accessors/identity.ts";
-import { request } from "@scribe/core/runtime/http/request.ts";
-import { CapabilityTokens, UnknownCapabilityToken } from "@scribe/engine/embedder/capabilities/tokens.ts";
+import { currentIdentity } from "@scribe/runtime/http/accessors/identity.ts";
+import { request } from "@scribe/runtime/http/request.ts";
+import { CapabilityTokens, UnknownCapabilityToken } from "@scribe/embedder/capabilities/tokens.ts";
 
 const CALLER: RequestUser = { id: "caller-1", caller: "authenticated", role: "owner", permissions: [], claims: {} };
 

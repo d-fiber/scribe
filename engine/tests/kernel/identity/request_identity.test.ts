@@ -34,14 +34,14 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/core/testing/settings.ts";
-import type { Grants } from "@scribe/core/contracts/grants.ts";
-import { RbacIdentity, RequestIdentity } from "@scribe/core/kernel/identity/request_identity.ts";
-import type { ResolvedJwtIdentity } from "@scribe/core/kernel/identity/resolver/jwt_resolver.ts";
-import { JwtIdentityResolver } from "@scribe/core/kernel/identity/resolver/jwt_resolver.ts";
-import { GrantsResolver } from "@scribe/core/runtime/support/ports/grants.ts";
-import { RequestScope } from "@scribe/core/runtime/scope.ts";
-import { installMock } from "@scribe/core/testing/install.ts";
+import "@scribe/testing/settings.ts";
+import type { Grants } from "@scribe/contracts/grants.ts";
+import { RbacIdentity, RequestIdentity } from "@scribe/kernel/identity/request_identity.ts";
+import type { ResolvedJwtIdentity } from "@scribe/kernel/identity/resolver/jwt_resolver.ts";
+import { JwtIdentityResolver } from "@scribe/kernel/identity/resolver/jwt_resolver.ts";
+import { GrantsResolver } from "@scribe/runtime/support/ports/grants.ts";
+import { RequestScope } from "@scribe/runtime/scope.ts";
+import { installMock } from "@scribe/testing/install.ts";
 import { assertEquals } from "@std/assert";
 
 const GRANTED: Grants = {

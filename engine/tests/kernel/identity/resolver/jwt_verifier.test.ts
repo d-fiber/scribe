@@ -34,13 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/core/testing/settings.ts";
-import { Env } from "@scribe/engine/env.ts";
-import { JwtVerifier } from "@scribe/core/kernel/identity/resolver/jwt_verifier.ts";
+import "@scribe/testing/settings.ts";
+import { JwtVerifier } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
 import { assertEquals, assertNotEquals } from "@std/assert";
 import { SignJWT } from "jose";
 
-const SECRET = () => new TextEncoder().encode(Env.JWT_SECRET!);
+const SECRET = () => new TextEncoder().encode(Deno.env.get("JWT_SECRET")!);
 
 interface Claims {
   sub?: string;

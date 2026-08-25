@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { logBuffer } from "@scribe/core/kernel/observability/log_delivery.ts";
+import { logBuffer } from "@scribe/kernel/observability/log_delivery.ts";
 import type { Bootstrapper } from "../../../common/bootstrapper.ts";
 
 /**

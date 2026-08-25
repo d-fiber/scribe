@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import "../../common/settings.ts";
-import "@scribe/core/runtime/support/edge_runtime_shim.ts";
+import "@scribe/runtime/support/edge_runtime_shim.ts";
 import { app as queueApp } from "./queue/queue.ts";
 import { WorkerHost } from "../../../embedder/mod.ts";
 import { ServerRuntime } from "./runtime.ts";

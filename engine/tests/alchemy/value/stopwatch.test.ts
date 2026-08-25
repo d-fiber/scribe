@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, FixedNow, having, isA, isFalse, throwsA } from "@scribe/engine/alchemy/test/mod.ts";
-import { DateTime, Duration, FormatException, Now, Stopwatch } from "@scribe/engine/alchemy/mod.ts";
+import { contains, equals, expect, FixedNow, having, isA, isFalse, throwsA } from "@scribe/alchemy/test/mod.ts";
+import { DateTime, Duration, FormatException, Now, Stopwatch } from "@scribe/alchemy/mod.ts";
 
 Deno.test("a stopwatch counts what the case says passed, and nothing else", () => {
   const now = new FixedNow(0);

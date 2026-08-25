@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isFalse } from "@scribe/engine/alchemy/test/mod.ts";
-import { InvocationContext, type Invoked } from "@scribe/engine/alchemy/api/route/mod.ts";
-import { Required } from "@scribe/engine/alchemy/mod.ts";
+import { equals, expect, isFalse } from "@scribe/alchemy/test/mod.ts";
+import { InvocationContext, type Invoked } from "@scribe/alchemy/api/route/mod.ts";
+import { Required } from "@scribe/alchemy/mod.ts";
 
 function invoked(over: Partial<Invoked> = {}): Invoked {
   return {

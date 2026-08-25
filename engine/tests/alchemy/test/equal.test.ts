@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equal, equals, expect, isFalse, isTrue } from "@scribe/engine/alchemy/test/mod.ts";
+import { equal, equals, expect, isFalse, isTrue } from "@scribe/alchemy/test/mod.ts";
 
 Deno.test("a value equals itself whatever it is", () => {
   expect(equal(1, 1), isTrue, "two of the same number are not equal");

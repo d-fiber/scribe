@@ -34,6 +34,6 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { registerAccountCascadeTests } from "@scribe/engine/tests/db/account_cascade_suite.ts";
+import { registerAccountCascadeTests } from "@scribe/tests/db/account_cascade_suite.ts";
 
 registerAccountCascadeTests("sdk");

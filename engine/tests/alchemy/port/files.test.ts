@@ -47,8 +47,8 @@ import {
   MemoryFileSystemDriver,
   MissingFileError,
   throwsA,
-} from "@scribe/engine/alchemy/test/mod.ts";
-import { Bytes, FileSystems, ScribeError } from "@scribe/engine/alchemy/mod.ts";
+} from "@scribe/alchemy/test/mod.ts";
+import { Bytes, FileSystems, ScribeError } from "@scribe/alchemy/mod.ts";
 
 function opened() {
   return new MemoryFileSystemDriver().open();

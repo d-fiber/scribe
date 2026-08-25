@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { PlaintextCache } from "@scribe/core/runtime/device/payload/plaintext_cache.ts";
+import { PlaintextCache } from "@scribe/runtime/device/payload/plaintext_cache.ts";
 import { assertEquals } from "@std/assert";
 
 const TTL_MS = 60_000;

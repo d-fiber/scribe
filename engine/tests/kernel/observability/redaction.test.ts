@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { previewOf } from "@scribe/core/kernel/observability/body_preview.ts";
-import { isSensitiveKey, redactIfJson, redactSensitive } from "@scribe/core/kernel/observability/redaction.ts";
+import { previewOf } from "@scribe/kernel/observability/body_preview.ts";
+import { isSensitiveKey, redactIfJson, redactSensitive } from "@scribe/kernel/observability/redaction.ts";
 import { assert, assertEquals, assertStringIncludes } from "@std/assert";
 
 function jsonResponse(body: unknown, status: number): Response {

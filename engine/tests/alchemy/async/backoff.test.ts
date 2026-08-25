@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect } from "@scribe/engine/alchemy/test/mod.ts";
-import { Duration, ExponentialBackoff } from "@scribe/engine/alchemy/mod.ts";
+import { equals, expect } from "@scribe/alchemy/test/mod.ts";
+import { Duration, ExponentialBackoff } from "@scribe/alchemy/mod.ts";
 
 Deno.test("ExponentialBackoff doubles from the base and stops at the ceiling", () => {
   const backoff = new ExponentialBackoff(Duration.milliseconds(1_000), Duration.milliseconds(30_000));

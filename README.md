@@ -91,17 +91,20 @@ sh tools/install.sh
 ## Layout
 
 ```
-engine/core/        the primitive package: contracts, runtime, kernel, test harness
+engine/contracts/   the pure types and the ports, which depend on nothing
+engine/runtime/     the primitives of the process: scope, device, ip, settings
+engine/kernel/      the HTTP pipeline: endpoint, router, identity, observability
+engine/embedder/    the fifteen points where a project reaches the framework
+engine/testing/     the test harness a package is handed
+engine/shell/       how the process starts, and the two runtimes
 engine/alchemy/     the vocabulary a package is written out of
-engine/builder/     what reads a package or a project and writes what the chain obeys
-engine/packages/    the mountable packages the builder resolves
-engine/boot/        how the process starts, and the two runtimes
-engine/project/     the fifteen points where a project reaches the framework
-engine/public/      mail rendering and the public pages
-protocol/         the host to worker contract, and its version
-sdk/js/ sdk/dart/ what a worker is written against
-ops/ templates/   the containers, the gateway, and what `create` writes
-web/              the documentation portal
+db/                 the base schema, played when the database is built
+packages/           the mountable packages
+public/             mail rendering and the public pages
+protocol/           the host to worker contract, and its version
+sdk/js/ sdk/dart/   what a worker is written against
+ops/ templates/     the containers, the gateway, and what `create` writes
+web/                the documentation portal
 ```
 
 ## The rules that hold it together
@@ -112,7 +115,7 @@ has to pass. The framework reaches the project through fifteen dynamic imports, 
 fallback, so a project that provides nothing still boots.
 
 **The layers are checked by the machine, not by discipline.** Seven layers, one direction, and a
-lint rule in `engine/core/.lint/layers.ts` that fails `deno lint` on anything reaching upward. A
+lint rule in `engine/.lint/layers.ts` that fails `deno lint` on anything reaching upward. A
 second rule gives directories a notion of private that TypeScript does not have: a file or an
 identifier prefixed `_` is visible only in its own directory and below.
 

@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { TtlLru } from "@scribe/core/runtime/support/cache/ttl_lru.ts";
+import { TtlLru } from "@scribe/runtime/support/cache/ttl_lru.ts";
 import { assertEquals } from "@std/assert";
 
 class Clock {

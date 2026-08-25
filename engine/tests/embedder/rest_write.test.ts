@@ -34,18 +34,18 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/core/testing/settings.ts";
+import "@scribe/testing/settings.ts";
 
 import { create } from "@bufbuild/protobuf";
 import { assertEquals } from "@std/assert";
-import { installMock } from "@scribe/core/testing/install.ts";
-import { PostgrestClients } from "@scribe/foundation/lib/src/database/client.ts";
+import { installMock } from "@scribe/testing/install.ts";
+import { PostgrestClients } from "@scribe/foundation/lib/src/database/postgrest_clients.ts";
 import { FakePostgrestClient } from "@scribe/foundation/tests/testing/database.ts";
 import {
   Operation,
   QuerySchema,
 } from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/database/database_pb.ts";
-import { executeQuery } from "@scribe/engine/embedder/capabilities/rest.ts";
+import { executeQuery } from "@scribe/embedder/capabilities/rest.ts";
 
 const UNOWNED = "t_email_templates";
 

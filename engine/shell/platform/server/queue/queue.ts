@@ -36,10 +36,10 @@
 
 import "../../../common/settings.ts";
 import { ServerResponse } from "@scribe/alchemy/route";
-import { Router } from "@scribe/core/kernel/http/routing/router.ts";
-import { serveFunction } from "@scribe/core/kernel/http/serve/mod.ts";
-import { queueRegistry } from "@scribe/foundation/lib/src/queue/core/registry.ts";
-import { extensions } from "@scribe/core/runtime/support/extensions/mod.ts";
+import { Router } from "@scribe/kernel/http/routing/router.ts";
+import { serveFunction } from "@scribe/kernel/http/serve/mod.ts";
+import { queueRegistry } from "@scribe/foundation/lib/src/queue/queue_registry.ts";
+import { extensions } from "@scribe/runtime/support/extensions/mod.ts";
 import { EXTENSION_QUEUE } from "../../../common/extensions.ts";
 import { Hono } from "hono";
 import { QueueDrainEndpoint, QueueDrainOneEndpoint, QueueStatusEndpoint } from "./drain.ts";

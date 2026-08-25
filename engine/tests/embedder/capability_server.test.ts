@@ -39,7 +39,7 @@ import { fromBinary } from "@bufbuild/protobuf";
 import { FailureSchema } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
 import { Storage } from "@scribe/sdk/gen/scribe/engine/packages/storage/protocol/storage_pb.ts";
 import { procedurePath } from "@scribe/sdk/src/transport/wire.ts";
-import { capabilityServer } from "@scribe/engine/embedder/capabilities/server.ts";
+import { capabilityServer } from "@scribe/embedder/capabilities/server.ts";
 
 /** Calls `path` on the host's capability server, the way a worker would. */
 async function call(path: string): Promise<{ status: number; code: string; message: string }> {

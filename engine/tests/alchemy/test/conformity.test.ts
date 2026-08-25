@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { checkCacheDriver, expectLater, isA, MemoryCaches, throwsA } from "@scribe/engine/alchemy/test/mod.ts";
-import { AssertionError } from "@scribe/engine/alchemy/test/expect/error.ts";
-import type { Cache, CacheDriver, CacheOptions } from "@scribe/engine/alchemy/mod.ts";
+import { checkCacheDriver, expectLater, isA, MemoryCaches, throwsA } from "@scribe/alchemy/test/mod.ts";
+import { AssertionError } from "@scribe/alchemy/test/expect/error.ts";
+import type { Cache, CacheDriver, CacheOptions } from "@scribe/alchemy/mod.ts";
 
 class RunsEveryTime implements CacheDriver {
   readonly #held = new Map<string, unknown>();

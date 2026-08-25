@@ -36,9 +36,9 @@
 
 import { Duration } from "@scribe/alchemy";
 import type { Caller } from "@scribe/alchemy/route";
-import { ApiContext, ApiEndpoint } from "@scribe/core/kernel/endpoint/api.ts";
-import { callEndpoint } from "@scribe/core/testing/kernel/endpoint.ts";
-import { installRateLimiterMock } from "@scribe/foundation/tests/testing/valkery.ts";
+import { ApiContext, ApiEndpoint } from "@scribe/kernel/endpoint/api.ts";
+import { callEndpoint } from "@scribe/testing/kernel/endpoint.ts";
+import { installRateLimiterMock } from "@scribe/foundation/tests/testing/cache.ts";
 import { assertEquals } from "@std/assert";
 
 class UnsignedWebhookEndpoint extends ApiEndpoint {

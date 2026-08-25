@@ -34,13 +34,13 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { RequestAuthorizer } from "@scribe/engine/shell/platform/edge/authorization/request_authorizer.ts";
-import type { WorkerDispatcher } from "@scribe/engine/shell/platform/edge/dispatch/worker_dispatcher.ts";
-import { EdgeFunctionsRuntime } from "@scribe/engine/shell/platform/edge/runtime.ts";
+import type { RequestAuthorizer } from "@scribe/shell/platform/edge/authorization/request_authorizer.ts";
+import type { WorkerDispatcher } from "@scribe/shell/platform/edge/dispatch/worker_dispatcher.ts";
+import { EdgeFunctionsRuntime } from "@scribe/shell/platform/edge/runtime.ts";
 import type {
   ResolvedService,
   ServiceResolver,
-} from "@scribe/engine/shell/platform/edge/services/service_resolver.ts";
+} from "@scribe/shell/platform/edge/services/service_resolver.ts";
 import { assertEquals } from "@std/assert";
 
 class StaticResolver implements ServiceResolver {

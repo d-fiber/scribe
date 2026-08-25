@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Bootstrapper } from "@scribe/engine/shell/common/bootstrapper.ts";
-import { BootSequence } from "@scribe/engine/shell/common/boot_sequence.ts";
+import type { Bootstrapper } from "@scribe/shell/common/bootstrapper.ts";
+import { BootSequence } from "@scribe/shell/common/boot_sequence.ts";
 import { assertEquals, assertRejects } from "@std/assert";
 
 function recorder(trace: string[], name: string, fails = false): Bootstrapper {

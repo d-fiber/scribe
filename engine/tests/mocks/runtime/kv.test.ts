@@ -39,65 +39,12 @@
 // connection is attempted and `--allow-net` isn't required (see `.claude/testing.md`).
 
 import { Duration, rateLimit, RateLimiters } from "@scribe/alchemy";
-import { Valkery } from "@scribe/foundation/lib/src/valkery/valkery.ts";
 import { assertEquals } from "@std/assert";
-import { installRateLimiterMock, installValkeryMock } from "@scribe/foundation/tests/testing/valkery.ts";
+import { installRateLimiterMock } from "@scribe/foundation/tests/testing/cache.ts";
 
 function aLimit() {
   return rateLimit({ key: "x", limit: 10, window: Duration.seconds(60), penalty: Duration.seconds(60) });
 }
-
-Deno.test(
-  "installValkeryMock: a Valkery subclass reads/writes against an in-memory store, restore() puts Redis back",
-  async () => {
-    const mock = installValkeryMock();
-    const cache = new Valkery<unknown>({ key: "test", ttl: Duration.seconds(60) });
-
-    assertEquals(await cache.get("missing"), null);
-    await cache.add("1", "a");
-    assertEquals(await cache.get("1"), "a");
-
-    mock.restore();
-  },
-);
-
-Deno.test(
-  "installValkeryMock: upsert only calls fn once for a cached key",
-  async () => {
-    const mock = installValkeryMock();
-    const cache = new Valkery<unknown>({ key: "test", ttl: Duration.seconds(60) });
-    let calls = 0;
-    const fn = () => {
-      calls++;
-      return Promise.resolve("value");
-    };
-
-    assertEquals(await cache.upsert("key", fn), "value");
-    assertEquals(await cache.upsert("key", fn), "value");
-    assertEquals(calls, 1);
-
-    mock.restore();
-  },
-);
-
-Deno.test(
-  "installValkeryMock: clear with a prefix only clears matching keys",
-  async () => {
-    const mock = installValkeryMock();
-    const cache = new Valkery<unknown>({ key: "test", ttl: Duration.seconds(60) });
-    await cache.add("brand:1", "a");
-    await cache.add("brand:2", "b");
-    await cache.add("store:1", "c");
-
-    await cache.clear("brand:*");
-
-    assertEquals(await cache.get("brand:1"), null);
-    assertEquals(await cache.get("brand:2"), null);
-    assertEquals(await cache.get("store:1"), "c");
-
-    mock.restore();
-  },
-);
 
 Deno.test(
   "installRateLimiterMock: defaults to an ok result and restore() empties a port nothing had filled",

@@ -34,13 +34,13 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/core/testing/settings.ts";
-import { readBoundedBody } from "@scribe/core/kernel/http/serve/body_reader.ts";
-import { stripPrefix } from "@scribe/core/runtime/http/pathname.ts";
-import { rewriteRequest } from "@scribe/core/kernel/http/serve/request_rewrite.ts";
-import { admitBody, inflightBodyBytes, releaseBody } from "@scribe/core/kernel/http/serve/body_admission.ts";
-import { MAX_BODY_BYTES, MAX_FORM_BYTES } from "@scribe/core/runtime/http/limits.ts";
-import { httpSettings } from "@scribe/core/runtime/support/settings/http.ts";
+import "@scribe/testing/settings.ts";
+import { readBoundedBody } from "@scribe/kernel/http/serve/body_reader.ts";
+import { stripPrefix } from "@scribe/runtime/http/pathname.ts";
+import { rewriteRequest } from "@scribe/kernel/http/serve/request_rewrite.ts";
+import { admitBody, inflightBodyBytes, releaseBody } from "@scribe/kernel/http/serve/body_admission.ts";
+import { MAX_BODY_BYTES, MAX_FORM_BYTES } from "@scribe/runtime/http/limits.ts";
+import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 import { assert, assertEquals } from "@std/assert";
 
 function upload(contentLength: number | null): Request {

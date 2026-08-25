@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Hono } from "hono";
-import { firstSegmentOf, stripPrefix } from "@scribe/core/runtime/http/pathname.ts";
+import { firstSegmentOf, stripPrefix } from "@scribe/runtime/http/pathname.ts";
 
 export interface NodeSurface {
   readonly app: Hono;

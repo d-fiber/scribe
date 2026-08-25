@@ -54,7 +54,7 @@ import {
   same,
   throwsA,
   withMessage,
-} from "@scribe/engine/alchemy/test/mod.ts";
+} from "@scribe/alchemy/test/mod.ts";
 
 class Held extends Error {}
 

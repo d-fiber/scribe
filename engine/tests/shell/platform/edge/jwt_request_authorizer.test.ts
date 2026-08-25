@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { JwtRequestAuthorizer } from "@scribe/engine/shell/platform/edge/authorization/jwt_request_authorizer.ts";
-import { OpenRequestAuthorizer } from "@scribe/engine/shell/platform/edge/authorization/request_authorizer.ts";
-import type { TokenVerifier } from "@scribe/engine/shell/platform/edge/authorization/token_verifier.ts";
+import { JwtRequestAuthorizer } from "@scribe/shell/platform/edge/authorization/jwt_request_authorizer.ts";
+import { OpenRequestAuthorizer } from "@scribe/shell/platform/edge/authorization/request_authorizer.ts";
+import type { TokenVerifier } from "@scribe/shell/platform/edge/authorization/token_verifier.ts";
 import { assertEquals } from "@std/assert";
 
 class FixedVerifier implements TokenVerifier {

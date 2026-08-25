@@ -46,11 +46,11 @@ import {
   RequestSchema,
 } from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
 import type { Route } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
-import { requestDevice } from "@scribe/core/runtime/device/mod.ts";
-import { currentIdentity } from "@scribe/core/runtime/http/accessors/identity.ts";
-import { currentLocation } from "@scribe/core/runtime/http/accessors/location.ts";
-import { request } from "@scribe/core/runtime/http/request.ts";
-import { RequestScope } from "@scribe/core/runtime/scope.ts";
+import { requestDevice } from "@scribe/runtime/device/mod.ts";
+import { currentIdentity } from "@scribe/runtime/http/accessors/identity.ts";
+import { currentLocation } from "@scribe/runtime/http/accessors/location.ts";
+import { request } from "@scribe/runtime/http/request.ts";
+import { RequestScope } from "@scribe/runtime/scope.ts";
 
 const methods: Record<string, ProtoMethod> = {
   GET: ProtoMethod.GET,

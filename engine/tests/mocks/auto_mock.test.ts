@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { assertEquals, assertThrows } from "@std/assert";
-import { createAutoMock } from "@scribe/core/testing/auto_mock.ts";
+import { createAutoMock } from "@scribe/testing/auto_mock.ts";
 
 class Leaf {
   ping(value: string): string {

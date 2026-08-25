@@ -45,8 +45,8 @@ import {
   isTrue,
   SequentialUuids,
   throwsA,
-} from "@scribe/engine/alchemy/test/mod.ts";
-import { DateTime, Duration, FormatException, Now, Uuid, Uuids } from "@scribe/engine/alchemy/mod.ts";
+} from "@scribe/alchemy/test/mod.ts";
+import { DateTime, Duration, FormatException, Now, Uuid, Uuids } from "@scribe/alchemy/mod.ts";
 
 Deno.test("now reads the source in force, so a case decides what time it is", () => {
   const fixed = new FixedNow(DateTime.parse("2026-01-01T00:00:00.000Z").millisecondsSinceEpoch);

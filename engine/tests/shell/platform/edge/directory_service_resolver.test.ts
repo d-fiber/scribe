@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { DirectoryServiceResolver } from "@scribe/engine/shell/platform/edge/services/directory_service_resolver.ts";
-import type { ModuleProbe } from "@scribe/engine/shell/platform/edge/services/module_probe.ts";
-import { ResolutionCache } from "@scribe/engine/shell/platform/edge/services/resolution_cache.ts";
+import { DirectoryServiceResolver } from "@scribe/shell/platform/edge/services/directory_service_resolver.ts";
+import type { ModuleProbe } from "@scribe/shell/platform/edge/services/module_probe.ts";
+import { ResolutionCache } from "@scribe/shell/platform/edge/services/resolution_cache.ts";
 import { assert, assertEquals } from "@std/assert";
 
 const ROOT = "/home/deno/functions";

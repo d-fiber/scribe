@@ -37,11 +37,11 @@
 import { assertEquals } from "@std/assert";
 import { Hono } from "hono";
 import type { LoggedEntry } from "@scribe/alchemy/observe";
-import type { LogRouting } from "@scribe/core/contracts/logging.ts";
-import { logger } from "@scribe/core/kernel/observability/logger.ts";
-import { LogRoutes } from "@scribe/core/kernel/observability/log_routing.ts";
-import { logBuffer } from "@scribe/core/kernel/observability/log_delivery.ts";
-import { RequestScope } from "@scribe/core/runtime/scope.ts";
+import type { LogRouting } from "@scribe/contracts/logging.ts";
+import { logger } from "@scribe/kernel/observability/logger.ts";
+import { LogRoutes } from "@scribe/kernel/observability/log_routing.ts";
+import { logBuffer } from "@scribe/kernel/observability/log_delivery.ts";
+import { RequestScope } from "@scribe/runtime/scope.ts";
 
 /** What the routing below was handed, flattened across deliveries. */
 const taken: LoggedEntry[] = [];

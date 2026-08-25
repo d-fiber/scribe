@@ -34,12 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/core/testing/settings.ts";
-import { Env } from "@scribe/engine/env.ts";
-import { AppKeyFirewall } from "@scribe/core/kernel/identity/firewall/app_key.ts";
-import { InternalSecretFirewall } from "@scribe/core/kernel/identity/firewall/internal.ts";
-import { constantTimeEqual } from "@scribe/core/runtime/support/crypto/constant_time.ts";
-import { RequestScope } from "@scribe/core/runtime/scope.ts";
+import "@scribe/testing/settings.ts";
+import { AppKeyFirewall } from "@scribe/kernel/identity/firewall/app_key.ts";
+import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
+import { InternalSecretFirewall } from "@scribe/kernel/identity/firewall/internal.ts";
+import { constantTimeEqual } from "@scribe/runtime/support/crypto/constant_time.ts";
+import { RequestScope } from "@scribe/runtime/scope.ts";
 import { assert, assertFalse } from "@std/assert";
 
 function withHeaders<T>(values: Record<string, string>, run: () => T): T {
@@ -47,21 +47,25 @@ function withHeaders<T>(values: Record<string, string>, run: () => T): T {
   return RequestScope.run(req, new Uint8Array(0), run, "127.0.0.1");
 }
 
-const VALID_ADMIN_KEY = Env.ADMIN_APP_KEYS[0];
-const VALID_APP_KEY = Env.APP_KEYS[0];
+const ADMIN_APP_KEYS = ["test-admin-app-key"];
+const APP_KEYS = ["test-app-key"];
+
+const VALID_ADMIN_KEY = ADMIN_APP_KEYS[0];
+const VALID_APP_KEY = APP_KEYS[0];
+const INTERNAL_SECRET = firewallSettings.get().internalSecret;
 
 Deno.test("app key firewall: the exact key passes", () => {
   assert(
     withHeaders(
       { "x-admin-app-key": VALID_ADMIN_KEY },
-      () => AppKeyFirewall.verify("x-admin-app-key", Env.ADMIN_APP_KEYS),
+      () => AppKeyFirewall.verify("x-admin-app-key", ADMIN_APP_KEYS),
     ),
   );
 });
 
 Deno.test("app key firewall: a missing header is refused", () => {
   assertFalse(
-    withHeaders({}, () => AppKeyFirewall.verify("x-admin-app-key", Env.ADMIN_APP_KEYS)),
+    withHeaders({}, () => AppKeyFirewall.verify("x-admin-app-key", ADMIN_APP_KEYS)),
   );
 });
 
@@ -78,7 +82,7 @@ Deno.test("app key firewall: near-miss keys are refused", () => {
     ]
   ) {
     assertFalse(
-      withHeaders({ "x-admin-app-key": candidate }, () => AppKeyFirewall.verify("x-admin-app-key", Env.ADMIN_APP_KEYS)),
+      withHeaders({ "x-admin-app-key": candidate }, () => AppKeyFirewall.verify("x-admin-app-key", ADMIN_APP_KEYS)),
       `"${candidate}" must not pass for the admin key`,
     );
   }
@@ -88,7 +92,7 @@ Deno.test("app key firewall: surrounding whitespace is stripped by HTTP itself",
   assert(
     withHeaders(
       { "x-admin-app-key": ` ${VALID_ADMIN_KEY} ` },
-      () => AppKeyFirewall.verify("x-admin-app-key", Env.ADMIN_APP_KEYS),
+      () => AppKeyFirewall.verify("x-admin-app-key", ADMIN_APP_KEYS),
     ),
     "Headers.get() applies the OWS trim of the HTTP spec, so padding never reaches the comparison",
   );
@@ -98,18 +102,18 @@ Deno.test("app key firewall: the app surface and the admin surface do not share 
   assertFalse(
     withHeaders(
       { "x-admin-app-key": VALID_APP_KEY },
-      () => AppKeyFirewall.verify("x-admin-app-key", Env.ADMIN_APP_KEYS),
+      () => AppKeyFirewall.verify("x-admin-app-key", ADMIN_APP_KEYS),
     ),
     "an app key must never open the admin API",
   );
   assertFalse(
-    withHeaders({ "x-app-key": VALID_ADMIN_KEY }, () => AppKeyFirewall.verify("x-app-key", Env.APP_KEYS)),
+    withHeaders({ "x-app-key": VALID_ADMIN_KEY }, () => AppKeyFirewall.verify("x-app-key", APP_KEYS)),
   );
 });
 
 Deno.test("app key firewall: the header name is honoured, not guessed", () => {
   assertFalse(
-    withHeaders({ "x-app-key": VALID_ADMIN_KEY }, () => AppKeyFirewall.verify("x-admin-app-key", Env.ADMIN_APP_KEYS)),
+    withHeaders({ "x-app-key": VALID_ADMIN_KEY }, () => AppKeyFirewall.verify("x-admin-app-key", ADMIN_APP_KEYS)),
     "the right key under the wrong header must not pass",
   );
 });
@@ -125,10 +129,10 @@ Deno.test("app key firewall: an empty allow-list refuses everything", () => {
 
 Deno.test("internal firewall: only the exact internal secret passes", () => {
   assert(
-    withHeaders({ "x-internal-secret": Env.INTERNAL_SECRET }, () => InternalSecretFirewall.verify()),
+    withHeaders({ "x-internal-secret": INTERNAL_SECRET }, () => InternalSecretFirewall.verify()),
   );
 
-  for (const candidate of ["", "nope", Env.INTERNAL_SECRET.slice(0, -1)]) {
+  for (const candidate of ["", "nope", INTERNAL_SECRET.slice(0, -1)]) {
     assertFalse(
       withHeaders({ "x-internal-secret": candidate }, () => InternalSecretFirewall.verify()),
     );

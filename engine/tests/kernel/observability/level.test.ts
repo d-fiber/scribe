@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { levelForStatus } from "@scribe/core/kernel/observability/level.ts";
+import { levelForStatus } from "@scribe/kernel/observability/level.ts";
 import { assertEquals } from "@std/assert";
 
 Deno.test("levelForStatus blames the caller for a 4xx and the host for a 5xx", () => {

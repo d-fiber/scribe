@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { type Extension, ExtensionRegistry } from "@scribe/core/runtime/support/extensions/registry.ts";
-import { isMissingModule } from "@scribe/core/runtime/support/extensions/missing_module.ts";
-import { OptionalExtension } from "@scribe/core/runtime/support/extensions/optional_extension.ts";
+import { type Extension, ExtensionRegistry } from "@scribe/runtime/support/extensions/registry.ts";
+import { isMissingModule } from "@scribe/runtime/support/extensions/missing_module.ts";
+import { OptionalExtension } from "@scribe/runtime/support/extensions/optional_extension.ts";
 import { assert, assertEquals, assertFalse, assertThrows } from "@std/assert";
 
 class CountingExtension implements Extension {

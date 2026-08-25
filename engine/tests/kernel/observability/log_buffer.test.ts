@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { LoggedEntry } from "@scribe/alchemy/observe";
-import { LogBuffer } from "@scribe/core/kernel/observability/log_buffer.ts";
+import { LogBuffer } from "@scribe/kernel/observability/log_buffer.ts";
 import { assert, assertEquals } from "@std/assert";
 
 const MAX_BUFFERED = 500;
