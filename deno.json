@@ -29,16 +29,18 @@
   "lint": {
     "plugins": [
       "./engine/.lint/private-module-scope.ts",
-      "./engine/.lint/layers.ts",
-      "./engine/.lint/project-boundary.ts"
+      "./engine/.lint/member-escape.ts"
     ],
     "rules": {
       "include": [
         "private-module-scope/private-module-scope",
-        "layers/layers",
-        "project-boundary/project-boundary"
+        "member-escape/member-escape"
       ]
-    }
+    },
+    "exclude": [
+      "sdk/js/gen",
+      "sdk/js/example"
+    ]
   },
   "compilerOptions": {
     "jsx": "react-jsx",

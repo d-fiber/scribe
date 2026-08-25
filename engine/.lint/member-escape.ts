@@ -34,36 +34,65 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-const SDK_MARKER = "/scribe/";
+/**
+ * The two directories a workspace member sits directly under, from the workspace root.
+ *
+ * They are matched as a prefix of the path relative to the root, never as a substring: a
+ * generated stub written to `sdk/js/gen/scribe/engine/packages/<name>/` carries both words in
+ * its path and belongs to no member, and searching anywhere in the string would take it for one.
+ *
+ * The anchor is the root itself and not the checkout's name, which is the whole difference from
+ * the layer rule this replaces. Cloning the repository under any name leaves `engine/` and
+ * `packages/` exactly where they are.
+ */
+const MEMBER_ROOTS = ["engine/", "packages/"] as const;
 
-const PROJECT_PREFIXES = ["@app/", "@generated/"] as const;
+/** The member `filename` belongs to, as an absolute directory, or null when it is in none. */
+function memberOf(filename: string): string | null {
+  const root = `${Deno.cwd()}/`;
+  if (!filename.startsWith(root)) return null;
 
-const SEAM_HINT =
-  'wrap it in `try { await import("...") } catch` with a defined fallback, ' +
-  "the way the other seams do";
+  const relative = filename.slice(root.length);
+  for (const under of MEMBER_ROOTS) {
+    if (!relative.startsWith(under)) continue;
 
-function projectPrefixOf(source: string): string | null {
-  for (const prefix of PROJECT_PREFIXES) {
-    if (source.startsWith(prefix)) return prefix;
+    const name = relative.slice(under.length).split("/")[0];
+    if (name === "" || !relative.slice(under.length).includes("/")) continue;
+
+    return `${root}${under}${name}/`;
   }
   return null;
 }
 
-export default {
-  name: "project-boundary",
-  rules: {
-    "project-boundary": {
-      create(ctx: Deno.lint.RuleContext) {
-        if (!ctx.filename.includes(SDK_MARKER)) return {};
+/** Where `specifier` lands, read from the directory `filename` sits in. */
+function resolvedFrom(filename: string, specifier: string): string {
+  const segments = filename.split("/").slice(0, -1);
+  for (const step of specifier.split("/")) {
+    if (step === "." || step === "") continue;
+    if (step === "..") segments.pop();
+    else segments.push(step);
+  }
+  return segments.join("/");
+}
 
-        function check(node: Deno.lint.Node, source: string) {
-          if (projectPrefixOf(source) === null) return;
+export default {
+  name: "member-escape",
+  rules: {
+    "member-escape": {
+      create(ctx: Deno.lint.RuleContext) {
+        const home: string | null = memberOf(ctx.filename);
+        if (home === null) return {};
+        const within = home;
+
+        function check(node: Deno.lint.Node, specifier: string) {
+          if (!specifier.startsWith(".")) return;
+          if (resolvedFrom(ctx.filename, specifier).startsWith(within)) return;
 
           ctx.report({
             node,
-            message:
-              `the SDK cannot statically import "${source}": scribe/ must compile, ` +
-              `test and boot without the project. To reach the project anyway, ${SEAM_HINT}.`,
+            message: `"${specifier}" climbs out of this member. A file of another member is ` +
+              `reached by the specifier its own deno.json declares, so that deno check refuses ` +
+              `what the layer order forbids. A path walks around that check.`,
           });
         }
 
@@ -76,8 +105,7 @@ export default {
             if (source) check(node, source.value);
           },
           ExportAllDeclaration(node) {
-            const source = node.source as { value: string } | null;
-            if (source) check(node, source.value);
+            check(node, (node.source as { value: string }).value);
           },
         };
       },
