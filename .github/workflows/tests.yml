@@ -78,24 +78,51 @@ jobs:
       - name: Check license headers
         run: bash .github/headers/check.sh
 
-  versioning:
+  format:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: .github/versioning
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: denoland/setup-deno@v2
         with:
-          python-version: "3.13"
+          deno-version: v2.x
 
-      - name: Install protoc
-        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+      - name: Check the formatting
+        run: deno fmt --check
 
-      - name: Run tests
-        run: python3 -m unittest discover -s tests -t . -v
+  version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check the version, and who moved it
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: bash .github/version/check.sh
+
+      - name: Write the changelog section, if the version moved
+        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+        run: |
+          set -eu
+          bash .github/version/changelog.sh
+
+          git diff --quiet CHANGELOG.md && exit 0
+
+          version=$(python3 -c "import json;print(json.load(open('deno.json'))['version'])")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "[DOC]: write what $version is made of"
+          git push origin HEAD:dev
+
+      - name: Name this commit after the version, if it has moved
+        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+        run: bash .github/version/tag.sh
 
   dependencies:
     if: github.event_name == 'schedule'

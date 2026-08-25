@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       dry-run:
-        description: Work out the version and changelog without writing anything
+        description: Say what would be released without opening anything
         type: boolean
         default: false
 
@@ -28,16 +28,20 @@ jobs:
           ssh-key: ${{ secrets.RELEASE_PUSH_KEY }}
           persist-credentials: true
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
+      - name: Refuse to release a version that was never tagged
+        run: |
+          set -eu
+          version=$(python3 -c "import json;print(json.load(open('deno.json'))['version'])")
+          git fetch --tags origin
 
-      - uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
-
-      - name: Install protoc
-        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+          if ! git rev-parse "v$version" >/dev/null 2>&1; then
+            echo "dev says $version, and no v$version tag exists."
+            echo ""
+            echo "A version is tagged by the CI once it moves, so an untagged one means"
+            echo "either the version has not been bumped or its checks never went green."
+            exit 1
+          fi
+          echo "v$version is on $(git rev-parse --short "v$version^{commit}")"
 
       - name: Refuse to release when dev has nothing new
         run: |
@@ -50,39 +54,13 @@ jobs:
           echo "Commits waiting to be released:"
           git log --no-merges --format='  %h %s' origin/main..HEAD
 
-      - name: Work out the version and write the changelog
-        working-directory: .github/versioning
-        run: |
-          python3 bump.py \
-            --repo="$GITHUB_WORKSPACE" \
-            --base=origin/main \
-            --head=HEAD \
-            ${{ inputs.dry-run && '--check' || '' }}
-
-      - name: Push the release commit to dev
-        if: ${{ !inputs.dry-run }}
-        run: |
-          set -eu
-          git config user.name "scribe-release[bot]"
-          git config user.email "scribe-release@users.noreply.github.com"
-          git add --all
-          if git diff --cached --quiet; then
-            echo "Nothing to commit, the versions and changelog were already current"
-            exit 0
-          fi
-          version=$(cat VERSION)
-          git commit -m "[RELEASE]: scribe $version"
-          git push origin HEAD:dev
-          echo "Pushed with the deploy key, so the test workflows run on this commit"
-          echo "and attach their results to the SHA the pull request will point at."
-
       - name: Open the pull request that moves dev into main
         if: ${{ !inputs.dry-run }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -eu
-          version=$(cat VERSION)
+          version=$(python3 -c "import json;print(json.load(open('deno.json'))['version'])")
           existing=$(gh pr list --base main --head dev --state open --json number --jq '.[0].number // empty')
 
           if [ -n "$existing" ]; then

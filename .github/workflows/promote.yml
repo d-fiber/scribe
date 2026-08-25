@@ -30,7 +30,7 @@ jobs:
           SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -eu
-          required="engine sdk-js versioning headers protocol format"
+          required="engine sdk-js version headers protocol format"
 
           for attempt in $(seq 1 45); do
             runs=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/check-runs" --paginate \
@@ -107,7 +107,7 @@ jobs:
             exit 0
           fi
 
-          version=$(cat VERSION)
+          version=$(python3 -c "import json;print(json.load(open('deno.json'))['version'])")
           git commit -m "[RELEASE]: scribe $version"
           git push origin HEAD:dev
 
@@ -130,4 +130,4 @@ jobs:
             git push origin promotion:dev
             echo "main had diverged, dev realigned onto the merge"
           fi
-          echo "main now carries scribe $(cat VERSION) from ${tip}"
+          echo "main now carries scribe $(python3 -c "import json;print(json.load(open('deno.json'))['version'])") from ${tip}"

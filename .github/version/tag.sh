@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Copyright (C) 2026 Fiber
 #
 # This Source Code Form is subject to the terms of the Mozilla Public License,
@@ -32,5 +33,35 @@
 # KIND OF LEGAL CLAIM.
 #
 # This header is a summary written for convenience. Where it differs from the
-# LICENSE file, the LICENSE file governs.
 
+
+set -euo pipefail
+
+ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+SCOPE="tag"
+
+say() {
+  echo "[$SCOPE] $1"
+}
+
+cd "$ROOT"
+
+version=$(python3 -c "import json;print(json.load(open('deno.json'))['version'])")
+tag="v$version"
+
+if git rev-parse "$tag" >/dev/null 2>&1; then
+  say "$tag is already on $(git rev-parse --short "$tag^{commit}"), so there is nothing to name"
+  exit 0
+fi
+
+if [ -z "$(git config user.email || true)" ]; then
+  git config user.name "github-actions[bot]"
+  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+fi
+
+say "naming $(git rev-parse --short HEAD) as $tag"
+
+git tag -a "$tag" -m "$version"
+git push origin "$tag"
+
+say "$tag is pushed. It stays on this commit for good, and moving it is what promote refuses."
