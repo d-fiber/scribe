@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { json } from "@scribe/alchemy";
+
 const SENSITIVE_WORDS: ReadonlySet<string> = new Set([
   "auth",
   "authorization",
@@ -80,7 +82,7 @@ export function redactSensitive(value: unknown): unknown {
 
 export function redactIfJson(text: string): string {
   try {
-    return JSON.stringify(redactSensitive(JSON.parse(text)));
+    return json.encode(redactSensitive(json.decode(text)));
   } catch {
     return text;
   }

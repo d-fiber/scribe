@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { json } from "@scribe/alchemy";
 import type { Future } from "@scribe/alchemy";
 import { create } from "@bufbuild/protobuf";
 import {
@@ -84,7 +85,7 @@ export async function cacheSet(request: SetRequest): Future<SetResult> {
   if (!key) return create(SetResultSchema, { error: failed("set", "missing key") });
 
   const seconds = Math.max(1, Math.round(Number(request.ttl?.millis ?? 0n) / 1000));
-  const payload = JSON.stringify(decodeJson(request.value));
+  const payload = json.encode(decodeJson(request.value));
 
   try {
     if (request.ttl) {
