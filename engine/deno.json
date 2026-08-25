@@ -1,8 +1,8 @@
 {
   "workspace": [],
   "tasks": {
-    "check": "deno check **/*.ts ../public ../packages",
-    "test": "deno test --allow-env --allow-sys --allow-read --env-file=tests/.env.test . ../public",
+    "check": "deno check **/*.ts ../packages",
+    "test": "deno test --allow-env --allow-sys --allow-read --env-file=tests/.env.test .",
     "test:net": "deno test --allow-env --allow-sys --allow-read --allow-net --env-file=tests/.env.test",
     "e2e:render": "deno run --allow-read --allow-write packages/foundation/tests/e2e/render.ts",
     "e2e:compose": "docker compose --project-directory packages/foundation/tests/e2e --env-file packages/foundation/tests/e2e/e2e.env -f packages/foundation/tests/e2e/.generated/valkery.yaml -f packages/foundation/tests/e2e/.generated/queue.yaml -f packages/foundation/tests/e2e/.generated/database.yaml -f packages/foundation/tests/e2e/compose.override.yaml",
@@ -99,7 +99,6 @@
     "@scribe/foundation/": "../packages/foundation/",
     "@scribe/kernel/": "./kernel/",
     "@scribe/protocol/": "../protocol/",
-    "@scribe/public/": "../public/",
     "@scribe/realtime/": "../packages/realtime/",
     "@scribe/remote_configs/": "../packages/remote_configs/",
     "@scribe/runtime/": "./runtime/",

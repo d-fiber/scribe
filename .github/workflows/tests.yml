@@ -40,7 +40,7 @@ jobs:
           deno-version: v2.x
 
       - name: Lint
-        run: deno lint --config deno.json . ../public
+        run: deno lint --config deno.json . ../packages
 
       - name: Type check
         run: deno task check
