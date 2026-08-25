@@ -41,6 +41,7 @@ REPOSITORY="${SCRIBE_REPOSITORY:-d-fiber/scribe}"
 BRANCH="${SCRIBE_BRANCH:-main}"
 TOOLS="scribe"
 TOOLS_REPOSITORY="${SCRIBE_TOOLS_REPOSITORY:-d-fiber/scribe_tools}"
+TEMPLATES_ASSET="scribe-templates.tar.gz"
 
 say() { printf '%s\n' "$*"; }
 fail() { printf '%s\n' "$*" >&2; exit 1; }
@@ -146,12 +147,36 @@ fetch() {
   done
 }
 
+fetch_templates() {
+  destination="$ROOT/tools"
+  archive="$destination/$TEMPLATES_ASSET"
+
+  say "  $TEMPLATES_ASSET from $TOOLS_REPOSITORY"
+  rm -f "$archive"
+
+  if have gh; then
+    gh release download --repo "$TOOLS_REPOSITORY" --pattern "$TEMPLATES_ASSET" --output "$archive"
+  elif have curl; then
+    curl -fsSL -o "$archive" "https://github.com/$TOOLS_REPOSITORY/releases/latest/download/$TEMPLATES_ASSET" \
+      || fail "Could not download $TEMPLATES_ASSET. While $TOOLS_REPOSITORY is private this needs the GitHub CLI: https://cli.github.com"
+  else
+    fail "Needs curl, or the GitHub CLI while the repository is private"
+  fi
+
+  rm -rf "$destination/templates"
+  tar -xzf "$archive" -C "$destination"
+  rm -f "$archive"
+
+  [ -d "$destination/templates/project" ] || fail "$TEMPLATES_ASSET carried no templates/project/"
+}
+
 main() {
   detect_platform
   locate_or_clone
 
   say "Fetching the $PLATFORM tools from $TOOLS_REPOSITORY"
   fetch
+  fetch_templates
 
   say ""
   say "Ready. The tools are in $ROOT/tools"
@@ -163,6 +188,9 @@ main() {
   say ""
   say "They are deliberately not committed, so run this again after pulling a"
   say "release that rebuilt them. tools/.platform says which build is in there."
+  say ""
+  say "tools/templates/ came down with them: scribe create reads it from next to"
+  say "the binary, so the two are replaced together."
 }
 
 main "$@"

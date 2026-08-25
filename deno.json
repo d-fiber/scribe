@@ -28,7 +28,6 @@
   "fmt": {
     "lineWidth": 120,
     "exclude": [
-      "templates",
       "sdk/js/gen"
     ]
   },
