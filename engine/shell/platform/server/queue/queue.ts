@@ -40,7 +40,7 @@ import { Router } from "@scribe/kernel/http/routing/router.ts";
 import { serveFunction } from "@scribe/kernel/http/serve/mod.ts";
 import { queueRegistry } from "@scribe/foundation";
 import { extensions } from "@scribe/runtime/support/extensions/mod.ts";
-import { EXTENSION_QUEUE } from "../../../common/extensions.ts";
+import { EXTENSION_QUEUE } from "@scribe/contracts/extensions.ts";
 import { Hono } from "hono";
 import { QueueDrainEndpoint, QueueDrainOneEndpoint, QueueStatusEndpoint } from "./drain.ts";
 

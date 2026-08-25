@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { extensions } from "@scribe/runtime/support/extensions/mod.ts";
-import { EXTENSION_CRON } from "../../../common/extensions.ts";
+import { EXTENSION_CRON } from "@scribe/contracts/extensions.ts";
 import type { Bootstrapper } from "../../../common/bootstrapper.ts";
 
 export class ExtensionsBootstrapper implements Bootstrapper {

@@ -34,5 +34,20 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+/**
+ * The names a runtime loads a package's declarations under.
+ *
+ * @remarks
+ * They live here rather than with either side because both need them and neither owns both ends.
+ * A package registers what it declares under one of these names, in its own `wires`, and a runtime
+ * loads that name at the moment it needs the declarations to have run. The framework therefore
+ * decides when, and never what: nothing here says where a file sits or what it holds.
+ *
+ * A name is only ever added by the package that answers it.
+ */
+
+/** The queue declarations a project wrote, loaded before a queue runtime consumes anything. */
 export const EXTENSION_QUEUE = "queue";
+
+/** The cron declarations a project wrote, loaded once the process has booted. */
 export const EXTENSION_CRON = "cron";

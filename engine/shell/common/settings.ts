@@ -34,7 +34,6 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { extensions, OptionalExtension, runDeclarations } from "@scribe/runtime/support/extensions/mod.ts";
 import { cacheSettings, databaseSettings, queueSettings, RedisRateLimiters, required } from "@scribe/foundation";
 import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
 import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
@@ -42,7 +41,6 @@ import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
 import { RateLimiters } from "@scribe/alchemy";
 import { workerSettings } from "@scribe/runtime/support/settings/worker.ts";
-import { EXTENSION_CRON, EXTENSION_QUEUE } from "./extensions.ts";
 
 /**
  * The port the persistent runtime listens on when the deployment names none.
@@ -116,10 +114,6 @@ workerSettings.use({
   handshakeDelayMs: WORKER_HANDSHAKE_DELAY_MS,
   publicNodes: publicNodes(),
 });
-
-extensions.register(new OptionalExtension(EXTENSION_QUEUE, () => runDeclarations("queues")));
-
-extensions.register(new OptionalExtension(EXTENSION_CRON, () => runDeclarations("crons")));
 
 /**
  * Hands the ports to the modules the project mounted.

@@ -52,6 +52,11 @@ export class ExtensionRegistry {
     this.#declared.set(extension.name, extension);
   }
 
+  /** Whether something already answers for `name`. */
+  declares(name: string): boolean {
+    return this.#declared.has(name);
+  }
+
   load(name: string): Promise<unknown | null> {
     const memoized = this.#loaded.get(name);
     if (memoized !== undefined) return memoized;
