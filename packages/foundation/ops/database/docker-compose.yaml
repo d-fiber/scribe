@@ -29,7 +29,7 @@ services:
     container_name: "supabase-db"
     build:
       context: "{{sdk_root}}"
-      dockerfile: "engine/packages/foundation/ops/database/Dockerfile"
+      dockerfile: "packages/foundation/ops/database/Dockerfile"
     restart: "unless-stopped"
     volumes:
       - "{{sdk_root}}/packages/foundation/db/provisioning/_supabase.sql:/docker-entrypoint-initdb.d/init-scripts/97-_supabase.sql:Z"
