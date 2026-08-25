@@ -74,7 +74,8 @@ import {
 } from "@scribe/sdk/gen/scribe/packages/auth/protocol/auth_pb.ts";
 import { Duration } from "@scribe/alchemy";
 import { type Ban } from "@scribe/auth";
-import { accountNamed, type AnyAccount, declaredAccounts } from "@scribe/auth/declaration";
+import { accountNamed, type AnyAccount, AUTH_EXTENSION, declaredAccounts } from "@scribe/auth/declaration";
+import { extensions } from "@scribe/runtime/support/extensions/mod.ts";
 import { encodeJson } from "../control/json.ts";
 
 const IDENTITY_FIELDS: ReadonlySet<string> = new Set([
@@ -94,8 +95,19 @@ function failed(scope: string, cause: unknown): { code: string; message: string 
   return { code: "auth_failed", message };
 }
 
-function declarationOf(role: string): AnyAccount | null {
-  return role ? accountNamed(role) : null;
+/**
+ * The declaration `role` names, or null when this process knows none by that name.
+ *
+ * @remarks
+ * The project's declarations are loaded first. A role lives in the project, and a capability call
+ * can land in a process that never imported the file declaring it, so loading here is what makes a
+ * role findable by name wherever the call arrives. The registry runs it once per process.
+ */
+async function declarationOf(role: string): Promise<AnyAccount | null> {
+  if (!role) return null;
+
+  await extensions.load(AUTH_EXTENSION);
+  return accountNamed(role);
 }
 
 function banOf(ban: Ban): BanMessage {
@@ -119,7 +131,7 @@ function banOf(ban: Ban): BanMessage {
  * typo in a role name as a deleted account.
  */
 export async function authGetAccount(request: AccountRequest): Promise<AccountResult> {
-  const declaration = declarationOf(request.role);
+  const declaration = await declarationOf(request.role);
   if (!declaration) {
     return create(AccountResultSchema, { error: failed("get-account", `no role named "${request.role}"`) });
   }
@@ -159,7 +171,7 @@ export async function authGetAccount(request: AccountRequest): Promise<AccountRe
  * nothing different to do in either case.
  */
 export async function authDeleteAccount(request: AccountRequest): Promise<BanResult> {
-  const declaration = declarationOf(request.role);
+  const declaration = await declarationOf(request.role);
   if (!declaration) {
     return create(BanResultSchema, { error: failed("delete-account", `no role named "${request.role}"`) });
   }
@@ -181,7 +193,7 @@ export async function authDeleteAccount(request: AccountRequest): Promise<BanRes
  * ban that was refused because the account does not exist from one the database would not write.
  */
 export async function authBan(request: BanRequest): Promise<BanResult> {
-  const declaration = declarationOf(request.role);
+  const declaration = await declarationOf(request.role);
   if (!declaration) return create(BanResultSchema, { error: failed("ban", `no role named "${request.role}"`) });
 
   try {
@@ -199,7 +211,7 @@ export async function authBan(request: BanRequest): Promise<BanResult> {
 
 /** Lets an account back in, and refuses when no ban of that role stands over it. */
 export async function authUnban(request: AccountRequest): Promise<BanResult> {
-  const declaration = declarationOf(request.role);
+  const declaration = await declarationOf(request.role);
   if (!declaration) return create(BanResultSchema, { error: failed("unban", `no role named "${request.role}"`) });
 
   try {
@@ -219,7 +231,7 @@ export async function authUnban(request: AccountRequest): Promise<BanResult> {
  * so this answers who is shut out now and not who has a row.
  */
 export async function authListBans(request: BanListRequest): Promise<BanListResult> {
-  const declaration = declarationOf(request.role);
+  const declaration = await declarationOf(request.role);
   if (!declaration) {
     return create(BanListResultSchema, { error: failed("list-bans", `no role named "${request.role}"`) });
   }
@@ -242,7 +254,7 @@ export async function authListBans(request: BanListRequest): Promise<BanListResu
  * device to kick, and listing answers all of them.
  */
 export async function authListDevices(request: DeviceRequest): Promise<DeviceListResult> {
-  const declaration = declarationOf(request.role);
+  const declaration = await declarationOf(request.role);
   if (!declaration) {
     return create(DeviceListResultSchema, { error: failed("list-devices", `no role named "${request.role}"`) });
   }
@@ -283,7 +295,7 @@ export async function authListDevices(request: DeviceRequest): Promise<DeviceLis
  * it asked for.
  */
 export async function authKickDevice(request: DeviceRequest): Promise<KickResult> {
-  const declaration = declarationOf(request.role);
+  const declaration = await declarationOf(request.role);
   if (!declaration) {
     return create(KickResultSchema, { error: failed("kick-device", `no role named "${request.role}"`) });
   }
@@ -304,7 +316,7 @@ export async function authKickDevice(request: DeviceRequest): Promise<KickResult
  * left, because the package answers nothing about how many records it removed.
  */
 export async function authKickAllDevices(request: DeviceRequest): Promise<KickResult> {
-  const declaration = declarationOf(request.role);
+  const declaration = await declarationOf(request.role);
   if (!declaration) {
     return create(KickResultSchema, { error: failed("kick-all-devices", `no role named "${request.role}"`) });
   }
