@@ -43,9 +43,6 @@ import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
 import { queueSettings } from "@scribe/foundation/lib/src/queue/queue_settings.ts";
 import { optional } from "@scribe/foundation/lib/src/environment.ts";
-import { searchSettings } from "@scribe/search/lib/src/settings.ts";
-import { authSettings } from "@scribe/auth/lib/src/settings.ts";
-import { storageSettings } from "@scribe/storage/lib/src/settings.ts";
 
 export function installTestSettings(): void {
   if (cacheSettings.configured) return;
@@ -72,26 +69,6 @@ export function installTestSettings(): void {
   httpSettings.use({
     port: Number(optional("PORT", "3000")),
     maxInflightBodyBytes: Number(optional("API_MAX_INFLIGHT_BODY_MB", "256")) * 1024 * 1024,
-  });
-  authSettings.use({
-    jwtSecret: optional("JWT_SECRET", "test-jwt-secret"),
-    pendingTokenSecret: optional("PENDING_TOKEN_SECRET", "test-pending-token-secret"),
-    googleClientId: optional("GOOGLE_CLIENT_ID", ""),
-    googleClientSecret: optional("GOOGLE_CLIENT_SECRET", ""),
-    appleClientId: optional("APPLE_CLIENT_ID", ""),
-    appleClientSecret: optional("APPLE_CLIENT_SECRET", ""),
-    twilioAccountSid: optional("TWILIO_ACCOUNT_SID", ""),
-    twilioAuthToken: optional("TWILIO_AUTH_TOKEN", ""),
-    twilioMessageServiceSid: optional("TWILIO_MESSAGE_SERVICE_SID", ""),
-  });
-  storageSettings.use({
-    apiUrl: optional("SUPABASE_STORAGE_INTERNAL_URL", "http://localhost:5000"),
-    serviceRoleKey: optional("SUPABASE_SERVICE_ROLE_KEY", "service"),
-    publicBaseUrl: optional("APP_URL", "http://localhost"),
-    privateBaseUrl: optional("ADMIN_URL", "http://localhost"),
-  });
-  searchSettings.use({
-    clusterUrl: optional("OPENSEARCH_URL", "http://localhost:9200"),
   });
 }
 
