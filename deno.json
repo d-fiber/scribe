@@ -1,4 +1,5 @@
 {
+  "version": "1.0.0",
   "workspace": [
     "./engine/alchemy",
     "./engine/contracts",
@@ -24,7 +25,11 @@
     "lint": "deno lint"
   },
   "fmt": {
-    "lineWidth": 120
+    "lineWidth": 120,
+    "exclude": [
+      "templates",
+      "sdk/js/gen"
+    ]
   },
   "lint": {
     "plugins": [
