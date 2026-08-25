@@ -73,7 +73,8 @@ import {
   RoleSchema,
 } from "@scribe/sdk/gen/scribe/packages/auth/protocol/auth_pb.ts";
 import { Duration } from "@scribe/alchemy";
-import { accountNamed, type AnyAccount, type Ban, declaredAccounts } from "@scribe/auth";
+import { type Ban } from "@scribe/auth";
+import { accountNamed, type AnyAccount, declaredAccounts } from "@scribe/auth/declaration";
 import { encodeJson } from "../control/json.ts";
 
 const IDENTITY_FIELDS: ReadonlySet<string> = new Set([
