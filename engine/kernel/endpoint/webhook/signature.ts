@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { utf8 } from "@scribe/alchemy";
 import type { Future } from "@scribe/alchemy";
 import { fromBase64 } from "@scribe/runtime/support/crypto/base64.ts";
 import type { SignedWebhookRequest } from "./signed_request.ts";

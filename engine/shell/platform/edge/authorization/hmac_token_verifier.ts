@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { utf8 } from "@scribe/alchemy";
 import type { Future } from "@scribe/alchemy";
 import { jwtVerify } from "jose";
 import type { TokenVerifier } from "./token_verifier.ts";
@@ -44,7 +45,7 @@ export class HmacTokenVerifier implements TokenVerifier {
   readonly #secret: Uint8Array;
 
   constructor(secret: string) {
-    this.#secret = new TextEncoder().encode(secret);
+    this.#secret = utf8.encode(secret);
   }
 
   static fromSecret(secret: string | undefined): HmacTokenVerifier | null {

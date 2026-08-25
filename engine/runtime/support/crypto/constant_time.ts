@@ -34,11 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { utf8 } from "@scribe/alchemy";
 import { timingSafeEqual } from "node:crypto";
 
 export function constantTimeEqual(a: string, b: string): boolean {
-  const bufA = new TextEncoder().encode(a);
-  const bufB = new TextEncoder().encode(b);
+  const bufA = utf8.encode(a);
+  const bufB = utf8.encode(b);
   if (bufA.length !== bufB.length) return false;
   return timingSafeEqual(bufA, bufB);
 }
