@@ -43,7 +43,7 @@ function render(element: React.ReactElement): string {
   return renderToStaticMarkup(element);
 }
 
-Deno.test("the hosting surface carries every control ported from poppin_ui", () => {
+Deno.test("the hosting surface carries every control a page is built from", () => {
   for (
     const name of [
       "AppIconButton",

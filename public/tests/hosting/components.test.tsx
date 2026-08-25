@@ -204,7 +204,7 @@ Deno.test("AppText covers the thirteen scales plus the hosting eyebrow", () => {
   );
 });
 
-Deno.test("AppIcon names its glyphs exactly like PoppinIconData does", () => {
+Deno.test("AppIcon renders a glyph under the name it was asked for", () => {
   const html = render(<designSystem.AppIcon name="map_pin" />);
 
   assertStringIncludes(html, 'data-icon="map_pin"');
@@ -212,7 +212,7 @@ Deno.test("AppIcon names its glyphs exactly like PoppinIconData does", () => {
   assertStringIncludes(html, 'stroke="currentColor"');
 });
 
-Deno.test("AppIcon covers the whole PoppinIconData enum, and renders every entry", () => {
+Deno.test("every name in the icon catalogue renders, and none is missing a glyph", () => {
   const names = Object.keys(iconCatalog) as AppIconName[];
 
   assertEquals(names.length, 684);
@@ -257,14 +257,14 @@ Deno.test("AppRichText separates its segments, and never after the last one", ()
       items={[
         { text: "By continuing you accept the" },
         { text: "terms", href: "https://example.test/terms" },
-        { text: "of Poppin." },
+        { text: "of this service." },
       ]}
     />,
   );
 
   assertStringIncludes(html, "By continuing you accept the ");
   assertStringIncludes(html, ">terms </a>");
-  assertStringIncludes(html, "of Poppin.</span>");
+  assertStringIncludes(html, "of this service.</span>");
 });
 
 Deno.test("AppRichText keeps a separator the caller already wrote", () => {

@@ -45,15 +45,3 @@ create table if not exists public.internal_t__push_templates (
 alter table public.internal_t__push_templates enable row level security;
 
 revoke all on public.internal_t__push_templates from authenticated, anon;
-
--- name is carried as it stands into internal_t__in_app_notifications.type,
--- which is free text with neither a foreign key nor an enum. Adding a template
--- here is therefore enough, and nothing else has to be kept in step.
-insert into public.internal_t__push_templates (name, title, body, data) values
-  (
-    'welcome',
-    'Bienvenue sur Poppin',
-    'Découvre les meilleurs bons plans près de chez toi.',
-    jsonb_build_object('type', 'welcome')
-  )
-on conflict (name) do nothing;

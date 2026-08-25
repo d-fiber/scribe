@@ -41,7 +41,7 @@ export function Logo(): string {
       <rect width="32" height="32" rx="8" fill="#7c3aed"/>
       <path d="M10 16L16 10L22 16L16 22L10 16Z" fill="white" opacity="0.9"/>
       <path d="M16 10L22 16L16 22" fill="white" opacity="0.5"/>
-      <text x="40" y="21" font-family="Inter, sans-serif" font-weight="700" font-size="16" fill="#fafafa" letter-spacing="-0.5">Poppin</text>
+      <text x="40" y="21" font-family="Inter, sans-serif" font-weight="700" font-size="16" fill="#fafafa" letter-spacing="-0.5">scribe</text>
     </svg>
   `)
   }`;

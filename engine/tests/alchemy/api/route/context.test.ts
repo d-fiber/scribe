@@ -46,7 +46,7 @@ function invoked(over: Partial<Invoked> = {}): Invoked {
     method: "POST",
     path: "/app/favorites/brands",
     ip: "127.0.0.1",
-    userAgent: "poppin/1.0",
+    userAgent: "scribe-client/1.0",
     sessionId: null,
     pathParams: {},
     query: {},
