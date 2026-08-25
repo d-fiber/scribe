@@ -35,7 +35,7 @@ by hand. Every generated file opens with a line saying so and naming the command
 ## What comes mounted
 
 A project mounts the packages it wants and gets nothing else. They live in
-[`scribe_packages`](https://github.com/d-fiber/scribe_packages), under `engine/packages/`.
+[`scribe_packages`](https://github.com/d-fiber/scribe_packages), under `packages/`.
 
 | Package          | What it holds                                                                                                                                                                   |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -79,7 +79,7 @@ sh tools/install.sh
 | Repository                                                            | What it is                                                                    |
 | --------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | [`scribe`](https://github.com/d-fiber/scribe)                         | the framework, this one                                                       |
-| [`scribe_packages`](https://github.com/d-fiber/scribe_packages)       | the mountable packages, a copy under `engine/packages/`                       |
+| [`scribe_packages`](https://github.com/d-fiber/scribe_packages)       | the mountable packages, a copy under `packages/`                              |
 | [`scribe_alchemy`](https://github.com/d-fiber/scribe_alchemy)         | the language the framework and its packages are both written in               |
 | [`scribe_pkg_builder`](https://github.com/d-fiber/scribe_pkg_builder) | what reads the packages, resolves them and writes the import map and the lock |
 | [`scribe_tools`](https://github.com/d-fiber/scribe_tools)             | `scribe`, the CLI a project is worked through                                 |
@@ -88,13 +88,13 @@ sh tools/install.sh
 ## Layout
 
 ```
-engine/contracts/   the pure types and the ports, which depend on nothing
+alchemy/            the vocabulary a package is written out of, which depends on nothing
+engine/contracts/   the pure types and the ports
 engine/runtime/     the primitives of the process: scope, device, ip, settings
 engine/kernel/      the HTTP pipeline: endpoint, router, identity, observability
 engine/embedder/    the fifteen points where a project reaches the framework
 engine/testing/     the test harness a package is handed
 engine/shell/       how the process starts, and the two runtimes
-engine/alchemy/     the vocabulary a package is written out of
 db/                 the base schema, played when the database is built
 packages/           the mountable packages
 public/             mail rendering and the public pages
@@ -110,10 +110,11 @@ web/                the documentation portal
 Removing a project and running `deno check`, `deno lint` and `deno task test` has to pass. The framework reaches the
 project through fifteen dynamic imports, each with a defined fallback, so a project that provides nothing still boots.
 
-**The layers are checked by the machine, not by discipline.** Seven layers, one direction, and a lint rule in
-`engine/.lint/layers.ts` that fails `deno lint` on anything reaching upward. A second rule gives directories a notion of
-private that TypeScript does not have: a file or an identifier prefixed `_` is visible only in its own directory and
-below.
+**The layers are checked by the machine, not by discipline.** Each layer is a workspace member that declares what it may
+reach, so a file importing another layer that its own `deno.json` does not name fails `deno check` with a TS2307. A path
+that walks around that check is caught by `.lint/member-escape.ts`, and `.lint/private-module-scope.ts` gives
+directories a notion of private that TypeScript does not have: a file or an identifier prefixed `_` is visible only in
+its own directory and below.
 
 **A project extends, it never modifies.** There is no `if (project === ...)` anywhere. A project mounts routers,
 declares optional extensions, registers hooks and queue runners, adds its columns with `ALTER TABLE`, and overrides the

@@ -86,18 +86,14 @@ and friends, `#` for shell, Python and Ruby, `--` for SQL. It goes at the very t
 Copy it from any neighbouring file of the same language. CI refuses a file without it, and refuses one that carries a
 copyright line without naming the license.
 
-Versions are not bumped by hand. `.github/versioning/bump.py` compares the public surface of each component between two
-revisions and decides on its own whether the change is a major, a minor or a patch. Removing an exported symbol or a
-protobuf field is a major, adding one is a minor.
+The version is bumped by hand, and only by the owner: `.github/version/check.sh` reads who moved it and fails on anyone
+else. There is one number for the whole framework, in `deno.json`, and no component carries its own. It is what a
+project compares itself against when it checks for an update, so it is the number that matters to whoever installs
+scribe rather than works on it.
 
-Three components carry their own version: `protocol/VERSION`, `engine/core` and `sdk/js`. The `VERSION` file at the root
-is the version of scribe as a whole, and it moves by the strongest bump any component took. It is the number a project
-compares itself against when it checks for an update, so it is the one that matters to people who install scribe rather
-than work on it.
-
-`CHANGELOG.md` is written by the same run, from commit subjects grouped by tag. This is what your `[TAG]:` prefix ends
-up doing, which is a good reason to pick it carefully. `[RELEASE]` commits are left out, since they are the bookkeeping
-itself.
+`CHANGELOG.md` is written when that number moves, from commit subjects grouped by tag. This is what your `[TAG]:` prefix
+ends up doing, which is a good reason to pick it carefully. `[RELEASE]` commits are left out, since they are the
+bookkeeping itself.
 
 One tag carries more weight than the others. A surface diff sees a symbol disappear, but it cannot see a field that kept
 its name and changed its meaning, which is the worst kind of break because nothing fails at compile time. Tagging such a
