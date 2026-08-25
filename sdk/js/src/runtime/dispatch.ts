@@ -69,6 +69,7 @@ import { describeCause } from "../transport/failure.ts";
 import { InvocationContext } from "./context.ts";
 import { CallScope } from "./scope.ts";
 
+// deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
 export async function invoke(worker: WorkerDefinition, invocation: Invocation): Promise<Reply> {
   const mounted = worker.routeFor(invocation.routeId);
   if (!mounted) {
@@ -123,6 +124,7 @@ export async function deliverLogs(
   return create(LogDeliveryAckSchema, {});
 }
 
+// deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
 export async function handleBatch(worker: WorkerDefinition, batch: Batch): Promise<BatchOutcome> {
   const queue = worker.queueFor(batch.queueId);
   if (!queue) {
@@ -177,6 +179,7 @@ export async function handleBatch(worker: WorkerDefinition, batch: Batch): Promi
   );
 }
 
+// deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
 export async function handleEvent(worker: WorkerDefinition, event: Event): Promise<HandleResult> {
   const hook = worker.hookFor(event.hookId);
   if (!hook) {
@@ -214,6 +217,7 @@ export async function handleEvent(worker: WorkerDefinition, event: Event): Promi
   );
 }
 
+// deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
 export async function triggerCron(
   worker: WorkerDefinition,
   trigger: CronTrigger,
