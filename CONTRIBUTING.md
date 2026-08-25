@@ -90,10 +90,10 @@ The version is bumped by hand, and only by the owner: `.github/version/check.sh`
 else. One number covers the whole framework, in `deno.json`. It is what a project compares itself against when it checks
 for an update, so it is the number that matters to whoever installs scribe rather than works on it.
 
-`protocol/VERSION` is the one number that moves on its own, because it says something else: which wire contract a host
-and a worker are speaking. A worker refuses a host whose major differs from its own, so that number changes when the
-contract does and not when the framework does. `sdk/js/tests/conformance.test.ts` fails if the SDK stops announcing what
-the file says.
+That number is also the wire contract. `PROTOCOL_VERSION` in `sdk/js/src/protocol/version.ts` announces it, a worker
+refuses a host whose major differs from its own, and `sdk/js/tests/conformance.test.ts` fails if the two stop agreeing.
+What the single number costs is that a major bump of the framework refuses every worker built against the one before,
+whether or not the contract itself moved.
 
 `CHANGELOG.md` is written when that number moves, from commit subjects grouped by tag. This is what your `[TAG]:` prefix
 ends up doing, which is a good reason to pick it carefully. `[RELEASE]` commits are left out, since they are the

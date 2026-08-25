@@ -67,10 +67,10 @@ async function protoFiles(): Promise<string[]> {
   return found;
 }
 
-Deno.test("the SDK announces the protocol version the contract carries", async () => {
-  const declared = (await Deno.readTextFile(new URL("protocol/VERSION", scribeRoot))).trim();
+Deno.test("the SDK announces the version the framework carries", async () => {
+  const manifest = JSON.parse(await Deno.readTextFile(new URL("deno.json", scribeRoot)));
 
-  assertEquals(PROTOCOL_VERSION, declared);
+  assertEquals(PROTOCOL_VERSION, manifest.version);
 });
 
 Deno.test("every .proto of the contract has its generated stub in the SDK", async () => {
