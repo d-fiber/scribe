@@ -83,7 +83,6 @@ sh tools/install.sh
 | [`scribe_alchemy`](https://github.com/d-fiber/scribe_alchemy)         | the language the framework and its packages are both written in               |
 | [`scribe_pkg_builder`](https://github.com/d-fiber/scribe_pkg_builder) | what reads the packages, resolves them and writes the import map and the lock |
 | [`scribe_tools`](https://github.com/d-fiber/scribe_tools)             | `scribe`, the CLI a project is worked through                                 |
-| [`scribe_dev_tools`](https://github.com/d-fiber/scribe_dev_tools)     | `scribedev`, the CLI the framework is worked on with                          |
 
 ## Layout
 

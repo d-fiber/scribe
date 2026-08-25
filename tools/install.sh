@@ -38,10 +38,9 @@
 set -eu
 
 REPOSITORY="${SCRIBE_REPOSITORY:-d-fiber/scribe}"
-TAG="${SCRIBE_TOOLS_TAG:-tools-latest}"
 BRANCH="${SCRIBE_BRANCH:-main}"
-TOOLS="scribe docs scribedev"
-TOOLS_REPOSITORY="${SCRIBEDEV_REPOSITORY:-d-fiber/scribe_dev_tools}"
+TOOLS="scribe"
+TOOLS_REPOSITORY="${SCRIBE_TOOLS_REPOSITORY:-d-fiber/scribe_tools}"
 
 say() { printf '%s\n' "$*"; }
 fail() { printf '%s\n' "$*" >&2; exit 1; }
@@ -123,18 +122,9 @@ fetch() {
     asset="$tool-$PLATFORM$EXTENSION"
     target="$destination/$tool$EXTENSION"
 
-    case "$tool" in
-      scribedev)
-        from="$TOOLS_REPOSITORY"
-        at="latest"
-        url="https://github.com/$from/releases/latest/download/$asset"
-        ;;
-      *)
-        from="$REPOSITORY"
-        at="$TAG"
-        url="https://github.com/$from/releases/download/$TAG/$asset"
-        ;;
-    esac
+    from="$TOOLS_REPOSITORY"
+    at="latest"
+    url="https://github.com/$from/releases/latest/download/$asset"
 
     say "  $asset from $from"
     rm -f "$target"
@@ -160,7 +150,7 @@ main() {
   detect_platform
   locate_or_clone
 
-  say "Fetching the $PLATFORM tools from $REPOSITORY release $TAG"
+  say "Fetching the $PLATFORM tools from $TOOLS_REPOSITORY"
   fetch
 
   say ""
@@ -169,7 +159,7 @@ main() {
   say ""
   say "They carry no platform in their path, so a link into your PATH is the same"
   say "line on every machine:"
-  say "  ln -sfn $ROOT/tools/scribedev ~/.local/bin/scribedev"
+  say "  ln -sfn $ROOT/tools/scribe ~/.local/bin/scribe"
   say ""
   say "They are deliberately not committed, so run this again after pulling a"
   say "release that rebuilt them. tools/.platform says which build is in there."
