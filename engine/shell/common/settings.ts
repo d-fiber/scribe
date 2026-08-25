@@ -35,16 +35,12 @@
 // LICENSE file, the LICENSE file governs.
 
 import { extensions, OptionalExtension } from "@scribe/runtime/support/extensions/mod.ts";
-import { cacheSettings } from "@scribe/foundation/lib/src/cache/cache_settings.ts";
-import { databaseSettings } from "@scribe/foundation/lib/src/database/database_settings.ts";
+import { cacheSettings, databaseSettings, queueSettings, RedisRateLimiters, required } from "@scribe/foundation";
 import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
 import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
 import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
-import { queueSettings } from "@scribe/foundation/lib/src/queue/queue_settings.ts";
-import { required } from "@scribe/foundation/lib/src/environment.ts";
 import { RateLimiters } from "@scribe/alchemy";
-import { RedisRateLimiters } from "@scribe/foundation/lib/src/rate_limit/redis_rate_limiter.ts";
 import { workerSettings } from "@scribe/runtime/support/settings/worker.ts";
 import { EXTENSION_CRON, EXTENSION_QUEUE } from "./extensions.ts";
 

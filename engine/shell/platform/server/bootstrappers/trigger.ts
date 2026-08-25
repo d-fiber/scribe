@@ -34,9 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { triggerRegistry } from "@scribe/foundation/lib/src/trigger/trigger_registry.ts";
-import { syncDeclaredSources } from "@scribe/foundation/lib/src/trigger/trigger_sources.ts";
-import { triggerRunner } from "@scribe/foundation/lib/src/trigger/trigger_runner.ts";
+import { syncDeclaredSources, triggerRegistry, triggerRunner } from "@scribe/foundation";
 import type { Bootstrapper } from "../../../common/bootstrapper.ts";
 
 /**

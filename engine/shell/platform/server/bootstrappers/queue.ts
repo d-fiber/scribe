@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { queueRunner } from "@scribe/foundation/lib/src/queue/runner/queue_runner.ts";
+import { queueRunner } from "@scribe/foundation";
 import type { Bootstrapper } from "../../../common/bootstrapper.ts";
 
 export class QueueBootstrapper implements Bootstrapper {

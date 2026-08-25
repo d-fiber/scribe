@@ -43,7 +43,7 @@ EXCLUDED="node_modules .git .dart_tool __pycache__ gen"
 
 # The number of cross-package imports that walk around a package's door today.
 # It is a debt: it may go down, never up. Lower it when you fix one.
-SIDE_DOOR_THRESHOLD=29
+SIDE_DOOR_THRESHOLD=0
 
 say() {
   echo "[$SCOPE] $1"

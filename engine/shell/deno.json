@@ -3,7 +3,7 @@
     "@scribe/contracts/": "../contracts/",
     "@scribe/embedder/": "../embedder/",
     "@scribe/foundation": "../../packages/foundation/lib/foundation.ts",
-    "@scribe/foundation/": "../../packages/foundation/",
+    "@scribe/foundation/testing": "../../packages/foundation/tests/testing/testing.ts",
     "@scribe/kernel/": "../kernel/",
     "@scribe/runtime/": "../runtime/",
     "@scribe/shell/": "./"

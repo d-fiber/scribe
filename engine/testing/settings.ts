@@ -34,15 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { scribe } from "@scribe/foundation/lib/foundation.ts";
-import { cacheSettings } from "@scribe/foundation/lib/src/cache/cache_settings.ts";
-import { databaseSettings } from "@scribe/foundation/lib/src/database/database_settings.ts";
+import { cacheSettings, databaseSettings, optional, queueSettings, scribe } from "@scribe/foundation";
 import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
 import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
 import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
-import { queueSettings } from "@scribe/foundation/lib/src/queue/queue_settings.ts";
-import { optional } from "@scribe/foundation/lib/src/environment.ts";
 
 export function installTestSettings(): void {
   if (cacheSettings.configured) return;

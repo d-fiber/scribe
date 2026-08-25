@@ -50,17 +50,18 @@ import {
   QueryResultBatchSchema,
   QueryResultSchema,
 } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
-import { PostgrestClients } from "@scribe/foundation/lib/src/database/postgrest_clients.ts";
-import { ownerOf } from "@scribe/foundation/lib/src/database/table_owners.ts";
 import {
+  AMBIGUITY_PROBE,
   assertPlainColumn,
   keywordLiteral,
+  NOBODY,
+  ownerOf,
+  ownerScope,
+  PostgrestClients,
   quoteFilterList,
   quoteFilterLiteral,
   UnsafeFilterError,
-} from "@scribe/foundation/lib/src/database/query/filter_literal.ts";
-import { NOBODY, ownerScope } from "@scribe/foundation/lib/src/database/query/owner_scope.ts";
-import { AMBIGUITY_PROBE } from "@scribe/foundation/lib/src/database/query/query_state.ts";
+} from "@scribe/foundation";
 import { decodeJson, encodeJson } from "../control/json.ts";
 
 function applyOperator(builder: any, filter: Filter): any {

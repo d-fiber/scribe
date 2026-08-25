@@ -40,7 +40,7 @@
 
 import { Duration, rateLimit, RateLimiters } from "@scribe/alchemy";
 import { assertEquals } from "@std/assert";
-import { installRateLimiterMock } from "@scribe/foundation/tests/testing/cache.ts";
+import { installRateLimiterMock } from "@scribe/foundation/testing";
 
 function aLimit() {
   return rateLimit({ key: "x", limit: 10, window: Duration.seconds(60), penalty: Duration.seconds(60) });

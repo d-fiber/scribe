@@ -37,7 +37,7 @@
 import { cache, Duration } from "@scribe/alchemy";
 import type { Cache } from "@scribe/alchemy";
 import { JwtVerifier } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
-import { IDENTITY_CACHE_KEY, IdentityRevocation } from "@scribe/foundation/lib/src/redis/identity_revocation.ts";
+import { IDENTITY_CACHE_KEY, IdentityRevocation } from "@scribe/foundation";
 import { TtlLru } from "@scribe/runtime/support/cache/ttl_lru.ts";
 import { sha256Hex } from "@scribe/runtime/support/crypto/hash.ts";
 import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";

@@ -52,7 +52,7 @@ import {
   type StorageMediaSpec,
   type StorageObject,
   StorageVisibility,
-} from "@scribe/storage/lib/storage.ts";
+} from "@scribe/storage";
 
 const PLACEHOLDER = /^\{([A-Za-z][A-Za-z0-9_]*)\}$/;
 

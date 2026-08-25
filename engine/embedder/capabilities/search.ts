@@ -43,7 +43,7 @@ import {
   type SearchResult,
   SearchResultSchema,
 } from "@scribe/sdk/gen/scribe/packages/search/protocol/search_pb.ts";
-import { type AnySearchIndex, indexNamed } from "@scribe/search/lib/search.ts";
+import { type AnySearchIndex, indexNamed } from "@scribe/search";
 import { decodeJson, encodeJson } from "../control/json.ts";
 
 function failed(scope: string, cause: unknown): { code: string; message: string } {

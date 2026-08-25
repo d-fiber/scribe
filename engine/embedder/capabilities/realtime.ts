@@ -43,7 +43,7 @@ import {
   type GrantResult,
   GrantResultSchema,
 } from "@scribe/sdk/gen/scribe/packages/realtime/protocol/realtime_pb.ts";
-import { broadcast, GrantedDestination } from "@scribe/realtime/lib/realtime.ts";
+import { broadcast, GrantedDestination } from "@scribe/realtime";
 import { decodeJson } from "../control/json.ts";
 
 function failed(scope: string, cause: unknown): { code: string; message: string } {

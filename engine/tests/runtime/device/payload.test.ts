@@ -42,7 +42,7 @@ import {
   DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS,
 } from "@scribe/runtime/device/payload/freshness.ts";
 import { DevicePayloadValidator } from "@scribe/runtime/device/payload/validator.ts";
-import { installValkeryMock } from "@scribe/foundation/tests/testing/cache.ts";
+import { installValkeryMock } from "@scribe/foundation/testing";
 import { assert, assertEquals } from "@std/assert";
 import { spy } from "@std/testing/mock";
 

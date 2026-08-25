@@ -40,7 +40,7 @@ import { ServerResponse } from "@scribe/alchemy/route";
 import type { RouteDescriptor } from "@scribe/kernel/http/routing/descriptor.ts";
 import { mountDescriptors } from "@scribe/kernel/http/routing/descriptor_mount.ts";
 import { callEndpoint } from "@scribe/testing/kernel/endpoint.ts";
-import { installRateLimiterMock } from "@scribe/foundation/tests/testing/cache.ts";
+import { installRateLimiterMock } from "@scribe/foundation/testing";
 import { assertEquals } from "@std/assert";
 import { Hono } from "hono";
 

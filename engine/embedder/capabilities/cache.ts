@@ -46,7 +46,7 @@ import {
   type SetResult,
   SetResultSchema,
 } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/cache_pb.ts";
-import { kv } from "@scribe/foundation/lib/src/redis/kv.ts";
+import { kv } from "@scribe/foundation";
 import { decodeJson, encodeJson } from "../control/json.ts";
 
 const PREFIX = "worker";
