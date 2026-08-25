@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "@scribe/alchemy";
+import { type Future, Registry } from "@scribe/alchemy";
 
 export interface Extension {
   readonly name: string;
@@ -42,29 +42,24 @@ export interface Extension {
 }
 
 export class ExtensionRegistry {
-  readonly #declared = new Map<string, Extension>();
+  readonly #declared = new Registry<Extension>("extension");
   readonly #loaded = new Map<string, Future<unknown | null>>();
 
   register(extension: Extension): void {
-    if (this.#declared.has(extension.name)) {
-      throw new Error(
-        `[extensions] "${extension.name}" is already registered.`,
-      );
-    }
-    this.#declared.set(extension.name, extension);
+    this.#declared.declare(extension.name, extension);
   }
 
   /** Whether something already answers for `name`. */
   declares(name: string): boolean {
-    return this.#declared.has(name);
+    return this.#declared.named(name) !== null;
   }
 
   load(name: string): Future<unknown | null> {
     const memoized = this.#loaded.get(name);
     if (memoized !== undefined) return memoized;
 
-    const extension = this.#declared.get(name);
-    if (extension === undefined) {
+    const extension = this.#declared.named(name);
+    if (extension === null) {
       console.info(`[extensions] ${name} not registered, skipped.`);
       return Promise.resolve(null);
     }
@@ -75,7 +70,7 @@ export class ExtensionRegistry {
   }
 
   registered(): readonly string[] {
-    return [...this.#declared.keys()];
+    return this.#declared.all().map((extension) => extension.name);
   }
 }
 

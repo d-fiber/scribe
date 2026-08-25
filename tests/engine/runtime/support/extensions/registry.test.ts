@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { DuplicateDeclarationError } from "@scribe/alchemy";
 import { type Extension, ExtensionRegistry } from "@scribe/runtime/support/extensions/registry.ts";
 import { isMissingModule } from "@scribe/runtime/support/extensions/missing_module.ts";
 import { OptionalExtension } from "@scribe/runtime/support/extensions/optional_extension.ts";
@@ -90,8 +91,8 @@ Deno.test("ExtensionRegistry refuses a duplicate registration", () => {
 
   assertThrows(
     () => registry.register(new CountingExtension("cron")),
-    Error,
-    "already registered",
+    DuplicateDeclarationError,
+    'extension "cron" is declared twice',
   );
 });
 
