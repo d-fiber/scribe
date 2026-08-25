@@ -55,7 +55,7 @@ const ROOT = new URL("../", import.meta.url).pathname.replace(/\/$/, "");
 const MEMBER_ROOTS = ["engine/", "packages/"] as const;
 
 /** The members that sit at the root rather than under a directory of their own. */
-const ROOT_MEMBERS = ["alchemy", "sdk/js"] as const;
+const ROOT_MEMBERS = ["alchemy", "sdk/js", "tests"] as const;
 
 /** The member `filename` belongs to, as an absolute directory, or null when it is in none. */
 function memberOf(filename: string): string | null {

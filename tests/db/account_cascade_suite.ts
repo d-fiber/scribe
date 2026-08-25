@@ -36,7 +36,7 @@
 
 import { assert, assertEquals } from "@std/assert";
 
-const SDK_ROOT = new URL("../../../", import.meta.url).pathname;
+const SDK_ROOT = new URL("../../", import.meta.url).pathname;
 
 const SDK_SQL_DIRS = [
   `${SDK_ROOT}db/init`,

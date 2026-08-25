@@ -8,7 +8,7 @@
     "./engine/embedder",
     "./engine/testing",
     "./engine/shell",
-    "./engine/tests",
+    "./tests",
     "./packages/audience",
     "./packages/auth",
     "./packages/dynamic_links",
@@ -21,8 +21,8 @@
   ],
   "tasks": {
     "check": "deno check engine packages",
-    "test": "deno test --allow-env --allow-sys --allow-read --allow-write --env-file=engine/tests/.env.test --parallel engine packages",
-    "test:net": "deno test --allow-env --allow-sys --allow-read --allow-write --allow-net --env-file=engine/tests/.env.test --parallel engine packages",
+    "test": "deno test --allow-env --allow-sys --allow-read --allow-write --env-file=tests/.env.test --parallel engine packages tests",
+    "test:net": "deno test --allow-env --allow-sys --allow-read --allow-write --allow-net --env-file=tests/.env.test --parallel engine packages tests",
     "lint": "deno lint"
   },
   "fmt": {
