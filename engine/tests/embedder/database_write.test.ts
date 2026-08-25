@@ -39,7 +39,7 @@ import "@scribe/testing/settings.ts";
 import { create } from "@bufbuild/protobuf";
 import { assertEquals } from "@std/assert";
 import { installMock } from "@scribe/testing/install.ts";
-import { PostgrestClients } from "@scribe/foundation";
+import { PostgrestClients } from "@scribe/foundation/database";
 import { FakePostgrestClient } from "@scribe/foundation/testing";
 import { Operation, QuerySchema } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
 import { executeQuery } from "@scribe/embedder/capabilities/database.ts";

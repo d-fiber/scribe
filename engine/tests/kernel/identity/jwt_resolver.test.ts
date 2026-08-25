@@ -37,8 +37,8 @@
 import "@scribe/testing/settings.ts";
 import { JwtIdentityResolver } from "@scribe/kernel/identity/resolver/jwt_resolver.ts";
 import { JwtVerifier } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
-import { IdentityRevocation, kv } from "@scribe/foundation";
-import type { Kv } from "@scribe/foundation";
+import { IdentityRevocation, kv } from "@scribe/foundation/redis";
+import type { Kv } from "@scribe/foundation/redis";
 import { installValkeryMock } from "@scribe/foundation/testing";
 import { installMock } from "@scribe/testing/install.ts";
 import { assert, assertEquals } from "@std/assert";

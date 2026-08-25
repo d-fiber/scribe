@@ -41,7 +41,7 @@ import {
   PushResultSchema,
 } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/queue_pb.ts";
 import { Duration } from "@scribe/alchemy";
-import { QueuePublisher, queueRegistry } from "@scribe/foundation";
+import { QueuePublisher, queueRegistry } from "@scribe/foundation/queue";
 import { decodeJson } from "../control/json.ts";
 
 /**

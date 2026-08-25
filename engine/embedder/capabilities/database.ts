@@ -61,7 +61,7 @@ import {
   quoteFilterList,
   quoteFilterLiteral,
   UnsafeFilterError,
-} from "@scribe/foundation";
+} from "@scribe/foundation/database";
 import { decodeJson, encodeJson } from "../control/json.ts";
 
 function applyOperator(builder: any, filter: Filter): any {

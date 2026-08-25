@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { cronRegistry, cronRunner } from "@scribe/foundation";
+import { cronRegistry, cronRunner } from "@scribe/foundation/cron";
 import type { Bootstrapper } from "../../../common/bootstrapper.ts";
 
 export class CronBootstrapper implements Bootstrapper {

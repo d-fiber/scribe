@@ -34,59 +34,23 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Duration } from "@scribe/alchemy";
-import type { RateLimit } from "@scribe/alchemy/route";
-import { ApiContext } from "@scribe/kernel/endpoint/api.ts";
-import { ServiceEndpoint } from "@scribe/kernel/endpoint/service.ts";
-import { queueRunner, queueStatus } from "@scribe/foundation/queue";
+/** Tables, the queries built against them, and what a query is allowed to see. */
 
-const _RATE_LIMIT: RateLimit = {
-  limit: 1000,
-  window: Duration.minutes(1),
-  penalty: Duration.minutes(1),
-  maxPenalty: Duration.minutes(1),
-};
-
-export class QueueDrainEndpoint extends ServiceEndpoint {
-  protected override rateLimit(): RateLimit {
-    return _RATE_LIMIT;
-  }
-
-  protected async run(_ctx: ApiContext): Promise<Response> {
-    return this.response.ok({ data: await queueRunner.run() });
-  }
-}
-
-export class QueueDrainOneEndpoint extends ServiceEndpoint {
-  readonly #name: string;
-
-  constructor(name: string) {
-    super();
-    this.#name = name;
-  }
-
-  protected override rateLimit(): RateLimit {
-    return _RATE_LIMIT;
-  }
-
-  protected async run(_ctx: ApiContext): Promise<Response> {
-    const result = await queueRunner.runOne(this.#name);
-    if (result === null) {
-      return this.response.notFound({
-        code: "unknown_queue",
-        message: `No queue named "${this.#name}" is declared.`,
-      });
-    }
-    return this.response.ok({ data: result });
-  }
-}
-
-export class QueueStatusEndpoint extends ServiceEndpoint {
-  protected override rateLimit(): RateLimit {
-    return _RATE_LIMIT;
-  }
-
-  protected async run(_ctx: ApiContext): Promise<Response> {
-    return this.response.ok({ data: await queueStatus.all() });
-  }
-}
+export {
+  assertPlainColumn,
+  keywordLiteral,
+  quoteFilterList,
+  quoteFilterLiteral,
+  UnsafeFilterError,
+} from "./src/database/query/filter_literal.ts";
+export { AMBIGUITY_PROBE } from "./src/database/query/query_state.ts";
+export { DatabaseQueryError, TypedQueryBuilder } from "./src/database/query/typed_query_builder.ts";
+export { NOBODY, ownerScope, READS_EVERY_ROW, type ScopeDecision } from "./src/database/query/owner_scope.ts";
+export { PostgrestClients } from "./src/database/postgrest_clients.ts";
+export { PostgrestDatabases } from "./src/database/postgrest_databases.ts";
+export { database, DatabaseClient } from "./src/database/database_client.ts";
+export { databaseSettings } from "./src/database/database_settings.ts";
+export { from, type RpcBuilder, TablesBase } from "./src/database/tables_base.ts";
+export { ownerOf, registerTableOwners } from "./src/database/table_owners.ts";
+export { type DatabaseSchema, Table, type TableShape } from "./src/database/table.ts";
+export { wrote } from "./src/database/wrote.ts";

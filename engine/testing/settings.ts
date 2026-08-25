@@ -34,7 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { cacheSettings, databaseSettings, optional, queueSettings, scribe } from "@scribe/foundation";
+import { cacheSettings } from "@scribe/foundation/cache";
+import { databaseSettings } from "@scribe/foundation/database";
+import { optional, scribe } from "@scribe/foundation";
+import { queueSettings } from "@scribe/foundation/queue";
 import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
 import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
 import { httpSettings } from "@scribe/runtime/support/settings/http.ts";

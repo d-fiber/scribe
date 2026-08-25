@@ -34,59 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Duration } from "@scribe/alchemy";
-import type { RateLimit } from "@scribe/alchemy/route";
-import { ApiContext } from "@scribe/kernel/endpoint/api.ts";
-import { ServiceEndpoint } from "@scribe/kernel/endpoint/service.ts";
-import { queueRunner, queueStatus } from "@scribe/foundation/queue";
+/** What this package writes down about itself. */
 
-const _RATE_LIMIT: RateLimit = {
-  limit: 1000,
-  window: Duration.minutes(1),
-  penalty: Duration.minutes(1),
-  maxPenalty: Duration.minutes(1),
-};
-
-export class QueueDrainEndpoint extends ServiceEndpoint {
-  protected override rateLimit(): RateLimit {
-    return _RATE_LIMIT;
-  }
-
-  protected async run(_ctx: ApiContext): Promise<Response> {
-    return this.response.ok({ data: await queueRunner.run() });
-  }
-}
-
-export class QueueDrainOneEndpoint extends ServiceEndpoint {
-  readonly #name: string;
-
-  constructor(name: string) {
-    super();
-    this.#name = name;
-  }
-
-  protected override rateLimit(): RateLimit {
-    return _RATE_LIMIT;
-  }
-
-  protected async run(_ctx: ApiContext): Promise<Response> {
-    const result = await queueRunner.runOne(this.#name);
-    if (result === null) {
-      return this.response.notFound({
-        code: "unknown_queue",
-        message: `No queue named "${this.#name}" is declared.`,
-      });
-    }
-    return this.response.ok({ data: result });
-  }
-}
-
-export class QueueStatusEndpoint extends ServiceEndpoint {
-  protected override rateLimit(): RateLimit {
-    return _RATE_LIMIT;
-  }
-
-  protected async run(_ctx: ApiContext): Promise<Response> {
-    return this.response.ok({ data: await queueStatus.all() });
-  }
-}
+export { ConsoleLogger } from "./src/observe/console_logger.ts";
+export { SystemNow } from "./src/observe/system_now.ts";

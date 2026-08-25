@@ -40,7 +40,7 @@ import {
   EmitResultSchema,
   type Event,
 } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/hook_pb.ts";
-import { hookRegistry } from "@scribe/foundation";
+import { hookRegistry } from "@scribe/foundation/hook";
 import { decodeJson } from "../control/json.ts";
 
 /**
