@@ -105,8 +105,12 @@ def main() -> int:
 
     if not registry.get("agreementInForce", False):
         print(
-            f"\n{len(unsigned)} contributor(s) have not signed, but the agreement is not in force yet.\n"
-            "See .github/cla/CLA.md. Not failing the build until the text exists.",
+            f"\n{len(unsigned)} contributor(s) have not signed, and the agreement is not in force.\n"
+            "The text in .github/cla/CLA.md is an adaptation of the Apache ICLA that no lawyer\n"
+            "has read, and it still has two blanks: the company and its seat in clause 1, and\n"
+            "the governing law and venue in clause 10. Nobody is asked to sign that. Arming it\n"
+            "means filling those in and having the text reviewed, or pointing at a hosted\n"
+            "agreement the way Flutter points at Google's.",
             file=sys.stderr,
         )
         return 0
