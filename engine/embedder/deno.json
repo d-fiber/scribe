@@ -1,11 +1,15 @@
 {
   "imports": {
+    "@scribe/auth/": "../../packages/auth/",
     "@scribe/contracts/": "../contracts/",
     "@scribe/embedder/": "./",
     "@scribe/foundation/": "../../packages/foundation/",
     "@scribe/kernel/": "../kernel/",
+    "@scribe/realtime/": "../../packages/realtime/",
     "@scribe/runtime/": "../runtime/",
     "@scribe/sdk": "../../sdk/js/mod.ts",
-    "@scribe/sdk/": "../../sdk/js/"
+    "@scribe/sdk/": "../../sdk/js/",
+    "@scribe/search/": "../../packages/search/",
+    "@scribe/storage/": "../../packages/storage/"
   }
 }
