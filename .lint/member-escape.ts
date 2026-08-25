@@ -121,6 +121,12 @@ export default {
           ExportAllDeclaration(node) {
             check(node, (node.source as { value: string }).value);
           },
+          ImportExpression(node) {
+            const argument = node.source as { type?: string; value?: unknown } | undefined;
+            if (argument?.type !== "Literal" || typeof argument.value !== "string") return;
+
+            check(node, argument.value);
+          },
         };
       },
     },
