@@ -34,30 +34,36 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { MiddlewareHandler } from "hono";
 import { Hono } from "hono";
-import { honoRouter } from "@scribe/kernel/http/routing/hono_router.ts";
+import { TrieRouter } from "hono/router/trie-router";
 
-export abstract class Router {
-  readonly #middleware?: MiddlewareHandler;
-
-  constructor(middleware?: MiddlewareHandler) {
-    this.#middleware = middleware;
-  }
-
-  protected abstract routes(app: Hono): void;
-
-  private build(): Hono {
-    const app = honoRouter();
-    if (this.#middleware) app.use("*", this.#middleware);
-    this.routes(app);
-    return app;
-  }
-
-  static create<T extends Router, TArgs extends unknown[]>(
-    this: new (...args: TArgs) => T,
-    ...args: TArgs
-  ): Hono {
-    return new this(...args).build();
-  }
+/**
+ * A Hono built on the router the framework picks, rather than the one it defaults to.
+ *
+ * @remarks
+ * Hono's default is `SmartRouter`, which chooses `RegExpRouter` whenever the route
+ * table allows it. That router compiles every route into one regular expression,
+ * lazily, inside the first `match` the process serves. Three things follow from
+ * that, and the third is why this file exists.
+ *
+ * A match costs roughly a hundred instructions per mounted route, because the
+ * matching group is found by scanning them. At five thousand parameterised routes
+ * that is around forty microseconds against about one for a trie.
+ *
+ * The compile is paid on the first request rather than at boot, and it grows
+ * faster than the table: about a second at five thousand routes, three and a half
+ * at ten thousand. Every cold isolate pays it, on the first user it answers.
+ *
+ * And between twelve and fourteen thousand parameterised routes V8 refuses the
+ * expression outright, `SyntaxError: Regular expression too large`. No flag lifts
+ * it, `SmartRouter` catches only `UnsupportedPathError` and rethrows the rest, and
+ * it happens after the process booted and answered a health check on a static
+ * path. A trie has no such ceiling and is flat across the whole range.
+ *
+ * What it costs is about two hundred nanoseconds a request below fifty routes,
+ * where the expression is still small enough to win. A framework is not tuned for
+ * fifty routes.
+ */
+export function honoRouter(): Hono {
+  return new Hono({ router: new TrieRouter() });
 }

@@ -35,6 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Hono } from "hono";
+import { honoRouter } from "@scribe/kernel/http/routing/hono_router.ts";
 import { majorOf, PROTOCOL_VERSION } from "@scribe/sdk";
 import type { Manifest, NodeDeclaration } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import { workerSettings } from "@scribe/runtime/support/settings/worker.ts";
@@ -113,7 +114,7 @@ function resolver(): (node: NodeDeclaration) => Hono {
       );
     }
 
-    const app = new Hono();
+    const app = honoRouter();
     NodeSurfaces.register(node.name, app);
     return app;
   };

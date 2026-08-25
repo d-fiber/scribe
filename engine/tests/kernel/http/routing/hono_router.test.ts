@@ -34,30 +34,23 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { MiddlewareHandler } from "hono";
-import { Hono } from "hono";
+import { assert, assertEquals } from "@std/assert";
+import { TrieRouter } from "hono/router/trie-router";
 import { honoRouter } from "@scribe/kernel/http/routing/hono_router.ts";
 
-export abstract class Router {
-  readonly #middleware?: MiddlewareHandler;
+Deno.test("the framework names its router instead of letting hono choose one", () => {
+  assert(
+    honoRouter().router instanceof TrieRouter,
+    "hono chose the router, and its default compiles every route into one regular expression",
+  );
+});
 
-  constructor(middleware?: MiddlewareHandler) {
-    this.#middleware = middleware;
-  }
+Deno.test("a route table far past what a regular expression takes still answers", async () => {
+  const app = honoRouter();
+  for (let i = 0; i < 14_000; i++) app.get(`/r${i}/:id`, (c) => c.text(`${i}`));
 
-  protected abstract routes(app: Hono): void;
+  const answered = await app.fetch(new Request("http://api.test/r13999/7"));
 
-  private build(): Hono {
-    const app = honoRouter();
-    if (this.#middleware) app.use("*", this.#middleware);
-    this.routes(app);
-    return app;
-  }
-
-  static create<T extends Router, TArgs extends unknown[]>(
-    this: new (...args: TArgs) => T,
-    ...args: TArgs
-  ): Hono {
-    return new this(...args).build();
-  }
-}
+  assertEquals(answered.status, 200, "the first request to a large table was refused");
+  assertEquals(await answered.text(), "13999");
+});

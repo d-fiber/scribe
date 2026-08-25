@@ -42,6 +42,7 @@ import { LogRoutes } from "@scribe/kernel/observability/log_routing.ts";
 import { logBuffer } from "@scribe/kernel/observability/log_delivery.ts";
 import { request } from "@scribe/runtime/http/request.ts";
 import { Hono } from "hono";
+import { honoRouter } from "@scribe/kernel/http/routing/hono_router.ts";
 import { createMiddleware } from "hono/factory";
 
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
@@ -108,7 +109,7 @@ const observeExchange = createMiddleware(async (c, next) => {
 });
 
 export function logger(app: Hono): Hono {
-  const root: Hono = new Hono();
+  const root: Hono = honoRouter();
   root.use("*", observeExchange);
   root.route("/", app);
   return root;
