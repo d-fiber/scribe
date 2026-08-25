@@ -46,9 +46,10 @@ import { Search } from "@scribe/sdk/gen/scribe/packages/search/protocol/search_p
 import { Storage } from "@scribe/sdk/gen/scribe/packages/storage/protocol/storage_pb.ts";
 import { CapabilityTokens } from "./tokens.ts";
 import { cacheDelete, cacheGet, cacheSet } from "./cache.ts";
-import { hookEmit, queuePush } from "./event_driven.ts";
+import { hookEmit } from "./hook.ts";
+import { queuePush } from "./queue.ts";
 import { shipLogs } from "./logging.ts";
-import { executeQueries, executeQuery } from "./rest.ts";
+import { executeQueries, executeQuery } from "./database.ts";
 import {
   authBan,
   authDeleteAccount,

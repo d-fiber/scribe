@@ -34,40 +34,48 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/testing/settings.ts";
-
 import { create } from "@bufbuild/protobuf";
-import { assertEquals } from "@std/assert";
-import { installMock } from "@scribe/testing/install.ts";
-import { PostgrestClients } from "@scribe/foundation/lib/src/database/postgrest_clients.ts";
-import { FakePostgrestClient } from "@scribe/foundation/tests/testing/database.ts";
-import { Operation, QuerySchema } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
-import { executeQuery } from "@scribe/embedder/capabilities/database.ts";
+import {
+  type PushRequest,
+  type PushResult,
+  PushResultSchema,
+} from "@scribe/sdk/gen/scribe/packages/foundation/protocol/queue_pb.ts";
+import { Duration } from "@scribe/alchemy";
+import { QueuePublisher, queueRegistry } from "@scribe/foundation";
+import { decodeJson } from "../control/json.ts";
 
-const UNOWNED = "t_email_templates";
-
-function seeded(): { fake: FakePostgrestClient; restore(): void } {
-  const fake = new FakePostgrestClient({
-    [UNOWNED]: [{ id: 1, name: "welcome" }, { id: 2, name: "reset" }],
-  });
-  const mock = installMock(
-    PostgrestClients as unknown as Record<string, unknown>,
-    "service",
-    (() => fake) as unknown as never,
-  );
-  return { fake, restore: () => mock.restore() };
-}
-
-Deno.test("a worker delete with no predicate at all is refused, not run", async () => {
-  const { fake, restore } = seeded();
-  try {
-    const answer = await executeQuery(
-      create(QuerySchema, { table: UNOWNED, operation: Operation.DELETE }),
-    );
-
-    assertEquals(fake.rows(UNOWNED).length, 2, "no row may be removed by a query naming none");
-    assertEquals(answer.error?.code, "unbounded_write");
-  } finally {
-    restore();
+/**
+ * Puts what a worker sent on one of the queues the host declared.
+ *
+ * @remarks
+ * The queue has to be declared on the host: a worker names one, it does not create one, and a
+ * name nothing answers to is refused under `unknown_queue` rather than silently dropped.
+ *
+ * A request carrying several payloads pushes them together and answers one identifier per
+ * message, in the order they were given. A failure part way through leaves the messages already
+ * pushed on the queue, because nothing here can take one back.
+ */
+export async function queuePush(request: PushRequest): Promise<PushResult> {
+  const registered = queueRegistry.get(request.queueId);
+  if (!registered) {
+    return create(PushResultSchema, {
+      error: { code: "unknown_queue", message: `${request.queueId} is not declared by the host.` },
+    });
   }
-});
+
+  const producer = new QueuePublisher<unknown>(registered);
+  const delay = Number(request.delay?.millis ?? 0n);
+
+  try {
+    const messageIds = await Promise.all(
+      request.payloads.map((payload) =>
+        producer.push(decodeJson(payload), delay > 0 ? { delay: Duration.milliseconds(delay) } : {})
+      ),
+    );
+    return create(PushResultSchema, { messageIds });
+  } catch (cause) {
+    return create(PushResultSchema, {
+      error: { code: "push_failed", message: cause instanceof Error ? cause.message : String(cause) },
+    });
+  }
+}

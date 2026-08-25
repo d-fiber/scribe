@@ -34,40 +34,41 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/testing/settings.ts";
-
 import { create } from "@bufbuild/protobuf";
-import { assertEquals } from "@std/assert";
-import { installMock } from "@scribe/testing/install.ts";
-import { PostgrestClients } from "@scribe/foundation/lib/src/database/postgrest_clients.ts";
-import { FakePostgrestClient } from "@scribe/foundation/tests/testing/database.ts";
-import { Operation, QuerySchema } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
-import { executeQuery } from "@scribe/embedder/capabilities/database.ts";
+import {
+  type EmitResult,
+  EmitResultSchema,
+  type Event,
+} from "@scribe/sdk/gen/scribe/packages/foundation/protocol/hook_pb.ts";
+import { hookRegistry } from "@scribe/foundation";
+import { decodeJson } from "../control/json.ts";
 
-const UNOWNED = "t_email_templates";
-
-function seeded(): { fake: FakePostgrestClient; restore(): void } {
-  const fake = new FakePostgrestClient({
-    [UNOWNED]: [{ id: 1, name: "welcome" }, { id: 2, name: "reset" }],
-  });
-  const mock = installMock(
-    PostgrestClients as unknown as Record<string, unknown>,
-    "service",
-    (() => fake) as unknown as never,
-  );
-  return { fake, restore: () => mock.restore() };
-}
-
-Deno.test("a worker delete with no predicate at all is refused, not run", async () => {
-  const { fake, restore } = seeded();
-  try {
-    const answer = await executeQuery(
-      create(QuerySchema, { table: UNOWNED, operation: Operation.DELETE }),
-    );
-
-    assertEquals(fake.rows(UNOWNED).length, 2, "no row may be removed by a query naming none");
-    assertEquals(answer.error?.code, "unbounded_write");
-  } finally {
-    restore();
+/**
+ * Runs the handlers the host registered for the event a worker emitted.
+ *
+ * @remarks
+ * The hook has to be declared on the host, and an event nothing answers to is refused under
+ * `unknown_hook`: a worker emitting into a name that was never registered would otherwise
+ * believe it had been heard.
+ *
+ * `handled` is how many handlers ran, which is what tells an emitter that a hook exists but
+ * nobody subscribed to it. The handlers run before the answer leaves, so a failure in any one
+ * of them is carried back rather than swallowed.
+ */
+export async function hookEmit(event: Event): Promise<EmitResult> {
+  const hook = hookRegistry.get(event.event);
+  if (!hook) {
+    return create(EmitResultSchema, {
+      error: { code: "unknown_hook", message: `${event.event} is not declared by the host.` },
+    });
   }
-});
+
+  try {
+    await hook.run(decodeJson(event.payload) as never);
+    return create(EmitResultSchema, { handled: hook.handlers() });
+  } catch (cause) {
+    return create(EmitResultSchema, {
+      error: { code: "emit_failed", message: cause instanceof Error ? cause.message : String(cause) },
+    });
+  }
+}

@@ -37,10 +37,8 @@
 import { create } from "@bufbuild/protobuf";
 import { TimeSchema } from "../../gen/scribe/protocol/common_pb.ts";
 import { Queue } from "../../gen/scribe/packages/foundation/protocol/queue_pb.ts";
-import { Hook } from "../../gen/scribe/packages/foundation/protocol/hook_pb.ts";
 import { encodeJson } from "../contracts/json.ts";
 import type { Time } from "../contracts/time.ts";
-import { CallScope } from "../runtime/scope.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";
 
@@ -70,32 +68,5 @@ export const queue: QueueCapability = {
     });
     raiseOn("queue", result.error);
     return result.messageIds;
-  },
-};
-
-/** The events a worker fires so that whatever subscribed to them runs. */
-export interface HooksCapability {
-  /**
-   * Emits `event` with `payload`, and answers how many handlers the host ran for it.
-   *
-   * A zero means the event reached the host and nothing was listening, which is not a refusal.
-   * The trace identifier of the current call scope travels with the event, so what the handlers
-   * do stays under the trace that caused it.
-   *
-   * @throws {CapabilityError} When the host refused the emission.
-   */
-  emit(event: string, payload: unknown): Promise<number>;
-}
-
-export const hooks: HooksCapability = {
-  async emit(event: string, payload: unknown): Promise<number> {
-    const result = await host.client().call(Hook.method.emit, {
-      event,
-      payload: encodeJson(payload),
-      traceId: CallScope.current().traceId,
-      emittedAt: BigInt(Date.now()),
-    });
-    raiseOn("hook", result.error);
-    return result.handled;
   },
 };

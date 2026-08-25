@@ -34,40 +34,35 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/testing/settings.ts";
+import { Hook } from "../../gen/scribe/packages/foundation/protocol/hook_pb.ts";
+import { encodeJson } from "../contracts/json.ts";
+import { CallScope } from "../runtime/scope.ts";
+import { host } from "./channel.ts";
+import { raiseOn } from "./error.ts";
 
-import { create } from "@bufbuild/protobuf";
-import { assertEquals } from "@std/assert";
-import { installMock } from "@scribe/testing/install.ts";
-import { PostgrestClients } from "@scribe/foundation/lib/src/database/postgrest_clients.ts";
-import { FakePostgrestClient } from "@scribe/foundation/tests/testing/database.ts";
-import { Operation, QuerySchema } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
-import { executeQuery } from "@scribe/embedder/capabilities/database.ts";
-
-const UNOWNED = "t_email_templates";
-
-function seeded(): { fake: FakePostgrestClient; restore(): void } {
-  const fake = new FakePostgrestClient({
-    [UNOWNED]: [{ id: 1, name: "welcome" }, { id: 2, name: "reset" }],
-  });
-  const mock = installMock(
-    PostgrestClients as unknown as Record<string, unknown>,
-    "service",
-    (() => fake) as unknown as never,
-  );
-  return { fake, restore: () => mock.restore() };
+/** The events a worker fires so that whatever subscribed to them runs. */
+export interface HooksCapability {
+  /**
+   * Emits `event` with `payload`, and answers how many handlers the host ran for it.
+   *
+   * A zero means the event reached the host and nothing was listening, which is not a refusal.
+   * The trace identifier of the current call scope travels with the event, so what the handlers
+   * do stays under the trace that caused it.
+   *
+   * @throws {CapabilityError} When the host refused the emission.
+   */
+  emit(event: string, payload: unknown): Promise<number>;
 }
 
-Deno.test("a worker delete with no predicate at all is refused, not run", async () => {
-  const { fake, restore } = seeded();
-  try {
-    const answer = await executeQuery(
-      create(QuerySchema, { table: UNOWNED, operation: Operation.DELETE }),
-    );
-
-    assertEquals(fake.rows(UNOWNED).length, 2, "no row may be removed by a query naming none");
-    assertEquals(answer.error?.code, "unbounded_write");
-  } finally {
-    restore();
-  }
-});
+export const hooks: HooksCapability = {
+  async emit(event: string, payload: unknown): Promise<number> {
+    const result = await host.client().call(Hook.method.emit, {
+      event,
+      payload: encodeJson(payload),
+      traceId: CallScope.current().traceId,
+      emittedAt: BigInt(Date.now()),
+    });
+    raiseOn("hook", result.error);
+    return result.handled;
+  },
+};

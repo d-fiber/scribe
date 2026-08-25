@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Get, type InvocationContext, rest } from "../../../mod.ts";
+import { database, Get, type InvocationContext } from "../../../mod.ts";
 
 interface BrandRow extends Record<string, unknown> {
   brand_id: string;
@@ -43,7 +43,7 @@ interface BrandRow extends Record<string, unknown> {
 
 export class ReadBrand extends Get {
   protected override async run(ctx: InvocationContext): Promise<Response> {
-    const brand = await rest
+    const brand = await database
       .from<BrandRow>("brands")
       .where((row) => row.brand_id.eq(ctx.param("brandId") ?? ""))
       .first();

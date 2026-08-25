@@ -109,11 +109,12 @@ export type { Account, AccountBan, AccountDevice, AccountRole } from "./src/capa
 export { cache } from "./src/capabilities/cache.ts";
 export { host } from "./src/capabilities/channel.ts";
 export { CapabilityError } from "./src/capabilities/error.ts";
-export { hooks, queue } from "./src/capabilities/event_driven.ts";
+export { hooks } from "./src/capabilities/hook.ts";
+export { queue } from "./src/capabilities/queue.ts";
 export { realtime } from "./src/capabilities/realtime.ts";
-export type { FilterBuilder } from "./src/capabilities/rest/filter.ts";
-export { rest, RestQuery } from "./src/capabilities/rest/query.ts";
-export type { Page } from "./src/capabilities/rest/query.ts";
+export type { FilterBuilder } from "./src/capabilities/database/filter.ts";
+export { database, DatabaseQuery } from "./src/capabilities/database/query.ts";
+export type { Page } from "./src/capabilities/database/query.ts";
 export { search } from "./src/capabilities/search.ts";
 export type { SearchPage } from "./src/capabilities/search.ts";
 export { storage } from "./src/capabilities/storage.ts";

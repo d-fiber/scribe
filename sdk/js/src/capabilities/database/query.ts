@@ -52,7 +52,7 @@ import { host } from "../channel.ts";
 import { raiseOn } from "../error.ts";
 import { type FilterBuilder, filters } from "./filter.ts";
 
-const CAPABILITY = "rest";
+const CAPABILITY = "database";
 
 interface QueryState {
   readonly select: readonly string[];
@@ -86,23 +86,23 @@ export interface Page<Row> {
   readonly count: number;
 }
 
-export class RestQuery<Row extends object> {
+export class DatabaseQuery<Row extends object> {
   constructor(
     readonly table: string,
     readonly state: QueryState = EMPTY,
   ) {}
 
-  select(...columns: readonly (keyof Row & string)[]): RestQuery<Row> {
+  select(...columns: readonly (keyof Row & string)[]): DatabaseQuery<Row> {
     return this.#with({ select: columns });
   }
 
-  where(build: (columns: FilterBuilder<Row>) => Filter | readonly Filter[]): RestQuery<Row> {
+  where(build: (columns: FilterBuilder<Row>) => Filter | readonly Filter[]): DatabaseQuery<Row> {
     const produced = build(filters<Row>());
     const added = Array.isArray(produced) ? produced : [produced as Filter];
     return this.#with({ where: [...this.state.where, ...added] });
   }
 
-  either(build: (columns: FilterBuilder<Row>) => readonly Filter[]): RestQuery<Row> {
+  either(build: (columns: FilterBuilder<Row>) => readonly Filter[]): DatabaseQuery<Row> {
     const group = create(FilterGroupSchema, {
       filters: [...build(filters<Row>())],
       disjunction: true,
@@ -110,7 +110,7 @@ export class RestQuery<Row extends object> {
     return this.#with({ groups: [...this.state.groups, group] });
   }
 
-  order(column: keyof Row & string, options: OrderOptions = {}): RestQuery<Row> {
+  order(column: keyof Row & string, options: OrderOptions = {}): DatabaseQuery<Row> {
     const entry = create(OrderSchema, {
       column,
       descending: options.descending ?? false,
@@ -119,15 +119,15 @@ export class RestQuery<Row extends object> {
     return this.#with({ order: [...this.state.order, entry] });
   }
 
-  limit(count: number): RestQuery<Row> {
+  limit(count: number): DatabaseQuery<Row> {
     return this.#with({ limit: count });
   }
 
-  offset(start: number): RestQuery<Row> {
+  offset(start: number): DatabaseQuery<Row> {
     return this.#with({ offset: start });
   }
 
-  range(from: number, to: number): RestQuery<Row> {
+  range(from: number, to: number): DatabaseQuery<Row> {
     return this.#with({ offset: from, limit: to - from + 1 });
   }
 
@@ -169,8 +169,8 @@ export class RestQuery<Row extends object> {
     return decodeJson<Row[]>(result.data) ?? [];
   }
 
-  #with(state: Partial<QueryState>): RestQuery<Row> {
-    return new RestQuery<Row>(this.table, { ...this.state, ...state });
+  #with(state: Partial<QueryState>): DatabaseQuery<Row> {
+    return new DatabaseQuery<Row>(this.table, { ...this.state, ...state });
   }
 
   async #execute(
@@ -190,7 +190,7 @@ export class RestQuery<Row extends object> {
 
 /** The wire description of `query`, as both a single call and a batch entry send it. */
 function described<Row extends object>(
-  query: RestQuery<Row>,
+  query: DatabaseQuery<Row>,
   operation: Operation,
   payload?: unknown,
   onConflict: readonly string[] = [],
@@ -216,13 +216,13 @@ function described<Row extends object>(
 }
 
 /** The rows each query of a batch answers, one array per query, in the order they were given. */
-// deno-lint-ignore no-explicit-any -- RestQuery is invariant in Row, so no concrete supertype accepts every instantiation.
-export type BatchRows<Q extends readonly RestQuery<any>[]> = {
-  [K in keyof Q]: Q[K] extends RestQuery<infer Row> ? readonly Row[] : never;
+// deno-lint-ignore no-explicit-any -- DatabaseQuery is invariant in Row, so no concrete supertype accepts every instantiation.
+export type BatchRows<Q extends readonly DatabaseQuery<any>[]> = {
+  [K in keyof Q]: Q[K] extends DatabaseQuery<infer Row> ? readonly Row[] : never;
 };
 
 /** The database as a worker reaches it, one table at a time or several tables in one call. */
-export interface RestCapability {
+export interface DatabaseCapability {
   /**
    * A query against `table`, with nothing selected, nothing filtered and no order yet.
    *
@@ -230,7 +230,7 @@ export interface RestCapability {
    * what makes `select`, `where` and `order` name columns the compiler knows rather than free
    * strings.
    */
-  from<Row extends object>(table: string): RestQuery<Row>;
+  from<Row extends object>(table: string): DatabaseQuery<Row>;
 
   /**
    * The rows every query of `queries` matches, read in one call to the host.
@@ -247,14 +247,14 @@ export interface RestCapability {
    *
    * @example
    * ```ts
-   * const [brands, users] = await rest.all([
-   *   rest.from<Brand>("brands").select("id"),
-   *   rest.from<User>("users").where((u) => u.active.is(true)),
+   * const [brands, users] = await database.all([
+   *   database.from<Brand>("brands").select("id"),
+   *   database.from<User>("users").where((u) => u.active.is(true)),
    * ]);
    * ```
    */
-  // deno-lint-ignore no-explicit-any -- see BatchRows: RestQuery is invariant in Row.
-  all<const Q extends readonly RestQuery<any>[]>(queries: Q): Promise<BatchRows<Q>>;
+  // deno-lint-ignore no-explicit-any -- see BatchRows: DatabaseQuery is invariant in Row.
+  all<const Q extends readonly DatabaseQuery<any>[]>(queries: Q): Promise<BatchRows<Q>>;
 
   /**
    * What the database function `name` answers for `args`, or null when it answers nothing.
@@ -267,13 +267,13 @@ export interface RestCapability {
   rpc<T = unknown>(name: string, args?: Record<string, unknown>): Promise<T | null>;
 }
 
-export const rest: RestCapability = {
-  from<Row extends object>(table: string): RestQuery<Row> {
-    return new RestQuery<Row>(table);
+export const database: DatabaseCapability = {
+  from<Row extends object>(table: string): DatabaseQuery<Row> {
+    return new DatabaseQuery<Row>(table);
   },
 
-  // deno-lint-ignore no-explicit-any -- see BatchRows: RestQuery is invariant in Row.
-  async all<const Q extends readonly RestQuery<any>[]>(queries: Q): Promise<BatchRows<Q>> {
+  // deno-lint-ignore no-explicit-any -- see BatchRows: DatabaseQuery is invariant in Row.
+  async all<const Q extends readonly DatabaseQuery<any>[]>(queries: Q): Promise<BatchRows<Q>> {
     if (queries.length === 0) return [] as unknown as BatchRows<Q>;
 
     const batch = await host.client().call(Database.method.executeBatch, {

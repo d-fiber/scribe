@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { type InvocationContext, Post, Required, rest } from "../../../mod.ts";
+import { database, type InvocationContext, Post, Required } from "../../../mod.ts";
 
 interface BrandRow extends Record<string, unknown> {
   brand_id: string;
@@ -50,7 +50,7 @@ export class CreateBrand extends Post {
     const body = ctx.body({ name: Required(String) });
     if (!body) return this.response.badRequest();
 
-    const [brand] = await rest.from<BrandRow>("brands").insert({ name: body.name });
+    const [brand] = await database.from<BrandRow>("brands").insert({ name: body.name });
 
     return this.response.created({ data: { brand } });
   }
