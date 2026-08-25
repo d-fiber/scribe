@@ -138,7 +138,7 @@ Deno.test("isMissingModule recognises the shapes Deno reports", () => {
 
 Deno.test("isMissingModule recognises an unmapped specifier by its code", () => {
   const unmapped = Object.assign(
-    new TypeError('Import "@app/extensions/event_driven/cron/cron.ts" not a dependency and not in import map'),
+    new TypeError('Import "@app/extensions/foundation/cron/cron.ts" not a dependency and not in import map'),
     { code: "ERR_MODULE_NOT_FOUND" },
   );
 

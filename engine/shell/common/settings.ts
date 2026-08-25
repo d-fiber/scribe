@@ -120,14 +120,14 @@ workerSettings.use({
 extensions.register(
   new OptionalExtension(
     EXTENSION_QUEUE,
-    () => import("@app/extensions/event_driven/queue/queue.ts"),
+    () => import("@app/extensions/foundation/queue/queue.ts"),
   ),
 );
 
 extensions.register(
   new OptionalExtension(
     EXTENSION_CRON,
-    () => import("@app/extensions/event_driven/cron/cron.ts"),
+    () => import("@app/extensions/foundation/cron/cron.ts"),
   ),
 );
 
