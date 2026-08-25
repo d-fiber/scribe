@@ -47,7 +47,7 @@ type Instantiable<T> = new () => T;
  * a file that holds none is not an error -- an empty `_log.ts` is a project
  * that has not written its sink yet.
  */
-export function instances<T>(module: DiscoveredModule, base: Function): T[] {
+export function instances<T>(module: DiscoveredModule, base: abstract new (...args: never[]) => unknown): T[] {
   return Object.values(module)
     .filter((exported): exported is Instantiable<T> =>
       typeof exported === "function" && exported.prototype instanceof base
