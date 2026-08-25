@@ -87,9 +87,13 @@ Copy it from any neighbouring file of the same language. CI refuses a file witho
 copyright line without naming the license.
 
 The version is bumped by hand, and only by the owner: `.github/version/check.sh` reads who moved it and fails on anyone
-else. There is one number for the whole framework, in `deno.json`, and no component carries its own. It is what a
-project compares itself against when it checks for an update, so it is the number that matters to whoever installs
-scribe rather than works on it.
+else. One number covers the whole framework, in `deno.json`. It is what a project compares itself against when it checks
+for an update, so it is the number that matters to whoever installs scribe rather than works on it.
+
+`protocol/VERSION` is the one number that moves on its own, because it says something else: which wire contract a host
+and a worker are speaking. A worker refuses a host whose major differs from its own, so that number changes when the
+contract does and not when the framework does. `sdk/js/tests/conformance.test.ts` fails if the SDK stops announcing what
+the file says.
 
 `CHANGELOG.md` is written when that number moves, from commit subjects grouped by tag. This is what your `[TAG]:` prefix
 ends up doing, which is a good reason to pick it carefully. `[RELEASE]` commits are left out, since they are the
