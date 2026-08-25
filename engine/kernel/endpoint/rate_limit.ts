@@ -38,10 +38,7 @@ import { type Duration, rateLimit } from "@scribe/alchemy";
 import type { RateLimit } from "@scribe/alchemy/route";
 import { firstSegmentOf } from "@scribe/runtime/http/pathname.ts";
 import { request } from "@scribe/runtime/http/request.ts";
-import {
-  SHARED_ADDRESS_MAX_PENALTY,
-  SHARED_ADDRESS_STRIKE_MEMORY,
-} from "@scribe/foundation/lib/src/rate_limit/redis_rate_limiter.ts";
+import { SHARED_ADDRESS_MAX_PENALTY, SHARED_ADDRESS_STRIKE_MEMORY } from "@scribe/contracts/rate_limit.ts";
 import { CallerKind, requestCaller } from "@scribe/runtime/http/caller.ts";
 
 /** The shorter of `declared` and `cap`, and `cap` when nothing was declared. */
