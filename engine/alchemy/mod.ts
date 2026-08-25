@@ -153,6 +153,8 @@ export { rateLimit, RateLimiters } from "./port/rate_limit.ts";
 export type { RateLimiter, RateLimiterDriver, RateLimitOptions, RateLimitOutcome } from "./port/rate_limit.ts";
 export { cache, Caches, DEFAULT_CACHE_DEADLINE } from "./port/cache.ts";
 export type { Cache, CacheDriver, CacheOptions } from "./port/cache.ts";
+export { claimOnce, Claims } from "./port/claim.ts";
+export type { ClaimDriver, ClaimOptions, WhenUnavailable } from "./port/claim.ts";
 
 export { FileSystems } from "./port/files.ts";
 export type { FileSystem, FileSystemDriver, FileSystemEntity } from "./port/files.ts";
