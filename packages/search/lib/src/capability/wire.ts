@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { Search } from "@scribe/sdk/gen/scribe/packages/search/protocol/search_pb.ts";
+import type { CapabilityWiring } from "@scribe/contracts/capability.ts";
 import { create } from "@bufbuild/protobuf";
 import {
   type QueueRequest,
@@ -43,8 +45,8 @@ import {
   type SearchResult,
   SearchResultSchema,
 } from "@scribe/sdk/gen/scribe/packages/search/protocol/search_pb.ts";
-import { type AnySearchIndex, indexNamed } from "@scribe/search";
-import { decodeJson, encodeJson } from "../control/json.ts";
+import { type AnySearchIndex, indexNamed } from "../../search.ts";
+import { decodeJson, encodeJson } from "@scribe/sdk";
 
 function failed(scope: string, cause: unknown): { code: string; message: string } {
   const message = cause instanceof Error ? cause.message : String(cause);
@@ -133,4 +135,17 @@ export async function searchQuery(request: SearchRequest): Promise<SearchResult>
   } catch (cause) {
     return create(SearchResultSchema, { error: failed("search", cause) });
   }
+}
+
+/**
+ * Answers the three procedures `search.proto` declares.
+ *
+ * @remarks
+ * The host hands the wire over at boot and never names a procedure of this package, so mounting it
+ * is what makes a worker able to query an index.
+ */
+export function wireSearch(wiring: CapabilityWiring): void {
+  wiring.on(Search.method.add, searchAdd);
+  wiring.on(Search.method.delete, searchDelete);
+  wiring.on(Search.method.search, searchQuery);
 }

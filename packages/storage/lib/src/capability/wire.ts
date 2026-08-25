@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { Storage as StorageService } from "@scribe/sdk/gen/scribe/packages/storage/protocol/storage_pb.ts";
+import type { CapabilityWiring } from "@scribe/contracts/capability.ts";
 import { create } from "@bufbuild/protobuf";
 import {
   type DeleteRequest,
@@ -52,7 +54,7 @@ import {
   type StorageMediaSpec,
   type StorageObject,
   StorageVisibility,
-} from "@scribe/storage";
+} from "../../storage.ts";
 
 const PLACEHOLDER = /^\{([A-Za-z][A-Za-z0-9_]*)\}$/;
 
@@ -257,4 +259,17 @@ export async function storageList(request: ListRequest): Promise<ListResult> {
   } catch (cause) {
     return create(ListResultSchema, { error: failed("list", "list_failed", cause) });
   }
+}
+
+/**
+ * Answers the two procedures of `storage.proto` that anything behind them can answer honestly.
+ *
+ * @remarks
+ * `Upload` and `SignedUrl` are left to the host's named 501. The first cannot be addressed without
+ * the media spec a declaration carries and the wire does not, and nothing in this package signs a
+ * URL, so answering either would mean inventing what it promised.
+ */
+export function wireStorage(wiring: CapabilityWiring): void {
+  wiring.on(StorageService.method.delete, storageDelete);
+  wiring.on(StorageService.method.list, storageList);
 }

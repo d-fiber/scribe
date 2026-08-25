@@ -40,30 +40,13 @@ import { Queue } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/queue
 import { Hook } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/hook_pb.ts";
 import { Database } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
 import { Logging } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
-import { Auth } from "@scribe/sdk/gen/scribe/packages/auth/protocol/auth_pb.ts";
-import { Realtime } from "@scribe/sdk/gen/scribe/packages/realtime/protocol/realtime_pb.ts";
-import { Search } from "@scribe/sdk/gen/scribe/packages/search/protocol/search_pb.ts";
-import { Storage } from "@scribe/sdk/gen/scribe/packages/storage/protocol/storage_pb.ts";
+import { capabilities } from "@scribe/contracts/capability.ts";
 import { CapabilityTokens } from "./tokens.ts";
 import { cacheDelete, cacheGet, cacheSet } from "./cache.ts";
 import { hookEmit } from "./hook.ts";
 import { queuePush } from "./queue.ts";
 import { shipLogs } from "./logging.ts";
 import { executeQueries, executeQuery } from "./database.ts";
-import {
-  authBan,
-  authDeleteAccount,
-  authGetAccount,
-  authKickAllDevices,
-  authKickDevice,
-  authListBans,
-  authListDevices,
-  authListRoles,
-  authUnban,
-} from "./auth.ts";
-import { realtimeBroadcast, realtimeGrant, realtimeRevoke } from "./realtime.ts";
-import { searchAdd, searchDelete, searchQuery } from "./search.ts";
-import { storageDelete, storageList } from "./storage.ts";
 
 /**
  * The host side of every procedure a worker may call.
@@ -73,9 +56,15 @@ import { storageDelete, storageList } from "./storage.ts";
  * ones `engine/embedder/deno.json` names: adding a service means both, and forgetting the second
  * is a type error rather than a silent 501.
  *
- * Anything the contract declares and this does not wire answers a named 501 rather than a 404.
- * Listing those procedures instead would mean importing the stub of every module the contract
- * knows, and that list would be wrong the day a package adds a service.
+ * What the host answers itself is what `foundation` needs to exist at all: the database, the
+ * cache, the queue, the hook and the logs. Everything else is registered by the package that owns
+ * it, so mounting a package is what makes a worker able to call it, and the host names none of
+ * them. Replaying the capability token is done here rather than by each package, because a package
+ * that had to do it would be one that could forget to.
+ *
+ * Anything the contract declares and nobody wires answers a named 501 rather than a 404. Listing
+ * those procedures instead would mean importing the stub of every module the contract knows, and
+ * that list would be wrong the day a package adds a service.
  *
  * Three declared procedures are deliberately left to that 501, because nothing behind them can
  * answer honestly rather than because nobody got to them. They are named in
@@ -96,57 +85,12 @@ export function capabilityServer(): UnaryServer {
     )
     .on(Queue.method.push, (request, call) => CapabilityTokens.run(call.capabilityToken, () => queuePush(request)))
     .on(Hook.method.emit, (event, call) => CapabilityTokens.run(call.capabilityToken, () => hookEmit(event)))
-    .on(Logging.method.ship, (batch, call) => CapabilityTokens.run(call.capabilityToken, () => shipLogs(batch)))
-    .on(
-      Realtime.method.broadcast,
-      (request, call) => CapabilityTokens.run(call.capabilityToken, () => realtimeBroadcast(request)),
-    )
-    .on(
-      Realtime.method.grant,
-      (request, call) => CapabilityTokens.run(call.capabilityToken, () => realtimeGrant(request)),
-    )
-    .on(
-      Realtime.method.revoke,
-      (request, call) => CapabilityTokens.run(call.capabilityToken, () => realtimeRevoke(request)),
-    )
-    .on(Search.method.add, (request, call) => CapabilityTokens.run(call.capabilityToken, () => searchAdd(request)))
-    .on(
-      Search.method.delete,
-      (request, call) => CapabilityTokens.run(call.capabilityToken, () => searchDelete(request)),
-    )
-    .on(Search.method.search, (request, call) => CapabilityTokens.run(call.capabilityToken, () => searchQuery(request)))
-    .on(
-      Storage.method.delete,
-      (request, call) => CapabilityTokens.run(call.capabilityToken, () => storageDelete(request)),
-    )
-    .on(Storage.method.list, (request, call) => CapabilityTokens.run(call.capabilityToken, () => storageList(request)))
-    .on(
-      Auth.method.getAccount,
-      (request, call) => CapabilityTokens.run(call.capabilityToken, () => authGetAccount(request)),
-    )
-    .on(
-      Auth.method.deleteAccount,
-      (request, call) => CapabilityTokens.run(call.capabilityToken, () => authDeleteAccount(request)),
-    )
-    .on(Auth.method.ban, (request, call) => CapabilityTokens.run(call.capabilityToken, () => authBan(request)))
-    .on(Auth.method.unban, (request, call) => CapabilityTokens.run(call.capabilityToken, () => authUnban(request)))
-    .on(
-      Auth.method.listBans,
-      (request, call) => CapabilityTokens.run(call.capabilityToken, () => authListBans(request)),
-    )
-    .on(
-      Auth.method.listDevices,
-      (request, call) => CapabilityTokens.run(call.capabilityToken, () => authListDevices(request)),
-    )
-    .on(
-      Auth.method.kickDevice,
-      (request, call) => CapabilityTokens.run(call.capabilityToken, () => authKickDevice(request)),
-    )
-    .on(
-      Auth.method.kickAllDevices,
-      (request, call) => CapabilityTokens.run(call.capabilityToken, () => authKickAllDevices(request)),
-    )
-    .on(Auth.method.listRoles, (_request, call) => CapabilityTokens.run(call.capabilityToken, () => authListRoles()));
+    .on(Logging.method.ship, (batch, call) => CapabilityTokens.run(call.capabilityToken, () => shipLogs(batch)));
+
+  capabilities.wire({
+    on: (method, handler) =>
+      server.on(method, (request, call) => CapabilityTokens.run(call.capabilityToken, () => handler(request))),
+  });
 
   return server.otherwise((path) => {
     throw new TransportFailure(

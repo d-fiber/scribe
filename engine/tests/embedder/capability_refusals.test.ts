@@ -62,10 +62,10 @@ import {
   authListDevices,
   authListRoles,
   authUnban,
-} from "@scribe/embedder/capabilities/auth.ts";
-import { realtimeBroadcast, realtimeGrant, realtimeRevoke } from "@scribe/embedder/capabilities/realtime.ts";
-import { searchAdd, searchDelete, searchQuery } from "@scribe/embedder/capabilities/search.ts";
-import { storageDelete, storageList } from "@scribe/embedder/capabilities/storage.ts";
+} from "@scribe/auth/lib/src/capability/wire.ts";
+import { realtimeBroadcast, realtimeGrant, realtimeRevoke } from "@scribe/realtime/lib/src/capability/wire.ts";
+import { searchAdd, searchDelete, searchQuery } from "@scribe/search/lib/src/capability/wire.ts";
+import { storageDelete, storageList } from "@scribe/storage/lib/src/capability/wire.ts";
 
 const UNDECLARED = "nothing_declares_this";
 

@@ -96,6 +96,8 @@ export type { ServeOptions } from "./src/runtime/serve.ts";
 
 export { json, ServerResponse } from "./src/http/response.ts";
 
+export { decodeJson, encodeJson } from "./src/contracts/json.ts";
+
 export { Arr, Nested, Required } from "./src/validation/schema.ts";
 export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema } from "./src/validation/schema.ts";
 

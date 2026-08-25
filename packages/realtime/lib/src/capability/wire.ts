@@ -43,8 +43,10 @@ import {
   type GrantResult,
   GrantResultSchema,
 } from "@scribe/sdk/gen/scribe/packages/realtime/protocol/realtime_pb.ts";
-import { broadcast, GrantedDestination } from "@scribe/realtime";
-import { decodeJson } from "../control/json.ts";
+import { broadcast, GrantedDestination } from "../../realtime.ts";
+import { decodeJson } from "@scribe/sdk";
+import { Realtime } from "@scribe/sdk/gen/scribe/packages/realtime/protocol/realtime_pb.ts";
+import type { CapabilityWiring } from "@scribe/contracts/capability.ts";
 
 function failed(scope: string, cause: unknown): { code: string; message: string } {
   const message = cause instanceof Error ? cause.message : String(cause);
@@ -145,4 +147,17 @@ export async function realtimeBroadcast(request: BroadcastRequest): Promise<Broa
   } catch (cause) {
     return create(BroadcastResultSchema, { error: failed("broadcast", cause) });
   }
+}
+
+/**
+ * Answers the three procedures `realtime.proto` declares.
+ *
+ * @remarks
+ * The host hands the wire over at boot and never names a procedure of this package, so mounting it
+ * is what makes a worker able to broadcast, and unmounting it is what stops that.
+ */
+export function wireRealtime(wiring: CapabilityWiring): void {
+  wiring.on(Realtime.method.broadcast, realtimeBroadcast);
+  wiring.on(Realtime.method.grant, realtimeGrant);
+  wiring.on(Realtime.method.revoke, realtimeRevoke);
 }

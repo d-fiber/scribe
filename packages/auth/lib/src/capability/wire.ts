@@ -47,6 +47,8 @@
  * the package's door.
  */
 
+import { Auth } from "@scribe/sdk/gen/scribe/packages/auth/protocol/auth_pb.ts";
+import type { CapabilityWiring } from "@scribe/contracts/capability.ts";
 import { create } from "@bufbuild/protobuf";
 import {
   type AccountRequest,
@@ -73,10 +75,10 @@ import {
   RoleSchema,
 } from "@scribe/sdk/gen/scribe/packages/auth/protocol/auth_pb.ts";
 import { Duration } from "@scribe/alchemy";
-import { type Ban } from "@scribe/auth";
-import { accountNamed, type AnyAccount, AUTH_EXTENSION, declaredAccounts } from "@scribe/auth/declaration";
+import { type Ban } from "../../auth.ts";
+import { accountNamed, type AnyAccount, AUTH_EXTENSION, declaredAccounts } from "../../declaration.ts";
 import { extensions } from "@scribe/runtime/support/extensions/mod.ts";
-import { encodeJson } from "../control/json.ts";
+import { encodeJson } from "@scribe/sdk";
 
 const IDENTITY_FIELDS: ReadonlySet<string> = new Set([
   "id",
@@ -343,4 +345,23 @@ export function authListRoles(): Promise<RoleListResult> {
       create(RoleSchema, { name: account.name, channels: [...account.channels] })
     ),
   }));
+}
+
+/**
+ * Answers the nine procedures of `auth.proto` that a declaration can answer.
+ *
+ * @remarks
+ * `Validate` is left to the host's named 501: this package carries no rule to hold a candidate
+ * password, address or number against, so there is nothing to call.
+ */
+export function wireAuth(wiring: CapabilityWiring): void {
+  wiring.on(Auth.method.getAccount, authGetAccount);
+  wiring.on(Auth.method.deleteAccount, authDeleteAccount);
+  wiring.on(Auth.method.ban, authBan);
+  wiring.on(Auth.method.unban, authUnban);
+  wiring.on(Auth.method.listBans, authListBans);
+  wiring.on(Auth.method.listDevices, authListDevices);
+  wiring.on(Auth.method.kickDevice, authKickDevice);
+  wiring.on(Auth.method.kickAllDevices, authKickAllDevices);
+  wiring.on(Auth.method.listRoles, () => authListRoles());
 }
