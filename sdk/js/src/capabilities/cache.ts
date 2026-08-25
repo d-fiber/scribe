@@ -36,7 +36,7 @@
 
 import { create } from "@bufbuild/protobuf";
 import { TimeSchema } from "../../gen/scribe/protocol/common_pb.ts";
-import { Valkery, ValkeryKeySchema } from "../../gen/scribe/engine/packages/foundation/protocol/valkery/valkery_pb.ts";
+import { Cache, CacheKeySchema } from "../../gen/scribe/packages/foundation/protocol/cache_pb.ts";
 import { decodeJson, encodeJson } from "../contracts/json.ts";
 import type { Time } from "../contracts/time.ts";
 import { host } from "./channel.ts";
@@ -45,18 +45,18 @@ import { raiseOn } from "./error.ts";
 const CAPABILITY = "cache";
 
 function keyOf(namespace: string, key: string) {
-  return create(ValkeryKeySchema, { namespace, key });
+  return create(CacheKeySchema, { namespace, key });
 }
 
 export const cache = {
   async get<T>(namespace: string, key: string): Promise<T | null> {
-    const result = await host.client().call(Valkery.method.get, { key: keyOf(namespace, key) });
+    const result = await host.client().call(Cache.method.get, { key: keyOf(namespace, key) });
     raiseOn(CAPABILITY, result.error);
     return result.hit ? decodeJson<T>(result.value) : null;
   },
 
   async set(namespace: string, key: string, value: unknown, ttl?: Time): Promise<void> {
-    const result = await host.client().call(Valkery.method.set, {
+    const result = await host.client().call(Cache.method.set, {
       key: keyOf(namespace, key),
       value: encodeJson(value),
       ttl: ttl ? create(TimeSchema, { millis: BigInt(ttl.ms) }) : undefined,
@@ -65,7 +65,7 @@ export const cache = {
   },
 
   async delete(namespace: string, key: string, prefix = false): Promise<number> {
-    const result = await host.client().call(Valkery.method.delete, {
+    const result = await host.client().call(Cache.method.delete, {
       key: keyOf(namespace, key),
       prefix,
     });

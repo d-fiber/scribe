@@ -41,10 +41,7 @@ import { assertEquals } from "@std/assert";
 import { installMock } from "@scribe/testing/install.ts";
 import { PostgrestClients } from "@scribe/foundation/lib/src/database/postgrest_clients.ts";
 import { FakePostgrestClient } from "@scribe/foundation/tests/testing/database.ts";
-import {
-  Operation,
-  QuerySchema,
-} from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/database/database_pb.ts";
+import { Operation, QuerySchema } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
 import { executeQuery } from "@scribe/embedder/capabilities/rest.ts";
 
 const UNOWNED = "t_email_templates";

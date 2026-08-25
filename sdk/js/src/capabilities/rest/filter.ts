@@ -39,7 +39,7 @@ import {
   type Filter,
   FilterOperator,
   FilterSchema,
-} from "../../../gen/scribe/engine/packages/foundation/protocol/database/database_pb.ts";
+} from "../../../gen/scribe/packages/foundation/protocol/database_pb.ts";
 import { encodeJson } from "../../contracts/json.ts";
 
 function on(column: string, operator: FilterOperator, value: unknown, negated = false): Filter {

@@ -16,7 +16,8 @@
     "./packages/realtime",
     "./packages/remote_configs",
     "./packages/search",
-    "./packages/storage"
+    "./packages/storage",
+    "./sdk/js"
   ],
   "tasks": {
     "check": "deno check engine packages",

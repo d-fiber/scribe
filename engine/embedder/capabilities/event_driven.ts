@@ -39,12 +39,12 @@ import {
   type PushRequest,
   type PushResult,
   PushResultSchema,
-} from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/queue/queue_pb.ts";
+} from "@scribe/sdk/gen/scribe/packages/foundation/protocol/queue_pb.ts";
 import {
   type EmitResult,
   EmitResultSchema,
   type Event,
-} from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/hook/hook_pb.ts";
+} from "@scribe/sdk/gen/scribe/packages/foundation/protocol/hook_pb.ts";
 import { Duration } from "@scribe/alchemy";
 import { hookRegistry } from "@scribe/foundation/lib/src/hook/hook_registry.ts";
 import { QueuePublisher } from "@scribe/foundation/lib/src/queue/queue.ts";

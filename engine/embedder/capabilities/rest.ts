@@ -49,7 +49,7 @@ import {
   type QueryResultBatch,
   QueryResultBatchSchema,
   QueryResultSchema,
-} from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/database/database_pb.ts";
+} from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
 import { PostgrestClients } from "@scribe/foundation/lib/src/database/postgrest_clients.ts";
 import { ownerOf } from "@scribe/foundation/lib/src/database/table_owners.ts";
 import {

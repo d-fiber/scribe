@@ -41,17 +41,17 @@ import {
   type Batch,
   type BatchOutcome,
   BatchOutcomeSchema,
-} from "../../gen/scribe/engine/packages/foundation/protocol/queue/queue_pb.ts";
+} from "../../gen/scribe/packages/foundation/protocol/queue_pb.ts";
 import {
   type Event,
   type HandleResult,
   HandleResultSchema,
-} from "../../gen/scribe/engine/packages/foundation/protocol/hook/hook_pb.ts";
+} from "../../gen/scribe/packages/foundation/protocol/hook_pb.ts";
 import {
   type CronOutcome,
   CronOutcomeSchema,
   type CronTrigger,
-} from "../../gen/scribe/engine/packages/foundation/protocol/cron/cron_pb.ts";
+} from "../../gen/scribe/packages/foundation/protocol/cron_pb.ts";
 import { type LogDelivery, type LogDeliveryAck, LogDeliveryAckSchema } from "../../gen/scribe/protocol/logs_pb.ts";
 import { decodeJson, encodeJson } from "../contracts/json.ts";
 import { loggedEntry } from "../observability/log_sink.ts";

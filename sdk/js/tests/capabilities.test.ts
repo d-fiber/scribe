@@ -41,8 +41,8 @@ import {
   FilterOperator,
   Operation,
   type Query,
-} from "../gen/scribe/engine/packages/foundation/protocol/database/database_pb.ts";
-import { Valkery } from "../gen/scribe/engine/packages/foundation/protocol/valkery/valkery_pb.ts";
+} from "../gen/scribe/packages/foundation/protocol/database_pb.ts";
+import { Cache } from "../gen/scribe/packages/foundation/protocol/cache_pb.ts";
 import { decodeJson, encodeJson } from "../src/contracts/json.ts";
 
 interface Brand extends Record<string, unknown> {
@@ -69,8 +69,8 @@ async function withHost(
       capture.trace = call.traceId;
       return { data: encodeJson(rows), count: 7n };
     })
-    .on(Valkery.method.get, () => ({ hit: true, value: encodeJson({ cached: true }) }))
-    .on(Valkery.method.set, () => ({
+    .on(Cache.method.get, () => ({ hit: true, value: encodeJson({ cached: true }) }))
+    .on(Cache.method.set, () => ({
       error: { code: "cache_failed", message: "redis is down" },
     }));
 

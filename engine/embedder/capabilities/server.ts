@@ -35,10 +35,10 @@
 // LICENSE file, the LICENSE file governs.
 
 import { TransportFailure, UnaryServer } from "@scribe/sdk";
-import { Valkery } from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/valkery/valkery_pb.ts";
-import { Queue } from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/queue/queue_pb.ts";
-import { Hook } from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/hook/hook_pb.ts";
-import { Database } from "@scribe/sdk/gen/scribe/engine/packages/foundation/protocol/database/database_pb.ts";
+import { Cache } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/cache_pb.ts";
+import { Queue } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/queue_pb.ts";
+import { Hook } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/hook_pb.ts";
+import { Database } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
 import { Logging } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 import { CapabilityTokens } from "./tokens.ts";
 import { cacheDelete, cacheGet, cacheSet } from "./cache.ts";
@@ -53,10 +53,10 @@ export function capabilityServer(): UnaryServer {
       Database.method.executeBatch,
       (batch, call) => CapabilityTokens.run(call.capabilityToken, () => executeQueries(batch)),
     )
-    .on(Valkery.method.get, (request, call) => CapabilityTokens.run(call.capabilityToken, () => cacheGet(request)))
-    .on(Valkery.method.set, (request, call) => CapabilityTokens.run(call.capabilityToken, () => cacheSet(request)))
+    .on(Cache.method.get, (request, call) => CapabilityTokens.run(call.capabilityToken, () => cacheGet(request)))
+    .on(Cache.method.set, (request, call) => CapabilityTokens.run(call.capabilityToken, () => cacheSet(request)))
     .on(
-      Valkery.method.delete,
+      Cache.method.delete,
       (request, call) => CapabilityTokens.run(call.capabilityToken, () => cacheDelete(request)),
     )
     .on(Queue.method.push, (request, call) => CapabilityTokens.run(call.capabilityToken, () => queuePush(request)))
