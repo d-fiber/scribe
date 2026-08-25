@@ -42,34 +42,6 @@ interface SlotSpec {
 }
 
 const SLOTS: Record<ProjectSlot, SlotSpec> = {
-  [ProjectSlot.AdminRoutes]: {
-    load: () => import("@app/api/admin/index.ts"),
-    degradesSilently: false,
-  },
-  [ProjectSlot.AppRoutes]: {
-    load: () => import("@app/api/app/index.ts"),
-    degradesSilently: false,
-  },
-  [ProjectSlot.InternalRegistration]: {
-    load: () => import("@app/api/internal/index.ts"),
-    degradesSilently: false,
-  },
-  [ProjectSlot.GotrueEmailContext]: {
-    load: () => import("@app/api/internal/gotrue/email/resolve_app_user_context.ts"),
-    degradesSilently: false,
-  },
-  [ProjectSlot.MailTemplates]: {
-    load: () => import("@app/public/mails/index.ts"),
-    degradesSilently: false,
-  },
-  [ProjectSlot.HostingPages]: {
-    load: () => import("@app/public/hostings/index.ts"),
-    degradesSilently: false,
-  },
-  [ProjectSlot.SmsTemplates]: {
-    load: () => import("@app/public/sms/index.ts"),
-    degradesSilently: false,
-  },
   [ProjectSlot.ThemeColors]: {
     load: () => import("@app/public/theme/colors.ts"),
     degradesSilently: true,

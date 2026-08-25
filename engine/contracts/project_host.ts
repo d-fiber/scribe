@@ -35,14 +35,10 @@
 // LICENSE file, the LICENSE file governs.
 
 export enum ProjectSlot {
-  AdminRoutes = "admin-routes",
-  AppRoutes = "app-routes",
-  InternalRegistration = "internal-registration",
-  GotrueEmailContext = "gotrue-email-context",
-  MailTemplates = "mail-templates",
-  HostingPages = "hosting-pages",
-  SmsTemplates = "sms-templates",
+  /** The colours a project overrides, read once when the theme is built. */
   ThemeColors = "theme-colors",
+
+  /** The fonts a project overrides, read the same way. */
   ThemeFonts = "theme-fonts",
 }
 
