@@ -44,14 +44,16 @@ const CAPABILITY = "realtime";
 /** The channels a worker publishes on, and the accounts allowed to listen to them. */
 export interface RealtimeCapability {
   /**
-   * Publishes `payload` on `channel` as `action` upon `entityId`, and answers how many
-   * subscribers it was delivered to.
+   * Publishes `payload` on `channel` as `action` upon `entityId`, and answers whether it left.
    *
-   * A zero means nobody was listening, which is not a refusal.
+   * A false means the host had no transport registered and dropped the emission, which is not a
+   * refusal. What it never means is that nobody was listening: no subscriber is counted anywhere
+   * on the way, so a broadcast delivered to an empty channel and one delivered to a thousand
+   * accounts answer the same true.
    *
    * @throws {CapabilityError} When the host refused the broadcast.
    */
-  broadcast(channel: string, action: string, entityId: string, payload: unknown): Promise<number>;
+  broadcast(channel: string, action: string, entityId: string, payload: unknown): Promise<boolean>;
 
   /**
    * Lets the accounts of `accountIds` listen to `channel`.
@@ -74,7 +76,7 @@ export const realtime: RealtimeCapability = {
     action: string,
     entityId: string,
     payload: unknown,
-  ): Promise<number> {
+  ): Promise<boolean> {
     const result = await host.client().call(Realtime.method.broadcast, {
       channel,
       action,
@@ -82,7 +84,7 @@ export const realtime: RealtimeCapability = {
       payload: encodeJson(payload),
     });
     raiseOn(CAPABILITY, result.error);
-    return result.delivered;
+    return result.sent;
   },
 
   async grant(channel: string, accountIds: readonly string[]): Promise<void> {

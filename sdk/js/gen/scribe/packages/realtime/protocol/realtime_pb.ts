@@ -33,6 +33,7 @@
 //
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
+
 // Copyright (C) 2026 Fiber
 //
 // This Source Code Form is subject to the terms of the Mozilla Public License,
@@ -83,7 +84,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scribe/packages/realtime/protocol/realtime.proto.
  */
 export const file_scribe_packages_realtime_protocol_realtime: GenFile = /*@__PURE__*/
-  fileDesc("CjBzY3JpYmUvcGFja2FnZXMvcmVhbHRpbWUvcHJvdG9jb2wvcmVhbHRpbWUucHJvdG8SGnNjcmliZS5jbGllbnRzLnJlYWx0aW1lLnYxImgKEEJyb2FkY2FzdFJlcXVlc3QSDwoHY2hhbm5lbBgBIAEoCRIOCgZhY3Rpb24YAiABKAkSEQoJZW50aXR5X2lkGAMgASgJEiAKB3BheWxvYWQYBCABKAsyDy5zY3JpYmUudjEuSnNvbiJHCg9Ccm9hZGNhc3RSZXN1bHQSEQoJZGVsaXZlcmVkGAEgASgNEiEKBWVycm9yGAIgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUiNAoMR3JhbnRSZXF1ZXN0Eg8KB2NoYW5uZWwYASABKAkSEwoLYWNjb3VudF9pZHMYAiADKAkiMAoLR3JhbnRSZXN1bHQSIQoFZXJyb3IYASABKAsyEi5zY3JpYmUudjEuRmFpbHVyZTKrAgoIUmVhbHRpbWUSZgoJQnJvYWRjYXN0Eiwuc2NyaWJlLmNsaWVudHMucmVhbHRpbWUudjEuQnJvYWRjYXN0UmVxdWVzdBorLnNjcmliZS5jbGllbnRzLnJlYWx0aW1lLnYxLkJyb2FkY2FzdFJlc3VsdBJaCgVHcmFudBIoLnNjcmliZS5jbGllbnRzLnJlYWx0aW1lLnYxLkdyYW50UmVxdWVzdBonLnNjcmliZS5jbGllbnRzLnJlYWx0aW1lLnYxLkdyYW50UmVzdWx0ElsKBlJldm9rZRIoLnNjcmliZS5jbGllbnRzLnJlYWx0aW1lLnYxLkdyYW50UmVxdWVzdBonLnNjcmliZS5jbGllbnRzLnJlYWx0aW1lLnYxLkdyYW50UmVzdWx0YgZwcm90bzM", [file_scribe_protocol_common]);
+  fileDesc("CjBzY3JpYmUvcGFja2FnZXMvcmVhbHRpbWUvcHJvdG9jb2wvcmVhbHRpbWUucHJvdG8SGnNjcmliZS5jbGllbnRzLnJlYWx0aW1lLnYxImgKEEJyb2FkY2FzdFJlcXVlc3QSDwoHY2hhbm5lbBgBIAEoCRIOCgZhY3Rpb24YAiABKAkSEQoJZW50aXR5X2lkGAMgASgJEiAKB3BheWxvYWQYBCABKAsyDy5zY3JpYmUudjEuSnNvbiJCCg9Ccm9hZGNhc3RSZXN1bHQSDAoEc2VudBgBIAEoCBIhCgVlcnJvchgCIAEoCzISLnNjcmliZS52MS5GYWlsdXJlIjQKDEdyYW50UmVxdWVzdBIPCgdjaGFubmVsGAEgASgJEhMKC2FjY291bnRfaWRzGAIgAygJIjAKC0dyYW50UmVzdWx0EiEKBWVycm9yGAEgASgLMhIuc2NyaWJlLnYxLkZhaWx1cmUyqwIKCFJlYWx0aW1lEmYKCUJyb2FkY2FzdBIsLnNjcmliZS5jbGllbnRzLnJlYWx0aW1lLnYxLkJyb2FkY2FzdFJlcXVlc3QaKy5zY3JpYmUuY2xpZW50cy5yZWFsdGltZS52MS5Ccm9hZGNhc3RSZXN1bHQSWgoFR3JhbnQSKC5zY3JpYmUuY2xpZW50cy5yZWFsdGltZS52MS5HcmFudFJlcXVlc3QaJy5zY3JpYmUuY2xpZW50cy5yZWFsdGltZS52MS5HcmFudFJlc3VsdBJbCgZSZXZva2USKC5zY3JpYmUuY2xpZW50cy5yZWFsdGltZS52MS5HcmFudFJlcXVlc3QaJy5zY3JpYmUuY2xpZW50cy5yZWFsdGltZS52MS5HcmFudFJlc3VsdGIGcHJvdG8z", [file_scribe_protocol_common]);
 
 /**
  * @generated from message scribe.clients.realtime.v1.BroadcastRequest
@@ -147,9 +148,9 @@ export const BroadcastRequestSchema: GenMessage<BroadcastRequest, {jsonType: Bro
  */
 export type BroadcastResult = Message<"scribe.clients.realtime.v1.BroadcastResult"> & {
   /**
-   * @generated from field: uint32 delivered = 1;
+   * @generated from field: bool sent = 1;
    */
-  delivered: number;
+  sent: boolean;
 
   /**
    * @generated from field: scribe.v1.Failure error = 2;
@@ -162,9 +163,9 @@ export type BroadcastResult = Message<"scribe.clients.realtime.v1.BroadcastResul
  */
 export type BroadcastResultJson = {
   /**
-   * @generated from field: uint32 delivered = 1;
+   * @generated from field: bool sent = 1;
    */
-  delivered?: number;
+  sent?: boolean;
 
   /**
    * @generated from field: scribe.v1.Failure error = 2;
