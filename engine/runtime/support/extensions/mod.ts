@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+export { type DeclarationKind, type ProjectDeclarations, runDeclarations } from "./declarations.ts";
 export { isMissingModule } from "./missing_module.ts";
 export { type ExtensionImporter, OptionalExtension } from "./optional_extension.ts";
 export { type Extension, ExtensionRegistry, extensions } from "./registry.ts";

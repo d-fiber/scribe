@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { extensions, OptionalExtension } from "@scribe/runtime/support/extensions/mod.ts";
+import { extensions, OptionalExtension, runDeclarations } from "@scribe/runtime/support/extensions/mod.ts";
 import { cacheSettings, databaseSettings, queueSettings, RedisRateLimiters, required } from "@scribe/foundation";
 import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
 import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
@@ -117,19 +117,9 @@ workerSettings.use({
   publicNodes: publicNodes(),
 });
 
-extensions.register(
-  new OptionalExtension(
-    EXTENSION_QUEUE,
-    () => import("@app/extensions/foundation/queue/queue.ts"),
-  ),
-);
+extensions.register(new OptionalExtension(EXTENSION_QUEUE, () => runDeclarations("queues")));
 
-extensions.register(
-  new OptionalExtension(
-    EXTENSION_CRON,
-    () => import("@app/extensions/foundation/cron/cron.ts"),
-  ),
-);
+extensions.register(new OptionalExtension(EXTENSION_CRON, () => runDeclarations("crons")));
 
 /**
  * Hands the ports to the modules the project mounted.
