@@ -1,7 +1,7 @@
 {
   "workspace": [],
   "tasks": {
-    "check": "deno check **/*.ts ../public",
+    "check": "deno check **/*.ts ../public ../packages",
     "test": "deno test --allow-env --allow-sys --allow-read --env-file=tests/.env.test . ../public",
     "test:net": "deno test --allow-env --allow-sys --allow-read --allow-net --env-file=tests/.env.test",
     "e2e:render": "deno run --allow-read --allow-write packages/foundation/tests/e2e/render.ts",
