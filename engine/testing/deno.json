@@ -1,0 +1,11 @@
+{
+  "imports": {
+    "@scribe/auth/": "../../packages/auth/",
+    "@scribe/contracts/": "../contracts/",
+    "@scribe/foundation/": "../../packages/foundation/",
+    "@scribe/runtime/": "../runtime/",
+    "@scribe/search/": "../../packages/search/",
+    "@scribe/storage/": "../../packages/storage/",
+    "@scribe/testing/": "./"
+  }
+}

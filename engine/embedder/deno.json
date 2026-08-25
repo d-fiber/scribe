@@ -1,0 +1,11 @@
+{
+  "imports": {
+    "@scribe/contracts/": "../contracts/",
+    "@scribe/embedder/": "./",
+    "@scribe/foundation/": "../../packages/foundation/",
+    "@scribe/kernel/": "../kernel/",
+    "@scribe/runtime/": "../runtime/",
+    "@scribe/sdk": "../../sdk/js/mod.ts",
+    "@scribe/sdk/": "../../sdk/js/"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "imports": {
+    "@scribe/audience/": "../../packages/audience/",
+    "@scribe/auth/": "../../packages/auth/",
+    "@scribe/contracts/": "../contracts/",
+    "@scribe/dynamic_links/": "../../packages/dynamic_links/",
+    "@scribe/embedder/": "../embedder/",
+    "@scribe/foundation/": "../../packages/foundation/",
+    "@scribe/kernel/": "../kernel/",
+    "@scribe/protocol/": "../../protocol/",
+    "@scribe/realtime/": "../../packages/realtime/",
+    "@scribe/remote_configs/": "../../packages/remote_configs/",
+    "@scribe/runtime/": "../runtime/",
+    "@scribe/sdk": "../../sdk/js/mod.ts",
+    "@scribe/sdk/": "../../sdk/js/",
+    "@scribe/search/": "../../packages/search/",
+    "@scribe/shell/": "../shell/",
+    "@scribe/storage/": "../../packages/storage/",
+    "@scribe/testing/": "../testing/",
+    "@scribe/tests/": "./"
+  }
+}

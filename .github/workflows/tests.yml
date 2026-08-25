@@ -16,10 +16,6 @@ concurrency:
 jobs:
   engine:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: engine
-
     steps:
       - uses: actions/checkout@v4
 
@@ -40,7 +36,7 @@ jobs:
           deno-version: v2.x
 
       - name: Lint
-        run: deno lint --config deno.json . ../packages
+        run: deno task lint
 
       - name: Type check
         run: deno task check
@@ -129,7 +125,7 @@ jobs:
               echo ""
             done
             echo "Imports pinned by URL are invisible here too. Today that is"
-            echo '`jose`, pinned to a fixed version of deno.land/x in engine/deno.json.'
+            echo '`jose`, pinned to a fixed version of deno.land/x in deno.json.'
           } >> "$GITHUB_STEP_SUMMARY"
 
   protocol:

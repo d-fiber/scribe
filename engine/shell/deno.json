@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "@scribe/contracts/": "../contracts/",
+    "@scribe/embedder/": "../embedder/",
+    "@scribe/foundation/": "../../packages/foundation/",
+    "@scribe/kernel/": "../kernel/",
+    "@scribe/runtime/": "../runtime/",
+    "@scribe/shell/": "./"
+  }
+}
