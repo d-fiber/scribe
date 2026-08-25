@@ -34,13 +34,15 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
+
 declare global {
-  var EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | undefined;
+  var EdgeRuntime: { waitUntil(promise: Future<unknown>): void } | undefined;
 }
 
 if (!globalThis.EdgeRuntime) {
   globalThis.EdgeRuntime = {
-    waitUntil(promise: Promise<unknown>): void {
+    waitUntil(promise: Future<unknown>): void {
       promise.catch((e) => console.error("[EdgeRuntime.waitUntil]", e));
     },
   };

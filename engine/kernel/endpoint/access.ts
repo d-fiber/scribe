@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { Caller } from "@scribe/alchemy/route";
 import { RequestIdentity } from "@scribe/kernel/identity/request_identity.ts";
 import { InternalSecretFirewall } from "@scribe/kernel/identity/firewall/internal.ts";
@@ -56,7 +57,7 @@ import { InternalSecretFirewall } from "@scribe/kernel/identity/firewall/interna
 export async function isAllowed(
   callers: readonly Caller[],
   webhookVerified: boolean,
-): Promise<boolean> {
+): Future<boolean> {
   if (callers.includes("anonymous")) return true;
 
   for (const caller of callers) {
@@ -67,7 +68,7 @@ export async function isAllowed(
 }
 
 /** Whether this one way of proving a call is satisfied by the call being answered. */
-function satisfies(caller: Caller, webhookVerified: boolean): Promise<boolean> {
+function satisfies(caller: Caller, webhookVerified: boolean): Future<boolean> {
   switch (caller) {
     case "anonymous":
       return Promise.resolve(true);

@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { IpLocation } from "@scribe/alchemy/route";
 import type { RequestDevice } from "@scribe/contracts/device.ts";
 import {
@@ -64,7 +65,7 @@ export class ApiContext {
     return parseBodyBytes(schema, request.bytes());
   }
 
-  form<S extends FormSchema>(schema: S): Promise<FormFromSchema<S> | null> {
+  form<S extends FormSchema>(schema: S): Future<FormFromSchema<S> | null> {
     return parseFormBytes(schema, RequestScope.getBodyBytes(), request.header("content-type") ?? "");
   }
 
@@ -100,11 +101,11 @@ export class ApiContext {
     return request.header(name);
   }
 
-  device(): Promise<RequestDevice | null> {
+  device(): Future<RequestDevice | null> {
     return requestDevice();
   }
 
-  location(): Promise<IpLocation> {
+  location(): Future<IpLocation> {
     return currentLocation();
   }
 }

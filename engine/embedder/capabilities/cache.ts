@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { create } from "@bufbuild/protobuf";
 import {
   type DeleteRequest,
@@ -63,7 +64,7 @@ function failed(scope: string, cause: unknown): { code: string; message: string 
   return { code: "cache_failed", message };
 }
 
-export async function cacheGet(request: GetRequest): Promise<GetResult> {
+export async function cacheGet(request: GetRequest): Future<GetResult> {
   const key = request.key;
   if (!key) return create(GetResultSchema, { error: failed("get", "missing key") });
 
@@ -78,7 +79,7 @@ export async function cacheGet(request: GetRequest): Promise<GetResult> {
   }
 }
 
-export async function cacheSet(request: SetRequest): Promise<SetResult> {
+export async function cacheSet(request: SetRequest): Future<SetResult> {
   const key = request.key;
   if (!key) return create(SetResultSchema, { error: failed("set", "missing key") });
 
@@ -97,7 +98,7 @@ export async function cacheSet(request: SetRequest): Promise<SetResult> {
   }
 }
 
-export async function cacheDelete(request: DeleteRequest): Promise<DeleteResult> {
+export async function cacheDelete(request: DeleteRequest): Future<DeleteResult> {
   const key = request.key;
   if (!key) return create(DeleteResultSchema, { error: failed("delete", "missing key") });
 
@@ -110,7 +111,7 @@ export async function cacheDelete(request: DeleteRequest): Promise<DeleteResult>
   }
 }
 
-async function deleteByPrefix(prefix: string): Promise<number> {
+async function deleteByPrefix(prefix: string): Future<number> {
   let cursor = "0";
   let deleted = 0;
 

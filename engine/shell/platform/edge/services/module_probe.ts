@@ -34,8 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
+
 export interface ModuleProbe {
-  hasModule(directory: string): Promise<boolean>;
+  hasModule(directory: string): Future<boolean>;
 }
 
 export class FilesystemModuleProbe implements ModuleProbe {
@@ -45,7 +47,7 @@ export class FilesystemModuleProbe implements ModuleProbe {
     this.#entryFile = entryFile;
   }
 
-  async hasModule(directory: string): Promise<boolean> {
+  async hasModule(directory: string): Future<boolean> {
     try {
       const stat = await Deno.stat(directory);
       if (!stat.isDirectory) return false;

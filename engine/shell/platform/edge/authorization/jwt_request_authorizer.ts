@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { ServerResponse } from "@scribe/alchemy/route";
 import { bearerToken } from "./bearer_token.ts";
 import type { RequestAuthorizer } from "./request_authorizer.ts";
@@ -51,7 +52,7 @@ export class JwtRequestAuthorizer implements RequestAuthorizer {
   async authorize(
     request: Request,
     service: string,
-  ): Promise<Response | null> {
+  ): Future<Response | null> {
     if (request.method === "OPTIONS") return null;
     if (this.#exemptServices.has(service)) return null;
 

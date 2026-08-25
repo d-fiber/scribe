@@ -35,6 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { hex } from "@scribe/alchemy";
+import type { Future } from "@scribe/alchemy";
 
 /**
  * `bytes` written as lower case hexadecimal, two characters per byte.
@@ -64,7 +65,7 @@ export const fromHex = hex.decode;
  *
  * @param input - What to digest, as text or as bytes.
  */
-export async function sha256Hex(input: string | Uint8Array): Promise<string> {
+export async function sha256Hex(input: string | Uint8Array): Future<string> {
   const bytes = typeof input === "string" ? new TextEncoder().encode(input) : input;
   const digest = await crypto.subtle.digest("SHA-256", bytes as BufferSource);
 

@@ -34,13 +34,14 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { Caller, RateLimit, RouteMethod } from "@scribe/alchemy/route";
 
 export interface RouteInvocation {
   readonly pathParams: Readonly<Record<string, string>>;
 }
 
-export type RouteHandler = (invocation: RouteInvocation) => Response | Promise<Response>;
+export type RouteHandler = (invocation: RouteInvocation) => Response | Future<Response>;
 
 export interface RouteDescriptor {
   readonly method: RouteMethod;

@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { LoggedEntry } from "@scribe/alchemy/observe";
 import { LogBuffer } from "@scribe/kernel/observability/log_buffer.ts";
 import { LogRoutes } from "@scribe/kernel/observability/log_routing.ts";
@@ -50,7 +51,7 @@ import { LogRoutes } from "@scribe/kernel/observability/log_routing.ts";
 function publishLogs(
   node: string | null,
   entries: readonly LoggedEntry[],
-): Promise<unknown> {
+): Future<unknown> {
   const routing = LogRoutes.current;
   if (!routing.claims(node)) return Promise.resolve();
 

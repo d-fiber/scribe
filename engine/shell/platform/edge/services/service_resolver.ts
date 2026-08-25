@@ -34,11 +34,13 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
+
 export interface ResolvedService {
   readonly service: string;
   readonly servicePath: string;
 }
 
 export interface ServiceResolver {
-  resolve(pathname: string): Promise<ResolvedService | null>;
+  resolve(pathname: string): Future<ResolvedService | null>;
 }

@@ -34,14 +34,16 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
+
 export interface Extension {
   readonly name: string;
-  load(): Promise<unknown | null>;
+  load(): Future<unknown | null>;
 }
 
 export class ExtensionRegistry {
   readonly #declared = new Map<string, Extension>();
-  readonly #loaded = new Map<string, Promise<unknown | null>>();
+  readonly #loaded = new Map<string, Future<unknown | null>>();
 
   register(extension: Extension): void {
     if (this.#declared.has(extension.name)) {
@@ -57,7 +59,7 @@ export class ExtensionRegistry {
     return this.#declared.has(name);
   }
 
-  load(name: string): Promise<unknown | null> {
+  load(name: string): Future<unknown | null> {
     const memoized = this.#loaded.get(name);
     if (memoized !== undefined) return memoized;
 

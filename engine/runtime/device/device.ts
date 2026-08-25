@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { RequestDevice } from "@scribe/contracts/device.ts";
 import { currentIdentity } from "@scribe/runtime/http/accessors/identity.ts";
 import { request } from "@scribe/runtime/http/request.ts";
@@ -48,7 +49,7 @@ const CACHE_KEY = "device:resolved";
 export async function decryptRequestDevice(
   encrypted: string,
   binding: string,
-): Promise<RequestDevice | null> {
+): Future<RequestDevice | null> {
   const raw = await DevicePayloadCipher.decrypt(encrypted);
   if (raw === null) return null;
 
@@ -62,8 +63,8 @@ export async function decryptRequestDevice(
   return device;
 }
 
-export function requestDevice(): Promise<RequestDevice | null> {
-  const cached = RequestScope.cache.get<Promise<RequestDevice | null>>(
+export function requestDevice(): Future<RequestDevice | null> {
+  const cached = RequestScope.cache.get<Future<RequestDevice | null>>(
     CACHE_KEY,
   );
   if (cached !== undefined) return cached;
@@ -73,7 +74,7 @@ export function requestDevice(): Promise<RequestDevice | null> {
   return pending;
 }
 
-function resolveDevice(): Promise<RequestDevice | null> {
+function resolveDevice(): Future<RequestDevice | null> {
   const encrypted = request.header("x-device-payload");
   if (!encrypted || encrypted.length > MAX_PAYLOAD_CHARS) {
     return Promise.resolve(null);

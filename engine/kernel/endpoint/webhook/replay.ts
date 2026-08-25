@@ -35,11 +35,12 @@
 // LICENSE file, the LICENSE file governs.
 
 import { claimOnce } from "@scribe/alchemy";
+import type { Future } from "@scribe/alchemy";
 import { MAX_TIMESTAMP_SKEW_S } from "./signed_request.ts";
 
 export const CLAIM_TTL_S = 2 * MAX_TIMESTAMP_SKEW_S;
 
-export function claimWebhookId(id: string): Promise<boolean> {
+export function claimWebhookId(id: string): Future<boolean> {
   // The opposite call to the one `claimNonce` makes: an index that cannot answer cannot tell
   // a first delivery from a replay, and a replayed delivery is the thing this exists to stop.
   return claimOnce(`webhook:seen:${id}`, CLAIM_TTL_S, {

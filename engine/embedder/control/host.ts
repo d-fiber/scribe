@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { Hono } from "hono";
 import { honoRouter } from "@scribe/kernel/http/routing/hono_router.ts";
 import { majorOf, PROTOCOL_VERSION } from "@scribe/sdk";
@@ -53,7 +54,7 @@ const BOOTSTRAP_REQUEST = new Request("http://worker.bootstrap/");
 
 let attached: Manifest | null = null;
 
-function wait(ms: number): Promise<void> {
+function wait(ms: number): Future<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
@@ -61,7 +62,7 @@ function ownCallbackUrl(port: number): string {
   return `http://${Deno.hostname()}:${port}`;
 }
 
-async function handshake(client: WorkerClient, token: string): Promise<Manifest> {
+async function handshake(client: WorkerClient, token: string): Future<Manifest> {
   const { callbackUrl, callbackPort, handshakeAttempts, handshakeDelayMs } = workerSettings.get();
   const address = callbackUrl ?? ownCallbackUrl(callbackPort);
   console.log(`[worker-host] announcing ${address} as this replica's callback address`);
@@ -125,7 +126,7 @@ export const WorkerHost = {
     return attached;
   },
 
-  async attach(): Promise<void> {
+  async attach(): Future<void> {
     const settings = workerSettings.get();
     const endpoint = settings.endpoint;
     if (endpoint === null) return;

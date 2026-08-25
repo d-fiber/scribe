@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
+
 /** What a deployment grants one account. */
 export interface Grants {
   /** What the deployment calls this account, in one word. */
@@ -57,8 +59,8 @@ export interface Grants {
  */
 export interface GrantSource {
   /** What `accountId` is called, or null when the deployment grants it nothing. */
-  roleOf(accountId: string): Promise<string | null>;
+  roleOf(accountId: string): Future<string | null>;
 
   /** What `role` may do. Empty when it may do nothing beyond what its name says. */
-  permissionsOf(role: string): Promise<string[]>;
+  permissionsOf(role: string): Future<string[]>;
 }

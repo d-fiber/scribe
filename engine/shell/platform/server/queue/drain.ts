@@ -35,6 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Duration } from "@scribe/alchemy";
+import type { Future } from "@scribe/alchemy";
 import type { RateLimit } from "@scribe/alchemy/route";
 import { ApiContext } from "@scribe/kernel/endpoint/api.ts";
 import { ServiceEndpoint } from "@scribe/kernel/endpoint/service.ts";
@@ -52,7 +53,7 @@ export class QueueDrainEndpoint extends ServiceEndpoint {
     return _RATE_LIMIT;
   }
 
-  protected async run(_ctx: ApiContext): Promise<Response> {
+  protected async run(_ctx: ApiContext): Future<Response> {
     return this.response.ok({ data: await queueRunner.run() });
   }
 }
@@ -69,7 +70,7 @@ export class QueueDrainOneEndpoint extends ServiceEndpoint {
     return _RATE_LIMIT;
   }
 
-  protected async run(_ctx: ApiContext): Promise<Response> {
+  protected async run(_ctx: ApiContext): Future<Response> {
     const result = await queueRunner.runOne(this.#name);
     if (result === null) {
       return this.response.notFound({
@@ -86,7 +87,7 @@ export class QueueStatusEndpoint extends ServiceEndpoint {
     return _RATE_LIMIT;
   }
 
-  protected async run(_ctx: ApiContext): Promise<Response> {
+  protected async run(_ctx: ApiContext): Future<Response> {
     return this.response.ok({ data: await queueStatus.all() });
   }
 }

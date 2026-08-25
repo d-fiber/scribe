@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
+
 /**
  * How a package answers the procedures its own contract declares.
  *
@@ -67,7 +69,7 @@ export interface CapabilityWiring {
    * would be one that could forget to.
    */
   // deno-lint-ignore no-explicit-any
-  on(method: any, handler: (request: any) => Promise<any>): unknown;
+  on(method: any, handler: (request: any) => Future<any>): unknown;
 }
 
 /** What a package hands over so the host can give it the wire at boot. */

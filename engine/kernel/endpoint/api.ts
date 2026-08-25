@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { Caller, RateLimit } from "@scribe/alchemy/route";
 import { callersOf } from "@scribe/alchemy/route";
 import { isAllowed } from "./access.ts";
@@ -61,7 +62,7 @@ export abstract class ApiEndpoint extends RouteEndpoint {
    * refused caller therefore spends a rate limit token, which is the half of the trade we want:
    * a flood of invalid tokens used to be answered without ever being counted.
    */
-  protected async execute(): Promise<Response> {
+  protected async execute(): Future<Response> {
     const callers = callersOf(this.access());
 
     const [allowed, withinLimit] = await Promise.all([
@@ -82,7 +83,7 @@ export abstract class ApiEndpoint extends RouteEndpoint {
   static handle<T extends ApiEndpoint, TArgs extends unknown[]>(
     this: new (...args: TArgs) => T,
     ...args: TArgs
-  ): Promise<Response> {
+  ): Future<Response> {
     return new this(...args).execute();
   }
 }

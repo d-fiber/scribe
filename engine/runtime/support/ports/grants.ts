@@ -36,7 +36,7 @@
 
 import type { Grants, GrantSource } from "@scribe/contracts/grants.ts";
 import { cache, Duration } from "@scribe/alchemy";
-import type { Cache } from "@scribe/alchemy";
+import type { Cache, Future } from "@scribe/alchemy";
 
 export class GrantsResolver {
   private static readonly _cache: Cache<Grants> = cache<Grants>({ key: "identity:grants", ttl: Duration.minutes(5) });
@@ -46,7 +46,7 @@ export class GrantsResolver {
     this._source = source;
   }
 
-  static async resolve(accountId: string): Promise<Grants | null> {
+  static async resolve(accountId: string): Future<Grants | null> {
     const cached = await this._cache.get(accountId);
     if (cached !== null) return cached;
 
@@ -62,7 +62,7 @@ export class GrantsResolver {
     return rbac;
   }
 
-  static invalidate(accountId?: string): Promise<void> {
+  static invalidate(accountId?: string): Future<void> {
     return accountId ? this._cache.delete(accountId) : this._cache.clear();
   }
 

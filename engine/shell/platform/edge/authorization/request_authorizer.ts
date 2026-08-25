@@ -34,12 +34,14 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
+
 export interface RequestAuthorizer {
-  authorize(request: Request, service: string): Promise<Response | null>;
+  authorize(request: Request, service: string): Future<Response | null>;
 }
 
 export class OpenRequestAuthorizer implements RequestAuthorizer {
-  authorize(): Promise<Response | null> {
+  authorize(): Future<Response | null> {
     return Promise.resolve(null);
   }
 }

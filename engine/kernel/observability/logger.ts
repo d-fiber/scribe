@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import "@scribe/runtime/support/edge_runtime_shim.ts";
 import type { LoggedLevel } from "@scribe/alchemy/observe";
 import { previewOf } from "@scribe/kernel/observability/body_preview.ts";
@@ -45,7 +46,7 @@ import { Hono } from "hono";
 import { honoRouter } from "@scribe/kernel/http/routing/hono_router.ts";
 import { createMiddleware } from "hono/factory";
 
-declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
+declare const EdgeRuntime: { waitUntil(p: Future<unknown>): void };
 
 /**
  * Holds the exchange for the project's sink, and never makes the client wait.

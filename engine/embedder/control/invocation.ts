@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { create } from "@bufbuild/protobuf";
 import { Caller as ProtoCaller, Method as ProtoMethod, Need } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
 import {
@@ -157,7 +158,7 @@ export async function invocationOf(
   pathParams: Readonly<Record<string, string>>,
   capabilityToken: string,
   traceId: string,
-): Promise<Invocation> {
+): Future<Invocation> {
   return create(InvocationSchema, {
     invocationId: crypto.randomUUID(),
     traceId,

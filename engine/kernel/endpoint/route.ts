@@ -34,18 +34,19 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { ServerResponse } from "@scribe/alchemy/route";
 import { ApiContext } from "./context.ts";
 
 export abstract class RouteEndpoint {
   protected readonly response = ServerResponse;
 
-  protected abstract run(ctx: ApiContext): Response | Promise<Response>;
+  protected abstract run(ctx: ApiContext): Response | Future<Response>;
 
   static invoke<T extends RouteEndpoint, TArgs extends unknown[]>(
     this: new (...args: TArgs) => T,
     ...args: TArgs
-  ): Promise<Response> {
+  ): Future<Response> {
     return Promise.resolve(new this(...args).run(new ApiContext()));
   }
 }

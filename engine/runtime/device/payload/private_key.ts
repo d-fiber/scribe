@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
 
 const PKCS8_X25519_HEADER = new Uint8Array([
@@ -59,13 +60,13 @@ const HEX_32_BYTES = /^[0-9a-fA-F]{64}$/;
 
 export class DeviceKeyError extends Error {}
 
-let imported: Promise<CryptoKey> | null = null;
+let imported: Future<CryptoKey> | null = null;
 
-export function devicePayloadPrivateKey(): Promise<CryptoKey> {
+export function devicePayloadPrivateKey(): Future<CryptoKey> {
   return (imported ??= importPrivateKey());
 }
 
-async function importPrivateKey(): Promise<CryptoKey> {
+async function importPrivateKey(): Future<CryptoKey> {
   const hex = readKeyHex();
   const raw = (hex.match(/.{2}/g) ?? []).map((byte) => parseInt(byte, 16));
 

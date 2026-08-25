@@ -34,10 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { type ProjectHost, ProjectSlot } from "@scribe/contracts/project_host.ts";
 
 interface SlotSpec {
-  readonly load: () => Promise<unknown>;
+  readonly load: () => Future<unknown>;
   readonly degradesSilently: boolean;
 }
 
@@ -55,7 +56,7 @@ const SLOTS: Record<ProjectSlot, SlotSpec> = {
 export class InProcessHost implements ProjectHost {
   readonly #resolved = new Map<ProjectSlot, unknown>();
 
-  async load<T>(slot: ProjectSlot): Promise<T | null> {
+  async load<T>(slot: ProjectSlot): Future<T | null> {
     const cached = this.#resolved.get(slot);
     if (cached !== undefined) return cached as T | null;
 

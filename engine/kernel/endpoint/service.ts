@@ -35,6 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Duration } from "@scribe/alchemy";
+import type { Future } from "@scribe/alchemy";
 import { InternalSecretFirewall } from "@scribe/kernel/identity/firewall/internal.ts";
 import { request } from "@scribe/runtime/http/request.ts";
 import { ApiEndpoint } from "./api.ts";
@@ -57,7 +58,7 @@ export abstract class ServiceEndpoint extends ApiEndpoint {
     };
   }
 
-  protected override execute(): Promise<Response> {
+  protected override execute(): Future<Response> {
     if (!InternalSecretFirewall.verify()) {
       return Promise.resolve(this.response.unauthorized());
     }

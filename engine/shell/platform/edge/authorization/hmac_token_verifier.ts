@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { jwtVerify } from "jose";
 import type { TokenVerifier } from "./token_verifier.ts";
 
@@ -50,7 +51,7 @@ export class HmacTokenVerifier implements TokenVerifier {
     return secret ? new HmacTokenVerifier(secret) : null;
   }
 
-  async verify(token: string): Promise<boolean> {
+  async verify(token: string): Future<boolean> {
     try {
       await jwtVerify(token, this.#secret);
       return true;

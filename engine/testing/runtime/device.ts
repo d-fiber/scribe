@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import "@scribe/testing/settings.ts";
 import type { RequestDevice } from "@scribe/contracts/device.ts";
 import { ClientType, DeviceCategory, DeviceOs, DeviceThemeMode, Localization } from "@scribe/contracts/enums.ts";
@@ -69,9 +70,9 @@ export function requestWith(
 
 export function withRequest<T>(
   device: RequestDevice | null,
-  body: () => Promise<T>,
+  body: () => Future<T>,
   headers: Record<string, string> = {},
-): Promise<T> {
+): Future<T> {
   return RequestScope.run(requestWith(headers), new Uint8Array(0), () => {
     RequestScope.cache.set(_DEVICE_CACHE_KEY, Promise.resolve(device));
     return body();

@@ -44,6 +44,7 @@ import type {
 } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import type { Reply } from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
 import { Duration } from "@scribe/alchemy";
+import type { Future } from "@scribe/alchemy";
 import type { Caller } from "@scribe/alchemy/route";
 import { isAllowed } from "@scribe/kernel/endpoint/access.ts";
 import type { RateLimit } from "@scribe/alchemy/route";
@@ -116,7 +117,7 @@ function responseOf(reply: Reply): Response {
   });
 }
 
-async function serve(route: Route, client: WorkerClient, c: Context): Promise<Response> {
+async function serve(route: Route, client: WorkerClient, c: Context): Future<Response> {
   const declared = route.access.map((caller) => callers[caller]);
 
   const [allowed, withinLimit] = await Promise.all([

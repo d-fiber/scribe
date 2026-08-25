@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { FilesystemModuleProbe, type ModuleProbe } from "./module_probe.ts";
 import { ResolutionCache } from "./resolution_cache.ts";
 import type { ResolvedService, ServiceResolver } from "./service_resolver.ts";
@@ -61,7 +62,7 @@ export class DirectoryServiceResolver implements ServiceResolver {
     this.#flatMatches = flatMatches;
   }
 
-  async resolve(pathname: string): Promise<ResolvedService | null> {
+  async resolve(pathname: string): Future<ResolvedService | null> {
     const segments = pathname.split("/").filter(Boolean);
     if (segments.length === 0) return null;
 
@@ -89,7 +90,7 @@ export class DirectoryServiceResolver implements ServiceResolver {
     service: string,
     prefixes: readonly string[],
     cache: ResolutionCache,
-  ): Promise<ResolvedService | null> {
+  ): Future<ResolvedService | null> {
     const remembered = cache.lookup(service);
     if (remembered !== undefined) {
       return remembered === null ? null : { service, servicePath: remembered };
@@ -103,7 +104,7 @@ export class DirectoryServiceResolver implements ServiceResolver {
   async #firstMatch(
     service: string,
     prefixes: readonly string[],
-  ): Promise<ResolvedService | null> {
+  ): Future<ResolvedService | null> {
     for (const prefix of prefixes) {
       const servicePath = `${this.#root}/${prefix}${service}`;
       if (await this.#probe.hasModule(servicePath)) {

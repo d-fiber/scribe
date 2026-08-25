@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { redactIfJson } from "./redaction.ts";
 
 const PREVIEW_BYTES_THRESHOLD = 8_192;
@@ -52,7 +53,7 @@ const PREVIEW_EDGE_CHARS = 250;
  * it reaches the project's sink, which may well post it to a collector, so a
  * token left in it would leave the machine.
  */
-export async function previewOf(response: Response): Promise<string> {
+export async function previewOf(response: Response): Future<string> {
   if (response.status < 400) return "";
 
   const declaredBytes = Number(response.headers.get("content-length") ?? 0);

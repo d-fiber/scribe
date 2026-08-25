@@ -47,7 +47,7 @@
  * shipped one gets its own driver.
  */
 
-import type { LifecycleSteps } from "@scribe/alchemy";
+import type { Future, LifecycleSteps } from "@scribe/alchemy";
 import { isMissingModule } from "../extensions/missing_module.ts";
 
 /** One package a project mounted, and the three moments it may run at. */
@@ -65,7 +65,7 @@ export interface Registrations {
   readonly mounted: readonly MountedPackage[];
 }
 
-let loaded: Promise<readonly MountedPackage[]> | null = null;
+let loaded: Future<readonly MountedPackage[]> | null = null;
 
 /**
  * The packages this process mounts, read once.
@@ -76,7 +76,7 @@ let loaded: Promise<readonly MountedPackage[]> | null = null;
  * there and throws is raised, because swallowing it would leave every port a package fills unbound
  * with nothing said, which reads as a healthy start followed by an unexplained exit.
  */
-export function mountedPackages(): Promise<readonly MountedPackage[]> {
+export function mountedPackages(): Future<readonly MountedPackage[]> {
   loaded ??= import("@generated/registrations.ts")
     .then((module) => (module as unknown as Registrations).mounted ?? [])
     .catch((raised: unknown) => {
@@ -99,7 +99,7 @@ export function mountedPackages(): Promise<readonly MountedPackage[]> {
  * They run one after another rather than together: a package may fill a port another one reads at
  * its own moment, and the project's order is what decides who wins.
  */
-export async function runMounted(moment: keyof LifecycleSteps): Promise<void> {
+export async function runMounted(moment: keyof LifecycleSteps): Future<void> {
   for (const mounted of await mountedPackages()) {
     const step = mounted.steps[moment];
     if (!step) continue;

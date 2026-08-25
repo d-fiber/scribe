@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { create } from "@bufbuild/protobuf";
 import type { LoggedEntry } from "@scribe/alchemy/observe";
 import type { LogRouting } from "@scribe/contracts/logging.ts";
@@ -104,7 +105,7 @@ export class WorkerLogSinks implements LogRouting {
     return this.#root;
   }
 
-  async deliver(node: string | null, entries: readonly LoggedEntry[]): Promise<void> {
+  async deliver(node: string | null, entries: readonly LoggedEntry[]): Future<void> {
     const target = node !== null && this.#withSink.has(node) ? node : null;
 
     await this.#client.deliverLogs(target, entries.map(wireEntry));

@@ -34,8 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
+
 export interface Bootstrapper {
   readonly name: string;
-  boot(): Promise<void> | void;
-  shutdown?(): Promise<void> | void;
+  boot(): Future<void> | void;
+  shutdown?(): Future<void> | void;
 }

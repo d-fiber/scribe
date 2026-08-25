@@ -35,6 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { type Duration, rateLimit } from "@scribe/alchemy";
+import type { Future } from "@scribe/alchemy";
 import type { RateLimit } from "@scribe/alchemy/route";
 import { firstSegmentOf } from "@scribe/runtime/http/pathname.ts";
 import { request } from "@scribe/runtime/http/request.ts";
@@ -69,7 +70,7 @@ export function rateLimitPrefix(): string {
  * it, so the penalty of such a bucket is capped whatever the route asked for. A route cannot make
  * that call itself: it declares one limit and serves both kinds of caller.
  */
-export async function withinRateLimit(key: string, limiter: RateLimit): Promise<boolean> {
+export async function withinRateLimit(key: string, limiter: RateLimit): Future<boolean> {
   const caller = requestCaller();
   if (caller === null) return limiter.failOpen ?? true;
 

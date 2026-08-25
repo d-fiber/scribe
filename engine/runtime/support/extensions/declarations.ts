@@ -33,6 +33,7 @@
 //
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
+import type { Future } from "@scribe/alchemy";
 import { isMissingModule } from "./missing_module.ts";
 
 /**
@@ -51,16 +52,16 @@ import { isMissingModule } from "./missing_module.ts";
  */
 export interface ProjectDeclarations {
   /** Loads every queue the project declared, and answers once they have all run. */
-  queues(): Promise<unknown[]>;
+  queues(): Future<unknown[]>;
 
   /** Loads every cron the project declared. */
-  crons(): Promise<unknown[]>;
+  crons(): Future<unknown[]>;
 
   /** Loads every account role the project declared. */
-  accounts(): Promise<unknown[]>;
+  accounts(): Future<unknown[]>;
 
   /** Loads every search index the project declared. */
-  searchers(): Promise<unknown[]>;
+  searchers(): Future<unknown[]>;
 }
 
 /** The kinds a project may declare, which are the four the generated file exports. */
@@ -73,7 +74,7 @@ const NOTHING: ProjectDeclarations = {
   searchers: () => Promise.resolve([]),
 };
 
-let declared: Promise<ProjectDeclarations> | null = null;
+let declared: Future<ProjectDeclarations> | null = null;
 
 /**
  * Runs the declarations of one kind, once per process.
@@ -91,7 +92,7 @@ let declared: Promise<ProjectDeclarations> | null = null;
  * a mounted package asked for, so this only happens when a package asks for a kind it never
  * declared, and answering the empty set is closer to the truth than calling what is not there.
  */
-export async function runDeclarations(kind: DeclarationKind): Promise<void> {
+export async function runDeclarations(kind: DeclarationKind): Future<void> {
   declared ??= import("@generated/declarations.ts")
     .then((module) => module as unknown as ProjectDeclarations)
     .catch((raised: unknown) => {

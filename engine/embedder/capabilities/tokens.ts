@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { RequestUser } from "@scribe/alchemy/route";
 import { RequestIdentityCache } from "@scribe/runtime/http/accessors/identity.ts";
 import { RequestScope } from "@scribe/runtime/scope.ts";
@@ -117,7 +118,7 @@ export const CapabilityTokens = {
     return grant;
   },
 
-  run<T>(token: string, handler: () => Promise<T>): Promise<T> {
+  run<T>(token: string, handler: () => Future<T>): Future<T> {
     const grant = CapabilityTokens.redeem(token);
     if (!grant) return Promise.reject(new UnknownCapabilityToken());
 

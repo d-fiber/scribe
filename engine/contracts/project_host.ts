@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
+
 export enum ProjectSlot {
   /** The colours a project overrides, read once when the theme is built. */
   ThemeColors = "theme-colors",
@@ -43,5 +45,5 @@ export enum ProjectSlot {
 }
 
 export interface ProjectHost {
-  load<T>(slot: ProjectSlot): Promise<T | null>;
+  load<T>(slot: ProjectSlot): Future<T | null>;
 }

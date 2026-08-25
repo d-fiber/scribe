@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { Bootstrapper } from "./bootstrapper.ts";
 import { BootSequence } from "./boot_sequence.ts";
 import { SignalWatcher } from "./signals.ts";
@@ -41,7 +42,7 @@ import { SignalWatcher } from "./signals.ts";
 export abstract class Runtime {
   abstract readonly name: string;
 
-  async start(): Promise<void> {
+  async start(): Future<void> {
     const sequence = new BootSequence(this.name, this.bootstrappers());
     await sequence.boot();
 

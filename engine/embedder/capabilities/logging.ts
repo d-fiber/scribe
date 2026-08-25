@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { create } from "@bufbuild/protobuf";
 import { type LogAck, LogAckSchema, type LogBatch } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 
@@ -50,6 +51,6 @@ import { type LogAck, LogAckSchema, type LogBatch } from "@scribe/sdk/gen/scribe
  * The capability stays because the worker cannot know that from its side: it
  * calls, and it is answered.
  */
-export function shipLogs(_batch: LogBatch): Promise<LogAck> {
+export function shipLogs(_batch: LogBatch): Future<LogAck> {
   return Promise.resolve(create(LogAckSchema, {}));
 }

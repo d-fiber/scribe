@@ -34,7 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export type ShutdownHandler = () => Promise<void> | void;
+import type { Future } from "@scribe/alchemy";
+
+export type ShutdownHandler = () => Future<void> | void;
 
 export class SignalWatcher {
   readonly #signals: readonly Deno.Signal[];
@@ -55,7 +57,7 @@ export class SignalWatcher {
     }
   }
 
-  async #handle(signal: Deno.Signal): Promise<void> {
+  async #handle(signal: Deno.Signal): Future<void> {
     console.info(`[shell:signals] ${signal} received, shutting down.`);
     await this.#onShutdown();
     Deno.exit(0);

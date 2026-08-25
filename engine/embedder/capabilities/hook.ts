@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { create } from "@bufbuild/protobuf";
 import {
   type EmitResult,
@@ -55,7 +56,7 @@ import { decodeJson } from "../control/json.ts";
  * nobody subscribed to it. The handlers run before the answer leaves, so a failure in any one
  * of them is carried back rather than swallowed.
  */
-export async function hookEmit(event: Event): Promise<EmitResult> {
+export async function hookEmit(event: Event): Future<EmitResult> {
   const hook = hookRegistry.get(event.event);
   if (!hook) {
     return create(EmitResultSchema, {

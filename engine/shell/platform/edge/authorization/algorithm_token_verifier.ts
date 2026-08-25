@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { decodeProtectedHeader } from "jose";
 import type { TokenVerifier } from "./token_verifier.ts";
 
@@ -54,7 +55,7 @@ export class AlgorithmTokenVerifier implements TokenVerifier {
     return [...this.#byAlgorithm.keys()];
   }
 
-  verify(token: string): Promise<boolean> {
+  verify(token: string): Future<boolean> {
     const verifier = this.#verifierFor(token);
     return verifier === null ? Promise.resolve(false) : verifier.verify(token);
   }

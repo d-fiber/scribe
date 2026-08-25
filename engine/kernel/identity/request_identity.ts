@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { RequestUser } from "@scribe/alchemy/route";
 import { request } from "@scribe/runtime/http/request.ts";
 import { GrantsResolver } from "@scribe/runtime/support/ports/grants.ts";
@@ -56,7 +57,7 @@ function _bearerJwt(): string | null {
 }
 
 /** Who the bearer token names, with what the deployment grants them, or null when it names nobody. */
-async function _resolveFromJwt(): Promise<ResolvedIdentity> {
+async function _resolveFromJwt(): Future<ResolvedIdentity> {
   const jwt = _bearerJwt();
   if (!jwt) return null;
 
@@ -76,12 +77,12 @@ async function _resolveFromJwt(): Promise<ResolvedIdentity> {
 }
 
 /** Who is calling, resolved once per request and remembered for the rest of it. */
-function _currentUser(): Promise<ResolvedIdentity> {
+function _currentUser(): Future<ResolvedIdentity> {
   return RequestIdentityCache.remember(_resolveFromJwt);
 }
 
 /** Forgets what a deployment grants `id`, or what it grants everybody when `id` is left out. */
-export function invalidateGrants(id?: string): Promise<void> {
+export function invalidateGrants(id?: string): Future<void> {
   return GrantsResolver.invalidate(id);
 }
 
@@ -95,17 +96,17 @@ export function invalidateGrants(id?: string): Promise<void> {
  */
 export class RequestIdentity {
   /** Whether anything proved this call at all. */
-  static async isConnected(): Promise<boolean> {
+  static async isConnected(): Future<boolean> {
     return (await _currentUser()) !== null;
   }
 
   /** What identifies the caller, or null when nothing proved the call. */
-  static async userId(): Promise<string | null> {
+  static async userId(): Future<string | null> {
     return (await _currentUser())?.id ?? null;
   }
 
   /** What the deployment calls the caller, or null when it calls them nothing. */
-  static async role(): Promise<string | null> {
+  static async role(): Future<string | null> {
     const role = (await _currentUser())?.role ?? "";
     return role === "" ? null : role;
   }
@@ -119,12 +120,12 @@ export class RequestIdentity {
 /** What the caller is allowed to do, read the same way whoever is calling. */
 export class RbacIdentity extends RequestIdentity {
   /** Every permission the caller holds. Empty when nothing proved the call. */
-  static async permissions(): Promise<string[]> {
+  static async permissions(): Future<string[]> {
     return (await _currentUser())?.permissions.slice() ?? [];
   }
 
   /** Whether the caller holds every one of `required`. */
-  static async grants(required: readonly string[]): Promise<boolean> {
+  static async grants(required: readonly string[]): Future<boolean> {
     const held = await this.permissions();
     return required.every((permission) => held.includes(permission));
   }

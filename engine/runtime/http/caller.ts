@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { RateLimiter, RateLimitOutcome } from "@scribe/alchemy";
+import type { Future, RateLimiter, RateLimitOutcome } from "@scribe/alchemy";
 import { currentIdentity } from "@scribe/runtime/http/accessors/identity.ts";
 import { request } from "@scribe/runtime/http/request.ts";
 
@@ -100,7 +100,7 @@ function suffixOf(caller: RequestCaller, subject: string): string {
  * chose for a hit it cannot measure, rather than joining a bucket shared with every other unnamed
  * caller.
  */
-export function checkCaller(limit: RateLimiter, subject: string = ""): Promise<RateLimitOutcome> {
+export function checkCaller(limit: RateLimiter, subject: string = ""): Future<RateLimitOutcome> {
   const caller = requestCaller();
   if (caller === null) {
     console.error(`[rate-limit] no caller to attribute "${limit.key}" to, and no bucket to record`);
@@ -111,7 +111,7 @@ export function checkCaller(limit: RateLimiter, subject: string = ""): Promise<R
 }
 
 /** Whether whoever is calling is serving a penalty on `limit`, for `subject` when there is one. */
-export function callerBlocked(limit: RateLimiter, subject: string = ""): Promise<boolean> {
+export function callerBlocked(limit: RateLimiter, subject: string = ""): Future<boolean> {
   const caller = requestCaller();
   if (caller === null) return Promise.resolve(!limit.unmeasured().ok);
 

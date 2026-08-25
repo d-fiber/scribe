@@ -41,6 +41,7 @@ import {
   PushResultSchema,
 } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/queue_pb.ts";
 import { Duration } from "@scribe/alchemy";
+import type { Future } from "@scribe/alchemy";
 import { QueuePublisher, queueRegistry } from "@scribe/foundation/queue";
 import { decodeJson } from "../control/json.ts";
 
@@ -55,7 +56,7 @@ import { decodeJson } from "../control/json.ts";
  * message, in the order they were given. A failure part way through leaves the messages already
  * pushed on the queue, because nothing here can take one back.
  */
-export async function queuePush(request: PushRequest): Promise<PushResult> {
+export async function queuePush(request: PushRequest): Future<PushResult> {
   const registered = queueRegistry.get(request.queueId);
   if (!registered) {
     return create(PushResultSchema, {

@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { ServerResponse } from "@scribe/alchemy/route";
 import { forward } from "@scribe/kernel/http/serve/mod.ts";
 import { NodeSurfaces } from "@scribe/embedder/control/node_surfaces.ts";
@@ -66,7 +67,7 @@ export class SurfaceRouter {
     this.#queue = queue;
   }
 
-  async route(pathname: string): Promise<Response> {
+  async route(pathname: string): Future<Response> {
     try {
       if (pathname === HEALTH_PATH) return new Response("ok");
 

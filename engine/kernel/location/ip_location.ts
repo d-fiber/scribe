@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { cache, Duration } from "@scribe/alchemy";
-import type { Cache } from "@scribe/alchemy";
+import type { Cache, Future } from "@scribe/alchemy";
 import { http } from "@scribe/alchemy/http";
 import { isPrivateIp } from "@scribe/runtime/http/ip/mod.ts";
 import type { GeolocationProvider, IpLocation } from "./provider.ts";
@@ -60,14 +60,14 @@ export class GeolocationResolver {
     new IpInfoProvider(),
   ];
 
-  static locate(ip: string): Promise<IpLocation> {
+  static locate(ip: string): Future<IpLocation> {
     if (!ip || isPrivateIp(ip)) return Promise.resolve(_EMPTY_LOCATION);
     return this._cache.upsert(ip, () => this._resolveViaProviders(ip));
   }
 
   private static async _resolveViaProviders(
     ip: string,
-  ): Promise<IpLocation> {
+  ): Future<IpLocation> {
     for (const provider of this._providers) {
       const location = await this._tryProvider(provider, ip);
       if (location) return location;
@@ -78,7 +78,7 @@ export class GeolocationResolver {
   private static async _tryProvider(
     provider: GeolocationProvider,
     ip: string,
-  ): Promise<IpLocation | null> {
+  ): Future<IpLocation | null> {
     try {
       const url = provider.buildUrl(ip);
       if (!url.startsWith("https://")) {
@@ -99,7 +99,7 @@ export class GeolocationResolver {
   }
 }
 
-export function ipLocation(ip: string): Promise<IpLocation> {
+export function ipLocation(ip: string): Future<IpLocation> {
   return GeolocationResolver.locate(ip);
 }
 

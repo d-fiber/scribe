@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { LoggedEntry } from "@scribe/alchemy/observe";
 
 /**
@@ -68,5 +69,5 @@ export interface LogRouting {
   claims(node: string | null): boolean;
 
   /** Hands a batch to the sink that claimed it. */
-  deliver(node: string | null, entries: readonly LoggedEntry[]): Promise<void>;
+  deliver(node: string | null, entries: readonly LoggedEntry[]): Future<void>;
 }

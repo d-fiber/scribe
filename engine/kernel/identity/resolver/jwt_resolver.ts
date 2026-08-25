@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { cache, Duration } from "@scribe/alchemy";
-import type { Cache } from "@scribe/alchemy";
+import type { Cache, Future } from "@scribe/alchemy";
 import { JwtVerifier } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
 import { IDENTITY_CACHE_KEY, IdentityRevocation } from "@scribe/foundation/redis";
 import { TtlLru } from "@scribe/runtime/support/cache/ttl_lru.ts";
@@ -160,7 +160,7 @@ export class JwtIdentityResolver {
    */
   static async resolveIdentity(
     jwt: string,
-  ): Promise<ResolvedJwtIdentity | null> {
+  ): Future<ResolvedJwtIdentity | null> {
     const cacheKey = await sha256Hex(jwt);
 
     const local = this._local.get(cacheKey);
@@ -185,7 +185,7 @@ export class JwtIdentityResolver {
   private static async _identityOf(
     payload: JWTPayload,
     jwt: string,
-  ): Promise<ResolvedJwtIdentity | null> {
+  ): Future<ResolvedJwtIdentity | null> {
     const claimed = _identityFromClaims(payload);
     if (claimed === null) return null;
 
@@ -199,7 +199,7 @@ export class JwtIdentityResolver {
     identity: ResolvedJwtIdentity,
     cacheKey: string,
     exp: number | null,
-  ): Promise<void> {
+  ): Future<void> {
     const revocable = await IdentityRevocation.remember(
       identity.id,
       cacheKey,
@@ -225,7 +225,7 @@ export class JwtIdentityResolver {
    * the very replica that was told to stop. The other replicas still wait it
    * out, which is what the window means.
    */
-  static invalidate(userId: string): Promise<void> {
+  static invalidate(userId: string): Future<void> {
     this.forget();
     return IdentityRevocation.revoke(userId);
   }
@@ -244,7 +244,7 @@ export class JwtIdentityResolver {
 
   private static async _fetchUser(
     jwt: string,
-  ): Promise<Record<string, unknown> | null> {
+  ): Future<Record<string, unknown> | null> {
     try {
       const res = await http.get(`${identitySettings.get().authUrl}/user`, {
         headers: {

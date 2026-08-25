@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { readBoundedBody } from "@scribe/kernel/http/serve/body_reader.ts";
 import { ServerResponse } from "@scribe/alchemy/route";
 import { pathnameOf, stripPrefix } from "@scribe/runtime/http/pathname.ts";
@@ -47,7 +48,7 @@ import type { Hono } from "hono";
 
 const RETRY_AFTER_S = "5";
 
-export function serve(handler: () => Response | Promise<Response>): void {
+export function serve(handler: () => Response | Future<Response>): void {
   Deno.serve({ port: httpSettings.get().port }, async (req, info) => {
     const admission = admitBody(req);
     if (admission === null) return bodyRefused();
@@ -67,7 +68,7 @@ export function serve(handler: () => Response | Promise<Response>): void {
   });
 }
 
-export function forward(app: Hono, subPath: string): Promise<Response> {
+export function forward(app: Hono, subPath: string): Future<Response> {
   const req = RequestScope.get();
   const bodyBytes = RequestScope.getBodyBytes();
 

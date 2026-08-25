@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { DEVICE_PAYLOAD_MAX_AGE_MS, DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS } from "./freshness.ts";
 import { PlaintextCache } from "./plaintext_cache.ts";
 import { devicePayloadPrivateKey } from "./private_key.ts";
@@ -56,7 +57,7 @@ interface SealedBox {
 }
 
 export class DevicePayloadCipher {
-  static async decrypt(encrypted: string): Promise<unknown | null> {
+  static async decrypt(encrypted: string): Future<unknown | null> {
     const now = Date.now();
 
     const cached = plaintexts.lookup(encrypted, now);
@@ -82,7 +83,7 @@ function objectFrom(plaintext: string | null): unknown | null {
   }
 }
 
-async function decipher(encrypted: string): Promise<string | null> {
+async function decipher(encrypted: string): Future<string | null> {
   const sealed = openSealedBox(encrypted);
   if (sealed === null) return null;
 
@@ -129,7 +130,7 @@ function base64Decode(encoded: string): Uint8Array<ArrayBuffer> | null {
 
 async function deriveAesKey(
   ephemeralPublicKey: Uint8Array<ArrayBuffer>,
-): Promise<CryptoKey> {
+): Future<CryptoKey> {
   const imported = await crypto.subtle.importKey(
     "raw",
     ephemeralPublicKey,

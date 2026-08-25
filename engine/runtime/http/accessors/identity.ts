@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { RequestUser } from "@scribe/alchemy/route";
 import { RequestScope } from "@scribe/runtime/scope.ts";
 
@@ -53,12 +54,12 @@ export class RequestIdentityCache {
   }
 
   static async remember(
-    resolve: () => Promise<ResolvedIdentity>,
-  ): Promise<ResolvedIdentity> {
+    resolve: () => Future<ResolvedIdentity>,
+  ): Future<ResolvedIdentity> {
     const resolved = this.resolved();
     if (resolved !== undefined) return resolved;
 
-    const pending = RequestScope.cache.get<Promise<ResolvedIdentity>>(_PENDING_KEY);
+    const pending = RequestScope.cache.get<Future<ResolvedIdentity>>(_PENDING_KEY);
     if (pending !== undefined) {
       const user = await pending;
       RequestScope.cache.set(_RESOLVED_KEY, user);

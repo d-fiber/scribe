@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { Context, Hono } from "hono";
 import { callersOf, ServerResponse } from "@scribe/alchemy/route";
 import { isAllowed } from "@scribe/kernel/endpoint/access.ts";
@@ -41,12 +42,12 @@ import { withinRateLimit } from "@scribe/kernel/endpoint/rate_limit.ts";
 import { RbacIdentity } from "@scribe/kernel/identity/request_identity.ts";
 import type { RouteDescriptor } from "./descriptor.ts";
 
-async function grantsAll(required: readonly string[]): Promise<boolean> {
+async function grantsAll(required: readonly string[]): Future<boolean> {
   const granted = await RbacIdentity.permissions();
   return required.every((permission) => granted.includes(permission));
 }
 
-async function serve(descriptor: RouteDescriptor, c: Context): Promise<Response> {
+async function serve(descriptor: RouteDescriptor, c: Context): Future<Response> {
   const callers = callersOf(descriptor.access);
 
   // Same reasoning as the worker routes in embedder/control/mount.ts: the limiter

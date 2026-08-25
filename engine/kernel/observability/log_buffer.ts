@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { LoggedEntry } from "@scribe/alchemy/observe";
 
 /** The entries of `batch`, gathered under the node each one belongs to. */
@@ -88,13 +89,13 @@ export class LogBuffer {
   readonly #publish: (
     node: string | null,
     entries: readonly LoggedEntry[],
-  ) => Promise<unknown>;
+  ) => Future<unknown>;
 
   #entries: LoggedEntry[] = [];
   #timer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
-    publish: (node: string | null, entries: readonly LoggedEntry[]) => Promise<unknown>,
+    publish: (node: string | null, entries: readonly LoggedEntry[]) => Future<unknown>,
   ) {
     this.#publish = publish;
   }
@@ -111,7 +112,7 @@ export class LogBuffer {
    * batch. A caller under a runtime that suspends on idle passes what it gets
    * to `waitUntil`, so the process stays alive long enough to publish.
    */
-  record(entry: LoggedEntry): Promise<void> | null {
+  record(entry: LoggedEntry): Future<void> | null {
     this.#entries.push(entry);
 
     if (this.#entries.length >= MAX_BUFFERED) return this.flush();
@@ -132,7 +133,7 @@ export class LogBuffer {
    * not worth taking the process down with them. One node failing does not stop
    * the others.
    */
-  async flush(): Promise<void> {
+  async flush(): Future<void> {
     this.#disarm();
     if (this.#entries.length === 0) return;
 

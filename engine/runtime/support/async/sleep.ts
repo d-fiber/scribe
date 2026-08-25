@@ -43,6 +43,6 @@ import { type Duration, Future } from "@scribe/alchemy";
  * It lives here rather than in `@scribe/alchemy`, which answers the same wait through
  * `Future.delayed`. This file keeps the name the framework already imports.
  */
-export function sleep(held: Duration): Promise<void> {
+export function sleep(held: Duration): Future<void> {
   return Future.delayed(held);
 }

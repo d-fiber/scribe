@@ -36,6 +36,7 @@
 
 // deno-lint-ignore-file no-explicit-any
 
+import type { Future } from "@scribe/alchemy";
 import { create } from "@bufbuild/protobuf";
 import {
   type Filter,
@@ -265,7 +266,7 @@ function shaped(builder: any, query: Query): any {
   return query.single ? current.maybeSingle() : current;
 }
 
-async function runRpc(query: Query): Promise<QueryResult> {
+async function runRpc(query: Query): Future<QueryResult> {
   const db = PostgrestClients.service() as any;
   const { data, error } = await db.rpc(query.rpcName, decodeJson(query.rpcArgs) ?? {});
 
@@ -281,7 +282,7 @@ async function runRpc(query: Query): Promise<QueryResult> {
  * @throws {Error} When the caller owns a different row than the one `query` reaches. Owner scoping
  * is decided here, in TypeScript, and never by a row level security policy.
  */
-export async function executeQuery(query: Query): Promise<QueryResult> {
+export async function executeQuery(query: Query): Future<QueryResult> {
   if (query.operation === Operation.RPC) return runRpc(query);
 
   if (reachesEveryRow(query)) {
@@ -332,7 +333,7 @@ function refused(cause: unknown): QueryResult {
  * A query the owner check refuses answers a `query_refused` entry rather than sinking the batch,
  * because the caller asked for several answers and the ones it may have are still worth returning.
  */
-export async function executeQueries(batch: QueryBatch): Promise<QueryResultBatch> {
+export async function executeQueries(batch: QueryBatch): Future<QueryResultBatch> {
   const results = await Promise.all(
     batch.queries.map((query) => executeQuery(query).catch(refused)),
   );

@@ -34,10 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { Extension } from "./registry.ts";
 import { isMissingModule } from "./missing_module.ts";
 
-export type ExtensionImporter = () => Promise<unknown>;
+export type ExtensionImporter = () => Future<unknown>;
 
 export class OptionalExtension implements Extension {
   readonly name: string;
@@ -49,7 +50,7 @@ export class OptionalExtension implements Extension {
     this.#importer = importer;
   }
 
-  async load(): Promise<unknown | null> {
+  async load(): Future<unknown | null> {
     try {
       return await this.#importer();
     } catch (error) {

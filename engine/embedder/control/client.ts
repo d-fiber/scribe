@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { type Fetcher, PROTOCOL_VERSION, UnaryClient } from "@scribe/sdk";
 import type { Manifest } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import { Registration } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
@@ -51,7 +52,7 @@ export class WorkerClient {
     readonly fetcher?: Fetcher,
   ) {}
 
-  describe(callbackUrl: string, capabilityToken: string): Promise<Manifest> {
+  describe(callbackUrl: string, capabilityToken: string): Future<Manifest> {
     return this.#channel(capabilityToken, "").call(Registration.method.describe, {
       hostProtocolVersion: PROTOCOL_VERSION,
       hostEndpoint: callbackUrl,
@@ -59,7 +60,7 @@ export class WorkerClient {
     });
   }
 
-  invoke(invocation: Invocation): Promise<Reply> {
+  invoke(invocation: Invocation): Future<Reply> {
     return this.#channel(invocation.capabilityToken, invocation.traceId).call(
       WorkerService.method.invoke,
       invocation,

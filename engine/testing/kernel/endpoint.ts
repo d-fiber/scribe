@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import "@scribe/testing/settings.ts";
 import type { RequestDevice } from "@scribe/contracts/device.ts";
 import type { RequestUser } from "@scribe/alchemy/route";
@@ -58,10 +59,10 @@ export interface ApiCallResult {
 }
 
 export function callEndpoint(
-  handler: () => Promise<Response>,
+  handler: () => Future<Response>,
   body: unknown = {},
   options: ApiCallOptions = {},
-): Promise<ApiCallResult> {
+): Future<ApiCallResult> {
   const {
     device = fakeDevice(),
     headers = {},
@@ -96,7 +97,7 @@ export function callEndpoint(
   }, "127.0.0.1");
 }
 
-async function _json(response: Response): Promise<Record<string, unknown>> {
+async function _json(response: Response): Future<Record<string, unknown>> {
   const text = await response.text();
   if (!text) return {};
   try {

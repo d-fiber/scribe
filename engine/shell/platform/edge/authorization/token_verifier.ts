@@ -34,7 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
+
 export interface TokenVerifier {
   readonly algorithms: readonly string[];
-  verify(token: string): Promise<boolean>;
+  verify(token: string): Future<boolean>;
 }

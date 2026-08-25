@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
 import { createRemoteJWKSet, decodeProtectedHeader, jwtVerify } from "jose";
 import type { JWTPayload, JWTVerifyResult } from "jose";
@@ -70,10 +71,10 @@ function remoteKeySet(): RemoteKeySet | null {
   }
 }
 
-type Verification = (jwt: string) => Promise<JWTVerifyResult>;
+type Verification = (jwt: string) => Future<JWTVerifyResult>;
 
 let hmacSecret: string | null = null;
-let hmacKey: Promise<CryptoKey> | null = null;
+let hmacKey: Future<CryptoKey> | null = null;
 
 /**
  * The shared secret as a `CryptoKey`, imported once per secret.
@@ -83,7 +84,7 @@ let hmacKey: Promise<CryptoKey> | null = null;
  * is keyed on the secret itself so that swapping it, which only tests do,
  * still takes effect.
  */
-function symmetricKey(secret: string): Promise<CryptoKey> {
+function symmetricKey(secret: string): Future<CryptoKey> {
   if (secret !== hmacSecret || hmacKey === null) {
     hmacSecret = secret;
     hmacKey = crypto.subtle.importKey(
@@ -127,7 +128,7 @@ function verificationFor(alg: string | undefined): Verification | null {
 }
 
 export class JwtVerifier {
-  static async verify(jwt: string): Promise<JWTPayload | null> {
+  static async verify(jwt: string): Future<JWTPayload | null> {
     try {
       const verification = verificationFor(decodeProtectedHeader(jwt).alg);
       if (verification === null) return null;

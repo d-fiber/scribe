@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { fromBase64 } from "@scribe/runtime/support/crypto/base64.ts";
 import type { SignedWebhookRequest } from "./signed_request.ts";
 
@@ -41,7 +42,7 @@ const SECRET_PREFIX = "whsec_";
 
 export async function importSigningKey(
   secret: string,
-): Promise<CryptoKey | null> {
+): Future<CryptoKey | null> {
   const encoded = secret.split(SECRET_PREFIX)[1];
   if (!encoded) return null;
 
@@ -60,7 +61,7 @@ export async function importSigningKey(
 export async function matchesAnyCandidate(
   key: CryptoKey,
   signed: SignedWebhookRequest,
-): Promise<boolean> {
+): Future<boolean> {
   const message = new TextEncoder().encode(
     `${signed.id}.${signed.timestamp}.${signed.rawBody}`,
   );

@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import type { Bootstrapper } from "./bootstrapper.ts";
 
 export class BootSequence {
@@ -47,7 +48,7 @@ export class BootSequence {
     this.#bootstrappers = bootstrappers;
   }
 
-  async boot(): Promise<void> {
+  async boot(): Future<void> {
     for (const bootstrapper of this.#bootstrappers) {
       try {
         await bootstrapper.boot();
@@ -66,7 +67,7 @@ export class BootSequence {
     );
   }
 
-  async shutdown(): Promise<void> {
+  async shutdown(): Future<void> {
     if (this.#shuttingDown) return;
     this.#shuttingDown = true;
 

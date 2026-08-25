@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { runMounted } from "@scribe/runtime/support/packages/mounted.ts";
 import type { Bootstrapper } from "../../../common/bootstrapper.ts";
 
@@ -52,11 +53,11 @@ import type { Bootstrapper } from "../../../common/bootstrapper.ts";
 export class MountedPackagesBootstrapper implements Bootstrapper {
   readonly name = "packages";
 
-  boot(): Promise<void> {
+  boot(): Future<void> {
     return runMounted("starts");
   }
 
-  shutdown(): Promise<void> {
+  shutdown(): Future<void> {
     return runMounted("stops");
   }
 }

@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { ServerResponse } from "@scribe/alchemy/route";
 import type { EdgePlatform } from "../platform.ts";
 import type { WorkerDispatcher } from "./worker_dispatcher.ts";
@@ -59,7 +60,7 @@ export class EdgeWorkerDispatcher implements WorkerDispatcher {
     this.#envVars = envVars;
   }
 
-  async dispatch(request: Request, servicePath: string): Promise<Response> {
+  async dispatch(request: Request, servicePath: string): Future<Response> {
     try {
       const worker = await this.#platform.createWorker({
         servicePath,
@@ -79,7 +80,7 @@ export class EdgeWorkerDispatcher implements WorkerDispatcher {
     }
   }
 
-  async #forward(request: Request): Promise<Request> {
+  async #forward(request: Request): Future<Request> {
     const carriesBody = request.method !== "GET" && request.method !== "HEAD";
     return new Request(request.url, {
       method: request.method,

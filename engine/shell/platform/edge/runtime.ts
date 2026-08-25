@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
 import { ServerResponse } from "@scribe/alchemy/route";
 import { Runtime } from "../../common/runtime.ts";
 import type { RequestAuthorizer } from "./authorization/request_authorizer.ts";
@@ -60,7 +61,7 @@ export class EdgeFunctionsRuntime extends Runtime {
     this.#dispatcher = collaborators.dispatcher;
   }
 
-  async handle(request: Request): Promise<Response> {
+  async handle(request: Request): Future<Response> {
     try {
       const resolved = await this.#resolver.resolve(
         new URL(request.url).pathname,

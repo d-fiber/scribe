@@ -34,8 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
+
 export interface EdgeWorker {
-  fetch(request: Request): Promise<Response>;
+  fetch(request: Request): Future<Response>;
 }
 
 export interface EdgeWorkerOptions {
@@ -48,19 +50,19 @@ export interface EdgeWorkerOptions {
 }
 
 export interface EdgePlatform {
-  createWorker(options: EdgeWorkerOptions): Promise<EdgeWorker>;
+  createWorker(options: EdgeWorkerOptions): Future<EdgeWorker>;
   tagRequest(original: Request, forwarded: Request): void;
 }
 
 declare const EdgeRuntime: {
   userWorkers: {
-    create(options: EdgeWorkerOptions): Promise<EdgeWorker>;
+    create(options: EdgeWorkerOptions): Future<EdgeWorker>;
   };
   applySupabaseTag(original: Request, forwarded: Request): void;
 };
 
 export class SupabaseEdgePlatform implements EdgePlatform {
-  createWorker(options: EdgeWorkerOptions): Promise<EdgeWorker> {
+  createWorker(options: EdgeWorkerOptions): Future<EdgeWorker> {
     return EdgeRuntime.userWorkers.create(options);
   }
 

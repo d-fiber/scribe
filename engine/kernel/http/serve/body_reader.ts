@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import type { Future } from "@scribe/alchemy";
+
 /**
  * Reads the whole request body, or `null` once it grows past `maxBytes`.
  *
@@ -50,7 +52,7 @@ export async function readBoundedBody(
   req: Request,
   maxBytes: number,
   declaredBytes: number | null = null,
-): Promise<Uint8Array | null> {
+): Future<Uint8Array | null> {
   if (!req.body) return new Uint8Array(0);
 
   const bound = declaredBytes === null ? maxBytes : Math.min(declaredBytes, maxBytes);
