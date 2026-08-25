@@ -41,7 +41,34 @@ import { raiseOn } from "./error.ts";
 
 const CAPABILITY = "realtime";
 
-export const realtime = {
+/** The channels a worker publishes on, and the accounts allowed to listen to them. */
+export interface RealtimeCapability {
+  /**
+   * Publishes `payload` on `channel` as `action` upon `entityId`, and answers how many
+   * subscribers it was delivered to.
+   *
+   * A zero means nobody was listening, which is not a refusal.
+   *
+   * @throws {CapabilityError} When the host refused the broadcast.
+   */
+  broadcast(channel: string, action: string, entityId: string, payload: unknown): Promise<number>;
+
+  /**
+   * Lets the accounts of `accountIds` listen to `channel`.
+   *
+   * @throws {CapabilityError} When the host refused the grant.
+   */
+  grant(channel: string, accountIds: readonly string[]): Promise<void>;
+
+  /**
+   * Takes `channel` back from the accounts of `accountIds`.
+   *
+   * @throws {CapabilityError} When the host refused the revocation.
+   */
+  revoke(channel: string, accountIds: readonly string[]): Promise<void>;
+}
+
+export const realtime: RealtimeCapability = {
   async broadcast(
     channel: string,
     action: string,

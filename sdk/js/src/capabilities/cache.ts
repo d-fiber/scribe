@@ -48,7 +48,38 @@ function keyOf(namespace: string, key: string) {
   return create(CacheKeySchema, { namespace, key });
 }
 
-export const cache = {
+/** The store the host keeps for the whole project, reached over the worker channel. */
+export interface CacheCapability {
+  /**
+   * The value held under `key` in `namespace`, or null when the store holds none.
+   *
+   * The value is decoded from the JSON it was written as, and nothing checks it against `T`.
+   *
+   * @throws {CapabilityError} When the host refused the read.
+   */
+  get<T>(namespace: string, key: string): Promise<T | null>;
+
+  /**
+   * Writes `value` under `key` in `namespace`, encoded as JSON.
+   *
+   * Without `ttl` the entry is left to whatever lifetime the host gives an entry that names none.
+   *
+   * @throws {CapabilityError} When the host refused the write.
+   */
+  set(namespace: string, key: string, value: unknown, ttl?: Time): Promise<void>;
+
+  /**
+   * Drops what is held under `key` in `namespace`, and answers how many entries went.
+   *
+   * With `prefix` set, `key` is read as the beginning of a key rather than a whole one, so one
+   * call drops a family of entries and the count is then above one.
+   *
+   * @throws {CapabilityError} When the host refused the deletion.
+   */
+  delete(namespace: string, key: string, prefix?: boolean): Promise<number>;
+}
+
+export const cache: CacheCapability = {
   async get<T>(namespace: string, key: string): Promise<T | null> {
     const result = await host.client().call(Cache.method.get, { key: keyOf(namespace, key) });
     raiseOn(CAPABILITY, result.error);

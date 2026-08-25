@@ -50,32 +50,50 @@ export interface SearchPage<T> {
   readonly total: number;
 }
 
-export const search = {
+/** The full text indexes a worker keeps up to date and queries. */
+export interface SearchCapability {
   /**
    * Queues `ids` of the index `index` for a rebuild, and answers whether the request was recorded.
    *
    * A table carrying the package's trigger never needs this. It is for the documents no table
    * change announces, such as one built from an outside service.
+   *
+   * @throws {CapabilityError} When the host refused the request.
    */
+  add(index: string, ids: readonly string[]): Promise<boolean>;
+
+  /**
+   * Queues `ids` of the index `index` for removal, and answers whether the request was recorded.
+   *
+   * @throws {CapabilityError} When the host refused the request.
+   */
+  delete(index: string, ids: readonly string[]): Promise<boolean>;
+
+  /**
+   * The page the index `index` gives for `params`.
+   *
+   * `params` is whatever the declaration takes, and nothing else travels: the plan, the fields
+   * looked in and the shape of one result are all decided by the declaration on the host. A host
+   * that answers nothing readable comes back as an empty page rather than as a refusal.
+   *
+   * @throws {CapabilityError} When the host refused the query.
+   */
+  search<T>(index: string, params: unknown): Promise<SearchPage<T>>;
+}
+
+export const search: SearchCapability = {
   async add(index: string, ids: readonly string[]): Promise<boolean> {
     const result = await host.client().call(Search.method.add, { index, ids: [...ids] });
     raiseOn(CAPABILITY, result.error);
     return result.queued;
   },
 
-  /** Queues `ids` of the index `index` for removal, and answers whether the request was recorded. */
   async delete(index: string, ids: readonly string[]): Promise<boolean> {
     const result = await host.client().call(Search.method.delete, { index, ids: [...ids] });
     raiseOn(CAPABILITY, result.error);
     return result.queued;
   },
 
-  /**
-   * Answers the page the index `index` gives for `params`.
-   *
-   * `params` is whatever the declaration takes, and nothing else travels: the plan, the fields
-   * looked in and the shape of one result are all decided by the declaration on the host.
-   */
   async search<T>(index: string, params: unknown): Promise<SearchPage<T>> {
     const result = await host.client().call(Search.method.search, {
       index,

@@ -40,7 +40,27 @@ import { TransportFailure } from "../transport/failure.ts";
 
 let channel: UnaryClient | null = null;
 
-export const host = {
+/** The one channel a worker holds to its host, and the handshake around it. */
+export interface HostChannel {
+  /** Points this channel at `endpoint`, replacing whatever it pointed at before. */
+  connect(endpoint: string): void;
+
+  /** Drops the channel, which puts every capability out of reach until the next connect. */
+  disconnect(): void;
+
+  /** Whether a channel is held, which is what tells a caller that a capability can answer. */
+  connected(): boolean;
+
+  /**
+   * The client every capability sends its calls through.
+   *
+   * @throws {TransportFailure} When the handshake has not happened, because a capability has
+   * nowhere to send its call before the host is known.
+   */
+  client(): UnaryClient;
+}
+
+export const host: HostChannel = {
   connect(endpoint: string): void {
     channel = new UnaryClient(endpoint, () => CallScope.credentials());
   },

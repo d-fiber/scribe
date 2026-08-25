@@ -44,7 +44,20 @@ import { CallScope } from "../runtime/scope.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";
 
-export const queue = {
+/** The host's queues, as the worker that produces the work reaches them. */
+export interface QueueCapability {
+  /**
+   * Pushes `payloads` onto the queue `queueId`, and answers the identifier given to each message.
+   *
+   * Every payload travels as JSON. Without `delay` the host makes the messages available at once,
+   * and with it they stay invisible to a consumer for that long.
+   *
+   * @throws {CapabilityError} When the host refused the push.
+   */
+  push(queueId: string, payloads: readonly unknown[], delay?: Time): Promise<readonly string[]>;
+}
+
+export const queue: QueueCapability = {
   async push(
     queueId: string,
     payloads: readonly unknown[],
@@ -60,7 +73,21 @@ export const queue = {
   },
 };
 
-export const hooks = {
+/** The events a worker fires so that whatever subscribed to them runs. */
+export interface HooksCapability {
+  /**
+   * Emits `event` with `payload`, and answers how many handlers the host ran for it.
+   *
+   * A zero means the event reached the host and nothing was listening, which is not a refusal.
+   * The trace identifier of the current call scope travels with the event, so what the handlers
+   * do stays under the trace that caused it.
+   *
+   * @throws {CapabilityError} When the host refused the emission.
+   */
+  emit(event: string, payload: unknown): Promise<number>;
+}
+
+export const hooks: HooksCapability = {
   async emit(event: string, payload: unknown): Promise<number> {
     const result = await host.client().call(Hook.method.emit, {
       event,

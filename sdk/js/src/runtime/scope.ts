@@ -61,7 +61,34 @@ let ambient: CallScopeState = {
   node: "",
 };
 
-export const CallScope = {
+/** The state of the call in flight, and the two ways a runtime installs it. */
+export interface CallScopeApi {
+  /**
+   * Runs `handler` with `state` as the scope everything inside it reads.
+   *
+   * The state is held in async local storage, so it follows the awaits of `handler` and is gone
+   * once it returns. This is what a runtime serving several calls at once uses, because each call
+   * then reads its own.
+   */
+  run<T>(state: CallScopeState, handler: () => T): T;
+
+  /**
+   * Makes `state` the scope read wherever no `run` is in flight.
+   *
+   * There is one such state for the whole process. It is for a runtime that handles one call at a
+   * time: a concurrent one that adopted instead of running would have two calls read each other's
+   * token.
+   */
+  adopt(state: CallScopeState): void;
+
+  /** The scope of the call in flight, falling back to the adopted one when there is none. */
+  current(): CallScopeState;
+
+  /** What the transport puts on every call it sends, taken from the scope in flight. */
+  credentials(): CallCredentials;
+}
+
+export const CallScope: CallScopeApi = {
   run<T>(state: CallScopeState, handler: () => T): T {
     return storage.run(state, handler);
   },

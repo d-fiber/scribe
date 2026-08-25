@@ -221,10 +221,16 @@ export type BatchRows<Q extends readonly RestQuery<any>[]> = {
   [K in keyof Q]: Q[K] extends RestQuery<infer Row> ? readonly Row[] : never;
 };
 
-export const rest = {
-  from<Row extends object>(table: string): RestQuery<Row> {
-    return new RestQuery<Row>(table);
-  },
+/** The database as a worker reaches it, one table at a time or several tables in one call. */
+export interface RestCapability {
+  /**
+   * A query against `table`, with nothing selected, nothing filtered and no order yet.
+   *
+   * `Row` is the shape the caller says a row has. Nothing checks it against the real table: it is
+   * what makes `select`, `where` and `order` name columns the compiler knows rather than free
+   * strings.
+   */
+  from<Row extends object>(table: string): RestQuery<Row>;
 
   /**
    * The rows every query of `queries` matches, read in one call to the host.
@@ -247,6 +253,25 @@ export const rest = {
    * ]);
    * ```
    */
+  // deno-lint-ignore no-explicit-any -- see BatchRows: RestQuery is invariant in Row.
+  all<const Q extends readonly RestQuery<any>[]>(queries: Q): Promise<BatchRows<Q>>;
+
+  /**
+   * What the database function `name` answers for `args`, or null when it answers nothing.
+   *
+   * The function runs on the database with the caller's own rights, so a row it touches is one
+   * the caller could have touched itself.
+   *
+   * @throws {CapabilityError} When the host refused the call.
+   */
+  rpc<T = unknown>(name: string, args?: Record<string, unknown>): Promise<T | null>;
+}
+
+export const rest: RestCapability = {
+  from<Row extends object>(table: string): RestQuery<Row> {
+    return new RestQuery<Row>(table);
+  },
+
   // deno-lint-ignore no-explicit-any -- see BatchRows: RestQuery is invariant in Row.
   async all<const Q extends readonly RestQuery<any>[]>(queries: Q): Promise<BatchRows<Q>> {
     if (queries.length === 0) return [] as unknown as BatchRows<Q>;
