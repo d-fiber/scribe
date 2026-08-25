@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+
 import type { StorageSettings } from "@scribe/storage/lib/contracts/settings.ts";
 import { Slot } from "@scribe/alchemy";
 

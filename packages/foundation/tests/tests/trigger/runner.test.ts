@@ -103,7 +103,8 @@ function installForgetfulDatabase(events: SeededRow[]): InstalledMock {
           const refused = {
             filter: () => refused,
             in: () => refused,
-            select: () => Promise.resolve({ data: null, error: { code: "42501", message: "permission denied" } }),
+            select: () =>
+              Promise.resolve({ data: null, error: { code: "42501", message: "permission denied" } }),
           };
           return refused;
         },
@@ -222,9 +223,7 @@ Deno.test({
   name: "DEFECT a row one declaration refuses republishes it to the other one at every pass",
   async fn() {
     const db = installDatabaseFake({ __trigger_events__: [row({ id: 1 })] });
-    const wire = wireTopology((msgID) =>
-      msgID.startsWith("orders:status") ? Promise.reject(new Error("too large")) : Promise.resolve("1")
-    );
+    const wire = wireTopology((msgID) => msgID.startsWith("orders:status") ? Promise.reject(new Error("too large")) : Promise.resolve("1"));
     try {
       await new TriggerRunner().drain();
       await new TriggerRunner().drain();
@@ -246,9 +245,7 @@ Deno.test({
   name: "DEFECT a declaration after the one that refused is never handed the event at all",
   async fn() {
     const db = installDatabaseFake({ __trigger_events__: [row({ id: 1 })] });
-    const wire = wireTopology((msgID) =>
-      msgID.startsWith("orders:update") ? Promise.reject(new Error("too large")) : Promise.resolve("1")
-    );
+    const wire = wireTopology((msgID) => msgID.startsWith("orders:update") ? Promise.reject(new Error("too large")) : Promise.resolve("1"));
     try {
       await new TriggerRunner().drain();
 

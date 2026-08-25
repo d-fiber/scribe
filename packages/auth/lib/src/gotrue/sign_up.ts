@@ -35,21 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Failure, Ok, type Result } from "@scribe/alchemy";
-import {
-  isPhoneProviderConfigured,
-  phoneNotConfiguredError,
-  requestIdTokenExchange,
-  SocialProvider,
-} from "./primitives.ts";
-import {
-  adminHeaders,
-  anonHeaders,
-  type AuthError,
-  authUrl,
-  type GoTrueSessionResponse,
-  type GoTrueUser,
-  requestAuth,
-} from "./transport.ts";
+import { SocialProvider, isPhoneProviderConfigured, phoneNotConfiguredError, requestIdTokenExchange } from "./primitives.ts";
+import { adminHeaders, anonHeaders, authUrl, requestAuth, type AuthError, type GoTrueSessionResponse, type GoTrueUser } from "./transport.ts";
 
 export class GoTrueSignUp {
   createUserWithEmail(

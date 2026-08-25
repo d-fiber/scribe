@@ -36,14 +36,7 @@
 
 import type { Result } from "@scribe/alchemy";
 import type { AccountRole } from "../../../contracts/role.ts";
-import {
-  anonHeaders,
-  type AuthError,
-  authUrl,
-  type GoTrueSessionResponse,
-  requestAuth,
-  requestAuthVoid,
-} from "../transport.ts";
+import { anonHeaders, authUrl, requestAuth, requestAuthVoid, type AuthError, type GoTrueSessionResponse } from "../transport.ts";
 
 class GoTrueSignInEmailOtp {
   send(

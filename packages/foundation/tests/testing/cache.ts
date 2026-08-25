@@ -38,8 +38,16 @@ import type { LockCommands } from "@scribe/foundation/lib/src/cache/lock/lock_co
 import { type Kv, kv } from "@scribe/foundation/lib/src/redis/kv.ts";
 import { RateLimiters } from "@scribe/alchemy";
 import { scribe } from "@scribe/foundation/lib/foundation.ts";
-import type { RateLimiter, RateLimiterDriver, RateLimitOptions, RateLimitOutcome } from "@scribe/alchemy";
-import { type InstalledMock, installMock } from "@scribe/foundation/tests/testing/install.ts";
+import type {
+  RateLimiter,
+  RateLimiterDriver,
+  RateLimitOptions,
+  RateLimitOutcome,
+} from "@scribe/alchemy";
+import {
+  type InstalledMock,
+  installMock,
+} from "@scribe/foundation/tests/testing/install.ts";
 
 export function installValkeryMock(): InstalledMock {
   scribe.wires?.();
@@ -51,7 +59,8 @@ export function installValkeryMock(): InstalledMock {
     installMock(
       kv(),
       "get",
-      ((key: string) => Promise.resolve(store.get(key) ?? null)) as unknown as Kv["get"],
+      ((key: string) =>
+        Promise.resolve(store.get(key) ?? null)) as unknown as Kv["get"],
     ),
     installMock(
       kv(),
@@ -115,9 +124,10 @@ export function installValkeryMock(): InstalledMock {
     installMock(
       kv(),
       "smembers",
-      ((key: string) => Promise.resolve(Array.from(sets.get(key) ?? []))) as unknown as Kv[
-        "smembers"
-      ],
+      ((key: string) =>
+        Promise.resolve(Array.from(sets.get(key) ?? []))) as unknown as Kv[
+          "smembers"
+        ],
     ),
     installMock(
       kv(),
@@ -141,7 +151,9 @@ export function installValkeryMock(): InstalledMock {
       "scan",
       ((_cursor: string, _match: string, pattern: string) => {
         const prefix = pattern.replace(/\*$/, "");
-        const keys = Array.from(store.keys()).filter((k) => k.startsWith(prefix));
+        const keys = Array.from(store.keys()).filter((k) =>
+          k.startsWith(prefix)
+        );
         return Promise.resolve(["0", keys] as [string, string[]]);
       }) as unknown as Kv["scan"],
     ),

@@ -35,7 +35,13 @@
 
 import { MultipartFile } from "@scribe/alchemy/http";
 import { MultipartRequest } from "@scribe/alchemy/http";
-import { assert, assertEquals, assertNotEquals, assertStringIncludes, assertThrows } from "@std/assert";
+import {
+  assert,
+  assertEquals,
+  assertNotEquals,
+  assertStringIncludes,
+  assertThrows,
+} from "@std/assert";
 
 function boundaryOf(request: MultipartRequest): string {
   const type = request.headers.get("content-type") ?? "";

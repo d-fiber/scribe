@@ -35,16 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { assert, assertEquals } from "@std/assert";
-import {
-  clusterHas,
-  clusterMapping,
-  dropIndex,
-  refresh,
-  report,
-  requireStack,
-  timed,
-  useStack,
-} from "./support/stack.ts";
+import { clusterHas, clusterMapping, dropIndex, refresh, report, requireStack, timed, useStack } from "./support/stack.ts";
 
 await requireStack();
 await useStack();

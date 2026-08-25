@@ -213,9 +213,10 @@ Deno.test("a hit Redis refuses to answer falls back on the declaration", async (
   const mock = installMock(
     kv() as unknown as RateLimitCommands,
     "rateLimitCheck",
-    (() => Promise.reject(new Error("redis down"))) as unknown as RateLimitCommands[
-      "rateLimitCheck"
-    ],
+    (() =>
+      Promise.reject(new Error("redis down"))) as unknown as RateLimitCommands[
+        "rateLimitCheck"
+      ],
   );
 
   try {

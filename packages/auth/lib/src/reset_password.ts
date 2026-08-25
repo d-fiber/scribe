@@ -48,8 +48,16 @@ import { isRateLimitCode } from "./gotrue/errors.ts";
 import { goTrue } from "./gotrue/gotrue_client.ts";
 import { AccountRevocation } from "./revocation.ts";
 import { SmsIntent, smsIntent } from "./sms_intent.ts";
-import { MAX_PENDING_TOKEN_CHARS, PendingToken, PendingTokenPurpose } from "./pending_token.ts";
-import { AuthValidator, EmailCheckStatus, PhoneCheckStatus } from "./validator.ts";
+import {
+  MAX_PENDING_TOKEN_CHARS,
+  PendingToken,
+  PendingTokenPurpose,
+} from "./pending_token.ts";
+import {
+  AuthValidator,
+  EmailCheckStatus,
+  PhoneCheckStatus,
+} from "./validator.ts";
 
 /** Why a reset could not be asked for or finished. */
 export enum ResetPasswordError {
@@ -209,7 +217,9 @@ export class ResetPassword {
     if (!sent.ok) {
       await smsIntent.consume(number);
       return new Failure(
-        isRateLimitCode(sent.error.code) ? ResetPasswordError.TooManyRequests : ResetPasswordError.Unexpected,
+        isRateLimitCode(sent.error.code)
+          ? ResetPasswordError.TooManyRequests
+          : ResetPasswordError.Unexpected,
       );
     }
 
@@ -233,7 +243,9 @@ export class ResetPassword {
     const answer = await goTrue.signIn.phone.verify(number, code);
     if (!answer.ok) {
       return new Failure(
-        isRateLimitCode(answer.error.code) ? ResetPasswordError.TooManyRequests : ResetPasswordError.InvalidCode,
+        isRateLimitCode(answer.error.code)
+          ? ResetPasswordError.TooManyRequests
+          : ResetPasswordError.InvalidCode,
       );
     }
 
@@ -243,7 +255,9 @@ export class ResetPassword {
     }
 
     const pendingToken = await this.#token.issue(number, this.#role, null);
-    return pendingToken ? new Ok({ pendingToken }) : new Failure(ResetPasswordError.Unexpected);
+    return pendingToken
+      ? new Ok({ pendingToken })
+      : new Failure(ResetPasswordError.Unexpected);
   }
 
   /**
@@ -263,7 +277,9 @@ export class ResetPassword {
     if (identifier === null) return new Failure(ResetPasswordError.Unexpected);
 
     const pendingToken = await this.#token.issue(identifier, this.#role, null);
-    return pendingToken ? new Ok({ pendingToken }) : new Failure(ResetPasswordError.Unexpected);
+    return pendingToken
+      ? new Ok({ pendingToken })
+      : new Failure(ResetPasswordError.Unexpected);
   }
 
   /** Spends the pending token and writes the new password. */
