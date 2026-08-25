@@ -34,15 +34,23 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "../../common/settings.ts";
-import "@scribe/runtime/support/edge_runtime_shim.ts";
-import { app as queueApp } from "./queue/queue.ts";
-import { workerEnabled } from "@scribe/embedder/enabled.ts";
-import { ServerRuntime } from "./runtime.ts";
+import { workerSettings } from "@scribe/runtime/support/settings/worker.ts";
 
-if (workerEnabled()) {
-  const { WorkerHost } = await import("@scribe/embedder/mod.ts");
-  await WorkerHost.attach();
+/**
+ * Whether this deployment runs a worker, read without opening the host that serves it.
+ *
+ * @remarks
+ * The answer is two fields of the settings and nothing else, but asking `WorkerHost`
+ * for it costs the module that answers: `control/host.ts` carries the capability
+ * server, the protocol stubs and the SDK, and reaching it pulls four hundred and
+ * forty-six modules into every process that boots. A worker is opt-in, so the
+ * common answer is no, and the common case used to pay for the other one.
+ *
+ * So the question lives here, where it costs three modules, and the host is
+ * imported only once the answer is yes.
+ *
+ * @returns Whether a worker endpoint is configured.
+ */
+export function workerEnabled(): boolean {
+  return workerSettings.configured && workerSettings.get().endpoint !== null;
 }
-
-await new ServerRuntime(queueApp).start();

@@ -121,10 +121,6 @@ function resolver(): (node: NodeDeclaration) => Hono {
 }
 
 export const WorkerHost = {
-  enabled(): boolean {
-    return workerSettings.configured && workerSettings.get().endpoint !== null;
-  },
-
   manifest(): Manifest | null {
     return attached;
   },
