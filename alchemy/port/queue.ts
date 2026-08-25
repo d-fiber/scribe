@@ -41,7 +41,7 @@ import type { Duration } from "../value/duration.ts";
 import type { UnmodifiableList } from "../value/list.ts";
 
 /** What opening a queue takes. */
-export interface QueueOptions {
+export interface DeclaredQueueOptions {
   /** The name this queue answers to, which is what keeps two of them apart. */
   readonly key: string;
 
@@ -95,7 +95,7 @@ export interface QueueMessage<T> {
  * is the host's business. The guarantee it buys over {@link unawaited} is that the work survives
  * this process: a crash between the push and the handling costs nothing.
  */
-export interface Queue<T> {
+export interface DeclaredQueue<T> {
   /** Puts `data` on this queue, and answers once the queue has taken it. */
   push(data: T): Future<void>;
 
@@ -111,7 +111,7 @@ export interface Queue<T> {
 /** What opens a queue. */
 export interface QueueDriver {
   /** Opens the queue `options` describes. Opening the same key twice answers the same queue. */
-  open<T>(options: QueueOptions): Queue<T>;
+  open<T>(options: DeclaredQueueOptions): DeclaredQueue<T>;
 
   /**
    * Starts draining `options` with the handler it declared.
@@ -120,7 +120,7 @@ export interface QueueDriver {
    * The host calls it once per declared queue, through {@link installQueues}, after it has filled
    * this slot. A driver that has nothing to drain, because another process does it, may do nothing.
    */
-  consume<T>(options: QueueOptions): void;
+  consume<T>(options: DeclaredQueueOptions): void;
 }
 
 /**
@@ -139,11 +139,11 @@ export const Queues: Slot<QueueDriver> = new Slot<QueueDriver>("Queues");
  * point nothing has filled {@link Queues}. Reading the slot there would throw before the host has
  * had a chance to start.
  */
-class DeferredQueue<T> implements Queue<T> {
-  readonly #options: QueueOptions;
-  #opened: Queue<T> | null = null;
+class DeferredQueue<T> implements DeclaredQueue<T> {
+  readonly #options: DeclaredQueueOptions;
+  #opened: DeclaredQueue<T> | null = null;
 
-  constructor(options: QueueOptions) {
+  constructor(options: DeclaredQueueOptions) {
     this.#options = options;
   }
 
@@ -155,7 +155,7 @@ class DeferredQueue<T> implements Queue<T> {
     return this.#queue().pushMany(batch);
   }
 
-  #queue(): Queue<T> {
+  #queue(): DeclaredQueue<T> {
     if (this.#opened === null) this.#opened = Queues.get().open<T>(this.#options);
     return this.#opened;
   }
@@ -182,9 +182,9 @@ class DeferredQueue<T> implements Queue<T> {
  * ```
  */
 /** Every queue a package has declared, by the key it answers to. */
-const declared = new Registry<QueueOptions>("queue");
+const declared = new Registry<DeclaredQueueOptions>("queue");
 
-export function queue<T>(options: QueueOptions): Queue<T> {
+export function queue<T>(options: DeclaredQueueOptions): DeclaredQueue<T> {
   declared.declare(options.key, options);
   return new DeferredQueue<T>(options);
 }

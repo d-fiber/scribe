@@ -36,16 +36,16 @@
 
 import type { Future } from "../../async/future.ts";
 import type {
-  ChangeHandler,
-  DeleteChange,
-  FieldChange,
-  InsertChange,
-  Transition,
-  Trigger,
+  DeclaredChangeHandler,
+  DeclaredDeleteChange,
+  DeclaredFieldChange,
+  DeclaredInsertChange,
+  DeclaredTransition,
+  DeclaredTrigger,
+  DeclaredTriggerOptions,
   TriggerDriver,
-  TriggerOptions,
 } from "../../port/trigger.ts";
-import type { UpdateChange } from "../../port/trigger.ts";
+import type { DeclaredUpdateChange } from "../../port/trigger.ts";
 
 /**
  * A watch that keeps what was written on it and notices nothing, for a test to run a package
@@ -56,57 +56,57 @@ import type { UpdateChange } from "../../port/trigger.ts";
  * for a database to notice, which is what lets a package's reaction be exercised without a database
  * at all.
  */
-export class MemoryTrigger<TRow> implements Trigger<TRow> {
-  readonly #inserts: Array<ChangeHandler<InsertChange<TRow>>> = [];
-  readonly #updates: Array<ChangeHandler<UpdateChange<TRow>>> = [];
-  readonly #deletes: Array<ChangeHandler<DeleteChange<TRow>>> = [];
-  readonly #fields = new Map<keyof TRow, Array<ChangeHandler<FieldChange<TRow, keyof TRow>>>>();
+export class MemoryTrigger<TRow> implements DeclaredTrigger<TRow> {
+  readonly #inserts: Array<DeclaredChangeHandler<DeclaredInsertChange<TRow>>> = [];
+  readonly #updates: Array<DeclaredChangeHandler<DeclaredUpdateChange<TRow>>> = [];
+  readonly #deletes: Array<DeclaredChangeHandler<DeclaredDeleteChange<TRow>>> = [];
+  readonly #fields = new Map<keyof TRow, Array<DeclaredChangeHandler<DeclaredFieldChange<TRow, keyof TRow>>>>();
 
-  onInsert(handle: ChangeHandler<InsertChange<TRow>>): Trigger<TRow> {
+  onInsert(handle: DeclaredChangeHandler<DeclaredInsertChange<TRow>>): DeclaredTrigger<TRow> {
     this.#inserts.push(handle);
     return this;
   }
 
-  onUpdate(handle: ChangeHandler<UpdateChange<TRow>>): Trigger<TRow> {
+  onUpdate(handle: DeclaredChangeHandler<DeclaredUpdateChange<TRow>>): DeclaredTrigger<TRow> {
     this.#updates.push(handle);
     return this;
   }
 
-  onDelete(handle: ChangeHandler<DeleteChange<TRow>>): Trigger<TRow> {
+  onDelete(handle: DeclaredChangeHandler<DeclaredDeleteChange<TRow>>): DeclaredTrigger<TRow> {
     this.#deletes.push(handle);
     return this;
   }
 
   onField<F extends keyof TRow>(
     field: F,
-    handle: ChangeHandler<FieldChange<TRow, F>>,
-    _moving?: Transition<TRow[F]>,
-  ): Trigger<TRow> {
+    handle: DeclaredChangeHandler<DeclaredFieldChange<TRow, F>>,
+    _moving?: DeclaredTransition<TRow[F]>,
+  ): DeclaredTrigger<TRow> {
     const held = this.#fields.get(field) ?? [];
-    held.push(handle as ChangeHandler<FieldChange<TRow, keyof TRow>>);
+    held.push(handle as DeclaredChangeHandler<DeclaredFieldChange<TRow, keyof TRow>>);
     this.#fields.set(field, held);
     return this;
   }
 
   /** Hands `change` to whoever asked about a row being written for the first time. */
-  async sawInsert(change: InsertChange<TRow>): Future<void> {
+  async sawInsert(change: DeclaredInsertChange<TRow>): Future<void> {
     for (const handle of this.#inserts) await handle(change);
   }
 
   /** Hands `change` to whoever asked about a row being written over. */
-  async sawUpdate(change: UpdateChange<TRow>): Future<void> {
+  async sawUpdate(change: DeclaredUpdateChange<TRow>): Future<void> {
     for (const handle of this.#updates) await handle(change);
   }
 
   /** Hands `change` to whoever asked about a row going. */
-  async sawDelete(change: DeleteChange<TRow>): Future<void> {
+  async sawDelete(change: DeclaredDeleteChange<TRow>): Future<void> {
     for (const handle of this.#deletes) await handle(change);
   }
 
   /** Hands `change` to whoever asked about `field` moving. */
-  async sawField<F extends keyof TRow>(field: F, change: FieldChange<TRow, F>): Future<void> {
+  async sawField<F extends keyof TRow>(field: F, change: DeclaredFieldChange<TRow, F>): Future<void> {
     for (const handle of this.#fields.get(field) ?? []) {
-      await handle(change as FieldChange<TRow, keyof TRow>);
+      await handle(change as DeclaredFieldChange<TRow, keyof TRow>);
     }
   }
 }
@@ -116,10 +116,10 @@ export class MemoryTriggers implements TriggerDriver {
   /** Every watch opened so far, by the name it answers to. */
   readonly opened: Map<string, MemoryTrigger<never>> = new Map<string, MemoryTrigger<never>>();
 
-  watch<TRow>(table: string, options?: TriggerOptions): Trigger<TRow> {
+  watch<TRow>(table: string, options?: DeclaredTriggerOptions): DeclaredTrigger<TRow> {
     const name = options?.name ?? table;
     const already = this.opened.get(name);
-    if (already !== undefined) return already as unknown as Trigger<TRow>;
+    if (already !== undefined) return already as unknown as DeclaredTrigger<TRow>;
 
     const held = new MemoryTrigger<TRow>();
     this.opened.set(name, held as unknown as MemoryTrigger<never>);

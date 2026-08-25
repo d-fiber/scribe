@@ -41,7 +41,7 @@ import type { UnmodifiableList } from "../value/list.ts";
 import type { Duration } from "../value/duration.ts";
 
 /** A time of day, told in whole hours and minutes. */
-export interface TimeOfDay {
+export interface DeclaredTimeOfDay {
   /** The hour, from 0 to 23. */
   readonly hour: number;
 
@@ -58,9 +58,9 @@ export interface TimeOfDay {
  * day and leaves the day alone. `expression` says everything, in the notation a scheduler already
  * knows, and it is the only one that can say "the first Monday of the month".
  */
-export type Schedule =
+export type DeclaredSchedule =
   | { readonly every: Duration }
-  | { readonly at: TimeOfDay }
+  | { readonly at: DeclaredTimeOfDay }
   | { readonly expression: string };
 
 /** What declaring a scheduled run takes. */
@@ -69,12 +69,12 @@ export interface CronOptions {
   readonly key: string;
 
   /** When it runs. */
-  readonly schedule: Schedule;
+  readonly schedule: DeclaredSchedule;
 
   /**
    * Which zone the schedule is read in. UTC when left out.
    *
-   * It matters for {@link TimeOfDay} and for an expression, and not at all for `every`: an interval
+   * It matters for {@link DeclaredTimeOfDay} and for an expression, and not at all for `every`: an interval
    * is the same length wherever it is read.
    */
   readonly timezone?: string;
@@ -101,18 +101,18 @@ export interface CronOptions {
  * schedule that fires while the last run is still going: a handler that cannot bear being run twice
  * has to say so itself, usually by taking a lock.
  */
-export interface Cron {
+export interface DeclaredCron {
   /** The name this run answers to. */
   readonly key: string;
 
   /** When it runs. */
-  readonly schedule: Schedule;
+  readonly schedule: DeclaredSchedule;
 }
 
 /** What holds a scheduled run and fires it. */
 export interface CronDriver {
   /** Takes the run `options` describes and fires it from then on. */
-  schedule(options: CronOptions): Cron;
+  schedule(options: CronOptions): DeclaredCron;
 }
 
 /**
@@ -146,7 +146,7 @@ const declared = new Registry<CronOptions>("cron");
  * cron({ key: "audience:sweep", schedule: { every: Duration.hours(1) }, run: () => sweep() });
  * ```
  */
-export function cron(options: CronOptions): Cron {
+export function cron(options: CronOptions): DeclaredCron {
   declared.declare(options.key, options);
   return { key: options.key, schedule: options.schedule };
 }
@@ -158,7 +158,7 @@ export function cron(options: CronOptions): Cron {
  * The host calls it once, after it has filled {@link Crons} and before it starts serving. It is the
  * moment the declarations of every mounted package become something that fires.
  */
-export function installCrons(): UnmodifiableList<Cron> {
+export function installCrons(): UnmodifiableList<DeclaredCron> {
   const driver = Crons.get();
   return declared.all().map((options) => driver.schedule(options));
 }

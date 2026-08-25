@@ -36,28 +36,28 @@
 
 import { equals, expect, isA, isFalse, isNotNull, isTrue, throwsA } from "@scribe/alchemy/test";
 import {
-  type Cron,
   cron,
   Crons,
+  type DeclaredCron,
+  type DeclaredHook,
+  type DeclaredQueue,
+  type DeclaredQueueOptions,
+  type DeclaredTrigger,
   DuplicateDeclarationError,
   Duration,
   forgetCrons,
   forgetHooks,
   forgetQueues,
   forgetTriggers,
-  type Hook,
   hook,
   type HookDriver,
   Hooks,
   installCrons,
   installQueues,
   installTriggers,
-  type Queue,
   queue,
   type QueueDriver,
-  type QueueOptions,
   Queues,
-  type Trigger,
   trigger,
   Triggers,
 } from "@scribe/alchemy";
@@ -67,11 +67,11 @@ class KeepingQueues implements QueueDriver {
   readonly draining: string[] = [];
   opened = 0;
 
-  consume<T>(options: QueueOptions): void {
+  consume<T>(options: DeclaredQueueOptions): void {
     this.draining.push(options.key);
   }
 
-  open<T>(): Queue<T> {
+  open<T>(): DeclaredQueue<T> {
     this.opened += 1;
     const pushed = this.pushed;
     return {
@@ -122,7 +122,7 @@ Deno.test("a hook opens itself at the first emit, not at the declaration", async
   const told: unknown[] = [];
   let opened = 0;
   const driver: HookDriver = {
-    open<T>(): Hook<T> {
+    open<T>(): DeclaredHook<T> {
       opened += 1;
       const listeners: Array<(payload: T) => void | Promise<void>> = [];
       return {
@@ -153,9 +153,9 @@ Deno.test("declaring a scheduled run touches nothing, so an import before boot i
 
 Deno.test("a scheduled run reaches the driver when the host installs it, and not before", () => {
   forgetCrons();
-  const taken: Cron[] = [];
+  const taken: DeclaredCron[] = [];
   Crons.use({
-    schedule(options): Cron {
+    schedule(options): DeclaredCron {
       const one = { key: options.key, schedule: options.schedule };
       taken.push(one);
       return one;
@@ -174,7 +174,7 @@ Deno.test("a scheduled run carries what it runs, so the driver never has to find
   let ran = false;
   let held: (() => void | Promise<void>) | null = null;
   Crons.use({
-    schedule(options): Cron {
+    schedule(options): DeclaredCron {
       held = options.run;
       return { key: options.key, schedule: options.schedule };
     },
@@ -201,9 +201,9 @@ Deno.test("a key taken twice is refused where the second declaration is written"
 
 Deno.test("the three ways of saying when are kept apart, not folded into one", () => {
   forgetCrons();
-  const taken: Cron[] = [];
+  const taken: DeclaredCron[] = [];
   Crons.use({
-    schedule(options): Cron {
+    schedule(options): DeclaredCron {
       const one = { key: options.key, schedule: options.schedule };
       taken.push(one);
       return one;
@@ -232,9 +232,9 @@ Deno.test("a watch reaches the driver when the host installs it, and not before"
   forgetTriggers();
   const watched: string[] = [];
   Triggers.use({
-    watch<TRow>(table: string): Trigger<TRow> {
+    watch<TRow>(table: string): DeclaredTrigger<TRow> {
       watched.push(table);
-      const one: Trigger<TRow> = {
+      const one: DeclaredTrigger<TRow> = {
         onInsert: () => one,
         onUpdate: () => one,
         onDelete: () => one,
@@ -255,8 +255,8 @@ Deno.test("what was written on a chain is played back in the order it was writte
   forgetTriggers();
   const played: string[] = [];
   Triggers.use({
-    watch<TRow>(): Trigger<TRow> {
-      const one: Trigger<TRow> = {
+    watch<TRow>(): DeclaredTrigger<TRow> {
+      const one: DeclaredTrigger<TRow> = {
         onInsert: () => {
           played.push("insert");
           return one;
@@ -319,7 +319,7 @@ Deno.test("a listener written before the host is up hears what is emitted after 
   const told: unknown[] = [];
   const heard: unknown[] = [];
   Hooks.use({
-    open<T>(): Hook<T> {
+    open<T>(): DeclaredHook<T> {
       const listeners: Array<(payload: T) => void | Promise<void>> = [];
       return {
         emit: async (payload) => {

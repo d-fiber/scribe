@@ -36,7 +36,7 @@
 
 import type { Future } from "../../async/future.ts";
 import type { UnmodifiableList } from "../../value/list.ts";
-import type { Queue, QueueDriver, QueueMessage, QueueOptions } from "../../port/queue.ts";
+import type { DeclaredQueue, DeclaredQueueOptions, QueueDriver, QueueMessage } from "../../port/queue.ts";
 
 /**
  * A queue that keeps what is pushed to it in a list, for a test to run a package against.
@@ -46,7 +46,7 @@ import type { Queue, QueueDriver, QueueMessage, QueueOptions } from "../../port/
  * and calls {@link deliver} to hand a message to the declared handler when it wants to exercise the
  * other side. Draining by itself would make a case depend on when a timer fired.
  */
-export class MemoryQueue<T> implements Queue<T> {
+export class MemoryQueue<T> implements DeclaredQueue<T> {
   /** Everything pushed to this queue, in the order it was pushed. */
   readonly pushed: T[] = [];
 
@@ -54,9 +54,9 @@ export class MemoryQueue<T> implements Queue<T> {
   readonly #attempts = new Map<string, number>();
 
   /** What this queue was declared with, the handler included when one was named. */
-  readonly #options: QueueOptions;
+  readonly #options: DeclaredQueueOptions;
 
-  constructor(options: QueueOptions) {
+  constructor(options: DeclaredQueueOptions) {
     this.#options = options;
   }
 
@@ -100,16 +100,16 @@ export class MemoryQueues implements QueueDriver {
   /** Every key the host asked to have drained. */
   readonly draining: string[] = [];
 
-  open<T>(options: QueueOptions): Queue<T> {
+  open<T>(options: DeclaredQueueOptions): DeclaredQueue<T> {
     const already = this.opened.get(options.key);
-    if (already !== undefined) return already as unknown as Queue<T>;
+    if (already !== undefined) return already as unknown as DeclaredQueue<T>;
 
     const held = new MemoryQueue<T>(options);
     this.opened.set(options.key, held as unknown as MemoryQueue<never>);
     return held;
   }
 
-  consume(options: QueueOptions): void {
+  consume(options: DeclaredQueueOptions): void {
     this.draining.push(options.key);
   }
 }

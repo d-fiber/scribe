@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "../../async/future.ts";
-import type { Cron, CronDriver, CronOptions } from "../../port/cron.ts";
+import type { CronDriver, CronOptions, DeclaredCron } from "../../port/cron.ts";
 
 /**
  * A scheduler that keeps what it was given and fires nothing, for a test to run a package against.
@@ -49,7 +49,7 @@ export class MemoryCrons implements CronDriver {
   /** Every run taken, by the key it answers to. */
   readonly taken: Map<string, CronOptions> = new Map<string, CronOptions>();
 
-  schedule(options: CronOptions): Cron {
+  schedule(options: CronOptions): DeclaredCron {
     this.taken.set(options.key, options);
     return { key: options.key, schedule: options.schedule };
   }

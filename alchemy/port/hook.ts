@@ -55,7 +55,7 @@ export interface HookOptions {
  * Nothing is promised about who hears it, or whether anybody does. A caller that needs the work
  * done reaches for a queue instead.
  */
-export interface Hook<T> {
+export interface DeclaredHook<T> {
   /** Says that this happened, carrying `payload`, and answers once it has been told. */
   emit(payload: T): Future<void>;
 
@@ -76,7 +76,7 @@ export interface Hook<T> {
 /** What carries an event to whoever listens. */
 export interface HookDriver {
   /** Opens the hook `options` describes. Opening the same event twice answers the same hook. */
-  open<T>(options: HookOptions): Hook<T>;
+  open<T>(options: HookOptions): DeclaredHook<T>;
 }
 
 /**
@@ -90,12 +90,12 @@ export const Hooks: Slot<HookDriver> = new Slot<HookDriver>("Hooks");
 const declared = new Registry<{ open(): void }>("hook");
 
 /** A hook that opens itself the first time it is used, and not before. */
-class DeferredHook<T> implements Hook<T> {
+class DeferredHook<T> implements DeclaredHook<T> {
   readonly #options: HookOptions;
 
   /** Whoever asked to hear this before the host was up, kept until there is something to open. */
   readonly #waiting: Array<(payload: T) => void | Future<void>> = [];
-  #opened: Hook<T> | null = null;
+  #opened: DeclaredHook<T> | null = null;
 
   constructor(options: HookOptions) {
     this.#options = options;
@@ -118,7 +118,7 @@ class DeferredHook<T> implements Hook<T> {
     this.#hook();
   }
 
-  #hook(): Hook<T> {
+  #hook(): DeclaredHook<T> {
     if (this.#opened === null) {
       this.#opened = Hooks.get().open<T>(this.#options);
       for (const listen of this.#waiting) this.#opened.on(listen);
@@ -141,7 +141,7 @@ class DeferredHook<T> implements Hook<T> {
  * await signedUp.emit({ userId });
  * ```
  */
-export function hook<T>(options: HookOptions): Hook<T> {
+export function hook<T>(options: HookOptions): DeclaredHook<T> {
   const held = new DeferredHook<T>(options);
   declared.declare(options.event, held);
   return held;

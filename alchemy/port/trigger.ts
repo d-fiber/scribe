@@ -39,13 +39,13 @@ import { Registry } from "../declare/registry.ts";
 import type { UnmodifiableList } from "../value/list.ts";
 import type { FutureOr } from "../async/future.ts";
 import type { DateTime } from "../value/date_time.ts";
-import type { QueueOptions } from "./queue.ts";
+import type { DeclaredQueueOptions } from "./queue.ts";
 
 /** The three things that can happen to a row, and there is no fourth. */
-export type TriggerOp = "insert" | "update" | "delete";
+export type DeclaredTriggerOp = "insert" | "update" | "delete";
 
 /** What every change carries, whichever of the three it is. */
-export interface ChangeBase {
+export interface DeclaredChangeBase {
   /** The table the row belongs to. */
   readonly table: string;
 
@@ -57,7 +57,7 @@ export interface ChangeBase {
 }
 
 /** A row that was written for the first time. */
-export interface InsertChange<TRow> extends ChangeBase {
+export interface DeclaredInsertChange<TRow> extends DeclaredChangeBase {
   /** Which of the three this is, and what narrows a body written against {@link Change}. */
   readonly op: "insert";
 
@@ -66,7 +66,7 @@ export interface InsertChange<TRow> extends ChangeBase {
 }
 
 /** A row that was written over. */
-export interface UpdateChange<TRow> extends ChangeBase {
+export interface DeclaredUpdateChange<TRow> extends DeclaredChangeBase {
   /** Which of the three this is. */
   readonly op: "update";
 
@@ -78,7 +78,7 @@ export interface UpdateChange<TRow> extends ChangeBase {
 }
 
 /** A row that went. */
-export interface DeleteChange<TRow> extends ChangeBase {
+export interface DeclaredDeleteChange<TRow> extends DeclaredChangeBase {
   /** Which of the three this is. */
   readonly op: "delete";
 
@@ -94,7 +94,7 @@ export interface DeleteChange<TRow> extends ChangeBase {
  * `change.after` and not `change.after.status`. The whole row is still under {@link row} for
  * everything the column does not carry.
  */
-export interface FieldChange<TRow, F extends keyof TRow> extends ChangeBase {
+export interface DeclaredFieldChange<TRow, F extends keyof TRow> extends DeclaredChangeBase {
   /** Which of the three this is. A column only moves on a write. */
   readonly op: "update";
 
@@ -117,10 +117,10 @@ export interface FieldChange<TRow, F extends keyof TRow> extends ChangeBase {
  * Testing `change.op` narrows it, so a body written against this reads `before` and `after` where
  * they exist and nowhere else.
  */
-export type Change<TRow> = InsertChange<TRow> | UpdateChange<TRow> | DeleteChange<TRow>;
+export type Change<TRow> = DeclaredInsertChange<TRow> | DeclaredUpdateChange<TRow> | DeclaredDeleteChange<TRow>;
 
 /** A body handed a change, whatever shape it takes. */
-export type ChangeHandler<C> = (change: C) => FutureOr<void>;
+export type DeclaredChangeHandler<C> = (change: C) => FutureOr<void>;
 
 /**
  * The move a column has to make for a body to be called, both ends optional.
@@ -129,7 +129,7 @@ export type ChangeHandler<C> = (change: C) => FutureOr<void>;
  * Leaving one out means any value on that side, so `{ to: "paid" }` is every write that lands on
  * paid whatever it came from, and `{ from: "held" }` is every write that leaves held.
  */
-export interface Transition<V> {
+export interface DeclaredTransition<V> {
   /** What the column has to be leaving. Any value when left out. */
   readonly from?: V;
 
@@ -138,7 +138,7 @@ export interface Transition<V> {
 }
 
 /** What declaring a watch takes beyond the table it watches. */
-export interface TriggerOptions {
+export interface DeclaredTriggerOptions {
   /**
    * What this watch is registered under.
    *
@@ -156,7 +156,7 @@ export interface TriggerOptions {
    * There is one, and it is why a body that fails is tried again rather than lost: a change is
    * handed over the same way any other deferred work is.
    */
-  readonly queue?: QueueOptions;
+  readonly queue?: DeclaredQueueOptions;
 }
 
 /**
@@ -170,15 +170,15 @@ export interface TriggerOptions {
  * write, and the row it is handed may already have moved again by the time it runs. A rule that
  * has to hold belongs in a constraint of the schema, not here.
  */
-export interface Trigger<TRow> {
+export interface DeclaredTrigger<TRow> {
   /** Calls `handle` for every row written to this table for the first time. */
-  onInsert(handle: ChangeHandler<InsertChange<TRow>>): Trigger<TRow>;
+  onInsert(handle: DeclaredChangeHandler<DeclaredInsertChange<TRow>>): DeclaredTrigger<TRow>;
 
   /** Calls `handle` for every write over a row of this table. */
-  onUpdate(handle: ChangeHandler<UpdateChange<TRow>>): Trigger<TRow>;
+  onUpdate(handle: DeclaredChangeHandler<DeclaredUpdateChange<TRow>>): DeclaredTrigger<TRow>;
 
   /** Calls `handle` for every row of this table that goes. */
-  onDelete(handle: ChangeHandler<DeleteChange<TRow>>): Trigger<TRow>;
+  onDelete(handle: DeclaredChangeHandler<DeclaredDeleteChange<TRow>>): DeclaredTrigger<TRow>;
 
   /**
    * Calls `handle` for every write that moves `field`.
@@ -187,15 +187,15 @@ export interface Trigger<TRow> {
    */
   onField<F extends keyof TRow>(
     field: F,
-    handle: ChangeHandler<FieldChange<TRow, F>>,
-    moving?: Transition<TRow[F]>,
-  ): Trigger<TRow>;
+    handle: DeclaredChangeHandler<DeclaredFieldChange<TRow, F>>,
+    moving?: DeclaredTransition<TRow[F]>,
+  ): DeclaredTrigger<TRow>;
 }
 
 /** What watches a table and hands over what happened to it. */
 export interface TriggerDriver {
   /** Opens a watch on `table`, described by `options`. */
-  watch<TRow>(table: string, options?: TriggerOptions): Trigger<TRow>;
+  watch<TRow>(table: string, options?: DeclaredTriggerOptions): DeclaredTrigger<TRow>;
 }
 
 /**
@@ -212,10 +212,10 @@ interface DeclaredWatch {
   readonly table: string;
 
   /** What it was declared with. */
-  readonly options: TriggerOptions | undefined;
+  readonly options: DeclaredTriggerOptions | undefined;
 
   /** Every call written on the chain, in the order it was written. */
-  readonly written: Array<(on: Trigger<never>) => void>;
+  readonly written: Array<(on: DeclaredTrigger<never>) => void>;
 }
 
 /** Every watch a package has declared, by the name it answers to. */
@@ -229,35 +229,35 @@ const declared = new Registry<DeclaredWatch>("trigger");
  * receives is kept and played back onto the driver's own watch by {@link installTriggers}, in the
  * order it was written.
  */
-class DeclaredTrigger<TRow> implements Trigger<TRow> {
+class DeclaredTriggerBuilder<TRow> implements DeclaredTrigger<TRow> {
   /** Where each call written on this chain is kept. */
-  readonly #written: Array<(on: Trigger<never>) => void>;
+  readonly #written: Array<(on: DeclaredTrigger<never>) => void>;
 
-  constructor(written: Array<(on: Trigger<never>) => void>) {
+  constructor(written: Array<(on: DeclaredTrigger<never>) => void>) {
     this.#written = written;
   }
 
-  onInsert(handle: ChangeHandler<InsertChange<TRow>>): Trigger<TRow> {
-    this.#written.push((on) => (on as Trigger<TRow>).onInsert(handle));
+  onInsert(handle: DeclaredChangeHandler<DeclaredInsertChange<TRow>>): DeclaredTrigger<TRow> {
+    this.#written.push((on) => (on as DeclaredTrigger<TRow>).onInsert(handle));
     return this;
   }
 
-  onUpdate(handle: ChangeHandler<UpdateChange<TRow>>): Trigger<TRow> {
-    this.#written.push((on) => (on as Trigger<TRow>).onUpdate(handle));
+  onUpdate(handle: DeclaredChangeHandler<DeclaredUpdateChange<TRow>>): DeclaredTrigger<TRow> {
+    this.#written.push((on) => (on as DeclaredTrigger<TRow>).onUpdate(handle));
     return this;
   }
 
-  onDelete(handle: ChangeHandler<DeleteChange<TRow>>): Trigger<TRow> {
-    this.#written.push((on) => (on as Trigger<TRow>).onDelete(handle));
+  onDelete(handle: DeclaredChangeHandler<DeclaredDeleteChange<TRow>>): DeclaredTrigger<TRow> {
+    this.#written.push((on) => (on as DeclaredTrigger<TRow>).onDelete(handle));
     return this;
   }
 
   onField<F extends keyof TRow>(
     field: F,
-    handle: ChangeHandler<FieldChange<TRow, F>>,
-    moving?: Transition<TRow[F]>,
-  ): Trigger<TRow> {
-    this.#written.push((on) => (on as Trigger<TRow>).onField(field, handle, moving));
+    handle: DeclaredChangeHandler<DeclaredFieldChange<TRow, F>>,
+    moving?: DeclaredTransition<TRow[F]>,
+  ): DeclaredTrigger<TRow> {
+    this.#written.push((on) => (on as DeclaredTrigger<TRow>).onField(field, handle, moving));
     return this;
   }
 }
@@ -284,10 +284,10 @@ class DeclaredTrigger<TRow> implements Trigger<TRow> {
  *   .onField("status", (change) => refund(change.row), { to: "cancelled" });
  * ```
  */
-export function trigger<TRow>(table: string, options?: TriggerOptions): Trigger<TRow> {
-  const written: Array<(on: Trigger<never>) => void> = [];
+export function trigger<TRow>(table: string, options?: DeclaredTriggerOptions): DeclaredTrigger<TRow> {
+  const written: Array<(on: DeclaredTrigger<never>) => void> = [];
   declared.declare(options?.name ?? table, { table, options, written });
-  return new DeclaredTrigger<TRow>(written);
+  return new DeclaredTriggerBuilder<TRow>(written);
 }
 
 /**
@@ -296,7 +296,7 @@ export function trigger<TRow>(table: string, options?: TriggerOptions): Trigger<
  * @remarks
  * The host calls it once, after it has filled {@link Triggers} and before it starts serving.
  */
-export function installTriggers(): UnmodifiableList<Trigger<never>> {
+export function installTriggers(): UnmodifiableList<DeclaredTrigger<never>> {
   const driver = Triggers.get();
   return declared.all().map((watch) => {
     const opened = driver.watch<never>(watch.table, watch.options);

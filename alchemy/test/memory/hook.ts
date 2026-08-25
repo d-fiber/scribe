@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "../../async/future.ts";
-import type { Hook, HookDriver, HookOptions } from "../../port/hook.ts";
+import type { DeclaredHook, HookDriver, HookOptions } from "../../port/hook.ts";
 
 /**
  * A hook that keeps what is emitted and calls whoever listened, for a test to run a package against.
@@ -46,7 +46,7 @@ import type { Hook, HookDriver, HookOptions } from "../../port/hook.ts";
  * port promises neither either: a package that depends on the order here is a package that will
  * break in production, and this fake is not the place that catches it.
  */
-export class MemoryHook<T> implements Hook<T> {
+export class MemoryHook<T> implements DeclaredHook<T> {
   /** Everything emitted, in the order it was emitted. */
   readonly emitted: T[] = [];
 
@@ -73,9 +73,9 @@ export class MemoryHooks implements HookDriver {
   /** Every hook opened so far, by the event it was opened under. */
   readonly opened: Map<string, MemoryHook<never>> = new Map<string, MemoryHook<never>>();
 
-  open<T>(options: HookOptions): Hook<T> {
+  open<T>(options: HookOptions): DeclaredHook<T> {
     const already = this.opened.get(options.event);
-    if (already !== undefined) return already as unknown as Hook<T>;
+    if (already !== undefined) return already as unknown as DeclaredHook<T>;
 
     const held = new MemoryHook<T>();
     this.opened.set(options.event, held as unknown as MemoryHook<never>);

@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { equals, expect, isFalse, isTrue } from "@scribe/alchemy/test";
-import type { DatabaseDriver, DatabaseSchema, Query } from "@scribe/alchemy";
+import type { DatabaseDriver, DeclaredDatabaseSchema, Query } from "@scribe/alchemy";
 import { Databases, Failure, Ok, Refusal, schema } from "@scribe/alchemy";
 
 interface Member {
@@ -44,7 +44,7 @@ interface Member {
   readonly since: number;
 }
 
-interface Schema extends DatabaseSchema {
+interface Schema extends DeclaredDatabaseSchema {
   readonly __audience_members__: { readonly row: Member };
 }
 
@@ -124,7 +124,7 @@ class OneTable implements DatabaseDriver {
   readonly asked: string[] = [];
   readonly query = new Recorded();
 
-  table<S extends DatabaseSchema, K extends keyof S & string>(name: K): Query<S[K]["row"] & object> {
+  table<S extends DeclaredDatabaseSchema, K extends keyof S & string>(name: K): Query<S[K]["row"] & object> {
     this.asked.push(name);
     return this.query as unknown as Query<S[K]["row"] & object>;
   }

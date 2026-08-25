@@ -128,25 +128,25 @@ export { Version, VersionError } from "./package/version.ts";
 export { DuplicateDeclarationError, Registry } from "./declare/registry.ts";
 
 export { cron, Crons, forgetCrons, installCrons } from "./port/cron.ts";
-export type { Cron, CronDriver, CronOptions, Schedule, TimeOfDay } from "./port/cron.ts";
+export type { CronDriver, CronOptions, DeclaredCron, DeclaredSchedule, DeclaredTimeOfDay } from "./port/cron.ts";
 export { forgetHooks, hook, Hooks, openHooks } from "./port/hook.ts";
-export type { Hook, HookDriver, HookOptions } from "./port/hook.ts";
+export type { DeclaredHook, HookDriver, HookOptions } from "./port/hook.ts";
 export { forgetQueues, installQueues, queue, Queues } from "./port/queue.ts";
-export type { Queue, QueueDriver, QueueMessage, QueueOptions } from "./port/queue.ts";
+export type { DeclaredQueue, DeclaredQueueOptions, QueueDriver, QueueMessage } from "./port/queue.ts";
 export { forgetTriggers, installTriggers, trigger, Triggers } from "./port/trigger.ts";
 export type {
   Change,
-  ChangeBase,
-  ChangeHandler,
-  DeleteChange,
-  FieldChange,
-  InsertChange,
-  Transition,
-  Trigger,
+  DeclaredChangeBase,
+  DeclaredChangeHandler,
+  DeclaredDeleteChange,
+  DeclaredFieldChange,
+  DeclaredInsertChange,
+  DeclaredTransition,
+  DeclaredTrigger,
+  DeclaredTriggerOp,
+  DeclaredTriggerOptions,
+  DeclaredUpdateChange,
   TriggerDriver,
-  TriggerOp,
-  TriggerOptions,
-  UpdateChange,
 } from "./port/trigger.ts";
 
 export { rateLimit, RateLimiters } from "./port/rate_limit.ts";
@@ -169,14 +169,14 @@ export type {
   ColumnFilter,
   Columns,
   DatabaseDriver,
-  DatabaseSchema,
+  DeclaredDatabaseSchema,
+  DeclaredFilterSpec,
+  DeclaredTableShape,
   Filters,
-  FilterSpec,
   OrderOptions,
   Projected,
   Query,
   Tables,
-  TableShape,
 } from "./port/database.ts";
 
 export { ListOf, Nested, Required } from "./api/body/mod.ts";

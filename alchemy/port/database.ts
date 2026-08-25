@@ -40,7 +40,7 @@ import type { List } from "../value/list.ts";
 import type { Result } from "../value/result.ts";
 
 /** One table of a schema, as the package that owns the SQL declares it. */
-export interface TableShape {
+export interface DeclaredTableShape {
   /** The shape of one row of this table. */
   readonly row: object;
 }
@@ -52,10 +52,10 @@ export interface TableShape {
  * Nothing here ever holds one. It is a type parameter, filled by whoever owns the SQL, which is
  * what keeps this free of any knowledge of a particular database.
  */
-export type DatabaseSchema = Record<string, TableShape>;
+export type DeclaredDatabaseSchema = Record<string, DeclaredTableShape>;
 
 /** One condition of a `where`, opaque to whoever built it. */
-export interface FilterSpec {
+export interface DeclaredFilterSpec {
   /** The column this condition narrows. */
   readonly column: string;
 }
@@ -63,34 +63,34 @@ export interface FilterSpec {
 /** The comparisons a condition can be built from, on one column. */
 export interface ColumnFilter<V> {
   /** Rows whose column equals `value`. */
-  eq(value: V): FilterSpec;
+  eq(value: V): DeclaredFilterSpec;
 
   /** Rows whose column is one of `values`. */
-  in(values: List<V>): FilterSpec;
+  in(values: List<V>): DeclaredFilterSpec;
 
   /** Rows whose column is `value`, null included, compared by identity rather than by equality. */
-  is(value: V | null): FilterSpec;
+  is(value: V | null): DeclaredFilterSpec;
 
   /** Rows whose column is strictly greater than `value`. */
-  gt(value: V): FilterSpec;
+  gt(value: V): DeclaredFilterSpec;
 
   /** Rows whose column is strictly less than `value`. */
-  lt(value: V): FilterSpec;
+  lt(value: V): DeclaredFilterSpec;
 
   /** Rows whose column is greater than `value` or equal to it. */
-  gte(value: V): FilterSpec;
+  gte(value: V): DeclaredFilterSpec;
 
   /** Rows whose column is less than `value` or equal to it. */
-  lte(value: V): FilterSpec;
+  lte(value: V): DeclaredFilterSpec;
 
   /** Rows whose column matches `pattern`, where `%` stands for any run and `_` for one character. */
-  like(pattern: string): FilterSpec;
+  like(pattern: string): DeclaredFilterSpec;
 
   /** Like {@link like}, ignoring case. */
-  ilike(pattern: string): FilterSpec;
+  ilike(pattern: string): DeclaredFilterSpec;
 
   /** Rows whose column differs from `value`. */
-  neq(value: V): FilterSpec;
+  neq(value: V): DeclaredFilterSpec;
 }
 
 /** What a `where` is handed: one filter per column of the row. */
@@ -134,7 +134,7 @@ export interface Query<Row extends object, Answer = Row> {
 
   /** Adds what `build` returns, kept in the order it was added. */
   where(
-    build: (filters: Filters<Row>) => FilterSpec | List<FilterSpec>,
+    build: (filters: Filters<Row>) => DeclaredFilterSpec | List<DeclaredFilterSpec>,
   ): Query<Row, Answer>;
 
   /** Orders by `column`. */
@@ -184,7 +184,7 @@ export interface Query<Row extends object, Answer = Row> {
 /** What answers a query on a named table. */
 export interface DatabaseDriver {
   /** A query on `name`, typed by the schema the package declares. */
-  table<S extends DatabaseSchema, K extends keyof S & string>(
+  table<S extends DeclaredDatabaseSchema, K extends keyof S & string>(
     name: K,
   ): Query<S[K]["row"] & object>;
 }
@@ -209,7 +209,7 @@ export const Databases: Slot<DatabaseDriver> = new Slot<DatabaseDriver>(
  * written `table<Schema, "users">("users")`, with the name given twice, and written `table("users")`
  * it silently answered a query typed as nothing in particular.
  */
-export interface Tables<S extends DatabaseSchema> {
+export interface Tables<S extends DeclaredDatabaseSchema> {
   /** A query on `name`, typed by the row `S` says that table holds. */
   table<K extends keyof S & string>(name: K): Query<S[K]["row"] & object>;
 }
@@ -228,7 +228,7 @@ export interface Tables<S extends DatabaseSchema> {
  * const held = await db.table("memberships").where((f) => f.account.is(accountId)).get();
  * ```
  */
-export function schema<S extends DatabaseSchema>(): Tables<S> {
+export function schema<S extends DeclaredDatabaseSchema>(): Tables<S> {
   return {
     table<K extends keyof S & string>(name: K): Query<S[K]["row"] & object> {
       return deferred<S[K]["row"] & object, S[K]["row"] & object>(() => Databases.get().table<S, K>(name));
