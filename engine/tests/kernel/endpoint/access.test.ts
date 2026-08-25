@@ -85,7 +85,7 @@ Deno.test("declaring a webhook caller does not by itself open an endpoint", asyn
     assertEquals(
       result.status,
       401,
-      "only WebhookEndpoint, which checks the signature, may satisfy a webhook caller",
+      "a webhook caller is satisfied only by an endpoint that overrides webhookVerified",
     );
   } finally {
     limiter.restore();
