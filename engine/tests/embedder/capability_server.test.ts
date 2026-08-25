@@ -51,10 +51,7 @@ async function call(path: string): Promise<{ status: number; code: string; messa
   return { status: response.status, code: failure.code, message: failure.message };
 }
 
-Deno.test("a procedure the contract declares and the host does not wire answers a named 501", async () => {
-  // Storage stands for every module the host mounts without serving its
-  // capability. The point is not this service in particular: nothing lists
-  // them any more, so any unwired path takes the same road.
+Deno.test("a procedure nothing behind it can answer honestly is left to the named 501", async () => {
   const path = procedurePath(Storage.method.upload);
   const answer = await call(path);
 
