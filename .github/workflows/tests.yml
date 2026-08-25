@@ -2,12 +2,16 @@ name: tests
 
 on:
   push:
+    branches: [dev, main]
   pull_request:
   schedule:
     - cron: "20 23 * * *"
 
 permissions:
   contents: read
+
+env:
+  DENO_VERSION: 2.7.14
 
 concurrency:
   group: tests-${{ github.ref }}
@@ -16,24 +20,19 @@ concurrency:
 jobs:
   engine:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check out the packages submodule
-        env:
-          PACKAGES_READ_KEY: ${{ secrets.PACKAGES_READ_KEY }}
-        run: |
-          set -eu
-          mkdir -p ~/.ssh
-          printf '%s\n' "$PACKAGES_READ_KEY" > ~/.ssh/packages
-          chmod 600 ~/.ssh/packages
-          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/packages -o IdentitiesOnly=yes" \
-            git submodule update --init --recursive
-
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version: ${{ env.DENO_VERSION }}
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/deno
+          key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
+          restore-keys: deno-${{ runner.os }}-
 
       - name: Type check
         run: deno task check
@@ -49,6 +48,7 @@ jobs:
 
   sdk-js:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: sdk/js
@@ -58,7 +58,7 @@ jobs:
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version: ${{ env.DENO_VERSION }}
 
       - name: Install the npm dependencies
         run: deno install
@@ -71,6 +71,7 @@ jobs:
 
   headers:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v4
@@ -80,6 +81,7 @@ jobs:
 
   binaries:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v4
@@ -89,6 +91,7 @@ jobs:
 
   packages:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v4
@@ -98,19 +101,21 @@ jobs:
 
   format:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version: ${{ env.DENO_VERSION }}
 
       - name: Check the formatting
         run: deno fmt --check
 
   version:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
 
@@ -147,13 +152,14 @@ jobs:
   dependencies:
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version: ${{ env.DENO_VERSION }}
 
       - name: Report the Deno dependencies that moved
         run: |
@@ -177,21 +183,10 @@ jobs:
 
   protocol:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Check out the packages submodule
-        env:
-          PACKAGES_READ_KEY: ${{ secrets.PACKAGES_READ_KEY }}
-        run: |
-          set -eu
-          mkdir -p ~/.ssh
-          printf '%s\n' "$PACKAGES_READ_KEY" > ~/.ssh/packages
-          chmod 600 ~/.ssh/packages
-          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/packages -o IdentitiesOnly=yes" \
-            git submodule update --init --recursive
 
       - name: Install protoc
         run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
