@@ -51,13 +51,14 @@
  * needs to happen at import or after boot.
  */
 
-import { Caches, Crons, Databases, FileSystems, Hooks, Queues, RateLimiters, Triggers } from "@scribe/alchemy";
+import { Caches, Claims, Crons, Databases, FileSystems, Hooks, Queues, RateLimiters, Triggers } from "@scribe/alchemy";
 import { Clients } from "@scribe/alchemy/http";
 import { Loggers } from "@scribe/alchemy/observe";
 import { Now } from "@scribe/alchemy";
 import type { LifecycleSteps } from "@scribe/alchemy";
 import { FetchClients } from "./src/http/fetch_client.ts";
 import { RedisCaches } from "./src/cache/redis_caches.ts";
+import { RedisClaims } from "./src/redis/claim_once.ts";
 import { NatsQueues } from "./src/queue/nats_queues.ts";
 import { InlineHooks } from "./src/hook/inline_hooks.ts";
 import { ScheduledCrons } from "./src/cron/scheduled_crons.ts";
@@ -101,6 +102,9 @@ export { FetchClient, FetchClients } from "./src/http/fetch_client.ts";
 
 export { ConsoleLogger } from "./src/observe/console_logger.ts";
 export { type Kv, kv } from "./src/redis/kv.ts";
+export { RedisClaims } from "./src/redis/claim_once.ts";
+export { IDENTITY_CACHE_KEY, IdentityRevocation } from "./src/redis/identity_revocation.ts";
+export { KeyIndex } from "./src/redis/key_index.ts";
 export { LocalFiles, LocalFileSystems } from "./src/files/local_files.ts";
 export { SystemNow } from "./src/observe/system_now.ts";
 
@@ -192,6 +196,7 @@ export const scribe: LifecycleSteps = {
     if (!Loggers.configured) Loggers.use(new ConsoleLogger());
     if (!Now.configured) Now.use(new SystemNow());
     if (!Caches.configured) Caches.use(new RedisCaches());
+    if (!Claims.configured) Claims.use(new RedisClaims());
     if (!RateLimiters.configured) RateLimiters.use(new RedisRateLimiters());
     if (!Queues.configured) Queues.use(new NatsQueues());
     if (!Hooks.configured) Hooks.use(new InlineHooks());

@@ -33,17 +33,24 @@
 //
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
+import type { ClaimDriver, ClaimOptions } from "@scribe/alchemy";
+import { kv } from "./kv.ts";
 
-import { claimOnce } from "@scribe/alchemy";
-import { MAX_TIMESTAMP_SKEW_S } from "./signed_request.ts";
-
-export const CLAIM_TTL_S = 2 * MAX_TIMESTAMP_SKEW_S;
-
-export function claimWebhookId(id: string): Promise<boolean> {
-  // The opposite call to the one `claimNonce` makes: an index that cannot answer cannot tell
-  // a first delivery from a replay, and a replayed delivery is the thing this exists to stop.
-  return claimOnce(`webhook:seen:${id}`, CLAIM_TTL_S, {
-    whenUnavailable: "refuse",
-    scope: "webhook",
-  });
+/**
+ * The claim driver a host running against Redis fills {@link Claims} with.
+ *
+ * @remarks
+ * A claim is `SET key NX EX ttl`: the store answers `OK` to the first caller and
+ * nothing to every other one until the key runs out. Nothing else is written, so
+ * two callers racing on the same key cannot both be told they took it.
+ */
+export class RedisClaims implements ClaimDriver {
+  async claim(key: string, ttlSeconds: number, options: ClaimOptions): Promise<boolean> {
+    try {
+      return await kv().set(key, "1", "EX", ttlSeconds, "NX") === "OK";
+    } catch (raised) {
+      console.error(`[claim:${options.scope}] the store refused a claim on ${key}.`, raised);
+      return options.whenUnavailable === "allow";
+    }
+  }
 }

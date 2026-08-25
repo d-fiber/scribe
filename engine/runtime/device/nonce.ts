@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { claimOnce } from "@scribe/runtime/redis/claim_once.ts";
+import { claimOnce } from "@scribe/alchemy";
 import { DEVICE_PAYLOAD_MAX_AGE_MS, DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS } from "./payload/freshness.ts";
 
 const NONCE_TTL_S = Math.ceil(
