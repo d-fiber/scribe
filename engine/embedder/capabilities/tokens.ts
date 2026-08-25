@@ -61,7 +61,33 @@ export class UnknownCapabilityToken extends Error {
 
 const grants = new Map<string, StoredGrant>();
 
+/**
+ * How long the store goes between two sweeps.
+ *
+ * A sweep walks every grant, so running one on each issue makes issuing cost the
+ * size of the store: at ten thousand grants in flight a host answers about twelve
+ * thousand tokens a second whatever the rest of the request costs, and the curve
+ * is quadratic in how many are alive at once.
+ *
+ * The gate is safe because the sweep was never what makes an expired grant
+ * unusable. `redeem` checks `expiresAt` itself and deletes on the way out, so a
+ * grant that has run out is refused the moment somebody presents it, whichever
+ * side of a sweep that happens on. What the gate delays is only when the memory
+ * comes back, by at most this long.
+ */
+const SWEEP_EVERY_MS = 1_000;
+
+let sweptAt = 0;
+
+/**
+ * Drops every grant that has run out, but not more than once per [SWEEP_EVERY_MS].
+ *
+ * @param now - The moment the caller is working against.
+ */
 function sweep(now: number): void {
+  if (now - sweptAt < SWEEP_EVERY_MS) return;
+  sweptAt = now;
+
   for (const [token, grant] of grants) {
     if (grant.expiresAt <= now) grants.delete(token);
   }

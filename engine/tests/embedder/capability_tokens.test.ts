@@ -88,8 +88,34 @@ Deno.test("a token the host never issued is refused", async () => {
   );
 });
 
-Deno.test("an expired token is swept instead of lingering", () => {
-  const token = CapabilityTokens.issue(grant(), -1);
+Deno.test("an expired token is refused, whether or not a sweep has run since", () => {
+  const first = CapabilityTokens.issue(grant(), -1);
 
-  assertEquals(CapabilityTokens.redeem(token), null);
+  assertEquals(CapabilityTokens.redeem(first), null, "an expired token was handed back");
+
+  // Issuing again in the same millisecond cannot have swept: the store runs one
+  // sweep a second. The refusal has to come from redeem reading the expiry.
+  const second = CapabilityTokens.issue(grant(), -1);
+  const third = CapabilityTokens.issue(grant(), -1);
+
+  assertEquals(CapabilityTokens.redeem(second), null, "an expired token survived a gated sweep");
+  assertEquals(CapabilityTokens.redeem(third), null, "an expired token survived a gated sweep");
+});
+
+Deno.test("issuing does not walk the store on every call", async () => {
+  const held: string[] = [];
+  for (let i = 0; i < 20_000; i++) held.push(CapabilityTokens.issue(grant(), 60_000));
+
+  const started = performance.now();
+  for (let i = 0; i < 2_000; i++) CapabilityTokens.issue(grant(), 60_000);
+  const each = (performance.now() - started) / 2_000;
+
+  for (const token of held) CapabilityTokens.revoke(token);
+
+  assertEquals(
+    each < 0.05,
+    true,
+    `issuing against a store of 20000 grants took ${each.toFixed(4)} ms a call, which is what a walk costs`,
+  );
+  await Promise.resolve();
 });
