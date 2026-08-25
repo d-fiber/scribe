@@ -35,31 +35,38 @@
 // LICENSE file, the LICENSE file governs.
 
 /**
- * The two directories a workspace member sits directly under, from the workspace root.
+ * The workspace root, taken from where this plugin sits rather than from the process.
+ *
+ * The file is `<root>/engine/.lint/member-escape.ts`, so three directories up is the root. It is
+ * read once, at load, and never per file: a rule runs for every file in the repository and an
+ * environment call there is both wasteful and, on some platforms, fatal.
+ *
+ * Nothing here names the checkout. Cloning the repository under any name moves this file with it.
+ */
+const ROOT = new URL("../../", import.meta.url).pathname.replace(/\/$/, "");
+
+/**
+ * The two directories a workspace member sits directly under, relative to the root.
  *
  * They are matched as a prefix of the path relative to the root, never as a substring: a
- * generated stub written to `sdk/js/gen/scribe/engine/packages/<name>/` carries both words in
- * its path and belongs to no member, and searching anywhere in the string would take it for one.
- *
- * The anchor is the root itself and not the checkout's name, which is the whole difference from
- * the layer rule this replaces. Cloning the repository under any name leaves `engine/` and
- * `packages/` exactly where they are.
+ * generated stub written to `sdk/js/gen/scribe/engine/packages/<name>/` carries both words in its
+ * path and belongs to no member, and searching anywhere in the string would take it for one.
  */
 const MEMBER_ROOTS = ["engine/", "packages/"] as const;
 
 /** The member `filename` belongs to, as an absolute directory, or null when it is in none. */
 function memberOf(filename: string): string | null {
-  const root = `${Deno.cwd()}/`;
+  const root = `${ROOT}/`;
   if (!filename.startsWith(root)) return null;
 
   const relative = filename.slice(root.length);
   for (const under of MEMBER_ROOTS) {
     if (!relative.startsWith(under)) continue;
 
-    const name = relative.slice(under.length).split("/")[0];
-    if (name === "" || !relative.slice(under.length).includes("/")) continue;
+    const rest = relative.slice(under.length);
+    if (!rest.includes("/")) continue;
 
-    return `${root}${under}${name}/`;
+    return `${root}${under}${rest.split("/")[0]}/`;
   }
   return null;
 }
