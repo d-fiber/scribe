@@ -104,6 +104,8 @@ export { json, ServerResponse } from "./src/http/response.ts";
 export { Arr, Nested, Required } from "./src/validation/schema.ts";
 export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema } from "./src/validation/schema.ts";
 
+export { auth } from "./src/capabilities/auth.ts";
+export type { Account, AccountBan, AccountDevice, AccountRole } from "./src/capabilities/auth.ts";
 export { cache } from "./src/capabilities/cache.ts";
 export { host } from "./src/capabilities/channel.ts";
 export { CapabilityError } from "./src/capabilities/error.ts";
