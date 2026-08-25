@@ -144,12 +144,47 @@ extensions.register(
  * editing the framework, and a module could not be unmounted without leaving a
  * dangling import behind.
  *
- * Its absence is ordinary rather than an error -- a checkout with no project
- * generated nothing, which is the state of the framework's own tests. The ports
- * then answer as they do when nobody registered: each says so at the first call
- * that needs it, naming itself.
+ * Its absence is ordinary rather than an error: a checkout with no project has
+ * nothing to register, and every port then answers as it does when nobody
+ * registered, each saying so at the first call that needs it, naming itself.
+ *
+ * A file that exists and throws while it loads is the opposite, and the two used
+ * to be swallowed by the same empty catch. That left all eleven ports unbound
+ * without a word: the process boots, listens, answers a health check, and then
+ * dies on the first error path that tries to log, because the logger is one of
+ * the ports nothing filled. It reads as a healthy start followed by an
+ * unexplained exit. So only the absence is quiet, and anything else is said out
+ * loud with what it was and where it came from.
  */
 try {
   await import("@generated/registrations.ts");
-  // deno-lint-ignore no-empty
-} catch {}
+} catch (raised) {
+  if (!_isAbsent(raised)) {
+    console.error(
+      "[shell] @generated/registrations.ts threw while loading, so no module registered its ports.",
+      raised,
+    );
+    throw raised;
+  }
+}
+
+/**
+ * Whether `raised` says the module is not there, rather than that it failed.
+ *
+ * @remarks
+ * Deno answers a specifier it cannot resolve with a `TypeError` naming what it
+ * looked for. There is no error class to narrow on, so the message is what tells
+ * the two apart, and the test beside this file is what keeps that reading honest.
+ *
+ * @param raised - Whatever the dynamic import threw.
+ * @returns Whether the module was simply absent.
+ */
+function _isAbsent(raised: unknown): boolean {
+  if (!(raised instanceof TypeError)) return false;
+
+  const said = raised.message;
+  return said.includes("Module not found") ||
+    said.includes("not a dependency") ||
+    said.includes("not in import map") ||
+    said.includes("Relative import path");
+}
