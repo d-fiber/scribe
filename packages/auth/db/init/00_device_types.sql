@@ -34,25 +34,29 @@
 -- This header is a summary written for convenience. Where it differs from the
 -- LICENSE file, the LICENSE file governs.
 
-create table if not exists public.internal_t__app_user_settings (
-  user_id           uuid                       primary key references public.internal_t__app_users(user_id) on delete cascade,
-  localization      public.localization        not null,
-  theme_mode        public.device_theme_mode   not null
+create type public.client_type as enum (
+  'app',
+  'web',
+  'soft'
 );
 
-alter table public.internal_t__app_user_settings enable row level security;
+create type public.device_os as enum (
+  'android',
+  'ios',
+  'linux',
+  'macos',
+  'windows',
+  'unknown'
+);
 
-grant select, update, delete on public.internal_t__app_user_settings to authenticated;
+create type public.device_category as enum (
+  'phone',
+  'tablet',
+  'desktop',
+  'unknown'
+);
 
-revoke insert on public.internal_t__app_user_settings from authenticated, anon;
-
-create policy "user_settings_policy" on public.internal_t__app_user_settings
-  for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-
-create policy "user_settings_delete" on public.internal_t__app_user_settings
-  for delete using (
-    auth.uid() = user_id
-    or (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
-  );
+create type public.location_coordinate as (
+  lat double precision,
+  lng double precision
+);

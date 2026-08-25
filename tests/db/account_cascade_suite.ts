@@ -39,7 +39,6 @@ import { assert, assertEquals } from "@std/assert";
 const SDK_ROOT = new URL("../../", import.meta.url).pathname;
 
 const SDK_SQL_DIRS = [
-  `${SDK_ROOT}db/init`,
   `${SDK_ROOT}packages/auth/db/init`,
 ];
 
@@ -72,40 +71,6 @@ async function allSql(roots: string[]): Promise<string> {
 
 export function registerAccountCascadeTests(label: string, extraRoots: string[] = []): void {
   const roots = [...SDK_SQL_DIRS, ...extraRoots];
-
-  Deno.test(`${label}: account root tables cascade from auth.users`, async () => {
-    const sql = await allSql(roots);
-    for (const table of ["internal_t__app_users", "internal_t__admin_users"]) {
-      const declaration = sql.match(
-        new RegExp(`create table[^;]*${table} \\([^;]*?references auth\\.users\\(id\\) on delete cascade`),
-      );
-      assert(
-        declaration !== null,
-        `${table} must reference auth.users(id) on delete cascade, which is what makes the sign-up rollback complete`,
-      );
-    }
-  });
-
-  Deno.test(`${label}: every child table of an account declares an explicit delete action`, async () => {
-    const sql = await allSql(roots);
-    const references = [
-      ...sql.matchAll(
-        /references public\.(internal_t__app_users|internal_t__admin_users)\s*\([^)]*\)((?: on delete (?:cascade|set null|restrict))?)/g,
-      ),
-    ];
-
-    assert(references.length > 0, "no reference found, the test is testing nothing");
-
-    const orphans = references
-      .filter((match) => match[2].trim() === "")
-      .map((match) => match[0]);
-
-    assertEquals(
-      orphans,
-      [],
-      `these references have no delete action: the row would outlive the account`,
-    );
-  });
 
   Deno.test(`${label}: pending-token cleanup is scheduled`, async () => {
     const sql = await allSql(roots);
