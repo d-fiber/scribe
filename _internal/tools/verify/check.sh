@@ -63,7 +63,7 @@ say "the analyser is happy with engine and sdk/js."
 cat <<'EOF'
 
 A green run here does not promise a green CI. The runners resolve @types/node
-through engine/deno.lock while a development machine resolves whatever its global
+through deno.lock while a development machine resolves whatever its global
 cache holds, so the two disagree on the globals shared with Node. A timer handle
 annotated `number` passes here and fails there, which is why the repository
 writes `ReturnType<typeof setTimeout>` everywhere.
