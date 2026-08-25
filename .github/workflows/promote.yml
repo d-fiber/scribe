@@ -30,7 +30,7 @@ jobs:
           SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -eu
-          required="engine sdk-js version headers protocol format"
+          required="engine sdk-js version headers protocol format binaries packages"
 
           for attempt in $(seq 1 45); do
             runs=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/check-runs" --paginate \

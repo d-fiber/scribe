@@ -78,6 +78,24 @@ jobs:
       - name: Check license headers
         run: bash .github/headers/check.sh
 
+  binaries:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check that no tracked file is a binary
+        run: bash .github/binaries/check.sh
+
+  packages:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check that every package is reached through its door
+        run: bash .github/packages/check.sh
+
   format:
     runs-on: ubuntu-latest
 
