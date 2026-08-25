@@ -44,22 +44,22 @@ say() {
   echo "[$SCOPE] $1"
 }
 
-[ -f "$ROOT/engine/packages/foundation/deno.json" ] || {
-  echo "[$SCOPE] engine/packages is empty, run \`git submodule update --init\` first." >&2
+[ -f "$ROOT/packages/foundation/deno.json" ] || {
+  echo "[$SCOPE] packages/ is empty, so this checkout is not a whole one." >&2
   exit 1
 }
 
-say "linting engine"
-(cd "$ROOT/engine" && deno lint)
+say "linting the workspace"
+(cd "$ROOT" && deno lint)
 
-say "type checking engine"
-(cd "$ROOT/engine" && deno task check)
+say "type checking the workspace"
+(cd "$ROOT" && deno task check)
 
 say "type checking sdk/js"
 (cd "$ROOT/sdk/js" && deno task check)
 
 echo ""
-say "the analyser is happy with engine and sdk/js."
+say "the analyser is happy with the workspace and sdk/js."
 cat <<'EOF'
 
 A green run here does not promise a green CI. The runners resolve @types/node

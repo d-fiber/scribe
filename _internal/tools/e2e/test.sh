@@ -59,10 +59,10 @@ case "$PACKAGE" in
 esac
 
 echo "[$SCOPE] running the $PACKAGE suite against the stack that is already up"
-echo "[$SCOPE] start it with engine/packages/tool/e2e/up.sh $PACKAGE"
+echo "[$SCOPE] start it with packages/tool/e2e/up.sh $PACKAGE"
 echo ""
 
-(cd "$ROOT/engine" && deno task "$TASK")
+(cd "$ROOT" && deno task "$TASK")
 
 echo ""
 echo "[$SCOPE] the $PACKAGE end-to-end suite is green."
