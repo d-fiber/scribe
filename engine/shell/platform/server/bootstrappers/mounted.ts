@@ -34,13 +34,29 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { queueRunner } from "@scribe/foundation/queue";
+import { runMounted } from "@scribe/runtime/support/packages/mounted.ts";
 import type { Bootstrapper } from "../../../common/bootstrapper.ts";
 
-export class QueueBootstrapper implements Bootstrapper {
-  readonly name = "queue";
+/**
+ * Runs the packages a project mounted, at the two moments a long-lived process has.
+ *
+ * @remarks
+ * It is listed by the runtimes that keep running, and by no others. `starts` is where a package
+ * puts the work that outlives a request, a cron loop or a queue consumer, and a process that only
+ * dispatches has no business holding either.
+ *
+ * The engine used to name each of those loops itself, one bootstrapper per subsystem of one
+ * package, so mounting a package was not enough to bring what it needs and unmounting one left a
+ * dangling import. Here the engine decides when, and never what.
+ */
+export class MountedPackagesBootstrapper implements Bootstrapper {
+  readonly name = "packages";
 
-  boot(): void {
-    queueRunner.start();
+  boot(): Promise<void> {
+    return runMounted("starts");
+  }
+
+  shutdown(): Promise<void> {
+    return runMounted("stops");
   }
 }

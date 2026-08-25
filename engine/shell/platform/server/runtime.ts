@@ -39,11 +39,8 @@ import { pathnameOf } from "@scribe/runtime/http/pathname.ts";
 import { RequestScope } from "@scribe/runtime/scope.ts";
 import type { Bootstrapper } from "../../common/bootstrapper.ts";
 import { Runtime } from "../../common/runtime.ts";
-import { CronBootstrapper } from "./bootstrappers/cron.ts";
-import { ExtensionsBootstrapper } from "./bootstrappers/extensions.ts";
-import { QueueBootstrapper } from "./bootstrappers/queue.ts";
+import { MountedPackagesBootstrapper } from "./bootstrappers/mounted.ts";
 import { RequestLogBootstrapper } from "./bootstrappers/request_log.ts";
-import { TriggerBootstrapper } from "./bootstrappers/trigger.ts";
 import type { Hono } from "hono";
 import { SurfaceRouter } from "./surface_router.ts";
 
@@ -58,13 +55,7 @@ export class ServerRuntime extends Runtime {
   }
 
   protected override bootstrappers(): readonly Bootstrapper[] {
-    return [
-      new ExtensionsBootstrapper(),
-      new CronBootstrapper(),
-      new QueueBootstrapper(),
-      new TriggerBootstrapper(),
-      new RequestLogBootstrapper(),
-    ];
+    return [new MountedPackagesBootstrapper(), new RequestLogBootstrapper()];
   }
 
   protected override shutdownSignals(): readonly Deno.Signal[] {

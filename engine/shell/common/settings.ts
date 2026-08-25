@@ -40,6 +40,7 @@ import { required } from "@scribe/foundation";
 import { queueSettings } from "@scribe/foundation/queue";
 import { RedisRateLimiters } from "@scribe/foundation/rate_limit";
 import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
+import { runMounted } from "@scribe/runtime/support/packages/mounted.ts";
 import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
 import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
@@ -120,55 +121,20 @@ workerSettings.use({
 });
 
 /**
- * Hands the ports to the modules the project mounted.
+ * Runs the `wires` step of every package the project mounted.
  *
- * `@generated/registrations.ts` imports the `register.ts` of every mounted
- * module, and the CLI writes it from `config.yaml`. That indirection is the
- * whole point: this file wired four modules by name, so adding a fifth meant
- * editing the framework, and a module could not be unmounted without leaving a
- * dangling import behind.
+ * `@generated/registrations.ts` carries one entry per package, and the CLI writes it from
+ * `config.yaml`. That indirection is the whole point: this file used to wire four modules by name,
+ * so adding a fifth meant editing the framework, and a module could not be unmounted without
+ * leaving a dangling import behind.
  *
- * Its absence is ordinary rather than an error: a checkout with no project has
- * nothing to register, and every port then answers as it does when nobody
- * registered, each saying so at the first call that needs it, naming itself.
+ * Its absence is ordinary rather than an error: a checkout with no project has nothing to register,
+ * and every port then answers as it does when nobody registered, each saying so at the first call
+ * that needs it, naming itself.
  *
- * A file that exists and throws while it loads is the opposite, and the two used
- * to be swallowed by the same empty catch. That left all eleven ports unbound
- * without a word: the process boots, listens, answers a health check, and then
- * dies on the first error path that tries to log, because the logger is one of
- * the ports nothing filled. It reads as a healthy start followed by an
- * unexplained exit. So only the absence is quiet, and anything else is said out
- * loud with what it was and where it came from.
+ * A file that exists and throws is the opposite, and the two used to be swallowed together. That
+ * left every port unbound without a word: the process boots, listens, answers a health check, and
+ * then dies on the first error path that tries to log, because the logger is one of the ports
+ * nothing filled. It reads as a healthy start followed by an unexplained exit.
  */
-try {
-  await import("@generated/registrations.ts");
-} catch (raised) {
-  if (!_isAbsent(raised)) {
-    console.error(
-      "[shell] @generated/registrations.ts threw while loading, so no module registered its ports.",
-      raised,
-    );
-    throw raised;
-  }
-}
-
-/**
- * Whether `raised` says the module is not there, rather than that it failed.
- *
- * @remarks
- * Deno answers a specifier it cannot resolve with a `TypeError` naming what it
- * looked for. There is no error class to narrow on, so the message is what tells
- * the two apart, and the test beside this file is what keeps that reading honest.
- *
- * @param raised - Whatever the dynamic import threw.
- * @returns Whether the module was simply absent.
- */
-function _isAbsent(raised: unknown): boolean {
-  if (!(raised instanceof TypeError)) return false;
-
-  const said = raised.message;
-  return said.includes("Module not found") ||
-    said.includes("not a dependency") ||
-    said.includes("not in import map") ||
-    said.includes("Relative import path");
-}
+await runMounted("wires");
