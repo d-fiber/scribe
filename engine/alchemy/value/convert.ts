@@ -88,12 +88,39 @@ export interface BytesCodec {
  * const read = hex.decode(written);
  * ```
  */
+/**
+ * The two characters each byte is written as, one entry per byte value.
+ *
+ * @remarks
+ * Building the pair per byte costs a `toString`, a `padStart` and an entry in an
+ * intermediate array, and this path runs on every session identifier and every
+ * digest the identity check takes. A table of 256 strings is built once and turns
+ * writing into a lookup and a join.
+ */
+const _HEX_PAIRS: readonly string[] = Array.from(
+  { length: 256 },
+  (_, byte) => byte.toString(16).padStart(PER_BYTE, "0"),
+);
+
+/**
+ * The value of each hexadecimal character, indexed by its code, or -1.
+ *
+ * Only what {@link hex.encode} writes is given a value, so upper case reads as
+ * refused here exactly as the pattern refused it before.
+ */
+const _HEX_VALUES: Int8Array = (() => {
+  const held = new Int8Array(128).fill(-1);
+  for (let value = 0; value < 16; value++) held[_HEX_PAIRS[value].charCodeAt(1)] = value;
+  return held;
+})();
+
 export const hex: BytesCodec = {
   encode(input: Uint8Array | ArrayBuffer): string {
     const view = input instanceof Uint8Array ? input : new Uint8Array(input);
-    return Array.from(view)
-      .map((byte) => byte.toString(16).padStart(PER_BYTE, "0"))
-      .join("");
+
+    let written = "";
+    for (let at = 0; at < view.length; at++) written += _HEX_PAIRS[view[at]];
+    return written;
   },
 
   /**
@@ -106,10 +133,23 @@ export const hex: BytesCodec = {
    * of characters.
    */
   decode(encoded: string): Uint8Array<ArrayBuffer> {
-    if (encoded.length % PER_BYTE !== 0 || !/^[0-9a-f]*$/.test(encoded)) {
+    if (encoded.length % PER_BYTE !== 0) {
       throw new FormatException(`Expected hexadecimal, two characters per byte. ${describeText(encoded.length, null)}`);
     }
-    return new Uint8Array((encoded.match(/.{2}/g) ?? []).map((byte) => parseInt(byte, 16)));
+
+    const read = new Uint8Array(encoded.length / PER_BYTE);
+    for (let at = 0; at < read.length; at++) {
+      const high = _HEX_VALUES[encoded.charCodeAt(at * 2)] ?? -1;
+      const low = _HEX_VALUES[encoded.charCodeAt(at * 2 + 1)] ?? -1;
+
+      if (high === -1 || low === -1 || high === undefined || low === undefined) {
+        throw new FormatException(
+          `Expected hexadecimal, two characters per byte. ${describeText(encoded.length, null)}`,
+        );
+      }
+      read[at] = (high << 4) | low;
+    }
+    return read;
   },
 };
 
@@ -137,6 +177,20 @@ export const utf8: Codec<string, Uint8Array> = {
 
 /** The alphabet base64 writes, in the order the specification gives it. */
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+/**
+ * The value of each base64 character, indexed by its code, or -1.
+ *
+ * @remarks
+ * Reading a character used to be `ALPHABET.indexOf`, which walks up to
+ * sixty-four characters for every one decoded. A JSON web token is decoded on
+ * every request that carries one, so the walk is on the identity path.
+ */
+const _BASE64_VALUES: Int8Array = (() => {
+  const held = new Int8Array(128).fill(-1);
+  for (let value = 0; value < ALPHABET.length; value++) held[ALPHABET.charCodeAt(value)] = value;
+  return held;
+})();
 
 /** How many bits one base64 character carries. */
 const PER_CHARACTER = 6;
@@ -187,18 +241,21 @@ export const base64: BytesCodec = {
     }
 
     const trimmed = encoded.replace(/=+$/, "");
-    const bytes: number[] = [];
+    const bytes = new Uint8Array((trimmed.length * PER_CHARACTER) >> 3);
+    let written = 0;
     let bits = 0;
     let held = 0;
 
-    for (const [position, character] of [...trimmed].entries()) {
-      const at = ALPHABET.indexOf(character);
-      if (at === -1) throw new FormatException(`Expected base64. ${describeText(encoded.length, position)}`);
+    for (let position = 0; position < trimmed.length; position++) {
+      const at = _BASE64_VALUES[trimmed.charCodeAt(position)] ?? -1;
+      if (at === -1 || at === undefined) {
+        throw new FormatException(`Expected base64. ${describeText(encoded.length, position)}`);
+      }
       held = (held << PER_CHARACTER) | at;
       bits += PER_CHARACTER;
       if (bits >= 8) {
         bits -= 8;
-        bytes.push((held >> bits) & 0xff);
+        bytes[written++] = (held >> bits) & 0xff;
       }
     }
 
@@ -210,7 +267,7 @@ export const base64: BytesCodec = {
       );
     }
 
-    return new Uint8Array(bytes);
+    return bytes;
   },
 };
 
