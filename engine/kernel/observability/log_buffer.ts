@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { unawaited } from "@scribe/alchemy";
 import type { Future } from "@scribe/alchemy";
 import type { LoggedEntry } from "@scribe/alchemy/observe";
 
@@ -157,7 +158,7 @@ export class LogBuffer {
 
     this.#timer = setTimeout(() => {
       this.#timer = null;
-      void this.flush();
+      unawaited(this.flush());
     }, LINGER_MS);
   }
 

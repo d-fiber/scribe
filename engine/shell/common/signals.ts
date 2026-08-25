@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { unawaited } from "@scribe/alchemy";
 import type { Future } from "@scribe/alchemy";
 
 export type ShutdownHandler = () => Future<void> | void;
@@ -50,7 +51,7 @@ export class SignalWatcher {
   watch(): void {
     for (const signal of this.#signals) {
       try {
-        Deno.addSignalListener(signal, () => void this.#handle(signal));
+        Deno.addSignalListener(signal, () => unawaited(this.#handle(signal)));
       } catch {
         console.warn(`[shell:signals] ${signal} not available on this platform.`);
       }
