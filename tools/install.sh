@@ -74,7 +74,7 @@ detect_platform() {
 }
 
 is_scribe_checkout() {
-  [ -d "$1/.git" ] && [ -d "$1/tools" ] && [ -f "$1/VERSION" ] && [ -d "$1/engine" ]
+  [ -d "$1/.git" ] && [ -d "$1/tools" ] && [ -f "$1/deno.json" ] && [ -d "$1/engine" ]
 }
 
 locate_or_clone() {
