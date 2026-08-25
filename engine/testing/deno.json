@@ -1,6 +1,7 @@
 {
   "imports": {
     "@scribe/contracts/": "../contracts/",
+    "@scribe/foundation": "../../packages/foundation/lib/foundation.ts",
     "@scribe/foundation/": "../../packages/foundation/",
     "@scribe/runtime/": "../runtime/",
     "@scribe/testing/": "./"

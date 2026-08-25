@@ -1,15 +1,20 @@
 {
   "imports": {
+    "@scribe/auth": "../../packages/auth/lib/auth.ts",
     "@scribe/auth/": "../../packages/auth/",
     "@scribe/contracts/": "../contracts/",
     "@scribe/embedder/": "./",
+    "@scribe/foundation": "../../packages/foundation/lib/foundation.ts",
     "@scribe/foundation/": "../../packages/foundation/",
     "@scribe/kernel/": "../kernel/",
+    "@scribe/realtime": "../../packages/realtime/lib/realtime.ts",
     "@scribe/realtime/": "../../packages/realtime/",
     "@scribe/runtime/": "../runtime/",
     "@scribe/sdk": "../../sdk/js/mod.ts",
     "@scribe/sdk/": "../../sdk/js/",
+    "@scribe/search": "../../packages/search/lib/search.ts",
     "@scribe/search/": "../../packages/search/",
+    "@scribe/storage": "../../packages/storage/lib/storage.ts",
     "@scribe/storage/": "../../packages/storage/"
   }
 }
