@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isFalse, isTrue } from "@scribe/alchemy/test/mod.ts";
+import { equals, expect, isFalse, isTrue } from "@scribe/alchemy/test";
 import {
   atLeast,
   isLoggedLevel,
@@ -44,7 +44,7 @@ import {
   Loggers,
   LogSink,
   severityOf,
-} from "@scribe/alchemy/observe/mod.ts";
+} from "@scribe/alchemy/observe";
 
 class Keeping extends LogSink {
   readonly seen: LoggedEntry[] = [];

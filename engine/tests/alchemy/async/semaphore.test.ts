@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isTrue } from "@scribe/alchemy/test/mod.ts";
-import { Duration, Future, Semaphore } from "@scribe/alchemy/mod.ts";
+import { equals, expect, isTrue } from "@scribe/alchemy/test";
+import { Duration, Future, Semaphore } from "@scribe/alchemy";
 
 Deno.test("Semaphore lets through up to its limit without waiting", async () => {
   const gate = new Semaphore(3);

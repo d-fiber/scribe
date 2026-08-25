@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect } from "@scribe/alchemy/test/mod.ts";
-import { HtmlPage } from "@scribe/alchemy/api/route/mod.ts";
+import { contains, equals, expect } from "@scribe/alchemy/test";
+import { HtmlPage } from "@scribe/alchemy/route";
 
 const PAGE = "<!doctype html><title>Reset</title>";
 

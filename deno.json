@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "workspace": [
-    "./engine/alchemy",
+    "./alchemy",
     "./engine/contracts",
     "./engine/runtime",
     "./engine/kernel",
@@ -34,8 +34,8 @@
   },
   "lint": {
     "plugins": [
-      "./engine/.lint/private-module-scope.ts",
-      "./engine/.lint/member-escape.ts"
+      "./.lint/private-module-scope.ts",
+      "./.lint/member-escape.ts"
     ],
     "rules": {
       "include": [
@@ -64,14 +64,13 @@
     "@opensearch-project/opensearch": "npm:@opensearch-project/opensearch@2.13.0",
     "@opensearch-project/opensearch/": "npm:/@opensearch-project/opensearch@2.13.0/",
     "@react-email/components": "npm:@react-email/components@0.5.7",
-    "@scribe/alchemy": "./engine/alchemy/mod.ts",
-    "@scribe/alchemy/": "./engine/alchemy/",
-    "@scribe/alchemy/body": "./engine/alchemy/api/body/mod.ts",
-    "@scribe/alchemy/http": "./engine/alchemy/http/mod.ts",
-    "@scribe/alchemy/observe": "./engine/alchemy/observe/mod.ts",
-    "@scribe/alchemy/route": "./engine/alchemy/api/route/mod.ts",
-    "@scribe/alchemy/server": "./engine/alchemy/api/server/mod.ts",
-    "@scribe/alchemy/test": "./engine/alchemy/test/mod.ts",
+    "@scribe/alchemy": "./alchemy/mod.ts",
+    "@scribe/alchemy/body": "./alchemy/api/body/mod.ts",
+    "@scribe/alchemy/http": "./alchemy/http/mod.ts",
+    "@scribe/alchemy/observe": "./alchemy/observe/mod.ts",
+    "@scribe/alchemy/route": "./alchemy/api/route/mod.ts",
+    "@scribe/alchemy/server": "./alchemy/api/server/mod.ts",
+    "@scribe/alchemy/test": "./alchemy/test/mod.ts",
     "@std/assert": "jsr:@std/assert@1.0.19",
     "@std/media-types": "jsr:@std/media-types@1.1.0",
     "@std/testing/mock": "jsr:@std/testing@1.0.20/mock",

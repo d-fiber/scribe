@@ -34,11 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, having, isA, isFalse, isTrue, throwsA } from "@scribe/alchemy/test/mod.ts";
-import { compileNode, RoutingError } from "@scribe/alchemy/api/route/mount/tree.ts";
-import type { DiscoveredRoute } from "@scribe/alchemy/api/route/mount/discovery.ts";
-import type { Contribution } from "@scribe/alchemy/api/route/mount/contribution.ts";
-import { NOTHING } from "@scribe/alchemy/api/route/mount/contribution.ts";
+import { contains, equals, expect, having, isA, isFalse, isTrue, throwsA } from "@scribe/alchemy/test";
+import { compileNode, RoutingError } from "@scribe/alchemy/route";
+import type { DiscoveredRoute } from "@scribe/alchemy/route";
+import type { Contribution } from "@scribe/alchemy/route";
+import { NOTHING } from "@scribe/alchemy/route";
 import {
   type Caller,
   Get,
@@ -47,8 +47,8 @@ import {
   Middleware,
   Post,
   type RateLimit,
-} from "@scribe/alchemy/api/route/mod.ts";
-import { Duration } from "@scribe/alchemy/mod.ts";
+} from "@scribe/alchemy/route";
+import { Duration } from "@scribe/alchemy";
 
 const CALL: Invoked = {
   invocationId: "call-1",

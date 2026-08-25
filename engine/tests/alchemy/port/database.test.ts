@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isFalse, isTrue } from "@scribe/alchemy/test/mod.ts";
-import type { DatabaseDriver, DatabaseSchema, Query } from "@scribe/alchemy/mod.ts";
-import { Databases, Failure, Ok, Refusal, schema } from "@scribe/alchemy/mod.ts";
+import { equals, expect, isFalse, isTrue } from "@scribe/alchemy/test";
+import type { DatabaseDriver, DatabaseSchema, Query } from "@scribe/alchemy";
+import { Databases, Failure, Ok, Refusal, schema } from "@scribe/alchemy";
 
 interface Member {
   readonly account_id: string;

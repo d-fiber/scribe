@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect } from "@scribe/alchemy/test/mod.ts";
-import { Current, type CurrentDriver, Currents, type CurrentStore } from "@scribe/alchemy/mod.ts";
+import { equals, expect } from "@scribe/alchemy/test";
+import { Current, type CurrentDriver, Currents, type CurrentStore } from "@scribe/alchemy";
 
 function stacking(): CurrentDriver {
   return {

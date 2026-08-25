@@ -37,22 +37,25 @@
 /**
  * The workspace root, taken from where this plugin sits rather than from the process.
  *
- * The file is `<root>/engine/.lint/member-escape.ts`, so three directories up is the root. It is
+ * The file is `<root>/.lint/member-escape.ts`, so two directories up is the root. It is
  * read once, at load, and never per file: a rule runs for every file in the repository and an
  * environment call there is both wasteful and, on some platforms, fatal.
  *
  * Nothing here names the checkout. Cloning the repository under any name moves this file with it.
  */
-const ROOT = new URL("../../", import.meta.url).pathname.replace(/\/$/, "");
+const ROOT = new URL("../", import.meta.url).pathname.replace(/\/$/, "");
 
 /**
- * The two directories a workspace member sits directly under, relative to the root.
+ * The directories a workspace member sits directly under, relative to the root.
  *
  * They are matched as a prefix of the path relative to the root, never as a substring: a
  * generated stub written to `sdk/js/gen/scribe/engine/packages/<name>/` carries both words in its
  * path and belongs to no member, and searching anywhere in the string would take it for one.
  */
 const MEMBER_ROOTS = ["engine/", "packages/"] as const;
+
+/** The members that sit at the root rather than under a directory of their own. */
+const ROOT_MEMBERS = ["alchemy", "sdk/js"] as const;
 
 /** The member `filename` belongs to, as an absolute directory, or null when it is in none. */
 function memberOf(filename: string): string | null {
@@ -67,6 +70,10 @@ function memberOf(filename: string): string | null {
     if (!rest.includes("/")) continue;
 
     return `${root}${under}${rest.split("/")[0]}/`;
+  }
+
+  for (const member of ROOT_MEMBERS) {
+    if (relative.startsWith(`${member}/`)) return `${root}${member}/`;
   }
   return null;
 }

@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isA, isFalse, isNotNull, isTrue, throwsA } from "@scribe/alchemy/test/mod.ts";
+import { equals, expect, isA, isFalse, isNotNull, isTrue, throwsA } from "@scribe/alchemy/test";
 import {
   type Cron,
   cron,
@@ -60,7 +60,7 @@ import {
   type Trigger,
   trigger,
   Triggers,
-} from "@scribe/alchemy/mod.ts";
+} from "@scribe/alchemy";
 
 class KeepingQueues implements QueueDriver {
   readonly pushed: unknown[] = [];

@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, having, isA, throwsA } from "@scribe/alchemy/test/mod.ts";
-import { Constraint, Version, VersionError } from "@scribe/alchemy/mod.ts";
+import { contains, equals, expect, having, isA, throwsA } from "@scribe/alchemy/test";
+import { Constraint, Version, VersionError } from "@scribe/alchemy";
 
 function allows(constraint: string, version: string): boolean {
   return Constraint.parse(constraint).allows(Version.parse(version));

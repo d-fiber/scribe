@@ -51,7 +51,7 @@ import {
   verifyNever,
   verifyNoMoreInteractions,
   when,
-} from "@scribe/alchemy/test/mod.ts";
+} from "@scribe/alchemy/test";
 
 interface Log {
   write(line: string): void;

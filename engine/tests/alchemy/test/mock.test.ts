@@ -52,7 +52,7 @@ import {
   reset,
   throwsA,
   when,
-} from "@scribe/alchemy/test/mod.ts";
+} from "@scribe/alchemy/test";
 
 interface Store {
   get(id: string): Promise<string | null>;

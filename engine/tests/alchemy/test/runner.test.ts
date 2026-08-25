@@ -48,7 +48,7 @@ import {
   type TestRunner,
   throwsA,
   when,
-} from "@scribe/alchemy/test/mod.ts";
+} from "@scribe/alchemy/test";
 
 interface Clock {
   now(): number;

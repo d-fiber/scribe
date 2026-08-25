@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, expectLater, isA, isFalse, throwsA } from "@scribe/alchemy/test/mod.ts";
+import { equals, expect, expectLater, isA, isFalse, throwsA } from "@scribe/alchemy/test";
 import type {
   Cache,
   CacheDriver,
@@ -42,8 +42,8 @@ import type {
   RateLimiter,
   RateLimiterDriver,
   RateLimitOutcome,
-} from "@scribe/alchemy/mod.ts";
-import { cache, Caches, Duration, rateLimit, RateLimiters, Slot, TimeoutException } from "@scribe/alchemy/mod.ts";
+} from "@scribe/alchemy";
+import { cache, Caches, Duration, rateLimit, RateLimiters, Slot, TimeoutException } from "@scribe/alchemy";
 
 class HeldInMemory<T> implements Cache<T> {
   readonly #held = new Map<string, T>();

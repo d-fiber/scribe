@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isFalse, isTrue } from "@scribe/alchemy/test/mod.ts";
-import { type Contribution, merge, NOTHING } from "@scribe/alchemy/api/route/mount/contribution.ts";
-import { Duration } from "@scribe/alchemy/mod.ts";
+import { equals, expect, isFalse, isTrue } from "@scribe/alchemy/test";
+import { type Contribution, merge, NOTHING } from "@scribe/alchemy/route";
+import { Duration } from "@scribe/alchemy";
 
 function layer(said: Partial<Contribution>): Contribution {
   return { ...NOTHING, ...said };

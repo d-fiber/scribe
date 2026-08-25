@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect } from "@scribe/alchemy/test/mod.ts";
+import { equals, expect } from "@scribe/alchemy/test";
 import {
   type Caller,
   InvocationContext,
@@ -43,8 +43,8 @@ import {
   NEEDS_DEVICE,
   Post,
   type RateLimit,
-} from "@scribe/alchemy/api/route/mod.ts";
-import { Duration } from "@scribe/alchemy/mod.ts";
+} from "@scribe/alchemy/route";
+import { Duration } from "@scribe/alchemy";
 
 const CALL: Invoked = {
   invocationId: "call-1",

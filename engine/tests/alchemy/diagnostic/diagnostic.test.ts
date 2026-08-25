@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, isFalse, isTrue } from "@scribe/alchemy/test/mod.ts";
-import { foldFrames, framesOf, renderError, ScribeError } from "@scribe/alchemy/mod.ts";
+import { contains, equals, expect, isFalse, isTrue } from "@scribe/alchemy/test";
+import { foldFrames, framesOf, renderError, ScribeError } from "@scribe/alchemy";
 
 const STACK = [
   "Error: nothing there",

@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isA, isFalse, isTrue, throwsA } from "@scribe/alchemy/test/mod.ts";
-import { Constraint, type LifecycleSteps, mount, Package } from "@scribe/alchemy/mod.ts";
+import { equals, expect, isA, isFalse, isTrue, throwsA } from "@scribe/alchemy/test";
+import { Constraint, type LifecycleSteps, mount, Package } from "@scribe/alchemy";
 
 const realtime = Package.named("realtime").version("1.2.0").runsOn("^3.0.0").build();
 

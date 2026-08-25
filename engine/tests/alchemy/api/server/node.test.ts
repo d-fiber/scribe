@@ -34,10 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, having, isA, isFalse, isTrue, throwsA } from "@scribe/alchemy/test/mod.ts";
-import { Node, Servers, standardNode, standardNodeNames } from "@scribe/alchemy/api/server/mod.ts";
-import { type Caller, Middleware, type RateLimit } from "@scribe/alchemy/api/route/mod.ts";
-import { Duration } from "@scribe/alchemy/mod.ts";
+import { contains, equals, expect, having, isA, isFalse, isTrue, throwsA } from "@scribe/alchemy/test";
+import { Node, Servers, standardNode, standardNodeNames } from "@scribe/alchemy/server";
+import { type Caller, Middleware, type RateLimit } from "@scribe/alchemy/route";
+import { Duration } from "@scribe/alchemy";
 
 class Throttled extends Middleware {
   protected override rateLimit(): RateLimit {
