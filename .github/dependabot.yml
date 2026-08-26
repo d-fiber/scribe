@@ -3,15 +3,7 @@ version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
-    schedule:
-      interval: weekly
-      day: monday
-    commit-message:
-      prefix: "[CHORE]:"
-    open-pull-requests-limit: 5
-
-  - package-ecosystem: npm
-    directory: /web
+    target-branch: dev
     schedule:
       interval: weekly
       day: monday
@@ -21,6 +13,7 @@ updates:
 
   - package-ecosystem: npm
     directory: /sdk/js
+    target-branch: dev
     schedule:
       interval: weekly
       day: monday
@@ -30,6 +23,7 @@ updates:
 
   - package-ecosystem: pub
     directory: /sdk/dart
+    target-branch: dev
     schedule:
       interval: weekly
       day: monday
