@@ -2,7 +2,6 @@
 .env
 
 /tools/*
-!/tools/install.sh
 !/tools/.gitkeep
 
 /postgres/

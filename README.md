@@ -68,10 +68,17 @@ scribe gen
 scribe doctor
 ```
 
-It ships built, in `tools/<platform>/`, put there when the framework was installed:
+It ships built, in `tools/`, put there by the installer, which also clones this repository if you do not have it yet:
 
 ```sh
-sh tools/install.sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/d-fiber/scribe_tools/main/install.sh)"
+```
+
+The three builds sit side by side and `tools/scribe` starts the one this machine runs, so the line that puts it on your
+`PATH` is the same everywhere:
+
+```sh
+ln -sfn "$(pwd)/tools/scribe" ~/.local/bin/scribe
 ```
 
 ## The repositories
