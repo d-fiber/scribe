@@ -43,7 +43,6 @@ import {
   formatEntry,
   type LoggedEntry,
   LogSink,
-  Node,
   RoutingError,
   ScribeServer,
 } from "../mod.ts";
@@ -53,13 +52,13 @@ import { LogDeliverySchema, LogEntrySchema, LogLevel } from "../gen/scribe/proto
 /**
  * What the sinks of this file were handed, in order.
  *
- * The registry builds a sink itself, from the class a `_log.ts` exports, so a
+ * The registry builds a sink itself, from the class a `_logs.ts` exports, so a
  * test cannot hold the instance it wants to read. The sinks write here instead,
  * under the name of the file they stand for.
  */
 const delivered: { sink: string; entries: readonly LoggedEntry[] }[] = [];
 
-/** Stands for `lib/_log.ts`. */
+/** Stands for `lib/_logs.ts`. */
 class ProjectLogs extends LogSink {
   protected override blockSize(): number {
     return 0;
@@ -70,7 +69,7 @@ class ProjectLogs extends LogSink {
   }
 }
 
-/** Stands for `lib/src/app/_log.ts`. */
+/** Stands for `lib/src/app/_logs.ts`. */
 class AppLogs extends LogSink {
   protected override blockSize(): number {
     return 0;
@@ -104,14 +103,12 @@ function actionsOf(sink: string): readonly string[] {
 }
 
 function sink(node: string | null, module: DiscoveredModule): DiscoveredLogSink {
-  return { node, file: node === null ? "lib/_log.ts" : `lib/src/${node}/_log.ts`, module };
+  return { node, file: node === null ? "lib/_logs.ts" : `lib/src/${node}/_logs.ts`, module };
 }
 
-/** A project of two nodes, taking the `_log.ts` files it was given. */
+/** A project of two nodes, taking the `_logs.ts` files it was given. */
 function projectWith(logSinks: readonly DiscoveredLogSink[]): ScribeServer {
-  return new ScribeServer({ routes: [], logSinks })
-    .addNode(new Node({ name: "app", public: true }))
-    .addNode(new Node({ name: "admin", public: false }));
+  return new ScribeServer({ routes: [], logSinks, nodes: [{ name: "app", public: true }, { name: "admin", public: false }] });
 }
 
 const BOTH: readonly DiscoveredLogSink[] = [
@@ -143,7 +140,7 @@ Deno.test("the manifest names every node that declared a sink, and the root one"
   assertEquals(manifest.rootLogSink, true);
 });
 
-Deno.test("a project with no _log.ts declares none, and is delivered nothing", async () => {
+Deno.test("a project with no _logs.ts declares none, and is delivered nothing", async () => {
   reset();
   const definition = projectWith([]).definition();
   const manifest = describeWorker(definition);
@@ -166,7 +163,7 @@ Deno.test("a node's entries go to that node's sink and to no other", async () =>
   assertEquals(actionsOf("root"), []);
 });
 
-Deno.test("a node with no _log.ts of its own falls back to the root sink", async () => {
+Deno.test("a node with no _logs.ts of its own falls back to the root sink", async () => {
   reset();
   const definition = projectWith(BOTH).definition();
 
@@ -187,7 +184,7 @@ Deno.test("what belongs to no node reaches the root sink alone", async () => {
   assertEquals(actionsOf("app"), []);
 });
 
-Deno.test("without a root _log.ts, what no node claimed is delivered nowhere", async () => {
+Deno.test("without a root _logs.ts, what no node claimed is delivered nowhere", async () => {
   reset();
   const definition = projectWith([sink("app", { AppLogs })]).definition();
 
@@ -235,18 +232,17 @@ Deno.test("a sink that throws does not fail the delivery", async () => {
   await deliverLogs(definition, delivery("", ["GET /health"]));
 });
 
-Deno.test("a _log.ts under a folder no addNode() opens is refused", () => {
+Deno.test("a _logs.ts under a folder no addNode() opens is refused", () => {
   assertThrows(
     () =>
-      new ScribeServer({ routes: [], logSinks: [sink("partners", { AppLogs })] })
-        .addNode(new Node({ name: "app", public: true }))
+      new ScribeServer({ routes: [], logSinks: [sink("partners", { AppLogs })], nodes: [{ name: "app", public: true }] })
         .definition(),
     RoutingError,
     "partners",
   );
 });
 
-Deno.test("a _log.ts that exports no sink is a project that has not written one", () => {
+Deno.test("a _logs.ts that exports no sink is a project that has not written one", () => {
   const manifest = describeWorker(projectWith([sink("app", {})]).definition());
 
   assertEquals(manifest.nodes.map((node) => node.logSink), [false, false]);

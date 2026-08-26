@@ -70,10 +70,10 @@ export interface DiscoveredRoute {
 }
 
 /**
- * A `_log.ts` the generator found, and the node it answers for.
+ * A `_logs.ts` the generator found, and the node it answers for.
  *
- * `node` is `null` for `lib/_log.ts`, the sink that takes what no node claimed.
- * A node without a `_log.ts` simply has no entry here, which is what makes
+ * `node` is `null` for `lib/_logs.ts`, the sink that takes what no node claimed.
+ * A node without a `_logs.ts` simply has no entry here, which is what makes
  * "declare nothing and nothing is delivered" the default rather than a branch.
  */
 export interface DiscoveredLogSink {

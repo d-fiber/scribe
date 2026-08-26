@@ -36,18 +36,7 @@
 
 import { assertEquals, assertRejects } from "@std/assert";
 import { create, fromBinary } from "@bufbuild/protobuf";
-import {
-  Caller,
-  Get,
-  Node,
-  NodeRoot,
-  PROTOCOL_VERSION,
-  type RateLimiter,
-  ScribeServer,
-  Time,
-  TransportFailure,
-  UnaryClient,
-} from "../mod.ts";
+import { Caller, Get, NodeRoot, PROTOCOL_VERSION, type RateLimiter, response, ScribeServer, Time, TransportFailure, UnaryClient } from "../mod.ts";
 import { Registration } from "../gen/scribe/protocol/manifest_pb.ts";
 import { InvocationSchema, RequestSchema, Worker as WorkerService } from "../gen/scribe/protocol/invocation_pb.ts";
 import { FailureSchema, Method as ProtoMethod } from "../gen/scribe/protocol/common_pb.ts";
@@ -68,12 +57,11 @@ class AppNode extends NodeRoot {
 
 class Ping extends Get {
   protected override run(): Response {
-    return this.response.ok({ data: { pong: true } });
+    return response.ok({ data: { pong: true } });
   }
 }
 
-const server = new ScribeServer({
-  routes: [
+const server = new ScribeServer({ routes: [
     {
       node: "app",
       path: "/ping",
@@ -81,8 +69,7 @@ const server = new ScribeServer({
       module: { Ping },
       branches: [],
     },
-  ],
-}).addNode(new Node({ name: "app", public: true, node: new AppNode() }));
+  ], nodes: [{ name: "app", public: true, root: new AppNode() }] });
 
 async function withWorker(run: (client: UnaryClient) => Promise<void>): Promise<void> {
   const listener = Deno.serve({ port: 0, onListen: () => {} }, server.handler());

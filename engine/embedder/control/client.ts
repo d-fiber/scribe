@@ -114,7 +114,7 @@ export class WorkerClient {
   }
 
   /**
-   * Hands a node's log entries to the `_log.ts` that claimed them.
+   * Hands a node's log entries to the `_logs.ts` that claimed them.
    *
    * The reverse of {@link shipLogs}: these entries were raised here and are on
    * their way to project code. No capability token travels with them, because

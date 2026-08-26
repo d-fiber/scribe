@@ -64,7 +64,7 @@ const callers: Record<ProtoCaller, Caller> = {
   [ProtoCaller.WEBHOOK]: Caller.Webhook,
 };
 
-export class InvocationContext {
+export class RequestContext {
   constructor(readonly invocation: Invocation) {}
 
   get user(): RequestUser | null {

@@ -91,7 +91,7 @@ export interface IpLocation {
  *
  * @remarks
  * It is what the framework builds from whatever carried the call, and what
- * {@link InvocationContext} is written over. Nothing here knows about a wire: the protocol has its
+ * {@link RequestContext} is written over. Nothing here knows about a wire: the protocol has its
  * own message for this, and turning one into the other happens where the protocol is spoken.
  *
  * That separation is the whole point. An endpoint reads a context and never a message, so the
@@ -153,7 +153,7 @@ const NOWHERE: IpLocation = { city: "", country: "" };
  *
  * @example
  * ```ts
- * protected override async run(ctx: InvocationContext): Future<Response> {
+ * protected override async run(ctx: RequestContext): Future<Response> {
  *   if (!ctx.id) return this.response.unauthorized();
  *
  *   const body = ctx.body({ brand_id: Required(string) });
@@ -163,7 +163,7 @@ const NOWHERE: IpLocation = { city: "", country: "" };
  * }
  * ```
  */
-export class InvocationContext {
+export class RequestContext {
   /** The call, as plain data. An endpoint rarely reads it: the members below are what it is for. */
   readonly invoked: Invoked;
 

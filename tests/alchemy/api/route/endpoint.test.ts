@@ -37,7 +37,7 @@
 import { equals, expect } from "@scribe/alchemy/test";
 import {
   type Caller,
-  InvocationContext,
+  RequestContext,
   type Invoked,
   type Need,
   NEEDS_DEVICE,
@@ -129,7 +129,7 @@ Deno.test("what an endpoint says about itself is read the same way", () => {
 });
 
 Deno.test("handling a call answers what run answered, whether it awaited or not", async () => {
-  const answer = await new Bare().handle(new InvocationContext(CALL));
+  const answer = await new Bare().handle(new RequestContext(CALL));
 
   expect(answer.status, equals(200));
 });

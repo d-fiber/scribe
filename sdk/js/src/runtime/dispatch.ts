@@ -58,7 +58,7 @@ import { loggedEntry } from "../observability/log_sink.ts";
 import type { QueueMessage } from "../manifest/events.ts";
 import type { WorkerDefinition } from "../manifest/worker.ts";
 import { describeCause } from "../transport/failure.ts";
-import { InvocationContext } from "./context.ts";
+import { RequestContext } from "./context.ts";
 import { CallScope } from "./scope.ts";
 
 // deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
@@ -74,7 +74,7 @@ export async function invoke(worker: WorkerDefinition, invocation: Invocation): 
 
   return CallScope.run(scopeOf(invocation, mounted.node), async () => {
     try {
-      const response = await mounted.route.handler(new InvocationContext(invocation));
+      const response = await mounted.route.handler(new RequestContext(invocation));
       return await replyFrom(invocation.invocationId, response);
     } catch (cause) {
       return failedReply(invocation.invocationId, "handler_failed", describeCause(cause));

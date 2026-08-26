@@ -36,17 +36,7 @@
 
 import { assertEquals } from "@std/assert";
 import { create } from "@bufbuild/protobuf";
-import {
-  Caller,
-  type DiscoveredRoute,
-  type InvocationContext,
-  Node,
-  NodeRoot,
-  Post,
-  type RateLimiter,
-  ScribeServer,
-  Time,
-} from "../mod.ts";
+import { Caller, type DiscoveredRoute, NodeRoot, Post, type RateLimiter, type RequestContext, response, ScribeServer, Time } from "../mod.ts";
 import { invoke } from "../src/runtime/dispatch.ts";
 import { IdentitySchema, InvocationSchema, RequestSchema } from "../gen/scribe/protocol/invocation_pb.ts";
 import { Caller as ProtoCaller, Method as ProtoMethod } from "../gen/scribe/protocol/common_pb.ts";
@@ -68,8 +58,8 @@ class AdminNode extends NodeRoot {
 }
 
 class UpdateBrand extends Post {
-  protected override run(ctx: InvocationContext): Response {
-    return this.response.ok({
+  protected override run(ctx: RequestContext): Response {
+    return response.ok({
       data: {
         brandId: ctx.param("brandId"),
         page: ctx.query("page"),
@@ -88,8 +78,7 @@ class Boom extends Post {
 }
 
 function workerWith(routes: readonly DiscoveredRoute[]) {
-  return new ScribeServer({ routes })
-    .addNode(new Node({ name: "admin", public: true, node: new AdminNode() }))
+  return new ScribeServer({ routes, nodes: [{ name: "admin", public: true, root: new AdminNode() }] })
     .definition();
 }
 

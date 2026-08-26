@@ -36,18 +36,7 @@
 
 import { assertEquals } from "@std/assert";
 import { Hono } from "hono";
-import {
-  Caller,
-  type DiscoveredRoute,
-  Get,
-  type InvocationContext,
-  Node,
-  NodeRoot,
-  PROTOCOL_VERSION,
-  type RateLimiter,
-  ScribeServer,
-  Time,
-} from "@scribe/sdk";
+import { Caller, type DiscoveredRoute, Get, NodeRoot, PROTOCOL_VERSION, type RateLimiter, type RequestContext, response, ScribeServer, Time } from "@scribe/sdk";
 import { installRateLimiterMock } from "@scribe/foundation/testing";
 import { RequestScope } from "@scribe/runtime/scope.ts";
 import { mountManifest } from "@scribe/embedder/control/mount.ts";
@@ -76,8 +65,8 @@ class AdminNode extends NodeRoot {
 }
 
 class ReadBrand extends Get {
-  protected override run(ctx: InvocationContext): Response {
-    return this.response.ok({
+  protected override run(ctx: RequestContext): Response {
+    return response.ok({
       data: { brandId: ctx.param("brandId"), page: ctx.query("page"), agent: ctx.userAgent },
     });
   }
@@ -85,7 +74,7 @@ class ReadBrand extends Get {
 
 class ReadSecret extends Get {
   protected override run(): Response {
-    return this.response.ok();
+    return response.ok();
   }
 }
 
@@ -106,9 +95,7 @@ const discovered: readonly DiscoveredRoute[] = [
   },
 ];
 
-const server = new ScribeServer({ routes: discovered })
-  .addNode(new Node({ name: "app", public: true, node: new AppNode() }))
-  .addNode(new Node({ name: "admin", public: true, node: new AdminNode() }));
+const server = new ScribeServer({ routes: discovered, nodes: [{ name: "app", public: true, root: new AppNode() }, { name: "admin", public: true, root: new AdminNode() }] });
 
 async function withAttachedWorker(
   run: (surfaces: { admin: Hono; app: Hono }) => Promise<void>,

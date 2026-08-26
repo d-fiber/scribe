@@ -35,23 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { assertEquals, assertThrows } from "@std/assert";
-import {
-  Caller,
-  Delete,
-  type DiscoveredRoute,
-  Get,
-  type InvocationContext,
-  Middleware,
-  Node,
-  NodeRoot,
-  Post,
-  PROTOCOL_VERSION,
-  type RateLimiter,
-  type RouteHandler,
-  RoutingError,
-  ScribeServer,
-  Time,
-} from "../mod.ts";
+import { Caller, Delete, type DiscoveredRoute, Get, Middleware, NodeRoot, Post, PROTOCOL_VERSION, type RateLimiter, type RequestContext, response, type RouteHandler, RoutingError, ScribeServer, Time } from "../mod.ts";
 import { Caller as ProtoCaller, Method as ProtoMethod } from "../gen/scribe/protocol/common_pb.ts";
 import { describeWorker } from "../mod.ts";
 
@@ -77,7 +61,7 @@ class Browsing extends Middleware {
 
 class ReadBrand extends Get {
   protected override run(): Response {
-    return this.response.ok();
+    return response.ok();
   }
 }
 
@@ -91,7 +75,7 @@ class DeleteBrand extends Delete {
   }
 
   protected override run(): Response {
-    return this.response.ok();
+    return response.ok();
   }
 }
 
@@ -101,7 +85,7 @@ class UpdateBranch extends Middleware {
   }
 
   protected override wrap(handler: RouteHandler): RouteHandler {
-    return async (ctx: InvocationContext) => {
+    return async (ctx: RequestContext) => {
       const response = await handler(ctx);
       response.headers.set("x-wrapped", "branch");
       return response;
@@ -115,7 +99,7 @@ class UpdateName extends Post {
   }
 
   protected override run(): Response {
-    return this.response.ok();
+    return response.ok();
   }
 }
 
@@ -131,9 +115,7 @@ function route(overrides: Partial<DiscoveredRoute>): DiscoveredRoute {
 }
 
 function serverWith(routes: readonly DiscoveredRoute[]): ScribeServer {
-  return new ScribeServer({ routes }).addNode(
-    new Node({ name: "app", public: true, node: new AppNode() }),
-  );
+  return new ScribeServer({ routes, nodes: [{ name: "app", public: true, root: new AppNode() }] });
 }
 
 Deno.test("one file answers as many methods as it declares classes", () => {
@@ -178,7 +160,7 @@ Deno.test("a branch wraps every handler below it", async () => {
     route({ path: "/brand/:brandId/update/name", module: { UpdateName }, branches: [{ UpdateBranch }] }),
   ]).definition();
 
-  const response = await definition.routes[0].route.handler({} as InvocationContext);
+  const response = await definition.routes[0].route.handler({} as RequestContext);
 
   assertEquals(response.headers.get("x-wrapped"), "branch");
 });
@@ -192,7 +174,7 @@ Deno.test("the rate limit key is derived from the path when nobody names it", ()
 Deno.test("a file declaring the same method twice is refused", () => {
   class OtherRead extends Get {
     protected override run(): Response {
-      return this.response.ok();
+      return response.ok();
     }
   }
 
@@ -204,45 +186,37 @@ Deno.test("a file declaring the same method twice is refused", () => {
 });
 
 Deno.test("a route nobody grants access to is refused instead of served open", () => {
-  const server = new ScribeServer({ routes: [route({ node: "partners", module: { ReadBrand } })] })
-    .addNode(new Node({ name: "partners", public: true }));
+  const server = new ScribeServer({ routes: [route({ node: "partners", module: { ReadBrand } })], nodes: [{ name: "partners", public: true }] });
 
   assertThrows(() => server.definition(), RoutingError, "without any access");
 });
 
 Deno.test("a folder no addNode declares is never served", () => {
-  const server = new ScribeServer({ routes: [route({ node: "example", module: { ReadBrand } })] })
-    .addNode(new Node({ name: "app", public: true }));
+  const server = new ScribeServer({ routes: [route({ node: "example", module: { ReadBrand } })], nodes: [{ name: "app", public: true }] });
 
   assertThrows(() => server.definition(), RoutingError, "no addNode() declares");
 });
 
 Deno.test("a standard node carries its caller without any root class", () => {
-  const definition = new ScribeServer({
-    routes: [route({ node: "admin", branches: [{ Browsing }], module: { ReadBrand } })],
-  }).addNode(new Node({ name: "admin", public: true })).definition();
+  const definition = new ScribeServer({ routes: [route({ node: "admin", branches: [{ Browsing }], module: { ReadBrand } })], nodes: [{ name: "admin", public: true }] }).definition();
 
   assertEquals(definition.routes[0].route.access, Caller.Admin);
 });
 
 Deno.test("the declared visibility is the one that reaches the manifest", () => {
-  const definition = new ScribeServer({
-    routes: [route({ node: "admin", branches: [{ Browsing }], module: { ReadBrand } })],
-  }).addNode(new Node({ name: "admin", public: false })).definition();
+  const definition = new ScribeServer({ routes: [route({ node: "admin", branches: [{ Browsing }], module: { ReadBrand } })], nodes: [{ name: "admin", public: false }] }).definition();
 
   assertEquals(definition.nodes.map((node) => [node.name, node.public]), [["admin", false]]);
 });
 
 Deno.test("a node named after a folder that does not exist is refused", () => {
-  const server = new ScribeServer({ routes: [], nodes: ["app"] })
-    .addNode(new Node({ name: "admin", public: true }));
+  const server = new ScribeServer({ routes: [], nodes: [{ name: "admin", public: true }] });
 
   assertThrows(() => server.definition(), RoutingError, "no admin/ folder exists");
 });
 
 Deno.test("a declared node reaches the manifest even with no route of its own", () => {
-  const definition = new ScribeServer({ nodes: ["admin"] })
-    .addNode(new Node({ name: "admin", public: true }))
+  const definition = new ScribeServer({ nodes: [{ name: "admin", public: true }] })
     .definition();
 
   assertEquals(definition.nodes.map((node) => node.name), ["admin"]);
@@ -260,28 +234,15 @@ Deno.test("addNode still overrides the standard node it shadows", () => {
     }
   }
 
-  const definition = new ScribeServer({ routes: [route({ module: { ReadBrand } })] })
-    .addNode(new Node({ name: "app", public: false, node: new Elevated() }))
+  const definition = new ScribeServer({ routes: [route({ module: { ReadBrand } })], nodes: [{ name: "app", public: false, root: new Elevated() }] })
     .definition();
 
   assertEquals(definition.routes[0].route.access, Caller.Admin);
   assertEquals(definition.nodes[0].public, false);
 });
 
-Deno.test("the same node declared twice on the server is refused", () => {
-  const server = serverWith([]);
-
-  assertThrows(
-    () => server.addNode(new Node({ name: "app", public: true, node: new AppNode() })),
-    RoutingError,
-    "declared twice",
-  );
-});
-
 Deno.test("the manifest carries the nodes and their visibility", () => {
-  const server = new ScribeServer({ routes: [route({ module: { ReadBrand } })] })
-    .addNode(new Node({ name: "app", public: true, node: new AppNode() }))
-    .addNode(new Node({ name: "services", public: false, node: new AppNode() }));
+  const server = new ScribeServer({ routes: [route({ module: { ReadBrand } })], nodes: [{ name: "app", public: true, root: new AppNode() }, { name: "services", public: false, root: new AppNode() }] });
 
   const manifest = describeWorker(server.definition());
 

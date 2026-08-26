@@ -39,7 +39,7 @@
  *
  * @remarks
  * Two halves. {@link log} is what a package calls, and what carries the line is filled by the host.
- * {@link LogSink} is what a project extends in a `_log.ts` to receive what was recorded, one node
+ * {@link LogSink} is what a project extends in a `_logs.ts` to receive what was recorded, one node
  * at a time or in blocks.
  *
  * Nothing here speaks the protocol. The lines cross the wire as a message, and turning one into a

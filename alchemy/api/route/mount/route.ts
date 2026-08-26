@@ -38,7 +38,7 @@ import type { Future } from "../../../async/future.ts";
 import type { UnmodifiableList } from "../../../value/list.ts";
 import type { Caller, Need, RouteMethod } from "../access.ts";
 import type { RateLimit } from "../rate_limit.ts";
-import type { InvocationContext } from "../context.ts";
+import type { RequestContext } from "../context.ts";
 
 /**
  * What answers one call.
@@ -47,7 +47,7 @@ import type { InvocationContext } from "../context.ts";
  * function, so a wrapper needs to know nothing about the class it came from.
  */
 export type RouteHandler = (
-  ctx: InvocationContext,
+  ctx: RequestContext,
 ) => Response | Future<Response>;
 
 /**

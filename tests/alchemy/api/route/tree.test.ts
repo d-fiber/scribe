@@ -42,7 +42,7 @@ import { NOTHING } from "@scribe/alchemy/route";
 import {
   type Caller,
   Get,
-  InvocationContext,
+  RequestContext,
   type Invoked,
   Middleware,
   Post,
@@ -184,7 +184,7 @@ Deno.test("a file that re-exports a base mounts the route it wrote, and no other
 
 Deno.test("a re-exported base never becomes a route that answers nothing", async () => {
   const compiled = compileNode("admin", [NODE_SAYS_EVERYTHING], [found({ default: Reader, Get })]);
-  const answered = await compiled[0].route.handler(new InvocationContext(CALL));
+  const answered = await compiled[0].route.handler(new RequestContext(CALL));
 
   expect(answered.status, equals(200), "the route that was mounted had no body to run");
 });

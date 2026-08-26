@@ -37,8 +37,7 @@
 import { Node, ScribeServer } from "../mod.ts";
 import { logSinks, nodes, routes } from "./routes.ts";
 
-const server = new ScribeServer({ routes, nodes, logSinks })
-  .addNode(new Node({ name: "app", public: true }));
+const server = new ScribeServer({ routes, logSinks, nodes: [{ name: "app", public: true }] });
 
 if (import.meta.main) await server.run();
 

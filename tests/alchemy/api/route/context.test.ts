@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { equals, expect, isFalse } from "@scribe/alchemy/test";
-import { InvocationContext, type Invoked } from "@scribe/alchemy/route";
+import { RequestContext, type Invoked } from "@scribe/alchemy/route";
 import { Required } from "@scribe/alchemy";
 
 function invoked(over: Partial<Invoked> = {}): Invoked {
@@ -59,14 +59,14 @@ function invoked(over: Partial<Invoked> = {}): Invoked {
 }
 
 Deno.test("a call nobody signed answers no identity rather than an empty one", () => {
-  const ctx = new InvocationContext(invoked());
+  const ctx = new RequestContext(invoked());
 
   expect(ctx.id, equals(null));
   expect(ctx.user, equals(null));
 });
 
 Deno.test("the identity of a signed call is read without walking into it", () => {
-  const ctx = new InvocationContext(invoked({
+  const ctx = new RequestContext(invoked({
     user: { id: "ada", caller: "authenticated", role: "member", permissions: [], claims: { email: "ada@bench.local" } },
   }));
 
@@ -75,7 +75,7 @@ Deno.test("the identity of a signed call is read without walking into it", () =>
 });
 
 Deno.test("a header is found whatever case it was written in", () => {
-  const ctx = new InvocationContext(invoked({ headers: { "content-type": "application/json" } }));
+  const ctx = new RequestContext(invoked({ headers: { "content-type": "application/json" } }));
 
   expect(ctx.header("Content-Type"), equals("application/json"));
   expect(ctx.header("CONTENT-TYPE"), equals("application/json"));
@@ -83,7 +83,7 @@ Deno.test("a header is found whatever case it was written in", () => {
 });
 
 Deno.test("what the path and the query carried is read by name, and absence is null", () => {
-  const ctx = new InvocationContext(invoked({ pathParams: { id: "7" }, query: { page: "2" } }));
+  const ctx = new RequestContext(invoked({ pathParams: { id: "7" }, query: { page: "2" } }));
 
   expect(ctx.param("id"), equals("7"));
   expect(ctx.param("missing"), equals(null));
@@ -92,7 +92,7 @@ Deno.test("what the path and the query carried is read by name, and absence is n
 });
 
 Deno.test("a body is read against the shape it was declared with", () => {
-  const ctx = new InvocationContext(invoked({
+  const ctx = new RequestContext(invoked({
     body: new TextEncoder().encode(JSON.stringify({ brand_id: "b-1" })),
   }));
 
@@ -100,29 +100,29 @@ Deno.test("a body is read against the shape it was declared with", () => {
 });
 
 Deno.test("a body missing what the shape requires answers nothing, and so does one that is not JSON", () => {
-  const missing = new InvocationContext(invoked({ body: new TextEncoder().encode("{}") }));
-  const broken = new InvocationContext(invoked({ body: new TextEncoder().encode("{") }));
+  const missing = new RequestContext(invoked({ body: new TextEncoder().encode("{}") }));
+  const broken = new RequestContext(invoked({ body: new TextEncoder().encode("{") }));
 
   expect(missing.body({ brand_id: Required(String) }), equals(null));
   expect(broken.body({ brand_id: Required(String) }), equals(null));
 });
 
 Deno.test("a call with no body reads as nothing rather than as an empty one", () => {
-  const ctx = new InvocationContext(invoked());
+  const ctx = new RequestContext(invoked());
 
   expect(ctx.body({ brand_id: Required(String) }), equals(null));
   expect(ctx.raw(), equals(null));
 });
 
 Deno.test("a place nothing resolved answers empty, so a caller never checks for null", () => {
-  const ctx = new InvocationContext(invoked());
+  const ctx = new RequestContext(invoked());
 
   expect(ctx.location(), equals({ city: "", country: "" }));
   expect(ctx.device(), equals(null));
 });
 
 Deno.test("nothing of the protocol reaches an endpoint: a call is plain data", () => {
-  const ctx = new InvocationContext(invoked({ sessionId: "s-1" }));
+  const ctx = new RequestContext(invoked({ sessionId: "s-1" }));
 
   expect(ctx.sessionId, equals("s-1"));
   expect(ctx.method, equals("POST"));

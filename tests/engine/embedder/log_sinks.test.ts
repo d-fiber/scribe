@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { assertEquals } from "@std/assert";
-import { type DiscoveredLogSink, LogSink, Node, ScribeServer } from "@scribe/sdk";
+import { type DiscoveredLogSink, LogSink, ScribeServer } from "@scribe/sdk";
 import type { Manifest } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import type { LoggedEntry } from "@scribe/alchemy/observe";
 import { WorkerLogSinks } from "@scribe/embedder/control/log_sinks.ts";
@@ -107,9 +107,7 @@ async function attach(
 ): Promise<{ sinks: WorkerLogSinks; manifest: Manifest }> {
   delivered.length = 0;
 
-  const server = new ScribeServer({ routes: [], logSinks })
-    .addNode(new Node({ name: "app", public: true }))
-    .addNode(new Node({ name: "admin", public: false }));
+  const server = new ScribeServer({ routes: [], logSinks, nodes: [{ name: "app", public: true }, { name: "admin", public: false }] });
 
   const client = new WorkerClient("http://worker.test", server.handler());
   const manifest = await client.describe("http://127.0.0.1:1", "bootstrap");

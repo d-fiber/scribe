@@ -36,8 +36,7 @@
 
 import type { Caller, Need, RouteMethod } from "../contracts/access.ts";
 import type { RateLimiter } from "../contracts/rate_limit.ts";
-import { ServerResponse } from "../http/response.ts";
-import type { InvocationContext } from "../runtime/context.ts";
+import type { RequestContext } from "../runtime/context.ts";
 import type { Contribution } from "./contribution.ts";
 
 export interface EndpointDocumentation {
@@ -46,7 +45,6 @@ export interface EndpointDocumentation {
 }
 
 export abstract class Endpoint {
-  protected readonly response = ServerResponse;
 
   abstract readonly method: RouteMethod;
 
@@ -78,7 +76,7 @@ export abstract class Endpoint {
     return null;
   }
 
-  protected abstract run(ctx: InvocationContext): Response | Promise<Response>;
+  protected abstract run(ctx: RequestContext): Response | Promise<Response>;
 
   contribution(): Contribution {
     return {
@@ -96,7 +94,7 @@ export abstract class Endpoint {
     return { method: this.method, description: this.description() };
   }
 
-  handle(ctx: InvocationContext): Promise<Response> {
+  handle(ctx: RequestContext): Promise<Response> {
     return Promise.resolve(this.run(ctx));
   }
 }

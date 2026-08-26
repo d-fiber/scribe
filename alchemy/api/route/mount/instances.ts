@@ -59,7 +59,7 @@ export const BASE: unique symbol = Symbol("scribe.base");
  * This is how a convention file declares what it declares: the generator hands
  * over the module namespace and nothing else, so the base class is what tells
  * an endpoint from a middleware from a log sink. A file may hold several, and
- * a file that holds none is not an error, since an empty `_log.ts` is a
+ * a file that holds none is not an error, since an empty `_logs.ts` is a
  * project that has not written its sink yet.
  *
  * What this repository exports to be extended is skipped, however a file came to

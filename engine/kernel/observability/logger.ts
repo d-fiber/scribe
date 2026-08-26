@@ -53,7 +53,7 @@ declare const EdgeRuntime: { waitUntil(p: Future<unknown>): void };
  *
  * The buffer answers with a publish only when this entry filled the batch, so
  * `waitUntil` is armed on the requests that flush rather than on all of them.
- * A project that declared no `_log.ts` has no sink, and the batch is dropped
+ * A project that declared no `_logs.ts` has no sink, and the batch is dropped
  * on delivery rather than being kept from here: this path stays the same
  * whether anybody is reading or not.
  */

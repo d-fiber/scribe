@@ -42,7 +42,7 @@
  * and overrides for what it requires. Nothing here answers a request. It says what an endpoint is
  * and what it wants, and the framework is what puts a call through it.
  *
- * Nothing here speaks the protocol either. {@link InvocationContext} is written over plain data, so
+ * Nothing here speaks the protocol either. {@link RequestContext} is written over plain data, so
  * the wire may gain a field or be replaced without an endpoint being touched.
  *
  * What `mount/` holds is the other half, and a project never writes it: what an endpoint becomes
@@ -56,7 +56,7 @@ export type { RateLimit } from "./rate_limit.ts";
 
 export type { Localization, RequestDevice } from "./device.ts";
 
-export { InvocationContext } from "./context.ts";
+export { RequestContext } from "./context.ts";
 export type { Invoked, IpLocation, RequestUser } from "./context.ts";
 
 export { Delete, Endpoint, Get, Patch, Post, Put } from "./endpoint.ts";

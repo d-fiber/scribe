@@ -64,7 +64,7 @@ function wireEntry(entry: LoggedEntry): ReturnType<typeof create<typeof LogEntry
 }
 
 /**
- * The `_log.ts` sinks a worker declared, and the delivery to them.
+ * The `_logs.ts` sinks a worker declared, and the delivery to them.
  *
  * Built from the manifest at handshake, because that is the only moment the
  * host learns what the project declared. Two sets of names rather than one map:

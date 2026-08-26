@@ -354,7 +354,7 @@ export const Logging: GenService<{
   serviceDesc(file_scribe_protocol_logs, 0);
 
 /**
- * Host to worker: the entries a `_log.ts` declared it would take.
+ * Host to worker: the entries a `_logs.ts` declared it would take.
  *
  * The reverse direction of Logging.Ship, and the reason both exist: the access
  * log is produced where the exchange happens, which is the host, while the sink

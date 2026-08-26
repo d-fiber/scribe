@@ -175,7 +175,7 @@ export interface WorkerLogger {
    *
    * Called once, when the worker definition is built. Until it is, entries go
    * to the host as they always did, which is what keeps a project that never
-   * declared a `_log.ts` working exactly as before.
+   * declared a `_logs.ts` working exactly as before.
    */
   useSinks(sinks: SinkRegistry): void;
 

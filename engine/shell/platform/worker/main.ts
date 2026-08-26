@@ -34,40 +34,35 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { LogRouting } from "@scribe/contracts/logging.ts";
+import { ScribeServer } from "@scribe/sdk";
+import type { DeclaredNode, DiscoveredLogSink, DiscoveredRoute } from "@scribe/sdk";
+
+/** What `@generated/routes.ts` exports, which is the whole of what a project serves. */
+interface GeneratedRoutes {
+  /** The nodes the project's manifest arms, with what each one lets in. */
+  readonly nodes: readonly DeclaredNode[];
+
+  /** Every route found under the directory a node is served by. */
+  readonly routes: readonly DiscoveredRoute[];
+
+  /** The log sinks the project declared, if it declared any. */
+  readonly logSinks?: readonly DiscoveredLogSink[];
+}
 
 /**
- * What a host with no project sink does: nothing, for every question.
+ * Runs the project this worker was given, and nothing else.
  *
- * This is the state of a process with no worker at all, and of one whose worker
- * declared no `_logs.ts`. Both are ordinary: the entries stay on the host's own
- * path, and nobody has to check whether a router was registered.
+ * It is the framework's own entry point and not the project's: what used to be
+ * a `main.ts` every project copied is the same four lines everywhere, and the
+ * nodes it used to declare are read from `config.yaml` now. The import is
+ * dynamic because `@generated/` is resolved by the project's import map and not
+ * by the framework's, so a static one would be checked against a map that never
+ * carries it.
  */
-const UNCLAIMED: LogRouting = {
-  nodeOf: () => null,
-  claims: () => false,
-  deliver: () => Promise.resolve(),
-};
+const generated = await import("@generated/routes.ts") as unknown as GeneratedRoutes;
 
-let routing: LogRouting = UNCLAIMED;
-
-export const LogRoutes = {
-  /** Points the host at the sinks a worker's manifest declared. */
-  use(next: LogRouting): void {
-    routing = next;
-  },
-
-  /**
-   * Forgets them, which is what a worker going away means.
-   *
-   * Without this a replaced manifest would keep the previous one's claims, and
-   * the host would go on delivering to sinks the new worker never declared.
-   */
-  reset(): void {
-    routing = UNCLAIMED;
-  },
-
-  get current(): LogRouting {
-    return routing;
-  },
-};
+await new ScribeServer({
+  routes: generated.routes,
+  nodes: generated.nodes,
+  logSinks: generated.logSinks,
+}).run();

@@ -371,7 +371,7 @@ class LoggingApi {
       _client.invoke<LogAck>(ctx, 'Logging', 'Ship', request, LogAck());
 }
 
-/// Host to worker: the entries a `_log.ts` declared it would take.
+/// Host to worker: the entries a `_logs.ts` declared it would take.
 ///
 /// The reverse direction of Logging.Ship, and the reason both exist: the access
 /// log is produced where the exchange happens, which is the host, while the sink

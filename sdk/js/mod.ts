@@ -56,7 +56,7 @@ export { Size, Time } from "./src/contracts/time.ts";
 export { Node } from "./src/server/node.ts";
 export type { NodeInput } from "./src/server/node.ts";
 export { ScribeServer } from "./src/server/scribe_server.ts";
-export type { ServerOptions } from "./src/server/scribe_server.ts";
+export type { DeclaredNode, ServerOptions } from "./src/server/scribe_server.ts";
 
 export type { Contribution } from "./src/routing/contribution.ts";
 export type { DiscoveredLogSink, DiscoveredModule, DiscoveredRoute } from "./src/routing/discovery.ts";
@@ -87,14 +87,14 @@ export type { RouteHandler, WorkerRoute } from "./src/manifest/route.ts";
 export { ManifestError, WorkerDefinition } from "./src/manifest/worker.ts";
 export type { MountedRoute, NodeManifest, WorkerInput } from "./src/manifest/worker.ts";
 
-export { InvocationContext } from "./src/runtime/context.ts";
+export { RequestContext } from "./src/runtime/context.ts";
 export type { RequestDevice, RequestIpLocation, RequestUser } from "./src/runtime/context.ts";
 export { env } from "./src/runtime/env.ts";
 export { CallScope } from "./src/runtime/scope.ts";
 export { serveWorker, workerHandler, workerServer } from "./src/runtime/serve.ts";
 export type { ServeOptions } from "./src/runtime/serve.ts";
 
-export { json, ServerResponse } from "./src/http/response.ts";
+export { json, response } from "./src/http/response.ts";
 
 export { decodeJson, encodeJson } from "./src/contracts/json.ts";
 

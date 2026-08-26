@@ -95,8 +95,8 @@ const BLOCK_SIZE = 100;
 const LINGER_MS = 5_000;
 
 /**
- * Where a node declares what to do with its entries: at `lib/<node>/_log.ts` for that node's
- * entries, or at `lib/_log.ts` to take everything no node
+ * Where a node declares what to do with its entries: at `lib/<node>/_logs.ts` for that node's
+ * entries, or at `lib/_logs.ts` to take everything no node
  * claimed. A node with none produces nothing, because the framework keeps no
  * destination of its own: declaring a sink is what turns logging on rather
  * than what redirects it.

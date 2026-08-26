@@ -39,7 +39,7 @@ import type { UnmodifiableList } from "../../value/list.ts";
 import type { Caller, Need, RouteMethod } from "./access.ts";
 import type { RateLimit } from "./rate_limit.ts";
 import { ServerResponse } from "./response.ts";
-import type { InvocationContext } from "./context.ts";
+import type { RequestContext } from "./context.ts";
 import type { Contribution } from "./mount/contribution.ts";
 import { BASE } from "./mount/instances.ts";
 
@@ -74,7 +74,7 @@ export interface EndpointDocumentation {
  *     return "authenticated";
  *   }
  *
- *   protected override run(ctx: InvocationContext) {
+ *   protected override run(ctx: RequestContext) {
  *     return this.response.ok({ id: ctx.user.id });
  *   }
  * }
@@ -146,7 +146,7 @@ export abstract class Endpoint {
    * @param ctx - The call: who made it, what it carried, and what it says about itself.
    * @returns The answer, built through `this.response`. It may be given as a future.
    */
-  protected abstract run(ctx: InvocationContext): Response | Future<Response>;
+  protected abstract run(ctx: RequestContext): Response | Future<Response>;
 
   /**
    * Everything this endpoint declares, gathered into one layer.
@@ -176,7 +176,7 @@ export abstract class Endpoint {
    *
    * It is the framework's way in, and an endpoint has no reason to override it.
    */
-  handle(ctx: InvocationContext): Future<Response> {
+  handle(ctx: RequestContext): Future<Response> {
     return Promise.resolve(this.run(ctx));
   }
 }
