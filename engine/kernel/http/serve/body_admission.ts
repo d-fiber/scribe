@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { MAX_BODY_BYTES, MAX_FORM_BYTES } from "@scribe/runtime/http/limits.ts";
+import { MAX_BODY_BYTES, UNDECLARED_BODY_BYTES } from "@scribe/runtime/http/limits.ts";
 import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 
 let inflightBytes = 0;
@@ -64,9 +64,8 @@ export interface BodyAdmission {
  * long before any single upload does.
  */
 export function admitBody(req: Request): BodyAdmission | null {
-  const ceiling = isMultipart(req) ? MAX_FORM_BYTES : MAX_BODY_BYTES;
-  const declared = declaredSize(req, ceiling);
-  const size = declared ?? ceiling;
+  const declared = declaredSize(req, MAX_BODY_BYTES);
+  const size = declared ?? UNDECLARED_BODY_BYTES;
 
   if (inflightBytes + size > httpSettings.get().maxInflightBodyBytes) {
     return null;
@@ -82,13 +81,6 @@ export function releaseBody(admission: BodyAdmission): void {
 
 export function inflightBodyBytes(): number {
   return inflightBytes;
-}
-
-function isMultipart(req: Request): boolean {
-  return req.headers
-    .get("content-type")
-    ?.toLowerCase()
-    .includes("multipart/form-data") ?? false;
 }
 
 /**

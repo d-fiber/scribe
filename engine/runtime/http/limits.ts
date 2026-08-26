@@ -34,5 +34,28 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export const MAX_BODY_BYTES = 65_536;
-export const MAX_FORM_BYTES = 100 * 1024 * 1024;
+/**
+ * The largest body this process will hold, whatever a caller declares.
+ *
+ * @remarks
+ * It is a backstop and not the limit a project sets: what a node accepts is
+ * `api.nodes.<name>.max_body_mb` in `config.yaml`, and the gateway answers 413
+ * to a bigger one before the request reaches this process. This number only has
+ * to sit above the largest a node may name, so the two never disagree and a
+ * project reading its own manifest is not refused by something it cannot see.
+ *
+ * A body that reaches here past the gateway came from somewhere else: an
+ * internal call, or a test.
+ */
+export const MAX_BODY_BYTES = 100 * 1024 * 1024;
+
+/**
+ * What a body is reserved at when the caller declares no length.
+ *
+ * @remarks
+ * A chunked request names no size, and reserving {@link MAX_BODY_BYTES} for
+ * each would spend the whole inflight budget on the first one. This is the
+ * guess taken instead: small enough that a flood of them is survivable, large
+ * enough that an ordinary payload fits without a second look.
+ */
+export const UNDECLARED_BODY_BYTES = 65_536;

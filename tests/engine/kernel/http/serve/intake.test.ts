@@ -39,7 +39,7 @@ import { readBoundedBody } from "@scribe/kernel/http/serve/body_reader.ts";
 import { stripPrefix } from "@scribe/runtime/http/pathname.ts";
 import { rewriteRequest } from "@scribe/kernel/http/serve/request_rewrite.ts";
 import { admitBody, inflightBodyBytes, releaseBody } from "@scribe/kernel/http/serve/body_admission.ts";
-import { MAX_BODY_BYTES, MAX_FORM_BYTES } from "@scribe/runtime/http/limits.ts";
+import { MAX_BODY_BYTES, UNDECLARED_BODY_BYTES } from "@scribe/runtime/http/limits.ts";
 import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 import { assert, assertEquals } from "@std/assert";
 
@@ -139,7 +139,7 @@ Deno.test("admitBody charges a non-multipart request to the in-flight budget too
       admission.maxBodyBytes,
       "a body admitted for free is a body nothing bounds: a thousand of them is what takes the process past its container",
     );
-    assertEquals(admission.maxBodyBytes, MAX_BODY_BYTES);
+    assertEquals(admission.maxBodyBytes, UNDECLARED_BODY_BYTES);
     assertEquals(admission.declaredBytes, null, "the fetch Request declared no length");
   } finally {
     if (admission) releaseBody(admission);
@@ -165,7 +165,7 @@ Deno.test("admitBody holds a non-multipart request to its own declared length", 
   }
 });
 
-Deno.test("admitBody caps an over-declared json body at the json ceiling", () => {
+Deno.test("admitBody refuses an over-declared length and falls back on the undeclared size", () => {
   const req = new Request("http://api.test/", {
     method: "POST",
     headers: {
@@ -177,7 +177,7 @@ Deno.test("admitBody caps an over-declared json body at the json ceiling", () =>
 
   const admission = admitBody(req);
   try {
-    assertEquals(admission?.maxBodyBytes, MAX_BODY_BYTES);
+    assertEquals(admission?.maxBodyBytes, UNDECLARED_BODY_BYTES);
     assertEquals(admission?.declaredBytes, null, "an unusable length is no length at all");
   } finally {
     if (admission) releaseBody(admission);
@@ -198,12 +198,12 @@ Deno.test("admitBody reserves exactly what it will let itself buffer", () => {
   }
 });
 
-Deno.test("admitBody falls back to the form ceiling without a usable length", () => {
-  for (const declared of [null, 0, -1, MAX_FORM_BYTES + 1]) {
+Deno.test("admitBody reserves the undeclared size when the length is missing or unusable", () => {
+  for (const declared of [null, 0, -1, MAX_BODY_BYTES + 1]) {
     const admission = admitBody(upload(declared));
     try {
-      assertEquals(admission?.reservedBytes, MAX_FORM_BYTES);
-      assertEquals(admission?.maxBodyBytes, MAX_FORM_BYTES);
+      assertEquals(admission?.reservedBytes, UNDECLARED_BODY_BYTES);
+      assertEquals(admission?.maxBodyBytes, UNDECLARED_BODY_BYTES);
       assertEquals(admission?.declaredBytes, null);
     } finally {
       if (admission) releaseBody(admission);
@@ -215,13 +215,13 @@ Deno.test("admitBody refuses once the in-flight budget is spent, and frees it ba
   const held = [];
   try {
     for (let i = 0; i < 2; i++) {
-      const admission = admitBody(upload(null));
+      const admission = admitBody(upload(MAX_BODY_BYTES));
       assert(admission, `upload ${i} fits in the 256 MB budget`);
       held.push(admission);
     }
 
     assertEquals(
-      admitBody(upload(null)),
+      admitBody(upload(MAX_BODY_BYTES)),
       null,
       "a third 100 MB upload would take the budget past 256 MB",
     );
@@ -234,14 +234,14 @@ Deno.test("admitBody refuses once the in-flight budget is spent, and frees it ba
 
 Deno.test("admitBody spends the budget the deployment configured, not a compiled-in one", () => {
   const configured = httpSettings.get();
-  httpSettings.use({ ...configured, maxInflightBodyBytes: MAX_FORM_BYTES });
+  httpSettings.use({ ...configured, maxInflightBodyBytes: MAX_BODY_BYTES });
 
   try {
-    const first = admitBody(upload(null));
+    const first = admitBody(upload(MAX_BODY_BYTES));
     try {
       assert(first, "one upload is exactly the budget a 100 MB replica was given");
       assertEquals(
-        admitBody(upload(null)),
+        admitBody(upload(MAX_BODY_BYTES)),
         null,
         "a replica sized under the old 256 MB ceiling must refuse the second upload",
       );
