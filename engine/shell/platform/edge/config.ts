@@ -63,7 +63,7 @@ export class EdgeConfig {
       functionsRoot: "/home/deno/functions",
       verifyJwt: Deno.env.get("VERIFY_JWT") === "true",
       jwtSecret: Deno.env.get("JWT_SECRET"),
-      authUrl: Deno.env.get("SUPABASE_AUTH_INTERNAL_URL"),
+      authUrl: Deno.env.get("AUTH_INTERNAL_URL"),
       memoryLimitMb: 150,
       workerTimeoutMs: 60_000,
     });

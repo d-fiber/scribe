@@ -71,14 +71,14 @@ function maxInflightBodyBytes(): number {
 cacheSettings.use({ redisUrl: required("REDIS_URL") });
 queueSettings.use({ natsUrl: required("NATS_URL") });
 databaseSettings.use({
-  restUrl: required("SUPABASE_REST_INTERNAL_URL"),
-  anonKey: required("SUPABASE_ANON_KEY"),
-  serviceRoleKey: required("SUPABASE_SERVICE_ROLE_KEY"),
+  restUrl: required("REST_INTERNAL_URL"),
+  anonKey: required("ANON_KEY"),
+  serviceRoleKey: required("SERVICE_KEY"),
 });
 identitySettings.use({
-  authUrl: required("SUPABASE_AUTH_INTERNAL_URL"),
-  anonKey: required("SUPABASE_ANON_KEY"),
-  serviceRoleKey: required("SUPABASE_SERVICE_ROLE_KEY"),
+  authUrl: required("AUTH_INTERNAL_URL"),
+  anonKey: required("ANON_KEY"),
+  serviceRoleKey: required("SERVICE_KEY"),
   jwtSecret: Deno.env.get("JWT_SECRET"),
 });
 firewallSettings.use({ internalSecret: required("INTERNAL_SECRET") });

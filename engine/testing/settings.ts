@@ -51,14 +51,14 @@ export function installTestSettings(): void {
   cacheSettings.use({ redisUrl: optional("REDIS_URL", "redis://localhost:6379") });
   queueSettings.use({ natsUrl: optional("NATS_URL", "nats://localhost:4222") });
   databaseSettings.use({
-    restUrl: optional("SUPABASE_REST_INTERNAL_URL", "http://localhost:3000"),
-    anonKey: optional("SUPABASE_ANON_KEY", "anon"),
-    serviceRoleKey: optional("SUPABASE_SERVICE_ROLE_KEY", "service"),
+    restUrl: optional("REST_INTERNAL_URL", "http://localhost:3000"),
+    anonKey: optional("ANON_KEY", "anon"),
+    serviceRoleKey: optional("SERVICE_KEY", "service"),
   });
   identitySettings.use({
-    authUrl: optional("SUPABASE_AUTH_INTERNAL_URL", "http://localhost:9999"),
-    anonKey: optional("SUPABASE_ANON_KEY", "anon"),
-    serviceRoleKey: optional("SUPABASE_SERVICE_ROLE_KEY", "service"),
+    authUrl: optional("AUTH_INTERNAL_URL", "http://localhost:9999"),
+    anonKey: optional("ANON_KEY", "anon"),
+    serviceRoleKey: optional("SERVICE_KEY", "service"),
     jwtSecret: Deno.env.get("JWT_SECRET"),
   });
   firewallSettings.use({ internalSecret: optional("INTERNAL_SECRET", "internal") });
