@@ -28,7 +28,8 @@
   "fmt": {
     "lineWidth": 120,
     "exclude": [
-      "sdk/js/gen"
+      "sdk/js/gen",
+      "packages/*/ops"
     ]
   },
   "lint": {
