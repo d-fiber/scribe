@@ -4,6 +4,9 @@
 /tools/*
 !/tools/.gitkeep
 
+/web/*
+!/web/.gitkeep
+
 /postgres/
 /storage/
 /opensearch/
