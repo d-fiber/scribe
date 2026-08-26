@@ -36,7 +36,17 @@
 
 import { assertEquals } from "@std/assert";
 import { create } from "@bufbuild/protobuf";
-import { Caller, type DiscoveredRoute, NodeRoot, Post, type RateLimiter, type RequestContext, response, ScribeServer, Time } from "../mod.ts";
+import {
+  Caller,
+  type DiscoveredRoute,
+  NodeRoot,
+  Post,
+  type RateLimiter,
+  type RequestContext,
+  response,
+  ScribeServer,
+  Time,
+} from "../mod.ts";
 import { invoke } from "../src/runtime/dispatch.ts";
 import { IdentitySchema, InvocationSchema, RequestSchema } from "../gen/scribe/protocol/invocation_pb.ts";
 import { Caller as ProtoCaller, Method as ProtoMethod } from "../gen/scribe/protocol/common_pb.ts";

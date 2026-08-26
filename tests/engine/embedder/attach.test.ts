@@ -36,7 +36,18 @@
 
 import { assertEquals } from "@std/assert";
 import { Hono } from "hono";
-import { Caller, type DiscoveredRoute, Get, NodeRoot, PROTOCOL_VERSION, type RateLimiter, type RequestContext, response, ScribeServer, Time } from "@scribe/sdk";
+import {
+  Caller,
+  type DiscoveredRoute,
+  Get,
+  NodeRoot,
+  PROTOCOL_VERSION,
+  type RateLimiter,
+  type RequestContext,
+  response,
+  ScribeServer,
+  Time,
+} from "@scribe/sdk";
 import { installRateLimiterMock } from "@scribe/foundation/testing";
 import { RequestScope } from "@scribe/runtime/scope.ts";
 import { mountManifest } from "@scribe/embedder/control/mount.ts";
@@ -95,7 +106,10 @@ const discovered: readonly DiscoveredRoute[] = [
   },
 ];
 
-const server = new ScribeServer({ routes: discovered, nodes: [{ name: "app", public: true, root: new AppNode() }, { name: "admin", public: true, root: new AdminNode() }] });
+const server = new ScribeServer({
+  routes: discovered,
+  nodes: [{ name: "app", public: true, root: new AppNode() }, { name: "admin", public: true, root: new AdminNode() }],
+});
 
 async function withAttachedWorker(
   run: (surfaces: { admin: Hono; app: Hono }) => Promise<void>,

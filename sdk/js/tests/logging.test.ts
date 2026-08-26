@@ -108,7 +108,11 @@ function sink(node: string | null, module: DiscoveredModule): DiscoveredLogSink 
 
 /** A project of two nodes, taking the `_logs.ts` files it was given. */
 function projectWith(logSinks: readonly DiscoveredLogSink[]): ScribeServer {
-  return new ScribeServer({ routes: [], logSinks, nodes: [{ name: "app", public: true }, { name: "admin", public: false }] });
+  return new ScribeServer({
+    routes: [],
+    logSinks,
+    nodes: [{ name: "app", public: true }, { name: "admin", public: false }],
+  });
 }
 
 const BOTH: readonly DiscoveredLogSink[] = [
@@ -232,10 +236,14 @@ Deno.test("a sink that throws does not fail the delivery", async () => {
   await deliverLogs(definition, delivery("", ["GET /health"]));
 });
 
-Deno.test("a _logs.ts under a folder no addNode() opens is refused", () => {
+Deno.test("a _logs.ts under a folder config.yaml declares no node for is refused", () => {
   assertThrows(
     () =>
-      new ScribeServer({ routes: [], logSinks: [sink("partners", { AppLogs })], nodes: [{ name: "app", public: true }] })
+      new ScribeServer({
+        routes: [],
+        logSinks: [sink("partners", { AppLogs })],
+        nodes: [{ name: "app", public: true }],
+      })
         .definition(),
     RoutingError,
     "partners",

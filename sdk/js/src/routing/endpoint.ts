@@ -45,7 +45,6 @@ export interface EndpointDocumentation {
 }
 
 export abstract class Endpoint {
-
   abstract readonly method: RouteMethod;
 
   protected access(): Caller | readonly Caller[] | null {

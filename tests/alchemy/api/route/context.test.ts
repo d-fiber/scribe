@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { equals, expect, isFalse } from "@scribe/alchemy/test";
-import { RequestContext, type Invoked } from "@scribe/alchemy/route";
+import { type Invoked, RequestContext } from "@scribe/alchemy/route";
 import { Required } from "@scribe/alchemy";
 
 function invoked(over: Partial<Invoked> = {}): Invoked {

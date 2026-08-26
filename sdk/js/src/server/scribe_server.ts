@@ -179,7 +179,7 @@ export class ScribeServer {
   }
 
   /**
-   * Refuses a `_logs.ts` under a folder no `addNode()` opens.
+   * Refuses a `_logs.ts` under a folder config.yaml declares no node for.
    *
    * Without this the file is read, the class is built, and nothing is ever
    * delivered to it: the host only ever names nodes the manifest declares. The
