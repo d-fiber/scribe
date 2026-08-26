@@ -2,6 +2,6 @@
 .github/workflows/      @daf-ep
 .github/rulesets/       @daf-ep
 .github/commits/        @daf-ep
-.github/versioning/     @daf-ep
+.github/version/        @daf-ep
 CODEOWNERS              @daf-ep
 protocol/               @daf-ep
