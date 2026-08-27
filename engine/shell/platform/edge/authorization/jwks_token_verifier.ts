@@ -61,9 +61,17 @@ export class JwksTokenVerifier implements TokenVerifier {
     }
   }
 
+  /**
+   * Whether `token` was signed by a key the identity service publishes.
+   *
+   * @remarks
+   * The algorithms are handed to jose rather than left to the key set to sort out. What this class
+   * says it takes is what it must take: a declaration nothing enforces is the shape an algorithm
+   * confusion grows in, and here nothing but the router in front happened to hold the line.
+   */
   async verify(token: string): Future<boolean> {
     try {
-      await jwtVerify(token, this.#keys);
+      await jwtVerify(token, this.#keys, { algorithms: [...this.algorithms] });
       return true;
     } catch {
       return false;

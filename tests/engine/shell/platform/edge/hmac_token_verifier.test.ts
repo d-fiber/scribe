@@ -34,39 +34,49 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { utf8 } from "@scribe/alchemy";
-import type { Future } from "@scribe/alchemy";
-import { jwtVerify } from "jose";
-import type { TokenVerifier } from "./token_verifier.ts";
+import { HmacTokenVerifier } from "@scribe/shell/platform/edge/authorization/hmac_token_verifier.ts";
+import { SignJWT } from "jose";
+import { assert, assertEquals, assertFalse } from "@std/assert";
 
-export class HmacTokenVerifier implements TokenVerifier {
-  readonly algorithms = ["HS256"] as const;
+const SECRET = "a-shared-secret-long-enough-for-hmac-sha-512-signatures";
 
-  readonly #secret: Uint8Array;
-
-  constructor(secret: string) {
-    this.#secret = utf8.encode(secret);
-  }
-
-  static fromSecret(secret: string | undefined): HmacTokenVerifier | null {
-    return secret ? new HmacTokenVerifier(secret) : null;
-  }
-
-  /**
-   * Whether `token` was signed with this deployment's shared secret.
-   *
-   * @remarks
-   * The algorithms are handed to jose rather than left to the key type. Without them a verifier
-   * that says it takes HS256 took HS384 and HS512 as well, because an octet key fits all three,
-   * and only the router in front of it happened to refuse them. A declaration nothing enforces is
-   * the shape an algorithm confusion grows in.
-   */
-  async verify(token: string): Future<boolean> {
-    try {
-      await jwtVerify(token, this.#secret, { algorithms: [...this.algorithms] });
-      return true;
-    } catch {
-      return false;
-    }
-  }
+function signed(alg: string): Promise<string> {
+  return new SignJWT({ sub: "u1", role: "authenticated" })
+    .setProtectedHeader({ alg })
+    .setIssuedAt()
+    .setExpirationTime("5m")
+    .sign(new TextEncoder().encode(SECRET));
 }
+
+Deno.test("the shared-secret verifier takes the algorithm it declares", async () => {
+  const verifier = new HmacTokenVerifier(SECRET);
+
+  assertEquals(verifier.algorithms, ["HS256"]);
+  assert(await verifier.verify(await signed("HS256")));
+});
+
+Deno.test("the shared-secret verifier takes no algorithm it does not declare", async () => {
+  const verifier = new HmacTokenVerifier(SECRET);
+
+  for (const alg of ["HS384", "HS512"]) {
+    assertFalse(
+      await verifier.verify(await signed(alg)),
+      `an octet key fits ${alg} too, so leaving the algorithms to the key type is a declaration nothing enforces`,
+    );
+  }
+});
+
+Deno.test("the shared-secret verifier refuses a token signed with another secret", async () => {
+  const other = await new SignJWT({ sub: "u1" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("5m")
+    .sign(new TextEncoder().encode("a-completely-different-shared-secret-value"));
+
+  assertFalse(await new HmacTokenVerifier(SECRET).verify(other));
+});
+
+Deno.test("fromSecret answers nothing when the deployment declares no secret", () => {
+  assertEquals(HmacTokenVerifier.fromSecret(undefined), null);
+  assertEquals(HmacTokenVerifier.fromSecret(""), null);
+});
