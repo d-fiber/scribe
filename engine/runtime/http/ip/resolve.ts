@@ -34,9 +34,23 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { normalizeIp } from "./address.ts";
+import { isIpAddress, normalizeIp } from "./address.ts";
 import { isTrustedProxy } from "./trusted_proxy.ts";
 
+/**
+ * Where the call came from, or empty when nothing here can say.
+ *
+ * @remarks
+ * Two things have to hold, and each answers a different lie. The peer has to be a proxy of the
+ * deployment, or anybody could name themselves by writing the header. And what the header carries
+ * has to be an address, or a caller behind a misconfigured proxy names itself something new on
+ * every call: the value becomes a rate limit bucket, a geolocation cache key and the `ip` a
+ * worker reads, and none of the three is bounded by anything else.
+ *
+ * Empty means unattributed, which is what a caller with no bucket already meant. It is not the
+ * peer address: every call would then share the proxy's own bucket and one caller going over
+ * would hold everybody out.
+ */
 export function resolveClientIp(
   headers: Headers,
   peerAddress: string | null,
@@ -44,5 +58,8 @@ export function resolveClientIp(
   if (!isTrustedProxy(peerAddress)) return "";
 
   const realIp = headers.get("x-real-ip");
-  return realIp === null ? "" : normalizeIp(realIp);
+  if (realIp === null) return "";
+
+  const address = normalizeIp(realIp);
+  return isIpAddress(address) ? address : "";
 }

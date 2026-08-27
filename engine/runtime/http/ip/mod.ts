@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export { ipv4ToInt, isInSubnetPrefix, normalizeIp } from "./address.ts";
+export { ipv4ToInt, isInSubnetPrefix, isIpAddress, normalizeIp } from "./address.ts";
 export { isPrivateIp } from "./private.ts";
 export { resolveClientIp } from "./resolve.ts";
 export { isTrustedProxy } from "./trusted_proxy.ts";

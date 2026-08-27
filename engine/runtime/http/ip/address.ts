@@ -60,6 +60,40 @@ export function ipv4ToInt(ip: string): number | null {
   return value;
 }
 
+/**
+ * The longest an address may be written, which is a full IPv6 with an embedded IPv4 tail.
+ *
+ * `ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255` is forty-five characters, and nothing an
+ * address parser accepts is longer.
+ */
+const MAX_ADDRESS_CHARS = 45;
+
+/**
+ * Whether `value` names an address at all.
+ *
+ * @remarks
+ * What arrives in `x-real-ip` is a header, and a header is whatever the sender put in it. The
+ * value ends up naming a rate limit bucket, a geolocation cache entry and the `ip` a worker is
+ * handed, so an unchecked one is a caller choosing its own bucket on every call and writing a
+ * key of its own length into Redis.
+ *
+ * IPv4 is answered by {@link ipv4ToInt} and never reaches the parser, which is every address a
+ * deployment sees in practice. IPv6 is handed to the platform's own host parser rather than to a
+ * pattern of ours: it is the same trade `pathnameOf` makes, being exactly right on the awkward
+ * spellings mattering more than being clever about them.
+ */
+export function isIpAddress(value: string): boolean {
+  if (value.length === 0 || value.length > MAX_ADDRESS_CHARS) return false;
+  if (ipv4ToInt(value) !== null) return true;
+  if (!value.includes(":")) return false;
+
+  try {
+    return new URL(`http://[${value}]/`).hostname.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export function isInSubnetPrefix(ip: string, prefix: string): boolean {
   if (!prefix.endsWith(".")) return false;
 

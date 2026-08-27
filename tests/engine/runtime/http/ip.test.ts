@@ -37,6 +37,7 @@
 import {
   ipv4ToInt,
   isInSubnetPrefix,
+  isIpAddress,
   isPrivateIp,
   isTrustedProxy,
   normalizeIp,
@@ -104,6 +105,40 @@ Deno.test("resolveClientIp hands back a plain IPv4, mapping unwrapped", () => {
     "9.9.9.9",
     "one client must land in one rate-limit bucket, whichever form the socket reported",
   );
+});
+
+Deno.test("resolveClientIp refuses a header that does not name an address", () => {
+  for (
+    const written of [
+      "not-an-ip",
+      "9.9.9.9, 1.1.1.1",
+      "example.com",
+      "A".repeat(2_000),
+      "999.999.999.999",
+      "9.9.9.9:443",
+      "",
+    ]
+  ) {
+    assertEquals(
+      resolveClientIp(headers({ "x-real-ip": written }), TRUSTED_PEER),
+      "",
+      `"${written.slice(0, 20)}" names a rate limit bucket, a geolocation entry and the ip a worker reads`,
+    );
+  }
+});
+
+Deno.test("resolveClientIp keeps an IPv6 the proxy reported", () => {
+  assertEquals(resolveClientIp(headers({ "x-real-ip": "2001:db8::1" }), TRUSTED_PEER), "2001:db8::1");
+  assertEquals(resolveClientIp(headers({ "x-real-ip": "::1" }), TRUSTED_PEER), "::1");
+});
+
+Deno.test("isIpAddress accepts what a proxy reports and nothing else", () => {
+  for (const written of ["9.9.9.9", "0.0.0.0", "255.255.255.255", "::1", "2001:db8::1", "fe80::1"]) {
+    assert(isIpAddress(written), `${written} is an address`);
+  }
+  for (const written of ["", " ", "9.9.9", "9.9.9.9.9", "256.0.0.1", "localhost", "[::1]", "::1/64"]) {
+    assertFalse(isIpAddress(written), `${written} is not an address`);
+  }
 });
 
 Deno.test("isTrustedProxy only accepts private peers", () => {
