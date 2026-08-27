@@ -222,3 +222,43 @@ Deno.test("isSensitiveKey splits on separators and on camel humps alike", () => 
     assert(!isSensitiveKey(innocent), innocent);
   }
 });
+
+/** `leaf` buried under `depth` objects, the shape a walk gives up on. */
+function nested(depth: number, leaf: unknown): unknown {
+  let held = leaf;
+  for (let level = 0; level < depth; level++) held = { under: held };
+  return held;
+}
+
+Deno.test("redactSensitive names what it will not walk instead of falling over", () => {
+  const walked = redactSensitive(nested(20_000, { password: "hunter2" }));
+
+  assertEquals(
+    JSON.stringify(walked).includes("hunter2"),
+    false,
+    "the walk used to throw, and the caller answered by handing on the text it had not redacted",
+  );
+  assertStringIncludes(JSON.stringify(walked), "[too deep]");
+});
+
+Deno.test("redactIfJson withholds a body it parsed and could not walk", () => {
+  const deep = redactIfJson(JSON.stringify(nested(20_000, { access_token: "leaked" })));
+
+  assert(!deep.includes("leaked"), "handing on what could not be redacted is handing on the secret");
+});
+
+Deno.test("redactIfJson still hands on what is not json at all", () => {
+  assertEquals(
+    redactIfJson("upstream refused the connection"),
+    "upstream refused the connection",
+    "a plain error message is worth reading, and carries no field to redact",
+  );
+});
+
+Deno.test("previewOf never prints a secret a deep body buried", async () => {
+  const preview = await previewOf(
+    new Response(JSON.stringify(nested(20_000, { password: "hunter2" })), { status: 500 }),
+  );
+
+  assert(!preview.includes("hunter2"));
+});

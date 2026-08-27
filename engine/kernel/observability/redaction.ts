@@ -60,19 +60,40 @@ const SENSITIVE_WORDS: ReadonlySet<string> = new Set([
 const WORD_BOUNDARY = /[^A-Za-z0-9]+|(?<=[a-z0-9])(?=[A-Z])/;
 const REDACTED = "[redacted]";
 
+/**
+ * How deep the walk goes before it stops describing and starts summarising.
+ *
+ * @remarks
+ * It is not a taste: the walk is recursive, and a body nested past the stack threw a `RangeError`
+ * that the caller caught by handing on the **unredacted** text. A secret at any depth therefore
+ * left the machine in the clear, and the deeper the body the surer it was to. No error body
+ * carries meaning this far down, so what is past it is named rather than walked.
+ */
+const MAX_DEPTH = 64;
+
+/** What stands in for a subtree the walk refused to go into. */
+const TOO_DEEP = "[too deep]";
+
 export function isSensitiveKey(key: string): boolean {
   return key
     .split(WORD_BOUNDARY)
     .some((word) => SENSITIVE_WORDS.has(word.toLowerCase()));
 }
 
-export function redactSensitive(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(redactSensitive);
+/**
+ * `value` with everything a sensitive name covers replaced, and nothing walked past {@link MAX_DEPTH}.
+ *
+ * @param depth - How far down this call already is. Callers leave it out.
+ */
+export function redactSensitive(value: unknown, depth: number = 0): unknown {
+  if (depth >= MAX_DEPTH) return TOO_DEEP;
+
+  if (Array.isArray(value)) return value.map((entry) => redactSensitive(entry, depth + 1));
 
   if (value !== null && typeof value === "object") {
     const out: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
-      out[key] = isSensitiveKey(key) ? REDACTED : redactSensitive(val);
+      out[key] = isSensitiveKey(key) ? REDACTED : redactSensitive(val, depth + 1);
     }
     return out;
   }
@@ -80,10 +101,34 @@ export function redactSensitive(value: unknown): unknown {
   return value;
 }
 
+/** What is handed on in place of a body that parsed as JSON and could not be walked. */
+const UNWALKABLE = "[unredacted json withheld]";
+
+/**
+ * `text` with its secrets replaced when it is JSON, and unchanged when it is not.
+ *
+ * @remarks
+ * The two failures are not the same and used to answer alike. Text that is not JSON is handed on
+ * as it stands, which is the point: a plain error message is worth reading. Text that **is** JSON
+ * and could not be walked is withheld, because handing it on is handing on exactly the secrets
+ * this function was called to remove.
+ *
+ * Nothing reaches that second answer today: what comes out of a parse is a plain tree, the depth
+ * bound keeps the walk off the stack, and a bounded plain tree always encodes. It stands so that a
+ * change to the walk cannot put an unredacted body back on the wire the way the missing bound
+ * did, and no test covers it because no input reaches it.
+ */
 export function redactIfJson(text: string): string {
+  let parsed: unknown;
   try {
-    return json.encode(redactSensitive(json.decode(text)));
+    parsed = json.decode(text);
   } catch {
     return text;
+  }
+
+  try {
+    return json.encode(redactSensitive(parsed));
+  } catch {
+    return UNWALKABLE;
   }
 }
