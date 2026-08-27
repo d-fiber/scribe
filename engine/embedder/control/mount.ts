@@ -96,12 +96,59 @@ export class NodeMountError extends Error {
   }
 }
 
-function limiterOf(limiter: ProtoRateLimiter | undefined): RateLimit {
+/**
+ * The limit `route` declares, refusing a route that declares none.
+ *
+ * @remarks
+ * A missing limiter used to become a limit of zero, and a limit of zero measures nothing: the
+ * driver says so on a line and lets the caller through, so the route was **unlimited** and wrote a
+ * log entry per request saying it. The two ways to read the manifest disagreed, since the JS SDK
+ * already refuses to compile such a route, and the host is the side that has to hold for a worker
+ * written in another language.
+ *
+ * Refusing here means the whole attachment stops, once, naming the route. That is the failure a
+ * deployment can act on; the other one is a rate limit nobody has that nobody sees.
+ */
+function limitOf(route: Route): RateLimit {
+  const limiter: ProtoRateLimiter | undefined = route.rateLimit;
+  if (limiter === undefined) {
+    throw new NodeMountError(
+      `${route.routeId} declares no rate limit. A route without one is a route nothing counts: ` +
+        `declare it on the endpoint, on a middleware, or on the node.`,
+    );
+  }
+
   return {
-    limit: limiter?.limit ?? 0,
-    window: Duration.milliseconds(Number(limiter?.window?.millis ?? 0n)),
-    penalty: Duration.milliseconds(Number(limiter?.penalty?.millis ?? 0n)),
-    maxPenalty: limiter?.maxPenalty ? Duration.milliseconds(Number(limiter.maxPenalty.millis)) : undefined,
+    limit: limiter.limit,
+    window: Duration.milliseconds(Number(limiter.window?.millis ?? 0n)),
+    penalty: Duration.milliseconds(Number(limiter.penalty?.millis ?? 0n)),
+    maxPenalty: limiter.maxPenalty ? Duration.milliseconds(Number(limiter.maxPenalty.millis)) : undefined,
+  };
+}
+
+/**
+ * A route as the host answers it, with everything the manifest only spells once already read.
+ *
+ * @remarks
+ * The callers and the limit were derived from the protobuf on every request, which is a handful of
+ * allocations per call for a value that cannot change while the worker stays attached.
+ */
+interface MountedRoute {
+  /** The route the manifest declared, as the invocation still needs it. */
+  readonly route: Route;
+
+  /** The ways of proving a call this route accepts, in the vocabulary the host reasons with. */
+  readonly access: readonly Caller[];
+
+  /** The quota this route holds a caller to. */
+  readonly limit: RateLimit;
+}
+
+function mountedRoute(route: Route): MountedRoute {
+  return {
+    route,
+    access: route.access.map((caller) => callers[caller]),
+    limit: limitOf(route),
   };
 }
 
@@ -117,15 +164,26 @@ function responseOf(reply: Reply): Response {
   });
 }
 
-async function serve(route: Route, client: WorkerClient, c: Context): Future<Response> {
-  const declared = route.access.map((caller) => callers[caller]);
+/**
+ * Answers a call on `mounted`, once the caller cleared access, the quota and the permissions.
+ *
+ * @remarks
+ * The quota is answered before the permissions, which is both the order {@link ApiEndpoint} uses
+ * and the only one that means anything. The other way round, a caller already over its quota was
+ * still told whether it holds the permission: the refusal it had earned was computed, its token
+ * spent, and then dropped for a more informative one. Probing what a route requires was therefore
+ * free however tight the limit was, which is the one thing the limit was there to prevent.
+ */
+async function serve(mounted: MountedRoute, client: WorkerClient, c: Context): Future<Response> {
+  const { route } = mounted;
 
   const [allowed, withinLimit] = await Promise.all([
-    isAllowed(declared, route.webhookVerified),
-    withinRateLimit(route.rateLimitKey, limiterOf(route.rateLimit)),
+    isAllowed(mounted.access, route.webhookVerified),
+    withinRateLimit(route.rateLimitKey, mounted.limit),
   ]);
 
   if (!allowed) return ServerResponse.unauthorized();
+  if (!withinLimit) return ServerResponse.tooManyRequests();
 
   if (route.requiredPermissions.length > 0 && !(await RbacIdentity.grants(route.requiredPermissions))) {
     return ServerResponse.forbidden({
@@ -133,8 +191,6 @@ async function serve(route: Route, client: WorkerClient, c: Context): Future<Res
       message: "You do not have the required permission to perform this action.",
     });
   }
-
-  if (!withinLimit) return ServerResponse.tooManyRequests();
 
   const traceId = crypto.randomUUID();
   const token = CapabilityTokens.issue({
@@ -180,7 +236,8 @@ export function mountManifest(
       );
     }
 
-    app[methods[route.method]](route.path, (c) => serve(route, client, c));
+    const prepared = mountedRoute(route);
+    app[methods[route.method]](route.path, (c) => serve(prepared, client, c));
     mounted += 1;
   }
 
