@@ -36,6 +36,9 @@
 
 import type { Future } from "@scribe/alchemy";
 import { ServerResponse } from "@scribe/alchemy/route";
+import { FRAMEWORK_SECRETS } from "@scribe/contracts/secrets.ts";
+import { readBoundedBody } from "@scribe/kernel/http/serve/body_reader.ts";
+import { MAX_BODY_BYTES } from "@scribe/runtime/http/limits.ts";
 import type { EdgePlatform } from "../platform.ts";
 import type { WorkerDispatcher } from "./worker_dispatcher.ts";
 
@@ -43,6 +46,21 @@ export interface WorkerLimits {
   readonly memoryLimitMb: number;
   readonly workerTimeoutMs: number;
   readonly importMapPath: string;
+}
+
+/**
+ * The headers this side keeps, whatever the caller sent.
+ *
+ * @remarks
+ * `x-internal-secret` is what proves a call comes from inside the deployment, and a function that
+ * echoed it or wrote it to a log would hand any caller the `service` role everywhere. The worker is
+ * the endpoint here, so the rest of what arrived is what it is answering and travels on.
+ */
+const WITHHELD_HEADERS: ReadonlySet<string> = new Set(["x-internal-secret"]);
+
+/** `environment` without the variables the framework owns. */
+function withoutSecrets(environment: readonly string[][]): string[][] {
+  return environment.filter(([name]) => !FRAMEWORK_SECRETS.has(name)).map((pair) => [...pair]);
 }
 
 export class EdgeWorkerDispatcher implements WorkerDispatcher {
@@ -57,11 +75,14 @@ export class EdgeWorkerDispatcher implements WorkerDispatcher {
   ) {
     this.#platform = platform;
     this.#limits = limits;
-    this.#envVars = envVars;
+    this.#envVars = withoutSecrets(envVars);
   }
 
   async dispatch(request: Request, servicePath: string): Future<Response> {
     try {
+      const forwarded = await this.#forward(request);
+      if (forwarded === null) return ServerResponse.payloadTooLarge();
+
       const worker = await this.#platform.createWorker({
         servicePath,
         memoryLimitMb: this.#limits.memoryLimitMb,
@@ -71,7 +92,6 @@ export class EdgeWorkerDispatcher implements WorkerDispatcher {
         envVars: this.#envVars,
       });
 
-      const forwarded = await this.#forward(request);
       this.#platform.tagRequest(request, forwarded);
       return await worker.fetch(forwarded);
     } catch (error) {
@@ -80,15 +100,39 @@ export class EdgeWorkerDispatcher implements WorkerDispatcher {
     }
   }
 
-  async #forward(request: Request): Future<Request> {
+  /**
+   * The request as the worker will see it, or `null` when its body is past what is accepted.
+   *
+   * @remarks
+   * The body is read into memory here, and until it was bounded a caller decided how much: nothing
+   * on this path is the admission control of `kernel/http/serve/`, which guards the other process.
+   * The bound is the same hard ceiling, so what the gateway already refuses is refused here too,
+   * and what reaches this side by another road no longer chooses its own size.
+   *
+   * Reading it also has to happen before a worker is asked for, or a refused body has already cost
+   * an isolate.
+   */
+  async #forward(request: Request): Future<Request | null> {
     const carriesBody = request.method !== "GET" && request.method !== "HEAD";
+    if (!carriesBody) return this.#rebuilt(request, null);
+
+    const intake = await readBoundedBody(request, MAX_BODY_BYTES);
+    if (!intake.ok) return null;
+
+    return this.#rebuilt(request, intake.bytes);
+  }
+
+  #rebuilt(request: Request, body: Uint8Array | null): Request {
+    const headers = new Headers();
+    request.headers.forEach((value, name) => {
+      if (!WITHHELD_HEADERS.has(name.toLowerCase())) headers.set(name, value);
+    });
+    headers.set("x-request-start", String(Date.now()));
+
     return new Request(request.url, {
       method: request.method,
-      headers: new Headers({
-        ...Object.fromEntries(request.headers),
-        "x-request-start": String(Date.now()),
-      }),
-      body: carriesBody ? await request.arrayBuffer() : null,
+      headers,
+      body: body === null || body.byteLength === 0 ? null : (body as BodyInit),
     });
   }
 }

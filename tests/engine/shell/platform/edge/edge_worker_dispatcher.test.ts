@@ -36,6 +36,7 @@
 
 import { EdgeWorkerDispatcher } from "@scribe/shell/platform/edge/dispatch/edge_worker_dispatcher.ts";
 import type { EdgePlatform, EdgeWorker, EdgeWorkerOptions } from "@scribe/shell/platform/edge/platform.ts";
+import { MAX_BODY_BYTES } from "@scribe/runtime/http/limits.ts";
 import { assert, assertEquals } from "@std/assert";
 
 const LIMITS = {
@@ -165,4 +166,90 @@ Deno.test("EdgeWorkerDispatcher reads the environment once, not per dispatch", a
   } finally {
     Deno.env.delete("SCRIBE_DISPATCH_PROBE");
   }
+});
+
+Deno.test("EdgeWorkerDispatcher hands the isolate none of the framework's own secrets", async () => {
+  const platform = new FakePlatform();
+  const environment = [
+    ["JWT_SECRET", "the-signing-secret"],
+    ["SERVICE_KEY", "the-service-role-key"],
+    ["INTERNAL_SECRET", "the-internal-secret"],
+    ["DEVICE_PAYLOAD_PRIVATE_KEY", "00112233"],
+    ["REDIS_URL", "redis://:password@cache:6379"],
+    ["STRIPE_SECRET_KEY", "what the project configured for itself"],
+  ];
+
+  await new EdgeWorkerDispatcher(platform, LIMITS, environment).dispatch(
+    new Request("http://localhost/app"),
+    "/functions/app",
+  );
+
+  const handed = new Set((platform.options?.envVars ?? []).map((pair) => pair[0]));
+
+  assertEquals(
+    [...handed],
+    ["STRIPE_SECRET_KEY"],
+    "a worker is handed the identity already resolved and reaches the rest through a capability, so the credentials of the deployment are not its business",
+  );
+});
+
+Deno.test("EdgeWorkerDispatcher keeps a project's own variables, whatever they are named", async () => {
+  const platform = new FakePlatform();
+
+  await new EdgeWorkerDispatcher(platform, LIMITS, [["MY_API_KEY", "kept"]]).dispatch(
+    new Request("http://localhost/app"),
+    "/functions/app",
+  );
+
+  assertEquals(
+    platform.options?.envVars,
+    [["MY_API_KEY", "kept"]],
+    "which variables a project needs is not something this framework can know, so it withholds only its own",
+  );
+});
+
+Deno.test("EdgeWorkerDispatcher withholds the header that proves an internal call", async () => {
+  const platform = new FakePlatform();
+
+  await dispatcher(platform).dispatch(
+    new Request("http://localhost/app", {
+      headers: { "authorization": "Bearer caller", "x-internal-secret": "the-internal-secret" },
+    }),
+    "/functions/app",
+  );
+
+  assertEquals(
+    platform.received?.headers.get("x-internal-secret"),
+    null,
+    "a function that echoed it would hand any caller the service role everywhere",
+  );
+  assertEquals(
+    platform.received?.headers.get("authorization"),
+    "Bearer caller",
+    "the worker is the endpoint here, so what it is answering travels on",
+  );
+});
+
+Deno.test("EdgeWorkerDispatcher refuses a body past the ceiling, and buys no isolate with it", async () => {
+  const platform = new FakePlatform();
+  const overrun = new ReadableStream({
+    start(controller) {
+      for (let chunk = 0; chunk <= MAX_BODY_BYTES / (1024 * 1024); chunk++) {
+        controller.enqueue(new Uint8Array(1024 * 1024));
+      }
+      controller.close();
+    },
+  });
+
+  const answer = await dispatcher(platform).dispatch(
+    new Request("http://localhost/app", { method: "POST", body: overrun }),
+    "/functions/app",
+  );
+
+  assertEquals(answer.status, 413);
+  assertEquals(
+    platform.options,
+    null,
+    "nothing on this path is the admission control of the other process, so a refused body must not have cost an isolate first",
+  );
 });
