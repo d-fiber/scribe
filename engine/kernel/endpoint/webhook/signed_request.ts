@@ -38,6 +38,18 @@ import { RequestScope } from "@scribe/runtime/scope.ts";
 
 export const MAX_TIMESTAMP_SKEW_S = 5 * 60;
 
+/**
+ * How many signatures one header may offer before the request is refused.
+ *
+ * @remarks
+ * The header carries several so that a secret can be rotated without dropping calls in flight,
+ * which is two or three at the very most. Nothing bounded it, and every candidate costs an HMAC
+ * verification against a body the sender chose: a header full of them turns one request into
+ * thousands of digests over a hundred kilobytes. Refusing outright rather than checking the first
+ * few keeps a truncated header from reading as a valid one.
+ */
+export const MAX_SIGNATURE_CANDIDATES = 8;
+
 export interface SignedWebhookRequest {
   readonly id: string;
   readonly timestamp: string;
@@ -59,6 +71,7 @@ export function readSignedRequest(): SignedWebhookRequest | null {
     .map((entry) => entry.split(",")[1])
     .filter(Boolean);
   if (candidateSignatures.length === 0) return null;
+  if (candidateSignatures.length > MAX_SIGNATURE_CANDIDATES) return null;
 
   return {
     id,

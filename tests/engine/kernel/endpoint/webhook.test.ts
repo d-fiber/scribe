@@ -37,6 +37,7 @@
 import { importSigningKey, matchesAnyCandidate } from "@scribe/kernel/endpoint/webhook/signature.ts";
 import {
   isFreshTimestamp,
+  MAX_SIGNATURE_CANDIDATES,
   MAX_TIMESTAMP_SKEW_S,
   readSignedRequest,
   type SignedWebhookRequest,
@@ -133,6 +134,41 @@ Deno.test("readSignedRequest refuses a signature header carrying no signature", 
       readSignedRequest,
     ),
     null,
+  );
+});
+
+Deno.test("readSignedRequest refuses a header offering more signatures than a rotation needs", () => {
+  const many = Array.from({ length: MAX_SIGNATURE_CANDIDATES + 1 }, (_, at) => `v1,AAAA${at}`).join(" ");
+
+  assertEquals(
+    withHeaders(
+      {
+        "webhook-id": "msg_1",
+        "webhook-timestamp": "1700000000",
+        "webhook-signature": many,
+      },
+      "{}",
+      readSignedRequest,
+    ),
+    null,
+    "every candidate costs an HMAC over a body the sender chose, so the header cannot set how many",
+  );
+});
+
+Deno.test("readSignedRequest still takes as many signatures as a rotation needs", () => {
+  const rotation = Array.from({ length: MAX_SIGNATURE_CANDIDATES }, (_, at) => `v1,AAAA${at}`).join(" ");
+
+  assertEquals(
+    withHeaders(
+      {
+        "webhook-id": "msg_1",
+        "webhook-timestamp": "1700000000",
+        "webhook-signature": rotation,
+      },
+      "{}",
+      readSignedRequest,
+    )?.candidateSignatures.length,
+    MAX_SIGNATURE_CANDIDATES,
   );
 });
 
