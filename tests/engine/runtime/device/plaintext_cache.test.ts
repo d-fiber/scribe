@@ -39,33 +39,42 @@ import { assertEquals } from "@std/assert";
 
 const TTL_MS = 60_000;
 
+/** A cache whose clock the test moves, so a window can close without anything waiting. */
+function cacheAt(clock: { now: number }, limit?: number): PlaintextCache {
+  return new PlaintextCache(TTL_MS, limit, () => clock.now);
+}
+
 Deno.test("a miss is undefined, and it is not the same thing as a cached refusal", () => {
-  const cache = new PlaintextCache(TTL_MS);
+  const cache = cacheAt({ now: 0 });
 
-  assertEquals(cache.lookup("absent", 0), undefined);
+  assertEquals(cache.lookup("absent"), undefined);
 
-  cache.remember("bad", null, 0);
+  cache.remember("bad", null);
   assertEquals(
-    cache.lookup("bad", 0),
+    cache.lookup("bad"),
     null,
     "an undecryptable payload is worth remembering: it is the flood case",
   );
 });
 
 Deno.test("a plaintext comes back untouched until its window closes", () => {
-  const cache = new PlaintextCache(TTL_MS);
-  cache.remember("sealed", '{"iat":1}', 1_000);
+  const clock = { now: 1_000 };
+  const cache = cacheAt(clock);
+  cache.remember("sealed", '{"iat":1}');
 
-  assertEquals(cache.lookup("sealed", 1_000), '{"iat":1}');
-  assertEquals(cache.lookup("sealed", 1_000 + TTL_MS - 1), '{"iat":1}');
+  assertEquals(cache.lookup("sealed"), '{"iat":1}');
+  clock.now = 1_000 + TTL_MS - 1;
+  assertEquals(cache.lookup("sealed"), '{"iat":1}');
 });
 
 Deno.test("an entry past the freshness window is dropped, never served", () => {
-  const cache = new PlaintextCache(TTL_MS);
-  cache.remember("sealed", '{"iat":1}', 1_000);
+  const clock = { now: 1_000 };
+  const cache = cacheAt(clock);
+  cache.remember("sealed", '{"iat":1}');
 
+  clock.now = 1_000 + TTL_MS;
   assertEquals(
-    cache.lookup("sealed", 1_000 + TTL_MS),
+    cache.lookup("sealed"),
     undefined,
     "a payload that can no longer be fresh has nothing left to offer",
   );
@@ -73,13 +82,42 @@ Deno.test("an entry past the freshness window is dropped, never served", () => {
 });
 
 Deno.test("the cache is bounded, so a flood of distinct payloads cannot grow it", () => {
-  const cache = new PlaintextCache(TTL_MS, 4);
+  const cache = cacheAt({ now: 0 }, 4);
 
-  for (let i = 0; i < 4; i++) cache.remember(`p${i}`, `{"n":${i}}`, 0);
+  for (let payload = 0; payload < 8; payload++) cache.remember(`p${payload}`, `{"n":${payload}}`);
+
   assertEquals(cache.size, 4);
+  assertEquals(cache.lookup("p7"), '{"n":7}');
+  assertEquals(cache.lookup("p0"), undefined);
+});
 
-  cache.remember("p4", '{"n":4}', 0);
-  assertEquals(cache.size, 1, "overflow clears rather than growing without bound");
-  assertEquals(cache.lookup("p4", 0), '{"n":4}');
-  assertEquals(cache.lookup("p0", 0), undefined);
+Deno.test("a flood drops the oldest payloads, not every payload it can reach", () => {
+  const cache = cacheAt({ now: 0 }, 16);
+
+  for (let real = 0; real < 10; real++) cache.remember(`legit-${real}`, `{"n":${real}}`);
+  for (let junk = 0; junk < 8; junk++) cache.remember(`junk-${junk}`, null);
+
+  assertEquals(cache.size, 16);
+  assertEquals(
+    cache.lookup("legit-9"),
+    '{"n":9}',
+    "emptying the table at the limit put every caller back to a seventy microsecond exchange, at the price of one flood",
+  );
+  assertEquals(cache.lookup("legit-0"), undefined, "the oldest is what a bounded table gives up");
+});
+
+Deno.test("a payload that keeps being presented is not what a flood pushes out", () => {
+  const cache = cacheAt({ now: 0 }, 4);
+  cache.remember("busy", '{"n":1}');
+
+  for (let junk = 0; junk < 8; junk++) {
+    assertEquals(cache.lookup("busy"), '{"n":1}');
+    cache.remember(`junk-${junk}`, null);
+  }
+
+  assertEquals(
+    cache.lookup("busy"),
+    '{"n":1}',
+    "reading an entry is what makes it recent, which is what keeps a live client out of the way of a flood",
+  );
 });

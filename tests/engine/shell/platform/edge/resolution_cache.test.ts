@@ -34,49 +34,49 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-const MAX_CACHED_RESOLUTIONS = 512;
+import { ResolutionCache } from "@scribe/shell/platform/edge/services/resolution_cache.ts";
+import { assertEquals } from "@std/assert";
 
-/**
- * Where each service name was found on disk, or the fact that it was not found at all.
- *
- * @remarks
- * Three answers and not two, the same way {@link PlaintextCache} holds three: `undefined` is a name
- * this process has not looked up, `null` is one it looked up and did not find.
- *
- * It holds no expiry, unlike the table `runtime/support/cache/ttl_lru.ts` carries, because what it
- * remembers is the layout of a directory that is baked into the image: an entry that has stopped
- * being true means the image changed under a running process, which it does not.
- *
- * The oldest entry goes when the table is full, one at a time. Emptying it at the limit meant a
- * caller asking for five hundred names that do not exist threw away every real resolution at a
- * stroke, and every service on the box paid a directory walk again.
- */
-export class ResolutionCache {
-  readonly #entries = new Map<string, string | null>();
-  readonly #limit: number;
+Deno.test("a miss is undefined, and it is not the same thing as a name that was not found", () => {
+  const cache = new ResolutionCache();
 
-  constructor(limit: number = MAX_CACHED_RESOLUTIONS) {
-    this.#limit = Math.max(1, limit);
-  }
+  assertEquals(cache.lookup("never-asked"), undefined);
 
-  /** Where `service` was found, or `undefined` when this process has not looked. */
-  lookup(service: string): string | null | undefined {
-    return this.#entries.get(service);
-  }
+  cache.remember("absent", null);
+  assertEquals(cache.lookup("absent"), null, "a name that is not on disk is worth remembering too");
+});
 
-  /** Holds where `service` was found, dropping the oldest entry if it has to. */
-  remember(service: string, servicePath: string | null): void {
-    this.#entries.delete(service);
-    this.#entries.set(service, servicePath);
+Deno.test("the cache is bounded, so a caller naming services cannot grow it", () => {
+  const cache = new ResolutionCache(4);
 
-    if (this.#entries.size <= this.#limit) return;
+  for (let name = 0; name < 8; name++) cache.remember(`s${name}`, `/srv/s${name}`);
 
-    const oldest = this.#entries.keys().next();
-    if (!oldest.done) this.#entries.delete(oldest.value);
-  }
+  assertEquals(cache.size, 4);
+  assertEquals(cache.lookup("s7"), "/srv/s7");
+  assertEquals(cache.lookup("s0"), undefined);
+});
 
-  /** How many names are held. */
-  get size(): number {
-    return this.#entries.size;
-  }
-}
+Deno.test("a flood of names that do not exist drops the oldest, not everything held", () => {
+  const cache = new ResolutionCache(16);
+
+  for (let real = 0; real < 10; real++) cache.remember(`node-${real}`, `/srv/node-${real}`);
+  for (let junk = 0; junk < 8; junk++) cache.remember(`junk-${junk}`, null);
+
+  assertEquals(cache.size, 16);
+  assertEquals(
+    cache.lookup("node-9"),
+    "/srv/node-9",
+    "emptying the table at the limit made every service on the box walk the directory again, at the price of one flood",
+  );
+  assertEquals(cache.lookup("node-0"), undefined);
+});
+
+Deno.test("remembering a name twice holds it once", () => {
+  const cache = new ResolutionCache(4);
+
+  cache.remember("s", "/srv/s");
+  cache.remember("s", "/srv/s-moved");
+
+  assertEquals(cache.size, 1);
+  assertEquals(cache.lookup("s"), "/srv/s-moved");
+});

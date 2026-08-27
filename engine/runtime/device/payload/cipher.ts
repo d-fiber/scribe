@@ -58,13 +58,11 @@ interface SealedBox {
 
 export class DevicePayloadCipher {
   static async decrypt(encrypted: string): Future<unknown | null> {
-    const now = Date.now();
-
-    const cached = plaintexts.lookup(encrypted, now);
+    const cached = plaintexts.lookup(encrypted);
     if (cached !== undefined) return objectFrom(cached);
 
     const plaintext = await decipher(encrypted);
-    plaintexts.remember(encrypted, plaintext, now);
+    plaintexts.remember(encrypted, plaintext);
     return objectFrom(plaintext);
   }
 
