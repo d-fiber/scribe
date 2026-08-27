@@ -36,7 +36,8 @@
 
 import "@scribe/testing/settings.ts";
 import { JwtVerifier } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
-import { assertEquals, assertNotEquals } from "@std/assert";
+import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
+import { assert, assertEquals, assertNotEquals } from "@std/assert";
 import { SignJWT } from "jose";
 
 const SECRET = () => new TextEncoder().encode(Deno.env.get("JWT_SECRET")!);
@@ -157,4 +158,73 @@ Deno.test("verify: garbage never throws, it returns null", async () => {
   for (const bad of ["", "   ", "a.b", "a.b.c", "....", "x".repeat(5000)]) {
     assertEquals(await JwtVerifier.verify(bad), null, `"${bad.slice(0, 8)}"`);
   }
+});
+
+/** An ES256 token, well enough formed for the verifier to pick its branch and then refuse it. */
+const ASYMMETRIC = "eyJhbGciOiJFUzI1NiJ9.eyJzdWIiOiJ1MSJ9.c2ln";
+
+/** Runs `run` with `authUrl` in the identity slot, putting back what was there. */
+async function withAuthUrl(authUrl: string | undefined, run: () => Promise<void>): Promise<void> {
+  const held = identitySettings.get();
+  identitySettings.use({ ...held, authUrl });
+  try {
+    await run();
+  } finally {
+    identitySettings.use(held);
+  }
+}
+
+/** What `run` wrote on the error channel. */
+async function errorsOf(run: () => Promise<void>): Promise<string[]> {
+  const written: string[] = [];
+  const held = console.error;
+  console.error = (...args: unknown[]) => written.push(String(args[0]));
+  try {
+    await run();
+  } finally {
+    console.error = held;
+  }
+  return written;
+}
+
+Deno.test("verify: a deployment with no identity service refuses in silence", async () => {
+  await withAuthUrl(undefined, async () => {
+    const written = await errorsOf(async () => {
+      for (let call = 0; call < 5; call++) assertEquals(await JwtVerifier.verify(ASYMMETRIC), null);
+    });
+
+    assertEquals(
+      written,
+      [],
+      "mounting no identity package is the ordinary state of such a deployment, and a line per token it is shown is a log an attacker fills",
+    );
+  });
+});
+
+Deno.test("verify: an address that is set and unusable is named once, not once per token", async () => {
+  await withAuthUrl("not a url at all", async () => {
+    const written = await errorsOf(async () => {
+      for (let call = 0; call < 5; call++) assertEquals(await JwtVerifier.verify(ASYMMETRIC), null);
+    });
+
+    assertEquals(written.length, 1, "the fault is worth saying, and worth saying once");
+    assert(written[0].includes("not a url at all"), "a line that does not name the address it failed on helps nobody");
+  });
+});
+
+Deno.test("verify: the key set follows the address, instead of freezing on the first one read", async () => {
+  await withAuthUrl("https://first.example", async () => {
+    await JwtVerifier.verify(ASYMMETRIC);
+  });
+
+  await withAuthUrl("still not a url", async () => {
+    const written = await errorsOf(async () => {
+      assertEquals(await JwtVerifier.verify(ASYMMETRIC), null);
+    });
+
+    assert(
+      written.some((line) => line.includes("still not a url")),
+      "a set frozen on the first address ever read ignores a slot filled again, without a word",
+    );
+  });
 });

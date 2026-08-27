@@ -52,23 +52,40 @@ function _isEndUserToken(payload: JWTPayload): boolean {
 
 type RemoteKeySet = ReturnType<typeof createRemoteJWKSet>;
 
+let keySetFor: string | undefined;
 let remoteKeys: RemoteKeySet | null = null;
 
+/**
+ * The key set of the identity service, built once per address.
+ *
+ * @remarks
+ * Two things were wrong with memoising on nothing but the answer. The set was frozen on the first
+ * address ever read, so a slot filled again afterwards was ignored without a word. And a failure
+ * was not memoised at all: a deployment that mounts no identity package has no address, so every
+ * asymmetric token it was ever shown rebuilt nothing and wrote a line about it, which is a log an
+ * attacker fills at will.
+ *
+ * An absent address is the ordinary state of such a deployment rather than a fault, so it answers
+ * `null` in silence. What is worth a line is an address that is set and unusable, and that line is
+ * written once for that address.
+ */
 function remoteKeySet(): RemoteKeySet | null {
-  if (remoteKeys !== null) return remoteKeys;
+  const authUrl = identitySettings.get().authUrl;
+  if (!authUrl) return null;
+  if (authUrl === keySetFor) return remoteKeys;
 
+  keySetFor = authUrl;
   try {
-    remoteKeys = createRemoteJWKSet(
-      new URL("/.well-known/jwks.json", identitySettings.get().authUrl),
-    );
-    return remoteKeys;
+    remoteKeys = createRemoteJWKSet(new URL("/.well-known/jwks.json", authUrl));
   } catch (error) {
+    remoteKeys = null;
     console.error(
-      "[jwt-verifier] no JWKS endpoint, asymmetric tokens will be refused:",
+      `[jwt-verifier] no JWKS endpoint at ${authUrl}, asymmetric tokens will be refused:`,
       error,
     );
-    return null;
   }
+
+  return remoteKeys;
 }
 
 type Verification = (jwt: string) => Future<JWTVerifyResult>;
