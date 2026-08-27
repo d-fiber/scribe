@@ -176,3 +176,34 @@ Deno.test("the identity is resolved once per request, however many times it is r
     mocks.forEach((mock) => mock.restore());
   }
 });
+
+Deno.test("what the caller holds is never handed out for anyone to change", async () => {
+  const resolver = resolvingTo({ id: "u1", claims: {} }, { role: "lead", permissions: ["brand.read"] });
+
+  try {
+    const handed = await withBearer(JWT, () => RbacIdentity.permissions());
+    handed.push("brand.write");
+
+    assertEquals(
+      await withBearer(JWT, () => RbacIdentity.grants(["brand.write"])),
+      false,
+      "grants reads the list itself now, so the copy handed to a caller has to stay a copy",
+    );
+  } finally {
+    resolver.restore();
+  }
+});
+
+Deno.test("holding nothing and having proved nothing both grant nothing", async () => {
+  const anonymous = resolvingTo(null);
+  try {
+    assertEquals(await withBearer(JWT, () => RbacIdentity.grants(["brand.read"])), false);
+    assertEquals(
+      await withBearer(JWT, () => RbacIdentity.grants([])),
+      true,
+      "a route requiring nothing is satisfied by anybody, caller or not",
+    );
+  } finally {
+    anonymous.restore();
+  }
+});
