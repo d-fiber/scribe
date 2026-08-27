@@ -106,6 +106,11 @@ export class TtlLru<T> {
     if (!oldest.done) this.#entries.delete(oldest.value);
   }
 
+  /** Forgets what is held for `key`, and does nothing when nothing is. */
+  delete(key: string): void {
+    this.#entries.delete(key);
+  }
+
   /** Forgets everything, which is what a caller does when it cannot say what changed. */
   clear(): void {
     this.#entries.clear();
