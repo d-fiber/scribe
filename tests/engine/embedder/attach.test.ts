@@ -48,6 +48,7 @@ import {
   ScribeServer,
   Time,
 } from "@scribe/sdk";
+import { HOST_HEADER } from "@scribe/sdk/src/transport/wire.ts";
 import { installRateLimiterMock } from "@scribe/foundation/testing";
 import { RequestScope } from "@scribe/runtime/scope.ts";
 import { mountManifest } from "@scribe/embedder/control/mount.ts";
@@ -111,14 +112,22 @@ const server = new ScribeServer({
   nodes: [{ name: "app", public: true, root: new AppNode() }, { name: "admin", public: true, root: new AdminNode() }],
 });
 
+const handler = server.handler();
+
+const CALLBACK = "http://replica.test:4747";
+
 async function withAttachedWorker(
-  run: (surfaces: { admin: Hono; app: Hono }) => Promise<void>,
+  run: (surfaces: { admin: Hono; app: Hono }, announced: readonly string[]) => Promise<void>,
 ): Promise<void> {
-  const client = new WorkerClient("http://worker.test", server.handler());
+  const announced: string[] = [];
+  const client = new WorkerClient("http://worker.test", CALLBACK, (request) => {
+    announced.push(request.headers.get(HOST_HEADER) ?? "");
+    return handler(request);
+  });
   const limiter = installRateLimiterMock();
 
   const surfaces = { admin: new Hono(), app: new Hono() };
-  const manifest = await client.describe("http://127.0.0.1:1", "bootstrap");
+  const manifest = await client.describe("bootstrap");
   const mounted = mountManifest(
     (node) => (node.name === "admin" ? surfaces.admin : surfaces.app),
     manifest,
@@ -130,7 +139,7 @@ async function withAttachedWorker(
   assertEquals(mounted, 2);
 
   try {
-    await run(surfaces);
+    await run(surfaces, announced);
   } finally {
     limiter.restore();
   }
@@ -157,6 +166,19 @@ Deno.test("a route discovered on the worker tree answers through the host", asyn
       code: "success",
       data: { brandId: "42", page: "2", agent: "conformance" },
     });
+  });
+});
+
+Deno.test("every call the host makes names the replica that made it", async () => {
+  await withAttachedWorker(async (surfaces, announced) => {
+    const response = await call(surfaces.app, "/brand/42?page=2");
+
+    assertEquals(response.status, 200);
+    assertEquals(
+      announced,
+      [CALLBACK, CALLBACK],
+      "a grant is redeemable at the replica that minted it and nowhere else, so every call has to name it",
+    );
   });
 });
 

@@ -50,15 +50,29 @@ import {
   type AnyUnaryMethod,
   CAPABILITY_HEADER,
   FAILURE_HEADER,
+  HOST_HEADER,
   procedurePath,
   PROTO_CONTENT_TYPE,
   PROTOCOL_HEADER,
   TRACE_HEADER,
 } from "./wire.ts";
 
+/** What a procedure is told about the call it is answering, beside the message itself. */
 export interface CallMetadata {
+  /** The grant the caller made this call under, empty when it held none. */
   readonly capabilityToken: string;
+
+  /** The identifier that ties this call to the exchange it belongs to, empty when it belongs to none. */
   readonly traceId: string;
+
+  /**
+   * The address at which {@link CallMetadata.capabilityToken} can be redeemed, empty when the
+   * caller named none.
+   *
+   * It is what a worker calls back on, and it is read from the call rather than from the handshake
+   * because a grant is only redeemable at the replica that issued it.
+   */
+  readonly hostEndpoint: string;
 }
 
 type ErasedProcedure = {
@@ -142,6 +156,7 @@ export function metadataOf(request: Request): CallMetadata {
   return {
     capabilityToken: request.headers.get(CAPABILITY_HEADER) ?? "",
     traceId: request.headers.get(TRACE_HEADER) ?? "",
+    hostEndpoint: request.headers.get(HOST_HEADER) ?? "",
   };
 }
 

@@ -90,7 +90,7 @@ Deno.test("a database query travels as a description the host executes", async (
 
   await withHost(capture, [{ id: "1", name: "Fiber", admin_id: "a" }], async () => {
     const rows = await CallScope.run(
-      { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", node: "" },
+      { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", hostEndpoint: "", node: "" },
       () =>
         database
           .from<Brand>("brands")
@@ -121,7 +121,7 @@ Deno.test("the capability token of the invocation is replayed on every outgoing 
 
   await withHost(capture, [], async () => {
     await CallScope.run(
-      { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", node: "" },
+      { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", hostEndpoint: "", node: "" },
       () => database.from<Brand>("brands").rows(),
     );
   });
@@ -194,7 +194,7 @@ async function withCountingHost(
   }
 }
 
-const SCOPE = { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", node: "" };
+const SCOPE = { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", hostEndpoint: "", node: "" };
 
 Deno.test("three reads read one at a time pay one round trip each", async () => {
   await withCountingHost(async (calls) => {

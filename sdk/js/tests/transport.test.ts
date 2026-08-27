@@ -91,6 +91,7 @@ async function withWorker(run: (client: UnaryClient) => Promise<void>): Promise<
   const client = new UnaryClient(endpoint, () => ({
     capabilityToken: "token-1",
     traceId: "trace-1",
+    hostEndpoint: "http://127.0.0.1:1",
   }));
 
   try {

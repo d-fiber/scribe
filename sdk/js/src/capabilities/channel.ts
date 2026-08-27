@@ -38,47 +38,73 @@ import { CallScope } from "../runtime/scope.ts";
 import { UnaryClient } from "../transport/client.ts";
 import { TransportFailure } from "../transport/failure.ts";
 
-let channel: UnaryClient | null = null;
+/**
+ * The address the last handshake announced, or null when none has happened.
+ *
+ * It answers calls made outside any dispatch, which is what the worker's own wiring and its
+ * background tasks make: those carry the standing credential the same handshake adopted, so the
+ * two stay a pair.
+ */
+let announced: string | null = null;
 
-/** The one channel a worker holds to its host, and the handshake around it. */
+/** The way back to the host, and the handshake around it. */
 export interface HostChannel {
-  /** Points this channel at `endpoint`, replacing whatever it pointed at before. */
+  /**
+   * Remembers `endpoint` as the host to call when a call names none, replacing the one before it.
+   *
+   * @remarks
+   * The handshake is what calls it, and every replica of the host handshakes with the same worker,
+   * so the address kept here is the last one to have introduced itself. That is only ever the
+   * address of a call made outside any dispatch, which carries the standing credential the same
+   * handshake adopted: the two are adopted together and cannot come apart.
+   */
   connect(endpoint: string): void;
 
-  /** Drops the channel, which puts every capability out of reach until the next connect. */
+  /** Forgets the remembered host, which puts every ambient capability out of reach. */
   disconnect(): void;
 
-  /** Whether a channel is held, which is what tells a caller that a capability can answer. */
+  /** Whether a host is reachable, which is what tells a caller that a capability can answer. */
   connected(): boolean;
 
   /**
    * The client every capability sends its calls through.
    *
-   * @throws {TransportFailure} When the handshake has not happened, because a capability has
-   * nowhere to send its call before the host is known.
+   * @remarks
+   * It answers the replica whose token the call in flight is carrying, and falls back to the
+   * remembered one when no call is in flight. A single channel fixed at the handshake would send
+   * every callback to the last replica that attached, where every token but its own is unknown.
+   *
+   * @throws {TransportFailure} When neither the call nor a handshake names a host, because a
+   * capability has nowhere to send its call before the host is known.
    */
   client(): UnaryClient;
 }
 
+function endpointOf(): string | null {
+  return CallScope.current().hostEndpoint || announced;
+}
+
 export const host: HostChannel = {
   connect(endpoint: string): void {
-    channel = new UnaryClient(endpoint, () => CallScope.credentials());
+    announced = endpoint;
   },
 
   disconnect(): void {
-    channel = null;
+    announced = null;
   },
 
   connected(): boolean {
-    return channel !== null;
+    return endpointOf() !== null;
   },
 
   client(): UnaryClient {
-    if (!channel) {
+    const endpoint = endpointOf();
+    if (endpoint === null) {
       throw TransportFailure.unavailable(
         "The worker is not connected to a host: capabilities are unreachable until the handshake happens.",
       );
     }
-    return channel;
+
+    return new UnaryClient(endpoint, () => CallScope.credentials());
   },
 };

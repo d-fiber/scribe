@@ -46,16 +46,33 @@ import { CronDispatch } from "@scribe/sdk/gen/scribe/packages/foundation/protoco
 import type { LogEntry } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 import { LogDispatch } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 
+/**
+ * The host side of the wire, as one replica holds it.
+ *
+ * @remarks
+ * Every call it makes names {@link WorkerClient.callbackUrl} beside the token, because a capability
+ * grant lives in the memory of the replica that issued it. Announcing the address once at the
+ * handshake is not enough: every replica handshakes with the same worker, which remembers one
+ * address, so the last one to introduce itself would receive the callbacks owed to all of them and
+ * refuse every token but its own as unknown.
+ */
 export class WorkerClient {
+  /**
+   * @param endpoint - Where this host reaches the worker.
+   * @param callbackUrl - Where the worker reaches this replica, and the only address at which the
+   * tokens this client carries can be redeemed.
+   * @param fetcher - What sends the call, defaulting to the platform's own when left out.
+   */
   constructor(
     readonly endpoint: string,
+    readonly callbackUrl: string,
     readonly fetcher?: Fetcher,
   ) {}
 
-  describe(callbackUrl: string, capabilityToken: string): Future<Manifest> {
+  describe(capabilityToken: string): Future<Manifest> {
     return this.#channel(capabilityToken, "").call(Registration.method.describe, {
       hostProtocolVersion: PROTOCOL_VERSION,
-      hostEndpoint: callbackUrl,
+      hostEndpoint: this.callbackUrl,
       capabilityToken,
     });
   }
@@ -131,7 +148,7 @@ export class WorkerClient {
   #channel(capabilityToken: string, traceId: string): UnaryClient {
     return new UnaryClient(
       this.endpoint,
-      () => ({ capabilityToken, traceId }),
+      () => ({ capabilityToken, traceId, hostEndpoint: this.callbackUrl }),
       this.fetcher,
     );
   }

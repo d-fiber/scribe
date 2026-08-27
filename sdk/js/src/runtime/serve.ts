@@ -90,15 +90,16 @@ export function workerServer(worker: WorkerDefinition): UnaryServer {
         capabilityToken: handshake.capabilityToken,
         traceId: "",
         invocationId: "",
+        hostEndpoint: handshake.hostEndpoint,
         node: "",
       });
 
       return describeWorker(worker);
     })
-    .on(WorkerService.method.invoke, (invocation) => invoke(worker, invocation))
-    .on(QueueDispatch.method.handle, (batch) => handleBatch(worker, batch))
-    .on(HookDispatch.method.handle, (event) => handleEvent(worker, event))
-    .on(CronDispatch.method.trigger, (trigger) => triggerCron(worker, trigger))
+    .on(WorkerService.method.invoke, (invocation, call) => invoke(worker, invocation, call.hostEndpoint))
+    .on(QueueDispatch.method.handle, (batch, call) => handleBatch(worker, batch, call.hostEndpoint))
+    .on(HookDispatch.method.handle, (event, call) => handleEvent(worker, event, call.hostEndpoint))
+    .on(CronDispatch.method.trigger, (trigger, call) => triggerCron(worker, trigger, call.hostEndpoint))
     .on(LogDispatch.method.handle, (delivery) => deliverLogs(worker, delivery));
 }
 

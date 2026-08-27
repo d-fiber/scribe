@@ -40,6 +40,14 @@ export const PROTO_CONTENT_TYPE = "application/proto";
 
 export const CAPABILITY_HEADER = "scribe-capability";
 
+/**
+ * The address of the replica that minted the token travelling beside it.
+ *
+ * A capability grant lives in the memory of the process that issued it, so a token is only
+ * redeemable at one address and the two have to travel together.
+ */
+export const HOST_HEADER = "scribe-host";
+
 export const PROTOCOL_HEADER = "scribe-protocol-version";
 
 export const TRACE_HEADER = "scribe-trace-id";

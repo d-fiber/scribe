@@ -56,19 +56,26 @@ function wait(ms: number): Future<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function ownCallbackUrl(port: number): string {
-  return `http://${Deno.hostname()}:${port}`;
+/**
+ * Where the worker reaches this replica, as the deployment names it or as the replica reads it.
+ *
+ * The hostname is the replica's own, never the name of the service: a capability grant lives in
+ * the memory of the process that issued it, so a shared name would send the worker to a replica
+ * where the grant is unknown.
+ */
+function callbackAddress(): string {
+  const { callbackUrl, callbackPort } = workerSettings.get();
+  return callbackUrl ?? `http://${Deno.hostname()}:${callbackPort}`;
 }
 
 async function handshake(client: WorkerClient, token: string): Future<Manifest> {
-  const { callbackUrl, callbackPort, handshakeAttempts, handshakeDelayMs } = workerSettings.get();
-  const address = callbackUrl ?? ownCallbackUrl(callbackPort);
-  console.log(`[worker-host] announcing ${address} as this replica's callback address`);
+  const { handshakeAttempts, handshakeDelayMs } = workerSettings.get();
+  console.log(`[worker-host] announcing ${client.callbackUrl} as this replica's callback address`);
 
   let last: unknown = null;
   for (let attempt = 1; attempt <= handshakeAttempts; attempt += 1) {
     try {
-      return await client.describe(address, token);
+      return await client.describe(token);
     } catch (cause) {
       last = cause;
       console.warn(`[worker-host] handshake attempt ${attempt} failed, retrying.`);
@@ -155,7 +162,7 @@ export const WorkerHost = {
 
     const token = issueBootstrap();
 
-    const client = new WorkerClient(endpoint);
+    const client = new WorkerClient(endpoint, callbackAddress());
     const manifest = await handshake(client, token);
     rejectIncompatible(manifest);
 

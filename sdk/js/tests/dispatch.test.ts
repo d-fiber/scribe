@@ -57,6 +57,8 @@ const encoder = new TextEncoder();
 
 const decoder = new TextDecoder();
 
+const HOST = "http://127.0.0.1:1";
+
 class AdminNode extends NodeRoot {
   protected override access(): Caller {
     return Caller.Admin;
@@ -128,7 +130,7 @@ Deno.test("an invocation reaches its handler and the response becomes a reply", 
     },
   ]);
 
-  const reply = await invoke(worker, invocationFor("admin:post:/brand/:brandId", { name: "Fiber" }));
+  const reply = await invoke(worker, invocationFor("admin:post:/brand/:brandId", { name: "Fiber" }), HOST);
 
   assertEquals(reply.status, 200);
   assertEquals(reply.invocationId, "inv-1");
@@ -139,7 +141,7 @@ Deno.test("an invocation reaches its handler and the response becomes a reply", 
 });
 
 Deno.test("an unknown route identifier fails loudly instead of guessing", async () => {
-  const reply = await invoke(workerWith([]), invocationFor("admin:get:/nope"));
+  const reply = await invoke(workerWith([]), invocationFor("admin:get:/nope"), HOST);
 
   assertEquals(reply.status, 500);
   assertEquals(reply.failure?.code, "unknown_route");
@@ -156,7 +158,7 @@ Deno.test("a handler that throws answers a failure the host can log", async () =
     },
   ]);
 
-  const reply = await invoke(worker, invocationFor("admin:post:/boom"));
+  const reply = await invoke(worker, invocationFor("admin:post:/boom"), HOST);
 
   assertEquals(reply.status, 500);
   assertEquals(reply.failure?.code, "handler_failed");

@@ -38,9 +38,24 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import type { CallCredentials } from "../transport/client.ts";
 
 export interface CallScopeState {
+  /** The grant the host handed this call, and the one every capability call inside it replays. */
   readonly capabilityToken: string;
+
+  /** The identifier that ties this call to the exchange it belongs to, empty when it belongs to none. */
   readonly traceId: string;
+
+  /** What the host called this invocation, empty for a call that answers no invocation. */
   readonly invocationId: string;
+
+  /**
+   * The address of the replica that handed this call its token.
+   *
+   * @remarks
+   * It travels with the token because a grant lives in the memory of the replica that issued it:
+   * calling any other replica back gets the grant refused as unknown. Empty means the host named
+   * none, and the channel then falls back to the one the handshake announced.
+   */
+  readonly hostEndpoint: string;
 
   /**
    * The node this call is running for, empty when it runs for none.
@@ -58,6 +73,7 @@ let ambient: CallScopeState = {
   capabilityToken: "",
   traceId: "",
   invocationId: "",
+  hostEndpoint: "",
   node: "",
 };
 
@@ -102,7 +118,7 @@ export const CallScope: CallScopeApi = {
   },
 
   credentials(): CallCredentials {
-    const { capabilityToken, traceId } = CallScope.current();
-    return { capabilityToken, traceId };
+    const { capabilityToken, traceId, hostEndpoint } = CallScope.current();
+    return { capabilityToken, traceId, hostEndpoint };
   },
 };

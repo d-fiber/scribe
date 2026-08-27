@@ -113,8 +113,8 @@ async function attach(
     nodes: [{ name: "app", public: true }, { name: "admin", public: false }],
   });
 
-  const client = new WorkerClient("http://worker.test", server.handler());
-  const manifest = await client.describe("http://127.0.0.1:1", "bootstrap");
+  const client = new WorkerClient("http://worker.test", "http://replica.test:4747", server.handler());
+  const manifest = await client.describe("bootstrap");
 
   return { sinks: new WorkerLogSinks(client, manifest), manifest };
 }

@@ -61,8 +61,18 @@ import { describeCause } from "../transport/failure.ts";
 import { RequestContext } from "./context.ts";
 import { CallScope } from "./scope.ts";
 
+/**
+ * Answers `invocation` with the route it names, under a scope bound to `hostEndpoint`.
+ *
+ * @param hostEndpoint - Where the token this invocation carries can be redeemed, which is the
+ * replica that sent it and not necessarily the one the handshake announced.
+ */
 // deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
-export async function invoke(worker: WorkerDefinition, invocation: Invocation): Promise<Reply> {
+export async function invoke(
+  worker: WorkerDefinition,
+  invocation: Invocation,
+  hostEndpoint: string,
+): Promise<Reply> {
   const mounted = worker.routeFor(invocation.routeId);
   if (!mounted) {
     return failedReply(
@@ -72,7 +82,7 @@ export async function invoke(worker: WorkerDefinition, invocation: Invocation): 
     );
   }
 
-  return CallScope.run(scopeOf(invocation, mounted.node), async () => {
+  return CallScope.run(scopeOf(invocation, mounted.node, hostEndpoint), async () => {
     try {
       const response = await mounted.route.handler(new RequestContext(invocation));
       return await replyFrom(invocation.invocationId, response);
@@ -116,8 +126,17 @@ export async function deliverLogs(
   return create(LogDeliveryAckSchema, {});
 }
 
+/**
+ * Hands `batch` to the queue it names, under a scope bound to `hostEndpoint`.
+ *
+ * @param hostEndpoint - Where the token this batch carries can be redeemed.
+ */
 // deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
-export async function handleBatch(worker: WorkerDefinition, batch: Batch): Promise<BatchOutcome> {
+export async function handleBatch(
+  worker: WorkerDefinition,
+  batch: Batch,
+  hostEndpoint: string,
+): Promise<BatchOutcome> {
   const queue = worker.queueFor(batch.queueId);
   if (!queue) {
     return create(BatchOutcomeSchema, {
@@ -144,6 +163,7 @@ export async function handleBatch(worker: WorkerDefinition, batch: Batch): Promi
       capabilityToken: batch.capabilityToken,
       traceId: batch.traceId,
       invocationId: batch.queueId,
+      hostEndpoint,
       node: "",
     },
     async () => {
@@ -171,8 +191,17 @@ export async function handleBatch(worker: WorkerDefinition, batch: Batch): Promi
   );
 }
 
+/**
+ * Hands `event` to the hook it names, under a scope bound to `hostEndpoint`.
+ *
+ * @param hostEndpoint - Where the token this event carries can be redeemed.
+ */
 // deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
-export async function handleEvent(worker: WorkerDefinition, event: Event): Promise<HandleResult> {
+export async function handleEvent(
+  worker: WorkerDefinition,
+  event: Event,
+  hostEndpoint: string,
+): Promise<HandleResult> {
   const hook = worker.hookFor(event.hookId);
   if (!hook) {
     return create(HandleResultSchema, {
@@ -188,6 +217,7 @@ export async function handleEvent(worker: WorkerDefinition, event: Event): Promi
       capabilityToken: event.capabilityToken,
       traceId: event.traceId,
       invocationId: event.hookId,
+      hostEndpoint,
       node: "",
     },
     async () => {
@@ -209,10 +239,16 @@ export async function handleEvent(worker: WorkerDefinition, event: Event): Promi
   );
 }
 
+/**
+ * Runs the cron `trigger` names, under a scope bound to `hostEndpoint`.
+ *
+ * @param hostEndpoint - Where the token this trigger carries can be redeemed.
+ */
 // deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
 export async function triggerCron(
   worker: WorkerDefinition,
   trigger: CronTrigger,
+  hostEndpoint: string,
 ): Promise<CronOutcome> {
   const cron = worker.cronFor(trigger.cronId);
   if (!cron) {
@@ -229,6 +265,7 @@ export async function triggerCron(
       capabilityToken: trigger.capabilityToken,
       traceId: trigger.traceId,
       invocationId: trigger.cronId,
+      hostEndpoint,
       node: "",
     },
     async () => {
@@ -247,11 +284,12 @@ export async function triggerCron(
   );
 }
 
-function scopeOf(invocation: Invocation, node: string) {
+function scopeOf(invocation: Invocation, node: string, hostEndpoint: string) {
   return {
     capabilityToken: invocation.capabilityToken,
     traceId: invocation.traceId,
     invocationId: invocation.invocationId,
+    hostEndpoint,
     node,
   };
 }
