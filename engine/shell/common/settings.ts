@@ -112,8 +112,8 @@ function publicNodes(): readonly string[] {
 }
 
 workerSettings.use({
-  endpoint: Deno.env.get("WORKER_ENDPOINT") ?? null,
-  callbackUrl: Deno.env.get("WORKER_CALLBACK_URL") ?? null,
+  endpoint: Deno.env.get("WORKER_ENDPOINT") || null,
+  callbackUrl: Deno.env.get("WORKER_CALLBACK_URL") || null,
   callbackPort: Number(Deno.env.get("WORKER_CALLBACK_PORT") ?? WORKER_CALLBACK_PORT),
   handshakeAttempts: WORKER_HANDSHAKE_ATTEMPTS,
   handshakeDelayMs: WORKER_HANDSHAKE_DELAY_MS,
