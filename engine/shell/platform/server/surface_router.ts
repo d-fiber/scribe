@@ -45,12 +45,13 @@ import type { Hono } from "hono";
  *
  * Everything else belongs to a node, and a node is named after a folder of the
  * project. The route scanner skips a folder whose name starts with `_`, so a
- * project cannot produce a node called `_health` or `_queue` however it names
- * its tree -- the prefix is what makes the host's own paths uncollidable
+ * project cannot produce a node called `_health`, `_queue` or `_codex` however it
+ * names its tree -- the prefix is what makes the host's own paths uncollidable
  * rather than merely unlikely.
  */
 const HEALTH_PATH = "/_health";
 const QUEUE_PREFIX = "/_queue";
+const CODEX_PREFIX = "/_codex";
 
 /**
  * Sends a request to the node that claims it.
@@ -62,9 +63,11 @@ const QUEUE_PREFIX = "/_queue";
  */
 export class SurfaceRouter {
   readonly #queue: Hono;
+  readonly #codex: Hono;
 
-  constructor(queue: Hono) {
+  constructor(queue: Hono, codex: Hono) {
     this.#queue = queue;
+    this.#codex = codex;
   }
 
   async route(pathname: string): Future<Response> {
@@ -73,6 +76,10 @@ export class SurfaceRouter {
 
       if (pathname === QUEUE_PREFIX || pathname.startsWith(`${QUEUE_PREFIX}/`)) {
         return await forward(this.#queue, pathname.slice(QUEUE_PREFIX.length) || "/");
+      }
+
+      if (pathname === CODEX_PREFIX || pathname.startsWith(`${CODEX_PREFIX}/`)) {
+        return await forward(this.#codex, pathname.slice(CODEX_PREFIX.length) || "/");
       }
 
       const node = NodeSurfaces.resolve(pathname);

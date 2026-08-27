@@ -36,6 +36,7 @@
 
 import "../../common/settings.ts";
 import "@scribe/runtime/support/edge_runtime_shim.ts";
+import { app as codexApp } from "./codex/codex.ts";
 import { app as queueApp } from "./queue/queue.ts";
 import { workerEnabled } from "@scribe/embedder/enabled.ts";
 import { ServerRuntime } from "./runtime.ts";
@@ -45,4 +46,4 @@ if (workerEnabled()) {
   await WorkerHost.attach();
 }
 
-await new ServerRuntime(queueApp).start();
+await new ServerRuntime(queueApp, codexApp).start();

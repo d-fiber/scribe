@@ -34,35 +34,29 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { serve } from "@scribe/kernel/http/serve/mod.ts";
-import { pathnameOf } from "@scribe/runtime/http/pathname.ts";
-import { RequestScope } from "@scribe/runtime/scope.ts";
-import type { Bootstrapper } from "../../common/bootstrapper.ts";
-import { Runtime } from "../../common/runtime.ts";
-import { MountedPackagesBootstrapper } from "./bootstrappers/mounted.ts";
-import { RequestLogBootstrapper } from "./bootstrappers/request_log.ts";
-import type { Hono } from "hono";
-import { SurfaceRouter } from "./surface_router.ts";
+import "../../../common/settings.ts";
+import { ServerResponse } from "@scribe/alchemy/route";
+import { Router } from "@scribe/kernel/http/routing/router.ts";
+import { serveFunction } from "@scribe/kernel/http/serve/mod.ts";
+import { Hono } from "hono";
+import { CodexMetricsEndpoint } from "./gauges.ts";
 
-export class ServerRuntime extends Runtime {
-  override readonly name = "server";
-
-  readonly #router: SurfaceRouter;
-
-  constructor(queue: Hono, codex: Hono) {
-    super();
-    this.#router = new SurfaceRouter(queue, codex);
-  }
-
-  protected override bootstrappers(): readonly Bootstrapper[] {
-    return [new MountedPackagesBootstrapper(), new RequestLogBootstrapper()];
-  }
-
-  protected override shutdownSignals(): readonly Deno.Signal[] {
-    return ["SIGTERM", "SIGINT"];
-  }
-
-  protected override listen(): void {
-    serve(() => this.#router.route(pathnameOf(RequestScope.get().url)));
+/**
+ * What the dashboard reads about the host, and nobody else does.
+ *
+ * @remarks
+ * The surface carries no secret and no write, but it does say how loaded a
+ * replica is, which is why it is answered only on the dashboard's own domain
+ * and only to a caller in the admin group. Both conditions live in the gateway:
+ * the host answers whoever reaches it, as it does for every other surface.
+ */
+class Codex extends Router {
+  protected routes(app: Hono): void {
+    app.get("/metrics", () => CodexMetricsEndpoint.handle());
+    app.all("*", () => ServerResponse.notFound());
   }
 }
+
+export const app = Codex.create();
+
+if (import.meta.main) serveFunction(app, "codex");
