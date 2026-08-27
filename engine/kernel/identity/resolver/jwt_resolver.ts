@@ -245,8 +245,11 @@ export class JwtIdentityResolver {
   private static async _fetchUser(
     jwt: string,
   ): Future<Record<string, unknown> | null> {
+    const authUrl = identitySettings.get().authUrl;
+    if (!authUrl) return null;
+
     try {
-      const res = await http.get(`${identitySettings.get().authUrl}/user`, {
+      const res = await http.get(`${authUrl}/user`, {
         headers: {
           "Content-Type": "application/json",
           apikey: identitySettings.get().anonKey,

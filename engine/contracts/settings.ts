@@ -35,9 +35,22 @@
 // LICENSE file, the LICENSE file governs.
 
 export interface IdentitySettings {
-  readonly authUrl: string;
+  /**
+   * The address of the service that publishes the JWKS, when one is mounted.
+   *
+   * Undefined for a project that mounts no identity package: there is no service
+   * to ask, and the verifier answers by refusing asymmetric tokens instead of
+   * keeping the process from starting.
+   */
+  readonly authUrl: string | undefined;
+
+  /** The key a caller with no session is given, as the gateway hands it out. */
   readonly anonKey: string;
+
+  /** The key that bypasses row level security, held by the engine alone. */
   readonly serviceRoleKey: string;
+
+  /** The shared secret symmetric tokens are signed with, when there is one. */
   readonly jwtSecret: string | undefined;
 }
 

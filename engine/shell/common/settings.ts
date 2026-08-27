@@ -76,7 +76,7 @@ databaseSettings.use({
   serviceRoleKey: required("SERVICE_KEY"),
 });
 identitySettings.use({
-  authUrl: required("AUTH_INTERNAL_URL"),
+  authUrl: Deno.env.get("AUTH_INTERNAL_URL"),
   anonKey: required("ANON_KEY"),
   serviceRoleKey: required("SERVICE_KEY"),
   jwtSecret: Deno.env.get("JWT_SECRET"),
