@@ -72,6 +72,9 @@ const DEFAULT_PORT = 8787;
 
 const DEFAULT_HOSTNAME = "0.0.0.0";
 
+/** The path an orchestrator asks for to know whether this worker is up. */
+const HEALTH_PATH = "/_health";
+
 export function workerServer(worker: WorkerDefinition): UnaryServer {
   return new UnaryServer()
     .on(Registration.method.describe, (handshake) => {
@@ -99,11 +102,26 @@ export function workerServer(worker: WorkerDefinition): UnaryServer {
     .on(LogDispatch.method.handle, (delivery) => deliverLogs(worker, delivery));
 }
 
+/**
+ * The handler a worker answers every request with.
+ *
+ * `GET /_health` is answered here rather than by the protocol server: the port
+ * speaks the registration protocol, which is POST only, so an orchestrator
+ * probing it with a plain GET is told the method is not allowed and never sees
+ * the worker come up, however well it is running.
+ */
 export function workerHandler(
   worker: WorkerDefinition,
 ): (request: Request) => Promise<Response> {
   const server = workerServer(worker);
-  return (request) => server.handle(request);
+
+  return (request) => {
+    if (request.method === "GET" && new URL(request.url).pathname === HEALTH_PATH) {
+      return Promise.resolve(new Response("ok", { headers: { "content-type": "text/plain" } }));
+    }
+
+    return server.handle(request);
+  };
 }
 
 export function serveWorker(
