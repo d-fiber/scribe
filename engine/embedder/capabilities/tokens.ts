@@ -50,7 +50,15 @@ export interface CapabilityGrant {
 }
 
 interface StoredGrant extends CapabilityGrant {
-  readonly expiresAt: number;
+  /**
+   * When this grant stops being redeemable, or `null` when it stands as long as the host holds it.
+   *
+   * A standing grant is not a longer-lived one: it is a grant whose life is an attachment rather
+   * than a stretch of time. The worker's bootstrap credential is the only one, and putting a
+   * figure on it made a host that runs longer than the figure lose the worker's ambient
+   * capabilities on a path nobody watches.
+   */
+  readonly expiresAt: number | null;
 }
 
 export class UnknownCapabilityToken extends Error {
@@ -61,6 +69,15 @@ export class UnknownCapabilityToken extends Error {
 }
 
 const grants = new Map<string, StoredGrant>();
+
+/**
+ * The token of the standing grant, when one stands.
+ *
+ * There is at most one, because there is one attached worker and this is the credential it calls
+ * back with outside any dispatch. Holding it is what lets a second attachment revoke the first
+ * one's: without that, every attachment left a live credential behind for the life of the process.
+ */
+let standingToken: string | null = null;
 
 /**
  * How long the store goes between two sweeps.
@@ -85,37 +102,76 @@ let sweptAt = 0;
  *
  * @param now - The moment the caller is working against.
  */
+function expired(grant: StoredGrant, now: number): boolean {
+  return grant.expiresAt !== null && grant.expiresAt <= now;
+}
+
 function sweep(now: number): void {
   if (now - sweptAt < SWEEP_EVERY_MS) return;
   sweptAt = now;
 
   for (const [token, grant] of grants) {
-    if (grant.expiresAt <= now) grants.delete(token);
+    if (expired(grant, now)) grants.delete(token);
   }
 }
 
 export const CapabilityTokens = {
-  issue(grant: CapabilityGrant, ttlMs: number = FALLBACK_TTL_MS): string {
+  /**
+   * Hands out a token for `grant`, good for `ttlMs`.
+   *
+   * @param ttlMs - How long the grant may be redeemed for, or `null` for one that stands until it
+   * is revoked. Only the worker's bootstrap credential is issued standing, because its life is the
+   * attachment and not a stretch of time.
+   */
+  issue(grant: CapabilityGrant, ttlMs: number | null = FALLBACK_TTL_MS): string {
     const now = Date.now();
     sweep(now);
 
     const token = crypto.randomUUID();
-    grants.set(token, { ...grant, expiresAt: now + ttlMs });
+    grants.set(token, { ...grant, expiresAt: ttlMs === null ? null : now + ttlMs });
     return token;
+  },
+
+  /**
+   * Hands out the one standing token of this host, revoking whatever stood before it.
+   *
+   * @remarks
+   * A standing grant is not a longer-lived one: it is a grant whose life is an attachment rather
+   * than a stretch of time. Only the worker's bootstrap credential is issued this way, and nothing
+   * ever hands it back, so replacing it is the only moment the previous one can be dropped.
+   */
+  standing(grant: CapabilityGrant): string {
+    if (standingToken !== null) CapabilityTokens.revoke(standingToken);
+
+    standingToken = CapabilityTokens.issue(grant, null);
+    return standingToken;
   },
 
   revoke(token: string): void {
     grants.delete(token);
+    if (token === standingToken) standingToken = null;
   },
 
   redeem(token: string): CapabilityGrant | null {
     const grant = grants.get(token);
     if (!grant) return null;
-    if (grant.expiresAt <= Date.now()) {
+    if (expired(grant, Date.now())) {
       grants.delete(token);
       return null;
     }
     return grant;
+  },
+
+  /**
+   * Whether `token` names a grant that may still be redeemed.
+   *
+   * It is what the capability port asks before it reads a body or names a procedure, so that a
+   * caller holding nothing learns nothing: without it, the port answers a wired procedure and an
+   * unwired one differently, which is the host's own surface read off by anybody who can reach
+   * the socket.
+   */
+  holds(token: string): boolean {
+    return CapabilityTokens.redeem(token) !== null;
   },
 
   run<T>(token: string, handler: () => Future<T>): Future<T> {

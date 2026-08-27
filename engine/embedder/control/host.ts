@@ -40,15 +40,13 @@ import { honoRouter } from "@scribe/kernel/http/routing/hono_router.ts";
 import { majorOf, PROTOCOL_VERSION } from "@scribe/sdk";
 import type { Manifest, NodeDeclaration } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import { workerSettings } from "@scribe/runtime/support/settings/worker.ts";
-import { capabilityServer } from "../capabilities/server.ts";
+import { capabilityHandler } from "../capabilities/server.ts";
 import { CapabilityTokens } from "../capabilities/tokens.ts";
 import { LogRoutes } from "@scribe/kernel/observability/log_routing.ts";
 import { WorkerLogSinks } from "./log_sinks.ts";
 import { mountManifest, NodeMountError } from "./mount.ts";
 import { NodeSurfaces } from "./node_surfaces.ts";
 import { WorkerClient } from "./client.ts";
-
-const BOOTSTRAP_TTL_MS = 86_400_000;
 
 const BOOTSTRAP_REQUEST = new Request("http://worker.bootstrap/");
 
@@ -80,6 +78,26 @@ async function handshake(client: WorkerClient, token: string): Future<Manifest> 
 
   const message = last instanceof Error ? last.message : String(last);
   throw new Error(`[worker-host] the worker never answered Describe: ${message}`);
+}
+
+/**
+ * The credential the worker calls back with outside any dispatch.
+ *
+ * @remarks
+ * The worker adopts it as its ambient token, so it is what a capability call made at wiring time
+ * or from a background task carries. Its life is the attachment, which is why it stands rather
+ * than running for a stretch of time: a day was long enough that nothing ever reached the end of
+ * it in a test, and a host that ran past it lost the worker's ambient capabilities to an
+ * `UnknownCapabilityToken` on a path nobody watches.
+ */
+function issueBootstrap(): string {
+  return CapabilityTokens.standing({
+    request: BOOTSTRAP_REQUEST,
+    bodyBytes: new Uint8Array(),
+    identity: null,
+    traceId: "",
+    invocationId: "",
+  });
 }
 
 function rejectIncompatible(manifest: Manifest): void {
@@ -131,22 +149,12 @@ export const WorkerHost = {
     const endpoint = settings.endpoint;
     if (endpoint === null) return;
 
-    const server = capabilityServer();
     Deno.serve(
-      { port: settings.callbackPort, hostname: "0.0.0.0" },
-      (request) => server.handle(request),
+      { port: settings.callbackPort, hostname: settings.callbackHostname },
+      capabilityHandler(),
     );
 
-    const token = CapabilityTokens.issue(
-      {
-        request: BOOTSTRAP_REQUEST,
-        bodyBytes: new Uint8Array(),
-        identity: null,
-        traceId: "",
-        invocationId: "",
-      },
-      BOOTSTRAP_TTL_MS,
-    );
+    const token = issueBootstrap();
 
     const client = new WorkerClient(endpoint);
     const manifest = await handshake(client, token);

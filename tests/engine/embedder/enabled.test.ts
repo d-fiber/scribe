@@ -43,6 +43,7 @@ const DEPLOYMENT: WorkerSettings = {
   endpoint: null,
   callbackUrl: null,
   callbackPort: 4747,
+  callbackHostname: "0.0.0.0",
   handshakeAttempts: 10,
   handshakeDelayMs: 1_000,
   publicNodes: [],

@@ -39,7 +39,10 @@ import { fromBinary } from "@bufbuild/protobuf";
 import { FailureSchema } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
 import { Storage } from "@scribe/sdk/gen/scribe/packages/storage/protocol/storage_pb.ts";
 import { procedurePath } from "@scribe/sdk/src/transport/wire.ts";
-import { capabilityServer } from "@scribe/embedder/capabilities/server.ts";
+import { capabilityHandler, capabilityServer } from "@scribe/embedder/capabilities/server.ts";
+import { CapabilityTokens } from "@scribe/embedder/capabilities/tokens.ts";
+import { Database } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
+import { assert } from "@std/assert";
 
 /** Calls `path` on the host's capability server, the way a worker would. */
 async function call(path: string): Promise<{ status: number; code: string; message: string }> {
@@ -65,4 +68,79 @@ Deno.test("a path the contract does not declare takes the same road", async () =
 
   assertEquals(answer.status, 501);
   assertStringIncludes(answer.message, "/scribe.v1.Nope/Call");
+});
+
+/** Calls the port the way anything on the network would, with `token` or with nothing. */
+function reach(path: string, token: string | null, body = new Uint8Array()): Request {
+  const headers = new Headers({ "content-type": "application/proto" });
+  if (token !== null) headers.set("scribe-capability", token);
+
+  return new Request(new URL(path, "http://host.test"), { method: "POST", headers, body: body as BodyInit });
+}
+
+Deno.test("the capability port answers a caller holding nothing the same way whatever it asks for", async () => {
+  const port = capabilityHandler();
+
+  const answers = await Promise.all(
+    [procedurePath(Database.method.execute), procedurePath(Storage.method.upload), "/scribe.v1.Nope/Call"]
+      .map((path) => port(reach(path, null))),
+  );
+
+  assertEquals(
+    answers.map((answer) => answer.status),
+    [401, 401, 401],
+    "a wired procedure answering differently from an unwired one is the host's surface read off by anybody",
+  );
+});
+
+Deno.test("the capability port refuses before it reads the body", async () => {
+  const port = capabilityHandler();
+  const request = reach(procedurePath(Database.method.execute), null, new Uint8Array(1024 * 1024));
+
+  const answer = await port(request);
+
+  assertEquals(answer.status, 401);
+  assertEquals(
+    request.bodyUsed,
+    false,
+    "a caller holding nothing must not be able to make the host hold a megabyte for it",
+  );
+});
+
+Deno.test("the capability port lets a token holder through to the named 501", async () => {
+  const port = capabilityHandler();
+  const token = CapabilityTokens.issue({
+    request: new Request("http://worker.bootstrap/"),
+    bodyBytes: new Uint8Array(),
+    identity: null,
+    traceId: "",
+    invocationId: "",
+  });
+
+  try {
+    const path = procedurePath(Storage.method.upload);
+    const answer = await port(reach(path, token));
+
+    assertEquals(answer.status, 501, "a worker that holds a token is owed the name of what it asked for");
+    const failure = fromBinary(FailureSchema, new Uint8Array(await answer.arrayBuffer()));
+    assertStringIncludes(failure.message, path);
+  } finally {
+    CapabilityTokens.revoke(token);
+  }
+});
+
+Deno.test("a token that has run out reaches no procedure at all", async () => {
+  const port = capabilityHandler();
+  const token = CapabilityTokens.issue({
+    request: new Request("http://worker.bootstrap/"),
+    bodyBytes: new Uint8Array(),
+    identity: null,
+    traceId: "",
+    invocationId: "",
+  }, -1);
+
+  const answer = await port(reach(procedurePath(Database.method.execute), token));
+
+  assertEquals(answer.status, 401);
+  assert(!CapabilityTokens.holds(token));
 });

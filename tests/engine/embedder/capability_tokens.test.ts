@@ -119,3 +119,50 @@ Deno.test("issuing does not walk the store on every call", async () => {
   );
   await Promise.resolve();
 });
+Deno.test("a standing grant outlives every stretch of time a figure could have named", async () => {
+  const token = CapabilityTokens.standing(grant());
+
+  assertEquals(
+    await CapabilityTokens.run(token, () => Promise.resolve("answered")),
+    "answered",
+    "the worker's ambient credential is the attachment, so a ttl on it is a day-long fuse nothing watches",
+  );
+
+  CapabilityTokens.revoke(token);
+});
+
+Deno.test("a second attachment revokes the credential the first one handed out", async () => {
+  const first = CapabilityTokens.standing(grant());
+  const second = CapabilityTokens.standing(grant());
+
+  await assertRejects(() => CapabilityTokens.run(first, () => Promise.resolve(null)), UnknownCapabilityToken);
+  assertEquals(
+    CapabilityTokens.holds(first),
+    false,
+    "nothing ever hands the token back, so replacing it is the only moment the old one can go",
+  );
+  assertEquals(await CapabilityTokens.run(second, () => Promise.resolve("answered")), "answered");
+
+  CapabilityTokens.revoke(second);
+});
+
+Deno.test("revoking the standing grant leaves nothing behind to revoke twice", async () => {
+  const token = CapabilityTokens.standing(grant());
+  CapabilityTokens.revoke(token);
+
+  const replacement = CapabilityTokens.standing(grant());
+  assertEquals(await CapabilityTokens.run(replacement, () => Promise.resolve("answered")), "answered");
+
+  CapabilityTokens.revoke(replacement);
+});
+
+Deno.test("holds answers for a token without spending it", () => {
+  const token = CapabilityTokens.issue(grant());
+
+  assertEquals(CapabilityTokens.holds(token), true);
+  assertEquals(CapabilityTokens.holds(token), true, "asking is not redeeming");
+  assertEquals(CapabilityTokens.holds("not-a-token"), false);
+  assertEquals(CapabilityTokens.holds(""), false);
+
+  CapabilityTokens.revoke(token);
+});

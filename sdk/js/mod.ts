@@ -135,4 +135,5 @@ export { SinkRegistry } from "./src/observability/sink_registry.ts";
 export { UnaryClient } from "./src/transport/client.ts";
 export type { CallCredentials, Fetcher } from "./src/transport/client.ts";
 export { TransportFailure } from "./src/transport/failure.ts";
-export { UnaryServer } from "./src/transport/server.ts";
+export { failureResponse, metadataOf, UnaryServer } from "./src/transport/server.ts";
+export type { CallMetadata } from "./src/transport/server.ts";

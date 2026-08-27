@@ -89,6 +89,14 @@ RateLimiters.use(new RedisRateLimiters());
 
 const WORKER_CALLBACK_PORT = 4747;
 
+/**
+ * The interface the capability port binds to when the deployment names none.
+ *
+ * Every interface, which is what a container with one network needs. A deployment that has more
+ * than one, or that publishes the port, names the address the worker calls instead.
+ */
+const WORKER_CALLBACK_HOSTNAME = "0.0.0.0";
+
 const WORKER_HANDSHAKE_ATTEMPTS = 10;
 
 const WORKER_HANDSHAKE_DELAY_MS = 1_000;
@@ -115,6 +123,7 @@ workerSettings.use({
   endpoint: Deno.env.get("WORKER_ENDPOINT") || null,
   callbackUrl: Deno.env.get("WORKER_CALLBACK_URL") || null,
   callbackPort: Number(Deno.env.get("WORKER_CALLBACK_PORT") ?? WORKER_CALLBACK_PORT),
+  callbackHostname: Deno.env.get("WORKER_CALLBACK_HOSTNAME") || WORKER_CALLBACK_HOSTNAME,
   handshakeAttempts: WORKER_HANDSHAKE_ATTEMPTS,
   handshakeDelayMs: WORKER_HANDSHAKE_DELAY_MS,
   publicNodes: publicNodes(),

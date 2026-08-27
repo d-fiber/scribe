@@ -91,6 +91,17 @@ export interface WorkerSettings {
    */
   readonly callbackUrl: string | null;
   readonly callbackPort: number;
+
+  /**
+   * The interface the capability port binds to.
+   *
+   * @remarks
+   * That port is the host's own capability surface: whoever reaches it and holds a token reads and
+   * writes through the service role. `0.0.0.0` is what a container with one network needs and it is
+   * the default, but it is a default and not a law: a replica sitting on more than one network, or
+   * one whose port is published, wants the address the worker actually calls and nothing else.
+   */
+  readonly callbackHostname: string;
   readonly handshakeAttempts: number;
   readonly handshakeDelayMs: number;
   readonly publicNodes: readonly string[];

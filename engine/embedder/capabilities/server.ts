@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { TransportFailure, UnaryServer } from "@scribe/sdk";
+import { failureResponse, metadataOf, TransportFailure, UnaryServer } from "@scribe/sdk";
 import { Cache } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/cache_pb.ts";
 import { Queue } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/queue_pb.ts";
 import { Hook } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/hook_pb.ts";
@@ -99,4 +99,32 @@ export function capabilityServer(): UnaryServer {
       501,
     );
   });
+}
+
+/**
+ * The handler the capability port answers with, gate included.
+ *
+ * @remarks
+ * The gate is here and not in each procedure, for the reason {@link capabilityServer} gives about
+ * replaying the token: what every handler has to remember, one of them will forget. It also runs
+ * *before* the protocol server, which is what the per-handler wrapper could never do. Without it a
+ * caller holding nothing still had the whole body read into memory before anything looked at its
+ * token, and still learned which procedures the host wires from the difference between the answer
+ * to a wired one and the named 501 of an unwired one.
+ *
+ * {@link capabilityServer} keeps answering that 501, because a worker that holds a token and asks
+ * for a procedure nobody wired is owed the name of what it asked for.
+ */
+export function capabilityHandler(): (request: Request) => Promise<Response> {
+  const server = capabilityServer();
+
+  return (request) => {
+    if (!CapabilityTokens.holds(metadataOf(request).capabilityToken)) {
+      return Promise.resolve(failureResponse(
+        new TransportFailure("unauthorized", "This port answers a capability token and nothing else.", 401),
+      ));
+    }
+
+    return server.handle(request);
+  };
 }
