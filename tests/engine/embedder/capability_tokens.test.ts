@@ -102,23 +102,25 @@ Deno.test("an expired token is refused, whether or not a sweep has run since", (
   assertEquals(CapabilityTokens.redeem(third), null, "an expired token survived a gated sweep");
 });
 
-Deno.test("issuing does not walk the store on every call", async () => {
-  const held: string[] = [];
-  for (let i = 0; i < 20_000; i++) held.push(CapabilityTokens.issue(grant(), 60_000));
+Deno.test("issuing does not walk the store on every call", () => {
+  // The first issue leaves the sweep gate closed behind it, whether it swept or was itself gated,
+  // so what the loop below observes is the gate and not where the previous test left the clock.
+  const opened = CapabilityTokens.issue(grant(), 60_000);
+  const before = CapabilityTokens.size;
 
-  const started = performance.now();
-  for (let i = 0; i < 2_000; i++) CapabilityTokens.issue(grant(), 60_000);
-  const each = (performance.now() - started) / 2_000;
+  const held = [opened];
+  for (let issued = 0; issued < 200; issued++) held.push(CapabilityTokens.issue(grant(), -1));
 
+  const grew = CapabilityTokens.size - before;
   for (const token of held) CapabilityTokens.revoke(token);
 
   assertEquals(
-    each < 0.05,
-    true,
-    `issuing against a store of 20000 grants took ${each.toFixed(4)} ms a call, which is what a walk costs`,
+    grew,
+    200,
+    "a sweep on every issue would have reaped these as they arrived, which is the store walked once a call",
   );
-  await Promise.resolve();
 });
+
 Deno.test("a standing grant outlives every stretch of time a figure could have named", async () => {
   const token = CapabilityTokens.standing(grant());
 
