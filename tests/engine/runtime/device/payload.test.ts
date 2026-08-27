@@ -36,12 +36,15 @@
 
 import "@scribe/testing/settings.ts";
 import { ClientType, DeviceCategory, DeviceOs, DeviceThemeMode, Localization } from "@scribe/contracts/enums.ts";
-import { decryptRequestDevice } from "@scribe/runtime/device/device.ts";
+import { decryptRequestDevice, requestDevice } from "@scribe/runtime/device/device.ts";
 import {
   DEVICE_PAYLOAD_MAX_AGE_MS,
   DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS,
 } from "@scribe/runtime/device/payload/freshness.ts";
 import { DevicePayloadValidator } from "@scribe/runtime/device/payload/validator.ts";
+import { RequestIdentityCache } from "@scribe/runtime/http/accessors/identity.ts";
+import { RequestScope } from "@scribe/runtime/scope.ts";
+import type { RequestUser } from "@scribe/alchemy/route";
 import { installValkeryMock } from "@scribe/foundation/testing";
 import { assert, assertEquals } from "@std/assert";
 import { spy } from "@std/testing/mock";
@@ -455,6 +458,85 @@ Deno.test("cache: a payload sealed for another binding stays refused when cached
       "the cache holds the plaintext, never a verdict: the rightful caller still passes",
     );
     assertEquals(rightful.binding, "user-2");
+  } finally {
+    kv.restore();
+  }
+});
+
+/** Runs `run` inside a request carrying `headers`, proved by `caller` when there is one. */
+function calling<T>(headers: Record<string, string>, caller: RequestUser | null, run: () => T): T {
+  const req = new Request("http://api.test/auth/sign-in", { headers: new Headers(headers) });
+
+  return RequestScope.run(req, new Uint8Array(0), () => {
+    RequestIdentityCache.seed(caller);
+    return run();
+  }, "127.0.0.1");
+}
+
+const SIGNED_IN: RequestUser = {
+  id: BINDING,
+  caller: "authenticated",
+  role: "",
+  permissions: [],
+  claims: {},
+};
+
+Deno.test("binding: a payload bound to nobody is taken by nobody", async () => {
+  const kv = installValkeryMock();
+  try {
+    const sealed = await seal(nominalPayload({ binding: "" }));
+
+    assertEquals(
+      await calling({ "x-device-payload": sealed }, null, () => requestDevice()),
+      null,
+      "an empty binding used to match every anonymous call carrying no key: one forged payload was a device for everybody",
+    );
+    assertEquals(
+      await calling({ "x-device-payload": sealed, "x-app-key": "" }, null, () => requestDevice()),
+      null,
+      "an empty header value is not an application key",
+    );
+    assertEquals(
+      await calling({ "x-device-payload": sealed, "x-admin-app-key": "" }, null, () => requestDevice()),
+      null,
+    );
+  } finally {
+    kv.restore();
+  }
+});
+
+Deno.test("binding: an anonymous caller presenting its application key still carries a device", async () => {
+  const kv = installValkeryMock();
+  try {
+    const sealed = await seal(nominalPayload({ binding: "app-key-1" }));
+
+    const device = await calling(
+      { "x-device-payload": sealed, "x-app-key": "app-key-1" },
+      null,
+      () => requestDevice(),
+    );
+
+    assert(device, "sign-in is anonymous by definition, and it is where the device signal matters most");
+    assertEquals(device.device_id, "device-1");
+  } finally {
+    kv.restore();
+  }
+});
+
+Deno.test("binding: a signed-in caller binds to its account and not to the key it also sent", async () => {
+  const kv = installValkeryMock();
+  try {
+    const forAccount = await seal(nominalPayload({ binding: BINDING }));
+    const forKey = await seal(nominalPayload({ binding: "app-key-1" }));
+
+    assert(
+      await calling({ "x-device-payload": forAccount, "x-app-key": "app-key-1" }, SIGNED_IN, () => requestDevice()),
+    );
+    assertEquals(
+      await calling({ "x-device-payload": forKey, "x-app-key": "app-key-1" }, SIGNED_IN, () => requestDevice()),
+      null,
+      "the account comes first, so a key-bound payload does not follow a session around",
+    );
   } finally {
     kv.restore();
   }

@@ -80,12 +80,30 @@ function resolveDevice(): Future<RequestDevice | null> {
     return Promise.resolve(null);
   }
 
-  return decryptRequestDevice(encrypted, currentBinding());
+  const binding = currentBinding();
+  if (binding === null) return Promise.resolve(null);
+
+  return decryptRequestDevice(encrypted, binding);
 }
 
-function currentBinding(): string {
-  return currentIdentity()?.id ??
-    request.header("x-admin-app-key") ??
-    request.header("x-app-key") ??
-    "";
+/** The header `name` carries, or null when it carries nothing, an empty value included. */
+function named(name: string): string | null {
+  return request.header(name) || null;
+}
+
+/**
+ * What this call binds a device payload to, or null when it binds it to nothing.
+ *
+ * @remarks
+ * A session identifier, else the application key, which is what an anonymous caller has. What
+ * there is no third case of is *nothing*: a payload sealed against an empty binding matched every
+ * anonymous call carrying no key, so one forged payload was a device for the whole population, and
+ * the nonce that would have made it single-use is optional. An empty header value read as a key
+ * reached the same place by the other road.
+ *
+ * The refusal is silent, like an unreadable sealed box: it is a normal case anybody can provoke,
+ * and a line per attempt is a log an attacker writes.
+ */
+function currentBinding(): string | null {
+  return currentIdentity()?.id ?? named("x-admin-app-key") ?? named("x-app-key");
 }
