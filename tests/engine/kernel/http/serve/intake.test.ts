@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import "@scribe/testing/settings.ts";
-import { readBoundedBody } from "@scribe/kernel/http/serve/body_reader.ts";
+import { type BodyIntake, readBoundedBody } from "@scribe/kernel/http/serve/body_reader.ts";
 import { stripPrefix } from "@scribe/runtime/http/pathname.ts";
 import { rewriteRequest } from "@scribe/kernel/http/serve/request_rewrite.ts";
 import { admitBody, inflightBodyBytes, releaseBody } from "@scribe/kernel/http/serve/body_admission.ts";
@@ -62,10 +62,17 @@ function jsonRequest(body: string): Request {
   });
 }
 
-Deno.test("readBoundedBody returns the whole body when it fits", async () => {
-  const bytes = await readBoundedBody(jsonRequest('{"a":1}'), MAX_BODY_BYTES);
+function bodyOf(intake: BodyIntake): Uint8Array {
+  assert(intake.ok, "the body was refused");
+  return intake.bytes;
+}
 
-  assertEquals(new TextDecoder().decode(bytes!), '{"a":1}');
+function textOf(intake: BodyIntake): string {
+  return new TextDecoder().decode(bodyOf(intake));
+}
+
+Deno.test("readBoundedBody returns the whole body when it fits", async () => {
+  assertEquals(textOf(await readBoundedBody(jsonRequest('{"a":1}'), MAX_BODY_BYTES)), '{"a":1}');
 });
 
 Deno.test("readBoundedBody reassembles a body split across chunks", async () => {
@@ -81,13 +88,14 @@ Deno.test("readBoundedBody reassembles a body split across chunks", async () => 
     body: stream,
   });
 
-  const bytes = await readBoundedBody(req, MAX_BODY_BYTES);
-
-  assertEquals(new TextDecoder().decode(bytes!), "hello world");
+  assertEquals(textOf(await readBoundedBody(req, MAX_BODY_BYTES)), "hello world");
 });
 
-Deno.test("readBoundedBody yields null past the bound instead of buffering on", async () => {
-  assertEquals(await readBoundedBody(jsonRequest("x".repeat(50)), 10), null);
+Deno.test("readBoundedBody refuses past the bound instead of buffering on", async () => {
+  const intake = await readBoundedBody(jsonRequest("x".repeat(50)), 10);
+
+  assertEquals(intake.ok, false);
+  assertEquals(intake.ok ? null : intake.refusal, "too-large");
 });
 
 Deno.test("readBoundedBody fills the declared buffer once instead of copying twice", async () => {
@@ -100,26 +108,47 @@ Deno.test("readBoundedBody fills the declared buffer once instead of copying twi
   });
   const req = new Request("http://api.test/", { method: "POST", body: stream });
 
-  const bytes = await readBoundedBody(req, MAX_BODY_BYTES, 11);
-
-  assertEquals(new TextDecoder().decode(bytes!), "hello world");
+  assertEquals(textOf(await readBoundedBody(req, MAX_BODY_BYTES, 11)), "hello world");
 });
 
 Deno.test("readBoundedBody trims a body that came in under its declared length", async () => {
-  const bytes = await readBoundedBody(jsonRequest('{"a":1}'), MAX_BODY_BYTES, 64);
+  const bytes = bodyOf(await readBoundedBody(jsonRequest('{"a":1}'), MAX_BODY_BYTES, 64));
 
   assertEquals(
-    new TextDecoder().decode(bytes!),
+    new TextDecoder().decode(bytes),
     '{"a":1}',
     "the preallocated tail must not be handed on as body bytes",
   );
-  assertEquals(bytes?.byteLength, 7);
+  assertEquals(bytes.byteLength, 7);
+});
+
+Deno.test("readBoundedBody holds on to nothing more than the body that arrived", async () => {
+  const declared = 8 * 1024 * 1024;
+
+  const bytes = bodyOf(await readBoundedBody(jsonRequest('{"a":1}'), MAX_BODY_BYTES, declared));
+
+  assertEquals(
+    bytes.buffer.byteLength,
+    bytes.byteLength,
+    "a sub-view over the declared buffer pins the whole declaration for as long as the request lives: " +
+      "seven bytes of body would hold eight megabytes",
+  );
+});
+
+Deno.test("readBoundedBody keeps the single buffer when the body fills what it declared", async () => {
+  const body = '{"a":1}';
+  const bytes = bodyOf(await readBoundedBody(jsonRequest(body), MAX_BODY_BYTES, body.length));
+
+  assertEquals(bytes.byteOffset, 0);
+  assertEquals(bytes.buffer.byteLength, body.length, "an honest content-length must not cost a second copy");
 });
 
 Deno.test("readBoundedBody refuses a body that overruns what it declared", async () => {
+  const intake = await readBoundedBody(jsonRequest("x".repeat(50)), MAX_BODY_BYTES, 10);
+
   assertEquals(
-    await readBoundedBody(jsonRequest("x".repeat(50)), MAX_BODY_BYTES, 10),
-    null,
+    intake.ok ? null : intake.refusal,
+    "too-large",
     "a content-length that lies low bought a small reservation and must not outgrow it",
   );
 });
@@ -127,7 +156,25 @@ Deno.test("readBoundedBody refuses a body that overruns what it declared", async
 Deno.test("readBoundedBody treats a body-less request as empty, not as an error", async () => {
   const req = new Request("http://api.test/", { method: "GET" });
 
-  assertEquals((await readBoundedBody(req, MAX_BODY_BYTES))?.byteLength, 0);
+  assertEquals(bodyOf(await readBoundedBody(req, MAX_BODY_BYTES)).byteLength, 0);
+});
+
+Deno.test("readBoundedBody tells a body that stopped mid-flight apart from one that was never sent", async () => {
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode('{"amount":10'));
+      controller.error(new Error("connection reset"));
+    },
+  });
+  const req = new Request("http://api.test/", { method: "POST", body: stream });
+
+  const intake = await readBoundedBody(req, MAX_BODY_BYTES);
+
+  assertEquals(
+    intake.ok ? null : intake.refusal,
+    "unreadable",
+    "half a body read as a whole one is how a dropped connection turns into an accepted write",
+  );
 });
 
 Deno.test("admitBody charges a non-multipart request to the in-flight budget too", () => {

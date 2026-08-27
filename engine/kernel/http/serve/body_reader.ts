@@ -37,7 +37,27 @@
 import type { Future } from "@scribe/alchemy";
 
 /**
- * Reads the whole request body, or `null` once it grows past `maxBytes`.
+ * Why a body was not handed on.
+ *
+ * `too-large` is the caller's own doing, and answers 413. `unreadable` is a body that stopped
+ * mid-flight, which answers 400: the bytes that did arrive are half of something, and reading
+ * them as a whole request is how a truncated write turns into an accepted one.
+ */
+export type BodyRefusal = "too-large" | "unreadable";
+
+/** What reading a request body produced: the bytes, or the reason there are none. */
+export type BodyIntake =
+  | { readonly ok: true; readonly bytes: Uint8Array }
+  | { readonly ok: false; readonly refusal: BodyRefusal };
+
+const EMPTY: BodyIntake = { ok: true, bytes: new Uint8Array(0) };
+
+function refused(refusal: BodyRefusal): BodyIntake {
+  return { ok: false, refusal };
+}
+
+/**
+ * Reads the whole request body, or says why it could not.
  *
  * Pass `declaredBytes` when the request announced a content-length: the
  * destination is then allocated once and written through, instead of holding
@@ -52,8 +72,8 @@ export async function readBoundedBody(
   req: Request,
   maxBytes: number,
   declaredBytes: number | null = null,
-): Future<Uint8Array | null> {
-  if (!req.body) return new Uint8Array(0);
+): Future<BodyIntake> {
+  if (!req.body) return EMPTY;
 
   const bound = declaredBytes === null ? maxBytes : Math.min(declaredBytes, maxBytes);
   const reader = req.body.getReader();
@@ -68,7 +88,7 @@ export async function readBoundedBody(
 
       if (total + value.byteLength > bound) {
         await reader.cancel().catch(() => {});
-        return null;
+        return refused("too-large");
       }
 
       if (preallocated !== null) preallocated.set(value, total);
@@ -78,10 +98,22 @@ export async function readBoundedBody(
     }
   } catch (error) {
     console.error("[serve] could not read the request body:", error);
-    return new Uint8Array(0);
+    return refused("unreadable");
   }
 
-  return preallocated !== null ? preallocated.subarray(0, total) : joined(chunks, total);
+  return { ok: true, bytes: preallocated !== null ? exactly(preallocated, total) : joined(chunks, total) };
+}
+
+/**
+ * The written prefix of `preallocated`, holding on to nothing more than that.
+ *
+ * A sub-view over the declared buffer keeps the whole allocation alive for as long as the request
+ * does, so a caller announcing a hundred megabytes and sending seven bytes pins a hundred
+ * megabytes. The copy is paid only when the body came in short, and it costs exactly what the
+ * undeclared path pays on every request.
+ */
+function exactly(preallocated: Uint8Array, total: number): Uint8Array {
+  return total === preallocated.byteLength ? preallocated : preallocated.slice(0, total);
 }
 
 function joined(chunks: readonly Uint8Array[], total: number): Uint8Array {

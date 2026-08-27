@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "@scribe/alchemy";
-import { readBoundedBody } from "@scribe/kernel/http/serve/body_reader.ts";
+import { type BodyRefusal, readBoundedBody } from "@scribe/kernel/http/serve/body_reader.ts";
 import { ServerResponse } from "@scribe/alchemy/route";
 import { pathnameOf, stripPrefix } from "@scribe/runtime/http/pathname.ts";
 import { rewriteRequest } from "@scribe/kernel/http/serve/request_rewrite.ts";
@@ -54,14 +54,14 @@ export function serve(handler: () => Response | Future<Response>): void {
     if (admission === null) return bodyRefused();
 
     try {
-      const bodyBytes = await readBoundedBody(
+      const intake = await readBoundedBody(
         req,
         admission.maxBodyBytes,
         admission.declaredBytes,
       );
-      if (bodyBytes === null) return ServerResponse.payloadTooLarge();
+      if (!intake.ok) return bodyRefusal(intake.refusal);
 
-      return await RequestScope.run(req, bodyBytes, handler, peerOf(info));
+      return await RequestScope.run(req, intake.bytes, handler, peerOf(info));
     } finally {
       releaseBody(admission);
     }
@@ -85,6 +85,17 @@ export function serveFunction(app: Hono, name: string): void {
     const pathname = pathnameOf(RequestScope.get().url);
     return forward(root, stripPrefix(pathname, name));
   });
+}
+
+/**
+ * What a body that never made it answers.
+ *
+ * A body that overran what it declared is the caller's own doing, so it is a 413. One that stopped
+ * mid-flight is a 400: what arrived is half a request, and answering it as a whole one is how a
+ * dropped connection turns into an accepted write.
+ */
+function bodyRefusal(refusal: BodyRefusal): Response {
+  return refusal === "too-large" ? ServerResponse.payloadTooLarge() : ServerResponse.badRequest();
 }
 
 function bodyRefused(): Response {
