@@ -41,8 +41,26 @@ import type { JWTPayload, JWTVerifyResult } from "jose";
 
 const _SYMMETRIC_ALGS = ["HS256"];
 const _ASYMMETRIC_ALGS = ["ES256", "RS256"];
+
+/** Every algorithm this framework can verify a bearer token with. */
+export const KNOWN_JWT_ALGORITHMS: readonly string[] = [..._SYMMETRIC_ALGS, ..._ASYMMETRIC_ALGS];
+
 const _AUDIENCE = "authenticated";
 const _END_USER_ROLE = "authenticated";
+
+/**
+ * Whether the deployment lets a token be signed with `alg`.
+ *
+ * @remarks
+ * Naming none is naming all, which keeps a deployment that has said nothing on the behaviour it
+ * had. What it costs is written on {@link IdentitySettings.jwtAlgorithms}: the accepted set is
+ * then whatever key material happens to be configured, and `JWT_SECRET` is configured because
+ * PostgREST needs it whether or not any token is signed with it.
+ */
+function _declared(alg: string): boolean {
+  const declared = identitySettings.get().jwtAlgorithms;
+  return declared.length === 0 || declared.includes(alg);
+}
 
 function _isEndUserToken(payload: JWTPayload): boolean {
   const { sub, role } = payload as JWTPayload & { role?: unknown };
@@ -118,6 +136,7 @@ function symmetricKey(secret: string): Future<CryptoKey> {
 
 function verificationFor(alg: string | undefined): Verification | null {
   if (alg === undefined) return null;
+  if (!_declared(alg)) return null;
 
   if (_SYMMETRIC_ALGS.includes(alg)) {
     const secret = identitySettings.get().jwtSecret;

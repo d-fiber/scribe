@@ -228,3 +228,37 @@ Deno.test("verify: the key set follows the address, instead of freezing on the f
     );
   });
 });
+
+/** Runs `run` with `jwtAlgorithms` declared, putting back what was there. */
+async function declaring(jwtAlgorithms: readonly string[], run: () => Promise<void>): Promise<void> {
+  const held = identitySettings.get();
+  identitySettings.use({ ...held, jwtAlgorithms });
+  try {
+    await run();
+  } finally {
+    identitySettings.use(held);
+  }
+}
+
+Deno.test("verify: a deployment that declares nothing takes what it has key material for", async () => {
+  await declaring([], async () => {
+    assertNotEquals(await JwtVerifier.verify(await endUser()), null);
+  });
+});
+
+Deno.test("verify: a deployment that names its algorithms refuses the ones it did not name", async () => {
+  await declaring(["ES256"], async () => {
+    assertEquals(
+      await JwtVerifier.verify(await endUser()),
+      null,
+      "JWT_SECRET is held by PostgREST, by the gateway and by the auth package, so a deployment " +
+        "signing ES256 needs a way to stop taking tokens forged with it",
+    );
+  });
+});
+
+Deno.test("verify: naming both is what a rotation does while the old tokens live out their hour", async () => {
+  await declaring(["ES256", "HS256"], async () => {
+    assertNotEquals(await JwtVerifier.verify(await endUser()), null);
+  });
+});

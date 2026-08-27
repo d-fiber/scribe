@@ -52,6 +52,21 @@ export interface IdentitySettings {
 
   /** The shared secret symmetric tokens are signed with, when there is one. */
   readonly jwtSecret: string | undefined;
+
+  /**
+   * The signing algorithms this deployment accepts on a bearer token.
+   *
+   * @remarks
+   * Empty means whatever there is key material for, which is what a deployment that has not
+   * thought about it gets. That default is wider than it looks: `JWT_SECRET` is held by PostgREST,
+   * by the edge gateway and by the auth package, so a deployment whose identity service signs
+   * ES256 still takes an HS256 token forged with a secret three other components hold, and had no
+   * way to say otherwise.
+   *
+   * Naming them closes that, and naming both is what a rotation does while the old tokens live
+   * out their hour.
+   */
+  readonly jwtAlgorithms: readonly string[];
 }
 
 export interface FirewallSettings {

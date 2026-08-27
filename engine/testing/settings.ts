@@ -60,6 +60,7 @@ export function installTestSettings(): void {
     anonKey: optional("ANON_KEY", "anon"),
     serviceRoleKey: optional("SERVICE_KEY", "service"),
     jwtSecret: Deno.env.get("JWT_SECRET"),
+    jwtAlgorithms: [],
   });
   firewallSettings.use({ internalSecret: optional("INTERNAL_SECRET", "internal") });
   deviceSettings.use({

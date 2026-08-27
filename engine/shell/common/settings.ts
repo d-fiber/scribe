@@ -46,6 +46,7 @@ import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
 import { RateLimiters } from "@scribe/alchemy";
 import { workerSettings } from "@scribe/runtime/support/settings/worker.ts";
+import { KNOWN_JWT_ALGORITHMS } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
 
 /**
  * The port the persistent runtime listens on when the deployment names none.
@@ -75,11 +76,36 @@ databaseSettings.use({
   anonKey: required("ANON_KEY"),
   serviceRoleKey: required("SERVICE_KEY"),
 });
+/**
+ * The algorithms a bearer token may be signed with, as the deployment names them.
+ *
+ * @remarks
+ * A name the framework does not know refuses at boot rather than being dropped: `ES256,RSA256` is
+ * a typo that would otherwise narrow the deployment to one algorithm in silence, which is the
+ * quietest way to lock every caller out at the next rotation.
+ */
+function jwtAlgorithms(): readonly string[] {
+  const declared = Deno.env.get("JWT_ALGORITHMS");
+  if (!declared) return [];
+
+  const named = declared.split(",").map((name) => name.trim()).filter((name) => name !== "");
+  const unknown = named.filter((name) => !KNOWN_JWT_ALGORITHMS.includes(name));
+  if (unknown.length > 0) {
+    throw new Error(
+      `JWT_ALGORITHMS names ${unknown.join(", ")}, which this framework cannot verify. ` +
+        `It knows ${KNOWN_JWT_ALGORITHMS.join(", ")}.`,
+    );
+  }
+
+  return named;
+}
+
 identitySettings.use({
   authUrl: Deno.env.get("AUTH_INTERNAL_URL"),
   anonKey: required("ANON_KEY"),
   serviceRoleKey: required("SERVICE_KEY"),
   jwtSecret: Deno.env.get("JWT_SECRET"),
+  jwtAlgorithms: jwtAlgorithms(),
 });
 firewallSettings.use({ internalSecret: required("INTERNAL_SECRET") });
 deviceSettings.use({ payloadPrivateKeyHex: required("DEVICE_PAYLOAD_PRIVATE_KEY") });
