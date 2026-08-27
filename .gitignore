@@ -7,10 +7,6 @@
 /web/*
 !/web/.gitkeep
 
-/postgres/
-/storage/
-/opensearch/
-
 node_modules/
 
 sdk/dart/.dart_tool/
