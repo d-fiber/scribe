@@ -94,7 +94,6 @@ function issueBootstrap(): string {
   return CapabilityTokens.standing({
     request: BOOTSTRAP_REQUEST,
     bodyBytes: new Uint8Array(),
-    identity: null,
     traceId: "",
     invocationId: "",
   });

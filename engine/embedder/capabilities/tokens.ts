@@ -44,7 +44,19 @@ const FALLBACK_TTL_MS = 300_000;
 export interface CapabilityGrant {
   readonly request: Request;
   readonly bodyBytes: Uint8Array;
-  readonly identity: RequestUser | null;
+
+  /**
+   * Who the invocation this grant came from proved, or `null` when it proved nobody.
+   *
+   * @remarks
+   * Left out entirely when no invocation came in at all, which is the worker's standing
+   * credential and nothing else. The three cases are not two: `null` is an anonymous caller and
+   * reads no row of an owned table, while absent is nobody having asked, which `ownerScope`
+   * refuses outright rather than narrowing. Seeding `null` for both made a credential that
+   * answered no request pass for a request that proved nobody.
+   */
+  readonly identity?: RequestUser | null;
+
   readonly traceId: string;
   readonly invocationId: string;
 }
@@ -140,7 +152,7 @@ export const CapabilityTokens = {
    * than a stretch of time. Only the worker's bootstrap credential is issued this way, and nothing
    * ever hands it back, so replacing it is the only moment the previous one can be dropped.
    */
-  standing(grant: CapabilityGrant): string {
+  standing(grant: Omit<CapabilityGrant, "identity">): string {
     if (standingToken !== null) CapabilityTokens.revoke(standingToken);
 
     standingToken = CapabilityTokens.issue(grant, null);
@@ -179,7 +191,10 @@ export const CapabilityTokens = {
     if (!grant) return Promise.reject(new UnknownCapabilityToken());
 
     return RequestScope.run(grant.request, grant.bodyBytes, () => {
-      RequestIdentityCache.seed(grant.identity);
+      // Seeded only when an invocation came in. Seeding `null` for a grant that answered no
+      // request tells the rest of the process that somebody called and proved nobody, which is
+      // the one thing `currentPrincipal` exists to tell apart.
+      if (grant.identity !== undefined) RequestIdentityCache.seed(grant.identity);
       return handler();
     });
   },

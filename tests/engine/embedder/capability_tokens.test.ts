@@ -36,7 +36,7 @@
 
 import type { RequestUser } from "@scribe/alchemy/route";
 import { assertEquals, assertRejects } from "@std/assert";
-import { currentIdentity } from "@scribe/runtime/http/accessors/identity.ts";
+import { currentIdentity, currentPrincipal } from "@scribe/runtime/http/accessors/identity.ts";
 import { request } from "@scribe/runtime/http/request.ts";
 import { CapabilityTokens, UnknownCapabilityToken } from "@scribe/embedder/capabilities/tokens.ts";
 
@@ -167,4 +167,37 @@ Deno.test("holds answers for a token without spending it", () => {
   assertEquals(CapabilityTokens.holds(""), false);
 
   CapabilityTokens.revoke(token);
+});
+
+Deno.test("a standing grant answered no request, and says so", async () => {
+  const token = CapabilityTokens.standing({
+    request: new Request("http://worker.bootstrap/"),
+    bodyBytes: new Uint8Array(),
+    traceId: "",
+    invocationId: "",
+  });
+
+  try {
+    assertEquals(
+      await CapabilityTokens.run(token, () => Promise.resolve(currentPrincipal().kind)),
+      "unproven",
+      "passing for an anonymous caller is how a credential that answered nothing reads an owned table as nobody, " +
+        "instead of being refused the way a queue pass or a cron body is",
+    );
+  } finally {
+    CapabilityTokens.revoke(token);
+  }
+});
+
+Deno.test("a request grant that proved nobody is an anonymous caller, not an absent one", async () => {
+  const token = CapabilityTokens.issue({ ...grant(), identity: null });
+
+  try {
+    assertEquals(
+      await CapabilityTokens.run(token, () => Promise.resolve(currentPrincipal().kind)),
+      "anonymous",
+    );
+  } finally {
+    CapabilityTokens.revoke(token);
+  }
 });
