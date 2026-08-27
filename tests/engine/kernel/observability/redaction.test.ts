@@ -120,6 +120,41 @@ Deno.test("previewOf elides a long body from both ends", async () => {
   assert(preview.length < 2_000, "the whole body must not reach the console");
 });
 
+Deno.test("previewOf stops reading a streamed body instead of holding all of it", async () => {
+  const megabytes = 4;
+  const stream = new ReadableStream({
+    start(controller) {
+      for (let chunk = 0; chunk < megabytes; chunk++) {
+        controller.enqueue(new Uint8Array(1024 * 1024).fill(120));
+      }
+      controller.close();
+    },
+  });
+
+  const preview = await previewOf(new Response(stream, { status: 502 }));
+
+  assertStringIncludes(
+    preview,
+    "bytes",
+    "a chunked error page declares no length: reading it whole is megabytes held on the request path",
+  );
+  assert(preview.length < 100, "the size is what travels, not a prefix cut mid-object");
+});
+
+Deno.test("previewOf leaves the response readable by the caller, streamed or not", async () => {
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode('{"code":"conflict"}'));
+      controller.close();
+    },
+  });
+  const response = new Response(stream, { status: 409 });
+
+  await previewOf(response);
+
+  assertEquals(await response.json(), { code: "conflict" });
+});
+
 Deno.test("previewOf leaves the response readable by the caller", async () => {
   const response = jsonResponse({ code: "conflict" }, 409);
 

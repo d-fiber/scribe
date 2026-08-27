@@ -59,8 +59,56 @@ export async function previewOf(response: Response): Future<string> {
   const declaredBytes = Number(response.headers.get("content-length") ?? 0);
   if (declaredBytes > PREVIEW_BYTES_THRESHOLD) return `[${declaredBytes} bytes]`;
 
-  const text = redactIfJson(await response.clone().text());
+  const head = await firstBytes(response, PREVIEW_BYTES_THRESHOLD);
+  if (head === null) return `[over ${PREVIEW_BYTES_THRESHOLD} bytes]`;
+
+  const text = redactIfJson(head);
   return text.length > PREVIEW_CHARS_THRESHOLD ? elided(text) : text;
+}
+
+/**
+ * The whole body as text, or `null` once it goes past `maxBytes`.
+ *
+ * @remarks
+ * A `content-length` is what bounds this everywhere it exists, and a chunked answer has none: an
+ * error page streamed by an upstream is then read whole into a string, on the request path, only
+ * to be cut to five hundred characters afterwards. Reading through the stream stops at the bound
+ * instead, and a body that goes past it is named by its size rather than by its contents, because
+ * a prefix cut mid-object is not JSON and would travel to the sink unredacted.
+ */
+async function firstBytes(response: Response, maxBytes: number): Future<string | null> {
+  const body = response.clone().body;
+  if (body === null) return "";
+
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      total += value.byteLength;
+      if (total > maxBytes) return null;
+
+      chunks.push(value);
+    }
+  } finally {
+    // Not awaited: `clone` tees, and a tee's cancel only settles once *both* branches cancel, so
+    // waiting here would hang on a response the caller has not read yet. Cancelling this branch
+    // is still what keeps the tee from queueing the rest of the body for a reader that is gone.
+    reader.cancel().catch(() => {});
+  }
+
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  return new TextDecoder().decode(bytes);
 }
 
 function elided(text: string): string {
