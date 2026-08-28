@@ -37,8 +37,13 @@
 
 set -euo pipefail
 
-EXTENSIONS="ts tsx js mjs cjs jsx dart go c h cpp hpp cc rs java kt swift proto php py sh rb sql"
-EXCLUDED="node_modules .git .dart_tool __pycache__ gen examples fixtures"
+# What a repository scans and what it skips, overridable from the environment.
+#
+# The list of extensions is the same everywhere, because a language that carries
+# a header carries it wherever it appears. What a repository skips is its own:
+# a fixture, a rendered tree or a template directory is not the same thing twice.
+EXTENSIONS="${EXTENSIONS:-ts tsx js mjs cjs jsx dart go c h cpp hpp cc rs java kt swift proto php py sh rb sql}"
+EXCLUDED="${EXCLUDED:-node_modules .git .dart_tool __pycache__ gen examples fixtures}"
 SCAN_LINES=60
 
 COPYRIGHT="Copyright (C) 2026 Fiber"

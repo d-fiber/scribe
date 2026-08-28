@@ -1,0 +1,90 @@
+name: gate
+
+# The three checks every repository owes, written once and called by the five.
+#
+# What differs between them is one thing, the command that compiles and tests,
+# and it stays at home under the name `verify`. Everything else is the same
+# work, and five copies of the same work is five places for it to drift: the
+# commit rule already existed in three versions, and the header check in five.
+#
+# The commit rule and the header rule are read from this repository, so there is
+# one of each, and they are read at the revision this workflow was called at:
+# a caller pins the workflow to a commit, and the rule it runs has to be the one
+# that commit carries rather than whatever `dev` holds a month later. What a repository skips is its own, and arrives as an input. The
+# version check stays with its caller, because a package version and a
+# framework version are not the same question.
+
+on:
+  workflow_call:
+    inputs:
+      excluded:
+        description: Directories the header check does not walk into
+        type: string
+        required: true
+      extensions:
+        description: File extensions the header check reads, the usual list when empty
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  commits:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+
+      - name: Take the rule from the framework, which holds the only copy
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: d-fiber/scribe
+          ref: ${{ github.workflow_sha }}
+          path: .gate
+          sparse-checkout: .github
+
+      - name: Check commit messages
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: bash .gate/.github/commits/check.sh "$BASE" "$HEAD"
+
+  headers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Take the rule from the framework, which holds the only copy
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: d-fiber/scribe
+          ref: ${{ github.workflow_sha }}
+          path: .gate
+          sparse-checkout: .github
+
+      - name: Check licence headers
+        env:
+          EXCLUDED: ${{ inputs.excluded }}
+          EXTENSIONS: ${{ inputs.extensions }}
+        run: bash .gate/.github/headers/check.sh
+
+  version:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+
+      - name: Check the version, and what names it
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: bash .github/version/check.sh
