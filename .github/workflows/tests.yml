@@ -116,8 +116,6 @@ jobs:
   version:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      contents: write
 
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -130,8 +128,29 @@ jobs:
           HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
         run: bash .github/version/check.sh
 
+  # The only job that writes, and it waits for every job that judges.
+  #
+  # A tag never moves, so one posted while a check was still running would name a
+  # red commit for good, and the only way out of that is to burn the number. The
+  # changelog goes out on the deploy key rather than on GITHUB_TOKEN, because a
+  # push made with that token starts no workflow and the commit would land on dev
+  # without anything ever reading it.
+  tag:
+    needs: [engine, sdk-js, headers, binaries, packages, format, version, protocol]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+          ssh-key: ${{ secrets.RELEASE_PUSH_KEY }}
+          persist-credentials: true
+
       - name: Write the changelog section, if the version moved
-        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
         run: |
           set -eu
           bash .github/version/changelog.sh
@@ -146,7 +165,6 @@ jobs:
           git push origin HEAD:dev
 
       - name: Name this commit after the version, if it has moved
-        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
         run: bash .github/version/tag.sh
 
   dependencies:
