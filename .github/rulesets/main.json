@@ -56,25 +56,25 @@
             "context": "sdk-js"
           },
           {
-            "context": "version"
-          },
-          {
-            "context": "headers"
-          },
-          {
-            "context": "protocol"
-          },
-          {
-            "context": "format"
-          },
-          {
             "context": "binaries"
           },
           {
             "context": "packages"
           },
           {
-            "context": "commits"
+            "context": "format"
+          },
+          {
+            "context": "protocol"
+          },
+          {
+            "context": "checks / commits"
+          },
+          {
+            "context": "checks / headers"
+          },
+          {
+            "context": "checks / version"
           },
           {
             "context": "signed"
