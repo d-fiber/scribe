@@ -88,3 +88,46 @@ jobs:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
           HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
         run: bash .github/version/check.sh
+
+  # Whether everyone who wrote a commit here may give it away.
+  #
+  # The agreement is one agreement for the whole framework, so somebody signs
+  # once and not five times, and the register lives in this repository beside
+  # the text they signed.
+  #
+  # The rule comes at the pinned revision like the other two, and the register
+  # comes from `dev` as it stands. That split is the point: a rule that changes
+  # is a release, and a signature that arrives is a Tuesday. Reading the register
+  # at the pin would mean five repositories to repoint every time somebody signs.
+  signed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+
+      - name: Take the rule from the framework, which holds the only copy
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: d-fiber/scribe
+          ref: ${{ github.job_workflow_sha }}
+          path: .gate
+          sparse-checkout: .github
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.13"
+
+      - name: Read who has signed, as the register stands
+        run: |
+          set -eu
+          curl -fsSL -o signatures.json \
+            https://raw.githubusercontent.com/d-fiber/scribe/dev/.github/cla/signatures.json
+
+      - name: Check every contributor has signed
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: python3 .gate/.github/cla/check.py "$BASE" "$HEAD" --registry signatures.json
