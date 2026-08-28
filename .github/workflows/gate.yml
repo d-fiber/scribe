@@ -43,7 +43,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: d-fiber/scribe
-          ref: ${{ github.workflow_sha }}
+          ref: ${{ github.job_workflow_sha }}
           path: .gate
           sparse-checkout: .github
 
@@ -64,7 +64,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: d-fiber/scribe
-          ref: ${{ github.workflow_sha }}
+          ref: ${{ github.job_workflow_sha }}
           path: .gate
           sparse-checkout: .github
 
