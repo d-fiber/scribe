@@ -23,8 +23,10 @@ copyright on your own work.
 If you cannot sign it, open an issue describing the change instead. A clear description of the problem is often more
 useful than the patch anyway.
 
-The agreement and the way to sign it are in [.github/cla/CLA.md](.github/cla/CLA.md). CI checks every commit author in a
-pull request against `.github/cla/signatures.json`, and `main` will not take a commit from someone who is neither listed
+The agreement and the way to sign it are in [.github/cla/CLA.md](.github/cla/CLA.md), and it is one agreement for the
+five repositories: signing once covers all of them. CI checks every commit author in a pull request against
+`.github/cla/signatures.json`, which this repository holds and the other four read as it stands on `dev`, so a signature
+added here takes effect everywhere the moment it lands. `main` will not take a commit from someone who is neither listed
 nor exempt. Fiber staff and bots are exempt: an employment contract already covers the first, and the second write
 nothing of their own.
 
