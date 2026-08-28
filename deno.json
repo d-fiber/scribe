@@ -21,7 +21,8 @@
     "lineWidth": 120,
     "exclude": [
       "sdk/js/gen",
-      "packages/*/ops"
+      "packages/*/ops",
+      "packages/*/fixtures"
     ]
   },
   "lint": {
