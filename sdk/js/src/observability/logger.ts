@@ -35,16 +35,11 @@
 // LICENSE file, the LICENSE file governs.
 
 import { create } from "@bufbuild/protobuf";
-import {
-  type LogEntry,
-  LogEntrySchema,
-  LogLevel,
-  Logging,
-} from "../../gen/scribe/protocol/logs_pb.ts";
+import { type LogEntry, LogEntrySchema, Logging, LogLevel } from "../../gen/scribe/protocol/logs_pb.ts";
 import { encodeJson } from "../contracts/json.ts";
 import { CallScope } from "../runtime/scope.ts";
 import { host } from "../capabilities/channel.ts";
-import { type LogSink, loggedEntry } from "./log_sink.ts";
+import { loggedEntry, type LogSink } from "./log_sink.ts";
 import type { SinkRegistry } from "./sink_registry.ts";
 
 const BATCH_THRESHOLD = 25;
@@ -67,13 +62,6 @@ class Logger {
   #pending: LogEntry[] = [];
   #sinks: SinkRegistry | null = null;
 
-  /**
-   * Points this logger at the sinks the server declared.
-   *
-   * Called once, when the worker definition is built. Until it is, entries go
-   * to the host as they always did, which is what keeps a project that never
-   * declared a `_log.ts` working exactly as before.
-   */
   useSinks(sinks: SinkRegistry): void {
     this.#sinks = sinks;
   }
@@ -94,18 +82,6 @@ class Logger {
     this.#record(LogLevel.ERROR, action, input);
   }
 
-  /**
-   * Sends what is pending, to the project's own sinks or to the host.
-   *
-   * A sink that claims an entry lives in this very process, so the entry is
-   * handed over directly rather than shipped to the host for it to send it
-   * straight back. Entries are grouped by node first, because one buffer holds
-   * whatever the process logged and two nodes must not read each other's.
-   *
-   * Nothing is put back on a sink failure: unlike the host, a sink is the final
-   * destination, and retrying it would grow the buffer for as long as it stays
-   * broken. What could not reach the host, on the other hand, is kept.
-   */
   async flush(): Promise<void> {
     if (this.#pending.length === 0) return;
 
@@ -186,4 +162,61 @@ class Logger {
   }
 }
 
-export const log = new Logger();
+/**
+ * The worker's log, as everything outside this file uses it.
+ *
+ * @remarks
+ * An entry is held in the process rather than sent as it is written. The buffer empties on its
+ * own once twenty five entries are waiting, and whenever {@link WorkerLogger.flush} is called.
+ */
+export interface WorkerLogger {
+  /**
+   * Points this logger at the sinks the server declared.
+   *
+   * Called once, when the worker definition is built. Until it is, entries go
+   * to the host as they always did, which is what keeps a project that never
+   * declared a `_logs.ts` working exactly as before.
+   */
+  useSinks(sinks: SinkRegistry): void;
+
+  /**
+   * Records `action` at debug level, under the node the current call scope names.
+   *
+   * A node whose sink claims the entry prints it there and nowhere else, so a line never lands on
+   * the terminal twice.
+   */
+  debug(action: string, input?: LogInput): void;
+
+  /** Records `action` at info level, under the node the current call scope names. */
+  info(action: string, input?: LogInput): void;
+
+  /** Records `action` at warning level, under the node the current call scope names. */
+  warn(action: string, input?: LogInput): void;
+
+  /**
+   * Records `action` at error level, under the node the current call scope names.
+   *
+   * Nothing is thrown and nothing is flushed early: an error entry travels like the others.
+   */
+  error(action: string, input?: LogInput): void;
+
+  /**
+   * Sends what is pending, to the project's own sinks or to the host.
+   *
+   * @remarks
+   * A sink that claims an entry lives in this very process, so the entry is
+   * handed over directly rather than shipped to the host for it to send it
+   * straight back. Entries are grouped by node first, because one buffer holds
+   * whatever the process logged and two nodes must not read each other's.
+   *
+   * Nothing is put back on a sink failure: unlike the host, a sink is the final
+   * destination, and retrying it would grow the buffer for as long as it stays
+   * broken. What could not reach the host, on the other hand, is kept.
+   */
+  flush(): Promise<void>;
+
+  /** How many entries are waiting to be sent, which is what a caller polls to know it can stop. */
+  readonly pending: number;
+}
+
+export const log: WorkerLogger = new Logger();

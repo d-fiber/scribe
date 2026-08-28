@@ -38,9 +38,24 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import type { CallCredentials } from "../transport/client.ts";
 
 export interface CallScopeState {
+  /** The grant the host handed this call, and the one every capability call inside it replays. */
   readonly capabilityToken: string;
+
+  /** The identifier that ties this call to the exchange it belongs to, empty when it belongs to none. */
   readonly traceId: string;
+
+  /** What the host called this invocation, empty for a call that answers no invocation. */
   readonly invocationId: string;
+
+  /**
+   * The address of the replica that handed this call its token.
+   *
+   * @remarks
+   * It travels with the token because a grant lives in the memory of the replica that issued it:
+   * calling any other replica back gets the grant refused as unknown. Empty means the host named
+   * none, and the channel then falls back to the one the handshake announced.
+   */
+  readonly hostEndpoint: string;
 
   /**
    * The node this call is running for, empty when it runs for none.
@@ -58,10 +73,38 @@ let ambient: CallScopeState = {
   capabilityToken: "",
   traceId: "",
   invocationId: "",
+  hostEndpoint: "",
   node: "",
 };
 
-export const CallScope = {
+/** The state of the call in flight, and the two ways a runtime installs it. */
+export interface CallScopeApi {
+  /**
+   * Runs `handler` with `state` as the scope everything inside it reads.
+   *
+   * The state is held in async local storage, so it follows the awaits of `handler` and is gone
+   * once it returns. This is what a runtime serving several calls at once uses, because each call
+   * then reads its own.
+   */
+  run<T>(state: CallScopeState, handler: () => T): T;
+
+  /**
+   * Makes `state` the scope read wherever no `run` is in flight.
+   *
+   * There is one such state for the whole process. It is for a runtime that handles one call at a
+   * time: a concurrent one that adopted instead of running would have two calls read each other's
+   * token.
+   */
+  adopt(state: CallScopeState): void;
+
+  /** The scope of the call in flight, falling back to the adopted one when there is none. */
+  current(): CallScopeState;
+
+  /** What the transport puts on every call it sends, taken from the scope in flight. */
+  credentials(): CallCredentials;
+}
+
+export const CallScope: CallScopeApi = {
   run<T>(state: CallScopeState, handler: () => T): T {
     return storage.run(state, handler);
   },
@@ -75,7 +118,7 @@ export const CallScope = {
   },
 
   credentials(): CallCredentials {
-    const { capabilityToken, traceId } = CallScope.current();
-    return { capabilityToken, traceId };
+    const { capabilityToken, traceId, hostEndpoint } = CallScope.current();
+    return { capabilityToken, traceId, hostEndpoint };
   },
 };

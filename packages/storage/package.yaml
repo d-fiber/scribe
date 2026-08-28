@@ -1,0 +1,26 @@
+name: storage
+description: The objects, the buckets, and the derivatives an image is served as.
+version: 1.0.0
+
+environment:
+  scribe: "^1.0.0"
+
+dependencies:
+  foundation: ^1.0.0
+  "@jsquash/webp/decode": any
+  "@std/media-types": any
+  blurhash: any
+  "fast-png": any
+  "jpeg-js": any
+
+dev_dependencies:
+  "@scribe/testing/": any
+  "@jsquash/webp/encode": any
+  "@supabase/postgrest-js": any
+
+scribe:
+  db:
+    init: ./db/init/
+  protocol: ./protocol/
+  ops:
+    - ./ops/

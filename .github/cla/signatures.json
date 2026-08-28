@@ -1,5 +1,5 @@
 {
-  "agreementInForce": true,
+  "agreementInForce": false,
   "exempt": {
     "emails": [
       "larsanov.inc@gmail.com",

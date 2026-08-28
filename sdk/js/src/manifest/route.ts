@@ -36,10 +36,10 @@
 
 import type { Caller, Need, RouteMethod } from "../contracts/access.ts";
 import type { RateLimiter } from "../contracts/rate_limit.ts";
-import type { InvocationContext } from "../runtime/context.ts";
+import type { RequestContext } from "../runtime/context.ts";
 
 export type RouteHandler = (
-  ctx: InvocationContext,
+  ctx: RequestContext,
 ) => Response | Promise<Response>;
 
 export interface WorkerRoute {

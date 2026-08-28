@@ -87,64 +87,116 @@ function fixedResponder(
   return (): Response => json({ code, message }, status);
 }
 
-export class ServerResponse {
-  static ok: SuccessResponder = successResponder(200);
-  static created: SuccessResponder = successResponder(201);
-  static accepted: SuccessResponder = successResponder(202);
+/**
+ * Every response an endpoint can hand back, by the name of what it means.
+ *
+ * It is an object and not a class because nothing here holds state: a class one
+ * never instantiates is a module with a prefix to type. Import it and write
+ * `response.ok(...)`; there is no other way in and nothing to construct.
+ */
+/** The shape of {@link response}, named so the public API carries an explicit type. */
+export interface ServerResponses {
+  /** 200, with whatever the endpoint answers. */
+  readonly ok: SuccessResponder;
 
-  static badRequest: ErrorResponder = errorResponder(
+  /** 201, for something the request just brought into being. */
+  readonly created: SuccessResponder;
+
+  /** 202, for work taken and not yet done. */
+  readonly accepted: SuccessResponder;
+
+  /** 400, when the request could not be understood. */
+  readonly badRequest: ErrorResponder;
+
+  /** 403, when the caller is known and not allowed. */
+  readonly forbidden: ErrorResponder;
+
+  /** 409, when the request fights the current state. */
+  readonly conflict: ErrorResponder;
+
+  /** 404, when there is nothing at that address. */
+  readonly notFound: ErrorResponder;
+
+  /** 401, when the caller has not proved who it is. */
+  readonly unauthorized: ErrorResponder;
+
+  /** 422, when the request was understood and cannot be carried out. */
+  readonly unprocessable: ErrorResponder;
+
+  /** 429, when the caller has spent its quota. */
+  readonly tooManyRequests: ErrorResponder;
+
+  /** 500, when something on our side gave way. */
+  readonly unexpected: ErrorResponder;
+
+  /** 405, when the method is not one this address answers. */
+  readonly methodNotAllowed: FixedErrorResponder;
+
+  /** 413, when the body is larger than the endpoint accepts. */
+  readonly payloadTooLarge: FixedErrorResponder;
+
+  /** 503, when the deployment is up and cannot serve right now. */
+  readonly serviceUnavailable: FixedErrorResponder;
+}
+
+export const response: ServerResponses = {
+  ok: successResponder(200),
+  created: successResponder(201),
+  accepted: successResponder(202),
+
+  badRequest: errorResponder(
     "bad_request",
     "The request could not be understood. Please check the data you sent and try again.",
     400,
-  );
-  static forbidden: ErrorResponder = errorResponder(
+  ),
+  forbidden: errorResponder(
     "forbidden",
     "Your account does not have the necessary permissions to perform this action.",
     403,
-  );
-  static conflict: ErrorResponder = errorResponder(
+  ),
+  conflict: errorResponder(
     "conflict",
     "The request could not be completed due to a conflict with the current state.",
     409,
-  );
-  static notFound: ErrorResponder = errorResponder(
+  ),
+  notFound: errorResponder(
     "not_found",
     "The resource you are looking for could not be found.",
     404,
-  );
-  static unauthorized: ErrorResponder = errorResponder(
+  ),
+  unauthorized: errorResponder(
     "unauthorized",
     "This action requires a valid authenticated session. Please sign in and try again.",
     401,
-  );
-  static unprocessable: ErrorResponder = errorResponder(
+  ),
+  unprocessable: errorResponder(
     "unprocessable",
     "The request could not be processed.",
     422,
-  );
-  static tooManyRequests: ErrorResponder = errorResponder(
+  ),
+  tooManyRequests: errorResponder(
     "too_many_requests",
     "You have sent too many requests in a short period of time. Please wait a moment and try again.",
     429,
-  );
-  static unexpected: ErrorResponder = errorResponder(
+  ),
+  unexpected: errorResponder(
     "unexpected_error",
     "Something went wrong on our end while processing your request. Please try again in a few moments.",
     500,
-  );
-  static methodNotAllowed: FixedErrorResponder = fixedResponder(
+  ),
+  methodNotAllowed: fixedResponder(
     "method_not_allowed",
     "The HTTP method used is not supported for this endpoint.",
     405,
-  );
-  static payloadTooLarge: FixedErrorResponder = fixedResponder(
+  ),
+  payloadTooLarge: fixedResponder(
     "payload_too_large",
     "The data included in your request exceeds the size limit we accept.",
     413,
-  );
-  static serviceUnavailable: FixedErrorResponder = fixedResponder(
+  ),
+  serviceUnavailable: fixedResponder(
     "service_unavailable",
     "The server is temporarily busy. Please retry in a few moments.",
     503,
-  );
-}
+  ),
+} as const;

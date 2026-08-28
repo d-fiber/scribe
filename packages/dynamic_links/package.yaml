@@ -1,0 +1,19 @@
+name: dynamic_links
+description: The short links, what a declaration decides and what it measures.
+version: 1.0.0
+
+environment:
+  scribe: "^1.0.0"
+
+dependencies:
+  foundation: ^1.0.0
+
+dev_dependencies:
+  "@scribe/testing/": any
+  "@supabase/postgrest-js": any
+
+scribe:
+  db:
+    init: ./db/init/
+  ops:
+    - ./ops/

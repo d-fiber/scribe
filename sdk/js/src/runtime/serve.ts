@@ -36,9 +36,9 @@
 
 import { Registration } from "../../gen/scribe/protocol/manifest_pb.ts";
 import { Worker as WorkerService } from "../../gen/scribe/protocol/invocation_pb.ts";
-import { QueueDispatch } from "../../gen/scribe/host/packages/foundation/protocol/queue/queue_pb.ts";
-import { HookDispatch } from "../../gen/scribe/host/packages/foundation/protocol/hook/hook_pb.ts";
-import { CronDispatch } from "../../gen/scribe/host/packages/foundation/protocol/cron/cron_pb.ts";
+import { QueueDispatch } from "../../gen/scribe/packages/foundation/protocol/queue_pb.ts";
+import { HookDispatch } from "../../gen/scribe/packages/foundation/protocol/hook_pb.ts";
+import { CronDispatch } from "../../gen/scribe/packages/foundation/protocol/cron_pb.ts";
 import { LogDispatch } from "../../gen/scribe/protocol/logs_pb.ts";
 import { host } from "../capabilities/channel.ts";
 import { describeWorker } from "../manifest/encode.ts";
@@ -72,6 +72,9 @@ const DEFAULT_PORT = 8787;
 
 const DEFAULT_HOSTNAME = "0.0.0.0";
 
+/** The path an orchestrator asks for to know whether this worker is up. */
+const HEALTH_PATH = "/_health";
+
 export function workerServer(worker: WorkerDefinition): UnaryServer {
   return new UnaryServer()
     .on(Registration.method.describe, (handshake) => {
@@ -87,23 +90,39 @@ export function workerServer(worker: WorkerDefinition): UnaryServer {
         capabilityToken: handshake.capabilityToken,
         traceId: "",
         invocationId: "",
+        hostEndpoint: handshake.hostEndpoint,
         node: "",
       });
 
       return describeWorker(worker);
     })
-    .on(WorkerService.method.invoke, (invocation) => invoke(worker, invocation))
-    .on(QueueDispatch.method.handle, (batch) => handleBatch(worker, batch))
-    .on(HookDispatch.method.handle, (event) => handleEvent(worker, event))
-    .on(CronDispatch.method.trigger, (trigger) => triggerCron(worker, trigger))
+    .on(WorkerService.method.invoke, (invocation, call) => invoke(worker, invocation, call.hostEndpoint))
+    .on(QueueDispatch.method.handle, (batch, call) => handleBatch(worker, batch, call.hostEndpoint))
+    .on(HookDispatch.method.handle, (event, call) => handleEvent(worker, event, call.hostEndpoint))
+    .on(CronDispatch.method.trigger, (trigger, call) => triggerCron(worker, trigger, call.hostEndpoint))
     .on(LogDispatch.method.handle, (delivery) => deliverLogs(worker, delivery));
 }
 
+/**
+ * The handler a worker answers every request with.
+ *
+ * `GET /_health` is answered here rather than by the protocol server: the port
+ * speaks the registration protocol, which is POST only, so an orchestrator
+ * probing it with a plain GET is told the method is not allowed and never sees
+ * the worker come up, however well it is running.
+ */
 export function workerHandler(
   worker: WorkerDefinition,
 ): (request: Request) => Promise<Response> {
   const server = workerServer(worker);
-  return (request) => server.handle(request);
+
+  return (request) => {
+    if (request.method === "GET" && new URL(request.url).pathname === HEALTH_PATH) {
+      return Promise.resolve(new Response("ok", { headers: { "content-type": "text/plain" } }));
+    }
+
+    return server.handle(request);
+  };
 }
 
 export function serveWorker(

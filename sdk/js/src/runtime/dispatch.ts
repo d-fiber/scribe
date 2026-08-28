@@ -36,40 +36,43 @@
 
 import { create } from "@bufbuild/protobuf";
 import { FailureSchema } from "../../gen/scribe/protocol/common_pb.ts";
-import {
-  type Invocation,
-  type Reply,
-  ReplySchema,
-} from "../../gen/scribe/protocol/invocation_pb.ts";
+import { type Invocation, type Reply, ReplySchema } from "../../gen/scribe/protocol/invocation_pb.ts";
 import {
   type Batch,
   type BatchOutcome,
   BatchOutcomeSchema,
-} from "../../gen/scribe/host/packages/foundation/protocol/queue/queue_pb.ts";
+} from "../../gen/scribe/packages/foundation/protocol/queue_pb.ts";
 import {
   type Event,
   type HandleResult,
   HandleResultSchema,
-} from "../../gen/scribe/host/packages/foundation/protocol/hook/hook_pb.ts";
+} from "../../gen/scribe/packages/foundation/protocol/hook_pb.ts";
 import {
   type CronOutcome,
   CronOutcomeSchema,
   type CronTrigger,
-} from "../../gen/scribe/host/packages/foundation/protocol/cron/cron_pb.ts";
-import {
-  type LogDelivery,
-  type LogDeliveryAck,
-  LogDeliveryAckSchema,
-} from "../../gen/scribe/protocol/logs_pb.ts";
+} from "../../gen/scribe/packages/foundation/protocol/cron_pb.ts";
+import { type LogDelivery, type LogDeliveryAck, LogDeliveryAckSchema } from "../../gen/scribe/protocol/logs_pb.ts";
 import { decodeJson, encodeJson } from "../contracts/json.ts";
 import { loggedEntry } from "../observability/log_sink.ts";
 import type { QueueMessage } from "../manifest/events.ts";
 import type { WorkerDefinition } from "../manifest/worker.ts";
 import { describeCause } from "../transport/failure.ts";
-import { InvocationContext } from "./context.ts";
+import { RequestContext } from "./context.ts";
 import { CallScope } from "./scope.ts";
 
-export async function invoke(worker: WorkerDefinition, invocation: Invocation): Promise<Reply> {
+/**
+ * Answers `invocation` with the route it names, under a scope bound to `hostEndpoint`.
+ *
+ * @param hostEndpoint - Where the token this invocation carries can be redeemed, which is the
+ * replica that sent it and not necessarily the one the handshake announced.
+ */
+// deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
+export async function invoke(
+  worker: WorkerDefinition,
+  invocation: Invocation,
+  hostEndpoint: string,
+): Promise<Reply> {
   const mounted = worker.routeFor(invocation.routeId);
   if (!mounted) {
     return failedReply(
@@ -79,9 +82,9 @@ export async function invoke(worker: WorkerDefinition, invocation: Invocation): 
     );
   }
 
-  return CallScope.run(scopeOf(invocation, mounted.node), async () => {
+  return CallScope.run(scopeOf(invocation, mounted.node, hostEndpoint), async () => {
     try {
-      const response = await mounted.route.handler(new InvocationContext(invocation));
+      const response = await mounted.route.handler(new RequestContext(invocation));
       return await replyFrom(invocation.invocationId, response);
     } catch (cause) {
       return failedReply(invocation.invocationId, "handler_failed", describeCause(cause));
@@ -123,7 +126,17 @@ export async function deliverLogs(
   return create(LogDeliveryAckSchema, {});
 }
 
-export async function handleBatch(worker: WorkerDefinition, batch: Batch): Promise<BatchOutcome> {
+/**
+ * Hands `batch` to the queue it names, under a scope bound to `hostEndpoint`.
+ *
+ * @param hostEndpoint - Where the token this batch carries can be redeemed.
+ */
+// deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
+export async function handleBatch(
+  worker: WorkerDefinition,
+  batch: Batch,
+  hostEndpoint: string,
+): Promise<BatchOutcome> {
   const queue = worker.queueFor(batch.queueId);
   if (!queue) {
     return create(BatchOutcomeSchema, {
@@ -150,6 +163,7 @@ export async function handleBatch(worker: WorkerDefinition, batch: Batch): Promi
       capabilityToken: batch.capabilityToken,
       traceId: batch.traceId,
       invocationId: batch.queueId,
+      hostEndpoint,
       node: "",
     },
     async () => {
@@ -177,7 +191,17 @@ export async function handleBatch(worker: WorkerDefinition, batch: Batch): Promi
   );
 }
 
-export async function handleEvent(worker: WorkerDefinition, event: Event): Promise<HandleResult> {
+/**
+ * Hands `event` to the hook it names, under a scope bound to `hostEndpoint`.
+ *
+ * @param hostEndpoint - Where the token this event carries can be redeemed.
+ */
+// deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
+export async function handleEvent(
+  worker: WorkerDefinition,
+  event: Event,
+  hostEndpoint: string,
+): Promise<HandleResult> {
   const hook = worker.hookFor(event.hookId);
   if (!hook) {
     return create(HandleResultSchema, {
@@ -193,6 +217,7 @@ export async function handleEvent(worker: WorkerDefinition, event: Event): Promi
       capabilityToken: event.capabilityToken,
       traceId: event.traceId,
       invocationId: event.hookId,
+      hostEndpoint,
       node: "",
     },
     async () => {
@@ -214,9 +239,16 @@ export async function handleEvent(worker: WorkerDefinition, event: Event): Promi
   );
 }
 
+/**
+ * Runs the cron `trigger` names, under a scope bound to `hostEndpoint`.
+ *
+ * @param hostEndpoint - Where the token this trigger carries can be redeemed.
+ */
+// deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
 export async function triggerCron(
   worker: WorkerDefinition,
   trigger: CronTrigger,
+  hostEndpoint: string,
 ): Promise<CronOutcome> {
   const cron = worker.cronFor(trigger.cronId);
   if (!cron) {
@@ -233,6 +265,7 @@ export async function triggerCron(
       capabilityToken: trigger.capabilityToken,
       traceId: trigger.traceId,
       invocationId: trigger.cronId,
+      hostEndpoint,
       node: "",
     },
     async () => {
@@ -251,11 +284,12 @@ export async function triggerCron(
   );
 }
 
-function scopeOf(invocation: Invocation, node: string) {
+function scopeOf(invocation: Invocation, node: string, hostEndpoint: string) {
   return {
     capabilityToken: invocation.capabilityToken,
     traceId: invocation.traceId,
     invocationId: invocation.invocationId,
+    hostEndpoint,
     node,
   };
 }

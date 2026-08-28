@@ -35,14 +35,14 @@
 // LICENSE file, the LICENSE file governs.
 
 import { assertEquals, assertRejects } from "@std/assert";
-import { cache, CallScope, CapabilityError, host, rest, UnaryServer } from "../mod.ts";
+import { cache, CallScope, CapabilityError, database, host, UnaryServer } from "../mod.ts";
 import {
   Database,
   FilterOperator,
   Operation,
   type Query,
-} from "../gen/scribe/host/packages/foundation/protocol/database/database_pb.ts";
-import { Valkery } from "../gen/scribe/host/packages/foundation/protocol/valkery/valkery_pb.ts";
+} from "../gen/scribe/packages/foundation/protocol/database_pb.ts";
+import { Cache } from "../gen/scribe/packages/foundation/protocol/cache_pb.ts";
 import { decodeJson, encodeJson } from "../src/contracts/json.ts";
 
 interface Brand extends Record<string, unknown> {
@@ -69,8 +69,8 @@ async function withHost(
       capture.trace = call.traceId;
       return { data: encodeJson(rows), count: 7n };
     })
-    .on(Valkery.method.get, () => ({ hit: true, value: encodeJson({ cached: true }) }))
-    .on(Valkery.method.set, () => ({
+    .on(Cache.method.get, () => ({ hit: true, value: encodeJson({ cached: true }) }))
+    .on(Cache.method.set, () => ({
       error: { code: "cache_failed", message: "redis is down" },
     }));
 
@@ -85,14 +85,14 @@ async function withHost(
   }
 }
 
-Deno.test("a rest query travels as a description the host executes", async () => {
+Deno.test("a database query travels as a description the host executes", async () => {
   const capture: Capture = { query: null, token: "", trace: "" };
 
   await withHost(capture, [{ id: "1", name: "Fiber", admin_id: "a" }], async () => {
     const rows = await CallScope.run(
-      { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", node: "" },
+      { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", hostEndpoint: "", node: "" },
       () =>
-        rest
+        database
           .from<Brand>("brands")
           .select("id", "name")
           .where((brand) => brand.name.ilike("fib%"))
@@ -121,8 +121,8 @@ Deno.test("the capability token of the invocation is replayed on every outgoing 
 
   await withHost(capture, [], async () => {
     await CallScope.run(
-      { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", node: "" },
-      () => rest.from<Brand>("brands").rows(),
+      { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", hostEndpoint: "", node: "" },
+      () => database.from<Brand>("brands").rows(),
     );
   });
 
@@ -134,7 +134,7 @@ Deno.test("a page reads the exact count the host answered", async () => {
   const capture: Capture = { query: null, token: "", trace: "" };
 
   await withHost(capture, [{ id: "1", name: "Fiber", admin_id: "a" }], async () => {
-    const page = await rest.from<Brand>("brands").page();
+    const page = await database.from<Brand>("brands").page();
 
     assertEquals(page.count, 7);
     assertEquals(page.rows.length, 1);
@@ -160,7 +160,7 @@ Deno.test("a failing capability raises instead of returning a silent null", asyn
 Deno.test("calling a capability before the handshake says so instead of hanging", async () => {
   host.disconnect();
 
-  await assertRejects(() => rest.from<Brand>("brands").rows());
+  await assertRejects(() => database.from<Brand>("brands").rows());
 });
 
 async function withCountingHost(
@@ -194,14 +194,14 @@ async function withCountingHost(
   }
 }
 
-const SCOPE = { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", node: "" };
+const SCOPE = { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", hostEndpoint: "", node: "" };
 
 Deno.test("three reads read one at a time pay one round trip each", async () => {
   await withCountingHost(async (calls) => {
     await CallScope.run(SCOPE, async () => {
-      await rest.from<Brand>("brands").rows();
-      await rest.from<Brand>("labels").rows();
-      await rest.from<Brand>("stores").rows();
+      await database.from<Brand>("brands").rows();
+      await database.from<Brand>("labels").rows();
+      await database.from<Brand>("stores").rows();
     });
 
     assertEquals(calls.execute, 3);
@@ -212,10 +212,10 @@ Deno.test("three reads read one at a time pay one round trip each", async () => 
 Deno.test("the same three reads given together pay one round trip in total", async () => {
   await withCountingHost(async (calls) => {
     const answers = await CallScope.run(SCOPE, () =>
-      rest.all([
-        rest.from<Brand>("brands"),
-        rest.from<Brand>("labels"),
-        rest.from<Brand>("stores"),
+      database.all([
+        database.from<Brand>("brands"),
+        database.from<Brand>("labels"),
+        database.from<Brand>("stores"),
       ]));
 
     assertEquals(calls.batch, 1);
@@ -227,9 +227,9 @@ Deno.test("the same three reads given together pay one round trip in total", asy
 Deno.test("a batch answers its queries in the order they were given, not the order they finished", async () => {
   await withCountingHost(async () => {
     const answers = await CallScope.run(SCOPE, () =>
-      rest.all([
-        rest.from<Brand>("z_last").select("id"),
-        rest.from<Brand>("a_first").select("id"),
+      database.all([
+        database.from<Brand>("z_last").select("id"),
+        database.from<Brand>("a_first").select("id"),
       ]));
 
     assertEquals(answers[0][0].id, "z_last");
@@ -239,7 +239,7 @@ Deno.test("a batch answers its queries in the order they were given, not the ord
 
 Deno.test("a batch of nothing reaches the host not at all", async () => {
   await withCountingHost(async (calls) => {
-    const answers = await CallScope.run(SCOPE, () => rest.all([]));
+    const answers = await CallScope.run(SCOPE, () => database.all([]));
 
     assertEquals(answers.length, 0);
     assertEquals(calls.batch, 0);

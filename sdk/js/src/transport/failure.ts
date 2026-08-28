@@ -79,7 +79,5 @@ export function describeCause(cause: unknown): string {
 }
 
 export function failureOf(cause: unknown): TransportFailure {
-  return cause instanceof TransportFailure
-    ? cause
-    : TransportFailure.internal(describeCause(cause));
+  return cause instanceof TransportFailure ? cause : TransportFailure.internal(describeCause(cause));
 }

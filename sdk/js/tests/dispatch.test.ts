@@ -39,20 +39,16 @@ import { create } from "@bufbuild/protobuf";
 import {
   Caller,
   type DiscoveredRoute,
-  type InvocationContext,
-  Node,
   NodeRoot,
   Post,
   type RateLimiter,
+  type RequestContext,
+  response,
   ScribeServer,
   Time,
 } from "../mod.ts";
 import { invoke } from "../src/runtime/dispatch.ts";
-import {
-  IdentitySchema,
-  InvocationSchema,
-  RequestSchema,
-} from "../gen/scribe/protocol/invocation_pb.ts";
+import { IdentitySchema, InvocationSchema, RequestSchema } from "../gen/scribe/protocol/invocation_pb.ts";
 import { Caller as ProtoCaller, Method as ProtoMethod } from "../gen/scribe/protocol/common_pb.ts";
 
 const LIMIT: RateLimiter = { limit: 10, window: Time.minutes(1), penalty: Time.minutes(1) };
@@ -60,6 +56,8 @@ const LIMIT: RateLimiter = { limit: 10, window: Time.minutes(1), penalty: Time.m
 const encoder = new TextEncoder();
 
 const decoder = new TextDecoder();
+
+const HOST = "http://127.0.0.1:1";
 
 class AdminNode extends NodeRoot {
   protected override access(): Caller {
@@ -72,8 +70,8 @@ class AdminNode extends NodeRoot {
 }
 
 class UpdateBrand extends Post {
-  protected override run(ctx: InvocationContext): Response {
-    return this.response.ok({
+  protected override run(ctx: RequestContext): Response {
+    return response.ok({
       data: {
         brandId: ctx.param("brandId"),
         page: ctx.query("page"),
@@ -92,8 +90,7 @@ class Boom extends Post {
 }
 
 function workerWith(routes: readonly DiscoveredRoute[]) {
-  return new ScribeServer({ routes })
-    .addNode(new Node({ name: "admin", public: true, node: new AdminNode() }))
+  return new ScribeServer({ routes, nodes: [{ name: "admin", public: true, root: new AdminNode() }] })
     .definition();
 }
 
@@ -133,7 +130,7 @@ Deno.test("an invocation reaches its handler and the response becomes a reply", 
     },
   ]);
 
-  const reply = await invoke(worker, invocationFor("admin:post:/brand/:brandId", { name: "Fiber" }));
+  const reply = await invoke(worker, invocationFor("admin:post:/brand/:brandId", { name: "Fiber" }), HOST);
 
   assertEquals(reply.status, 200);
   assertEquals(reply.invocationId, "inv-1");
@@ -144,7 +141,7 @@ Deno.test("an invocation reaches its handler and the response becomes a reply", 
 });
 
 Deno.test("an unknown route identifier fails loudly instead of guessing", async () => {
-  const reply = await invoke(workerWith([]), invocationFor("admin:get:/nope"));
+  const reply = await invoke(workerWith([]), invocationFor("admin:get:/nope"), HOST);
 
   assertEquals(reply.status, 500);
   assertEquals(reply.failure?.code, "unknown_route");
@@ -161,7 +158,7 @@ Deno.test("a handler that throws answers a failure the host can log", async () =
     },
   ]);
 
-  const reply = await invoke(worker, invocationFor("admin:post:/boom"));
+  const reply = await invoke(worker, invocationFor("admin:post:/boom"), HOST);
 
   assertEquals(reply.status, 500);
   assertEquals(reply.failure?.code, "handler_failed");

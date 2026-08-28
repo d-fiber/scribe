@@ -35,12 +35,12 @@
 // LICENSE file, the LICENSE file governs.
 
 import {
+  create,
   type DescMessage,
   type DescMethodUnary,
+  fromBinary,
   type MessageInitShape,
   type MessageShape,
-  create,
-  fromBinary,
   toBinary,
 } from "@bufbuild/protobuf";
 import { FailureSchema } from "../../gen/scribe/protocol/common_pb.ts";
@@ -49,15 +49,32 @@ import { describeCause, TransportFailure } from "./failure.ts";
 import {
   type AnyUnaryMethod,
   CAPABILITY_HEADER,
+  HOST_HEADER,
   procedurePath,
   PROTO_CONTENT_TYPE,
   PROTOCOL_HEADER,
   TRACE_HEADER,
 } from "./wire.ts";
 
+/** What a caller puts on every procedure call, so the other side knows on whose behalf it asks. */
 export interface CallCredentials {
+  /** The grant this call is made under, empty when the caller holds none. */
   readonly capabilityToken: string;
+
+  /** The identifier that ties this call to the exchange it belongs to, empty when it belongs to none. */
   readonly traceId: string;
+
+  /**
+   * The address at which {@link CallCredentials.capabilityToken} can be redeemed, empty when the
+   * caller names none.
+   *
+   * @remarks
+   * A grant lives in the memory of the replica that issued it, so a token is worth nothing at the
+   * next replica along. The address of the issuer therefore travels beside the token rather than
+   * being learned once at the handshake: the worker calls back the replica it is answering, not
+   * the last one that introduced itself.
+   */
+  readonly hostEndpoint: string;
 }
 
 export type Fetcher = (request: Request) => Promise<Response>;
@@ -75,14 +92,14 @@ export class UnaryClient {
     method: DescMethodUnary<I, O>,
     input: MessageInitShape<I>,
   ): Promise<MessageShape<O>> {
-    const { capabilityToken, traceId } = this.credentials();
+    const credentials = this.credentials();
     const url = new URL(procedurePath(method as AnyUnaryMethod), this.endpoint);
     const payload = toBinary(
       method.input,
       create(method.input, input as never),
     );
 
-    const response = await this.#send(url, payload, capabilityToken, traceId);
+    const response = await this.#send(url, payload, credentials);
     const body = new Uint8Array(await response.arrayBuffer());
 
     if (!response.ok) throw failureFrom(response.status, body);
@@ -93,8 +110,7 @@ export class UnaryClient {
   async #send(
     url: URL,
     payload: Uint8Array,
-    capabilityToken: string,
-    traceId: string,
+    credentials: CallCredentials,
   ): Promise<Response> {
     try {
       return await this.fetcher(
@@ -104,8 +120,9 @@ export class UnaryClient {
           headers: {
             "content-type": PROTO_CONTENT_TYPE,
             [PROTOCOL_HEADER]: PROTOCOL_VERSION,
-            [CAPABILITY_HEADER]: capabilityToken,
-            [TRACE_HEADER]: traceId,
+            [CAPABILITY_HEADER]: credentials.capabilityToken,
+            [HOST_HEADER]: credentials.hostEndpoint,
+            [TRACE_HEADER]: credentials.traceId,
           },
         }),
       );

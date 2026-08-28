@@ -36,14 +36,7 @@
 
 import { log } from "../observability/logger.ts";
 import { SinkRegistry } from "../observability/sink_registry.ts";
-import type {
-  WorkerCron,
-  WorkerHook,
-  WorkerQueue,
-  WorkerRealtime,
-  WorkerSearcher,
-  WorkerStorage,
-} from "./events.ts";
+import type { WorkerCron, WorkerHook, WorkerQueue, WorkerRealtime, WorkerSearcher, WorkerStorage } from "./events.ts";
 import { cronIdOf, hookIdOf, queueIdOf } from "./events.ts";
 import { routeIdOf, routingKeyOf, type WorkerRoute } from "./route.ts";
 
@@ -179,8 +172,9 @@ function indexed<T>(
   const index = new Map<string, T>();
   items.forEach((item, ordinal) => {
     const id = identify(item, ordinal);
-    if (index.has(id))
+    if (index.has(id)) {
       throw new ManifestError(`Two ${label}s share the identifier ${id}.`);
+    }
     index.set(id, item);
   });
   return index;

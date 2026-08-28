@@ -36,10 +36,7 @@
 
 import { create } from "@bufbuild/protobuf";
 import { TimeSchema } from "../../gen/scribe/protocol/common_pb.ts";
-import {
-  ObjectRefSchema,
-  Storage,
-} from "../../gen/scribe/host/packages/storage/protocol/storage_pb.ts";
+import { ObjectRefSchema, Storage } from "../../gen/scribe/packages/storage/protocol/storage_pb.ts";
 import type { Time } from "../contracts/time.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";
@@ -67,7 +64,53 @@ function refOf(location: ObjectLocation) {
   });
 }
 
-export const storage = {
+/** The objects a worker puts in the host's buckets, and what it can hand out about them. */
+export interface StorageCapability {
+  /**
+   * Writes `content` at `location` as `mimeType`, and answers the path it landed on.
+   *
+   * The host refuses a path that is already taken unless `upsert` is set, in which case the
+   * object standing there is replaced.
+   *
+   * @throws {CapabilityError} When the host refused the upload.
+   */
+  upload(location: ObjectLocation, content: Uint8Array, mimeType: string, upsert?: boolean): Promise<string>;
+
+  /**
+   * Removes every object of `locations`, and answers how many were there to remove.
+   *
+   * A location holding nothing is not a refusal: it simply does not count.
+   *
+   * @throws {CapabilityError} When the host refused the deletion.
+   */
+  delete(locations: readonly ObjectLocation[]): Promise<number>;
+
+  /**
+   * A link to the object at `location` that stands on its own for `expiresIn`.
+   *
+   * The link carries its own authorisation, so whoever holds it reads the object without an
+   * account. That is what makes `expiresIn` worth choosing rather than defaulting.
+   *
+   * @throws {CapabilityError} When the host refused to sign.
+   */
+  signedUrl(location: ObjectLocation, expiresIn: Time): Promise<string>;
+
+  /**
+   * The objects sitting under `folder`, once `pathArgs` filled the placeholders of its path.
+   *
+   * `limit` and `offset` are the page asked for, at a hundred objects by default.
+   *
+   * @throws {CapabilityError} When the host refused the listing.
+   */
+  list(
+    folder: string,
+    pathArgs?: Readonly<Record<string, string>>,
+    limit?: number,
+    offset?: number,
+  ): Promise<readonly StoredObject[]>;
+}
+
+export const storage: StorageCapability = {
   async upload(
     location: ObjectLocation,
     content: Uint8Array,

@@ -1,0 +1,70 @@
+// Copyright (C) 2026 Fiber
+//
+// This Source Code Form is subject to the terms of the Mozilla Public License,
+// v. 2.0. If a copy of the MPL was not distributed with this file, You can
+// obtain one at https://mozilla.org/MPL/2.0/.
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+// - Combine it with files under any other licence, proprietary ones included,
+//   and licence that larger work on your own terms.
+//
+// What you must do in return:
+// - Keep this notice on every file you received it on.
+// - Publish, under these same terms, the source of every file covered by them
+//   that you distribute, including the ones you changed, so that whoever
+//   receives your version can obtain that source.
+// - Leave Fiber out of it: the name "Fiber", its branding, its logos and its
+//   trademarks may not be used to endorse or promote what you build, and this
+//   licence grants no right to them.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY
+// OR CONDITION OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR
+// NON-INFRINGEMENT. IN NO EVENT SHALL FIBER BE LIABLE FOR ANY DIRECT, INDIRECT,
+// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING BUT NOT
+// LIMITED TO LOSS OF USE, DATA, PROFITS, OR BUSINESS INTERRUPTION) ARISING OUT
+// OF OR RELATED TO THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY
+// KIND OF LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+import type { Future } from "../../async/future.ts";
+import type { CronDriver, CronOptions, DeclaredCron } from "../../port/cron.ts";
+
+/**
+ * A scheduler that keeps what it was given and fires nothing, for a test to run a package against.
+ *
+ * @remarks
+ * A case fires a run by name through {@link fire} rather than waiting for a schedule to come round,
+ * which is what keeps a suite from taking as long as the interval it declares. What the schedule
+ * says is kept so a case can assert on it without firing anything.
+ */
+export class MemoryCrons implements CronDriver {
+  /** Every run taken, by the key it answers to. */
+  readonly taken: Map<string, CronOptions> = new Map<string, CronOptions>();
+
+  schedule(options: CronOptions): DeclaredCron {
+    this.taken.set(options.key, options);
+    return { key: options.key, schedule: options.schedule };
+  }
+
+  /**
+   * Runs what was declared under `key`, once.
+   *
+   * @throws {Error} When nothing was declared under `key`, because a case firing a run that does
+   * not exist is a case asserting on a name somebody changed.
+   */
+  fire(key: string): Future<void> {
+    const held = this.taken.get(key);
+    if (held === undefined) {
+      throw new Error(`No scheduled run was declared under "${key}". Declared: ${[...this.taken.keys()].join(", ")}.`);
+    }
+    return Promise.resolve(held.run());
+  }
+}

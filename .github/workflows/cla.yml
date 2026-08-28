@@ -1,6 +1,7 @@
 name: cla
 
 on:
+  push:
   pull_request:
 
 permissions:
@@ -24,7 +25,7 @@ jobs:
           python-version: "3.13"
 
       - name: Check every contributor has signed
-        run: |
-          python3 .github/cla/check.py \
-            "${{ github.event.pull_request.base.sha }}" \
-            "${{ github.event.pull_request.head.sha }}"
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: python3 .github/cla/check.py "$BASE" "$HEAD"

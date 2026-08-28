@@ -47,7 +47,6 @@ export enum Caller {
   Webhook = "webhook",
 }
 
-
 export enum Need {
   Device = "device",
   Location = "location",
@@ -83,7 +82,6 @@ const methods: Record<RouteMethod, ProtoMethod> = {
   delete: ProtoMethod.DELETE,
 };
 
-
 const needs: Record<Need, ProtoNeed> = {
   [Need.Device]: ProtoNeed.DEVICE,
   [Need.Location]: ProtoNeed.LOCATION,
@@ -107,7 +105,6 @@ export function decodeMethod(method: ProtoMethod): RouteMethod {
   );
   return found ?? "get";
 }
-
 
 export function encodeNeed(need: Need): ProtoNeed {
   return needs[need];

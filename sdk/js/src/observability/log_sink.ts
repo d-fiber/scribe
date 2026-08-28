@@ -117,8 +117,8 @@ const LINGER_MS = 5_000;
 /**
  * Where a node's log entries go. It is the only place they go.
  *
- * Declare one by exporting a subclass from a `_log.ts`: at the root of a node
- * to take that node's entries, or at `lib/_log.ts` to take everything no node
+ * Declare one by exporting a subclass from a `_logs.ts`: at the root of a node
+ * to take that node's entries, or at `lib/_logs.ts` to take everything no node
  * claimed. A node with none produces nothing -- the framework keeps no
  * destination of its own, so declaring a sink is what turns logging on rather
  * than what redirects it.

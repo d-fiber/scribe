@@ -2,6 +2,7 @@ name: tests
 
 on:
   push:
+    branches: [dev, main]
   pull_request:
   schedule:
     - cron: "20 23 * * *"
@@ -9,41 +10,35 @@ on:
 permissions:
   contents: read
 
+env:
+  DENO_VERSION: 2.7.14
+
 concurrency:
   group: tests-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  host:
+  engine:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: host
-
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check out the packages submodule
-        env:
-          PACKAGES_READ_KEY: ${{ secrets.PACKAGES_READ_KEY }}
-        run: |
-          set -eu
-          mkdir -p ~/.ssh
-          printf '%s\n' "$PACKAGES_READ_KEY" > ~/.ssh/packages
-          chmod 600 ~/.ssh/packages
-          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/packages -o IdentitiesOnly=yes" \
-            git submodule update --init --recursive
-
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Lint
-        run: deno lint
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/deno
+          key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
+          restore-keys: deno-${{ runner.os }}-
 
       - name: Type check
         run: deno task check
+
+      - name: Lint
+        run: deno task lint
 
       - name: Run tests
         run: deno task test
@@ -51,11 +46,9 @@ jobs:
       - name: Run tests with network access
         run: deno task test:net
 
-      - name: Run the package tests, which need a directory of their own
-        run: deno task test:pkg
-
   sdk-js:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: sdk/js
@@ -65,7 +58,7 @@ jobs:
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version: ${{ env.DENO_VERSION }}
 
       - name: Install the npm dependencies
         run: deno install
@@ -78,6 +71,7 @@ jobs:
 
   headers:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v4
@@ -85,35 +79,87 @@ jobs:
       - name: Check license headers
         run: bash .github/headers/check.sh
 
-  versioning:
+  binaries:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: .github/versioning
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
+      - name: Check that no tracked file is a binary
+        run: bash .github/binaries/check.sh
 
-      - name: Install protoc
-        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
-
-      - name: Run tests
-        run: python3 -m unittest discover -s tests -t . -v
-
-  dependencies:
-    if: github.event_name == 'schedule'
+  packages:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check that every package is reached through its door
+        run: bash .github/packages/check.sh
+
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version: ${{ env.DENO_VERSION }}
+
+      - name: Check the formatting
+        run: deno fmt --check
+
+  version:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check the version, and who moved it
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: bash .github/version/check.sh
+
+      - name: Write the changelog section, if the version moved
+        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+        run: |
+          set -eu
+          bash .github/version/changelog.sh
+
+          git diff --quiet CHANGELOG.md && exit 0
+
+          version=$(python3 -c "import json;print(json.load(open('deno.json'))['version'])")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "[DOC]: write what $version is made of"
+          git push origin HEAD:dev
+
+      - name: Name this commit after the version, if it has moved
+        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+        run: bash .github/version/tag.sh
+
+  dependencies:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
 
       - name: Report the Deno dependencies that moved
         run: |
@@ -123,7 +169,7 @@ jobs:
             echo ""
             echo "Dependabot does not read Deno, so this is the only place these show up."
             echo ""
-            for root in host sdk/js; do
+            for root in engine sdk/js; do
               echo "### $root"
               echo ""
               echo '```'
@@ -132,26 +178,15 @@ jobs:
               echo ""
             done
             echo "Imports pinned by URL are invisible here too. Today that is"
-            echo '`jose`, pinned to a fixed version of deno.land/x in host/deno.json.'
+            echo '`jose`, pinned to a fixed version of deno.land/x in deno.json.'
           } >> "$GITHUB_STEP_SUMMARY"
 
   protocol:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Check out the packages submodule
-        env:
-          PACKAGES_READ_KEY: ${{ secrets.PACKAGES_READ_KEY }}
-        run: |
-          set -eu
-          mkdir -p ~/.ssh
-          printf '%s\n' "$PACKAGES_READ_KEY" > ~/.ssh/packages
-          chmod 600 ~/.ssh/packages
-          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/packages -o IdentitiesOnly=yes" \
-            git submodule update --init --recursive
 
       - name: Install protoc
         run: sudo apt-get update && sudo apt-get install -y protobuf-compiler

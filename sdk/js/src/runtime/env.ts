@@ -47,7 +47,34 @@ function reader(): EnvReader | null {
   return runtime?.env ?? null;
 }
 
-export const env = {
+/** The worker's environment, read through whatever runtime is hosting it. */
+export interface Environment {
+  /**
+   * The value of `name`, or null when it is unset.
+   *
+   * Null is also what a runtime that exposes no environment at all answers, so a worker running
+   * outside Deno reads every setting as absent rather than failing.
+   */
+  get(name: string): string | null;
+
+  /**
+   * The value of `name` read as a number, or `fallback` when it is unset or not a finite number.
+   *
+   * A value that is present but unreadable is treated exactly like an absent one, so a typo in a
+   * setting keeps the default without saying anything.
+   */
+  number(name: string, fallback: number): number;
+
+  /**
+   * The value of `name`, for a setting the worker has no default for.
+   *
+   * @throws {Error} When `name` is unset, which is meant to stop the worker at start rather than
+   * let it run on a value nobody chose.
+   */
+  required(name: string): string;
+}
+
+export const env: Environment = {
   get(name: string): string | null {
     return reader()?.get(name) ?? null;
   },

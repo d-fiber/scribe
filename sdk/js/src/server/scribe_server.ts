@@ -49,11 +49,36 @@ import type { DiscoveredLogSink, DiscoveredRoute } from "../routing/discovery.ts
 import { compileNode, RoutingError } from "../routing/tree.ts";
 import { env } from "../runtime/env.ts";
 import { serveWorker, workerHandler } from "../runtime/serve.ts";
-import type { Node } from "./node.ts";
+import { Node } from "./node.ts";
+import type { NodeRoot } from "../routing/middleware.ts";
 
 const PORT_SETTING = "WORKER_PORT";
 
 const DEFAULT_PORT = 8888;
+
+/**
+ * A node as the project declared it, which is what `config.yaml` says about it.
+ *
+ * It is generated rather than written: a node is armed by the manifest and
+ * served by the directory of the same name, so nothing in the source declares
+ * one and nothing can disagree with the manifest about which exist.
+ */
+export interface DeclaredNode {
+  /** The node's name, which is the directory serving it. */
+  readonly name: string;
+
+  /** Whether the outside may call it, or only the deployment itself. */
+  readonly public: boolean;
+
+  /**
+   * The middleware every route of this node passes through, when it has one.
+   *
+   * It is the one thing about a node that `config.yaml` cannot hold, since it
+   * is code. A project writes it as `lib/<node>/_middleware.ts` and never fills
+   * this in; it is here for a caller that builds a server by hand.
+   */
+  readonly root?: NodeRoot;
+}
 
 interface ResolvedNode {
   readonly name: string;
@@ -65,7 +90,7 @@ export interface ServerOptions {
   readonly port?: number;
   readonly hostname?: string;
   readonly routes?: readonly DiscoveredRoute[];
-  readonly nodes?: readonly string[];
+  readonly nodes?: readonly DeclaredNode[];
   readonly logSinks?: readonly DiscoveredLogSink[];
   readonly queues?: readonly WorkerQueue<never>[];
   readonly hooks?: readonly WorkerHook[];
@@ -77,30 +102,20 @@ export interface ServerOptions {
 
 export class ScribeServer {
   readonly #options: ServerOptions;
-  readonly #nodes: ResolvedNode[] = [];
+  readonly #nodes: ResolvedNode[];
 
   constructor(options: ServerOptions = {}) {
     this.#options = options;
-  }
-
-  addNode(node: Node): this {
-    if (this.#nodes.some((declared) => declared.name === node.name)) {
-      throw new RoutingError(
-        `The node "${node.name}" is declared twice on the server.`,
-      );
-    }
-    this.#nodes.push({
+    this.#nodes = (options.nodes ?? []).map((node) => ({
       name: node.name,
       public: node.public,
-      layers: node.layers(),
-    });
-    return this;
+      layers: new Node({ name: node.name, public: node.public, node: node.root }).layers(),
+    }));
   }
 
   definition(): WorkerDefinition {
     const discovered = this.#options.routes ?? [];
     const nodes = this.#nodes;
-    this.#rejectMissingFolders();
     this.#rejectUndeclaredRoutes(discovered);
 
     const sinks = new SinkRegistry(this.#options.logSinks ?? []);
@@ -136,9 +151,11 @@ export class ScribeServer {
     const port = this.#options.port ?? env.number(PORT_SETTING, DEFAULT_PORT);
 
     console.log(
-      `[worker] ${definition.routes.length} routes on ${definition.nodes
-        .map((node) => `${node.name}${node.public ? "" : " (internal)"}`)
-        .join(", ")}`,
+      `[worker] ${definition.routes.length} routes on ${
+        definition.nodes
+          .map((node) => `${node.name}${node.public ? "" : " (internal)"}`)
+          .join(", ")
+      }`,
     );
 
     return serveWorker(definition, {
@@ -155,14 +172,14 @@ export class ScribeServer {
       if (declared.has(route.node)) continue;
 
       throw new RoutingError(
-        `${route.file} lives under "${route.node}/", which no addNode() declares: ` +
-          `nothing is served until the server opts in.`,
+        `${route.file} lives under "${route.node}/", which config.yaml declares no node for: ` +
+          `nothing is served until api.nodes names it.`,
       );
     }
   }
 
   /**
-   * Refuses a `_log.ts` under a folder no `addNode()` opens.
+   * Refuses a `_logs.ts` under a folder config.yaml declares no node for.
    *
    * Without this the file is read, the class is built, and nothing is ever
    * delivered to it: the host only ever names nodes the manifest declares. The
@@ -176,22 +193,8 @@ export class ScribeServer {
       if (declared.has(node)) continue;
 
       throw new RoutingError(
-        `A _log.ts lives under "${node}/", which no addNode() declares: ` +
+        `A _logs.ts lives under "${node}/", which config.yaml declares no node for: ` +
           `nothing would ever be delivered to it.`,
-      );
-    }
-  }
-
-  #rejectMissingFolders(): void {
-    const folders = this.#options.nodes;
-    if (folders === undefined) return;
-
-    for (const node of this.#nodes) {
-      if (folders.includes(node.name)) continue;
-
-      throw new RoutingError(
-        `addNode() declares "${node.name}", but no ${node.name}/ folder exists under the source root: ` +
-          `a node is named after the folder it serves.`,
       );
     }
   }

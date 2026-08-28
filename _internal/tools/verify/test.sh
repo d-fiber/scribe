@@ -44,20 +44,20 @@ say() {
   echo "[$SCOPE] $1"
 }
 
-[ -f "$ROOT/host/packages/foundation/deno.json" ] || {
-  echo "[$SCOPE] host/packages is empty, run \`git submodule update --init\` first." >&2
+[ -f "$ROOT/packages/foundation/deno.json" ] || {
+  echo "[$SCOPE] packages/ is empty, so this checkout is not a whole one." >&2
   exit 1
 }
 
-say "running host, offline"
-(cd "$ROOT/host" && deno task test)
+say "running the workspace, offline"
+(cd "$ROOT" && deno task test)
 
-say "running host, with network access"
-(cd "$ROOT/host" && deno task test:net)
+say "running the workspace, with network access"
+(cd "$ROOT" && deno task test:net)
 
 say "running sdk/js"
 (cd "$ROOT/sdk/js" && deno task test)
 
 echo ""
 say "every suite the CI runs on a push is green."
-say "the end-to-end suites need a stack up and are not part of this, see host/deno.json."
+say "the end-to-end suites need a stack up and are not part of this, see deno.json."

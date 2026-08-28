@@ -1,0 +1,203 @@
+// Copyright (C) 2026 Fiber
+//
+// This Source Code Form is subject to the terms of the Mozilla Public License,
+// v. 2.0. If a copy of the MPL was not distributed with this file, You can
+// obtain one at https://mozilla.org/MPL/2.0/.
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+// - Combine it with files under any other licence, proprietary ones included,
+//   and licence that larger work on your own terms.
+//
+// What you must do in return:
+// - Keep this notice on every file you received it on.
+// - Publish, under these same terms, the source of every file covered by them
+//   that you distribute, including the ones you changed, so that whoever
+//   receives your version can obtain that source.
+// - Leave Fiber out of it: the name "Fiber", its branding, its logos and its
+//   trademarks may not be used to endorse or promote what you build, and this
+//   licence grants no right to them.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY
+// OR CONDITION OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR
+// NON-INFRINGEMENT. IN NO EVENT SHALL FIBER BE LIABLE FOR ANY DIRECT, INDIRECT,
+// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING BUT NOT
+// LIMITED TO LOSS OF USE, DATA, PROFITS, OR BUSINESS INTERRUPTION) ARISING OUT
+// OF OR RELATED TO THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY
+// KIND OF LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+import type { RequestUser } from "@scribe/alchemy/route";
+import { assertEquals, assertRejects } from "@std/assert";
+import { currentIdentity, currentPrincipal } from "@scribe/runtime/http/accessors/identity.ts";
+import { request } from "@scribe/runtime/http/request.ts";
+import { CapabilityTokens, UnknownCapabilityToken } from "@scribe/embedder/capabilities/tokens.ts";
+
+const CALLER: RequestUser = { id: "caller-1", caller: "authenticated", role: "owner", permissions: [], claims: {} };
+
+function grant() {
+  return {
+    request: new Request("https://api.example.com/admin/brand?page=2", {
+      headers: { "user-agent": "conformance" },
+    }),
+    bodyBytes: new TextEncoder().encode(`{"name":"Fiber"}`),
+    identity: CALLER,
+    traceId: "trace-1",
+    invocationId: "inv-1",
+  };
+}
+
+Deno.test("a capability token replays the identity of the invocation that issued it", async () => {
+  const token = CapabilityTokens.issue(grant());
+
+  const seen = await CapabilityTokens.run(token, () =>
+    Promise.resolve({
+      id: currentIdentity()?.id,
+      path: request.path(),
+      agent: request.userAgent(),
+    }));
+
+  assertEquals(seen.id, "caller-1");
+  assertEquals(seen.path, "/admin/brand");
+  assertEquals(seen.agent, "conformance");
+
+  CapabilityTokens.revoke(token);
+});
+
+Deno.test("a revoked token cannot be replayed once the invocation is over", async () => {
+  const token = CapabilityTokens.issue(grant());
+  CapabilityTokens.revoke(token);
+
+  await assertRejects(
+    () => CapabilityTokens.run(token, () => Promise.resolve(null)),
+    UnknownCapabilityToken,
+  );
+});
+
+Deno.test("a token the host never issued is refused", async () => {
+  await assertRejects(
+    () => CapabilityTokens.run("forged", () => Promise.resolve(null)),
+    UnknownCapabilityToken,
+  );
+});
+
+Deno.test("an expired token is refused, whether or not a sweep has run since", () => {
+  const first = CapabilityTokens.issue(grant(), -1);
+
+  assertEquals(CapabilityTokens.redeem(first), null, "an expired token was handed back");
+
+  // Issuing again in the same millisecond cannot have swept: the store runs one
+  // sweep a second. The refusal has to come from redeem reading the expiry.
+  const second = CapabilityTokens.issue(grant(), -1);
+  const third = CapabilityTokens.issue(grant(), -1);
+
+  assertEquals(CapabilityTokens.redeem(second), null, "an expired token survived a gated sweep");
+  assertEquals(CapabilityTokens.redeem(third), null, "an expired token survived a gated sweep");
+});
+
+Deno.test("issuing does not walk the store on every call", () => {
+  // The first issue leaves the sweep gate closed behind it, whether it swept or was itself gated,
+  // so what the loop below observes is the gate and not where the previous test left the clock.
+  const opened = CapabilityTokens.issue(grant(), 60_000);
+  const before = CapabilityTokens.size;
+
+  const held = [opened];
+  for (let issued = 0; issued < 200; issued++) held.push(CapabilityTokens.issue(grant(), -1));
+
+  const grew = CapabilityTokens.size - before;
+  for (const token of held) CapabilityTokens.revoke(token);
+
+  assertEquals(
+    grew,
+    200,
+    "a sweep on every issue would have reaped these as they arrived, which is the store walked once a call",
+  );
+});
+
+Deno.test("a standing grant outlives every stretch of time a figure could have named", async () => {
+  const token = CapabilityTokens.standing(grant());
+
+  assertEquals(
+    await CapabilityTokens.run(token, () => Promise.resolve("answered")),
+    "answered",
+    "the worker's ambient credential is the attachment, so a ttl on it is a day-long fuse nothing watches",
+  );
+
+  CapabilityTokens.revoke(token);
+});
+
+Deno.test("a second attachment revokes the credential the first one handed out", async () => {
+  const first = CapabilityTokens.standing(grant());
+  const second = CapabilityTokens.standing(grant());
+
+  await assertRejects(() => CapabilityTokens.run(first, () => Promise.resolve(null)), UnknownCapabilityToken);
+  assertEquals(
+    CapabilityTokens.holds(first),
+    false,
+    "nothing ever hands the token back, so replacing it is the only moment the old one can go",
+  );
+  assertEquals(await CapabilityTokens.run(second, () => Promise.resolve("answered")), "answered");
+
+  CapabilityTokens.revoke(second);
+});
+
+Deno.test("revoking the standing grant leaves nothing behind to revoke twice", async () => {
+  const token = CapabilityTokens.standing(grant());
+  CapabilityTokens.revoke(token);
+
+  const replacement = CapabilityTokens.standing(grant());
+  assertEquals(await CapabilityTokens.run(replacement, () => Promise.resolve("answered")), "answered");
+
+  CapabilityTokens.revoke(replacement);
+});
+
+Deno.test("holds answers for a token without spending it", () => {
+  const token = CapabilityTokens.issue(grant());
+
+  assertEquals(CapabilityTokens.holds(token), true);
+  assertEquals(CapabilityTokens.holds(token), true, "asking is not redeeming");
+  assertEquals(CapabilityTokens.holds("not-a-token"), false);
+  assertEquals(CapabilityTokens.holds(""), false);
+
+  CapabilityTokens.revoke(token);
+});
+
+Deno.test("a standing grant answered no request, and says so", async () => {
+  const token = CapabilityTokens.standing({
+    request: new Request("http://worker.bootstrap/"),
+    bodyBytes: new Uint8Array(),
+    traceId: "",
+    invocationId: "",
+  });
+
+  try {
+    assertEquals(
+      await CapabilityTokens.run(token, () => Promise.resolve(currentPrincipal().kind)),
+      "unproven",
+      "passing for an anonymous caller is how a credential that answered nothing reads an owned table as nobody, " +
+        "instead of being refused the way a queue pass or a cron body is",
+    );
+  } finally {
+    CapabilityTokens.revoke(token);
+  }
+});
+
+Deno.test("a request grant that proved nobody is an anonymous caller, not an absent one", async () => {
+  const token = CapabilityTokens.issue({ ...grant(), identity: null });
+
+  try {
+    assertEquals(
+      await CapabilityTokens.run(token, () => Promise.resolve(currentPrincipal().kind)),
+      "anonymous",
+    );
+  } finally {
+    CapabilityTokens.revoke(token);
+  }
+});

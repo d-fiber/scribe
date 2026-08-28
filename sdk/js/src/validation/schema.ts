@@ -44,20 +44,7 @@ export type {
   ScalarCtor,
 } from "./field_types.ts";
 
-export {
-  Arr,
-  isArrMarker,
-  isNestedMarker,
-  isRequiredEntry,
-  Nested,
-  Required,
-  unwrapFieldCtor,
-} from "./markers.ts";
+export { Arr, isArrMarker, isNestedMarker, isRequiredEntry, Nested, Required, unwrapFieldCtor } from "./markers.ts";
 export type { ArrMarker, NestedMarker, RequiredMarker } from "./markers.ts";
 
-export type {
-  BodyFieldResult,
-  BodyFromSchema,
-  FormFieldResult,
-  FormFromSchema,
-} from "./inference.ts";
+export type { BodyFieldResult, BodyFromSchema, FormFieldResult, FormFromSchema } from "./inference.ts";

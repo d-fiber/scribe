@@ -1,4 +1,0 @@
-services:
-  db:
-    volumes:
-      - "{{sdk_root}}/host/packages/audience/db/init:/docker-entrypoint-init-sql/modules/audience:ro"

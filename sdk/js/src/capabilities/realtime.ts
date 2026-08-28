@@ -34,20 +34,49 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Realtime } from "../../gen/scribe/host/packages/realtime/protocol/realtime_pb.ts";
+import { Realtime } from "../../gen/scribe/packages/realtime/protocol/realtime_pb.ts";
 import { encodeJson } from "../contracts/json.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";
 
 const CAPABILITY = "realtime";
 
-export const realtime = {
+/** The channels a worker publishes on, and the accounts allowed to listen to them. */
+export interface RealtimeCapability {
+  /**
+   * Publishes `payload` on `channel` as `action` upon `entityId`, and answers whether it left.
+   *
+   * A false means the host had no transport registered and dropped the emission, which is not a
+   * refusal. What it never means is that nobody was listening: no subscriber is counted anywhere
+   * on the way, so a broadcast delivered to an empty channel and one delivered to a thousand
+   * accounts answer the same true.
+   *
+   * @throws {CapabilityError} When the host refused the broadcast.
+   */
+  broadcast(channel: string, action: string, entityId: string, payload: unknown): Promise<boolean>;
+
+  /**
+   * Lets the accounts of `accountIds` listen to `channel`.
+   *
+   * @throws {CapabilityError} When the host refused the grant.
+   */
+  grant(channel: string, accountIds: readonly string[]): Promise<void>;
+
+  /**
+   * Takes `channel` back from the accounts of `accountIds`.
+   *
+   * @throws {CapabilityError} When the host refused the revocation.
+   */
+  revoke(channel: string, accountIds: readonly string[]): Promise<void>;
+}
+
+export const realtime: RealtimeCapability = {
   async broadcast(
     channel: string,
     action: string,
     entityId: string,
     payload: unknown,
-  ): Promise<number> {
+  ): Promise<boolean> {
     const result = await host.client().call(Realtime.method.broadcast, {
       channel,
       action,
@@ -55,7 +84,7 @@ export const realtime = {
       payload: encodeJson(payload),
     });
     raiseOn(CAPABILITY, result.error);
-    return result.delivered;
+    return result.sent;
   },
 
   async grant(channel: string, accountIds: readonly string[]): Promise<void> {
