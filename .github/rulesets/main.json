@@ -77,7 +77,7 @@
             "context": "checks / version"
           },
           {
-            "context": "signed"
+            "context": "checks / signed"
           }
         ]
       }
