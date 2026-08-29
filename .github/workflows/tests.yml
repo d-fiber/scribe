@@ -18,17 +18,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # The three checks every repository owes, held here and called by the five.
+  checks:
+    uses: ./.github/workflows/gate.yml
+    with:
+      excluded: "node_modules .git .dart_tool __pycache__ gen examples fixtures"
+
   engine:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/.cache/deno
           key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
@@ -54,9 +60,9 @@ jobs:
         working-directory: sdk/js
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
@@ -69,22 +75,12 @@ jobs:
       - name: Run tests
         run: deno task test
 
-  headers:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Check license headers
-        run: bash .github/headers/check.sh
-
   binaries:
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Check that no tracked file is a binary
         run: bash .github/binaries/check.sh
@@ -94,7 +90,7 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Check that every package is reached through its door
         run: bash .github/packages/check.sh
@@ -104,34 +100,31 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
       - name: Check the formatting
         run: deno fmt --check
 
-  version:
+  tag:
+    needs: [engine, sdk-js, binaries, packages, format, protocol, checks]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: write
+      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
-
-      - name: Check the version, and who moved it
-        env:
-          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-          HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-        run: bash .github/version/check.sh
+          ssh-key: ${{ secrets.RELEASE_PUSH_KEY }}
+          persist-credentials: true
 
       - name: Write the changelog section, if the version moved
-        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
         run: |
           set -eu
           bash .github/version/changelog.sh
@@ -146,7 +139,6 @@ jobs:
           git push origin HEAD:dev
 
       - name: Name this commit after the version, if it has moved
-        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
         run: bash .github/version/tag.sh
 
   dependencies:
@@ -155,9 +147,9 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
@@ -186,7 +178,7 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Install protoc
         run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
