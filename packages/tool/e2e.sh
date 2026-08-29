@@ -35,21 +35,61 @@
 # This header is a summary written for convenience. Where it differs from the
 # LICENSE file, the LICENSE file governs.
 
-set -euo pipefail
+# Runs every package's e2e scenario, one after another, then tears down whatever
+# they left. A scenario brings its own stack up and down; this is the sweep for
+# one that crashed before its own teardown ran. Pass a package name to run just
+# that one.
 
-source "$(dirname "${BASH_SOURCE[0]}")/stack.sh"
+set -uo pipefail
 
-resolve_package "$@"
+ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+cd "$ROOT"
 
-if rendered; then
-  echo "[e2e:reset] stopping the $PACKAGE stack and dropping its volumes"
-  compose down -v
+say() { echo "[e2e] $1"; }
+
+command -v docker >/dev/null 2>&1 || { echo "[e2e] docker is not on your PATH." >&2; exit 1; }
+
+if [ $# -ge 1 ]; then
+  scenarios=("$1/tests/e2e/scenario.sh")
+  [ -f "${scenarios[0]}" ] || { echo "[e2e] $1 has no tests/e2e/scenario.sh." >&2; exit 64; }
+else
+  scenarios=(*/tests/e2e/scenario.sh)
 fi
 
-if [ -d "$E2E/.postgres" ]; then
-  echo "[e2e:reset] removing $PACKAGE/tests/e2e/.postgres"
-  rm -rf "$E2E/.postgres"
-fi
+ran=()
+failed=()
+for scenario in "${scenarios[@]}"; do
+  [ -f "$scenario" ] || continue
+  package=${scenario%%/*}
+  echo ""
+  say "=================== $package ==================="
+  if bash "$scenario"; then
+    ran+=("$package")
+  else
+    failed+=("$package")
+    say "$package failed"
+  fi
+done
 
 echo ""
-echo "[e2e:reset] the next start of $PACKAGE will run db/init from an empty database."
+say "cleaning up"
+projects=$(
+  docker ps -aq --filter "label=com.docker.compose.project" \
+    --format '{{.Label "com.docker.compose.project"}}' 2>/dev/null | grep '^e2e-' | sort -u || true
+)
+for project in $projects; do
+  docker compose -p "$project" --profile '*' down --volumes --remove-orphans >/dev/null 2>&1 || true
+  survivors=$(docker ps -aq --filter "label=com.docker.compose.project=$project")
+  # shellcheck disable=SC2086
+  [ -n "$survivors" ] && docker rm --force --volumes $survivors >/dev/null 2>&1 || true
+done
+docker network ls -q --filter 'name=^e2e-' 2>/dev/null | xargs -r docker network rm >/dev/null 2>&1 || true
+rm -rf ./*/tests/e2e/.e2e
+
+echo ""
+if [ ${#failed[@]} -eq 0 ]; then
+  say "${#ran[@]} scenario(s) green: ${ran[*]:-none}"
+  exit 0
+fi
+say "failed: ${failed[*]}"
+exit 1
