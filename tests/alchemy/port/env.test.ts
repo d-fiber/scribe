@@ -34,44 +34,44 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { environment } from "@scribe/foundation";
+import { equals, expect, isTrue, MemoryEnvironment } from "@scribe/alchemy/test";
+import { Environments } from "@scribe/alchemy";
 
-export class EdgeConfig {
-  readonly functionsRoot: string;
-  readonly verifyJwt: boolean;
-  readonly jwtSecret: string | undefined;
-  readonly authUrl: string | undefined;
-  readonly memoryLimitMb: number;
-  readonly workerTimeoutMs: number;
+Deno.test("a name that was set reads the value it was set to", () => {
+  const env = new MemoryEnvironment({ REDIS_URL: "redis://localhost:6379" });
 
-  private constructor(values: {
-    functionsRoot: string;
-    verifyJwt: boolean;
-    jwtSecret: string | undefined;
-    authUrl: string | undefined;
-    memoryLimitMb: number;
-    workerTimeoutMs: number;
-  }) {
-    this.functionsRoot = values.functionsRoot;
-    this.verifyJwt = values.verifyJwt;
-    this.jwtSecret = values.jwtSecret;
-    this.authUrl = values.authUrl;
-    this.memoryLimitMb = values.memoryLimitMb;
-    this.workerTimeoutMs = values.workerTimeoutMs;
+  expect(env.get("REDIS_URL"), equals("redis://localhost:6379"), "the value set did not come back");
+});
+
+Deno.test("a name that was never set reads undefined, the way an unset variable does", () => {
+  const env = new MemoryEnvironment({ PORT: "8080" });
+
+  expect(env.get("NOTHING"), equals(undefined), "a name nobody set answered something");
+});
+
+Deno.test("a name set to the empty string reads the empty string, not undefined", () => {
+  const env = new MemoryEnvironment({ VERIFY_JWT: "" });
+
+  expect(env.get("VERIFY_JWT"), equals(""), "an empty value was taken as absent");
+});
+
+Deno.test("toObject hands back every name and value, and a later change does not leak into it", () => {
+  const env = new MemoryEnvironment({ A: "1", B: "2" });
+  const snapshot = env.toObject();
+  env.set("A", "3");
+
+  expect(snapshot, equals({ A: "1", B: "2" }), "the snapshot moved under the caller");
+});
+
+Deno.test("the slot answers with whatever a host or a test put in it", () => {
+  const held = Environments.configured ? Environments.get() : null;
+  Environments.use(new MemoryEnvironment({ JWT_SECRET: "shhh" }));
+
+  try {
+    expect(Environments.configured, isTrue, "the slot stayed empty after use");
+    expect(Environments.get().get("JWT_SECRET"), equals("shhh"), "the slot answered with the wrong environment");
+  } finally {
+    if (held === null) Environments.clear();
+    else Environments.use(held);
   }
-
-  static fromEnvironment(): EdgeConfig {
-    return new EdgeConfig({
-      functionsRoot: "/home/deno/functions",
-      verifyJwt: environment().get("VERIFY_JWT") === "true",
-      jwtSecret: environment().get("JWT_SECRET"),
-      authUrl: environment().get("AUTH_INTERNAL_URL"),
-      memoryLimitMb: 150,
-      workerTimeoutMs: 60_000,
-    });
-  }
-
-  get importMapPath(): string {
-    return `${this.functionsRoot}/deno.json`;
-  }
-}
+});

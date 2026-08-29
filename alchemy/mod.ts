@@ -153,6 +153,9 @@ export type { ClaimDriver, ClaimOptions, WhenUnavailable } from "./port/claim.ts
 export { FileSystems } from "./port/files.ts";
 export type { FileSystem, FileSystemDriver, FileSystemEntity } from "./port/files.ts";
 
+export { Environments } from "./port/env.ts";
+export type { Environment } from "./port/env.ts";
+
 export { renderError } from "./diagnostic/render.ts";
 export type { RenderOptions } from "./diagnostic/render.ts";
 export { foldFrames, framesOf } from "./diagnostic/stack.ts";

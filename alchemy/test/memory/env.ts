@@ -34,44 +34,51 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { environment } from "@scribe/foundation";
+import type { Environment } from "../../port/env.ts";
 
-export class EdgeConfig {
-  readonly functionsRoot: string;
-  readonly verifyJwt: boolean;
-  readonly jwtSecret: string | undefined;
-  readonly authUrl: string | undefined;
-  readonly memoryLimitMb: number;
-  readonly workerTimeoutMs: number;
+/**
+ * A set of process settings held in a map, read the way the real environment would be.
+ *
+ * @remarks
+ * It is what a test fills {@link Environments} with, so that what it checks does not depend on how
+ * the machine running it is configured. A name it was not given reads `undefined`, exactly as an
+ * unset variable does.
+ *
+ * @example
+ * ```ts
+ * Environments.use(new MemoryEnvironment({ REDIS_URL: "redis://localhost:6379" }));
+ * ```
+ */
+export class MemoryEnvironment implements Environment {
+  /** Every name this holds, and the value set for it. */
+  readonly #held: Map<string, string>;
 
-  private constructor(values: {
-    functionsRoot: string;
-    verifyJwt: boolean;
-    jwtSecret: string | undefined;
-    authUrl: string | undefined;
-    memoryLimitMb: number;
-    workerTimeoutMs: number;
-  }) {
-    this.functionsRoot = values.functionsRoot;
-    this.verifyJwt = values.verifyJwt;
-    this.jwtSecret = values.jwtSecret;
-    this.authUrl = values.authUrl;
-    this.memoryLimitMb = values.memoryLimitMb;
-    this.workerTimeoutMs = values.workerTimeoutMs;
+  /**
+   * Builds an environment holding `values`.
+   *
+   * @param values - The names and values this reads, empty when left out.
+   */
+  constructor(values: Record<string, string> = {}) {
+    this.#held = new Map(Object.entries(values));
   }
 
-  static fromEnvironment(): EdgeConfig {
-    return new EdgeConfig({
-      functionsRoot: "/home/deno/functions",
-      verifyJwt: environment().get("VERIFY_JWT") === "true",
-      jwtSecret: environment().get("JWT_SECRET"),
-      authUrl: environment().get("AUTH_INTERNAL_URL"),
-      memoryLimitMb: 150,
-      workerTimeoutMs: 60_000,
-    });
+  /** The value set for `name`, or `undefined` when this holds none. */
+  get(name: string): string | undefined {
+    return this.#held.get(name);
   }
 
-  get importMapPath(): string {
-    return `${this.functionsRoot}/deno.json`;
+  /** Every name and value this holds, as a plain object. */
+  toObject(): Record<string, string> {
+    return Object.fromEntries(this.#held);
+  }
+
+  /** Sets `name` to `value`, over whatever was there. */
+  set(name: string, value: string): void {
+    this.#held.set(name, value);
+  }
+
+  /** Forgets `name`, so the next read of it is `undefined`. */
+  unset(name: string): void {
+    this.#held.delete(name);
   }
 }

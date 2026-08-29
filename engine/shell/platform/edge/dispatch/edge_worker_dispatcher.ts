@@ -36,6 +36,7 @@
 
 import type { Future } from "@scribe/alchemy";
 import { ServerResponse } from "@scribe/alchemy/route";
+import { environment } from "@scribe/foundation";
 import { FRAMEWORK_SECRETS } from "@scribe/contracts/secrets.ts";
 import { readBoundedBody } from "@scribe/kernel/http/serve/body_reader.ts";
 import { MAX_BODY_BYTES } from "@scribe/runtime/http/limits.ts";
@@ -71,7 +72,7 @@ export class EdgeWorkerDispatcher implements WorkerDispatcher {
   constructor(
     platform: EdgePlatform,
     limits: WorkerLimits,
-    envVars: string[][] = Object.entries(Deno.env.toObject()),
+    envVars: string[][] = Object.entries(environment().toObject()),
   ) {
     this.#platform = platform;
     this.#limits = limits;

@@ -92,6 +92,7 @@ export { NoCallReadError } from "./mock/recorder.ts";
 export type { Invocation } from "./mock/recorder.ts";
 
 export { MemoryFileSystem, MemoryFileSystemDriver, MissingFileError } from "./memory/files.ts";
+export { MemoryEnvironment } from "./memory/env.ts";
 export { MemoryCache, MemoryCaches } from "./memory/cache.ts";
 export { MemoryQueue, MemoryQueues } from "./memory/queue.ts";
 export { MemoryHook, MemoryHooks } from "./memory/hook.ts";

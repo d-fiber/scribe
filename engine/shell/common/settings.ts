@@ -36,7 +36,7 @@
 
 import { cacheSettings } from "@scribe/foundation/cache";
 import { databaseSettings } from "@scribe/foundation/database";
-import { required } from "@scribe/foundation";
+import { environment, required } from "@scribe/foundation";
 import { queueSettings } from "@scribe/foundation/queue";
 import { RedisRateLimiters } from "@scribe/foundation/rate_limit";
 import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
@@ -63,7 +63,7 @@ const DEFAULT_PORT = 3000;
 const DEFAULT_MAX_INFLIGHT_BODY_MB = 256;
 
 function maxInflightBodyBytes(): number {
-  const declared = Number(Deno.env.get("API_MAX_INFLIGHT_BODY_MB"));
+  const declared = Number(environment().get("API_MAX_INFLIGHT_BODY_MB"));
   const megabytes = Number.isFinite(declared) && declared > 0 ? declared : DEFAULT_MAX_INFLIGHT_BODY_MB;
 
   return megabytes * 1024 * 1024;
@@ -85,7 +85,7 @@ databaseSettings.use({
  * quietest way to lock every caller out at the next rotation.
  */
 function jwtAlgorithms(): readonly string[] {
-  const declared = Deno.env.get("JWT_ALGORITHMS");
+  const declared = environment().get("JWT_ALGORITHMS");
   if (!declared) return [];
 
   const named = declared.split(",").map((name) => name.trim()).filter((name) => name !== "");
@@ -101,15 +101,18 @@ function jwtAlgorithms(): readonly string[] {
 }
 
 identitySettings.use({
-  authUrl: Deno.env.get("AUTH_INTERNAL_URL"),
+  authUrl: environment().get("AUTH_INTERNAL_URL"),
   anonKey: required("ANON_KEY"),
   serviceRoleKey: required("SERVICE_KEY"),
-  jwtSecret: Deno.env.get("JWT_SECRET"),
+  jwtSecret: environment().get("JWT_SECRET"),
   jwtAlgorithms: jwtAlgorithms(),
 });
 firewallSettings.use({ internalSecret: required("INTERNAL_SECRET") });
 deviceSettings.use({ payloadPrivateKeyHex: required("DEVICE_PAYLOAD_PRIVATE_KEY") });
-httpSettings.use({ port: Number(Deno.env.get("PORT") ?? DEFAULT_PORT), maxInflightBodyBytes: maxInflightBodyBytes() });
+httpSettings.use({
+  port: Number(environment().get("PORT") ?? DEFAULT_PORT),
+  maxInflightBodyBytes: maxInflightBodyBytes(),
+});
 
 RateLimiters.use(new RedisRateLimiters());
 
@@ -139,17 +142,17 @@ const WORKER_HANDSHAKE_DELAY_MS = 1_000;
  * gateway exposes it.
  */
 function publicNodes(): readonly string[] {
-  const declared = Deno.env.get("GATEWAY_PUBLIC_NODES");
+  const declared = environment().get("GATEWAY_PUBLIC_NODES");
   if (!declared) return [];
 
   return declared.split(",").map((name) => name.trim()).filter((name) => name !== "");
 }
 
 workerSettings.use({
-  endpoint: Deno.env.get("WORKER_ENDPOINT") || null,
-  callbackUrl: Deno.env.get("WORKER_CALLBACK_URL") || null,
-  callbackPort: Number(Deno.env.get("WORKER_CALLBACK_PORT") ?? WORKER_CALLBACK_PORT),
-  callbackHostname: Deno.env.get("WORKER_CALLBACK_HOSTNAME") || WORKER_CALLBACK_HOSTNAME,
+  endpoint: environment().get("WORKER_ENDPOINT") || null,
+  callbackUrl: environment().get("WORKER_CALLBACK_URL") || null,
+  callbackPort: Number(environment().get("WORKER_CALLBACK_PORT") ?? WORKER_CALLBACK_PORT),
+  callbackHostname: environment().get("WORKER_CALLBACK_HOSTNAME") || WORKER_CALLBACK_HOSTNAME,
   handshakeAttempts: WORKER_HANDSHAKE_ATTEMPTS,
   handshakeDelayMs: WORKER_HANDSHAKE_DELAY_MS,
   publicNodes: publicNodes(),

@@ -34,44 +34,41 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { environment } from "@scribe/foundation";
+import { Slot } from "../bind/slot.ts";
 
-export class EdgeConfig {
-  readonly functionsRoot: string;
-  readonly verifyJwt: boolean;
-  readonly jwtSecret: string | undefined;
-  readonly authUrl: string | undefined;
-  readonly memoryLimitMb: number;
-  readonly workerTimeoutMs: number;
+/**
+ * The settings a process was started with, read by name.
+ *
+ * @remarks
+ * A package and the framework's own boot read what they need through this, never through the
+ * runtime under them. The one implementation that reads the real process environment lives beside
+ * the other drivers, in `foundation`, so that this file names nothing that runs and a test can put
+ * a fixed set of values behind it.
+ *
+ * Every method answers the way the runtime's own reader does: a name that was never set reads
+ * `undefined`, and a name set to the empty string reads `""`. Whether an empty value counts as
+ * absent is the caller's policy, not this port's.
+ */
+export interface Environment {
+  /** The value set for `name`, or `undefined` when nothing was. */
+  get(name: string): string | undefined;
 
-  private constructor(values: {
-    functionsRoot: string;
-    verifyJwt: boolean;
-    jwtSecret: string | undefined;
-    authUrl: string | undefined;
-    memoryLimitMb: number;
-    workerTimeoutMs: number;
-  }) {
-    this.functionsRoot = values.functionsRoot;
-    this.verifyJwt = values.verifyJwt;
-    this.jwtSecret = values.jwtSecret;
-    this.authUrl = values.authUrl;
-    this.memoryLimitMb = values.memoryLimitMb;
-    this.workerTimeoutMs = values.workerTimeoutMs;
-  }
-
-  static fromEnvironment(): EdgeConfig {
-    return new EdgeConfig({
-      functionsRoot: "/home/deno/functions",
-      verifyJwt: environment().get("VERIFY_JWT") === "true",
-      jwtSecret: environment().get("JWT_SECRET"),
-      authUrl: environment().get("AUTH_INTERNAL_URL"),
-      memoryLimitMb: 150,
-      workerTimeoutMs: 60_000,
-    });
-  }
-
-  get importMapPath(): string {
-    return `${this.functionsRoot}/deno.json`;
-  }
+  /** Every name and value set, as a plain object. A later read of one name still goes through {@link get}. */
+  toObject(): Record<string, string>;
 }
+
+/**
+ * What answers a caller that needs a setting the process was started with.
+ *
+ * @remarks
+ * The host fills this once, at boot, with the reader of the real environment, and a test fills it
+ * with a fixed map so that nothing it checks depends on how the machine running it is configured.
+ * Nothing declares against it: a setting is read, not declared, and reading falls back to the real
+ * environment when the slot is empty, so boot code that runs before anything wires still works.
+ *
+ * @example
+ * ```ts
+ * Environments.use(new MemoryEnvironment({ PORT: "8080" }));
+ * ```
+ */
+export const Environments: Slot<Environment> = new Slot<Environment>("Environments");

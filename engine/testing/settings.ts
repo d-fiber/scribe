@@ -36,7 +36,7 @@
 
 import { cacheSettings } from "@scribe/foundation/cache";
 import { databaseSettings } from "@scribe/foundation/database";
-import { optional, scribe } from "@scribe/foundation";
+import { environment, optional, scribe } from "@scribe/foundation";
 import { queueSettings } from "@scribe/foundation/queue";
 import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
 import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
@@ -59,7 +59,7 @@ export function installTestSettings(): void {
     authUrl: optional("AUTH_INTERNAL_URL", "http://localhost:9999"),
     anonKey: optional("ANON_KEY", "anon"),
     serviceRoleKey: optional("SERVICE_KEY", "service"),
-    jwtSecret: Deno.env.get("JWT_SECRET"),
+    jwtSecret: environment().get("JWT_SECRET"),
     jwtAlgorithms: [],
   });
   firewallSettings.use({ internalSecret: optional("INTERNAL_SECRET", "internal") });
