@@ -115,7 +115,7 @@ export {
   handsOverNothing,
   NO_ARTEFACTS,
   normaliseArtefactPath,
-  OPS_FRAGMENTS,
+  SERVICE_FRAGMENTS,
 } from "./package/artefacts.ts";
 export type { Artefacts, DatabaseArtefacts } from "./package/artefacts.ts";
 

@@ -134,7 +134,7 @@ Deno.test("a package that hands the stack nothing declares nothing", () => {
   expect(handsOverNothing(declared.artefacts), equals(true), "a package that took no step declared something");
   expect(declared.artefacts.db, equals(null), "a package that took no step named a sql directory");
   expect(declared.artefacts.protocol, equals(null), "a package that took no step named a protocol directory");
-  expect(declared.artefacts.ops.length, equals(0), "a package that took no step named a service");
+  expect(declared.artefacts.services.length, equals(0), "a package that took no step named a service");
 });
 
 Deno.test("a package carries what it said it hands the stack", () => {
@@ -142,17 +142,21 @@ Deno.test("a package carries what it said it hands the stack", () => {
     .version("1.0.0")
     .runsOn("^3.0.0")
     .hands({
-      db: { init: "./db/init/", provisioning: "./db/provisioning/" },
+      db: { init: "./deploy/db/init/", provisioning: "./deploy/db/provisioning/" },
       protocol: "./protocol/",
-      ops: ["./ops/database/", "./ops/queue/"],
+      services: ["./deploy/services/database/", "./deploy/services/queue/"],
     })
     .build();
 
-  expect(declared.artefacts.db?.init, equals("db/init"), "the init directory was lost");
-  expect(declared.artefacts.db?.provisioning, equals("db/provisioning"), "the provisioning directory was lost");
+  expect(declared.artefacts.db?.init, equals("deploy/db/init"), "the init directory was lost");
+  expect(declared.artefacts.db?.provisioning, equals("deploy/db/provisioning"), "the provisioning directory was lost");
   expect(declared.artefacts.db?.migrations, equals(null), "a directory nobody named came back declared");
   expect(declared.artefacts.protocol, equals("protocol"), "the protocol directory was lost");
-  expect([...declared.artefacts.ops], equals(["ops/database", "ops/queue"]), "the services were lost");
+  expect(
+    [...declared.artefacts.services],
+    equals(["deploy/services/database", "deploy/services/queue"]),
+    "the services were lost",
+  );
 });
 
 Deno.test("a db block naming no directory is the same as no db block", () => {
@@ -190,7 +194,10 @@ Deno.test("a path written empty is refused rather than read as the package itsel
 
 Deno.test("two spellings of one service are refused as the duplicate they are", () => {
   expect(
-    () => Package.named("audiences").version("1.0.0").runsOn("^3.0.0").hands({ ops: ["./ops/queue/", "ops/queue"] }),
+    () =>
+      Package.named("audiences").version("1.0.0").runsOn("^3.0.0").hands({
+        services: ["./deploy/services/queue/", "deploy/services/queue"],
+      }),
     throwsA(having(isA(DeclarationError), (raised) => raised.message, "message", contains("twice"))),
   );
 });
@@ -199,7 +206,7 @@ Deno.test("a path that climbs and comes back stays inside the package", () => {
   const declared = Package.named("audiences")
     .version("1.0.0")
     .runsOn("^3.0.0")
-    .hands({ protocol: "./ops/../protocol" })
+    .hands({ protocol: "./deploy/../protocol" })
     .build();
 
   expect(declared.artefacts.protocol, equals("protocol"), "the path was not read as the place it points at");

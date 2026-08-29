@@ -47,13 +47,13 @@ import type { UnmodifiableList } from "../value/list.ts";
 export const ARTEFACTS_KEY = "scribe";
 
 /** The keys the artefacts block may carry, and there is no fourth. */
-export const ARTEFACTS_KEYS: UnmodifiableList<string> = ["db", "protocol", "ops"];
+export const ARTEFACTS_KEYS: UnmodifiableList<string> = ["db", "protocol", "services"];
 
 /** The keys the `db:` block may carry, one per moment Postgres plays SQL at. */
 export const DATABASE_KEYS: UnmodifiableList<string> = ["init", "migrations", "provisioning"];
 
 /**
- * The names a fragment of the ops templates goes by, and the whole of them.
+ * The names a service fragment goes by, and the whole of them.
  *
  * @remarks
  * A fragment's name is what pairs it with the file of the base it completes, and there is no table
@@ -61,7 +61,7 @@ export const DATABASE_KEYS: UnmodifiableList<string> = ["init", "migrations", "p
  * invents one: a file under another name is reached through a path written inside a fragment, and
  * nothing looks it up.
  */
-export const OPS_FRAGMENTS: UnmodifiableList<string> = [
+export const SERVICE_FRAGMENTS: UnmodifiableList<string> = [
   "capacity.yaml",
   "docker-compose.yaml",
   "kong.yml",
@@ -113,28 +113,27 @@ export interface Artefacts {
   readonly protocol: string | null;
 
   /**
-   * The ops directories this package contributes, one per service, in the order written.
+   * The service directories this package contributes, one per service, in the order written.
    *
    * @remarks
-   * An entry is a directory, and what it hands over is the fragments it holds, whose names are in
-   * {@link OPS_FRAGMENTS}. Everything else a service needs, a Dockerfile or a script, is reached
-   * through a path written inside a fragment, so nothing looks it up by name and nothing has to
-   * declare it. An entry may also be a single fragment, for a package whose ops are a handful of
-   * files rather than a service of its own.
+   * An entry is a directory under `deploy/services/`, and what it hands over is the fragments it
+   * holds, whose names are in {@link SERVICE_FRAGMENTS}. Everything else a service needs, a
+   * Dockerfile or a script, is reached through a path written inside a fragment, so nothing looks
+   * it up by name and nothing has to declare it.
    */
-  readonly ops: UnmodifiableList<string>;
+  readonly services: UnmodifiableList<string>;
 }
 
 /** What a manifest with no artefacts block declares, which is nothing. */
 export const NO_ARTEFACTS: Artefacts = Object.freeze({
   db: null,
   protocol: null,
-  ops: Object.freeze([]) as UnmodifiableList<string>,
+  services: Object.freeze([]) as UnmodifiableList<string>,
 });
 
 /** Whether `artefacts` names nothing at all. */
 export function handsOverNothing(artefacts: Artefacts): boolean {
-  return artefacts.db === null && artefacts.protocol === null && artefacts.ops.length === 0;
+  return artefacts.db === null && artefacts.protocol === null && artefacts.services.length === 0;
 }
 
 /**
@@ -170,8 +169,8 @@ export function artefactPathProblem(path: string): string | null {
  *
  * @remarks
  * Manifest paths are posix whatever the machine reads them on, since they are written once and read
- * everywhere. `./ops/queue/` and `ops/queue` are the same entry, and a manifest that names both is
- * naming one service twice.
+ * everywhere. `./deploy/services/queue/` and `deploy/services/queue` are the same entry, and a
+ * manifest that names both is naming one service twice.
  */
 export function normaliseArtefactPath(path: string): string {
   const kept: string[] = [];

@@ -76,13 +76,16 @@ export interface PackageDirectory {
  * @remarks
  * Only `lib` is load-bearing. The rest is the layout a reader expects to find, not a list anything
  * is looked up in: a package that puts its migrations somewhere of its own invention declares that
- * place under `scribe:` and they run, and a package that puts them in `db/` without declaring them
- * finds that nothing runs them.
+ * place under `scribe:` and they run, and a package that puts them in `deploy/db/` without declaring
+ * them finds that nothing runs them.
  */
 export const PACKAGE_LAYOUT: UnmodifiableList<PackageDirectory> = [
   { name: "lib", holds: "the surface a project imports, and the code behind it", required: true },
-  { name: "db", holds: "the SQL that makes the package's tables, and what changes them", required: false },
-  { name: "ops", holds: "what the package adds to the compose, and what its services weigh", required: false },
+  {
+    name: "deploy",
+    holds: "everything the stack reads: the SQL, the compose fragments, the recipes, the configuration",
+    required: false,
+  },
   { name: "protocol", holds: "the contract between the host and a worker, one file per capability", required: false },
   { name: "tests", holds: "what proves the package does what it says", required: false },
   { name: "examples", holds: "the ten lines somebody reads before the documentation", required: false },

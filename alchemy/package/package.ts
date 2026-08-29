@@ -78,8 +78,8 @@ export interface ArtefactsDeclaration {
   /** The directory holding the `.proto` files, left out when it speaks to no worker. */
   readonly protocol?: string;
 
-  /** The ops directories this package contributes, one per service, in the order written. */
-  readonly ops?: readonly string[];
+  /** The service directories this package contributes, one per service, in the order written. */
+  readonly services?: readonly string[];
 }
 
 /** The last step, once everything required has been said. */
@@ -91,14 +91,14 @@ export interface Buildable {
 /** The point where a package may still say what it hands the stack. */
 export interface AwaitingArtefacts extends Buildable {
   /**
-   * Declares the SQL, the `.proto` files and the ops this package hands the stack.
+   * Declares the SQL, the `.proto` files and the services this package hands the stack.
    *
    * @remarks
    * A package that hands over none of them never takes this step, and its manifest says so by
    * carrying no `scribe:` block. Nothing falls back on a conventional path.
    *
    * @throws {DeclarationError} When a path is absolute, when it climbs out of the package, when it
-   * is written empty, or when two ops entries name one place.
+   * is written empty, or when two service entries name one place.
    */
   hands(artefacts: ArtefactsDeclaration): Buildable;
 }
@@ -238,7 +238,7 @@ export class Package
     this.#artefacts = Object.freeze({
       db: this.#database(artefacts.db),
       protocol: artefacts.protocol === undefined ? null : this.#path(artefacts.protocol, "scribe.protocol"),
-      ops: Object.freeze(this.#ops(artefacts.ops)),
+      services: Object.freeze(this.#services(artefacts.services)),
     });
     return this;
   }
@@ -257,12 +257,12 @@ export class Package
     return read.init === null && read.migrations === null && read.provisioning === null ? null : read;
   }
 
-  #ops(declared: readonly string[] | undefined): string[] {
+  #services(declared: readonly string[] | undefined): string[] {
     const found: string[] = [];
     for (const [index, written] of (declared ?? []).entries()) {
-      const path = this.#path(written, `scribe.ops[${index}]`);
+      const path = this.#path(written, `scribe.services[${index}]`);
       if (found.includes(path)) {
-        throw new DeclarationError(`"${this.#name}" names "${path}" twice under "scribe.ops:".`);
+        throw new DeclarationError(`"${this.#name}" names "${path}" twice under "scribe.services:".`);
       }
       found.push(path);
     }

@@ -75,7 +75,7 @@ export interface Manifest {
   readonly dependencies: Readonly<Record<string, Constraint>>;
 
   /**
-   * What this package hands the stack: its SQL, its `.proto` files, its ops.
+   * What this package hands the stack: its SQL, its `.proto` files, its services.
    *
    * @remarks
    * A manifest with no `scribe:` block hands over nothing, and that is the whole of the rule.
