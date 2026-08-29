@@ -46,7 +46,7 @@
  * something that runs and nothing here does.
  */
 
-export { expect, expectLater, fail } from "./expect/expect.ts";
+export { caught, expect, expectLater, fail } from "./expect/expect.ts";
 
 export {
   allOf,

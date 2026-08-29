@@ -102,6 +102,28 @@ export async function expectLater<T>(
   throw new AssertionError(sentence(threw ? raised : held, matcher, reason));
 }
 
+/**
+ * Awaits `actual`, and answers what it raised.
+ *
+ * @remarks
+ * It is for the case that needs the raised value itself, not only whether one arrived: a client
+ * exception carrying the address it failed against, an error carrying a code a caller switches on.
+ * When only whether something was raised matters, {@link expectLater} with {@link throwsA} says so
+ * in one line and needs nothing caught by hand.
+ *
+ * @throws {AssertionError} When `actual` settles instead of raising.
+ */
+export async function caught<T>(actual: Future<T> | (() => Future<T>)): Future<unknown> {
+  const settled = typeof actual === "function" ? actual() : actual;
+
+  try {
+    await settled;
+  } catch (raised) {
+    return raised;
+  }
+  throw new AssertionError("It settled instead of raising.");
+}
+
 /** What {@link sentence} reads off a matcher, which is everything of it that does not depend on T. */
 type Described = Pick<Matcher<never>, "described" | "mismatch">;
 
