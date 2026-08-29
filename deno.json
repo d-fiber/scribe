@@ -34,17 +34,23 @@
   "lint": {
     "plugins": [
       "./.lint/private-module-scope.ts",
-      "./.lint/member-escape.ts"
+      "./.lint/member-escape.ts",
+      "./.lint/sealed-runtime.ts"
     ],
     "rules": {
       "include": [
         "private-module-scope/private-module-scope",
-        "member-escape/member-escape"
+        "member-escape/member-escape",
+        "sealed-runtime/sealed-runtime"
       ]
     },
     "exclude": [
       "sdk/js/gen",
-      "sdk/js/example"
+      "sdk/js/example",
+      "packages/auth/tests/tests/pending_token.test.ts",
+      "packages/foundation/tests/tests/cron/runner.test.ts",
+      "packages/foundation/tests/tests/cron/hardening_runner.test.ts",
+      "packages/storage/tests/tests/video_frame.test.ts"
     ]
   },
   "compilerOptions": {
