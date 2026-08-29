@@ -49,6 +49,7 @@
 export { expect, expectLater, fail } from "./expect/expect.ts";
 
 export {
+  allOf,
   contains,
   equals,
   greaterThan,

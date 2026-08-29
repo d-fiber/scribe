@@ -120,6 +120,22 @@ export function isNot<T>(inner: Matcher<T>): Matcher<T> {
 }
 
 /**
+ * Holds when what it is given holds against every one of `inners`.
+ *
+ * @remarks
+ * It is for the check that is two things at once, such as a raise that is of a kind and carries a
+ * message: `throwsA(allOf(isA(TypeError), withMessage("declared twice")))`. The mismatch names the
+ * first of `inners` that failed, since that is the one a reader is looking for.
+ */
+export function allOf<T>(...inners: Matcher<T>[]): Matcher<T> {
+  return matcher(
+    inners.map((inner) => inner.described).join(" and "),
+    (actual) => inners.every((inner) => inner.matches(actual)),
+    (actual) => inners.find((inner) => !inner.matches(actual))?.mismatch(actual) ?? null,
+  );
+}
+
+/**
  * Holds on true, and on nothing else.
  *
  * It is written as holding anything, like {@link isNull}, because "and on nothing else" is the
