@@ -34,7 +34,6 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Artefacts } from "./artefacts.ts";
 import type { Future } from "../async/future.ts";
 import type { Constraint } from "./constraint.ts";
 import type { Version } from "./version.ts";
@@ -73,17 +72,6 @@ export interface Manifest {
    * past it, which is every tool that normalises a manifest on the way to a lock file.
    */
   readonly dependencies: Readonly<Record<string, Constraint>>;
-
-  /**
-   * What this package hands the stack: its SQL, its `.proto` files, its services.
-   *
-   * @remarks
-   * A manifest with no `scribe:` block hands over nothing, and that is the whole of the rule.
-   * Nothing falls back on a conventional path, so a directory the manifest does not name is one
-   * nothing plays, mounts or compiles, and a package that needs none of it says so by leaving the
-   * block out.
-   */
-  readonly artefacts: Artefacts;
 }
 
 /**

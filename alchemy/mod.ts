@@ -91,14 +91,11 @@ export { ScribeError } from "./error/scribe_error.ts";
 
 export { DeclarationError, DEFAULT_DESCRIPTION, Package } from "./package/package.ts";
 export type {
-  ArtefactsDeclaration,
-  AwaitingArtefacts,
   AwaitingDependencies,
   AwaitingDescription,
   AwaitingFramework,
   AwaitingVersion,
   Buildable,
-  DatabaseDeclaration,
   Dependencies,
 } from "./package/package.ts";
 
@@ -108,16 +105,13 @@ export type { Lifecycle, LifecycleStep, LifecycleSteps, Manifest, MountedPackage
 export { isValidPackageName, packageNameProblem, RESERVED_PACKAGE_NAMES } from "./package/name.ts";
 
 export {
-  artefactPathProblem,
-  ARTEFACTS_KEY,
-  ARTEFACTS_KEYS,
-  DATABASE_KEYS,
-  handsOverNothing,
-  NO_ARTEFACTS,
-  normaliseArtefactPath,
+  DATABASE_MOMENTS,
+  DECLARES_EXPORT,
+  DEPLOY,
+  DEPLOY_ENTRIES,
+  REQUIRED_DATABASE_MOMENTS,
   SERVICE_FRAGMENTS,
-} from "./package/artefacts.ts";
-export type { Artefacts, DatabaseArtefacts } from "./package/artefacts.ts";
+} from "./package/deploy.ts";
 
 export { isPackageDirectory, MANIFEST, MANIFEST_KEYS, PACKAGE_LAYOUT, requiredEntries } from "./package/layout.ts";
 export type { PackageDirectory } from "./package/layout.ts";
