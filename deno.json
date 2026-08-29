@@ -142,6 +142,7 @@
     "@scribe/storage/testing": "./packages/storage/tests/testing/testing.ts",
     "@scribe/storage/testing/settings": "./packages/storage/tests/testing/settings.ts",
     "@scribe/testing/install.ts": "./engine/testing/install.ts",
+    "@scribe/testing/runner.ts": "./engine/testing/runner.ts",
     "@scribe/testing/runtime/device.ts": "./engine/testing/runtime/device.ts",
     "@scribe/testing/settings.ts": "./engine/testing/settings.ts",
     "@std/assert": "jsr:@std/assert@1.0.19",
