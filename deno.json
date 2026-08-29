@@ -11,6 +11,10 @@
     "./tests",
     "./sdk/js"
   ],
+  "exclude": [
+    "packages/*/tests/e2e/fixtures",
+    "packages/*/tests/e2e/.e2e"
+  ],
   "tasks": {
     "check": "deno check engine packages",
     "test": "deno test --allow-env --allow-sys --allow-read --allow-write --env-file=tests/.env.test --parallel engine packages tests",
@@ -23,6 +27,7 @@
       "sdk/js/gen",
       "packages/*/deploy/services",
       "packages/*/deploy/recipes",
+      "packages/*/tests/e2e",
       "packages/*/fixtures"
     ]
   },
@@ -113,7 +118,6 @@
     "@scribe/foundation/trigger": "./packages/foundation/lib/trigger.ts",
     "@scribe/realtime": "./packages/realtime/lib/realtime.ts",
     "@scribe/realtime/": "./packages/realtime/",
-    "@scribe/realtime/e2e": "./packages/realtime/tests/e2e/support/stack.ts",
     "@scribe/realtime/testing": "./packages/realtime/tests/testing/testing.ts",
     "@scribe/realtime/testing/settings": "./packages/realtime/tests/testing/settings.ts",
     "@scribe/remote_configs": "./packages/remote_configs/lib/remote_configs.ts",
@@ -136,12 +140,10 @@
     "@scribe/sdk/": "./sdk/js/",
     "@scribe/search": "./packages/search/lib/search.ts",
     "@scribe/search/": "./packages/search/",
-    "@scribe/search/e2e": "./packages/search/tests/e2e/support/stack.ts",
     "@scribe/search/testing": "./packages/search/tests/testing/testing.ts",
     "@scribe/search/testing/settings": "./packages/search/tests/testing/settings.ts",
     "@scribe/storage": "./packages/storage/lib/storage.ts",
     "@scribe/storage/": "./packages/storage/",
-    "@scribe/storage/e2e": "./packages/storage/tests/e2e/support/stack.ts",
     "@scribe/storage/testing": "./packages/storage/tests/testing/testing.ts",
     "@scribe/storage/testing/settings": "./packages/storage/tests/testing/settings.ts",
     "@scribe/testing/install.ts": "./engine/testing/install.ts",
