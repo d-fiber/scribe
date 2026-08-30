@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import type { RequestUser } from "@scribe/alchemy/route";
 import { assertEquals, assertRejects } from "@std/assert";
 import { currentIdentity, currentPrincipal } from "@scribe/runtime/http/accessors/identity.ts";
@@ -54,7 +56,7 @@ function grant() {
   };
 }
 
-Deno.test("a capability token replays the identity of the invocation that issued it", async () => {
+Scribe.test("a capability token replays the identity of the invocation that issued it", async () => {
   const token = CapabilityTokens.issue(grant());
 
   const seen = await CapabilityTokens.run(token, () =>
@@ -71,7 +73,7 @@ Deno.test("a capability token replays the identity of the invocation that issued
   CapabilityTokens.revoke(token);
 });
 
-Deno.test("a revoked token cannot be replayed once the invocation is over", async () => {
+Scribe.test("a revoked token cannot be replayed once the invocation is over", async () => {
   const token = CapabilityTokens.issue(grant());
   CapabilityTokens.revoke(token);
 
@@ -81,14 +83,14 @@ Deno.test("a revoked token cannot be replayed once the invocation is over", asyn
   );
 });
 
-Deno.test("a token the host never issued is refused", async () => {
+Scribe.test("a token the host never issued is refused", async () => {
   await assertRejects(
     () => CapabilityTokens.run("forged", () => Promise.resolve(null)),
     UnknownCapabilityToken,
   );
 });
 
-Deno.test("an expired token is refused, whether or not a sweep has run since", () => {
+Scribe.test("an expired token is refused, whether or not a sweep has run since", () => {
   const first = CapabilityTokens.issue(grant(), -1);
 
   assertEquals(CapabilityTokens.redeem(first), null, "an expired token was handed back");
@@ -102,7 +104,7 @@ Deno.test("an expired token is refused, whether or not a sweep has run since", (
   assertEquals(CapabilityTokens.redeem(third), null, "an expired token survived a gated sweep");
 });
 
-Deno.test("issuing does not walk the store on every call", () => {
+Scribe.test("issuing does not walk the store on every call", () => {
   // The first issue leaves the sweep gate closed behind it, whether it swept or was itself gated,
   // so what the loop below observes is the gate and not where the previous test left the clock.
   const opened = CapabilityTokens.issue(grant(), 60_000);
@@ -121,7 +123,7 @@ Deno.test("issuing does not walk the store on every call", () => {
   );
 });
 
-Deno.test("a standing grant outlives every stretch of time a figure could have named", async () => {
+Scribe.test("a standing grant outlives every stretch of time a figure could have named", async () => {
   const token = CapabilityTokens.standing(grant());
 
   assertEquals(
@@ -133,7 +135,7 @@ Deno.test("a standing grant outlives every stretch of time a figure could have n
   CapabilityTokens.revoke(token);
 });
 
-Deno.test("a second attachment revokes the credential the first one handed out", async () => {
+Scribe.test("a second attachment revokes the credential the first one handed out", async () => {
   const first = CapabilityTokens.standing(grant());
   const second = CapabilityTokens.standing(grant());
 
@@ -148,7 +150,7 @@ Deno.test("a second attachment revokes the credential the first one handed out",
   CapabilityTokens.revoke(second);
 });
 
-Deno.test("revoking the standing grant leaves nothing behind to revoke twice", async () => {
+Scribe.test("revoking the standing grant leaves nothing behind to revoke twice", async () => {
   const token = CapabilityTokens.standing(grant());
   CapabilityTokens.revoke(token);
 
@@ -158,7 +160,7 @@ Deno.test("revoking the standing grant leaves nothing behind to revoke twice", a
   CapabilityTokens.revoke(replacement);
 });
 
-Deno.test("holds answers for a token without spending it", () => {
+Scribe.test("holds answers for a token without spending it", () => {
   const token = CapabilityTokens.issue(grant());
 
   assertEquals(CapabilityTokens.holds(token), true);
@@ -169,7 +171,7 @@ Deno.test("holds answers for a token without spending it", () => {
   CapabilityTokens.revoke(token);
 });
 
-Deno.test("a standing grant answered no request, and says so", async () => {
+Scribe.test("a standing grant answered no request, and says so", async () => {
   const token = CapabilityTokens.standing({
     request: new Request("http://worker.bootstrap/"),
     bodyBytes: new Uint8Array(),
@@ -189,7 +191,7 @@ Deno.test("a standing grant answered no request, and says so", async () => {
   }
 });
 
-Deno.test("a request grant that proved nobody is an anonymous caller, not an absent one", async () => {
+Scribe.test("a request grant that proved nobody is an anonymous caller, not an absent one", async () => {
   const token = CapabilityTokens.issue({ ...grant(), identity: null });
 
   try {

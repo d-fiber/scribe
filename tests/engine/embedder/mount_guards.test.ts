@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import "@scribe/testing/settings.ts";
 import { create } from "@bufbuild/protobuf";
 import { Caller as ProtoCaller, Method as ProtoMethod } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
@@ -114,7 +116,7 @@ function quotaAnswering(outcome: RateLimitOutcome): { restore: () => void } {
 const OVER_QUOTA: RateLimitOutcome = { ok: false, retryAfter: 60, strikes: 1 };
 const WITHIN_QUOTA: RateLimitOutcome = { ok: true, remaining: 9 };
 
-Deno.test("a route whose manifest declares no rate limit is refused at mount, by name", () => {
+Scribe.test("a route whose manifest declares no rate limit is refused at mount, by name", () => {
   installValkeryMock();
 
   const error = assertThrows(
@@ -129,7 +131,7 @@ Deno.test("a route whose manifest declares no rate limit is refused at mount, by
   );
 });
 
-Deno.test("a caller over its quota is told so, and not what the route requires", async () => {
+Scribe.test("a caller over its quota is told so, and not what the route requires", async () => {
   installValkeryMock();
   const limiter = quotaAnswering(OVER_QUOTA);
 
@@ -149,7 +151,7 @@ Deno.test("a caller over its quota is told so, and not what the route requires",
   }
 });
 
-Deno.test("a caller inside its quota that holds nothing is still forbidden", async () => {
+Scribe.test("a caller inside its quota that holds nothing is still forbidden", async () => {
   installValkeryMock();
   const limiter = quotaAnswering(WITHIN_QUOTA);
 
@@ -165,7 +167,7 @@ Deno.test("a caller inside its quota that holds nothing is still forbidden", asy
   }
 });
 
-Deno.test("a caller that proved nothing is refused before either question is asked", async () => {
+Scribe.test("a caller that proved nothing is refused before either question is asked", async () => {
   installValkeryMock();
   const limiter = quotaAnswering(WITHIN_QUOTA);
 

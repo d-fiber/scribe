@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals, assertFalse } from "@std/assert";
 import type { WorkerSettings } from "@scribe/contracts/settings.ts";
 import { workerSettings } from "@scribe/runtime/support/settings/worker.ts";
@@ -59,10 +61,10 @@ function asking<T>(endpoint: string | null, body: () => T): T {
   }
 }
 
-Deno.test("a deployment that names no worker endpoint runs none", () => {
+Scribe.test("a deployment that names no worker endpoint runs none", () => {
   assertFalse(asking(null, workerEnabled), "the host would have opened a worker nobody asked for");
 });
 
-Deno.test("a deployment that names one runs it", () => {
+Scribe.test("a deployment that names one runs it", () => {
   assertEquals(asking("http://worker.test:4747", workerEnabled), true);
 });

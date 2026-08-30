@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals } from "@std/assert";
 import { Hono } from "hono";
 import {
@@ -157,7 +159,7 @@ function call(app: Hono, path: string): Promise<Response> {
   );
 }
 
-Deno.test("a route discovered on the worker tree answers through the host", async () => {
+Scribe.test("a route discovered on the worker tree answers through the host", async () => {
   await withAttachedWorker(async (surfaces) => {
     const response = await call(surfaces.app, "/brand/42?page=2");
 
@@ -169,7 +171,7 @@ Deno.test("a route discovered on the worker tree answers through the host", asyn
   });
 });
 
-Deno.test("every call the host makes names the replica that made it", async () => {
+Scribe.test("every call the host makes names the replica that made it", async () => {
   await withAttachedWorker(async (surfaces, announced) => {
     const response = await call(surfaces.app, "/brand/42?page=2");
 
@@ -182,7 +184,7 @@ Deno.test("every call the host makes names the replica that made it", async () =
   });
 });
 
-Deno.test("the host refuses an unauthenticated caller before the worker is invoked", async () => {
+Scribe.test("the host refuses an unauthenticated caller before the worker is invoked", async () => {
   await withAttachedWorker(async (surfaces) => {
     const response = await call(surfaces.admin, "/secret");
 

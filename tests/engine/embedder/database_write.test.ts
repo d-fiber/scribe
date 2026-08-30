@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import "@scribe/testing/settings.ts";
 
 import { create } from "@bufbuild/protobuf";
@@ -58,7 +60,7 @@ function seeded(): { fake: FakePostgrestClient; restore(): void } {
   return { fake, restore: () => mock.restore() };
 }
 
-Deno.test("a worker delete with no predicate at all is refused, not run", async () => {
+Scribe.test("a worker delete with no predicate at all is refused, not run", async () => {
   const { fake, restore } = seeded();
   try {
     const answer = await executeQuery(
