@@ -41,10 +41,12 @@ export class Time {
     this.#ms = ms;
   }
 
+  /** This duration, in seconds. */
   get value(): number {
     return this.#ms / 1000;
   }
 
+  /** This duration, in milliseconds. */
   get ms(): number {
     return this.#ms;
   }
@@ -85,6 +87,7 @@ export class Size {
     this.#bytes = bytes;
   }
 
+  /** This size, in bytes. */
   get bytes(): number {
     return this.#bytes;
   }

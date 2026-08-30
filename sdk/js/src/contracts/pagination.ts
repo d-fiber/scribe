@@ -35,7 +35,10 @@
 // LICENSE file, the LICENSE file governs.
 
 export interface Pagination<T> {
+  /** The rows this page carries, already sliced to the requested size. */
   items: T[];
+
+  /** Where this page sits within the full result set. */
   pagination: {
     offset: number;
     total: number;
