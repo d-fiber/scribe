@@ -44,11 +44,23 @@ const ROOT = new URL("../", import.meta.url).pathname.replace(/\/$/, "");
  *
  * `sdk/js/gen` and `sdk/js/example` are generated code and an example, the same two `deno lint`
  * itself leaves alone. `.git` holds no source. Anything else under the root is in scope, `.lint/`
- * included, even though none of the three rules today have anything to say about a file there.
+ * included, even though none of the five rules today have anything to say about a file there.
  */
 const EXCLUDED_DIRECTORIES = [".git", "sdk/js/gen", "sdk/js/example"];
 
-/** Every `.ts` file under `root`, skipping {@link EXCLUDED_DIRECTORIES}. */
+/**
+ * A directory name that carries no source of ours wherever it appears, unlike
+ * {@link EXCLUDED_DIRECTORIES}, which names a single fixed path.
+ *
+ * @remarks
+ * `node_modules` holds `.d.ts` files for every third-party dependency Node-style tooling resolves
+ * against, `sdk/js/node_modules/` among them. `deno lint` never walks into one; this run didn't
+ * either until `documented-fields` was strict enough to notice the gap, once it reported hundreds
+ * of vendored types as unlabelled fields of ours.
+ */
+const EXCLUDED_DIRECTORY_NAMES = ["node_modules"];
+
+/** Every `.ts` file under `root`, skipping {@link EXCLUDED_DIRECTORIES} and {@link EXCLUDED_DIRECTORY_NAMES}. */
 async function collectFiles(root: string): Promise<string[]> {
   const found: string[] = [];
 
@@ -60,6 +72,8 @@ async function collectFiles(root: string): Promise<string[]> {
       if (EXCLUDED_DIRECTORIES.some((excluded) => relative === excluded || relative.startsWith(`${excluded}/`))) {
         continue;
       }
+
+      if (entry.isDirectory && EXCLUDED_DIRECTORY_NAMES.includes(entry.name)) continue;
 
       if (entry.isDirectory) {
         await walk(path);
