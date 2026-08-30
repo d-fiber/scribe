@@ -37,14 +37,15 @@
 import type { Rule } from "./ast.ts";
 import { memberEscape } from "./member-escape.ts";
 import { privateModuleScope } from "./private-module-scope.ts";
+import { sealedAlchemy } from "./sealed-alchemy.ts";
 import { sealedRuntime } from "./sealed-runtime.ts";
 
 /**
  * Every rule `run.ts` checks a file against, in the order it reports them.
  *
  * @remarks
- * This is the one list a new rule has to join. Write the rule next to these three, export a
+ * This is the one list a new rule has to join. Write the rule next to these four, export a
  * `const` of the {@link Rule} shape, and add it here — `run.ts` does not otherwise know how many
  * rules exist.
  */
-export const RULES: readonly Rule[] = [privateModuleScope, memberEscape, sealedRuntime];
+export const RULES: readonly Rule[] = [privateModuleScope, memberEscape, sealedRuntime, sealedAlchemy];
