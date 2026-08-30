@@ -50,9 +50,16 @@ import { deliverLogs, handleBatch, handleEvent, invoke, triggerCron } from "./di
 import { CallScope } from "./scope.ts";
 
 export interface ServeOptions {
+  /** The port to listen on. Left to the runtime's own default when omitted. */
   readonly port?: number;
+
+  /** The host address to bind to. Left to the runtime's own default when omitted. */
   readonly hostname?: string;
+
+  /** A signal that shuts the server down when aborted. Runs until the process exits when omitted. */
   readonly signal?: AbortSignal;
+
+  /** Called once the server is actually bound and listening. */
   readonly onListen?: (address: { port: number; hostname: string }) => void;
 }
 
