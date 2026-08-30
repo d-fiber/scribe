@@ -143,18 +143,21 @@ export type {
   TriggerDriver,
 } from "./port/trigger.ts";
 
-export { rateLimit, RateLimiters } from "./port/rate_limit.ts";
-export type { RateLimiter, RateLimiterDriver, RateLimitOptions, RateLimitOutcome } from "./port/rate_limit.ts";
 export { cache, Caches, DEFAULT_CACHE_DEADLINE } from "./port/cache.ts";
 export type { Cache, CacheDriver, CacheOptions } from "./port/cache.ts";
 export { claimOnce, Claims } from "./port/claim.ts";
 export type { ClaimDriver, ClaimOptions, WhenUnavailable } from "./port/claim.ts";
+export { rateLimit, RateLimiters } from "./port/rate_limit.ts";
+export type { RateLimiter, RateLimiterDriver, RateLimitOptions, RateLimitOutcome } from "./port/rate_limit.ts";
 
 export { FileSystems } from "./port/files.ts";
 export type { FileSystem, FileSystemDriver, FileSystemEntity } from "./port/files.ts";
 
 export { Environments } from "./port/env.ts";
 export type { Environment } from "./port/env.ts";
+
+export { Commands } from "./port/commands.ts";
+export type { Command, CommandOptions, CommandResult } from "./port/commands.ts";
 
 export { renderError } from "./diagnostic/render.ts";
 export type { RenderOptions } from "./diagnostic/render.ts";
