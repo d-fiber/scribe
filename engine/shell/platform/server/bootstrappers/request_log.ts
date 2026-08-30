@@ -50,6 +50,7 @@ import type { Bootstrapper } from "../../../common/bootstrapper.ts";
  * serves a request.
  */
 export class RequestLogBootstrapper implements Bootstrapper {
+  /** This bootstrapper's label in `BootSequence` logging: `request-log`. */
   readonly name = "request-log";
 
   boot(): void {}

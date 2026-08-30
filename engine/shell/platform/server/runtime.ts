@@ -46,6 +46,7 @@ import type { Hono } from "hono";
 import { SurfaceRouter } from "./surface_router.ts";
 
 export class ServerRuntime extends Runtime {
+  /** This runtime's label in `BootSequence` logging: `server`. */
   override readonly name = "server";
 
   readonly #router: SurfaceRouter;

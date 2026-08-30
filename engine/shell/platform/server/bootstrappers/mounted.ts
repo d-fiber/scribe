@@ -51,6 +51,7 @@ import type { Bootstrapper } from "../../../common/bootstrapper.ts";
  * dangling import. Here the engine decides when, and never what.
  */
 export class MountedPackagesBootstrapper implements Bootstrapper {
+  /** This bootstrapper's label in `BootSequence` logging: `packages`. */
   readonly name = "packages";
 
   boot(): Future<void> {
