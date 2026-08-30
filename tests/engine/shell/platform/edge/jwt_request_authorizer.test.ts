@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { JwtRequestAuthorizer } from "@scribe/shell/platform/edge/authorization/jwt_request_authorizer.ts";
 import { OpenRequestAuthorizer } from "@scribe/shell/platform/edge/authorization/request_authorizer.ts";
 import type { TokenVerifier } from "@scribe/shell/platform/edge/authorization/token_verifier.ts";
@@ -62,7 +64,7 @@ async function codeOf(response: Response): Promise<string> {
   return ((await response.json()) as { code: string }).code;
 }
 
-Deno.test("JwtRequestAuthorizer lets a valid token through", async () => {
+Scribe.test("JwtRequestAuthorizer lets a valid token through", async () => {
   const verifier = new FixedVerifier(true);
   const authorizer = new JwtRequestAuthorizer(verifier, []);
 
@@ -75,7 +77,7 @@ Deno.test("JwtRequestAuthorizer lets a valid token through", async () => {
   assertEquals(verifier.calls, 1);
 });
 
-Deno.test("JwtRequestAuthorizer rejects an invalid token with invalid_jwt", async () => {
+Scribe.test("JwtRequestAuthorizer rejects an invalid token with invalid_jwt", async () => {
   const authorizer = new JwtRequestAuthorizer(new FixedVerifier(false), []);
 
   const denial = await authorizer.authorize(
@@ -87,7 +89,7 @@ Deno.test("JwtRequestAuthorizer rejects an invalid token with invalid_jwt", asyn
   assertEquals(await codeOf(denial!), "invalid_jwt");
 });
 
-Deno.test("JwtRequestAuthorizer rejects a missing or malformed header", async () => {
+Scribe.test("JwtRequestAuthorizer rejects a missing or malformed header", async () => {
   const verifier = new FixedVerifier(true);
   const authorizer = new JwtRequestAuthorizer(verifier, []);
 
@@ -102,7 +104,7 @@ Deno.test("JwtRequestAuthorizer rejects a missing or malformed header", async ()
   assertEquals(verifier.calls, 0);
 });
 
-Deno.test("JwtRequestAuthorizer never challenges a preflight", async () => {
+Scribe.test("JwtRequestAuthorizer never challenges a preflight", async () => {
   const verifier = new FixedVerifier(false);
   const authorizer = new JwtRequestAuthorizer(verifier, []);
 
@@ -112,7 +114,7 @@ Deno.test("JwtRequestAuthorizer never challenges a preflight", async () => {
   assertEquals(verifier.calls, 0);
 });
 
-Deno.test("JwtRequestAuthorizer exempts the services it was given", async () => {
+Scribe.test("JwtRequestAuthorizer exempts the services it was given", async () => {
   const verifier = new FixedVerifier(false);
   const authorizer = new JwtRequestAuthorizer(verifier, ["gotrue", "queue"]);
 
@@ -124,7 +126,7 @@ Deno.test("JwtRequestAuthorizer exempts the services it was given", async () => 
   assertEquals(denial?.status, 401);
 });
 
-Deno.test("OpenRequestAuthorizer authorizes everything", async () => {
+Scribe.test("OpenRequestAuthorizer authorizes everything", async () => {
   const authorizer = new OpenRequestAuthorizer();
 
   assertEquals(await authorizer.authorize(), null);

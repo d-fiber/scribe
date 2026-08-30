@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import type { Bootstrapper } from "@scribe/shell/common/bootstrapper.ts";
 import { BootSequence } from "@scribe/shell/common/boot_sequence.ts";
 import { assertEquals, assertRejects } from "@std/assert";
@@ -51,7 +53,7 @@ function recorder(trace: string[], name: string, fails = false): Bootstrapper {
   };
 }
 
-Deno.test("BootSequence boots in declaration order", async () => {
+Scribe.test("BootSequence boots in declaration order", async () => {
   const trace: string[] = [];
   await new BootSequence("test", [
     recorder(trace, "a"),
@@ -62,7 +64,7 @@ Deno.test("BootSequence boots in declaration order", async () => {
   assertEquals(trace, ["boot:a", "boot:b", "boot:c"]);
 });
 
-Deno.test("BootSequence shuts down in reverse order", async () => {
+Scribe.test("BootSequence shuts down in reverse order", async () => {
   const trace: string[] = [];
   const sequence = new BootSequence("test", [
     recorder(trace, "a"),
@@ -76,7 +78,7 @@ Deno.test("BootSequence shuts down in reverse order", async () => {
   assertEquals(trace, ["shutdown:b", "shutdown:a"]);
 });
 
-Deno.test("BootSequence rolls back what already booted when one fails", async () => {
+Scribe.test("BootSequence rolls back what already booted when one fails", async () => {
   const trace: string[] = [];
   const sequence = new BootSequence("test", [
     recorder(trace, "a"),
@@ -89,7 +91,7 @@ Deno.test("BootSequence rolls back what already booted when one fails", async ()
   assertEquals(trace, ["boot:a", "boot:b", "shutdown:a"]);
 });
 
-Deno.test("BootSequence shutdown is idempotent", async () => {
+Scribe.test("BootSequence shutdown is idempotent", async () => {
   const trace: string[] = [];
   const sequence = new BootSequence("test", [recorder(trace, "a")]);
 
@@ -100,7 +102,7 @@ Deno.test("BootSequence shutdown is idempotent", async () => {
   assertEquals(trace, ["boot:a", "shutdown:a"]);
 });
 
-Deno.test("BootSequence tolerates a bootstrapper without shutdown", async () => {
+Scribe.test("BootSequence tolerates a bootstrapper without shutdown", async () => {
   const trace: string[] = [];
   const sequence = new BootSequence("test", [
     { name: "bare", boot: () => void trace.push("boot:bare") },

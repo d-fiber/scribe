@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { AlgorithmTokenVerifier } from "@scribe/shell/platform/edge/authorization/algorithm_token_verifier.ts";
 import type { TokenVerifier } from "@scribe/shell/platform/edge/authorization/token_verifier.ts";
 import { assert, assertEquals, assertFalse } from "@std/assert";
@@ -63,7 +65,7 @@ class StubVerifier implements TokenVerifier {
   }
 }
 
-Deno.test("AlgorithmTokenVerifier routes a token to the verifier owning its alg", async () => {
+Scribe.test("AlgorithmTokenVerifier routes a token to the verifier owning its alg", async () => {
   const hmac = new StubVerifier(["HS256"], true);
   const jwks = new StubVerifier(["ES256", "RS256"], false);
   const verifier = new AlgorithmTokenVerifier([hmac, jwks]);
@@ -76,7 +78,7 @@ Deno.test("AlgorithmTokenVerifier routes a token to the verifier owning its alg"
   assertEquals(jwks.calls, 1);
 });
 
-Deno.test("AlgorithmTokenVerifier rejects an algorithm nobody claims", async () => {
+Scribe.test("AlgorithmTokenVerifier rejects an algorithm nobody claims", async () => {
   const verifier = new AlgorithmTokenVerifier([
     new StubVerifier(["HS256"], true),
   ]);
@@ -84,7 +86,7 @@ Deno.test("AlgorithmTokenVerifier rejects an algorithm nobody claims", async () 
   assertFalse(await verifier.verify(tokenWithAlgorithm("none")));
 });
 
-Deno.test("AlgorithmTokenVerifier rejects a malformed token instead of throwing", async () => {
+Scribe.test("AlgorithmTokenVerifier rejects a malformed token instead of throwing", async () => {
   const verifier = new AlgorithmTokenVerifier([
     new StubVerifier(["HS256"], true),
   ]);
@@ -93,7 +95,7 @@ Deno.test("AlgorithmTokenVerifier rejects a malformed token instead of throwing"
   assertFalse(await verifier.verify(""));
 });
 
-Deno.test("AlgorithmTokenVerifier reports every algorithm it can handle", () => {
+Scribe.test("AlgorithmTokenVerifier reports every algorithm it can handle", () => {
   const verifier = new AlgorithmTokenVerifier([
     new StubVerifier(["HS256"], true),
     new StubVerifier(["ES256", "RS256"], true),
@@ -102,7 +104,7 @@ Deno.test("AlgorithmTokenVerifier reports every algorithm it can handle", () => 
   assertEquals([...verifier.algorithms].sort(), ["ES256", "HS256", "RS256"]);
 });
 
-Deno.test("AlgorithmTokenVerifier with no verifier accepts nothing", async () => {
+Scribe.test("AlgorithmTokenVerifier with no verifier accepts nothing", async () => {
   const verifier = new AlgorithmTokenVerifier([]);
 
   assertFalse(await verifier.verify(tokenWithAlgorithm("HS256")));

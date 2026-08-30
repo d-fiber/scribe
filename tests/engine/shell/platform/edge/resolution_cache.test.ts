@@ -34,10 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { ResolutionCache } from "@scribe/shell/platform/edge/services/resolution_cache.ts";
 import { assertEquals } from "@std/assert";
 
-Deno.test("a miss is undefined, and it is not the same thing as a name that was not found", () => {
+Scribe.test("a miss is undefined, and it is not the same thing as a name that was not found", () => {
   const cache = new ResolutionCache();
 
   assertEquals(cache.lookup("never-asked"), undefined);
@@ -46,7 +48,7 @@ Deno.test("a miss is undefined, and it is not the same thing as a name that was 
   assertEquals(cache.lookup("absent"), null, "a name that is not on disk is worth remembering too");
 });
 
-Deno.test("the cache is bounded, so a caller naming services cannot grow it", () => {
+Scribe.test("the cache is bounded, so a caller naming services cannot grow it", () => {
   const cache = new ResolutionCache(4);
 
   for (let name = 0; name < 8; name++) cache.remember(`s${name}`, `/srv/s${name}`);
@@ -56,7 +58,7 @@ Deno.test("the cache is bounded, so a caller naming services cannot grow it", ()
   assertEquals(cache.lookup("s0"), undefined);
 });
 
-Deno.test("a flood of names that do not exist drops the oldest, not everything held", () => {
+Scribe.test("a flood of names that do not exist drops the oldest, not everything held", () => {
   const cache = new ResolutionCache(16);
 
   for (let real = 0; real < 10; real++) cache.remember(`node-${real}`, `/srv/node-${real}`);
@@ -71,7 +73,7 @@ Deno.test("a flood of names that do not exist drops the oldest, not everything h
   assertEquals(cache.lookup("node-0"), undefined);
 });
 
-Deno.test("remembering a name twice holds it once", () => {
+Scribe.test("remembering a name twice holds it once", () => {
   const cache = new ResolutionCache(4);
 
   cache.remember("s", "/srv/s");
