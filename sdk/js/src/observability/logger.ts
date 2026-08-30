@@ -53,8 +53,13 @@ const consoles: Record<LogLevel, (message: string) => void> = {
 };
 
 export interface LogInput {
+  /** The kind of thing causing the entry being logged. Left unset when nothing names one. */
   readonly actorType?: string;
+
+  /** The identifier of the thing causing the entry being logged. Left unset when nothing names one. */
   readonly actorId?: string;
+
+  /** Whatever else is worth attaching to the entry being logged. */
   readonly metadata?: unknown;
 }
 
