@@ -40,11 +40,15 @@ import type { RequestContext } from "../runtime/context.ts";
 import type { Contribution } from "./contribution.ts";
 
 export interface EndpointDocumentation {
+  /** The HTTP method the endpoint this describes answers. */
   readonly method: RouteMethod;
+
+  /** What the endpoint does, or `null` when its subclass never overrides {@link Endpoint.description}. */
   readonly description: string | null;
 }
 
 export abstract class Endpoint {
+  /** The HTTP method this endpoint answers, fixed by the concrete subclass. */
   abstract readonly method: RouteMethod;
 
   protected access(): Caller | readonly Caller[] | null {
@@ -99,21 +103,26 @@ export abstract class Endpoint {
 }
 
 export abstract class Get extends Endpoint {
+  /** This endpoint always answers a GET request. */
   override readonly method: RouteMethod = "get";
 }
 
 export abstract class Post extends Endpoint {
+  /** This endpoint always answers a POST request. */
   override readonly method: RouteMethod = "post";
 }
 
 export abstract class Put extends Endpoint {
+  /** This endpoint always answers a PUT request. */
   override readonly method: RouteMethod = "put";
 }
 
 export abstract class Patch extends Endpoint {
+  /** This endpoint always answers a PATCH request. */
   override readonly method: RouteMethod = "patch";
 }
 
 export abstract class Delete extends Endpoint {
+  /** This endpoint always answers a DELETE request. */
   override readonly method: RouteMethod = "delete";
 }

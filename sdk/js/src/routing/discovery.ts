@@ -37,10 +37,19 @@
 export type DiscoveredModule = Readonly<Record<string, unknown>>;
 
 export interface DiscoveredRoute {
+  /** The node this route was found under. */
   readonly node: string;
+
+  /** The route's path, derived from the route file's location on disk. */
   readonly path: string;
+
+  /** The path of the route file the generator found, relative to the node's root. */
   readonly file: string;
+
+  /** The route file's exports, as the generator loaded them. */
   readonly module: DiscoveredModule;
+
+  /** The `_middleware.ts` modules found along the route file's ancestor directories, root first. */
   readonly branches: readonly DiscoveredModule[];
 }
 
@@ -52,7 +61,12 @@ export interface DiscoveredRoute {
  * "declare nothing and nothing is delivered" the default rather than a branch.
  */
 export interface DiscoveredLogSink {
+  /** The node this sink answers for, or `null` for the root sink that takes what no node claimed. */
   readonly node: string | null;
+
+  /** The path of the `_logs.ts` file the generator found, relative to the node's root. */
   readonly file: string;
+
+  /** The sink file's exports, as the generator loaded them. */
   readonly module: DiscoveredModule;
 }

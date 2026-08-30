@@ -39,12 +39,25 @@ import type { RateLimiter } from "../contracts/rate_limit.ts";
 import type { RouteHandler } from "../manifest/route.ts";
 
 export interface Contribution {
+  /** The caller kind this layer restricts a route to, or `null` when it leaves access to another layer. */
   readonly access: Caller | readonly Caller[] | null;
+
+  /** The permissions this layer adds. `merge` concatenates every layer's list rather than replacing it. */
   readonly permissions: readonly string[];
+
+  /** The rate limit this layer sets, or `null` when it leaves the limit to another layer. */
   readonly rateLimit: RateLimiter | null;
+
+  /** The rate limit key this layer sets, or `null` when it leaves the key to another layer. */
   readonly rateLimitKey: string | null;
+
+  /** The extra context this layer adds. `merge` concatenates every layer's list rather than replacing it. */
   readonly needs: readonly Need[];
+
+  /** Whether this layer marks the route as requiring a verified webhook, or `null` to leave that to another layer. */
   readonly webhookVerified: boolean | null;
+
+  /** How this layer wraps a handler, or `null` when it contributes nothing to `wrapAll`. */
   readonly wrap: ((handler: RouteHandler) => RouteHandler) | null;
 }
 
