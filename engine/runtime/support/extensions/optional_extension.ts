@@ -41,6 +41,7 @@ import { isMissingModule } from "./missing_module.ts";
 export type ExtensionImporter = () => Future<unknown>;
 
 export class OptionalExtension implements Extension {
+  /** This extension's name, used to label the console output when it is skipped or fails to load. */
   readonly name: string;
 
   readonly #importer: ExtensionImporter;

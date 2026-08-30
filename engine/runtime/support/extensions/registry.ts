@@ -37,6 +37,7 @@
 import { type Future, Registry } from "@scribe/alchemy";
 
 export interface Extension {
+  /** This extension's registered name, looked up by `ExtensionRegistry.load`. */
   readonly name: string;
   load(): Future<unknown | null>;
 }

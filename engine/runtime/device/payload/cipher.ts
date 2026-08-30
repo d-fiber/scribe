@@ -66,6 +66,7 @@ export class DevicePayloadCipher {
     return objectFrom(plaintext);
   }
 
+  /** How many decrypted device payloads the plaintext cache currently holds. */
   static get cachedPlaintexts(): number {
     return plaintexts.size;
   }

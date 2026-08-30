@@ -37,7 +37,10 @@
 import { ipv4ToInt } from "./address.ts";
 
 export interface Ipv4Range {
+  /** The range's first address, as a 32-bit unsigned integer. */
   readonly first: number;
+
+  /** The range's last address, inclusive, as a 32-bit unsigned integer. */
   readonly last: number;
 }
 

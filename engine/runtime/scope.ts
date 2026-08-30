@@ -68,6 +68,8 @@ export interface RequestScopeApi {
   peer(): string | null;
   set(req: Request, bodyBytes: Uint8Array): void;
   getBodyBytes(): Uint8Array | null;
+
+  /** Per-request scratch storage, cleared whenever `set` swaps in a new request. */
   readonly cache: RequestScopeCache;
 }
 
