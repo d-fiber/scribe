@@ -34,10 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, expectLater, having, isA, isTrue, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, expectLater, having, isA, isTrue, Scribe, throwsA } from "@scribe/alchemy/test";
 import { Duration, Future, runPooled } from "@scribe/alchemy";
 
-Deno.test("runPooled visits every item exactly once", async () => {
+Scribe.test("runPooled visits every item exactly once", async () => {
   const seen: number[] = [];
   const items = Array.from({ length: 25 }, (_, i) => i);
 
@@ -50,7 +51,7 @@ Deno.test("runPooled visits every item exactly once", async () => {
   expect([...seen].sort((a, b) => a - b), equals(items));
 });
 
-Deno.test("runPooled never exceeds the requested concurrency", async () => {
+Scribe.test("runPooled never exceeds the requested concurrency", async () => {
   let inFlight = 0;
   let peak = 0;
 
@@ -64,7 +65,7 @@ Deno.test("runPooled never exceeds the requested concurrency", async () => {
   expect(peak <= 3, isTrue, `peak concurrency was ${peak}`);
 });
 
-Deno.test("runPooled still runs everything when the limit is zero or negative", async () => {
+Scribe.test("runPooled still runs everything when the limit is zero or negative", async () => {
   const seen: number[] = [];
 
   await runPooled([1, 2, 3], 0, (item) => {
@@ -79,7 +80,7 @@ Deno.test("runPooled still runs everything when the limit is zero or negative", 
   expect(seen, equals([1, 2, 3, 4, 5]));
 });
 
-Deno.test("runPooled on an empty list resolves without calling the worker", async () => {
+Scribe.test("runPooled on an empty list resolves without calling the worker", async () => {
   let calls = 0;
 
   await runPooled([], 4, () => {
@@ -90,7 +91,7 @@ Deno.test("runPooled on an empty list resolves without calling the worker", asyn
   expect(calls, equals(0));
 });
 
-Deno.test("a call that fails stops the pool rather than letting the rest run on unwatched", async () => {
+Scribe.test("a call that fails stops the pool rather than letting the rest run on unwatched", async () => {
   const done: number[] = [];
 
   await runPooled([1, 2, 3, 4, 5, 6], 2, async (item) => {
@@ -108,7 +109,7 @@ Deno.test("a call that fails stops the pool rather than letting the rest run on 
   expect(done, equals(settledAtFailure), "the pool went on working after the caller was told it failed");
 });
 
-Deno.test("the failure a caller is handed is the one that stopped the pool", async () => {
+Scribe.test("the failure a caller is handed is the one that stopped the pool", async () => {
   await expectLater(
     () =>
       runPooled([1, 2], 1, (item) => {

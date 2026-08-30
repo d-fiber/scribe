@@ -34,10 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, isA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { contains, equals, expect, isA, Scribe } from "@scribe/alchemy/test";
 import { Refusal, REFUSAL_KINDS, renderError, ScribeError } from "@scribe/alchemy";
 
-Deno.test("each way in carries the kind that matches what it says", () => {
+Scribe.test("each way in carries the kind that matches what it says", () => {
   expect(Refusal.missing("nothing here").kind, equals("missing"));
   expect(Refusal.denied("not for you").kind, equals("denied"));
   expect(Refusal.conflict("already there").kind, equals("conflict"));
@@ -45,25 +46,25 @@ Deno.test("each way in carries the kind that matches what it says", () => {
   expect(Refusal.unavailable("no answer").kind, equals("unavailable"));
 });
 
-Deno.test("a refusal is raised on purpose, so it prints as its sentence and keeps no trace", () => {
+Scribe.test("a refusal is raised on purpose, so it prints as its sentence and keeps no trace", () => {
   const rendered = renderError(Refusal.missing('no audience is declared under "editors".'));
 
   expect(rendered, contains('no audience is declared under "editors".'));
   expect(rendered.includes("refusal.test.ts"), equals(false));
 });
 
-Deno.test("a refusal descends from the base every deliberate raise shares", () => {
+Scribe.test("a refusal descends from the base every deliberate raise shares", () => {
   expect(Refusal.denied("not for you"), isA(ScribeError));
 });
 
-Deno.test("the cause travels with the refusal that wraps it", () => {
+Scribe.test("the cause travels with the refusal that wraps it", () => {
   const underneath = new Error("the socket closed");
   const raised = Refusal.unavailable("the index is not answering.", { cause: underneath });
 
   expect(raised.cause, equals(underneath));
 });
 
-Deno.test("every kind is listed, so a host mapping them can be made to cover all five", () => {
+Scribe.test("every kind is listed, so a host mapping them can be made to cover all five", () => {
   const mapped: Record<string, number> = {};
   for (const kind of REFUSAL_KINDS) mapped[kind] = 1;
 

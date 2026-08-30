@@ -34,19 +34,20 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isA, isFalse, isTrue, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, isA, isFalse, isTrue, Scribe, throwsA } from "@scribe/alchemy/test";
 import { Constraint, type LifecycleSteps, mount, Package } from "@scribe/alchemy";
 
 const realtime = Package.named("realtime").version("1.2.0").runsOn("^3.0.0").build();
 
-Deno.test("mounting keeps the manifest it was given", () => {
+Scribe.test("mounting keeps the manifest it was given", () => {
   const mounted = mount(realtime, { scribe: {} });
 
   expect(mounted.manifest.name, equals("realtime"), "the mounted package lost its name");
   expect(mounted.manifest.version.toString(), equals("1.2.0"), "the mounted package lost its version");
 });
 
-Deno.test("a package that runs at no moment is mounted all the same", () => {
+Scribe.test("a package that runs at no moment is mounted all the same", () => {
   const mounted = mount(realtime, { scribe: {} });
 
   expect(mounted.wires, equals(null), "a package that wires nothing came back with a step");
@@ -54,7 +55,7 @@ Deno.test("a package that runs at no moment is mounted all the same", () => {
   expect(mounted.stops, equals(null), "a package that stops nothing came back with a step");
 });
 
-Deno.test("each moment the entry exports is the one that is handed over", () => {
+Scribe.test("each moment the entry exports is the one that is handed over", () => {
   const ran: string[] = [];
   const mounted = mount(realtime, {
     scribe: {
@@ -71,7 +72,7 @@ Deno.test("each moment the entry exports is the one that is handed over", () => 
   expect(ran, equals(["wires", "starts", "stops"]), "the moments were not the ones the entry exported");
 });
 
-Deno.test("what an entry exports beyond the three moments is left alone", () => {
+Scribe.test("what an entry exports beyond the three moments is left alone", () => {
   const entry = { Channel: class {}, scribe: { starts: () => {} } };
   const mounted = mount(realtime, entry);
 
@@ -79,19 +80,19 @@ Deno.test("what an entry exports beyond the three moments is left alone", () => 
   expect(typeof mounted.starts, equals("function"), "the one moment it did export was dropped");
 });
 
-Deno.test("a package that runs at no moment says so with an empty set of steps", () => {
+Scribe.test("a package that runs at no moment says so with an empty set of steps", () => {
   const none: LifecycleSteps = {};
 
   expect(mount(realtime, { scribe: none }).starts, equals(null));
 });
 
-Deno.test("a manifest cannot be changed once it is built", () => {
+Scribe.test("a manifest cannot be changed once it is built", () => {
   expect(Object.isFrozen(realtime), isTrue, "a built manifest can still be written to");
   expect(Object.isFrozen(realtime.version), isTrue, "the version of a built manifest can be written to");
   expect(Object.isFrozen(realtime.scribe), isTrue, "the framework constraint of a built manifest can be written to");
 });
 
-Deno.test("the dependencies of a built manifest cannot be added to", () => {
+Scribe.test("the dependencies of a built manifest cannot be added to", () => {
   const declared = Package.named("realtime")
     .version("1.2.0")
     .runsOn("^3.0.0")

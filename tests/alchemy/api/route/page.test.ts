@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { contains, equals, expect, Scribe } from "@scribe/alchemy/test";
 import { HtmlPage } from "@scribe/alchemy/route";
 
 const PAGE = "<!doctype html><title>Reset</title>";
@@ -43,7 +44,7 @@ function policyOf(response: Response): string {
   return response.headers.get("Content-Security-Policy") ?? "";
 }
 
-Deno.test("a rendered page says it is html and forbids being stored", () => {
+Scribe.test("a rendered page says it is html and forbids being stored", () => {
   const response = HtmlPage.render(PAGE);
 
   expect(response.headers.get("Content-Type"), equals("text/html; charset=utf-8"));
@@ -53,20 +54,20 @@ Deno.test("a rendered page says it is html and forbids being stored", () => {
   expect(response.headers.get("X-Frame-Options"), equals("DENY"));
 });
 
-Deno.test("a rendered page answers 200 and the html it was given", async () => {
+Scribe.test("a rendered page answers 200 and the html it was given", async () => {
   const response = HtmlPage.render(PAGE);
 
   expect(response.status, equals(200));
   expect(await response.text(), equals(PAGE));
 });
 
-Deno.test("a rendered page keeps the status it was given", () => {
+Scribe.test("a rendered page keeps the status it was given", () => {
   expect(HtmlPage.render(PAGE, 404).status, equals(404));
   expect(HtmlPage.renderForm(PAGE, 400).status, equals(400));
   expect(HtmlPage.renderInterstitial(PAGE, 410).status, equals(410));
 });
 
-Deno.test("every page loads nothing from anywhere but itself", () => {
+Scribe.test("every page loads nothing from anywhere but itself", () => {
   for (const response of [HtmlPage.render(PAGE), HtmlPage.renderForm(PAGE), HtmlPage.renderInterstitial(PAGE)]) {
     const policy = policyOf(response);
 
@@ -77,21 +78,21 @@ Deno.test("every page loads nothing from anywhere but itself", () => {
   }
 });
 
-Deno.test("a sealed page may neither post a form nor open a request", () => {
+Scribe.test("a sealed page may neither post a form nor open a request", () => {
   const policy = policyOf(HtmlPage.render(PAGE));
 
   expect(policy, contains("form-action 'none'"));
   expect(policy, contains("connect-src 'none'"), "connect-src is left to default-src instead of being written out");
 });
 
-Deno.test("a form page may post to itself and nothing more", () => {
+Scribe.test("a form page may post to itself and nothing more", () => {
   const policy = policyOf(HtmlPage.renderForm(PAGE));
 
   expect(policy, contains("form-action 'self'"));
   expect(policy, contains("connect-src 'none'"), "a form page may also reach an origin with a request");
 });
 
-Deno.test("an interstitial may report to itself and post no form", () => {
+Scribe.test("an interstitial may report to itself and post no form", () => {
   const policy = policyOf(HtmlPage.renderInterstitial(PAGE));
 
   expect(policy, contains("connect-src 'self'"), "the beacon of an interstitial is refused silently");

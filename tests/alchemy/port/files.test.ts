@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
 import {
   contains,
   equals,
@@ -46,6 +47,7 @@ import {
   isTrue,
   MemoryFileSystemDriver,
   MissingFileError,
+  Scribe,
   throwsA,
 } from "@scribe/alchemy/test";
 import { Bytes, FileSystems, ScribeError } from "@scribe/alchemy";
@@ -54,7 +56,7 @@ function opened() {
   return new MemoryFileSystemDriver().open();
 }
 
-Deno.test("a file hands back the text it was given", async () => {
+Scribe.test("a file hands back the text it was given", async () => {
   const disk = opened();
   await disk.writeText("/lib/audience.ts", "export const held = 1;");
 
@@ -65,7 +67,7 @@ Deno.test("a file hands back the text it was given", async () => {
   );
 });
 
-Deno.test("a file hands back a copy, so nobody edits what is held by writing into it", async () => {
+Scribe.test("a file hands back a copy, so nobody edits what is held by writing into it", async () => {
   const disk = opened();
   await disk.write("/held", new Uint8Array([1, 2]));
 
@@ -75,14 +77,14 @@ Deno.test("a file hands back a copy, so nobody edits what is held by writing int
   expect((await disk.read("/held"))[0], equals(1), "editing what was read changed what is held");
 });
 
-Deno.test("reading a path nothing is held at refuses instead of answering nothing", async () => {
+Scribe.test("reading a path nothing is held at refuses instead of answering nothing", async () => {
   await expectLater(
     () => opened().read("/gone"),
     throwsA(having(isA(MissingFileError), (raised) => raised.message, "message", contains("/gone"))),
   );
 });
 
-Deno.test("a refusal of this port descends from ScribeError, so a caller can tell it apart", async () => {
+Scribe.test("a refusal of this port descends from ScribeError, so a caller can tell it apart", async () => {
   await expectLater(() => opened().readText("/gone"), throwsA(isA(MissingFileError)));
   await expectLater(
     () => opened().readText("/gone"),
@@ -91,11 +93,11 @@ Deno.test("a refusal of this port descends from ScribeError, so a caller can tel
   );
 });
 
-Deno.test("describing a path nothing is held at answers nothing rather than refusing", async () => {
+Scribe.test("describing a path nothing is held at answers nothing rather than refusing", async () => {
   expect(await opened().describe("/gone"), equals(null), "describing a missing path did not answer null");
 });
 
-Deno.test("describing a file says what it is and how much it holds", async () => {
+Scribe.test("describing a file says what it is and how much it holds", async () => {
   const disk = opened();
   await disk.writeText("/held", "abc");
 
@@ -107,7 +109,7 @@ Deno.test("describing a file says what it is and how much it holds", async () =>
   expect(entry!.size.inBytes, equals(Bytes.of(3).inBytes), "a file of three bytes was measured otherwise");
 });
 
-Deno.test("writing a file makes the directories above it without being asked", async () => {
+Scribe.test("writing a file makes the directories above it without being asked", async () => {
   const disk = opened();
   await disk.writeText("/lib/src/db/tables.ts", "");
 
@@ -117,7 +119,7 @@ Deno.test("writing a file makes the directories above it without being asked", a
   expect(entry!.isDirectory, isTrue, "the directory above a written file is not a directory");
 });
 
-Deno.test("a directory lists what is directly under it and nothing deeper", async () => {
+Scribe.test("a directory lists what is directly under it and nothing deeper", async () => {
   const disk = opened();
   await disk.writeText("/lib/audience.ts", "");
   await disk.writeText("/lib/src/key.ts", "");
@@ -127,7 +129,7 @@ Deno.test("a directory lists what is directly under it and nothing deeper", asyn
   expect(names, equals(["audience.ts", "src"]), "a directory listed something other than what is under it");
 });
 
-Deno.test("listing what holds bytes refuses", async () => {
+Scribe.test("listing what holds bytes refuses", async () => {
   const disk = opened();
   await disk.writeText("/held", "");
 
@@ -137,7 +139,7 @@ Deno.test("listing what holds bytes refuses", async () => {
   );
 });
 
-Deno.test("removing a directory takes everything under it", async () => {
+Scribe.test("removing a directory takes everything under it", async () => {
   const disk = opened();
   await disk.writeText("/lib/src/key.ts", "");
   await disk.writeText("/lib/audience.ts", "");
@@ -148,11 +150,11 @@ Deno.test("removing a directory takes everything under it", async () => {
   expect(await disk.describe("/lib/audience.ts"), isNotNull, "a sibling of a removed directory went with it");
 });
 
-Deno.test("removing a path nothing is held at does nothing rather than refusing", async () => {
+Scribe.test("removing a path nothing is held at does nothing rather than refusing", async () => {
   await opened().remove("/gone");
 });
 
-Deno.test("a temporary path is one nothing else was given", async () => {
+Scribe.test("a temporary path is one nothing else was given", async () => {
   const disk = opened();
 
   const first = await disk.temporaryFile();
@@ -162,13 +164,13 @@ Deno.test("a temporary path is one nothing else was given", async () => {
   expect(await disk.readText(first), equals(""), "a temporary file was not made empty");
 });
 
-Deno.test("a driver hands back the same file system every time it is opened", () => {
+Scribe.test("a driver hands back the same file system every time it is opened", () => {
   const driver = new MemoryFileSystemDriver();
 
   expect(driver.open() === driver.open(), isTrue, "opening twice gave two different file systems");
 });
 
-Deno.test("a package reaches a file through the slot the host filled", async () => {
+Scribe.test("a package reaches a file through the slot the host filled", async () => {
   const driver = new MemoryFileSystemDriver();
   await driver.open().writeText("/package.yaml", "name: audience\n");
 

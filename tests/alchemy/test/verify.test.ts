@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
 import {
   anything,
   capture,
@@ -44,6 +45,7 @@ import {
   isA,
   mock,
   NoCallReadError,
+  Scribe,
   throwsA,
   VerificationError,
   verify,
@@ -65,7 +67,7 @@ function logging(): Log {
   return log;
 }
 
-Deno.test("a call that never happened refuses, and the refusal lists what did happen", () => {
+Scribe.test("a call that never happened refuses, and the refusal lists what did happen", () => {
   const log = logging();
   log.write("started");
 
@@ -80,7 +82,7 @@ Deno.test("a call that never happened refuses, and the refusal lists what did ha
   );
 });
 
-Deno.test("once refuses when the call was made twice", () => {
+Scribe.test("once refuses when the call was made twice", () => {
   const log = logging();
   log.write("a");
   log.write("a");
@@ -91,7 +93,7 @@ Deno.test("once refuses when the call was made twice", () => {
   );
 });
 
-Deno.test("times, atLeast and atMost each answer for the count they name", () => {
+Scribe.test("times, atLeast and atMost each answer for the count they name", () => {
   const log = logging();
   log.write("a");
   log.write("a");
@@ -100,7 +102,7 @@ Deno.test("times, atLeast and atMost each answer for the count they name", () =>
   verify(() => log.write("a")).times(3).atLeast(2).atMost(3);
 });
 
-Deno.test("a check claims every call it matched, so a second check of it finds nothing left", () => {
+Scribe.test("a check claims every call it matched, so a second check of it finds nothing left", () => {
   const log = logging();
   log.write("a");
   log.write("a");
@@ -112,7 +114,7 @@ Deno.test("a check claims every call it matched, so a second check of it finds n
   );
 });
 
-Deno.test("verifyNever refuses when the call was made, claimed or not", () => {
+Scribe.test("verifyNever refuses when the call was made, claimed or not", () => {
   const log = logging();
   log.write("a");
   verify(() => log.write("a")).once();
@@ -123,14 +125,14 @@ Deno.test("verifyNever refuses when the call was made, claimed or not", () => {
   );
 });
 
-Deno.test("verifyNever holds when the call was never made", () => {
+Scribe.test("verifyNever holds when the call was never made", () => {
   const log = logging();
   log.write("a");
 
   verifyNever(() => log.write("b"));
 });
 
-Deno.test("verifyInOrder holds when the calls came in the order given, whatever sat between", () => {
+Scribe.test("verifyInOrder holds when the calls came in the order given, whatever sat between", () => {
   const log = logging();
   log.write("first");
   log.write("noise");
@@ -139,7 +141,7 @@ Deno.test("verifyInOrder holds when the calls came in the order given, whatever 
   verifyInOrder([() => log.write("first"), () => log.write("second")]);
 });
 
-Deno.test("verifyInOrder refuses when the calls came the other way round", () => {
+Scribe.test("verifyInOrder refuses when the calls came the other way round", () => {
   const log = logging();
   log.write("second");
   log.write("first");
@@ -155,7 +157,7 @@ Deno.test("verifyInOrder refuses when the calls came the other way round", () =>
   );
 });
 
-Deno.test("verifyNoMoreInteractions refuses when a call no check claimed is left", () => {
+Scribe.test("verifyNoMoreInteractions refuses when a call no check claimed is left", () => {
   const log = logging();
   log.write("a");
   log.write("b");
@@ -167,7 +169,7 @@ Deno.test("verifyNoMoreInteractions refuses when a call no check claimed is left
   );
 });
 
-Deno.test("verifyNoMoreInteractions holds once every call has been claimed", () => {
+Scribe.test("verifyNoMoreInteractions holds once every call has been claimed", () => {
   const log = logging();
   log.write("a");
   verify(() => log.write("a")).once();
@@ -175,7 +177,7 @@ Deno.test("verifyNoMoreInteractions holds once every call has been claimed", () 
   verifyNoMoreInteractions(log);
 });
 
-Deno.test("a capture collects the calls a declared answer matched", () => {
+Scribe.test("a capture collects the calls a declared answer matched", () => {
   const line = capture<string>();
   const log = mock<Log>({ named: "log" });
   when(() => log.write(line.arg)).thenReturn(undefined);
@@ -186,7 +188,7 @@ Deno.test("a capture collects the calls a declared answer matched", () => {
   expect(line.values, equals(["a", "b"]));
 });
 
-Deno.test("a check clears what a capture kept before counting, so it answers for itself alone", () => {
+Scribe.test("a check clears what a capture kept before counting, so it answers for itself alone", () => {
   const line = capture<string>();
   const log = mock<Log>({ named: "log" });
   when(() => log.write(line.arg)).thenReturn(undefined);
@@ -199,7 +201,7 @@ Deno.test("a check clears what a capture kept before counting, so it answers for
   expect(line.values, equals(["b"]));
 });
 
-Deno.test("verify refuses a function that called nothing on a double", () => {
+Scribe.test("verify refuses a function that called nothing on a double", () => {
   expect(
     () => verify(() => 1 + 1),
     throwsA(
@@ -208,7 +210,7 @@ Deno.test("verify refuses a function that called nothing on a double", () => {
   );
 });
 
-Deno.test("a check never reaches the answers, so it records nothing itself", () => {
+Scribe.test("a check never reaches the answers, so it records nothing itself", () => {
   const log = logging();
   log.write("a");
 

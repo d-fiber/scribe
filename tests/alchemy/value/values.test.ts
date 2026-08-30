@@ -34,24 +34,36 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, expectLater, having, isA, isFalse, isTrue, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import {
+  contains,
+  equals,
+  expect,
+  expectLater,
+  having,
+  isA,
+  isFalse,
+  isTrue,
+  Scribe,
+  throwsA,
+} from "@scribe/alchemy/test";
 import { Bytes, Completer, Duration, Failure, Ok, okay, Pagination, Refusal, Slot } from "@scribe/alchemy";
 
-Deno.test("a slot hands back what was put in it", () => {
+Scribe.test("a slot hands back what was put in it", () => {
   const slot = new Slot<string>("realtime");
   slot.use("open");
 
   expect(slot.get(), equals("open"), "the slot answered something other than what it was given");
 });
 
-Deno.test("a slot nobody configured refuses instead of answering nothing", () => {
+Scribe.test("a slot nobody configured refuses instead of answering nothing", () => {
   expect(
     () => new Slot<string>("realtime").get(),
     throwsA(having(isA(Error), (raised) => raised.message, "message", contains("was never given a value"))),
   );
 });
 
-Deno.test("a slot says whether it was configured without being asked for the value", () => {
+Scribe.test("a slot says whether it was configured without being asked for the value", () => {
   const slot = new Slot<number>("cache");
 
   expect(slot.configured, isFalse, "an untouched slot claims to be configured");
@@ -59,7 +71,7 @@ Deno.test("a slot says whether it was configured without being asked for the val
   expect(slot.configured, isTrue, "a slot that was given a value denies being configured");
 });
 
-Deno.test("a duration is the same however it was written", () => {
+Scribe.test("a duration is the same however it was written", () => {
   expect(
     Duration.seconds(90).inMilliseconds,
     equals(Duration.minutes(1).inMilliseconds + Duration.seconds(30).inMilliseconds),
@@ -68,12 +80,12 @@ Deno.test("a duration is the same however it was written", () => {
   expect(Duration.days(1).inMilliseconds, equals(Duration.hours(24).inMilliseconds), "a day is not twenty four hours");
 });
 
-Deno.test("a size is the same however it was written", () => {
+Scribe.test("a size is the same however it was written", () => {
   expect(Bytes.kilobytes(1).inBytes, equals(Bytes.of(1024).inBytes), "a kilobyte is not 1024 bytes");
   expect(Bytes.gigabytes(1).inMegabytes, equals(1024), "a gigabyte is not 1024 megabytes");
 });
 
-Deno.test("an outcome carries its data or its error, and says which", () => {
+Scribe.test("an outcome carries its data or its error, and says which", () => {
   const kept: Ok<number> = new Ok(3);
   const refused: Failure<string> = new Failure("no such row");
 
@@ -83,14 +95,14 @@ Deno.test("an outcome carries its data or its error, and says which", () => {
   expect(refused.error, equals("no such row"), "the Failure lost its reason");
 });
 
-Deno.test("a page hands back the rows it was asked for, and no more", () => {
+Scribe.test("a page hands back the rows it was asked for, and no more", () => {
   const page = Pagination.of([1, 2, 3, 4], 0, 3);
 
   expect(page.items, equals([1, 2, 3]), "the page kept the row that proves there is another one");
   expect(page.hasMore, isTrue, "a page with a row to spare says there is nothing after it");
 });
 
-Deno.test("a page that fits says there is nothing after it", () => {
+Scribe.test("a page that fits says there is nothing after it", () => {
   const page = Pagination.of([1, 2], 10, 3);
 
   expect(page.items, equals([1, 2]), "the page dropped a row it was given");
@@ -98,14 +110,14 @@ Deno.test("a page that fits says there is nothing after it", () => {
   expect(page.offset, equals(10), "the page forgot where it started");
 });
 
-Deno.test("an empty page carries nothing and points nowhere", () => {
+Scribe.test("an empty page carries nothing and points nowhere", () => {
   const page = Pagination.empty<number>();
 
   expect(page.items, equals([]), "an empty page holds a row");
   expect(page.hasMore, isFalse, "an empty page claims there is more");
 });
 
-Deno.test("a page written out carries the shape a caller reads, not the one it holds", () => {
+Scribe.test("a page written out carries the shape a caller reads, not the one it holds", () => {
   const written = Pagination.of([1, 2, 3, 4], 10, 3).toJson();
 
   expect(written.items, equals([1, 2, 3]));
@@ -113,7 +125,7 @@ Deno.test("a page written out carries the shape a caller reads, not the one it h
   expect(written.pagination.has_more, isTrue, "the written page lost that there is more after it");
 });
 
-Deno.test("writing a page out copies its rows, so nobody writes back into the page", () => {
+Scribe.test("writing a page out copies its rows, so nobody writes back into the page", () => {
   const page = Pagination.of([1, 2], 0, 3);
   const written = page.toJson();
 
@@ -122,7 +134,7 @@ Deno.test("writing a page out copies its rows, so nobody writes back into the pa
   expect(page.items.length, equals(2), "the page was changed through what was written out");
 });
 
-Deno.test("the three ordered values sort by what they hold, not by how they were written", () => {
+Scribe.test("the three ordered values sort by what they hold, not by how they were written", () => {
   const held = [Duration.hours(1), Duration.milliseconds(5), Duration.minutes(2)];
   held.sort((a, b) => a.compareTo(b));
 
@@ -134,7 +146,7 @@ Deno.test("the three ordered values sort by what they hold, not by how they were
   expect(sizes.map((one) => one.inBytes), equals([7, 3 * 1024 * 1024, 1024 * 1024 * 1024]));
 });
 
-Deno.test("a completer answers what settles it, and a second settling changes nothing", async () => {
+Scribe.test("a completer answers what settles it, and a second settling changes nothing", async () => {
   const completer = new Completer<string>();
 
   completer.complete("first");
@@ -144,7 +156,7 @@ Deno.test("a completer answers what settles it, and a second settling changes no
   expect(completer.isCompleted, isTrue, "a settled completer says it is still waiting");
 });
 
-Deno.test("two durations add and subtract, and a subtraction may go below nothing", () => {
+Scribe.test("two durations add and subtract, and a subtraction may go below nothing", () => {
   const window = Duration.minutes(1);
 
   expect(window.add(Duration.seconds(30)).inSeconds, equals(90));
@@ -152,7 +164,7 @@ Deno.test("two durations add and subtract, and a subtraction may go below nothin
   expect(Duration.seconds(1).subtract(Duration.seconds(3)).inSeconds, equals(-2));
 });
 
-Deno.test("a duration never moves, so what a caller adds reaches nobody else", () => {
+Scribe.test("a duration never moves, so what a caller adds reaches nobody else", () => {
   const window = Duration.minutes(1);
 
   window.add(Duration.hours(1));
@@ -160,21 +172,21 @@ Deno.test("a duration never moves, so what a caller adds reaches nobody else", (
   expect(window.inMinutes, equals(1), "the duration was changed by adding to it");
 });
 
-Deno.test("two quantities of bytes add and subtract", () => {
+Scribe.test("two quantities of bytes add and subtract", () => {
   const limit = Bytes.megabytes(1);
 
   expect(limit.add(Bytes.kilobytes(512)).inKilobytes, equals(1536));
   expect(limit.subtract(Bytes.kilobytes(512)).inKilobytes, equals(512));
 });
 
-Deno.test("a quantity prints with the unit it is read in", () => {
+Scribe.test("a quantity prints with the unit it is read in", () => {
   expect(Bytes.kilobytes(2).toString(), equals("2 KB"));
   expect(Bytes.of(512).toString(), equals("512 B"));
   expect(Bytes.megabytes(1).toString(), equals("1 MB"));
   expect(Bytes.of(1536).toString(), equals("1.5 KB"));
 });
 
-Deno.test("a quantity compares against another through the member written for it", () => {
+Scribe.test("a quantity compares against another through the member written for it", () => {
   expect(
     Bytes.megabytes(1).compareTo(Bytes.kilobytes(999)) > 0,
     isTrue,
@@ -182,24 +194,24 @@ Deno.test("a quantity compares against another through the member written for it
   );
 });
 
-Deno.test("two quantities of the same size are equal however each was written", () => {
+Scribe.test("two quantities of the same size are equal however each was written", () => {
   expect(Bytes.kilobytes(1).equals(Bytes.of(1024)), isTrue, "a kilobyte was not a thousand and twenty four bytes");
   expect(Bytes.kilobytes(1).equals(Bytes.of(1023)), isFalse);
 });
 
-Deno.test("a duration prints with the unit it is read in", () => {
+Scribe.test("a duration prints with the unit it is read in", () => {
   expect(Duration.milliseconds(250).toString(), equals("250ms"));
   expect(Duration.seconds(90).toString(), equals("1.5min"));
   expect(Duration.days(7).toString(), equals("7d"));
   expect(Duration.milliseconds(0).toString(), equals("0s"));
 });
 
-Deno.test("two durations of the same length are equal however each was written", () => {
+Scribe.test("two durations of the same length are equal however each was written", () => {
   expect(Duration.seconds(60).equals(Duration.minutes(1)), isTrue, "sixty seconds was not one minute");
   expect(Duration.seconds(59).equals(Duration.minutes(1)), isFalse);
 });
 
-Deno.test("an outcome that carries nothing still says which one it is", () => {
+Scribe.test("an outcome that carries nothing still says which one it is", () => {
   const kept = okay;
   const refused = new Failure(Refusal.invalid("nothing to carry."));
 
@@ -207,13 +219,13 @@ Deno.test("an outcome that carries nothing still says which one it is", () => {
   expect(refused.ok, isFalse, "an outcome built as a failure says it worked");
 });
 
-Deno.test("the total of a page counts what is known, and one more when there is another page", () => {
+Scribe.test("the total of a page counts what is known, and one more when there is another page", () => {
   expect(Pagination.of([1, 2, 3, 4], 10, 3).total, equals(14));
   expect(Pagination.of([1, 2], 10, 3).total, equals(12));
   expect(Pagination.empty<number>().total, equals(0));
 });
 
-Deno.test("a completer that fails rejects what waits on it, once and no more", async () => {
+Scribe.test("a completer that fails rejects what waits on it, once and no more", async () => {
   const completer = new Completer<string>();
 
   expect(completer.isCompleted, isFalse, "a completer says it is settled before anything settled it");
@@ -226,7 +238,7 @@ Deno.test("a completer that fails rejects what waits on it, once and no more", a
   );
 });
 
-Deno.test("comparing two values reads the unit each of them holds", () => {
+Scribe.test("comparing two values reads the unit each of them holds", () => {
   expect(Number(Duration.minutes(1)), equals(60_000), "a duration compared as something other than milliseconds");
   expect(Number(Bytes.kilobytes(2)), equals(2048), "a quantity compared as something other than bytes");
   expect(

@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, isFalse, isTrue } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { contains, equals, expect, isFalse, isTrue, Scribe } from "@scribe/alchemy/test";
 import { foldFrames, framesOf, renderError, ScribeError } from "@scribe/alchemy";
 
 const STACK = [
@@ -47,7 +48,7 @@ const STACK = [
 
 const ROOTS = ["/home/ada/scribe"];
 
-Deno.test("a frame under a root is shown relative to it", () => {
+Scribe.test("a frame under a root is shown relative to it", () => {
   const frames = framesOf(STACK, ROOTS);
 
   expect(frames[0].own, isTrue, "a frame under a root was called foreign");
@@ -55,37 +56,37 @@ Deno.test("a frame under a root is shown relative to it", () => {
   expect(frames[0].text.includes("/home/ada"), isFalse, "the root was left on the front of the frame");
 });
 
-Deno.test("a frame under no root is left exactly as it stands", () => {
+Scribe.test("a frame under no root is left exactly as it stands", () => {
   const frames = framesOf(STACK, ROOTS);
 
   expect(frames[1].own, isFalse, "a runtime frame was called ours");
   expect(frames[1].text, equals("ext:deno_web/02_timers.js:66:10"), "a foreign frame was rewritten");
 });
 
-Deno.test("a root written as a file URL is read like a plain path", () => {
+Scribe.test("a root written as a file URL is read like a plain path", () => {
   const frames = framesOf(STACK, ["file:///home/ada/scribe/"]);
 
   expect(frames[0].own, isTrue, "a root written as a URL matched nothing");
 });
 
-Deno.test("a stack read against no root has no frame of its own", () => {
+Scribe.test("a stack read against no root has no frame of its own", () => {
   expect(framesOf(STACK, []).some((frame) => frame.own), isFalse, "a frame was called ours with no root given");
 });
 
-Deno.test("a run of foreign frames is folded into a count", () => {
+Scribe.test("a run of foreign frames is folded into a count", () => {
   const lines = foldFrames(framesOf(STACK, ROOTS));
 
   expect(lines.length, equals(3), "the foreign frames were not folded into one line");
   expect(lines[1], contains("2 frames elsewhere"));
 });
 
-Deno.test("a single foreign frame is counted in the singular", () => {
+Scribe.test("a single foreign frame is counted in the singular", () => {
   const folded = foldFrames([{ text: "ext:core/01_core.js:1:1", own: false }]);
 
   expect(folded, equals(["... 1 frame elsewhere"]), "one hidden frame was counted in the plural");
 });
 
-Deno.test("something raised on purpose is boxed and shown without a trace", () => {
+Scribe.test("something raised on purpose is boxed and shown without a trace", () => {
   const written = renderError(new ScribeError('nothing is held at "/gone".'), { scope: "storage" });
 
   expect(written, contains("┌─ scribe ─ storage "));
@@ -93,17 +94,17 @@ Deno.test("something raised on purpose is boxed and shown without a trace", () =
   expect(written.includes("    at "), isFalse, "a ScribeError was shown with a trace");
 });
 
-Deno.test("a box drawn without a scope still names the framework", () => {
+Scribe.test("a box drawn without a scope still names the framework", () => {
   expect(renderError(new ScribeError("gone")), contains("┌─ scribe "));
 });
 
-Deno.test("a long sentence is wrapped rather than run past the rule", () => {
+Scribe.test("a long sentence is wrapped rather than run past the rule", () => {
   const written = renderError(new ScribeError("word ".repeat(60).trim()), { width: 40 });
 
   expect(written.split("\n").every((line) => line.length <= 40), isTrue, "a line ran past the width it was given");
 });
 
-Deno.test("a fault in the code keeps its trace, folded down to the frames that are ours", () => {
+Scribe.test("a fault in the code keeps its trace, folded down to the frames that are ours", () => {
   const raised = new Error("nothing there");
   raised.stack = STACK;
 
@@ -115,6 +116,6 @@ Deno.test("a fault in the code keeps its trace, folded down to the frames that a
   expect(written.includes("┌─"), isFalse, "a fault in the code was boxed");
 });
 
-Deno.test("something raised that is not an error at all is still said in a box", () => {
+Scribe.test("something raised that is not an error at all is still said in a box", () => {
   expect(renderError("gone"), contains("gone"));
 });

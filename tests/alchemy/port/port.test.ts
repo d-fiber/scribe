@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, expectLater, isA, isFalse, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, expectLater, isA, isFalse, Scribe, throwsA } from "@scribe/alchemy/test";
 import type {
   Cache,
   CacheDriver,
@@ -120,7 +121,7 @@ function roleOf(members: Cache<string>, who: string): Promise<string> {
   return members.upsert(who, () => Promise.resolve("reader"));
 }
 
-Deno.test("a package reaches a cache without naming what is behind it", async () => {
+Scribe.test("a package reaches a cache without naming what is behind it", async () => {
   const driver = new OpensInMemory();
   Caches.use(driver);
 
@@ -131,7 +132,7 @@ Deno.test("a package reaches a cache without naming what is behind it", async ()
   expect(driver.opened[0].key, equals("audience:member"), "the cache was opened under another name");
 });
 
-Deno.test("what is already held is handed back instead of being computed again", async () => {
+Scribe.test("what is already held is handed back instead of being computed again", async () => {
   Caches.use(new OpensInMemory());
   const members = Caches.get().open<string>({ key: "audience:member" });
   await members.add("ada", "editor");
@@ -146,7 +147,7 @@ Deno.test("what is already held is handed back instead of being computed again",
   expect(computed, equals(0), "the computation ran although something was held");
 });
 
-Deno.test("a refusal carries what the caller needs to try again", async () => {
+Scribe.test("a refusal carries what the caller needs to try again", async () => {
   RateLimiters.use({ open: () => new RefusesEverybody() } as RateLimiterDriver);
 
   const outcome = await RateLimiters.get().open({
@@ -163,7 +164,7 @@ Deno.test("a refusal carries what the caller needs to try again", async () => {
   }
 });
 
-Deno.test("declaring a cache at module scope touches nothing, so an import before boot is safe", () => {
+Scribe.test("declaring a cache at module scope touches nothing, so an import before boot is safe", () => {
   const untouched = new Slot<CacheDriver>("Untouched");
   const declared = cache<string>({ key: "audience:member" });
 
@@ -171,7 +172,7 @@ Deno.test("declaring a cache at module scope touches nothing, so an import befor
   expect(typeof declared.get, equals("function"), "declaring a cache did not hand back a cache");
 });
 
-Deno.test("a cache opens itself at the first call, not at the declaration", async () => {
+Scribe.test("a cache opens itself at the first call, not at the declaration", async () => {
   const driver = new OpensInMemory();
   const members = cache<string>({ key: "audience:member" });
 
@@ -185,7 +186,7 @@ Deno.test("a cache opens itself at the first call, not at the declaration", asyn
   expect(driver.opened.length, equals(1), "the cache was opened again by a second call");
 });
 
-Deno.test("a rate limit declared at module scope opens at the first call too", async () => {
+Scribe.test("a rate limit declared at module scope opens at the first call too", async () => {
   let opened = 0;
   const limit = rateLimit({ key: "sign_in", limit: 5, window: Duration.minutes(1), penalty: Duration.minutes(10) });
 
@@ -201,7 +202,7 @@ Deno.test("a rate limit declared at module scope opens at the first call too", a
   expect(opened, equals(1), "the limit was not opened by the first call");
 });
 
-Deno.test("a cache that answers too slowly is read as a cache that holds nothing", async () => {
+Scribe.test("a cache that answers too slowly is read as a cache that holds nothing", async () => {
   Caches.use({
     open<T>(): Cache<T> {
       return {
@@ -222,7 +223,7 @@ Deno.test("a cache that answers too slowly is read as a cache that holds nothing
   expect(await held.get("ada"), equals(null), "a slow cache held a request instead of missing");
 });
 
-Deno.test("a cache that answers too slowly raises when the declaration asked it to", async () => {
+Scribe.test("a cache that answers too slowly raises when the declaration asked it to", async () => {
   Caches.use({
     open<T>(): Cache<T> {
       return {
@@ -243,7 +244,7 @@ Deno.test("a cache that answers too slowly raises when the declaration asked it 
   await expectLater(() => held.get("ada"), throwsA(isA(TimeoutException)));
 });
 
-Deno.test("a write that runs out of time raises whatever the declaration said about reads", async () => {
+Scribe.test("a write that runs out of time raises whatever the declaration said about reads", async () => {
   Caches.use({
     open<T>(): Cache<T> {
       return {

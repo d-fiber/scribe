@@ -34,10 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
 import { Commands } from "@scribe/alchemy";
-import { equals, expect, isA, isTrue, MemoryCommands, throwsA } from "@scribe/alchemy/test";
+import { equals, expect, isA, isTrue, MemoryCommands, Scribe, throwsA } from "@scribe/alchemy/test";
 
-Deno.test(
+Scribe.test(
   "a run is answered with the result the runner was built with",
   async () => {
     const runner = new MemoryCommands({
@@ -61,7 +62,7 @@ Deno.test(
   },
 );
 
-Deno.test("a field left out of the answer takes its empty value", async () => {
+Scribe.test("a field left out of the answer takes its empty value", async () => {
   const runner = new MemoryCommands();
 
   const result = await runner.run("true", []);
@@ -70,7 +71,7 @@ Deno.test("a field left out of the answer takes its empty value", async () => {
   expect(result.stdout.length, equals(0), "the default output was not empty");
 });
 
-Deno.test(
+Scribe.test(
   "the runner keeps every run it was asked for, with its arguments and its input",
   async () => {
     const runner = new MemoryCommands();
@@ -104,7 +105,7 @@ Deno.test(
   },
 );
 
-Deno.test(
+Scribe.test(
   "a function answer sees the program and the arguments of the run",
   async () => {
     const runner = new MemoryCommands((program, args) =>
@@ -123,7 +124,7 @@ Deno.test(
   },
 );
 
-Deno.test(
+Scribe.test(
   "only hands back the single run, and throws once there is more than one",
   async () => {
     const runner = new MemoryCommands();
@@ -140,7 +141,7 @@ Deno.test(
   },
 );
 
-Deno.test(
+Scribe.test(
   "the slot answers with whatever a host or a test put in it",
   async () => {
     const held = Commands.configured ? Commands.get() : null;

@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isFalse, isTrue } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, isFalse, isTrue, Scribe } from "@scribe/alchemy/test";
 import {
   atLeast,
   isLoggedLevel,
@@ -69,20 +70,20 @@ function entry(over: Partial<LoggedEntry> = {}): LoggedEntry {
   };
 }
 
-Deno.test("the four levels run from the least to the most serious, and nothing else is one", () => {
+Scribe.test("the four levels run from the least to the most serious, and nothing else is one", () => {
   expect(severityOf("debug"), equals(0));
   expect(severityOf("error"), equals(3));
   expect(isLoggedLevel("warn"), isTrue, "warn was refused as a level");
   expect(isLoggedLevel("fatal"), isFalse, "fatal was taken for a level");
 });
 
-Deno.test("a floor is a comparison, not a list of the names somebody remembered", () => {
+Scribe.test("a floor is a comparison, not a list of the names somebody remembered", () => {
   expect(atLeast("error", "warn"), isTrue, "an error did not clear a warn floor");
   expect(atLeast("warn", "warn"), isTrue, "a warn did not clear its own floor");
   expect(atLeast("info", "warn"), isFalse, "an info cleared a warn floor");
 });
 
-Deno.test("what a package records reaches the logger in force at the call", () => {
+Scribe.test("what a package records reaches the logger in force at the call", () => {
   const said: string[] = [];
   const keeping: Logger = {
     debug: (action) => said.push(`debug ${action}`),
@@ -99,7 +100,7 @@ Deno.test("what a package records reaches the logger in force at the call", () =
   expect(said, equals(["info audience.member_added", "warn audience.quota_near"]));
 });
 
-Deno.test("a sink is handed every entry of a delivery, in the order it was recorded", async () => {
+Scribe.test("a sink is handed every entry of a delivery, in the order it was recorded", async () => {
   const sink = new Keeping();
 
   await sink.receive([entry({ action: "first" }), entry({ action: "second" })]);
@@ -108,7 +109,7 @@ Deno.test("a sink is handed every entry of a delivery, in the order it was recor
   expect(sink.seen.map((one) => one.action), equals(["first", "second"]));
 });
 
-Deno.test("flushing a sink hands over what it held and stops it waiting to", async () => {
+Scribe.test("flushing a sink hands over what it held and stops it waiting to", async () => {
   const sink = new Keeping();
 
   await sink.receive([entry()]);

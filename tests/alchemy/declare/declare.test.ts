@@ -34,17 +34,18 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, having, isA, isFalse, isTrue, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { contains, equals, expect, having, isA, isFalse, isTrue, Scribe, throwsA } from "@scribe/alchemy/test";
 import { DuplicateDeclarationError, Registry, Slot } from "@scribe/alchemy";
 
-Deno.test("a registry hands back what was declared under a name", () => {
+Scribe.test("a registry hands back what was declared under a name", () => {
   const audiences = new Registry<string>("audience");
 
   expect(audiences.declare("editors", "the editors"), equals("the editors"), "declaring answered something else");
   expect(audiences.named("editors"), equals("the editors"), "the registry lost what it was given");
 });
 
-Deno.test("a name declared twice is refused where it is written", () => {
+Scribe.test("a name declared twice is refused where it is written", () => {
   const audiences = new Registry<string>("audience");
   audiences.declare("editors", "first");
 
@@ -59,7 +60,7 @@ Deno.test("a name declared twice is refused where it is written", () => {
   );
 });
 
-Deno.test("the kind is named in the refusal, so the reader knows which registry spoke", () => {
+Scribe.test("the kind is named in the refusal, so the reader knows which registry spoke", () => {
   const configs = new Registry<number>("remote config");
   configs.declare("timeout", 1);
 
@@ -74,14 +75,14 @@ Deno.test("the kind is named in the refusal, so the reader knows which registry 
   );
 });
 
-Deno.test("a name nobody declared answers nothing rather than throwing", () => {
+Scribe.test("a name nobody declared answers nothing rather than throwing", () => {
   const audiences = new Registry<string>("audience");
 
   expect(audiences.named("editors"), equals(null), "an undeclared name answered something");
   expect(audiences.holds("editors"), isFalse, "an undeclared name is claimed to be held");
 });
 
-Deno.test("a registry hands back everything in the order it was declared", () => {
+Scribe.test("a registry hands back everything in the order it was declared", () => {
   const links = new Registry<string>("link");
   links.declare("invite", "a");
   links.declare("share", "b");
@@ -91,7 +92,7 @@ Deno.test("a registry hands back everything in the order it was declared", () =>
   expect(links.size, equals(2), "the registry miscounted what it holds");
 });
 
-Deno.test("forgetting empties the registry, which only a test has any business doing", () => {
+Scribe.test("forgetting empties the registry, which only a test has any business doing", () => {
   const links = new Registry<string>("link");
   links.declare("invite", "a");
   links.forget();
@@ -101,7 +102,7 @@ Deno.test("forgetting empties the registry, which only a test has any business d
   expect(links.named("invite"), equals("b"), "a name freed by forgetting is still refused");
 });
 
-Deno.test("a slot and a registry are the two halves of the same idea", () => {
+Scribe.test("a slot and a registry are the two halves of the same idea", () => {
   const transport = new Slot<string>("RealtimeTransports");
   const channels = new Registry<string>("channel");
 

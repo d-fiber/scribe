@@ -34,10 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, FixedNow, having, isA, isFalse, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { contains, equals, expect, FixedNow, having, isA, isFalse, Scribe, throwsA } from "@scribe/alchemy/test";
 import { DateTime, Duration, FormatException, Now, Stopwatch } from "@scribe/alchemy";
 
-Deno.test("a stopwatch counts what the case says passed, and nothing else", () => {
+Scribe.test("a stopwatch counts what the case says passed, and nothing else", () => {
   const now = new FixedNow(0);
   Now.use(now);
   const watch = Stopwatch.started();
@@ -47,7 +48,7 @@ Deno.test("a stopwatch counts what the case says passed, and nothing else", () =
   expect(watch.elapsed.inMinutes, equals(1.5));
 });
 
-Deno.test("a stopped stopwatch keeps what it counted and stops counting", () => {
+Scribe.test("a stopped stopwatch keeps what it counted and stops counting", () => {
   const now = new FixedNow(0);
   Now.use(now);
   const watch = Stopwatch.started();
@@ -60,7 +61,7 @@ Deno.test("a stopped stopwatch keeps what it counted and stops counting", () => 
   expect(watch.isRunning, isFalse, "a stopped stopwatch says it is still running");
 });
 
-Deno.test("counting again adds to what was counted before", () => {
+Scribe.test("counting again adds to what was counted before", () => {
   const now = new FixedNow(0);
   Now.use(now);
   const watch = Stopwatch.started();
@@ -73,7 +74,7 @@ Deno.test("counting again adds to what was counted before", () => {
   expect(watch.elapsedMilliseconds, equals(3000));
 });
 
-Deno.test("starting one that runs and stopping one that does not both do nothing", () => {
+Scribe.test("starting one that runs and stopping one that does not both do nothing", () => {
   const now = new FixedNow(0);
   Now.use(now);
   const watch = Stopwatch.started();
@@ -88,14 +89,14 @@ Deno.test("starting one that runs and stopping one that does not both do nothing
   expect(watch.elapsedMilliseconds, equals(2000));
 });
 
-Deno.test("a reading that names no instant refuses as a format that was not met", () => {
+Scribe.test("a reading that names no instant refuses as a format that was not met", () => {
   expect(
     () => DateTime.parse("the day before yesterday"),
     throwsA(having(isA(FormatException), (raised) => raised.message, "message", contains("Expected"))),
   );
 });
 
-Deno.test("a stopwatch nobody started has counted nothing and says so", () => {
+Scribe.test("a stopwatch nobody started has counted nothing and says so", () => {
   Now.use(new FixedNow(5000));
   const watch = new Stopwatch();
 
@@ -103,7 +104,7 @@ Deno.test("a stopwatch nobody started has counted nothing and says so", () => {
   expect(watch.elapsedMilliseconds, equals(0));
 });
 
-Deno.test("resetting a running stopwatch drops what it counted and keeps it running", () => {
+Scribe.test("resetting a running stopwatch drops what it counted and keeps it running", () => {
   const now = new FixedNow(0);
   Now.use(now);
   const watch = Stopwatch.started();
@@ -118,7 +119,7 @@ Deno.test("resetting a running stopwatch drops what it counted and keeps it runn
   expect(watch.elapsedMilliseconds, equals(2000));
 });
 
-Deno.test("resetting a stopped stopwatch drops what it counted and leaves it stopped", () => {
+Scribe.test("resetting a stopped stopwatch drops what it counted and leaves it stopped", () => {
   const now = new FixedNow(0);
   Now.use(now);
   const watch = Stopwatch.started();
@@ -132,7 +133,7 @@ Deno.test("resetting a stopped stopwatch drops what it counted and leaves it sto
   expect(watch.isRunning, isFalse, "a reset stopwatch started counting again on its own");
 });
 
-Deno.test("what a stopwatch answers as a duration is what it answers in milliseconds", () => {
+Scribe.test("what a stopwatch answers as a duration is what it answers in milliseconds", () => {
   const now = new FixedNow(0);
   Now.use(now);
   const watch = Stopwatch.started();

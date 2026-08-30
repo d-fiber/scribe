@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isFalse } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, isFalse, Scribe } from "@scribe/alchemy/test";
 import { type Invoked, RequestContext } from "@scribe/alchemy/route";
 import { Required } from "@scribe/alchemy";
 
@@ -58,14 +59,14 @@ function invoked(over: Partial<Invoked> = {}): Invoked {
   };
 }
 
-Deno.test("a call nobody signed answers no identity rather than an empty one", () => {
+Scribe.test("a call nobody signed answers no identity rather than an empty one", () => {
   const ctx = new RequestContext(invoked());
 
   expect(ctx.id, equals(null));
   expect(ctx.user, equals(null));
 });
 
-Deno.test("the identity of a signed call is read without walking into it", () => {
+Scribe.test("the identity of a signed call is read without walking into it", () => {
   const ctx = new RequestContext(invoked({
     user: { id: "ada", caller: "authenticated", role: "member", permissions: [], claims: { email: "ada@bench.local" } },
   }));
@@ -74,7 +75,7 @@ Deno.test("the identity of a signed call is read without walking into it", () =>
   expect(ctx.user?.caller, equals("authenticated"));
 });
 
-Deno.test("a header is found whatever case it was written in", () => {
+Scribe.test("a header is found whatever case it was written in", () => {
   const ctx = new RequestContext(invoked({ headers: { "content-type": "application/json" } }));
 
   expect(ctx.header("Content-Type"), equals("application/json"));
@@ -82,7 +83,7 @@ Deno.test("a header is found whatever case it was written in", () => {
   expect(ctx.header("accept"), equals(null));
 });
 
-Deno.test("what the path and the query carried is read by name, and absence is null", () => {
+Scribe.test("what the path and the query carried is read by name, and absence is null", () => {
   const ctx = new RequestContext(invoked({ pathParams: { id: "7" }, query: { page: "2" } }));
 
   expect(ctx.param("id"), equals("7"));
@@ -91,7 +92,7 @@ Deno.test("what the path and the query carried is read by name, and absence is n
   expect(ctx.query("missing"), equals(null));
 });
 
-Deno.test("a body is read against the shape it was declared with", () => {
+Scribe.test("a body is read against the shape it was declared with", () => {
   const ctx = new RequestContext(invoked({
     body: new TextEncoder().encode(JSON.stringify({ brand_id: "b-1" })),
   }));
@@ -99,7 +100,7 @@ Deno.test("a body is read against the shape it was declared with", () => {
   expect(ctx.body({ brand_id: Required(String) })?.brand_id, equals("b-1"));
 });
 
-Deno.test("a body missing what the shape requires answers nothing, and so does one that is not JSON", () => {
+Scribe.test("a body missing what the shape requires answers nothing, and so does one that is not JSON", () => {
   const missing = new RequestContext(invoked({ body: new TextEncoder().encode("{}") }));
   const broken = new RequestContext(invoked({ body: new TextEncoder().encode("{") }));
 
@@ -107,21 +108,21 @@ Deno.test("a body missing what the shape requires answers nothing, and so does o
   expect(broken.body({ brand_id: Required(String) }), equals(null));
 });
 
-Deno.test("a call with no body reads as nothing rather than as an empty one", () => {
+Scribe.test("a call with no body reads as nothing rather than as an empty one", () => {
   const ctx = new RequestContext(invoked());
 
   expect(ctx.body({ brand_id: Required(String) }), equals(null));
   expect(ctx.raw(), equals(null));
 });
 
-Deno.test("a place nothing resolved answers empty, so a caller never checks for null", () => {
+Scribe.test("a place nothing resolved answers empty, so a caller never checks for null", () => {
   const ctx = new RequestContext(invoked());
 
   expect(ctx.location(), equals({ city: "", country: "" }));
   expect(ctx.device(), equals(null));
 });
 
-Deno.test("nothing of the protocol reaches an endpoint: a call is plain data", () => {
+Scribe.test("nothing of the protocol reaches an endpoint: a call is plain data", () => {
   const ctx = new RequestContext(invoked({ sessionId: "s-1" }));
 
   expect(ctx.sessionId, equals("s-1"));

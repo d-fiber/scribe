@@ -34,28 +34,29 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isTrue, MemoryEnvironment } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, isTrue, MemoryEnvironment, Scribe } from "@scribe/alchemy/test";
 import { Environments } from "@scribe/alchemy";
 
-Deno.test("a name that was set reads the value it was set to", () => {
+Scribe.test("a name that was set reads the value it was set to", () => {
   const env = new MemoryEnvironment({ REDIS_URL: "redis://localhost:6379" });
 
   expect(env.get("REDIS_URL"), equals("redis://localhost:6379"), "the value set did not come back");
 });
 
-Deno.test("a name that was never set reads undefined, the way an unset variable does", () => {
+Scribe.test("a name that was never set reads undefined, the way an unset variable does", () => {
   const env = new MemoryEnvironment({ PORT: "8080" });
 
   expect(env.get("NOTHING"), equals(undefined), "a name nobody set answered something");
 });
 
-Deno.test("a name set to the empty string reads the empty string, not undefined", () => {
+Scribe.test("a name set to the empty string reads the empty string, not undefined", () => {
   const env = new MemoryEnvironment({ VERIFY_JWT: "" });
 
   expect(env.get("VERIFY_JWT"), equals(""), "an empty value was taken as absent");
 });
 
-Deno.test("toObject hands back every name and value, and a later change does not leak into it", () => {
+Scribe.test("toObject hands back every name and value, and a later change does not leak into it", () => {
   const env = new MemoryEnvironment({ A: "1", B: "2" });
   const snapshot = env.toObject();
   env.set("A", "3");
@@ -63,7 +64,7 @@ Deno.test("toObject hands back every name and value, and a later change does not
   expect(snapshot, equals({ A: "1", B: "2" }), "the snapshot moved under the caller");
 });
 
-Deno.test("the slot answers with whatever a host or a test put in it", () => {
+Scribe.test("the slot answers with whatever a host or a test put in it", () => {
   const held = Environments.configured ? Environments.get() : null;
   Environments.use(new MemoryEnvironment({ JWT_SECRET: "shhh" }));
 

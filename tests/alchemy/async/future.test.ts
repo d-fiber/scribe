@@ -34,15 +34,16 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, expectLater, having, isA, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { contains, equals, expect, expectLater, having, isA, Scribe, throwsA } from "@scribe/alchemy/test";
 import { Duration, Future, unawaited } from "@scribe/alchemy";
 
-Deno.test("a delayed future settles with what it was given, after the wait", async () => {
+Scribe.test("a delayed future settles with what it was given, after the wait", async () => {
   expect(await Future.delayed(Duration.milliseconds(1), 42), equals(42));
   expect(await Future.delayed(Duration.milliseconds(1)), equals(undefined));
 });
 
-Deno.test("a future already settled answers without waiting for anything", async () => {
+Scribe.test("a future already settled answers without waiting for anything", async () => {
   expect(await Future.value(7), equals(7));
   await expectLater(
     () => Future.error(new Error("refused")),
@@ -50,7 +51,7 @@ Deno.test("a future already settled answers without waiting for anything", async
   );
 });
 
-Deno.test("waiting on several answers all of them, in the order they were given", async () => {
+Scribe.test("waiting on several answers all of them, in the order they were given", async () => {
   const held = await Future.wait([
     Future.delayed(Duration.milliseconds(4), "slow"),
     Future.value("quick"),
@@ -59,7 +60,7 @@ Deno.test("waiting on several answers all of them, in the order they were given"
   expect(held, equals(["slow", "quick"]));
 });
 
-Deno.test("any settles with the first one to settle, and the losers carry on", async () => {
+Scribe.test("any settles with the first one to settle, and the losers carry on", async () => {
   const slow = Future.delayed(Duration.milliseconds(8), "slow");
   const quick = Future.delayed(Duration.milliseconds(1), "quick");
 
@@ -67,7 +68,7 @@ Deno.test("any settles with the first one to settle, and the losers carry on", a
   expect(await slow, equals("slow"));
 });
 
-Deno.test("a microtask runs after the work in hand, not during it", async () => {
+Scribe.test("a microtask runs after the work in hand, not during it", async () => {
   const order: string[] = [];
   const held = Future.microtask(() => order.push("after"));
 
@@ -77,7 +78,7 @@ Deno.test("a microtask runs after the work in hand, not during it", async () => 
   expect(order, equals(["during", "after"]));
 });
 
-Deno.test("detached work that fails is logged rather than left to nobody", async () => {
+Scribe.test("detached work that fails is logged rather than left to nobody", async () => {
   const raised: unknown[] = [];
   const before = console.error;
   console.error = (...args: unknown[]) => void raised.push(args[1]);
@@ -89,7 +90,7 @@ Deno.test("detached work that fails is logged rather than left to nobody", async
   expect((raised[0] as Error).message, equals("the body failed"));
 });
 
-Deno.test("racing settles on the first to finish, failure and all", async () => {
+Scribe.test("racing settles on the first to finish, failure and all", async () => {
   const slow = Future.delayed(Duration.milliseconds(5), "slow");
   const failing = Future.error<string>(new Error("first back"));
 
@@ -100,7 +101,7 @@ Deno.test("racing settles on the first to finish, failure and all", async () => 
   await slow;
 });
 
-Deno.test("asking for the first to succeed steps over the one that failed", async () => {
+Scribe.test("asking for the first to succeed steps over the one that failed", async () => {
   const failing = Future.error<string>(new Error("primary is down"));
   const fallback = Future.delayed(Duration.milliseconds(5), "fallback");
 

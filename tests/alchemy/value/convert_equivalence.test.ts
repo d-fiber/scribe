@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals } from "@std/assert";
 import { base64, base64Url, hex } from "@scribe/alchemy";
 
@@ -107,7 +109,7 @@ const CORNERS = [
   "zz",
 ];
 
-Deno.test("writing bytes as hexadecimal answers what the loop it replaced answered", () => {
+Scribe.test("writing bytes as hexadecimal answers what the loop it replaced answered", () => {
   let compared = 0;
   for (let length = 0; length <= 64; length++) {
     const view = new Uint8Array(length);
@@ -124,7 +126,7 @@ Deno.test("writing bytes as hexadecimal answers what the loop it replaced answer
   assertEquals(compared, 65);
 });
 
-Deno.test("reading hexadecimal agrees with the pattern it replaced, refusals included", () => {
+Scribe.test("reading hexadecimal agrees with the pattern it replaced, refusals included", () => {
   const corpus: string[] = [...CORNERS];
   for (let seed = 0; seed < 2_000; seed++) {
     const source = "0123456789abcdefABCDEF xyz=";
@@ -140,7 +142,7 @@ Deno.test("reading hexadecimal agrees with the pattern it replaced, refusals inc
   assertEquals(corpus.length, 2_016);
 });
 
-Deno.test("reading base64 agrees with the walk it replaced, refusals included", () => {
+Scribe.test("reading base64 agrees with the walk it replaced, refusals included", () => {
   const corpus: string[] = [...CORNERS];
   for (let seed = 0; seed < 3_000; seed++) {
     const source = `${ALPHABET}=-_!é`;
@@ -160,7 +162,7 @@ Deno.test("reading base64 agrees with the walk it replaced, refusals included", 
   assertEquals(corpus.length, 3_016);
 });
 
-Deno.test("every byte string survives a round trip through all three codecs", () => {
+Scribe.test("every byte string survives a round trip through all three codecs", () => {
   for (let length = 0; length <= 96; length++) {
     const view = new Uint8Array(length);
     for (let at = 0; at < length; at++) view[at] = (at * 53 + length * 29) & 0xff;

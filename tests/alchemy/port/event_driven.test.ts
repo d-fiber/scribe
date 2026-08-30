@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isA, isFalse, isNotNull, isTrue, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, isA, isFalse, isNotNull, isTrue, Scribe, throwsA } from "@scribe/alchemy/test";
 import {
   cron,
   Crons,
@@ -87,14 +88,14 @@ class KeepingQueues implements QueueDriver {
   }
 }
 
-Deno.test("declaring a queue at module scope touches nothing, so an import before boot is safe", () => {
+Scribe.test("declaring a queue at module scope touches nothing, so an import before boot is safe", () => {
   const declared = queue<string>({ key: "audience:welcome" });
 
   expect(typeof declared.push, equals("function"));
   expect(() => Queues.get(), throwsA(isNotNull));
 });
 
-Deno.test("a queue opens itself at the first push, not at the declaration", async () => {
+Scribe.test("a queue opens itself at the first push, not at the declaration", async () => {
   forgetQueues();
   const kept = new KeepingQueues();
   const welcomes = queue<string>({ key: "audience:welcome" });
@@ -107,7 +108,7 @@ Deno.test("a queue opens itself at the first push, not at the declaration", asyn
   expect(kept.pushed, equals(["ada"]));
 });
 
-Deno.test("a batch goes over whole, not one at a time", async () => {
+Scribe.test("a batch goes over whole, not one at a time", async () => {
   forgetQueues();
   const kept = new KeepingQueues();
   Queues.use(kept);
@@ -117,7 +118,7 @@ Deno.test("a batch goes over whole, not one at a time", async () => {
   expect(kept.pushed, equals(["ada", "grace"]));
 });
 
-Deno.test("a hook opens itself at the first emit, not at the declaration", async () => {
+Scribe.test("a hook opens itself at the first emit, not at the declaration", async () => {
   forgetHooks();
   const told: unknown[] = [];
   let opened = 0;
@@ -143,7 +144,7 @@ Deno.test("a hook opens itself at the first emit, not at the declaration", async
   expect(told, equals(["ada"]));
 });
 
-Deno.test("declaring a scheduled run touches nothing, so an import before boot is safe", () => {
+Scribe.test("declaring a scheduled run touches nothing, so an import before boot is safe", () => {
   forgetCrons();
 
   cron({ key: "audience:sweep", schedule: { every: Duration.hours(1) }, run: () => {} });
@@ -151,7 +152,7 @@ Deno.test("declaring a scheduled run touches nothing, so an import before boot i
   expect(Crons.configured, isFalse, "declaring a run reached for a driver that is not there yet");
 });
 
-Deno.test("a scheduled run reaches the driver when the host installs it, and not before", () => {
+Scribe.test("a scheduled run reaches the driver when the host installs it, and not before", () => {
   forgetCrons();
   const taken: DeclaredCron[] = [];
   Crons.use({
@@ -169,7 +170,7 @@ Deno.test("a scheduled run reaches the driver when the host installs it, and not
   expect(taken.map((one) => one.key), equals(["audience:sweep"]));
 });
 
-Deno.test("a scheduled run carries what it runs, so the driver never has to find the other half", async () => {
+Scribe.test("a scheduled run carries what it runs, so the driver never has to find the other half", async () => {
   forgetCrons();
   let ran = false;
   let held: (() => void | Promise<void>) | null = null;
@@ -187,7 +188,7 @@ Deno.test("a scheduled run carries what it runs, so the driver never has to find
   expect(ran, isTrue, "a scheduled run was declared with a body the driver could not reach");
 });
 
-Deno.test("a key taken twice is refused where the second declaration is written", () => {
+Scribe.test("a key taken twice is refused where the second declaration is written", () => {
   forgetCrons();
 
   cron({ key: "audience:sweep", schedule: { every: Duration.hours(1) }, run: () => {} });
@@ -199,7 +200,7 @@ Deno.test("a key taken twice is refused where the second declaration is written"
   );
 });
 
-Deno.test("the three ways of saying when are kept apart, not folded into one", () => {
+Scribe.test("the three ways of saying when are kept apart, not folded into one", () => {
   forgetCrons();
   const taken: DeclaredCron[] = [];
   Crons.use({
@@ -220,7 +221,7 @@ Deno.test("the three ways of saying when are kept apart, not folded into one", (
   expect("expression" in taken[2].schedule, isTrue);
 });
 
-Deno.test("declaring a watch touches nothing, so an import before boot is safe", () => {
+Scribe.test("declaring a watch touches nothing, so an import before boot is safe", () => {
   forgetTriggers();
 
   trigger("orders").onInsert(() => {});
@@ -228,7 +229,7 @@ Deno.test("declaring a watch touches nothing, so an import before boot is safe",
   expect(Triggers.configured, isFalse, "declaring a watch reached for a driver that is not there yet");
 });
 
-Deno.test("a watch reaches the driver when the host installs it, and not before", () => {
+Scribe.test("a watch reaches the driver when the host installs it, and not before", () => {
   forgetTriggers();
   const watched: string[] = [];
   Triggers.use({
@@ -251,7 +252,7 @@ Deno.test("a watch reaches the driver when the host installs it, and not before"
   expect(watched, equals(["orders"]));
 });
 
-Deno.test("what was written on a chain is played back in the order it was written", () => {
+Scribe.test("what was written on a chain is played back in the order it was written", () => {
   forgetTriggers();
   const played: string[] = [];
   Triggers.use({
@@ -287,7 +288,7 @@ Deno.test("what was written on a chain is played back in the order it was writte
   expect(played, equals(["insert", "field", "delete"]));
 });
 
-Deno.test("a queue carries what drains it, and the host starts it when it installs", () => {
+Scribe.test("a queue carries what drains it, and the host starts it when it installs", () => {
   forgetQueues();
   const kept = new KeepingQueues();
   Queues.use(kept);
@@ -302,7 +303,7 @@ Deno.test("a queue carries what drains it, and the host starts it when it instal
   expect(kept.draining, equals(["audience:welcome"]), "a queue nobody declared a handler for was drained");
 });
 
-Deno.test("a queue key taken twice is refused where the second declaration is written", () => {
+Scribe.test("a queue key taken twice is refused where the second declaration is written", () => {
   forgetQueues();
 
   queue<string>({ key: "audience:welcome" });
@@ -314,7 +315,7 @@ Deno.test("a queue key taken twice is refused where the second declaration is wr
   );
 });
 
-Deno.test("a listener written before the host is up hears what is emitted after it", async () => {
+Scribe.test("a listener written before the host is up hears what is emitted after it", async () => {
   forgetHooks();
   const told: unknown[] = [];
   const heard: unknown[] = [];

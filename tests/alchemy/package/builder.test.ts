@@ -34,10 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, having, isA, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { contains, equals, expect, having, isA, Scribe, throwsA } from "@scribe/alchemy/test";
 import { DeclarationError, DEFAULT_DESCRIPTION, Package, VersionError } from "@scribe/alchemy";
 
-Deno.test("a manifest carries what the chain gave it", () => {
+Scribe.test("a manifest carries what the chain gave it", () => {
   const declared = Package.named("realtime")
     .describedAs("Broadcasts a row's life to the callers a channel lets in.")
     .version("1.2.0")
@@ -56,14 +57,14 @@ Deno.test("a manifest carries what the chain gave it", () => {
   expect(declared.dependencies["audiences"]?.toString(), equals("^1.0.0"), "the manifest lost its dependency");
 });
 
-Deno.test("a package that says nothing beyond its version and its framework is a package", () => {
+Scribe.test("a package that says nothing beyond its version and its framework is a package", () => {
   const declared = Package.named("audiences").version("1.0.0").runsOn("^3.0.0").build();
 
   expect(Object.keys(declared.dependencies).length, equals(0), "a package that asks for nothing carries a dependency");
   expect(declared.description, equals(DEFAULT_DESCRIPTION), "a package nobody described was described anyway");
 });
 
-Deno.test("a package that describes itself with nothing is refused", () => {
+Scribe.test("a package that describes itself with nothing is refused", () => {
   expect(
     () => Package.named("realtime").describedAs("   "),
     throwsA(
@@ -72,63 +73,63 @@ Deno.test("a package that describes itself with nothing is refused", () => {
   );
 });
 
-Deno.test("a name with a capital letter cannot open a manifest", () => {
+Scribe.test("a name with a capital letter cannot open a manifest", () => {
   expect(
     () => Package.named("Realtime"),
     throwsA(having(isA(DeclarationError), (raised) => raised.message, "message", contains("cannot name a package"))),
   );
 });
 
-Deno.test("a name with a digit cannot open a manifest", () => {
+Scribe.test("a name with a digit cannot open a manifest", () => {
   expect(
     () => Package.named("s3"),
     throwsA(having(isA(DeclarationError), (raised) => raised.message, "message", contains("cannot name a package"))),
   );
 });
 
-Deno.test("a name with a doubled underscore cannot open a manifest", () => {
+Scribe.test("a name with a doubled underscore cannot open a manifest", () => {
   expect(
     () => Package.named("dynamic__links"),
     throwsA(having(isA(DeclarationError), (raised) => raised.message, "message", contains("cannot name a package"))),
   );
 });
 
-Deno.test("a name the framework keeps cannot open a manifest", () => {
+Scribe.test("a name the framework keeps cannot open a manifest", () => {
   expect(
     () => Package.named("core"),
     throwsA(having(isA(DeclarationError), (raised) => raised.message, "message", contains("keeps for itself"))),
   );
 });
 
-Deno.test("a version that is not three numbers is refused", () => {
+Scribe.test("a version that is not three numbers is refused", () => {
   expect(
     () => Package.named("realtime").version("1.2"),
     throwsA(having(isA(VersionError), (raised) => raised.message, "message", contains("is not a version"))),
   );
 });
 
-Deno.test("a framework constraint that cannot be read is refused", () => {
+Scribe.test("a framework constraint that cannot be read is refused", () => {
   expect(
     () => Package.named("realtime").version("1.0.0").runsOn("3.x"),
     throwsA(having(isA(VersionError), (raised) => raised.message, "message", contains("is not a bound"))),
   );
 });
 
-Deno.test("a package cannot ask for itself", () => {
+Scribe.test("a package cannot ask for itself", () => {
   expect(
     () => Package.named("realtime").version("1.0.0").runsOn("^3.0.0").dependsOn({ realtime: "^1.0.0" }),
     throwsA(having(isA(DeclarationError), (raised) => raised.message, "message", contains("asks for itself"))),
   );
 });
 
-Deno.test("a dependency on something that cannot name a package is refused", () => {
+Scribe.test("a dependency on something that cannot name a package is refused", () => {
   expect(
     () => Package.named("realtime").version("1.0.0").runsOn("^3.0.0").dependsOn({ Audiences: "^1.0.0" }),
     throwsA(having(isA(DeclarationError), (raised) => raised.message, "message", contains("cannot name a package"))),
   );
 });
 
-Deno.test("what a package built cannot be changed afterwards", () => {
+Scribe.test("what a package built cannot be changed afterwards", () => {
   const declared = Package.named("audiences").version("1.0.0").runsOn("^3.0.0").build();
 
   expect(Object.isFrozen(declared), equals(true), "a built manifest is writable");

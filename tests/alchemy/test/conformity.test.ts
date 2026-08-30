@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { checkCacheDriver, expectLater, isA, MemoryCaches, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { checkCacheDriver, expectLater, isA, MemoryCaches, Scribe, throwsA } from "@scribe/alchemy/test";
 import { AssertionError } from "@scribe/alchemy/test";
 import type { Cache, CacheDriver, CacheOptions } from "@scribe/alchemy";
 
@@ -77,10 +78,10 @@ class RunsEveryTime implements CacheDriver {
   }
 }
 
-Deno.test("the cache this repository ships keeps every promise the port makes", async () => {
+Scribe.test("the cache this repository ships keeps every promise the port makes", async () => {
   await checkCacheDriver(new MemoryCaches());
 });
 
-Deno.test("a driver that runs a computation once per caller is caught, not passed", async () => {
+Scribe.test("a driver that runs a computation once per caller is caught, not passed", async () => {
   await expectLater(() => checkCacheDriver(new RunsEveryTime()), throwsA(isA(AssertionError)));
 });
