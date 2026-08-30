@@ -44,44 +44,79 @@
 const ROOT = new URL("../", import.meta.url).pathname.replace(/\/$/, "");
 
 /**
- * Whether `filename` is a test of a mountable package.
+ * Where in a mountable package `filename` sits, or null when the rule leaves it alone.
  *
- * A package is written against `Scribe` and `expect`, never against the runtime under them: the
- * whole point of `@scribe/alchemy/test` is to be the layer between the two. A test that reaches for
- * the runtime directly is a test that would not survive the framework changing hosts, and it is
- * the seam this rule keeps sealed.
+ * A package names what it wants to do and lets the framework fill in what does it: `lib/` reads
+ * the file system, the environment and the rest through the ports in `@scribe/alchemy`, and a
+ * test reads them through the Memory doubles in `@scribe/alchemy/test`. Code in either zone that
+ * reaches the runtime directly would not survive the framework changing hosts, and it is the seam
+ * this rule keeps sealed.
+ *
+ * `foundation/lib/` is the exception. It is the one package that reaches the host: the drivers
+ * every other package reads through are filled there, so its `lib/` is where the runtime is
+ * allowed to be named. Its tests are held to the rule like any other.
  */
-function isPackageTest(filename: string): boolean {
+function sealedZone(filename: string): "lib" | "test" | null {
   const root = `${ROOT}/`;
-  if (!filename.startsWith(root)) return false;
+  if (!filename.startsWith(root)) return null;
 
   const relative = filename.slice(root.length);
-  return relative.startsWith("packages/") && relative.includes("/tests/");
+  if (!relative.startsWith("packages/")) return null;
+
+  if (relative.includes("/tests/")) return "test";
+  if (relative.startsWith("packages/foundation/lib/")) return null;
+  if (relative.includes("/lib/")) return "lib";
+
+  return null;
 }
 
 /**
- * The specifier prefixes a package test may not import.
+ * The specifier prefixes a mountable package may not import.
  *
  * `@std` and `jsr:@std` are the standard library, `node:` the Node compatibility surface, and
  * `npm:` a package pulled straight from the registry. Each of them is a dependency on the host
- * rather than on the framework, and every one of them has an answer inside `@scribe/alchemy/test`.
+ * rather than on the framework, and every one of them has an answer inside `@scribe/alchemy` or,
+ * for a test, `@scribe/alchemy/test`.
  */
 const FORBIDDEN_SPECIFIERS = ["@std/", "jsr:@std/", "node:", "npm:"] as const;
 
-/** The message a forbidden import reports with. */
-function importMessage(specifier: string): string {
+/** The message a forbidden import in `lib/` reports with. */
+function libImportMessage(specifier: string): string {
+  return `"${specifier}" reaches past the framework to the runtime under it. A package's lib/ ` +
+    `names what it wants through @scribe/alchemy, and the framework fills in what does it. The ` +
+    `one package allowed to name the runtime is foundation, because it is the one that fills ` +
+    `those ports.`;
+}
+
+/** The message a forbidden import in a test reports with. */
+function testImportMessage(specifier: string): string {
   return `"${specifier}" reaches past the framework to the runtime under it. A package test is ` +
     `written against @scribe/alchemy/test, which stands between the two on purpose: Scribe holds ` +
     `the cases, expect and its matchers hold the assertions, and the Memory doubles hold the ` +
     `ports. Nothing a package test needs is outside it.`;
 }
 
+/** The message a `Deno` reference in `lib/` reports with. */
+const LIB_RUNTIME_MESSAGE = "Deno is the runtime the framework stands in front of. A package's lib/ reaches the file " +
+  "system, the environment, a subprocess and the rest through the ports in @scribe/alchemy, " +
+  "which foundation fills. foundation is the one package allowed to name the runtime.";
+
+/** The message a `Deno` reference in a test reports with. */
+const TEST_RUNTIME_MESSAGE =
+  "Deno is the runtime the framework stands in front of. A package test declares its cases with " +
+  "Scribe, not Deno.test, and reads the clock, the file system and the rest through the doubles " +
+  "in @scribe/alchemy/test.";
+
 export default {
   name: "sealed-runtime",
   rules: {
     "sealed-runtime": {
       create(ctx: Deno.lint.RuleContext) {
-        if (!isPackageTest(ctx.filename)) return {};
+        const zone = sealedZone(ctx.filename);
+        if (zone === null) return {};
+
+        const importMessage = zone === "lib" ? libImportMessage : testImportMessage;
+        const runtimeMessage = zone === "lib" ? LIB_RUNTIME_MESSAGE : TEST_RUNTIME_MESSAGE;
 
         function checkSpecifier(node: Deno.lint.Node, specifier: string) {
           if (FORBIDDEN_SPECIFIERS.some((prefix) => specifier.startsWith(prefix))) {
@@ -109,12 +144,7 @@ export default {
           MemberExpression(node) {
             const object = node.object as { type?: string; name?: string };
             if (object.type === "Identifier" && object.name === "Deno") {
-              ctx.report({
-                node,
-                message: "Deno is the runtime the framework stands in front of. A package test " +
-                  "declares its cases with Scribe, not Deno.test, and reads the clock, the file " +
-                  "system and the rest through the doubles in @scribe/alchemy/test.",
-              });
+              ctx.report({ node, message: runtimeMessage });
             }
           },
         };
