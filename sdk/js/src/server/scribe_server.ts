@@ -87,16 +87,37 @@ interface ResolvedNode {
 }
 
 export interface ServerOptions {
+  /** The port to listen on. Read from `WORKER_PORT`, or {@link DEFAULT_PORT}, when omitted. */
   readonly port?: number;
+
+  /** The host address to bind to. Left to the runtime's own default when omitted. */
   readonly hostname?: string;
+
+  /** The routes the generator discovered on disk. None when omitted. */
   readonly routes?: readonly DiscoveredRoute[];
+
+  /** The nodes the project declared. None when omitted. */
   readonly nodes?: readonly DeclaredNode[];
+
+  /** The `_logs.ts` modules the generator found. None when omitted, so every log falls to the default sink. */
   readonly logSinks?: readonly DiscoveredLogSink[];
+
+  /** The queues this worker declares. None when omitted. */
   readonly queues?: readonly WorkerQueue<never>[];
+
+  /** The hooks this worker declares. None when omitted. */
   readonly hooks?: readonly WorkerHook[];
+
+  /** The cron jobs this worker declares. None when omitted. */
   readonly crons?: readonly WorkerCron[];
+
+  /** The searchers this worker declares. None when omitted. */
   readonly searchers?: readonly WorkerSearcher[];
+
+  /** The realtime channels this worker declares. None when omitted. */
   readonly realtimes?: readonly WorkerRealtime[];
+
+  /** The storage folders this worker declares. None when omitted. */
   readonly storages?: readonly WorkerStorage[];
 }
 

@@ -38,9 +38,16 @@ import { Caller } from "../contracts/access.ts";
 import type { Contribution } from "../routing/contribution.ts";
 
 export interface StandardNode {
+  /** The reserved node name this standard declaration answers for. */
   readonly name: string;
+
+  /** The caller kind every route under this node is restricted to, before any layer narrows it further. */
   readonly caller: Caller;
+
+  /** Whether this node is reachable directly, rather than only through another node's dispatch. */
   readonly public: boolean;
+
+  /** Whether every route under this node requires an already-verified webhook. `null` when it doesn't decide. */
   readonly webhookVerified: boolean | null;
 }
 
