@@ -77,12 +77,18 @@ const EMPTY: QueryState = {
 };
 
 export interface OrderOptions {
+  /** Whether this column sorts largest first. Ascending when omitted. */
   readonly descending?: boolean;
+
+  /** Whether a null in this column sorts before every other value instead of after it. */
   readonly nullsFirst?: boolean;
 }
 
 export interface Page<Row> {
+  /** The rows this page carries, in the order the query returned them. */
   readonly rows: readonly Row[];
+
+  /** How many rows the query matched in total, not just how many this page carries. */
   readonly count: number;
 }
 

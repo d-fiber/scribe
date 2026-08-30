@@ -44,15 +44,27 @@ import { raiseOn } from "./error.ts";
 const CAPABILITY = "storage";
 
 export interface ObjectLocation {
+  /** The name of the declared storage folder this object lives under. */
   readonly folder: string;
+
+  /** The values that fill the folder's path template, keyed by placeholder name. */
   readonly pathArgs?: Readonly<Record<string, string>>;
+
+  /** The object's name within the resolved path. */
   readonly filename: string;
 }
 
 export interface StoredObject {
+  /** The object's full path, folder and filename resolved together. */
   readonly path: string;
+
+  /** The object's size, in bytes. */
   readonly bytes: number;
+
+  /** The content type the object was stored with. */
   readonly mimeType: string;
+
+  /** When the object was last written, as milliseconds since the Unix epoch. */
   readonly updatedAt: number;
 }
 
