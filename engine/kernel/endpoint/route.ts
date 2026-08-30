@@ -39,6 +39,7 @@ import { ServerResponse } from "@scribe/alchemy/route";
 import { ApiContext } from "./context.ts";
 
 export abstract class RouteEndpoint {
+  /** The response builder subclasses use to construct an HTTP response, without importing it themselves. */
   protected readonly response = ServerResponse;
 
   protected abstract run(ctx: ApiContext): Response | Future<Response>;

@@ -40,7 +40,10 @@ import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 let inflightBytes = 0;
 
 export interface BodyAdmission {
+  /** The bytes reserved against the process budget for this request, released by `releaseBody` once the handler answers. */
   readonly reservedBytes: number;
+
+  /** The ceiling the body reader may read up to for this request. */
   readonly maxBodyBytes: number;
 
   /**

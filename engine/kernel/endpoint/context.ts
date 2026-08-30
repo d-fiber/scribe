@@ -53,10 +53,12 @@ import { request } from "@scribe/runtime/http/request.ts";
 import { RequestScope } from "@scribe/runtime/scope.ts";
 
 export class ApiContext {
+  /** The identity of the caller, or `null` for an anonymous request. */
   get user(): RequestUser | null {
     return currentIdentity() ?? null;
   }
 
+  /** The caller's identity id, or `null` for an anonymous request. */
   get id(): string | null {
     return this.user?.id ?? null;
   }
@@ -73,22 +75,27 @@ export class ApiContext {
     return request.raw();
   }
 
+  /** The request's HTTP method. */
   get method(): string {
     return request.method();
   }
 
+  /** The request's path. */
   get path(): string {
     return request.path();
   }
 
+  /** The request's `User-Agent` header, as the caller sent it. */
   get userAgent(): string {
     return request.userAgent();
   }
 
+  /** The caller's IP address, as the process resolved it from the request. */
   get ip(): string {
     return request.ip();
   }
 
+  /** The caller's session identifier, or `null` when the request carries none. */
   get sessionId(): string | null {
     return request.sessionId();
   }
