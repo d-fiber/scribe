@@ -87,5 +87,6 @@
     "package": "react-dom",
     "version": "19.2.7",
     "subpath": "server"
-  }
+  },
+  { "specifier": "typescript", "registry": "npm", "version": "6.0.3" }
 ]

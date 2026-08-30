@@ -19,7 +19,7 @@
     "check": "deno check engine packages",
     "test": "deno test --allow-env --allow-sys --allow-read --allow-write --allow-run --allow-net=127.0.0.1 --env-file=tests/.env.test --parallel engine packages tests",
     "test:net": "deno test --allow-env --allow-sys --allow-read --allow-write --allow-run --allow-net --env-file=tests/.env.test --parallel engine packages tests",
-    "lint": "deno lint",
+    "lint": "deno lint && deno run --allow-read --allow-env .lint/run.ts",
     "gen:dependencies": "deno run --allow-read --allow-write _internal/tools/gen/dependencies.ts"
   },
   "fmt": {
@@ -33,25 +33,9 @@
     ]
   },
   "lint": {
-    "plugins": [
-      "./.lint/private-module-scope.ts",
-      "./.lint/member-escape.ts",
-      "./.lint/sealed-runtime.ts"
-    ],
-    "rules": {
-      "include": [
-        "private-module-scope/private-module-scope",
-        "member-escape/member-escape",
-        "sealed-runtime/sealed-runtime"
-      ]
-    },
     "exclude": [
       "sdk/js/gen",
-      "sdk/js/example",
-      "packages/auth/tests/tests/pending_token.test.ts",
-      "packages/foundation/tests/tests/cron/runner.test.ts",
-      "packages/foundation/tests/tests/cron/hardening_runner.test.ts",
-      "packages/foundation/tests/tests/wiring/wires.test.ts"
+      "sdk/js/example"
     ]
   },
   "compilerOptions": {
@@ -168,6 +152,7 @@
     "lucide-react/bundle": "npm:/lucide-react@1.24.0/dist/cjs/lucide-react.js",
     "react": "npm:react@19.2.8",
     "react-dom/server": "npm:react-dom@19.2.7/server",
-    "react/jsx-runtime": "npm:react@19.2.8/jsx-runtime"
+    "react/jsx-runtime": "npm:react@19.2.8/jsx-runtime",
+    "typescript": "npm:typescript@6.0.3"
   }
 }

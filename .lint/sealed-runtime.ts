@@ -34,8 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { forEachIdentifierNamed, forEachModuleSpecifier, type Rule, type Violation } from "./ast.ts";
+
 /**
- * The workspace root, taken from where this plugin sits rather than from the process.
+ * The workspace root, taken from where this rule sits rather than from the process.
  *
  * The file is `<root>/.lint/sealed-runtime.ts`, so one directory up is the root. It is read once,
  * at load, and never per file: a rule runs for every file in the repository, and an environment
@@ -165,46 +167,47 @@ function runtimeMessage(zone: "lib" | "test", filename: string): string {
     "the doubles in @scribe/alchemy/test.";
 }
 
-export default {
+/** A file this rule cannot yet hold to the standard the rest of the repository meets. */
+function isExempt(filename: string): boolean {
+  return EXEMPT_FILES.some((exempt) => filename.endsWith(`/${exempt}`));
+}
+
+/**
+ * The four files this rule cannot yet tell "reaches the host" from "names it to refuse it".
+ *
+ * The first three make a clock or a timer move with `@std/testing/time`, and the package they
+ * test reads `Date.now()` or poses `setInterval` directly rather than through a port: nothing in
+ * `@scribe/alchemy/test` can simulate one until `pending_token.ts` and `CronRunner` take one as an
+ * argument. The fourth, `wires.test.ts`, poses `installMock(Deno, "connect", ...)` to prove that
+ * mounting the package dials nothing: naming the host to stop it from acting is not the same
+ * gesture as reading or writing through it, and no port answers "nothing may call out" today.
+ */
+const EXEMPT_FILES = [
+  "packages/auth/tests/tests/pending_token.test.ts",
+  "packages/foundation/tests/tests/cron/runner.test.ts",
+  "packages/foundation/tests/tests/cron/hardening_runner.test.ts",
+  "packages/foundation/tests/tests/wiring/wires.test.ts",
+];
+
+export const sealedRuntime: Rule = {
   name: "sealed-runtime",
-  rules: {
-    "sealed-runtime": {
-      create(ctx: Deno.lint.RuleContext) {
-        const zone = sealedZone(ctx.filename);
-        if (zone === null) return {};
 
-        const filename = ctx.filename;
+  check(sourceFile, filename) {
+    const zone = sealedZone(filename);
+    if (zone === null || isExempt(filename)) return [];
 
-        function checkSpecifier(node: Deno.lint.Node, specifier: string) {
-          if (FORBIDDEN_SPECIFIERS.some((prefix) => specifier.startsWith(prefix))) {
-            ctx.report({ node, message: importMessage(zone, filename, specifier) });
-          }
-        }
+    const violations: Violation[] = [];
 
-        return {
-          ImportDeclaration(node) {
-            checkSpecifier(node, (node.source as { value: string }).value);
-          },
-          ExportNamedDeclaration(node) {
-            const source = node.source as { value: string } | null;
-            if (source) checkSpecifier(node, source.value);
-          },
-          ExportAllDeclaration(node) {
-            checkSpecifier(node, (node.source as { value: string }).value);
-          },
-          ImportExpression(node) {
-            const argument = node.source as { type?: string; value?: unknown } | undefined;
-            if (argument?.type === "Literal" && typeof argument.value === "string") {
-              checkSpecifier(node, argument.value);
-            }
-          },
-          Identifier(node) {
-            if (node.name === "Deno") {
-              ctx.report({ node, message: runtimeMessage(zone, filename) });
-            }
-          },
-        };
-      },
-    },
+    forEachModuleSpecifier(sourceFile, ({ node, specifier }) => {
+      if (FORBIDDEN_SPECIFIERS.some((prefix) => specifier.startsWith(prefix))) {
+        violations.push({ node, message: importMessage(zone, filename, specifier) });
+      }
+    });
+
+    forEachIdentifierNamed(sourceFile, "Deno", (node) => {
+      violations.push({ node, message: runtimeMessage(zone, filename) });
+    });
+
+    return violations;
   },
-} satisfies Deno.lint.Plugin;
+};

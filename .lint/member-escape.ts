@@ -34,12 +34,14 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { forEachModuleSpecifier, type Rule, type Violation } from "./ast.ts";
+
 /**
- * The workspace root, taken from where this plugin sits rather than from the process.
+ * The workspace root, taken from where this rule sits rather than from the process.
  *
- * The file is `<root>/.lint/member-escape.ts`, so two directories up is the root. It is
- * read once, at load, and never per file: a rule runs for every file in the repository and an
- * environment call there is both wasteful and, on some platforms, fatal.
+ * The file is `<root>/.lint/member-escape.ts`, so one directory up is the root. It is read once,
+ * at load, and never per file: a rule runs for every file in the repository and an environment
+ * call there is both wasteful and, on some platforms, fatal.
  *
  * Nothing here names the checkout. Cloning the repository under any name moves this file with it.
  */
@@ -89,46 +91,27 @@ function resolvedFrom(filename: string, specifier: string): string {
   return segments.join("/");
 }
 
-export default {
+export const memberEscape: Rule = {
   name: "member-escape",
-  rules: {
-    "member-escape": {
-      create(ctx: Deno.lint.RuleContext) {
-        const home: string | null = memberOf(ctx.filename);
-        if (home === null) return {};
-        const within = home;
 
-        function check(node: Deno.lint.Node, specifier: string) {
-          if (!specifier.startsWith(".")) return;
-          if (resolvedFrom(ctx.filename, specifier).startsWith(within)) return;
+  check(sourceFile, filename) {
+    const home = memberOf(filename);
+    if (home === null) return [];
 
-          ctx.report({
-            node,
-            message: `"${specifier}" climbs out of this member. A file of another member is ` +
-              `reached by the specifier its own deno.json declares, so that deno check refuses ` +
-              `what the layer order forbids. A path walks around that check.`,
-          });
-        }
+    const violations: Violation[] = [];
 
-        return {
-          ImportDeclaration(node) {
-            check(node, (node.source as { value: string }).value);
-          },
-          ExportNamedDeclaration(node) {
-            const source = node.source as { value: string } | null;
-            if (source) check(node, source.value);
-          },
-          ExportAllDeclaration(node) {
-            check(node, (node.source as { value: string }).value);
-          },
-          ImportExpression(node) {
-            const argument = node.source as { type?: string; value?: unknown } | undefined;
-            if (argument?.type !== "Literal" || typeof argument.value !== "string") return;
+    forEachModuleSpecifier(sourceFile, ({ node, specifier }) => {
+      if (!specifier.startsWith(".")) return;
+      if (resolvedFrom(filename, specifier).startsWith(home)) return;
 
-            check(node, argument.value);
-          },
-        };
-      },
-    },
+      violations.push({
+        node,
+        message: `"${specifier}" climbs out of this member. A file of another member is ` +
+          `reached by the specifier its own deno.json declares, so that deno check refuses ` +
+          `what the layer order forbids. A path walks around that check.`,
+      });
+    });
+
+    return violations;
   },
-} satisfies Deno.lint.Plugin;
+};

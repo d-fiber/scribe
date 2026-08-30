@@ -35,7 +35,8 @@
     "npm:lucide-react@1.24.0": "1.24.0_react@19.2.8",
     "npm:react-dom@19.2.7": "19.2.7_react@19.2.8",
     "npm:react@19.2.8": "19.2.8",
-    "npm:tweetnacl@1.0.3": "1.0.3"
+    "npm:tweetnacl@1.0.3": "1.0.3",
+    "npm:typescript@6.0.3": "6.0.3"
   },
   "jsr": {
     "@hono/hono@4.13.4": {
@@ -126,7 +127,7 @@
       "dependencies": [
         "@bufbuild/protobuf",
         "@typescript/vfs",
-        "typescript"
+        "typescript@5.4.5"
       ]
     },
     "@ioredis/commands@1.10.0": {
@@ -353,7 +354,7 @@
       "integrity": "sha512-PJFXFS4ZJKiJ9Qiuix6Dz/OwEIqHD7Dme1UwZhTK11vR+5dqW2ACbdndWQexBzCx+CPuMe5WBYQWCsFyGlQLlQ==",
       "dependencies": [
         "debug",
-        "typescript"
+        "typescript@5.4.5"
       ]
     },
     "aws4@1.13.2": {
@@ -552,6 +553,10 @@
       "integrity": "sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==",
       "bin": true
     },
+    "typescript@6.0.3": {
+      "integrity": "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==",
+      "bin": true
+    },
     "undici-types@8.3.0": {
       "integrity": "sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ=="
     },
@@ -591,7 +596,8 @@
       "npm:libphonenumber-js@1.13.9",
       "npm:lucide-react@1.24.0",
       "npm:react-dom@19.2.7",
-      "npm:react@19.2.8"
+      "npm:react@19.2.8",
+      "npm:typescript@6.0.3"
     ],
     "members": {
       "sdk/js": {

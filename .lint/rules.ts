@@ -34,48 +34,17 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { forEachModuleSpecifier, namedSpecifiersOf, type Rule, sourceNameOf, type Violation } from "./ast.ts";
+import type { Rule } from "./ast.ts";
+import { memberEscape } from "./member-escape.ts";
+import { privateModuleScope } from "./private-module-scope.ts";
+import { sealedRuntime } from "./sealed-runtime.ts";
 
-/** Whether a specifier's directory, relative to the file that wrote it, stays inside its own tree. */
-function isAllowedDir(dir: string): boolean {
-  if (dir === "" || dir === ".") return true;
-  return dir.split("/").every((segment) => segment === "..");
-}
-
-export const privateModuleScope: Rule = {
-  name: "private-module-scope",
-
-  check(sourceFile) {
-    const violations: Violation[] = [];
-
-    forEachModuleSpecifier(sourceFile, ({ node, specifier }) => {
-      if (!specifier.startsWith(".")) return;
-
-      const segments = specifier.split("/");
-      const name = segments[segments.length - 1];
-      const dir = segments.slice(0, -1).join("/");
-      if (isAllowedDir(dir)) return;
-
-      if (name.startsWith("_")) {
-        violations.push({
-          node,
-          message: `"${name}" is a private module (starts with _) and can only be imported ` +
-            `from its own directory or any of its subdirectories.`,
-        });
-      }
-
-      for (const specifierNode of namedSpecifiersOf(node)) {
-        const privateName = sourceNameOf(specifierNode);
-        if (!privateName.startsWith("_")) continue;
-
-        violations.push({
-          node: specifierNode,
-          message: `"${privateName}" starts with _ and is private to its directory it cannot ` +
-            `be used outside of its folder or its descendants.`,
-        });
-      }
-    });
-
-    return violations;
-  },
-};
+/**
+ * Every rule `run.ts` checks a file against, in the order it reports them.
+ *
+ * @remarks
+ * This is the one list a new rule has to join. Write the rule next to these three, export a
+ * `const` of the {@link Rule} shape, and add it here — `run.ts` does not otherwise know how many
+ * rules exist.
+ */
+export const RULES: readonly Rule[] = [privateModuleScope, memberEscape, sealedRuntime];

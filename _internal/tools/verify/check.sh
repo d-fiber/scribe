@@ -51,6 +51,7 @@ say() {
 
 say "linting the workspace"
 (cd "$ROOT" && deno lint)
+(cd "$ROOT" && deno run --allow-read --allow-env .lint/run.ts)
 
 say "type checking the workspace"
 (cd "$ROOT" && deno task check)
