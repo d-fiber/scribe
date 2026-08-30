@@ -48,38 +48,82 @@ export class ManifestError extends Error {
 }
 
 export interface NodeManifest {
+  /** The node's name, the one a route or a log sink declares itself under. */
   readonly name: string;
+
+  /** Whether this node is reachable directly, rather than only through another node's dispatch. */
   readonly public: boolean;
+
+  /** Whether this node carries its own `_logs.ts`, rather than falling to the default sink. */
   readonly logSink: boolean;
 }
 
 export interface MountedRoute {
+  /** The node this route was mounted under. */
   readonly node: string;
+
+  /** The route's identifier, unique across the whole worker. */
   readonly routeId: string;
+
+  /** The route itself, as it was declared. */
   readonly route: WorkerRoute;
 }
 
 export interface WorkerInput {
+  /** The nodes this worker declares. None when omitted. */
   readonly nodes?: readonly NodeManifest[];
+
+  /** The routes this worker mounts. None when omitted. */
   readonly routes?: readonly MountedRoute[];
+
+  /** The queues this worker declares. None when omitted. */
   readonly queues?: readonly WorkerQueue<never>[];
+
+  /** The hooks this worker declares. None when omitted. */
   readonly hooks?: readonly WorkerHook[];
+
+  /** The cron jobs this worker declares. None when omitted. */
   readonly crons?: readonly WorkerCron[];
+
+  /** The searchers this worker declares. None when omitted. */
   readonly searchers?: readonly WorkerSearcher[];
+
+  /** The realtime channels this worker declares. None when omitted. */
   readonly realtimes?: readonly WorkerRealtime[];
+
+  /** The storage folders this worker declares. None when omitted. */
   readonly storages?: readonly WorkerStorage[];
+
+  /** Where this worker's log sinks are registered. A fresh, empty registry when omitted. */
   readonly sinks?: SinkRegistry;
 }
 
 export class WorkerDefinition {
+  /** The nodes this worker declares. */
   readonly nodes: readonly NodeManifest[];
+
+  /** The routes this worker mounts. */
   readonly routes: readonly MountedRoute[];
+
+  /** This worker's queues, indexed by the identifier {@link queueIdOf} derives from their name. */
   readonly queues: ReadonlyMap<string, WorkerQueue<never>>;
+
+  /** This worker's hooks, indexed by the identifier {@link hookIdOf} derives from their event and ordinal. */
   readonly hooks: ReadonlyMap<string, WorkerHook>;
+
+  /** This worker's cron jobs, indexed by the identifier {@link cronIdOf} derives from their name. */
   readonly crons: ReadonlyMap<string, WorkerCron>;
+
+  /** The searchers this worker declares. */
   readonly searchers: readonly WorkerSearcher[];
+
+  /** The realtime channels this worker declares. */
   readonly realtimes: readonly WorkerRealtime[];
+
+  /** The storage folders this worker declares. */
   readonly storages: readonly WorkerStorage[];
+
+  /** Where this worker's log sinks are registered. */
   readonly sinks: SinkRegistry;
 
   readonly #byRouteId: Map<string, MountedRoute>;

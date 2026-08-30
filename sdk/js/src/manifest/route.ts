@@ -43,14 +43,31 @@ export type RouteHandler = (
 ) => Response | Promise<Response>;
 
 export interface WorkerRoute {
+  /** The HTTP method this route answers. */
   readonly method: RouteMethod;
+
+  /** The path this route is mounted at, colon segments naming its path parameters. */
   readonly path: string;
+
+  /** The caller kind, or kinds, allowed to reach this route. */
   readonly access: Caller | readonly Caller[];
+
+  /** The rate limit callers of this route are held to. */
   readonly rateLimit: RateLimiter;
+
+  /** The key callers of this route are bucketed under for `rateLimit`. */
   readonly rateLimitKey: string;
+
+  /** The permissions a caller must hold to reach this route. Every allowed caller passes when omitted. */
   readonly requiredPermissions?: readonly string[];
+
+  /** Whether the host must have already verified this request as a webhook before the handler runs. */
   readonly webhookVerified?: boolean;
+
+  /** The extra context this route's handler reads off the request, beyond what every route gets. */
   readonly needs?: readonly Need[];
+
+  /** The function that answers a request once it clears access, permissions and the rate limit. */
   readonly handler: RouteHandler;
 }
 

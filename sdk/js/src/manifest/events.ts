@@ -38,9 +38,16 @@ import type { Listen } from "../contracts/access.ts";
 import type { Size, Time } from "../contracts/time.ts";
 
 export interface QueueMessage<T> {
+  /** The identifier the queue assigned when this message was enqueued. */
   readonly messageId: string;
+
+  /** The payload the producer enqueued, decoded into the handler's own type. */
   readonly payload: T;
+
+  /** How many times the queue has delivered this message, starting at one. */
   readonly attempt: number;
+
+  /** When this message was enqueued, as milliseconds since the Unix epoch. */
   readonly enqueuedAt: number;
 }
 
@@ -49,15 +56,27 @@ export type QueueHandler<T> = (
 ) => Promise<readonly string[]> | readonly string[];
 
 export interface WorkerQueue<T = unknown> {
+  /** The queue's name, used to address it and to derive its identifier. */
   readonly name: string;
+
+  /** How many messages the queue delivers to the handler in one call, at most. */
   readonly batchSize: number;
+
+  /** How long a delivered message stays hidden from other consumers before it is considered failed. */
   readonly visibilityTimeout: Time;
+
+  /** How many delivery attempts a message gets before the queue gives up on it. */
   readonly maxAttempts: number;
+
+  /** The function that processes a batch of messages. */
   readonly handler: QueueHandler<T>;
 }
 
 export interface HookOutcome {
+  /** Whether this outcome stops the rest of the trigger chain from running. */
   readonly halted?: boolean;
+
+  /** The replacement the row is written with instead of the row the trigger received. */
   readonly mutation?: unknown;
 }
 
@@ -66,36 +85,65 @@ export type HookHandler = (
 ) => Promise<HookOutcome | void> | HookOutcome | void;
 
 export interface WorkerHook {
+  /** The database event this hook reacts to, matching a row insert, update or delete. */
   readonly event: string;
+
+  /** Where this hook runs relative to the other hooks on the same event. Lower runs first. */
   readonly priority?: number;
+
+  /** The function that reacts to the event. */
   readonly handler: HookHandler;
 }
 
 export type CronHandler = () => Promise<void> | void;
 
 export interface WorkerCron {
+  /** The cron's name, used to address it and to derive its identifier. */
   readonly name: string;
+
+  /** The cron expression that decides when this job runs. */
   readonly schedule: string;
+
+  /** The function the schedule invokes. */
   readonly handler: CronHandler;
 }
 
 export interface WorkerSearcher {
+  /** The name of the table or view this searcher indexes. */
   readonly entity: string;
+
+  /** The name of the search index this searcher writes into. */
   readonly index: string;
+
+  /** The index's field mappings, in the search engine's own shape. Left to the engine's default when omitted. */
   readonly mappings?: unknown;
+
+  /** The index's settings, in the search engine's own shape. Left to the engine's default when omitted. */
   readonly settings?: unknown;
 }
 
 export interface WorkerRealtime {
+  /** The name of the channel this declaration broadcasts on. */
   readonly channel: string;
+
+  /** The row events this channel broadcasts. */
   readonly actions: readonly string[];
+
+  /** How open this channel's own broadcast is, before any grant is written. */
   readonly listen: Listen;
 }
 
 export interface WorkerStorage {
+  /** The name this storage folder is declared and addressed under. */
   readonly folder: string;
+
+  /** The path template objects in this folder resolve against, placeholders included. */
   readonly pathTemplate: string;
+
+  /** The largest object this folder accepts. A write past it is refused. */
   readonly maxSize: Size;
+
+  /** The content types this folder accepts. A write with any other type is refused. */
   readonly mimeTypes: readonly string[];
 }
 
