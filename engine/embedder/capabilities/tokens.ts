@@ -42,7 +42,10 @@ import { RequestScope } from "@scribe/runtime/scope.ts";
 const FALLBACK_TTL_MS = 300_000;
 
 export interface CapabilityGrant {
+  /** The request the invocation carried, replayed through `RequestScope.run` when this grant is redeemed. */
   readonly request: Request;
+
+  /** The request body bytes the invocation carried, replayed alongside `request` when this grant is redeemed. */
   readonly bodyBytes: Uint8Array;
 
   /**
@@ -57,7 +60,10 @@ export interface CapabilityGrant {
    */
   readonly identity?: RequestUser | null;
 
+  /** The trace identifier the invocation carried, threaded through so a redeemed call ties back to it. */
   readonly traceId: string;
+
+  /** The invocation identifier the invocation carried, threaded through so a redeemed call ties back to it. */
   readonly invocationId: string;
 }
 

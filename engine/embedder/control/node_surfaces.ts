@@ -38,7 +38,10 @@ import type { Hono } from "hono";
 import { firstSegmentOf, stripPrefix } from "@scribe/runtime/http/pathname.ts";
 
 export interface NodeSurface {
+  /** The node's own Hono app, mounted once resolution has stripped the node's leading segment. */
   readonly app: Hono;
+
+  /** The pathname with the node's leading segment stripped, what the node's own app sees as its root. */
   readonly subPath: string;
 }
 
