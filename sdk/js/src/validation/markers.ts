@@ -37,17 +37,26 @@
 import type { BodyFieldCtor, BodySchema, FormFieldCtor, ScalarCtor } from "./field_types.ts";
 
 export interface ArrMarker<C> {
+  /** The tag {@link isArrMarker} checks for. Always `true`; its presence, not its value, is the signal. */
   readonly _arr: true;
+
+  /** The constructor each element of the array is validated against. */
   readonly ctor: C;
 }
 
 export interface NestedMarker<S extends BodySchema> {
+  /** The tag {@link isNestedMarker} checks for. Always `true`; its presence, not its value, is the signal. */
   readonly _nested: true;
+
+  /** The schema the nested value is validated against. */
   readonly schema: S;
 }
 
 export interface RequiredMarker<C> {
+  /** The tag {@link isRequiredEntry} checks for. Always `true`; its presence, not its value, is the signal. */
   readonly _required: true;
+
+  /** The constructor the wrapped value is validated against. */
   readonly ctor: C;
 }
 
