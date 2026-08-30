@@ -19,7 +19,8 @@
     "check": "deno check engine packages",
     "test": "deno test --allow-env --allow-sys --allow-read --allow-write --env-file=tests/.env.test --parallel engine packages tests",
     "test:net": "deno test --allow-env --allow-sys --allow-read --allow-write --allow-net --env-file=tests/.env.test --parallel engine packages tests",
-    "lint": "deno lint"
+    "lint": "deno lint",
+    "gen:dependencies": "deno run --allow-read --allow-write _internal/tools/gen/dependencies.ts"
   },
   "fmt": {
     "lineWidth": 120,
