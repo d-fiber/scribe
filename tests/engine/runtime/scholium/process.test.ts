@@ -34,39 +34,36 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Command, CommandOptions, CommandResult } from "@scribe/alchemy";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, isTrue, Scribe } from "@scribe/alchemy/test";
+import { LocalProcess } from "@scribe/runtime/scholium/process.ts";
 
-/**
- * The subprocesses this process can start, as the port describes a command runner.
- *
- * @remarks
- * It is the only file of this package that starts a program that is not this one, which is what
- * lets a test stand a fixed answer behind the port without a binary being installed. Whether a
- * program may be started at all is the deployment's business, set by what the process was allowed
- * to run, not by a check this class could make.
- */
-export class LocalCommands implements Command {
-  /** Runs `program` with `args`, feeding it `options.stdin` when there is any, and reads it whole. */
-  async run(program: string, args: readonly string[], options?: CommandOptions): Promise<CommandResult> {
-    const input = options?.stdin;
-    const spawned = new Deno.Command(program, {
-      args: [...args],
-      stdin: input === undefined ? "null" : "piped",
-      stdout: "piped",
-      stderr: "piped",
-    });
+Scribe.test("hostname answers what the platform's own reader answers", () => {
+  expect(new LocalProcess().hostname(), equals(Deno.hostname()));
+});
 
-    if (input === undefined) {
-      const { code, stdout, stderr } = await spawned.output();
-      return { code, stdout, stderr };
-    }
+Scribe.test("resident memory is a real, positive count of bytes", () => {
+  const bytes = new LocalProcess().residentMemoryBytes();
 
-    const child = spawned.spawn();
-    const writer = child.stdin.getWriter();
-    await writer.write(input);
-    await writer.close();
+  expect(Number.isFinite(bytes), isTrue, "the platform must answer a real number");
+  expect(bytes > 0, isTrue, "a running process holds some resident memory");
+});
 
-    const { code, stdout, stderr } = await child.output();
-    return { code, stdout, stderr };
+Scribe.test("a watched signal runs the handler it was given", async () => {
+  const process = new LocalProcess();
+  let fired = false;
+  const handler = () => {
+    fired = true;
+  };
+
+  process.onShutdownSignal("SIGTERM", handler);
+
+  try {
+    Deno.kill(Deno.pid, "SIGTERM");
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(fired, isTrue, "the handler must run when the watched signal arrives");
+  } finally {
+    Deno.removeSignalListener("SIGTERM", handler);
   }
-}
+});

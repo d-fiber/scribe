@@ -43,13 +43,14 @@ import { admitBody, inflightBodyBytes, releaseBody } from "@scribe/kernel/http/s
 import { logger } from "@scribe/kernel/observability/logger.ts";
 import "@scribe/kernel/location/ip_location.ts";
 import { RequestScope } from "@scribe/runtime/scope.ts";
+import { Listeners } from "@scribe/runtime/scholium/listener.ts";
 import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 import type { Hono } from "hono";
 
 const RETRY_AFTER_S = "5";
 
 export function serve(handler: () => Response | Future<Response>): void {
-  Deno.serve({ port: httpSettings.get().port }, async (req, info) => {
+  Listeners.get().serve(async (req, peer) => {
     const admission = admitBody(req);
     if (admission === null) return bodyRefused();
 
@@ -61,11 +62,11 @@ export function serve(handler: () => Response | Future<Response>): void {
       );
       if (!intake.ok) return bodyRefusal(intake.refusal);
 
-      return await RequestScope.run(req, intake.bytes, handler, peerOf(info));
+      return await RequestScope.run(req, intake.bytes, handler, peer.hostname);
     } finally {
       releaseBody(admission);
     }
-  });
+  }, { port: httpSettings.get().port });
 }
 
 export function forward(app: Hono, subPath: string): Future<Response> {
@@ -106,8 +107,4 @@ function bodyRefused(): Response {
   const response = ServerResponse.serviceUnavailable();
   response.headers.set("Retry-After", RETRY_AFTER_S);
   return response;
-}
-
-function peerOf(info: Deno.ServeHandlerInfo): string | null {
-  return info.remoteAddr.transport === "tcp" ? info.remoteAddr.hostname : null;
 }

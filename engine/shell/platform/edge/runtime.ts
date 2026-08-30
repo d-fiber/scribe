@@ -36,6 +36,7 @@
 
 import type { Future } from "@scribe/alchemy";
 import { ServerResponse } from "@scribe/alchemy/route";
+import { Listeners } from "@scribe/runtime/scholium/listener.ts";
 import { Runtime } from "../../common/runtime.ts";
 import type { RequestAuthorizer } from "./authorization/request_authorizer.ts";
 import type { WorkerDispatcher } from "./dispatch/worker_dispatcher.ts";
@@ -88,6 +89,6 @@ export class EdgeFunctionsRuntime extends Runtime {
   }
 
   protected override listen(): void {
-    Deno.serve((request) => this.handle(request));
+    Listeners.get().serve((request) => this.handle(request));
   }
 }

@@ -36,7 +36,7 @@
 
 import type { Future } from "@scribe/alchemy";
 import { ServerResponse } from "@scribe/alchemy/route";
-import { environment } from "@scribe/foundation";
+import { environment } from "@scribe/runtime/scholium/env.ts";
 import { FRAMEWORK_SECRETS } from "@scribe/contracts/secrets.ts";
 import { readBoundedBody } from "@scribe/kernel/http/serve/body_reader.ts";
 import { MAX_BODY_BYTES } from "@scribe/runtime/http/limits.ts";

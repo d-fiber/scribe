@@ -37,6 +37,7 @@
 import { serve } from "@scribe/kernel/http/serve/mod.ts";
 import { pathnameOf } from "@scribe/runtime/http/pathname.ts";
 import { RequestScope } from "@scribe/runtime/scope.ts";
+import type { ShutdownSignal } from "@scribe/runtime/scholium/process.ts";
 import type { Bootstrapper } from "../../common/bootstrapper.ts";
 import { Runtime } from "../../common/runtime.ts";
 import { MountedPackagesBootstrapper } from "./bootstrappers/mounted.ts";
@@ -58,7 +59,7 @@ export class ServerRuntime extends Runtime {
     return [new MountedPackagesBootstrapper(), new RequestLogBootstrapper()];
   }
 
-  protected override shutdownSignals(): readonly Deno.Signal[] {
+  protected override shutdownSignals(): readonly ShutdownSignal[] {
     return ["SIGTERM", "SIGINT"];
   }
 

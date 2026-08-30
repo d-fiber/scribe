@@ -41,12 +41,12 @@ import { Environments } from "@scribe/alchemy";
  * The environment this process was started in, as the port describes one.
  *
  * @remarks
- * It is the only file of this package that reads the runtime's own environment, which is what
- * lets a test put a fixed set of values behind the port without the machine it runs on showing
- * through. Every read answers the way the runtime's reader does: an unset name is `undefined`,
- * and a name set to the empty string is `""`.
+ * It is the only file in this folder that reads the host's own environment, which is what lets a
+ * test put a fixed set of values behind the port without the machine it runs on showing through.
+ * Every read answers the way the host's own reader does: an unset name is `undefined`, and a name
+ * set to the empty string is `""`.
  */
-export class ProcessEnvironment implements Environment {
+export class LocalEnvironment implements Environment {
   /** The value set for `name`, or `undefined` when the process holds none. */
   get(name: string): string | undefined {
     return Deno.env.get(name);
@@ -58,7 +58,7 @@ export class ProcessEnvironment implements Environment {
   }
 }
 
-const process = new ProcessEnvironment();
+const _local = new LocalEnvironment();
 
 /**
  * What a setting is read through: what filled {@link Environments} when a host or a test did, and
@@ -70,7 +70,7 @@ const process = new ProcessEnvironment();
  * and from then on every read goes through what it put there.
  */
 export function environment(): Environment {
-  return Environments.configured ? Environments.get() : process;
+  return Environments.configured ? Environments.get() : _local;
 }
 
 /**

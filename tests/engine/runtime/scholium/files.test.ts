@@ -32,12 +32,14 @@
 // KIND OF LEGAL CLAIM.
 //
 // This header is a summary written for convenience. Where it differs from the
-import "@scribe/testing/runner.ts";
+// LICENSE file, the LICENSE file governs.
+
+import "@scribe/runtime/scholium/runner.ts";
 import { equals, expect, expectLater, isNot, isNotNull, isTrue, same, Scribe, throwsA } from "@scribe/alchemy/test";
 import { FileSystems } from "@scribe/alchemy";
 import type { FileSystem } from "@scribe/alchemy";
 import { MemoryFileSystem } from "@scribe/alchemy/test";
-import { LocalFiles, LocalFileSystems } from "../../../lib/src/files/local_files.ts";
+import { LocalFiles, LocalFileSystems } from "@scribe/runtime/scholium/files.ts";
 
 async function inADirectory(body: (disk: LocalFiles, root: string) => Promise<void>): Promise<void> {
   const disk = new LocalFiles();

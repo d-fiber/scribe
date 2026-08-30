@@ -34,6 +34,37 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-/** What a package hands the stack to be played or copied. */
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, expectLater, isA, Scribe, throwsA } from "@scribe/alchemy/test";
+import { LocalCommands } from "@scribe/runtime/scholium/commands.ts";
 
-export { LocalFiles, LocalFileSystems } from "./src/files/local_files.ts";
+function text(bytes: Uint8Array): string {
+  return new TextDecoder().decode(bytes);
+}
+
+Scribe.test("a program that exits zero answers its stdout and an empty stderr", async () => {
+  const result = await new LocalCommands().run("echo", ["hello", "scholium"]);
+
+  expect(result.code, equals(0));
+  expect(text(result.stdout).trim(), equals("hello scholium"));
+  expect(text(result.stderr), equals(""));
+});
+
+Scribe.test("a program that exits non-zero answers its code rather than throwing", async () => {
+  const result = await new LocalCommands().run("false", []);
+
+  expect(result.code, equals(1));
+});
+
+Scribe.test("stdin is fed to the program only when the caller gives one", async () => {
+  const result = await new LocalCommands().run("cat", [], { stdin: new TextEncoder().encode("piped in") });
+
+  expect(text(result.stdout), equals("piped in"));
+});
+
+Scribe.test("a program the platform cannot find refuses rather than answering a code", async () => {
+  await expectLater(
+    () => new LocalCommands().run("scholium-test-program-that-does-not-exist", []),
+    throwsA(isA(Error)),
+  );
+});

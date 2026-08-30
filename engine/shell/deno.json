@@ -6,7 +6,6 @@
     "@scribe/foundation/cache": "../../packages/foundation/lib/cache.ts",
     "@scribe/foundation/cron": "../../packages/foundation/lib/cron.ts",
     "@scribe/foundation/database": "../../packages/foundation/lib/database.ts",
-    "@scribe/foundation/files": "../../packages/foundation/lib/files.ts",
     "@scribe/foundation/hook": "../../packages/foundation/lib/hook.ts",
     "@scribe/foundation/http": "../../packages/foundation/lib/http.ts",
     "@scribe/foundation/observe": "../../packages/foundation/lib/observe.ts",

@@ -32,6 +32,7 @@
 // KIND OF LEGAL CLAIM.
 //
 // This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
 
 import type { FileSystem, FileSystemDriver, FileSystemEntity, Future, List } from "@scribe/alchemy";
 import { Bytes } from "@scribe/alchemy";
@@ -40,7 +41,7 @@ import { Bytes } from "@scribe/alchemy";
  * The disk this process runs on, as the port describes a file system.
  *
  * @remarks
- * It is the only file of this package that knows a disk exists, which is what lets a test put
+ * It is the only file in this folder that knows a disk exists, which is what lets a test put
  * something else behind the port without a byte being written. Every path is taken as it was
  * given: what a package may reach is a deployment's business, decided by what the process was
  * allowed to open, not by a check this class could make and a caller could work around.
@@ -163,7 +164,7 @@ export class LocalFiles implements FileSystem {
 }
 
 /**
- * What opens the disk for a package that asked the port for one.
+ * What opens the disk for a caller that asked the port for one.
  *
  * @remarks
  * One instance answers every ask, because nothing is held: a file system is a set of calls on
@@ -195,7 +196,7 @@ function _lastSegment(path: string): string {
  *
  * @remarks
  * A missing name and a path reaching through a file are two errors on the platform and one answer
- * here. `NotADirectory` has no class of its own, so it is read from the name the runtime gives it.
+ * here. `NotADirectory` has no class of its own, so it is read from the name the host gives it.
  */
 function _namesNothing(raised: unknown): boolean {
   return raised instanceof Deno.errors.NotFound ||

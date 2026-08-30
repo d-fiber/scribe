@@ -34,11 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/testing/runner.ts";
+import "@scribe/runtime/scholium/runner.ts";
 import { allOf, equals, expect, isA, isTrue, Scribe, throwsA, withMessage } from "@scribe/alchemy/test";
 import { Environments } from "@scribe/alchemy";
 import { MemoryEnvironment } from "@scribe/alchemy/test";
-import { environment, optional, ProcessEnvironment, required } from "../../../lib/foundation.ts";
+import { environment, LocalEnvironment, optional, required } from "@scribe/runtime/scholium/env.ts";
 
 function withEnvironment(values: Record<string, string>, body: () => void): void {
   const held = Environments.configured ? Environments.get() : null;
@@ -82,13 +82,30 @@ Scribe.test("optional takes an empty variable as set, so a deployment can disabl
   });
 });
 
+Scribe.test("environment answers whatever the slot was filled with", () => {
+  withEnvironment({ PORT: "8080" }, () => {
+    expect(environment().get("PORT"), equals("8080"));
+  });
+});
+
 Scribe.test("environment answers the process reader until the slot is filled", () => {
   const held = Environments.configured ? Environments.get() : null;
   Environments.clear();
 
   try {
-    expect(environment() instanceof ProcessEnvironment, isTrue, "an unfilled slot did not fall back to the process");
+    expect(environment() instanceof LocalEnvironment, isTrue, "an unfilled slot did not fall back to the process");
   } finally {
     if (held !== null) Environments.use(held);
+  }
+});
+
+Scribe.test("the local environment reads the host's own process environment", () => {
+  const name = "SCHOLIUM_ENV_TEST_PROBE";
+  Deno.env.set(name, "sentinel");
+
+  try {
+    expect(new LocalEnvironment().get(name), equals("sentinel"));
+  } finally {
+    Deno.env.delete(name);
   }
 });

@@ -36,7 +36,6 @@
 
 import { cacheSettings } from "@scribe/foundation/cache";
 import { databaseSettings } from "@scribe/foundation/database";
-import { environment, required } from "@scribe/foundation";
 import { queueSettings } from "@scribe/foundation/queue";
 import { RedisRateLimiters } from "@scribe/foundation/rate_limit";
 import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
@@ -44,9 +43,18 @@ import { runMounted } from "@scribe/runtime/support/packages/mounted.ts";
 import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
 import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
-import { RateLimiters } from "@scribe/alchemy";
+import { Commands, Environments, FileSystems, RateLimiters } from "@scribe/alchemy";
+import { LocalCommands } from "@scribe/runtime/scholium/commands.ts";
+import { environment, LocalEnvironment, required } from "@scribe/runtime/scholium/env.ts";
+import { LocalFileSystems } from "@scribe/runtime/scholium/files.ts";
+import { Listeners, LocalListener } from "@scribe/runtime/scholium/listener.ts";
+import { LocalProcess, Processes } from "@scribe/runtime/scholium/process.ts";
 import { workerSettings } from "@scribe/runtime/support/settings/worker.ts";
 import { KNOWN_JWT_ALGORITHMS } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
+
+Environments.use(new LocalEnvironment());
+FileSystems.use(new LocalFileSystems());
+Commands.use(new LocalCommands());
 
 /**
  * The port the persistent runtime listens on when the deployment names none.
@@ -113,6 +121,9 @@ httpSettings.use({
   port: Number(environment().get("PORT") ?? DEFAULT_PORT),
   maxInflightBodyBytes: maxInflightBodyBytes(),
 });
+
+Listeners.use(new LocalListener());
+Processes.use(new LocalProcess());
 
 RateLimiters.use(new RedisRateLimiters());
 

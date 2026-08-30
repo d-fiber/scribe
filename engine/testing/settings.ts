@@ -36,15 +36,23 @@
 
 import { cacheSettings } from "@scribe/foundation/cache";
 import { databaseSettings } from "@scribe/foundation/database";
-import { environment, optional, scribe } from "@scribe/foundation";
+import { scribe } from "@scribe/foundation";
 import { queueSettings } from "@scribe/foundation/queue";
 import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
 import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
 import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
+import { Commands, Environments, FileSystems } from "@scribe/alchemy";
+import { LocalCommands } from "@scribe/runtime/scholium/commands.ts";
+import { environment, LocalEnvironment, optional } from "@scribe/runtime/scholium/env.ts";
+import { LocalFileSystems } from "@scribe/runtime/scholium/files.ts";
 
 export function installTestSettings(): void {
   if (cacheSettings.configured) return;
+
+  Environments.use(new LocalEnvironment());
+  FileSystems.use(new LocalFileSystems());
+  Commands.use(new LocalCommands());
 
   scribe.wires?.();
 

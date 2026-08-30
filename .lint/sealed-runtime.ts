@@ -44,28 +44,65 @@
 const ROOT = new URL("../", import.meta.url).pathname.replace(/\/$/, "");
 
 /**
- * Where in a mountable package `filename` sits, or null when the rule leaves it alone.
+ * The engine layers a package never touches directly, but that reach the host all the same.
+ *
+ * `engine/runtime/scholium/` is the exception: it is where the host is allowed to be named, and
+ * every other file in these five layers reaches it only through the ports declared there.
+ */
+const SEALED_ENGINE_LAYERS = [
+  "engine/runtime/",
+  "engine/kernel/",
+  "engine/embedder/",
+  "engine/shell/",
+  "engine/testing/",
+];
+
+/**
+ * Where inside the engine layers the host is allowed to be named.
+ *
+ * `engine/runtime/scholium/` is the container: everything that reaches the host through a
+ * listener, a process boundary or the platform's own test runner lives there. Two older files
+ * stand outside it, each already its own single, named place rather than a scatter, and each
+ * staying there for a reason of its own: `current.ts` fills its port at import rather than at
+ * boot, on purpose, and moving it would change when it runs; `constant_time.ts` is read by a
+ * package outside this repository, and moving it would mean editing that package's own source
+ * instead of this one.
+ */
+const ENGINE_HOST_EXCEPTIONS = [
+  "engine/runtime/scholium/",
+  "engine/runtime/current.ts",
+  "engine/runtime/support/crypto/constant_time.ts",
+];
+
+/**
+ * Where in a mountable package or an engine layer `filename` sits, or null when the rule leaves
+ * it alone.
  *
  * A package names what it wants to do and lets the framework fill in what does it: `lib/` reads
  * the file system, the environment and the rest through the ports in `@scribe/alchemy`, and a
  * test reads them through the Memory doubles in `@scribe/alchemy/test`. Code in either zone that
  * reaches the runtime directly would not survive the framework changing hosts, and it is the seam
- * this rule keeps sealed.
+ * this rule keeps sealed. The engine layers that sit above a package carry the same seam: they
+ * reach the host through the ports in `engine/runtime/scholium/` instead.
  *
- * `foundation/lib/` is the exception. It is the one package that reaches the host: the drivers
- * every other package reads through are filled there, so its `lib/` is where the runtime is
- * allowed to be named. Its tests are held to the rule like any other.
+ * No package carries an exception. `foundation` used to be the one that read the host directly,
+ * to fill the drivers every other package reads through; those drivers moved to
+ * `engine/runtime/scholium/`, and every package, `foundation` included, is sealed the same way.
  */
 function sealedZone(filename: string): "lib" | "test" | null {
   const root = `${ROOT}/`;
   if (!filename.startsWith(root)) return null;
 
   const relative = filename.slice(root.length);
-  if (!relative.startsWith("packages/")) return null;
 
-  if (relative.includes("/tests/")) return "test";
-  if (relative.startsWith("packages/foundation/lib/")) return null;
-  if (relative.includes("/lib/")) return "lib";
+  if (relative.startsWith("packages/")) {
+    return relative.includes("/tests/") ? "test" : relative.includes("/lib/") ? "lib" : null;
+  }
+
+  if (SEALED_ENGINE_LAYERS.some((layer) => relative.startsWith(layer))) {
+    if (ENGINE_HOST_EXCEPTIONS.some((exception) => relative.startsWith(exception))) return null;
+    return "lib";
+  }
 
   return null;
 }
@@ -80,32 +117,53 @@ function sealedZone(filename: string): "lib" | "test" | null {
  */
 const FORBIDDEN_SPECIFIERS = ["@std/", "jsr:@std/", "node:", "npm:"] as const;
 
-/** The message a forbidden import in `lib/` reports with. */
-function libImportMessage(specifier: string): string {
-  return `"${specifier}" reaches past the framework to the runtime under it. A package's lib/ ` +
-    `names what it wants through @scribe/alchemy, and the framework fills in what does it. The ` +
-    `one package allowed to name the runtime is foundation, because it is the one that fills ` +
-    `those ports.`;
+/** Whether `filename` sits under one of the engine layers this rule seals. */
+function isEngineFile(filename: string): boolean {
+  const root = `${ROOT}/`;
+  if (!filename.startsWith(root)) return false;
+
+  const relative = filename.slice(root.length);
+  return SEALED_ENGINE_LAYERS.some((layer) => relative.startsWith(layer));
 }
 
-/** The message a forbidden import in a test reports with. */
-function testImportMessage(specifier: string): string {
-  return `"${specifier}" reaches past the framework to the runtime under it. A package test is ` +
-    `written against @scribe/alchemy/test, which stands between the two on purpose: Scribe holds ` +
-    `the cases, expect and its matchers hold the assertions, and the Memory doubles hold the ` +
-    `ports. Nothing a package test needs is outside it.`;
+/** The message a forbidden import reports with. */
+function importMessage(zone: "lib" | "test", filename: string, specifier: string): string {
+  if (isEngineFile(filename)) {
+    return `"${specifier}" reaches past the framework to the host runtime under it. ` +
+      `engine/kernel, engine/embedder, engine/shell and engine/testing name what they want ` +
+      `through the ports in engine/runtime/scholium/, the one place allowed to name the host.`;
+  }
+
+  if (zone === "lib") {
+    return `"${specifier}" reaches past the framework to the host runtime under it. A package's ` +
+      `lib/ names what it wants through @scribe/alchemy, and engine/runtime/scholium/ fills in ` +
+      `what does it. No package, foundation included, is allowed to name the host.`;
+  }
+
+  return `"${specifier}" reaches past the framework to the host runtime under it. A package test ` +
+    `is written against @scribe/alchemy/test, which stands between the two on purpose: Scribe ` +
+    `holds the cases, expect and its matchers hold the assertions, and the Memory doubles hold ` +
+    `the ports. Nothing a package test needs is outside it.`;
 }
 
-/** The message a `Deno` reference in `lib/` reports with. */
-const LIB_RUNTIME_MESSAGE = "Deno is the runtime the framework stands in front of. A package's lib/ reaches the file " +
-  "system, the environment, a subprocess and the rest through the ports in @scribe/alchemy, " +
-  "which foundation fills. foundation is the one package allowed to name the runtime.";
+/** The message a direct reference to the host runtime reports with. */
+function runtimeMessage(zone: "lib" | "test", filename: string): string {
+  if (isEngineFile(filename)) {
+    return "This reaches the host runtime directly. engine/kernel, engine/embedder, " +
+      "engine/shell and engine/testing reach the listener, the process and the rest through " +
+      "the ports in engine/runtime/scholium/, the one place allowed to name the host.";
+  }
 
-/** The message a `Deno` reference in a test reports with. */
-const TEST_RUNTIME_MESSAGE =
-  "Deno is the runtime the framework stands in front of. A package test declares its cases with " +
-  "Scribe, not Deno.test, and reads the clock, the file system and the rest through the doubles " +
-  "in @scribe/alchemy/test.";
+  if (zone === "lib") {
+    return "This reaches the host runtime directly. A package's lib/ reaches the file system, " +
+      "the environment, a subprocess and the rest through the ports in @scribe/alchemy, which " +
+      "engine/runtime/scholium/ fills. No package is allowed to name the host.";
+  }
+
+  return "This reaches the host runtime directly. A package test declares its cases with Scribe, " +
+    "not the host's own test runner, and reads the clock, the file system and the rest through " +
+    "the doubles in @scribe/alchemy/test.";
+}
 
 export default {
   name: "sealed-runtime",
@@ -115,12 +173,11 @@ export default {
         const zone = sealedZone(ctx.filename);
         if (zone === null) return {};
 
-        const importMessage = zone === "lib" ? libImportMessage : testImportMessage;
-        const runtimeMessage = zone === "lib" ? LIB_RUNTIME_MESSAGE : TEST_RUNTIME_MESSAGE;
+        const filename = ctx.filename;
 
         function checkSpecifier(node: Deno.lint.Node, specifier: string) {
           if (FORBIDDEN_SPECIFIERS.some((prefix) => specifier.startsWith(prefix))) {
-            ctx.report({ node, message: importMessage(specifier) });
+            ctx.report({ node, message: importMessage(zone, filename, specifier) });
           }
         }
 
@@ -141,10 +198,9 @@ export default {
               checkSpecifier(node, argument.value);
             }
           },
-          MemberExpression(node) {
-            const object = node.object as { type?: string; name?: string };
-            if (object.type === "Identifier" && object.name === "Deno") {
-              ctx.report({ node, message: runtimeMessage });
+          Identifier(node) {
+            if (node.name === "Deno") {
+              ctx.report({ node, message: runtimeMessage(zone, filename) });
             }
           },
         };

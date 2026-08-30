@@ -34,6 +34,39 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-/** What starts a program that is not this process, for a package that shells out to a tool. */
+import type { Command, CommandOptions, CommandResult } from "@scribe/alchemy";
 
-export { LocalCommands } from "./src/commands/local_commands.ts";
+/**
+ * The subprocesses this process can start, as the port describes a command runner.
+ *
+ * @remarks
+ * It is the only file in this folder that starts a program that is not this one, which is what
+ * lets a test stand a fixed answer behind the port without a binary being installed. Whether a
+ * program may be started at all is the deployment's business, set by what the process was allowed
+ * to run, not by a check this class could make.
+ */
+export class LocalCommands implements Command {
+  /** Runs `program` with `args`, feeding it `options.stdin` when there is any, and reads it whole. */
+  async run(program: string, args: readonly string[], options?: CommandOptions): Promise<CommandResult> {
+    const input = options?.stdin;
+    const spawned = new Deno.Command(program, {
+      args: [...args],
+      stdin: input === undefined ? "null" : "piped",
+      stdout: "piped",
+      stderr: "piped",
+    });
+
+    if (input === undefined) {
+      const { code, stdout, stderr } = await spawned.output();
+      return { code, stdout, stderr };
+    }
+
+    const child = spawned.spawn();
+    const writer = child.stdin.getWriter();
+    await writer.write(input);
+    await writer.close();
+
+    const { code, stdout, stderr } = await child.output();
+    return { code, stdout, stderr };
+  }
+}

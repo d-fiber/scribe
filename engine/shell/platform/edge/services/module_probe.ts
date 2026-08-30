@@ -35,6 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "@scribe/alchemy";
+import { FileSystems } from "@scribe/alchemy";
 
 export interface ModuleProbe {
   hasModule(directory: string): Future<boolean>;
@@ -49,10 +50,10 @@ export class FilesystemModuleProbe implements ModuleProbe {
 
   async hasModule(directory: string): Future<boolean> {
     try {
-      const stat = await Deno.stat(directory);
-      if (!stat.isDirectory) return false;
-      await Deno.stat(`${directory}/${this.#entryFile}`);
-      return true;
+      const disk = FileSystems.get().open();
+      const found = await disk.describe(directory);
+      if (found === null || !found.isDirectory) return false;
+      return (await disk.describe(`${directory}/${this.#entryFile}`)) !== null;
     } catch {
       return false;
     }

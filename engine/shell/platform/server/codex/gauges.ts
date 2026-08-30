@@ -40,6 +40,7 @@ import type { RateLimit } from "@scribe/alchemy/route";
 import { ApiContext, ApiEndpoint } from "@scribe/kernel/endpoint/api.ts";
 import type { Caller } from "@scribe/alchemy/route";
 import { inflightBodyBytes } from "@scribe/kernel/http/serve/body_admission.ts";
+import { Processes } from "@scribe/runtime/scholium/process.ts";
 import { queueStatus } from "@scribe/foundation/queue";
 
 const _RATE_LIMIT: RateLimit = {
@@ -103,7 +104,7 @@ export class CodexMetricsEndpoint extends ApiEndpoint {
     const gauges: CodexGauges = {
       uptimeSeconds: Math.round(performance.now() / 1000),
       inflightBodyBytes: inflightBodyBytes(),
-      residentBytes: Deno.memoryUsage().rss,
+      residentBytes: Processes.get().residentMemoryBytes(),
       queues: await queueStatus.all(),
     };
 
