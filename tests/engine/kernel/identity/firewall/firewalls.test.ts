@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import "@scribe/testing/settings.ts";
 import { AppKeyFirewall } from "@scribe/kernel/identity/firewall/app_key.ts";
 import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
@@ -54,7 +56,7 @@ const VALID_ADMIN_KEY = ADMIN_APP_KEYS[0];
 const VALID_APP_KEY = APP_KEYS[0];
 const INTERNAL_SECRET = firewallSettings.get().internalSecret;
 
-Deno.test("app key firewall: the exact key passes", () => {
+Scribe.test("app key firewall: the exact key passes", () => {
   assert(
     withHeaders(
       { "x-admin-app-key": VALID_ADMIN_KEY },
@@ -63,13 +65,13 @@ Deno.test("app key firewall: the exact key passes", () => {
   );
 });
 
-Deno.test("app key firewall: a missing header is refused", () => {
+Scribe.test("app key firewall: a missing header is refused", () => {
   assertFalse(
     withHeaders({}, () => AppKeyFirewall.verify("x-admin-app-key", ADMIN_APP_KEYS)),
   );
 });
 
-Deno.test("app key firewall: near-miss keys are refused", () => {
+Scribe.test("app key firewall: near-miss keys are refused", () => {
   for (
     const candidate of [
       "",
@@ -88,7 +90,7 @@ Deno.test("app key firewall: near-miss keys are refused", () => {
   }
 });
 
-Deno.test("app key firewall: surrounding whitespace is stripped by HTTP itself", () => {
+Scribe.test("app key firewall: surrounding whitespace is stripped by HTTP itself", () => {
   assert(
     withHeaders(
       { "x-admin-app-key": ` ${VALID_ADMIN_KEY} ` },
@@ -98,7 +100,7 @@ Deno.test("app key firewall: surrounding whitespace is stripped by HTTP itself",
   );
 });
 
-Deno.test("app key firewall: the app surface and the admin surface do not share keys", () => {
+Scribe.test("app key firewall: the app surface and the admin surface do not share keys", () => {
   assertFalse(
     withHeaders(
       { "x-admin-app-key": VALID_APP_KEY },
@@ -111,14 +113,14 @@ Deno.test("app key firewall: the app surface and the admin surface do not share 
   );
 });
 
-Deno.test("app key firewall: the header name is honoured, not guessed", () => {
+Scribe.test("app key firewall: the header name is honoured, not guessed", () => {
   assertFalse(
     withHeaders({ "x-app-key": VALID_ADMIN_KEY }, () => AppKeyFirewall.verify("x-admin-app-key", ADMIN_APP_KEYS)),
     "the right key under the wrong header must not pass",
   );
 });
 
-Deno.test("app key firewall: an empty allow-list refuses everything", () => {
+Scribe.test("app key firewall: an empty allow-list refuses everything", () => {
   assertFalse(
     withHeaders({ "x-admin-app-key": VALID_ADMIN_KEY }, () => AppKeyFirewall.verify("x-admin-app-key", [])),
   );
@@ -127,7 +129,7 @@ Deno.test("app key firewall: an empty allow-list refuses everything", () => {
   );
 });
 
-Deno.test("internal firewall: only the exact internal secret passes", () => {
+Scribe.test("internal firewall: only the exact internal secret passes", () => {
   assert(
     withHeaders({ "x-internal-secret": INTERNAL_SECRET }, () => InternalSecretFirewall.verify()),
   );
@@ -140,13 +142,13 @@ Deno.test("internal firewall: only the exact internal secret passes", () => {
   assertFalse(withHeaders({}, () => InternalSecretFirewall.verify()));
 });
 
-Deno.test("internal firewall: an app key does not stand in for the internal secret", () => {
+Scribe.test("internal firewall: an app key does not stand in for the internal secret", () => {
   assertFalse(
     withHeaders({ "x-internal-secret": VALID_ADMIN_KEY }, () => InternalSecretFirewall.verify()),
   );
 });
 
-Deno.test("constantTimeEqual: agrees with === on the outcome", () => {
+Scribe.test("constantTimeEqual: agrees with === on the outcome", () => {
   assert(constantTimeEqual("abc", "abc"));
   assert(constantTimeEqual("", ""));
   assertFalse(constantTimeEqual("abc", "abd"));

@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import type { RequestUser } from "@scribe/alchemy/route";
 import { Duration } from "@scribe/alchemy";
 import { ServerResponse } from "@scribe/alchemy/route";
@@ -92,7 +94,7 @@ function call(app: Hono, identity?: RequestUser) {
   );
 }
 
-Deno.test("mountDescriptors: an anonymous caller never reaches the handler", async () => {
+Scribe.test("mountDescriptors: an anonymous caller never reaches the handler", async () => {
   reached = null;
   const limiter = installRateLimiterMock();
   try {
@@ -105,7 +107,7 @@ Deno.test("mountDescriptors: an anonymous caller never reaches the handler", asy
   }
 });
 
-Deno.test("mountDescriptors: access is checked before permissions, so an unproved call gets 401 and not 403", async () => {
+Scribe.test("mountDescriptors: access is checked before permissions, so an unproved call gets 401 and not 403", async () => {
   reached = null;
   const limiter = installRateLimiterMock();
   try {
@@ -118,7 +120,7 @@ Deno.test("mountDescriptors: access is checked before permissions, so an unprove
   }
 });
 
-Deno.test("mountDescriptors: a session is a session, so an administrator answers a route open to any of them", async () => {
+Scribe.test("mountDescriptors: a session is a session, so an administrator answers a route open to any of them", async () => {
   reached = null;
   const limiter = installRateLimiterMock();
   try {
@@ -129,7 +131,7 @@ Deno.test("mountDescriptors: a session is a session, so an administrator answers
   }
 });
 
-Deno.test("mountDescriptors: an admin missing the declared permission is forbidden", async () => {
+Scribe.test("mountDescriptors: an admin missing the declared permission is forbidden", async () => {
   reached = null;
   const limiter = installRateLimiterMock();
   try {
@@ -143,7 +145,7 @@ Deno.test("mountDescriptors: an admin missing the declared permission is forbidd
   }
 });
 
-Deno.test("mountDescriptors: every declared permission is required, not just one of them", async () => {
+Scribe.test("mountDescriptors: every declared permission is required, not just one of them", async () => {
   reached = null;
   const limiter = installRateLimiterMock();
   try {
@@ -157,7 +159,7 @@ Deno.test("mountDescriptors: every declared permission is required, not just one
   }
 });
 
-Deno.test("mountDescriptors: the rate limit is spent after access, never before", async () => {
+Scribe.test("mountDescriptors: the rate limit is spent after access, never before", async () => {
   reached = null;
   const limiter = installRateLimiterMock({
     ok: false,
@@ -174,7 +176,7 @@ Deno.test("mountDescriptors: the rate limit is spent after access, never before"
   }
 });
 
-Deno.test("mountDescriptors: a route that clears the three checks receives its path params", async () => {
+Scribe.test("mountDescriptors: a route that clears the three checks receives its path params", async () => {
   reached = null;
   const limiter = installRateLimiterMock();
   try {
@@ -188,7 +190,7 @@ Deno.test("mountDescriptors: a route that clears the three checks receives its p
   }
 });
 
-Deno.test("mountDescriptors: declaring no permission asks for none", async () => {
+Scribe.test("mountDescriptors: declaring no permission asks for none", async () => {
   reached = null;
   const limiter = installRateLimiterMock();
   try {

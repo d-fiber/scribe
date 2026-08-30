@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import "@scribe/testing/settings.ts";
 import { JwtIdentityResolver } from "@scribe/kernel/identity/resolver/jwt_resolver.ts";
 import { JwtVerifier } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
@@ -101,7 +103,7 @@ function harness(claims: Record<string, Claims | null>) {
   };
 }
 
-Deno.test("a second request on the same token never pays for the signature again", async () => {
+Scribe.test("a second request on the same token never pays for the signature again", async () => {
   const h = harness({
     [USER_JWT]: { sub: "u1", email: "u@x.io", exp: inSeconds(600) },
   });
@@ -120,7 +122,7 @@ Deno.test("a second request on the same token never pays for the signature again
   }
 });
 
-Deno.test("a second request on the same token does not go back to Redis either", async () => {
+Scribe.test("a second request on the same token does not go back to Redis either", async () => {
   const h = harness({
     [USER_JWT]: { sub: "u1", email: "u@x.io", exp: inSeconds(600) },
   });
@@ -154,7 +156,7 @@ Deno.test("a second request on the same token does not go back to Redis either",
   }
 });
 
-Deno.test("the process stops answering for a token once its own window has passed", async () => {
+Scribe.test("the process stops answering for a token once its own window has passed", async () => {
   const h = harness({
     [USER_JWT]: { sub: "u1", email: "u@x.io", exp: inSeconds(600) },
   });
@@ -183,7 +185,7 @@ Deno.test("the process stops answering for a token once its own window has passe
   }
 });
 
-Deno.test("a cached identity stops being served once its token has expired", async () => {
+Scribe.test("a cached identity stops being served once its token has expired", async () => {
   const h = harness({
     [USER_JWT]: { sub: "u1", email: "u@x.io", exp: inSeconds(1) },
   });
@@ -212,7 +214,7 @@ Deno.test("a cached identity stops being served once its token has expired", asy
   }
 });
 
-Deno.test("the identity is read from the claims, without asking GoTrue", async () => {
+Scribe.test("the identity is read from the claims, without asking GoTrue", async () => {
   const h = harness({
     [ADMIN_JWT]: {
       sub: "a1",
@@ -238,7 +240,7 @@ Deno.test("the identity is read from the claims, without asking GoTrue", async (
   }
 });
 
-Deno.test("a revoked user is resolved against GoTrue until the marker lapses", async () => {
+Scribe.test("a revoked user is resolved against GoTrue until the marker lapses", async () => {
   const h = harness({
     [ADMIN_JWT]: {
       sub: "u1",
@@ -263,7 +265,7 @@ Deno.test("a revoked user is resolved against GoTrue until the marker lapses", a
   }
 });
 
-Deno.test("a token that fails verification buys nothing, cached or not", async () => {
+Scribe.test("a token that fails verification buys nothing, cached or not", async () => {
   const h = harness({ [USER_JWT]: null });
 
   try {
