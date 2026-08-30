@@ -45,16 +45,30 @@ import { fakeDevice } from "../runtime/device.ts";
 const _DEVICE_CACHE_KEY = "device:resolved";
 
 export interface ApiCallOptions {
+  /** The device payload the call carries, or `null` for none; defaults to `fakeDevice()` when omitted. */
   readonly device?: RequestDevice | null;
+
+  /** Extra headers merged onto the request, taking precedence over the ones this helper sets. */
   readonly headers?: Record<string, string>;
+
+  /** The HTTP method the request is sent with. */
   readonly method?: string;
+
+  /** The request path. */
   readonly path?: string;
+
+  /** The identity the request is made as, or `null`/omitted for an anonymous call. */
   readonly identity?: RequestUser | null;
+
+  /** The bearer token sent when `identity` is set. */
   readonly token?: string;
 }
 
 export interface ApiCallResult {
+  /** The response's HTTP status code. */
   readonly status: number;
+
+  /** The response body, parsed as JSON, or `{ _raw: text }` when it does not parse. */
   readonly body: Record<string, unknown>;
 }
 

@@ -38,6 +38,7 @@
 import "@scribe/testing/settings.ts";
 
 export interface AutoMock<T> {
+  /** The proxied stand-in for `real`, recording every call and answering through a configured override when one exists. */
   readonly target: T;
   when(path: string, impl: (...args: any[]) => unknown): void;
   calls(path: string): unknown[][];
