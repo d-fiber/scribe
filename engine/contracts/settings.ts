@@ -70,14 +70,17 @@ export interface IdentitySettings {
 }
 
 export interface FirewallSettings {
+  /** The shared secret that marks a call as coming from inside the deployment, not from an outside caller. */
   readonly internalSecret: string;
 }
 
 export interface DeviceSettings {
+  /** The device payload's private key, hex-encoded, used to decrypt what a device encrypted with it. */
   readonly payloadPrivateKeyHex: string;
 }
 
 export interface HttpSettings {
+  /** The TCP port this process listens on. */
   readonly port: number;
 
   /**
@@ -93,6 +96,7 @@ export interface HttpSettings {
 }
 
 export interface WorkerSettings {
+  /** The worker's own address, or `null` when this deployment runs no worker. */
   readonly endpoint: string | null;
 
   /**
@@ -105,6 +109,8 @@ export interface WorkerSettings {
    * replica by hostname, meaning a host running outside the container network.
    */
   readonly callbackUrl: string | null;
+
+  /** The port the callback address falls back to deriving from the replica's own hostname when `callbackUrl` is unset. */
   readonly callbackPort: number;
 
   /**
@@ -117,7 +123,19 @@ export interface WorkerSettings {
    * one whose port is published, wants the address the worker actually calls and nothing else.
    */
   readonly callbackHostname: string;
+
+  /** How many times the host retries the worker's `Describe` call during the handshake before giving up. */
   readonly handshakeAttempts: number;
+
+  /** How long the host waits between handshake attempts, in milliseconds. */
   readonly handshakeDelayMs: number;
+
+  /**
+   * The node names the gateway routes publicly, as the deployment declares them.
+   *
+   * @remarks
+   * A node absent here that declares itself internal is left alone; only the other direction, a
+   * node marked internal that the gateway exposes anyway, is refused.
+   */
   readonly publicNodes: readonly string[];
 }
