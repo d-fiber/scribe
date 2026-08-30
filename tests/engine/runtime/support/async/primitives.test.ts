@@ -34,13 +34,15 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { ExponentialBackoff } from "@scribe/alchemy";
 import { runPooled } from "@scribe/alchemy";
 import { sleep } from "@scribe/runtime/support/async/sleep.ts";
 import { assert, assertEquals } from "@std/assert";
 import { Duration } from "@scribe/alchemy";
 
-Deno.test("ExponentialBackoff doubles from the base and stops at the ceiling", () => {
+Scribe.test("ExponentialBackoff doubles from the base and stops at the ceiling", () => {
   const backoff = new ExponentialBackoff(Duration.milliseconds(1_000), Duration.milliseconds(30_000));
 
   assertEquals(backoff.delayFor(1).inMilliseconds, 1_000);
@@ -50,27 +52,27 @@ Deno.test("ExponentialBackoff doubles from the base and stops at the ceiling", (
   assertEquals(backoff.delayFor(50).inMilliseconds, 30_000);
 });
 
-Deno.test("ExponentialBackoff never returns more than the ceiling, even at attempt 1", () => {
+Scribe.test("ExponentialBackoff never returns more than the ceiling, even at attempt 1", () => {
   const backoff = new ExponentialBackoff(Duration.milliseconds(5_000), Duration.milliseconds(1_000));
 
   assertEquals(backoff.delayFor(1).inMilliseconds, 1_000);
 });
 
-Deno.test("ExponentialBackoff treats attempt 0 and negatives as the first attempt", () => {
+Scribe.test("ExponentialBackoff treats attempt 0 and negatives as the first attempt", () => {
   const backoff = new ExponentialBackoff(Duration.milliseconds(500), Duration.milliseconds(10_000));
 
   assertEquals(backoff.delayFor(0).inMilliseconds, 500);
   assertEquals(backoff.delayFor(-3).inMilliseconds, 500);
 });
 
-Deno.test("ExponentialBackoff honours a custom factor", () => {
+Scribe.test("ExponentialBackoff honours a custom factor", () => {
   const backoff = new ExponentialBackoff(Duration.milliseconds(100), Duration.milliseconds(100_000), 3);
 
   assertEquals(backoff.delayFor(2).inMilliseconds, 300);
   assertEquals(backoff.delayFor(3).inMilliseconds, 900);
 });
 
-Deno.test("runPooled visits every item exactly once", async () => {
+Scribe.test("runPooled visits every item exactly once", async () => {
   const seen: number[] = [];
   const items = Array.from({ length: 25 }, (_, i) => i);
 
@@ -83,7 +85,7 @@ Deno.test("runPooled visits every item exactly once", async () => {
   assertEquals([...seen].sort((a, b) => a - b), items);
 });
 
-Deno.test("runPooled never exceeds the requested concurrency", async () => {
+Scribe.test("runPooled never exceeds the requested concurrency", async () => {
   let inFlight = 0;
   let peak = 0;
 
@@ -97,7 +99,7 @@ Deno.test("runPooled never exceeds the requested concurrency", async () => {
   assert(peak <= 3, `peak concurrency was ${peak}`);
 });
 
-Deno.test("runPooled still runs everything when the limit is zero or negative", async () => {
+Scribe.test("runPooled still runs everything when the limit is zero or negative", async () => {
   const seen: number[] = [];
 
   await runPooled([1, 2, 3], 0, (item) => {
@@ -112,7 +114,7 @@ Deno.test("runPooled still runs everything when the limit is zero or negative", 
   assertEquals(seen, [1, 2, 3, 4, 5]);
 });
 
-Deno.test("runPooled on an empty list resolves without calling the worker", async () => {
+Scribe.test("runPooled on an empty list resolves without calling the worker", async () => {
   let calls = 0;
 
   await runPooled([], 4, () => {

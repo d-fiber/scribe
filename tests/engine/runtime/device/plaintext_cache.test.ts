@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { PlaintextCache } from "@scribe/runtime/device/payload/plaintext_cache.ts";
 import { assertEquals } from "@std/assert";
 
@@ -44,7 +46,7 @@ function cacheAt(clock: { now: number }, limit?: number): PlaintextCache {
   return new PlaintextCache(TTL_MS, limit, () => clock.now);
 }
 
-Deno.test("a miss is undefined, and it is not the same thing as a cached refusal", () => {
+Scribe.test("a miss is undefined, and it is not the same thing as a cached refusal", () => {
   const cache = cacheAt({ now: 0 });
 
   assertEquals(cache.lookup("absent"), undefined);
@@ -57,7 +59,7 @@ Deno.test("a miss is undefined, and it is not the same thing as a cached refusal
   );
 });
 
-Deno.test("a plaintext comes back untouched until its window closes", () => {
+Scribe.test("a plaintext comes back untouched until its window closes", () => {
   const clock = { now: 1_000 };
   const cache = cacheAt(clock);
   cache.remember("sealed", '{"iat":1}');
@@ -67,7 +69,7 @@ Deno.test("a plaintext comes back untouched until its window closes", () => {
   assertEquals(cache.lookup("sealed"), '{"iat":1}');
 });
 
-Deno.test("an entry past the freshness window is dropped, never served", () => {
+Scribe.test("an entry past the freshness window is dropped, never served", () => {
   const clock = { now: 1_000 };
   const cache = cacheAt(clock);
   cache.remember("sealed", '{"iat":1}');
@@ -81,7 +83,7 @@ Deno.test("an entry past the freshness window is dropped, never served", () => {
   assertEquals(cache.size, 0, "the expired entry must not keep occupying a slot");
 });
 
-Deno.test("the cache is bounded, so a flood of distinct payloads cannot grow it", () => {
+Scribe.test("the cache is bounded, so a flood of distinct payloads cannot grow it", () => {
   const cache = cacheAt({ now: 0 }, 4);
 
   for (let payload = 0; payload < 8; payload++) cache.remember(`p${payload}`, `{"n":${payload}}`);
@@ -91,7 +93,7 @@ Deno.test("the cache is bounded, so a flood of distinct payloads cannot grow it"
   assertEquals(cache.lookup("p0"), undefined);
 });
 
-Deno.test("a flood drops the oldest payloads, not every payload it can reach", () => {
+Scribe.test("a flood drops the oldest payloads, not every payload it can reach", () => {
   const cache = cacheAt({ now: 0 }, 16);
 
   for (let real = 0; real < 10; real++) cache.remember(`legit-${real}`, `{"n":${real}}`);
@@ -106,7 +108,7 @@ Deno.test("a flood drops the oldest payloads, not every payload it can reach", (
   assertEquals(cache.lookup("legit-0"), undefined, "the oldest is what a bounded table gives up");
 });
 
-Deno.test("a payload that keeps being presented is not what a flood pushes out", () => {
+Scribe.test("a payload that keeps being presented is not what a flood pushes out", () => {
   const cache = cacheAt({ now: 0 }, 4);
   cache.remember("busy", '{"n":1}');
 

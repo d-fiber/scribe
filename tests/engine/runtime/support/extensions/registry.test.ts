@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { DuplicateDeclarationError } from "@scribe/alchemy";
 import { type Extension, ExtensionRegistry } from "@scribe/runtime/support/extensions/registry.ts";
 import { isMissingModule } from "@scribe/runtime/support/extensions/missing_module.ts";
@@ -54,7 +56,7 @@ class CountingExtension implements Extension {
   }
 }
 
-Deno.test("ExtensionRegistry loads a registered extension", async () => {
+Scribe.test("ExtensionRegistry loads a registered extension", async () => {
   const registry = new ExtensionRegistry();
   const extension = new CountingExtension("cron");
   registry.register(extension);
@@ -63,7 +65,7 @@ Deno.test("ExtensionRegistry loads a registered extension", async () => {
   assertEquals(extension.calls, 1);
 });
 
-Deno.test("ExtensionRegistry loads each extension at most once", async () => {
+Scribe.test("ExtensionRegistry loads each extension at most once", async () => {
   const registry = new ExtensionRegistry();
   const extension = new CountingExtension("searcher");
   registry.register(extension);
@@ -79,13 +81,13 @@ Deno.test("ExtensionRegistry loads each extension at most once", async () => {
   assertEquals(second, third);
 });
 
-Deno.test("ExtensionRegistry returns null for an unregistered name", async () => {
+Scribe.test("ExtensionRegistry returns null for an unregistered name", async () => {
   const registry = new ExtensionRegistry();
 
   assertEquals(await registry.load("nothing"), null);
 });
 
-Deno.test("ExtensionRegistry refuses a duplicate registration", () => {
+Scribe.test("ExtensionRegistry refuses a duplicate registration", () => {
   const registry = new ExtensionRegistry();
   registry.register(new CountingExtension("cron"));
 
@@ -96,7 +98,7 @@ Deno.test("ExtensionRegistry refuses a duplicate registration", () => {
   );
 });
 
-Deno.test("ExtensionRegistry lists what it knows", () => {
+Scribe.test("ExtensionRegistry lists what it knows", () => {
   const registry = new ExtensionRegistry();
   registry.register(new CountingExtension("queue"));
   registry.register(new CountingExtension("cron"));
@@ -104,7 +106,7 @@ Deno.test("ExtensionRegistry lists what it knows", () => {
   assertEquals([...registry.registered()].sort(), ["cron", "queue"]);
 });
 
-Deno.test("OptionalExtension swallows a missing module and yields null", async () => {
+Scribe.test("OptionalExtension swallows a missing module and yields null", async () => {
   const extension = new OptionalExtension("absent", () => {
     throw new Error('Module not found "file:///nope.ts".');
   });
@@ -112,7 +114,7 @@ Deno.test("OptionalExtension swallows a missing module and yields null", async (
   assertEquals(await extension.load(), null);
 });
 
-Deno.test("OptionalExtension yields null on a broken module too", async () => {
+Scribe.test("OptionalExtension yields null on a broken module too", async () => {
   const extension = new OptionalExtension("broken", () => {
     throw new TypeError("x is not a function");
   });
@@ -120,14 +122,14 @@ Deno.test("OptionalExtension yields null on a broken module too", async () => {
   assertEquals(await extension.load(), null);
 });
 
-Deno.test("OptionalExtension returns what the importer resolved", async () => {
+Scribe.test("OptionalExtension returns what the importer resolved", async () => {
   const module = { declared: 3 };
   const extension = new OptionalExtension("ok", () => Promise.resolve(module));
 
   assertEquals(await extension.load(), module);
 });
 
-Deno.test("isMissingModule recognises the shapes Deno reports", () => {
+Scribe.test("isMissingModule recognises the shapes Deno reports", () => {
   assert(isMissingModule(new Error('Module not found "file:///a.ts".')));
   assert(isMissingModule(new Error("Cannot find module './a.ts'")));
   assert(isMissingModule(new Error("os error 2")));
@@ -137,7 +139,7 @@ Deno.test("isMissingModule recognises the shapes Deno reports", () => {
   assertFalse(isMissingModule(new Error("boom")));
 });
 
-Deno.test("isMissingModule recognises an unmapped specifier by its code", () => {
+Scribe.test("isMissingModule recognises an unmapped specifier by its code", () => {
   const unmapped = Object.assign(
     new TypeError('Import "@generated/declarations.ts" not a dependency and not in import map'),
     { code: "ERR_MODULE_NOT_FOUND" },
@@ -146,7 +148,7 @@ Deno.test("isMissingModule recognises an unmapped specifier by its code", () => 
   assert(isMissingModule(unmapped));
 });
 
-Deno.test("isMissingModule leaves a module that threw while evaluating alone", () => {
+Scribe.test("isMissingModule leaves a module that threw while evaluating alone", () => {
   const broken = Object.assign(new TypeError("x is not a function"), { code: "ERR_INVALID_STATE" });
 
   assertFalse(isMissingModule(broken));

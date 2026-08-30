@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import "@scribe/testing/settings.ts";
 import { ClientType, DeviceCategory, DeviceOs, DeviceThemeMode, Localization } from "@scribe/contracts/enums.ts";
 import { decryptRequestDevice, requestDevice } from "@scribe/runtime/device/device.ts";
@@ -166,7 +168,7 @@ async function seal(payload: unknown): Promise<string> {
   return btoa(String.fromCharCode(...bytes));
 }
 
-Deno.test("cipher: a sealed payload round-trips through the real key", async () => {
+Scribe.test("cipher: a sealed payload round-trips through the real key", async () => {
   const kv = installValkeryMock();
   try {
     const device = await decryptRequestDevice(
@@ -182,7 +184,7 @@ Deno.test("cipher: a sealed payload round-trips through the real key", async () 
   }
 });
 
-Deno.test("cipher: a payload sealed for another binding is refused", async () => {
+Scribe.test("cipher: a payload sealed for another binding is refused", async () => {
   const kv = installValkeryMock();
   try {
     const sealed = await seal(nominalPayload({ binding: "user-2" }));
@@ -192,7 +194,7 @@ Deno.test("cipher: a payload sealed for another binding is refused", async () =>
   }
 });
 
-Deno.test("cipher: a tampered ciphertext never decrypts", async () => {
+Scribe.test("cipher: a tampered ciphertext never decrypts", async () => {
   const kv = installValkeryMock();
   try {
     const sealed = await seal(nominalPayload());
@@ -206,7 +208,7 @@ Deno.test("cipher: a tampered ciphertext never decrypts", async () => {
   }
 });
 
-Deno.test("cipher: garbage never throws, it just yields nothing", async () => {
+Scribe.test("cipher: garbage never throws, it just yields nothing", async () => {
   const kv = installValkeryMock();
   try {
     for (const bad of ["", "not-base64!!", btoa("too-short"), "x".repeat(200)]) {
@@ -221,7 +223,7 @@ Deno.test("cipher: garbage never throws, it just yields nothing", async () => {
   }
 });
 
-Deno.test("nonce: a payload carrying a nonce is single-use", async () => {
+Scribe.test("nonce: a payload carrying a nonce is single-use", async () => {
   const kv = installValkeryMock();
   try {
     const sealed = await seal(
@@ -242,7 +244,7 @@ Deno.test("nonce: a payload carrying a nonce is single-use", async () => {
   }
 });
 
-Deno.test("nonce: two payloads with distinct nonces both pass", async () => {
+Scribe.test("nonce: two payloads with distinct nonces both pass", async () => {
   const kv = installValkeryMock();
   try {
     const first = await seal(nominalPayload({ nonce: "b".repeat(32) }));
@@ -255,7 +257,7 @@ Deno.test("nonce: two payloads with distinct nonces both pass", async () => {
   }
 });
 
-Deno.test("nonce: a payload without a nonce stays replayable", async () => {
+Scribe.test("nonce: a payload without a nonce stays replayable", async () => {
   const kv = installValkeryMock();
   try {
     const sealed = await seal(nominalPayload());
@@ -270,7 +272,7 @@ Deno.test("nonce: a payload without a nonce stays replayable", async () => {
   }
 });
 
-Deno.test("validator: the binding must match exactly", () => {
+Scribe.test("validator: the binding must match exactly", () => {
   assertEquals(
     DevicePayloadValidator.validate(nominalPayload(), "user-2"),
     null,
@@ -282,7 +284,7 @@ Deno.test("validator: the binding must match exactly", () => {
   assert(DevicePayloadValidator.validate(nominalPayload(), BINDING));
 });
 
-Deno.test("validator: a stale payload is refused", () => {
+Scribe.test("validator: a stale payload is refused", () => {
   const stale = nominalPayload({
     iat: Date.now() - DEVICE_PAYLOAD_MAX_AGE_MS - 1_000,
   });
@@ -294,7 +296,7 @@ Deno.test("validator: a stale payload is refused", () => {
   assert(DevicePayloadValidator.validate(fresh, BINDING));
 });
 
-Deno.test("validator: a payload dated in the future is refused", () => {
+Scribe.test("validator: a payload dated in the future is refused", () => {
   const ahead = nominalPayload({
     iat: Date.now() + DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS + 5_000,
   });
@@ -311,7 +313,7 @@ Deno.test("validator: a payload dated in the future is refused", () => {
   );
 });
 
-Deno.test("validator: every enum field is closed", () => {
+Scribe.test("validator: every enum field is closed", () => {
   const cases: Record<string, unknown>[] = [
     { client: "browser" },
     { os: "symbian" },
@@ -329,7 +331,7 @@ Deno.test("validator: every enum field is closed", () => {
   }
 });
 
-Deno.test("validator: unbounded strings are refused", () => {
+Scribe.test("validator: unbounded strings are refused", () => {
   const cases: Record<string, unknown>[] = [
     { device_id: "" },
     { device_id: "x".repeat(257) },
@@ -351,7 +353,7 @@ Deno.test("validator: unbounded strings are refused", () => {
   }
 });
 
-Deno.test("validator: a missing required field is refused", () => {
+Scribe.test("validator: a missing required field is refused", () => {
   for (
     const field of [
       "device_id",
@@ -375,13 +377,13 @@ Deno.test("validator: a missing required field is refused", () => {
   }
 });
 
-Deno.test("validator: a non-object is refused without throwing", () => {
+Scribe.test("validator: a non-object is refused without throwing", () => {
   for (const raw of [null, undefined, 42, "payload", []]) {
     assertEquals(DevicePayloadValidator.validate(raw, BINDING), null);
   }
 });
 
-Deno.test("cache: the same payload derives its key once, not once per request", async () => {
+Scribe.test("cache: the same payload derives its key once, not once per request", async () => {
   const kv = installValkeryMock();
   const sealed = await seal(nominalPayload());
   const derive = spy(crypto.subtle, "deriveBits");
@@ -403,7 +405,7 @@ Deno.test("cache: the same payload derives its key once, not once per request", 
   }
 });
 
-Deno.test("cache: each request gets its own device object, never a shared one", async () => {
+Scribe.test("cache: each request gets its own device object, never a shared one", async () => {
   const kv = installValkeryMock();
   try {
     const sealed = await seal(nominalPayload());
@@ -423,7 +425,7 @@ Deno.test("cache: each request gets its own device object, never a shared one", 
   }
 });
 
-Deno.test("cache: a payload that is too old is still refused on a cache hit", async () => {
+Scribe.test("cache: a payload that is too old is still refused on a cache hit", async () => {
   const kv = installValkeryMock();
   try {
     const stale = await seal(
@@ -441,7 +443,7 @@ Deno.test("cache: a payload that is too old is still refused on a cache hit", as
   }
 });
 
-Deno.test("cache: a payload sealed for another binding stays refused when cached", async () => {
+Scribe.test("cache: a payload sealed for another binding stays refused when cached", async () => {
   const kv = installValkeryMock();
   try {
     const other = await seal(nominalPayload({ binding: "user-2" }));
@@ -481,7 +483,7 @@ const SIGNED_IN: RequestUser = {
   claims: {},
 };
 
-Deno.test("binding: a payload bound to nobody is taken by nobody", async () => {
+Scribe.test("binding: a payload bound to nobody is taken by nobody", async () => {
   const kv = installValkeryMock();
   try {
     const sealed = await seal(nominalPayload({ binding: "" }));
@@ -505,7 +507,7 @@ Deno.test("binding: a payload bound to nobody is taken by nobody", async () => {
   }
 });
 
-Deno.test("binding: an anonymous caller presenting its application key still carries a device", async () => {
+Scribe.test("binding: an anonymous caller presenting its application key still carries a device", async () => {
   const kv = installValkeryMock();
   try {
     const sealed = await seal(nominalPayload({ binding: "app-key-1" }));
@@ -523,7 +525,7 @@ Deno.test("binding: an anonymous caller presenting its application key still car
   }
 });
 
-Deno.test("binding: a signed-in caller binds to its account and not to the key it also sent", async () => {
+Scribe.test("binding: a signed-in caller binds to its account and not to the key it also sent", async () => {
   const kv = installValkeryMock();
   try {
     const forAccount = await seal(nominalPayload({ binding: BINDING }));
