@@ -40,6 +40,7 @@ import { jwtVerify } from "jose";
 import type { TokenVerifier } from "./token_verifier.ts";
 
 export class HmacTokenVerifier implements TokenVerifier {
+  /** The only algorithm this verifier accepts: the one an octet secret is valid for. */
   readonly algorithms = ["HS256"] as const;
 
   readonly #secret: Uint8Array;

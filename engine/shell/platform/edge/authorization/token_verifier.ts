@@ -37,6 +37,7 @@
 import type { Future } from "@scribe/alchemy";
 
 export interface TokenVerifier {
+  /** The JWT `alg` values this verifier accepts, handed to jose explicitly so nothing beyond them is ever trusted. */
   readonly algorithms: readonly string[];
   verify(token: string): Future<boolean>;
 }

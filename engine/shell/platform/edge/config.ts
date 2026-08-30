@@ -37,11 +37,22 @@
 import { environment } from "@scribe/runtime/scholium/env.ts";
 
 export class EdgeConfig {
+  /** The directory on disk that holds the deployed functions, one subdirectory per service. */
   readonly functionsRoot: string;
+
+  /** Whether a request must carry a JWT this platform can verify before it reaches a function. */
   readonly verifyJwt: boolean;
+
+  /** The HMAC secret JWT verification signs against, when verification runs locally rather than against `authUrl`. */
   readonly jwtSecret: string | undefined;
+
+  /** The internal address of the auth service a JWT is verified against, when verification is not local. */
   readonly authUrl: string | undefined;
+
+  /** The memory ceiling given to each worker isolate, in megabytes. */
   readonly memoryLimitMb: number;
+
+  /** How long a worker isolate has to answer a request before it is killed, in milliseconds. */
   readonly workerTimeoutMs: number;
 
   private constructor(values: {
@@ -71,6 +82,7 @@ export class EdgeConfig {
     });
   }
 
+  /** The functions root's own `deno.json`, read as the import map every worker isolate resolves against. */
   get importMapPath(): string {
     return `${this.functionsRoot}/deno.json`;
   }

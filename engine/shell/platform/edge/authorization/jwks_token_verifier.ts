@@ -41,6 +41,7 @@ import type { TokenVerifier } from "./token_verifier.ts";
 type KeySet = ReturnType<typeof createRemoteJWKSet>;
 
 export class JwksTokenVerifier implements TokenVerifier {
+  /** The algorithms this verifier accepts from the identity service's published keys. */
   readonly algorithms = ["ES256", "RS256"] as const;
 
   readonly #keys: KeySet;

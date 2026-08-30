@@ -41,11 +41,22 @@ export interface EdgeWorker {
 }
 
 export interface EdgeWorkerOptions {
+  /** The on-disk path of the service this worker serves, under the functions root. */
   readonly servicePath: string;
+
+  /** The memory ceiling given to this worker isolate, in megabytes. */
   readonly memoryLimitMb: number;
+
+  /** How long this worker isolate has to answer before it is killed, in milliseconds. */
   readonly workerTimeoutMs: number;
+
+  /** Whether this worker skips the platform's module cache, forcing every import to resolve fresh. */
   readonly noModuleCache: boolean;
+
+  /** The import map this worker resolves its imports against, or `null` to use the platform default. */
   readonly importMapPath: string | null;
+
+  /** The environment variables this worker starts with, each entry a `[name, value]` pair. */
   readonly envVars: string[][];
 }
 

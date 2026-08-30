@@ -51,6 +51,7 @@ export class AlgorithmTokenVerifier implements TokenVerifier {
     this.#byAlgorithm = byAlgorithm;
   }
 
+  /** Every algorithm at least one wrapped verifier accepts, in no particular order. */
   get algorithms(): readonly string[] {
     return [...this.#byAlgorithm.keys()];
   }

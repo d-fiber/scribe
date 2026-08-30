@@ -43,12 +43,18 @@ import type { WorkerDispatcher } from "./dispatch/worker_dispatcher.ts";
 import type { ServiceResolver } from "./services/service_resolver.ts";
 
 export interface EdgeRuntimeCollaborators {
+  /** Turns an incoming path into the service that answers it. */
   readonly resolver: ServiceResolver;
+
+  /** Decides whether a request is allowed to reach the service `resolver` found. */
   readonly authorizer: RequestAuthorizer;
+
+  /** Runs the resolved service's worker and turns its answer into a response. */
   readonly dispatcher: WorkerDispatcher;
 }
 
 export class EdgeFunctionsRuntime extends Runtime {
+  /** This runtime's label in `BootSequence` logging: `edge`. */
   override readonly name = "edge";
 
   readonly #resolver: ServiceResolver;

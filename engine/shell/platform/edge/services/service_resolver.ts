@@ -37,7 +37,10 @@
 import type { Future } from "@scribe/alchemy";
 
 export interface ResolvedService {
+  /** The service name a request resolved to, used to authorize it and to tag it downstream. */
   readonly service: string;
+
+  /** The on-disk path of the resolved service, passed to the dispatcher to load its worker. */
   readonly servicePath: string;
 }
 

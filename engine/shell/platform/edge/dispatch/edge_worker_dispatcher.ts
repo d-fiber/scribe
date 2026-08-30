@@ -44,8 +44,13 @@ import type { EdgePlatform } from "../platform.ts";
 import type { WorkerDispatcher } from "./worker_dispatcher.ts";
 
 export interface WorkerLimits {
+  /** The memory ceiling given to the worker, in megabytes. */
   readonly memoryLimitMb: number;
+
+  /** How long the worker has to answer before it is killed, in milliseconds. */
   readonly workerTimeoutMs: number;
+
+  /** The import map path the worker resolves its imports against. */
   readonly importMapPath: string;
 }
 
