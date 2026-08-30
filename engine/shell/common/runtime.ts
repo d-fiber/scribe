@@ -41,6 +41,7 @@ import { BootSequence } from "./boot_sequence.ts";
 import { SignalWatcher } from "./signals.ts";
 
 export abstract class Runtime {
+  /** This runtime's label, passed to `BootSequence` and printed ahead of every line it logs. */
   abstract readonly name: string;
 
   async start(): Future<void> {
