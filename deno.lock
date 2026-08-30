@@ -16,7 +16,6 @@
     "jsr:@std/data-structures@^1.1.2": "1.1.2",
     "jsr:@std/internal@^1.0.12": "1.0.14",
     "jsr:@std/io@0.225.2": "0.225.2",
-    "jsr:@std/media-types@1.1.0": "1.1.0",
     "jsr:@std/testing@1.0.20": "1.0.20",
     "npm:@bufbuild/protobuf@2": "2.14.0",
     "npm:@bufbuild/protobuf@2.14.0": "2.14.0",
@@ -97,9 +96,6 @@
       "dependencies": [
         "jsr:@std/bytes"
       ]
-    },
-    "@std/media-types@1.1.0": {
-      "integrity": "c9d093f0c05c3512932b330e3cc1fe1d627b301db33a4c2c2185c02471d6eaa4"
     },
     "@std/testing@1.0.20": {
       "integrity": "21380ed438672762e4ec549cbf4fe41c5b68f5598773a30b64abe7375513e721",
@@ -580,7 +576,6 @@
       "jsr:@nats-io/transport-deno@3.4.0",
       "jsr:@panva/jose@6.2.10",
       "jsr:@std/assert@1.0.19",
-      "jsr:@std/media-types@1.1.0",
       "jsr:@std/testing@1.0.20",
       "npm:@bufbuild/protobuf@2.14.0",
       "npm:@jsquash/webp@1.5.0",
