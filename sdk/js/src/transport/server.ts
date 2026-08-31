@@ -81,6 +81,7 @@ type ErasedProcedure = {
   readonly run: (input: never, call: CallMetadata) => Promise<unknown>;
 };
 
+/** The answering side of a unary RPC: routes a request to a wired procedure and encodes its reply. */
 export class UnaryServer {
   readonly #procedures = new Map<string, ErasedProcedure>();
   #otherwise: ((path: string) => never) | null = null;
@@ -91,7 +92,7 @@ export class UnaryServer {
    * Without one, an unknown path is a 404, which is the right answer for a
    * side that was never meant to serve it. A side that serves *part* of the
    * contract wants to say so instead, and it cannot list what it left out
-   * without naming every service the contract declares -- a list that goes
+   * without naming every service the contract declares, a list that goes
    * stale the day someone adds one.
    *
    * The handler is given the procedure path, which carries both the service
@@ -102,6 +103,7 @@ export class UnaryServer {
     return this;
   }
 
+  /** Wires `handler` to answer `method`, replacing whatever was wired to it before. */
   on<I extends DescMessage, O extends DescMessage>(
     method: DescMethodUnary<I, O>,
     handler: (
@@ -117,10 +119,12 @@ export class UnaryServer {
     return this;
   }
 
+  /** Whether `path` names a procedure this server has wired with {@link on}. */
   handles(path: string): boolean {
     return this.#procedures.has(path);
   }
 
+  /** Dispatches `request` to the procedure it names, answering a `Failure` response for anything that throws. */
   async handle(request: Request): Promise<Response> {
     try {
       return await this.#dispatch(request);
@@ -152,6 +156,7 @@ export class UnaryServer {
   }
 }
 
+/** `request`'s `CallMetadata`, read off the headers `UnaryClient` sends alongside every call. */
 export function metadataOf(request: Request): CallMetadata {
   return {
     capabilityToken: request.headers.get(CAPABILITY_HEADER) ?? "",
@@ -160,6 +165,7 @@ export function metadataOf(request: Request): CallMetadata {
   };
 }
 
+/** A successful procedure reply carrying `body`, the protocol content type and version headers set. */
 export function protoResponse(body: Uint8Array, status: number): Response {
   return new Response(body as BodyInit, {
     status,
@@ -170,6 +176,7 @@ export function protoResponse(body: Uint8Array, status: number): Response {
   });
 }
 
+/** `failure` encoded as a wire response, `failure.status` carried as the HTTP status. */
 export function failureResponse(failure: TransportFailure): Response {
   return new Response(toBinary(FailureSchema, failure.toProto()) as BodyInit, {
     status: failure.status,
