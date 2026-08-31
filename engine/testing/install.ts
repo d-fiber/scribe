@@ -37,6 +37,7 @@
 import "@scribe/testing/settings.ts";
 import "./settings.ts";
 
+/** A patch `installMock` and its variants applied to an object, undone by calling `restore`. */
 export interface InstalledMock {
   restore(): void;
 }

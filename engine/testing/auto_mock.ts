@@ -37,6 +37,7 @@
 // deno-lint-ignore-file no-explicit-any
 import "@scribe/testing/settings.ts";
 
+/** A recording proxy over `real`, produced by `createAutoMock`, that answers calls through `when` or the real object. */
 export interface AutoMock<T> {
   /** The proxied stand-in for `real`, recording every call and answering through a configured override when one exists. */
   readonly target: T;
@@ -44,6 +45,14 @@ export interface AutoMock<T> {
   calls(path: string): unknown[][];
 }
 
+/**
+ * How `createAutoMock` should answer a call nothing has configured.
+ *
+ * @remarks
+ * Without `defaultImpl`, an unconfigured call throws rather than returning `undefined`, so a test
+ * that reaches a method it never called `when` on fails loudly instead of silently proceeding with
+ * a missing value. `defaultImpl` opts out of that for mocks where most calls are safe to no-op.
+ */
 export interface AutoMockOptions {
   defaultImpl?(path: string, args: unknown[]): unknown;
 }
