@@ -1,16 +1,5 @@
 {
   "version": "1.0.0",
-  "workspace": [
-    "./alchemy",
-    "./engine/contracts",
-    "./engine/runtime",
-    "./engine/kernel",
-    "./engine/embedder",
-    "./engine/testing",
-    "./engine/shell",
-    "./tests",
-    "./sdk/js"
-  ],
   "exclude": [
     "packages/*/tests/e2e/fixtures",
     "packages/*/tests/e2e/.e2e"
@@ -20,7 +9,7 @@
     "test": "deno test --allow-env --allow-sys --allow-read --allow-write --allow-run --allow-net=127.0.0.1 --env-file=tests/.env.test --parallel engine packages tests",
     "test:net": "deno test --allow-env --allow-sys --allow-read --allow-write --allow-run --allow-net --env-file=tests/.env.test --parallel engine packages tests",
     "lint": "deno lint && deno run --allow-read --allow-env .lint/run.ts",
-    "gen:dependencies": "deno run --allow-read --allow-write _internal/tools/gen/dependencies.ts"
+    "gen:workspace": "bash dev_tools/gen/workspace.sh"
   },
   "fmt": {
     "lineWidth": 120,
@@ -38,11 +27,6 @@
       "sdk/js/example"
     ]
   },
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
-    "jsxImportSourceTypes": "npm:@types/react@^19"
-  },
   "imports": {
     "@bufbuild/protobuf": "npm:@bufbuild/protobuf@2.14.0",
     "@bufbuild/protobuf/codegenv2": "npm:@bufbuild/protobuf@2.14.0/codegenv2",
@@ -53,7 +37,6 @@
     "@nats-io/transport-deno": "jsr:@nats-io/transport-deno@3.4.0",
     "@opensearch-project/opensearch": "npm:@opensearch-project/opensearch@2.13.0",
     "@opensearch-project/opensearch/": "npm:/@opensearch-project/opensearch@2.13.0/",
-    "@react-email/components": "npm:@react-email/components@0.5.7",
     "@scribe/alchemy": "./alchemy/mod.ts",
     "@scribe/alchemy/body": "./alchemy/api/body/mod.ts",
     "@scribe/alchemy/http": "./alchemy/http/mod.ts",
@@ -71,6 +54,7 @@
     "@scribe/auth/declaration": "./packages/auth/lib/declaration.ts",
     "@scribe/auth/devices": "./packages/auth/lib/devices.ts",
     "@scribe/auth/identifier": "./packages/auth/lib/identifier.ts",
+    "@scribe/auth/lib/src/capability/wire.ts": "./packages/auth/lib/src/capability/wire.ts",
     "@scribe/auth/password": "./packages/auth/lib/password.ts",
     "@scribe/auth/reset_password": "./packages/auth/lib/reset_password.ts",
     "@scribe/auth/session": "./packages/auth/lib/session.ts",
@@ -79,6 +63,7 @@
     "@scribe/auth/sms_intent": "./packages/auth/lib/sms_intent.ts",
     "@scribe/auth/testing": "./packages/auth/tests/testing/testing.ts",
     "@scribe/auth/testing/settings": "./packages/auth/tests/testing/settings.ts",
+    "@scribe/contracts/": "./engine/contracts/",
     "@scribe/contracts/capability.ts": "./engine/contracts/capability.ts",
     "@scribe/contracts/device.ts": "./engine/contracts/device.ts",
     "@scribe/contracts/enums.ts": "./engine/contracts/enums.ts",
@@ -88,6 +73,7 @@
     "@scribe/dynamic_links/": "./packages/dynamic_links/",
     "@scribe/dynamic_links/testing": "./packages/dynamic_links/tests/testing/testing.ts",
     "@scribe/dynamic_links/testing/settings": "./packages/dynamic_links/tests/testing/settings.ts",
+    "@scribe/embedder/": "./engine/embedder/",
     "@scribe/foundation": "./packages/foundation/lib/foundation.ts",
     "@scribe/foundation/": "./packages/foundation/",
     "@scribe/foundation/cache": "./packages/foundation/lib/cache.ts",
@@ -102,14 +88,18 @@
     "@scribe/foundation/testing": "./packages/foundation/tests/testing/testing.ts",
     "@scribe/foundation/testing/settings": "./packages/foundation/tests/testing/settings.ts",
     "@scribe/foundation/trigger": "./packages/foundation/lib/trigger.ts",
+    "@scribe/kernel/": "./engine/kernel/",
+    "@scribe/protocol/": "./protocol/",
     "@scribe/realtime": "./packages/realtime/lib/realtime.ts",
     "@scribe/realtime/": "./packages/realtime/",
+    "@scribe/realtime/lib/src/capability/wire.ts": "./packages/realtime/lib/src/capability/wire.ts",
     "@scribe/realtime/testing": "./packages/realtime/tests/testing/testing.ts",
     "@scribe/realtime/testing/settings": "./packages/realtime/tests/testing/settings.ts",
     "@scribe/remote_configs": "./packages/remote_configs/lib/remote_configs.ts",
     "@scribe/remote_configs/": "./packages/remote_configs/",
     "@scribe/remote_configs/testing": "./packages/remote_configs/tests/testing/testing.ts",
     "@scribe/remote_configs/testing/settings": "./packages/remote_configs/tests/testing/settings.ts",
+    "@scribe/runtime/": "./engine/runtime/",
     "@scribe/runtime/device/device.ts": "./engine/runtime/device/device.ts",
     "@scribe/runtime/http/accessors/identity.ts": "./engine/runtime/http/accessors/identity.ts",
     "@scribe/runtime/http/accessors/location.ts": "./engine/runtime/http/accessors/location.ts",
@@ -127,15 +117,20 @@
     "@scribe/sdk/": "./sdk/js/",
     "@scribe/search": "./packages/search/lib/search.ts",
     "@scribe/search/": "./packages/search/",
+    "@scribe/search/lib/src/capability/wire.ts": "./packages/search/lib/src/capability/wire.ts",
     "@scribe/search/testing": "./packages/search/tests/testing/testing.ts",
     "@scribe/search/testing/settings": "./packages/search/tests/testing/settings.ts",
+    "@scribe/shell/": "./engine/shell/",
     "@scribe/storage": "./packages/storage/lib/storage.ts",
     "@scribe/storage/": "./packages/storage/",
+    "@scribe/storage/lib/src/capability/wire.ts": "./packages/storage/lib/src/capability/wire.ts",
     "@scribe/storage/testing": "./packages/storage/tests/testing/testing.ts",
     "@scribe/storage/testing/settings": "./packages/storage/tests/testing/settings.ts",
+    "@scribe/testing/": "./engine/testing/",
     "@scribe/testing/install.ts": "./engine/testing/install.ts",
     "@scribe/testing/runtime/device.ts": "./engine/testing/runtime/device.ts",
     "@scribe/testing/settings.ts": "./engine/testing/settings.ts",
+    "@scribe/tests/": "./tests/",
     "@std/assert": "jsr:@std/assert@1.0.19",
     "@std/testing/mock": "jsr:@std/testing@1.0.20/mock",
     "@std/testing/time": "jsr:@std/testing@1.0.20/time",
@@ -148,11 +143,6 @@
     "jose": "jsr:@panva/jose@6.2.10",
     "jpeg-js": "npm:jpeg-js@0.4.4",
     "libphonenumber-js": "npm:libphonenumber-js@1.13.9",
-    "lucide-react": "npm:lucide-react@1.24.0",
-    "lucide-react/bundle": "npm:/lucide-react@1.24.0/dist/cjs/lucide-react.js",
-    "react": "npm:react@19.2.8",
-    "react-dom/server": "npm:react-dom@19.2.7/server",
-    "react/jsx-runtime": "npm:react@19.2.8/jsx-runtime",
     "typescript": "npm:typescript@6.0.3"
   }
 }
