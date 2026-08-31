@@ -50,6 +50,7 @@ export const MAX_TIMESTAMP_SKEW_S = 5 * 60;
  */
 export const MAX_SIGNATURE_CANDIDATES = 8;
 
+/** A webhook delivery's identity and body, read off its headers before any signature is checked. */
 export interface SignedWebhookRequest {
   /** The delivery's identifier, from the `webhook-id` header. */
   readonly id: string;
@@ -94,3 +95,6 @@ export function isFreshTimestamp(rawTimestamp: string): boolean {
 
   return Math.abs(Date.now() / 1000 - seconds) <= MAX_TIMESTAMP_SKEW_S;
 }
+
+
+

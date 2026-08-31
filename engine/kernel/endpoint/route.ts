@@ -38,12 +38,26 @@ import type { Future } from "@scribe/alchemy";
 import { ServerResponse } from "@scribe/alchemy/route";
 import { ApiContext } from "./context.ts";
 
+/**
+ * The base every HTTP endpoint in this kernel extends.
+ *
+ * @remarks
+ * `ApiEndpoint`, which adds the access check and the rate limit, extends this rather than
+ * duplicating it, so the one thing every endpoint truly shares, taking a context and producing a
+ * response, lives in exactly one place regardless of how much else a concrete kind of endpoint
+ * layers on top.
+ */
 export abstract class RouteEndpoint {
   /** The response builder subclasses use to construct an HTTP response, without importing it themselves. */
   protected readonly response = ServerResponse;
 
+  /** Produces the response for `ctx`, implemented by each concrete endpoint. */
   protected abstract run(ctx: ApiContext): Response | Future<Response>;
 
+  /**
+   * Constructs an instance with `args` and answers a request straight from `run`, without the
+   * access check or rate limit `ApiEndpoint.handle` adds.
+   */
   static invoke<T extends RouteEndpoint, TArgs extends unknown[]>(
     this: new (...args: TArgs) => T,
     ...args: TArgs

@@ -52,6 +52,15 @@ import { currentLocation } from "@scribe/runtime/http/accessors/location.ts";
 import { request } from "@scribe/runtime/http/request.ts";
 import { RequestScope } from "@scribe/runtime/scope.ts";
 
+/**
+ * What an endpoint handler is given to read the request it answers.
+ *
+ * @remarks
+ * Every accessor here is a thin read over a request-scoped value, `RequestScope`, `currentIdentity`,
+ * `requestDevice`, that already exists whether or not a handler asks for it: `ApiContext` exists so
+ * a `Route` subclass reads the request through one object handed to `run` instead of importing each
+ * of those accessors itself, and so a test can construct one without first setting up a whole request.
+ */
 export class ApiContext {
   /** The identity of the caller, or `null` for an anonymous request. */
   get user(): RequestUser | null {
@@ -63,14 +72,17 @@ export class ApiContext {
     return this.user?.id ?? null;
   }
 
+  /** The request body parsed against `schema`, or `null` when it does not match. */
   body<S extends BodySchema>(schema: S): BodyFromSchema<S> | null {
     return parseBodyBytes(schema, request.bytes());
   }
 
+  /** The request body read as form data and parsed against `schema`, or `null` when it does not match. */
   form<S extends FormSchema>(schema: S): Future<FormFromSchema<S> | null> {
     return parseFormBytes(schema, RequestScope.getBodyBytes(), request.header("content-type") ?? "");
   }
 
+  /** The request body parsed as JSON with no schema check, or `null` when it does not parse. */
   raw(): unknown | null {
     return request.raw();
   }
@@ -100,18 +112,22 @@ export class ApiContext {
     return request.sessionId();
   }
 
+  /** The value of query parameter `key`, or `null` when the request carries none. */
   query(key: string): string | null {
     return request.query(key);
   }
 
+  /** The value of request header `name`, or `null` when the request carries none. */
   header(name: string): string | null {
     return request.header(name);
   }
 
+  /** The device claims the request carries, decrypted and validated, or `null` when it carries none. */
   device(): Future<RequestDevice | null> {
     return requestDevice();
   }
 
+  /** Where the caller's IP resolves to, or an empty location when nothing could resolve it. */
   location(): Future<IpLocation> {
     return currentLocation();
   }
