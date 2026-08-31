@@ -36,11 +36,14 @@
 
 import { AbstractGeolocationProvider, type IpLocation } from "../provider.ts";
 
+/** The {@link AbstractGeolocationProvider} that asks db-ip.com's free tier, one of the four `GeolocationResolver` falls back through. */
 export class DbIpProvider extends AbstractGeolocationProvider {
+  /** The `buildUrl` implementation: db-ip.com's own free-tier lookup endpoint for `ip`. */
   buildUrl(ip: string): string {
     return `https://api.db-ip.com/v2/free/${encodeURIComponent(ip)}`;
   }
 
+  /** The `parse` implementation: db-ip.com's `city` and `countryCode` fields. */
   parse(data: unknown): IpLocation | null {
     return this.location(this.field(data, "city"), this.field(data, "countryCode"));
   }

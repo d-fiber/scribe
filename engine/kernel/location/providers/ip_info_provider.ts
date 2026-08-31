@@ -36,11 +36,14 @@
 
 import { AbstractGeolocationProvider, type IpLocation } from "../provider.ts";
 
+/** The {@link AbstractGeolocationProvider} that asks ipinfo.io, one of the four `GeolocationResolver` falls back through. */
 export class IpInfoProvider extends AbstractGeolocationProvider {
+  /** The `buildUrl` implementation: ipinfo.io's own lookup endpoint for `ip`. */
   buildUrl(ip: string): string {
     return `https://ipinfo.io/${encodeURIComponent(ip)}/json`;
   }
 
+  /** The `parse` implementation: ipinfo.io's `city` and `country` fields. */
   parse(data: unknown): IpLocation | null {
     return this.location(this.field(data, "city"), this.field(data, "country"));
   }

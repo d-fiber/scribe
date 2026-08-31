@@ -36,11 +36,14 @@
 
 import { AbstractGeolocationProvider, type IpLocation } from "../provider.ts";
 
+/** The {@link AbstractGeolocationProvider} that asks freeipapi.com, one of the four `GeolocationResolver` falls back through. */
 export class FreeIpApiProvider extends AbstractGeolocationProvider {
+  /** The `buildUrl` implementation: freeipapi.com's own lookup endpoint for `ip`. */
   buildUrl(ip: string): string {
     return `https://free.freeipapi.com/api/json/${encodeURIComponent(ip)}`;
   }
 
+  /** The `parse` implementation: freeipapi.com's `cityName` and `countryCode` fields. */
   parse(data: unknown): IpLocation | null {
     return this.location(this.field(data, "cityName"), this.field(data, "countryCode"));
   }

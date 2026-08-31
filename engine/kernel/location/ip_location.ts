@@ -50,6 +50,14 @@ export type { IpLocation };
 const _TIMEOUT: Duration = Duration.seconds(3);
 const _EMPTY_LOCATION: IpLocation = { city: "", country: "" };
 
+/**
+ * Locates an IP by trying each configured {@link GeolocationProvider} in turn.
+ *
+ * @remarks
+ * Cached for a day, because a given IP resolves to the same city on every lookup and every
+ * provider here is a free tier with its own rate limit: caching is what keeps a popular deployment
+ * from burning through that limit on repeat callers instead of new ones.
+ */
 export class GeolocationResolver {
   private static readonly _cache: Cache<IpLocation> = cache<IpLocation>({ key: "ip:geo", ttl: Duration.days(1) });
 
@@ -60,6 +68,10 @@ export class GeolocationResolver {
     new IpInfoProvider(),
   ];
 
+  /**
+   * The location of `ip`, or an empty location for a private address or a provider that answers
+   * nothing usable. Reads through the cache, and tries each provider until one answers.
+   */
   static locate(ip: string): Future<IpLocation> {
     if (!ip || isPrivateIp(ip)) return Promise.resolve(_EMPTY_LOCATION);
     return this._cache.upsert(ip, () => this._resolveViaProviders(ip));
