@@ -45,7 +45,7 @@ interface Dependency {
   /** Which registry this dependency comes from. */
   readonly registry: "npm" | "jsr";
 
-  /** The package name, when it differs from `specifier` — a renamed alias, or a subpath export. */
+  /** The package name, when it differs from `specifier`: a renamed alias, or a subpath export. */
   readonly package?: string;
 
   /** The version this repository pins. */
