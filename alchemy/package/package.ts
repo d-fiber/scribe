@@ -53,7 +53,15 @@ export class DeclarationError extends ScribeError {}
  */
 export const DEFAULT_DESCRIPTION = "Say in one sentence what this package does.";
 
-/** The packages a manifest asks for, from a package name to the constraint it accepts. */
+/**
+ * The packages a manifest asks for, from a package name to the constraint it accepts.
+ *
+ * @remarks
+ * A plain record of strings rather than a list of `{ name, constraint }` pairs, because a manifest
+ * cannot declare the same dependency twice: the key doing double duty as both the name and the
+ * uniqueness check is what makes a duplicate a type error a caller writes, not a runtime refusal
+ * this class has to detect.
+ */
 export type Dependencies = Readonly<Record<string, string>>;
 
 /** The last step, once everything required has been said. */
@@ -156,6 +164,10 @@ export class Package
     return new Package(name);
   }
 
+  /**
+   * The {@link AwaitingDescription.describedAs} step: trims `description` and refuses it once it
+   * is empty, so a placeholder left blank cannot silently become a manifest with no description.
+   */
   describedAs(description: string): AwaitingVersion {
     if (description.trim() === "") {
       throw new DeclarationError(
@@ -166,16 +178,22 @@ export class Package
     return this;
   }
 
+  /** The {@link AwaitingVersion.version} step: parses `version` and stores it, or throws trying. */
   version(version: string): AwaitingFramework {
     this.#version = Version.parse(version);
     return this;
   }
 
+  /** The {@link AwaitingFramework.runsOn} step: parses `constraint` and stores it, or throws trying. */
   runsOn(constraint: string): AwaitingDependencies {
     this.#scribe = Constraint.parse(constraint);
     return this;
   }
 
+  /**
+   * The {@link AwaitingDependencies.dependsOn} step: validates each name and constraint and
+   * refuses a package that names itself, before storing the rest.
+   */
   dependsOn(dependencies: Dependencies): Buildable {
     for (const [name, constraint] of Object.entries(dependencies)) {
       const problem = packageNameProblem(name);
@@ -190,6 +208,13 @@ export class Package
     return this;
   }
 
+  /**
+   * The {@link Buildable.build} step: freezes everything declared so far into a `Manifest`.
+   *
+   * @throws {DeclarationError} When no version or no framework constraint was ever declared. The
+   * chained interfaces already make both steps mandatory before `build` is reachable, so this is
+   * the guard against a caller that got here some other way, not the path a correct chain takes.
+   */
   build(): Manifest {
     if (this.#version === null) {
       throw new DeclarationError(`"${this.#name}" has no version.`);
