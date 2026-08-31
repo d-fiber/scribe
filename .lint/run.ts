@@ -35,7 +35,15 @@
 // LICENSE file, the LICENSE file governs.
 
 import ts from "typescript";
+import { FileSystems } from "@scribe/alchemy";
+import { LocalFileSystems } from "@scribe/runtime/scholium/files.ts";
+import { LocalProcess, Processes } from "@scribe/runtime/scholium/process.ts";
 import { RULES } from "./rules.ts";
+
+FileSystems.use(new LocalFileSystems());
+Processes.use(new LocalProcess());
+
+const disk = FileSystems.get().open();
 
 const ROOT = new URL("../", import.meta.url).pathname.replace(/\/$/, "");
 
@@ -65,7 +73,7 @@ async function collectFiles(root: string): Promise<string[]> {
   const found: string[] = [];
 
   async function walk(directory: string): Promise<void> {
-    for await (const entry of Deno.readDir(directory)) {
+    for (const entry of await disk.list(directory)) {
       const path = `${directory}/${entry.name}`;
       const relative = path.slice(root.length + 1);
 
@@ -93,7 +101,7 @@ function printViolation(sourceFile: ts.SourceFile, ruleName: string, node: ts.No
   const relative = sourceFile.fileName.slice(ROOT.length + 1);
 
   console.error(`error[${ruleName}]: ${message}`);
-  console.error(`  --> ${relative}:${line + 1}:${character + 1}`);
+  console.error(`  > ${relative}:${line + 1}:${character + 1}`);
   console.error("");
 }
 
@@ -102,7 +110,7 @@ async function main(): Promise<void> {
   let problems = 0;
 
   for (const path of files) {
-    const text = await Deno.readTextFile(path);
+    const text = await disk.readText(path);
     const sourceFile = ts.createSourceFile(path, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
 
     for (const rule of RULES) {
@@ -115,7 +123,7 @@ async function main(): Promise<void> {
 
   if (problems > 0) {
     console.error(`Found ${problems} problem${problems === 1 ? "" : "s"}`);
-    Deno.exit(1);
+    Processes.get().exit(1);
   }
 
   console.log(`Checked ${files.length} files`);
