@@ -36,7 +36,8 @@
 
 import type { BodyFieldCtor, FormFieldCtor } from "../field_types.ts";
 import { isArrMarker, isNestedMarker } from "../markers.ts";
-import { ArrayFieldResolver } from "./array_field_resolver.ts";
+import type { ScalarCtor } from "../schema.ts";
+import { ArrayFieldResolver, type ArrayItemCtor } from "./array_field_resolver.ts";
 import type { FieldResolver } from "./field_resolver.ts";
 import { NestedFieldResolver } from "./nested_field_resolver.ts";
 import { ScalarFieldResolver } from "./scalar_field_resolver.ts";
@@ -46,14 +47,11 @@ export class FieldResolverFactory {
   /** The resolver for `ctor`: array, nested, or scalar, read off which marker `ctor` carries, if any. */
   static for(ctor: BodyFieldCtor | FormFieldCtor): FieldResolver {
     if (isArrMarker(ctor)) {
-      // deno-lint-ignore no-explicit-any
-      return new ArrayFieldResolver(ctor.ctor as any);
+      return new ArrayFieldResolver(ctor.ctor as ArrayItemCtor);
     }
     if (isNestedMarker(ctor)) {
-      // deno-lint-ignore no-explicit-any
-      return new NestedFieldResolver(ctor.schema as any);
+      return new NestedFieldResolver(ctor.schema);
     }
-    // deno-lint-ignore no-explicit-any
-    return new ScalarFieldResolver(ctor as any);
+    return new ScalarFieldResolver(ctor as ScalarCtor | typeof File);
   }
 }

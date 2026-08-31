@@ -39,7 +39,7 @@ import type { BodySchema, NestedMarker, ScalarCtor } from "../schema.ts";
 import type { FieldResolver } from "./field_resolver.ts";
 import { ScalarFieldResolver } from "./scalar_field_resolver.ts";
 
-type ArrayItemCtor =
+export type ArrayItemCtor =
   | ScalarCtor
   | typeof File
   | NestedMarker<BodySchema>
