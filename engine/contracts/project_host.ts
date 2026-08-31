@@ -44,6 +44,14 @@ export enum ProjectSlot {
   ThemeFonts = "theme-fonts",
 }
 
+/**
+ * The port through which the engine reaches into a project's own code, one named slot at a time.
+ *
+ * @remarks
+ * A project is optional: the implementation resolves a slot with a dynamic import and degrades
+ * to `null` instead of throwing when the project never provided it, so the engine can ask for a
+ * theme override without first checking whether one exists.
+ */
 export interface ProjectHost {
   load<T>(slot: ProjectSlot): Future<T | null>;
 }

@@ -36,6 +36,15 @@
 
 import type { ClientType, DeviceCategory, DeviceOs, DeviceThemeMode, Localization } from "@scribe/contracts/enums.ts";
 
+/**
+ * The device claims a caller sends with a request, decrypted from its encrypted payload.
+ *
+ * @remarks
+ * `DevicePayloadValidator.validate` produces this shape only once the payload has been decrypted,
+ * its binding matches the request it rode with, and its `iat` is still fresh, so a caller cannot
+ * forge these fields without the deployment's own private key. Nothing here proves the device
+ * itself is telling the truth about its hardware or its build.
+ */
 export interface RequestDevice {
   /** What the caller calls this device, kept across launches of the application. */
   device_id: string;
