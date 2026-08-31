@@ -95,6 +95,3 @@ export function isFreshTimestamp(rawTimestamp: string): boolean {
 
   return Math.abs(Date.now() / 1000 - seconds) <= MAX_TIMESTAMP_SKEW_S;
 }
-
-
-
