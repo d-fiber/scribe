@@ -45,6 +45,15 @@ import { RequestLogBootstrapper } from "./bootstrappers/request_log.ts";
 import type { Hono } from "hono";
 import { SurfaceRouter } from "./surface_router.ts";
 
+/**
+ * The runtime a long-lived server process boots.
+ *
+ * @remarks
+ * Unlike `EdgeFunctionsRuntime`, which spins up a fresh isolate per request, this one runs every
+ * node in the same process for the whole time it stays up, which is what makes it the platform
+ * that can watch `SIGTERM` and `SIGINT` at all: an isolate the platform recycles per request has
+ * no process lifetime of its own to arm a signal on.
+ */
 export class ServerRuntime extends Runtime {
   /** This runtime's label in `BootSequence` logging: `server`. */
   override readonly name = "server";
@@ -56,14 +65,24 @@ export class ServerRuntime extends Runtime {
     this.#router = new SurfaceRouter(queue, codex);
   }
 
+  /** Mounts the project's packages, then starts the request log. */
   protected override bootstrappers(): readonly Bootstrapper[] {
     return [new MountedPackagesBootstrapper(), new RequestLogBootstrapper()];
   }
 
+  /** `SIGTERM` and `SIGINT`, since a server process is the one platform that can watch either. */
   protected override shutdownSignals(): readonly ShutdownSignal[] {
     return ["SIGTERM", "SIGINT"];
   }
 
+  /**
+   * Serves every request by routing its pathname through the `SurfaceRouter`.
+   *
+   * @remarks
+   * `serve`'s handler takes no request parameter: `RequestScope.run` puts the incoming request
+   * behind `RequestScope.get()` before it calls the handler, so `route` reads the pathname from
+   * there rather than being handed one.
+   */
   protected override listen(): void {
     serve(() => this.#router.route(pathnameOf(RequestScope.get().url)));
   }

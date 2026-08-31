@@ -50,7 +50,14 @@ const _RATE_LIMIT: RateLimit = {
   maxPenalty: Duration.minutes(1),
 };
 
-/** What one replica of the host is holding, as the dashboard reads it. */
+/**
+ * What one replica of the host is holding, as the dashboard reads it.
+ *
+ * @remarks
+ * Named "one replica" rather than "the deployment" on purpose: a deployment usually runs several
+ * replicas, and this endpoint is called against each of them in turn, so a figure here is a fact
+ * about the process answering, memory and in-flight bytes especially, never a sum across the fleet.
+ */
 export interface CodexGauges {
   /** Seconds this replica has been serving, which resets when it restarts. */
   readonly uptimeSeconds: number;
@@ -92,14 +99,17 @@ export interface CodexGauges {
  * refused here.
  */
 export class CodexMetricsEndpoint extends ApiEndpoint {
+  /** Requires the service caller role, which the gateway grants only from the admin key. */
   protected override access(): Caller {
     return "service";
   }
 
+  /** 600 calls a minute, with a one-minute penalty. */
   protected override rateLimit(): RateLimit {
     return _RATE_LIMIT;
   }
 
+  /** Answers the current gauges of this replica. */
   protected async run(_ctx: ApiContext): Future<Response> {
     const gauges: CodexGauges = {
       uptimeSeconds: Math.round(performance.now() / 1000),

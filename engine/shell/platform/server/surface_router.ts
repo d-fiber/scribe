@@ -46,7 +46,7 @@ import type { Hono } from "hono";
  * Everything else belongs to a node, and a node is named after a folder of the
  * project. The route scanner skips a folder whose name starts with `_`, so a
  * project cannot produce a node called `_health`, `_queue` or `_codex` however it
- * names its tree -- the prefix is what makes the host's own paths uncollidable
+ * names its tree, since the prefix is what makes the host's own paths uncollidable
  * rather than merely unlikely.
  */
 const HEALTH_PATH = "/_health";
@@ -70,6 +70,15 @@ export class SurfaceRouter {
     this.#codex = codex;
   }
 
+  /**
+   * Sends a request for `pathname` to whichever surface claims it: the host's own health check,
+   * the queue or codex dashboard behind their `_` prefixes, or the node named by the path's
+   * first segment.
+   *
+   * @remarks
+   * A failure raised while forwarding is caught here and turned into an unexpected-error
+   * response, so a routing bug never escapes as an unhandled rejection.
+   */
   async route(pathname: string): Future<Response> {
     try {
       if (pathname === HEALTH_PATH) return new Response("ok");

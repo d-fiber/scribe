@@ -53,8 +53,10 @@ export class RequestLogBootstrapper implements Bootstrapper {
   /** This bootstrapper's label in `BootSequence` logging: `request-log`. */
   readonly name = "request-log";
 
+  /** No-op: there is nothing to prime before this replica's first request. */
   boot(): void {}
 
+  /** Publishes whatever entries this replica is still holding before it goes. */
   shutdown(): Future<void> {
     return logBuffer.flush();
   }
