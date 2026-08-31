@@ -52,6 +52,7 @@ const consoles: Record<LogLevel, (message: string) => void> = {
   [LogLevel.ERROR]: console.error,
 };
 
+/** What a caller may attach to a log entry beyond its level and message. */
 export interface LogInput {
   /** The kind of thing causing the entry being logged. Left unset when nothing names one. */
   readonly actorType?: string;
@@ -124,7 +125,7 @@ class Logger {
     return this.#pending.length;
   }
 
-  /** The entries of [pending], gathered under the sink each one belongs to. */
+  /** The entries of `pending`, gathered under the sink each one belongs to. */
   #groupBySink(pending: readonly LogEntry[]): Map<LogSink | null, LogEntry[]> {
     const grouped = new Map<LogSink | null, LogEntry[]>();
 
