@@ -37,32 +37,27 @@
 
 set -euo pipefail
 
-ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
-SCOPE="e2e:test"
+ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+SCOPE="test"
 
-usage() {
-  echo "usage: $(basename "$0") <foundation|realtime|storage|dynamic_links|audience|remote_configs>" >&2
-  exit 64
+say() {
+  echo "[$SCOPE] $1"
 }
 
-[ $# -eq 1 ] || usage
-PACKAGE=$1
+[ -f "$ROOT/packages/foundation/deno.json" ] || {
+  echo "[$SCOPE] packages/ is empty, so this checkout is not a whole one." >&2
+  exit 1
+}
 
-case "$PACKAGE" in
-  foundation) TASK="test:e2e" ;;
-  realtime) TASK="test:e2e:realtime" ;;
-  storage) TASK="test:e2e:storage" ;;
-  dynamic_links) TASK="test:e2e:dynamic_links" ;;
-  audience) TASK="test:e2e:audience" ;;
-  remote_configs) TASK="test:e2e:remote_configs" ;;
-  *) usage ;;
-esac
+say "running the workspace, offline"
+(cd "$ROOT" && deno task test)
 
-echo "[$SCOPE] running the $PACKAGE suite against the stack that is already up"
-echo "[$SCOPE] start it with packages/tool/e2e/up.sh $PACKAGE"
-echo ""
+say "running the workspace, with network access"
+(cd "$ROOT" && deno task test:net)
 
-(cd "$ROOT" && deno task "$TASK")
+say "running sdk/js"
+(cd "$ROOT/sdk/js" && deno task test)
 
 echo ""
-echo "[$SCOPE] the $PACKAGE end-to-end suite is green."
+say "every suite the CI runs on a push is green."
+say "the end-to-end suites need a stack up and are not part of this, see deno.json."
