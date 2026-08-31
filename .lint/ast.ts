@@ -137,7 +137,8 @@ export function forEachIdentifierNamed(
  * `node` is read loosely on purpose: {@link forEachModuleSpecifier} hands a rule a bare
  * `ts.Node`, and asking it to narrow the type first before it can call this would defeat the
  * point of unifying the four shapes in the first place. A node that is neither answers empty,
- * which is what a dynamic `import(...)` — no destructured binding to name — should answer too.
+ * which is what a dynamic `import(...)` should answer too, since it has no destructured binding
+ * to name.
  */
 export function namedSpecifiersOf(
   node: ts.Node,
@@ -162,7 +163,7 @@ export function namedSpecifiersOf(
  * when they alias; an import or export that does not alias carries no `propertyName` at all, and
  * `name` is then both the source name and the local one. Either way, this is the name the source
  * module actually declared, which is the one a rule about what a directory keeps private cares
- * about — the local alias a caller chose says nothing about where the thing came from.
+ * about. The local alias a caller chose says nothing about where the thing came from.
  */
 export function sourceNameOf(specifier: ts.ImportSpecifier | ts.ExportSpecifier): string {
   return (specifier.propertyName ?? specifier.name).text;

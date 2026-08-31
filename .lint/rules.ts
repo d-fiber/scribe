@@ -46,7 +46,7 @@ import { sealedRuntime } from "./sealed-runtime.ts";
  *
  * @remarks
  * This is the one list a new rule has to join. Write the rule next to these five, export a
- * `const` of the {@link Rule} shape, and add it here — `run.ts` does not otherwise know how many
+ * `const` of the {@link Rule} shape, and add it here: `run.ts` does not otherwise know how many
  * rules exist.
  */
 export const RULES: readonly Rule[] = [

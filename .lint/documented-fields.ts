@@ -59,7 +59,7 @@ function hasDocComment(node: ts.Node): boolean {
  * "ce qui est exporté se documente" in `rules/commun/comments.md`.
  */
 function isPrivateMember(
-  node: ts.PropertyDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration,
+  node: ts.PropertyDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration | ts.MethodDeclaration,
 ): boolean {
   if (ts.isPrivateIdentifier(node.name)) return true;
 
@@ -78,6 +78,20 @@ function fieldMessage(name: string): string {
     `documents every field it has, not only the ones with something to say: a block half ` +
     `documented reads as a claim that the silent fields carry no provenance and no invariant, ` +
     `when the truth is only that nobody has looked at them yet.`;
+}
+
+function methodMessage(name: string): string {
+  return `Method "${name}" carries no documentation. A class exported from this codebase ` +
+    `documents every method it declares the same way it documents every field: a caller reads ` +
+    `the method from the outside before ever opening the body, and a silent method reads as one ` +
+    `nobody has reviewed rather than one with nothing to say.`;
+}
+
+function declarationMessage(kind: string, name: string): string {
+  return `${kind} "${name}" carries no documentation of its own, above the declaration. A fully ` +
+    `documented member list does not say what the whole shape is for: an exported interface, ` +
+    `type or class needs the same one-sentence summary any other exported declaration would, ` +
+    `before a caller ever reaches a single field or method.`;
 }
 
 /** Flags every undocumented `PropertySignature` among `members`. */
@@ -123,12 +137,31 @@ function checkClassMembers(node: ts.ClassDeclaration, violations: Violation[]): 
         documented: (existing?.documented ?? false) || documented,
         node: existing?.node ?? member,
       });
+    } else if (ts.isMethodDeclaration(member)) {
+      if (isPrivateMember(member)) continue;
+
+      const name = memberName(member.name);
+      if (name === undefined) continue;
+
+      if (!hasDocComment(member)) violations.push({ node: member, message: methodMessage(name) });
     }
   }
 
   for (const [name, { documented, node: accessorNode }] of accessors) {
     if (!documented) violations.push({ node: accessorNode, message: fieldMessage(name) });
   }
+}
+
+/** Flags `node` itself when it carries no doc comment of its own, above its member list. */
+function checkContainerDoc(
+  node: ts.InterfaceDeclaration | ts.TypeAliasDeclaration | ts.ClassDeclaration,
+  kind: string,
+  violations: Violation[],
+): void {
+  if (hasDocComment(node)) return;
+
+  const name = node.name?.text ?? "<anonymous>";
+  violations.push({ node, message: declarationMessage(kind, name) });
 }
 
 export const documentedFields: Rule = {
@@ -141,12 +174,15 @@ export const documentedFields: Rule = {
 
     function walk(node: ts.Node): void {
       if (ts.isInterfaceDeclaration(node) && isExported(node)) {
+        checkContainerDoc(node, "Interface", violations);
         checkPropertyMembers(node.members, violations);
       } else if (
         ts.isTypeAliasDeclaration(node) && isExported(node) && ts.isTypeLiteralNode(node.type)
       ) {
+        checkContainerDoc(node, "Type", violations);
         checkPropertyMembers(node.type.members, violations);
       } else if (ts.isClassDeclaration(node) && isExported(node)) {
+        checkContainerDoc(node, "Class", violations);
         checkClassMembers(node, violations);
       }
 
