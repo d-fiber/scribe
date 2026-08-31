@@ -37,11 +37,30 @@
 import { RequestScope } from "@scribe/runtime/scope.ts";
 import { constantTimeEqual } from "@scribe/runtime/support/crypto/constant_time.ts";
 
+/**
+ * What a firewall that checks a shared secret against a header has in common, shared as static helpers.
+ *
+ * @remarks
+ * {@link AppKeyFirewall} and {@link InternalSecretFirewall} both reduce to the same three steps,
+ * read the header, compare it against one or more known-good values, decide, so this base carries
+ * that logic once rather than each firewall reimplementing its own comparison and risking one of
+ * them comparing in variable time by accident.
+ */
 export abstract class SecretFirewall {
+  /** The value of `headerName` on the request in scope, or `null` when it is absent. */
   protected static headerValue(headerName: string): string | null {
     return RequestScope.get().headers.get(headerName);
   }
 
+  /**
+   * Whether `provided` matches one of `candidates`.
+   *
+   * @remarks
+   * Each comparison runs in constant time through `constantTimeEqual`, so a caller cannot measure
+   * how much of a guessed secret matched from how long the response took to come back: a
+   * string-equality check that returns as soon as it finds a mismatched byte would leak exactly
+   * that.
+   */
   protected static matchesAny(
     provided: string,
     candidates: readonly string[],
@@ -49,6 +68,7 @@ export abstract class SecretFirewall {
     return candidates.some((candidate) => constantTimeEqual(provided, candidate));
   }
 
+  /** Whether `headerName` on the request in scope carries one of `candidates`. */
   protected static verifyHeader(
     headerName: string,
     candidates: readonly string[],

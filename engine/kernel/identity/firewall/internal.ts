@@ -39,7 +39,18 @@ import { SecretFirewall } from "@scribe/kernel/identity/firewall/secret_firewall
 
 const HEADER = "x-internal-secret";
 
+/**
+ * Checks a request's `x-internal-secret` header against this deployment's own internal secret.
+ *
+ * @remarks
+ * This is what a route declared `access: "service"` is checked against: a caller inside the
+ * deployment, PostgREST, another package, the worker, proves it by carrying the shared secret,
+ * rather than by holding a session the way an end user's caller does. The header name and the
+ * secret are both fixed, unlike {@link AppKeyFirewall}, because there is exactly one thing this
+ * check answers: was this call made from inside the deployment.
+ */
 export class InternalSecretFirewall extends SecretFirewall {
+  /** Whether the request in scope carries this deployment's internal secret. */
   static verify(): boolean {
     return this.verifyHeader(HEADER, [firewallSettings.get().internalSecret]);
   }
