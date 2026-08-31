@@ -110,6 +110,14 @@ export const Listeners: Slot<Listener> = new Slot<Listener>("Listeners");
  * and nothing that calls {@link Listeners} notices.
  */
 export class LocalListener implements Listener {
+  /**
+   * The {@link Listener.serve} implementation.
+   *
+   * @remarks
+   * `handler` is wrapped rather than passed straight to the host's own serve call, because the host
+   * hands the connection info alongside the request and `handler` wants the peer address alone,
+   * already extracted: this is where that translation happens, once, instead of in every caller.
+   */
   serve(handler: RequestHandler, options?: ListenOptions): BoundListener {
     const wrapped = (request: Request, info: Deno.ServeHandlerInfo): Response | Future<Response> =>
       handler(request, _peerOf(info));

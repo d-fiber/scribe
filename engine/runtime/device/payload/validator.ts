@@ -69,7 +69,25 @@ const FIELD_RULES: readonly FieldRule[] = [
   (payload) => oneOf(payload.theme_mode, DeviceThemeMode),
 ];
 
+/**
+ * Checks a decrypted device payload's shape, freshness and binding before it is trusted as a {@link RequestDevice}.
+ *
+ * @remarks
+ * Decryption alone proves a payload was sealed with this deployment's key, not that it was sealed
+ * for this call: a payload copied from one request onto another would still decrypt cleanly, which
+ * is what `expectedBinding` and `iat` close off, one tying it to the session or key it was sealed
+ * against, the other to a freshness window it cannot outlive.
+ */
 export class DevicePayloadValidator {
+  /**
+   * Answers `raw` as a {@link RequestDevice} once its binding matches `expectedBinding`, its `iat`
+   * is still fresh, and every field passes its own rule; `null` otherwise.
+   *
+   * @remarks
+   * A refused payload never says which check it failed: the caller reads `null` and nothing more,
+   * the same silence a payload that would not decrypt at all gets, so a forged payload cannot be
+   * refined by watching which reason changes between attempts.
+   */
   static validate(raw: unknown, expectedBinding: string): RequestDevice | null {
     if (typeof raw !== "object" || raw === null) return null;
 

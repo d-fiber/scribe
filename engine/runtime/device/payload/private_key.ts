@@ -58,6 +58,7 @@ const PKCS8_X25519_HEADER = new Uint8Array([
 
 const HEX_32_BYTES = /^[0-9a-fA-F]{64}$/;
 
+/** Raised when the configured device payload private key is not a 32-byte hex string. */
 export class DeviceKeyError extends Error {}
 
 let imported: Future<CryptoKey> | null = null;

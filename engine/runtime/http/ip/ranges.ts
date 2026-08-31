@@ -36,6 +36,14 @@
 
 import { ipv4ToInt } from "./address.ts";
 
+/**
+ * A contiguous span of IPv4 addresses, bounds inclusive.
+ *
+ * @remarks
+ * Held as integers rather than dotted strings, because `isPrivateIp` checks a caller's address
+ * against every reserved range declared in this file on every request that needs one: a numeric
+ * comparison against `first` and `last` is what keeps that check cheap enough to run there.
+ */
 export interface Ipv4Range {
   /** The range's first address, as a 32-bit unsigned integer. */
   readonly first: number;

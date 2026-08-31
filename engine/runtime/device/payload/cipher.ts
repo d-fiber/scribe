@@ -56,7 +56,25 @@ interface SealedBox {
   readonly cipherWithTag: Uint8Array<ArrayBuffer>;
 }
 
+/**
+ * Decrypts a device's sealed payload into the JSON object it encoded.
+ *
+ * @remarks
+ * A device is expected to encrypt the same payload again on every request within its own freshness
+ * window, since it has no way to know a previous call already decoded it: the plaintext cache is
+ * what keeps a device that calls repeatedly from costing an X25519 exchange and an AES-GCM
+ * decryption on every one of those calls.
+ */
 export class DevicePayloadCipher {
+  /**
+   * Opens `encrypted`, a sealed box, and parses the plaintext as JSON.
+   *
+   * @remarks
+   * Answers `null` rather than throwing whenever the box cannot be opened or the plaintext is not
+   * valid JSON, since a malformed device payload is refused the same way a missing one is: by the
+   * caller getting nothing to work with. Successful decryptions are cached, so a payload replayed
+   * inside the plaintext cache's TTL is not decrypted twice.
+   */
   static async decrypt(encrypted: string): Future<unknown | null> {
     const cached = plaintexts.lookup(encrypted);
     if (cached !== undefined) return objectFrom(cached);

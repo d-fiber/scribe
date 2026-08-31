@@ -44,15 +44,34 @@ export type ResolvedIdentity = RequestUser | null;
 const _RESOLVED_KEY = "identity:user:resolved";
 const _PENDING_KEY = "identity:user:pending";
 
+/**
+ * Who the request in scope resolved to.
+ *
+ * @remarks
+ * Held in `RequestScope.cache` rather than resolved fresh on every read, because identity
+ * resolution reaches JWKS or GoTrue, and several accessors within the same request, `currentIdentity`,
+ * an access check, a route's own handler, would otherwise each pay that cost separately for the
+ * one token the request actually carried.
+ */
 export class RequestIdentityCache {
+  /** The identity already resolved for this request, or `undefined` when nothing has resolved yet. */
   static resolved(): ResolvedIdentity | undefined {
     return RequestScope.cache.get<ResolvedIdentity>(_RESOLVED_KEY);
   }
 
+  /** Sets the resolved identity directly, bypassing `remember`, for code that already has an answer. */
   static seed(user: ResolvedIdentity): void {
     RequestScope.cache.set(_RESOLVED_KEY, user);
   }
 
+  /**
+   * Answers the resolved identity, running `resolve` only if nothing has resolved yet.
+   *
+   * @remarks
+   * A resolution in flight is shared: a second caller that arrives while `resolve` is still
+   * pending awaits the same promise instead of starting a second one, so several accessors racing
+   * for the identity on one request cost a single resolution.
+   */
   static async remember(
     resolve: () => Future<ResolvedIdentity>,
   ): Future<ResolvedIdentity> {

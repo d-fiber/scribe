@@ -52,11 +52,31 @@ function activeState(): RequestState {
   return store;
 }
 
+/**
+ * Per-request scratch storage, keyed by string.
+ *
+ * @remarks
+ * Exists so something resolved once per request, the caller's identity, the caller's device, does
+ * not get resolved again every time a different accessor asks for it: `RequestIdentityCache` and
+ * similar callers write their answer here the first time and read it back on every later call
+ * within the same request. Cleared whenever `set` swaps in a new request, so nothing from one
+ * request's cache is ever visible to the next.
+ */
 export interface RequestScopeCache {
   get<T>(key: string): T | undefined;
   set<T>(key: string, value: T): void;
 }
 
+/**
+ * What `RequestScope` exposes.
+ *
+ * @remarks
+ * Every accessor here reads from `Current`, the ambient store this scope is built on, so a
+ * function anywhere in the call stack can reach the request in flight without it being threaded
+ * through as a parameter. That is what lets a package's own code call `currentIdentity()` or
+ * `requestDevice()` without knowing whether it is three calls deep inside a handler or being
+ * called directly from a test.
+ */
 export interface RequestScopeApi {
   run<T>(
     req: Request,
