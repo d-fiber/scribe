@@ -72,6 +72,11 @@ export type { Result } from "./value/result.ts";
 
 export { BindingError, Slot } from "./bind/slot.ts";
 
+export { Container, container } from "./di/container.ts";
+export type { Token } from "./di/container.ts";
+export { Singleton } from "./di/decorators.ts";
+export type { SingletonOptions } from "./di/decorators.ts";
+
 export { base64, base64Url, hex, json, utf8 } from "./value/convert.ts";
 export type { BytesCodec, Codec } from "./value/convert.ts";
 
