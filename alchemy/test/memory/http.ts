@@ -82,6 +82,10 @@ export class MemoryClient extends BaseClient {
     return this.seen[0];
   }
 
+  /**
+   * The {@link BaseClient.send} implementation: records `request` in {@link seen} and answers
+   * the configured {@link MemoryAnswer} without touching a network.
+   */
   override send(request: BaseRequest): Promise<StreamedResponse> {
     this.seen.push(request);
 
@@ -94,6 +98,7 @@ export class MemoryClient extends BaseClient {
     );
   }
 
+  /** The {@link BaseClient.close} override: counts the call in {@link closed} instead of doing nothing. */
   override close(): void {
     this.closed++;
   }

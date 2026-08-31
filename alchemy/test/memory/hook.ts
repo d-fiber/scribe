@@ -53,11 +53,16 @@ export class MemoryHook<T> implements DeclaredHook<T> {
   /** Whoever asked to hear this. */
   readonly #listening: Array<(payload: T) => void | Future<void>> = [];
 
+  /**
+   * The {@link DeclaredHook.emit} implementation: records `payload` in {@link emitted}, then
+   * calls every listener in registration order, letting a raised error stop the rest.
+   */
   async emit(payload: T): Future<void> {
     this.emitted.push(payload);
     for (const listen of this.#listening) await listen(payload);
   }
 
+  /** The {@link DeclaredHook.on} implementation: records `listen`, called by every later {@link emit}. */
   on(listen: (payload: T) => void | Future<void>): void {
     this.#listening.push(listen);
   }
@@ -73,6 +78,10 @@ export class MemoryHooks implements HookDriver {
   /** Every hook opened so far, by the event it was opened under. */
   readonly opened: Map<string, MemoryHook<never>> = new Map<string, MemoryHook<never>>();
 
+  /**
+   * The {@link HookDriver.open} implementation: opens a {@link MemoryHook} for `options.event`,
+   * or hands back the one already opened under that event.
+   */
   open<T>(options: HookOptions): DeclaredHook<T> {
     const already = this.opened.get(options.event);
     if (already !== undefined) return already as unknown as DeclaredHook<T>;

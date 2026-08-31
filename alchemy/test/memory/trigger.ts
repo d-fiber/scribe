@@ -62,21 +62,33 @@ export class MemoryTrigger<TRow> implements DeclaredTrigger<TRow> {
   readonly #deletes: Array<DeclaredChangeHandler<DeclaredDeleteChange<TRow>>> = [];
   readonly #fields = new Map<keyof TRow, Array<DeclaredChangeHandler<DeclaredFieldChange<TRow, keyof TRow>>>>();
 
+  /** The {@link DeclaredTrigger.onInsert} implementation: records `handle`, called back by {@link sawInsert}. */
   onInsert(handle: DeclaredChangeHandler<DeclaredInsertChange<TRow>>): DeclaredTrigger<TRow> {
     this.#inserts.push(handle);
     return this;
   }
 
+  /** The {@link DeclaredTrigger.onUpdate} implementation: records `handle`, called back by {@link sawUpdate}. */
   onUpdate(handle: DeclaredChangeHandler<DeclaredUpdateChange<TRow>>): DeclaredTrigger<TRow> {
     this.#updates.push(handle);
     return this;
   }
 
+  /** The {@link DeclaredTrigger.onDelete} implementation: records `handle`, called back by {@link sawDelete}. */
   onDelete(handle: DeclaredChangeHandler<DeclaredDeleteChange<TRow>>): DeclaredTrigger<TRow> {
     this.#deletes.push(handle);
     return this;
   }
 
+  /**
+   * The {@link DeclaredTrigger.onField} implementation: records `handle` under `field`, called
+   * back by {@link sawField}.
+   *
+   * @remarks
+   * `_moving` is accepted to match the port's signature but never consulted: a test hands a change
+   * to `sawField` directly, so it already chose which move to simulate, and filtering it again here
+   * would only let a case silently pass a transition its own call never asked for.
+   */
   onField<F extends keyof TRow>(
     field: F,
     handle: DeclaredChangeHandler<DeclaredFieldChange<TRow, F>>,
@@ -116,6 +128,11 @@ export class MemoryTriggers implements TriggerDriver {
   /** Every watch opened so far, by the name it answers to. */
   readonly opened: Map<string, MemoryTrigger<never>> = new Map<string, MemoryTrigger<never>>();
 
+  /**
+   * The {@link TriggerDriver.watch} implementation: opens a {@link MemoryTrigger} for `table`, or
+   * hands back the one already opened under the same name so a second declaration on the same
+   * table shares handlers with the first instead of watching in isolation.
+   */
   watch<TRow>(table: string, options?: DeclaredTriggerOptions): DeclaredTrigger<TRow> {
     const name = options?.name ?? table;
     const already = this.opened.get(name);
