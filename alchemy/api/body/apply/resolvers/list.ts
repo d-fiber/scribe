@@ -42,7 +42,7 @@ import type { FieldResolver } from "./resolver.ts";
 import { PrimitiveFieldResolver } from "./primitive.ts";
 
 /** Everything a list may be declared to hold, one item at a time. */
-type ListItemType =
+export type ListItemType =
   | PrimitiveType
   | typeof File
   | NestedMarker<BodySchema>

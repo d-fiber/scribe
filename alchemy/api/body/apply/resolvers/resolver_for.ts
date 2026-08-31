@@ -34,10 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { BodyFieldType, FormFieldType } from "../../field_types.ts";
+import type { BodyFieldType, BodySchema, FormFieldType, PrimitiveType } from "../../field_types.ts";
 import { isListMarker, isNestedMarker } from "../../markers.ts";
 import type { FieldResolver } from "./resolver.ts";
-import { ListFieldResolver } from "./list.ts";
+import { ListFieldResolver, type ListItemType } from "./list.ts";
 import { NestedFieldResolver } from "./nested.ts";
 import { PrimitiveFieldResolver } from "./primitive.ts";
 
@@ -50,10 +50,7 @@ import { PrimitiveFieldResolver } from "./primitive.ts";
  * seen first, because its resolver is the one that will look inside for the other.
  */
 export function resolverFor(type: BodyFieldType | FormFieldType): FieldResolver {
-  // deno-lint-ignore no-explicit-any
-  if (isListMarker(type)) return new ListFieldResolver(type.type as any);
-  // deno-lint-ignore no-explicit-any
-  if (isNestedMarker(type)) return new NestedFieldResolver(type.schema as any);
-  // deno-lint-ignore no-explicit-any
-  return new PrimitiveFieldResolver(type as any);
+  if (isListMarker(type)) return new ListFieldResolver(type.type as ListItemType);
+  if (isNestedMarker(type)) return new NestedFieldResolver(type.schema as BodySchema);
+  return new PrimitiveFieldResolver(type as PrimitiveType | typeof File);
 }
