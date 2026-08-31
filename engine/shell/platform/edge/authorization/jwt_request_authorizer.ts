@@ -40,6 +40,16 @@ import { bearerToken } from "./bearer_token.ts";
 import type { RequestAuthorizer } from "./request_authorizer.ts";
 import type { TokenVerifier } from "./token_verifier.ts";
 
+/**
+ * The {@link RequestAuthorizer} a deployment gets when `config.verifyJwt` is turned on.
+ *
+ * @remarks
+ * The verifier itself is handed in rather than built here, because which one applies is a
+ * deployment-wide choice made once by `factory.ts`: symmetric, asymmetric, or a mix of both
+ * depending on which algorithms the deployment declared. This class only ever asks the verifier
+ * it was given for a yes or no, so a new signing scheme is a new {@link TokenVerifier}, never a
+ * change here.
+ */
 export class JwtRequestAuthorizer implements RequestAuthorizer {
   readonly #verifier: TokenVerifier;
   readonly #exemptServices: ReadonlySet<string>;
@@ -49,6 +59,18 @@ export class JwtRequestAuthorizer implements RequestAuthorizer {
     this.#exemptServices = new Set(exemptServices);
   }
 
+  /**
+   * The {@link RequestAuthorizer.authorize} implementation.
+   *
+   * @remarks
+   * A preflight `OPTIONS` request carries no bearer token by definition, a browser sends it before
+   * the real request to ask what is allowed, so refusing it here would break CORS for every
+   * authenticated route rather than protect anything. A service named in `exemptServices` is let
+   * through the same way, for a function a deployment has decided should answer without a caller
+   * proving who they are. Every other request needs a bearer token that the verifier accepts;
+   * missing and invalid are told apart in the response so a caller who sent nothing does not read
+   * the same as one whose token failed to verify.
+   */
   async authorize(
     request: Request,
     service: string,

@@ -36,6 +36,14 @@
 
 import type { Future } from "@scribe/alchemy";
 
+/**
+ * Answers a request by running it against a freshly created worker for `servicePath`.
+ *
+ * @remarks
+ * `EdgeFunctionsRuntime` reaches a worker only through this interface, never through
+ * {@link EdgeWorkerDispatcher} directly, so a test can hand it a dispatcher that never touches the
+ * real edge platform at all.
+ */
 export interface WorkerDispatcher {
   dispatch(request: Request, servicePath: string): Future<Response>;
 }

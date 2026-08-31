@@ -36,8 +36,21 @@
 
 import type { Future } from "@scribe/alchemy";
 
+/**
+ * Checks a bearer JWT against one signing scheme.
+ *
+ * @remarks
+ * There is one implementation per scheme, {@link HmacTokenVerifier} for a shared secret and
+ * {@link JwksTokenVerifier} for a remote key set, rather than one verifier that branches on the
+ * token's own `alg` header: a token gets to name the algorithm it was signed with, so a verifier
+ * that trusted that header would let a caller downgrade to whichever scheme is weakest. Which
+ * verifier answers for which algorithm is instead decided once, from this deployment's own
+ * configuration, by {@link AlgorithmTokenVerifier}.
+ */
 export interface TokenVerifier {
   /** The JWT `alg` values this verifier accepts, handed to jose explicitly so nothing beyond them is ever trusted. */
   readonly algorithms: readonly string[];
+
+  /** Whether `token`'s signature verifies against this scheme's own key material. */
   verify(token: string): Future<boolean>;
 }

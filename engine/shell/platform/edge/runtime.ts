@@ -42,6 +42,16 @@ import type { RequestAuthorizer } from "./authorization/request_authorizer.ts";
 import type { WorkerDispatcher } from "./dispatch/worker_dispatcher.ts";
 import type { ServiceResolver } from "./services/service_resolver.ts";
 
+/**
+ * The three collaborators `EdgeFunctionsRuntime` composes into a request pipeline.
+ *
+ * @remarks
+ * Handed in rather than constructed inside {@link EdgeFunctionsRuntime}, because each one already
+ * has its own reason to vary independently: a resolver that reads the filesystem differently in a
+ * test, an authorizer chosen by whether JWT verification is on, a dispatcher that knows how to
+ * reach the platform's own worker isolates. Building them here would tie all three choices to one
+ * constructor instead of leaving each to the code that already decides it.
+ */
 export interface EdgeRuntimeCollaborators {
   /** Turns an incoming path into the service that answers it. */
   readonly resolver: ServiceResolver;
@@ -53,8 +63,18 @@ export interface EdgeRuntimeCollaborators {
   readonly dispatcher: WorkerDispatcher;
 }
 
+/**
+ * The `Runtime` this deployment boots on the edge platform.
+ *
+ * @remarks
+ * Unlike `engine/shell/platform/server/runtime.ts`, which serves every node from one long-lived
+ * process, this runtime spins up a fresh worker isolate per resolved service on every request. It
+ * exists as its own `Runtime` rather than a mode of the other one because the two differ in more
+ * than how they listen: they resolve, authorize and dispatch through entirely different
+ * collaborators, matched to what each platform actually offers.
+ */
 export class EdgeFunctionsRuntime extends Runtime {
-  /** This runtime's label in `BootSequence` logging: `edge`. */
+  /** This runtime's label in `BootSequence` logging, and the prefix every line it logs carries. */
   override readonly name = "edge";
 
   readonly #resolver: ServiceResolver;
@@ -68,6 +88,16 @@ export class EdgeFunctionsRuntime extends Runtime {
     this.#dispatcher = collaborators.dispatcher;
   }
 
+  /**
+   * Resolves `request` to a service, authorizes it, and dispatches it to that service's worker.
+   *
+   * @remarks
+   * Authorization runs even when resolution finds nothing, so a request the deployment refuses
+   * never leaks whether the function it named exists. An unresolved request that does pass
+   * authorization is answered with `missing_function_name` instead of falling through to a
+   * dispatch that has nothing to dispatch to. Anything else that goes wrong is logged and answered
+   * as an internal error rather than left to propagate.
+   */
   async handle(request: Request): Future<Response> {
     try {
       const resolved = await this.#resolver.resolve(
@@ -94,6 +124,15 @@ export class EdgeFunctionsRuntime extends Runtime {
     }
   }
 
+  /**
+   * The {@link Runtime.listen} implementation.
+   *
+   * @remarks
+   * Reaches the host through {@link Listeners} rather than opening a socket itself, the same
+   * indirection `engine/runtime/scholium/` uses everywhere a host capability is needed: this file
+   * never has to know how a socket is opened on the platform underneath it, only that `serve`
+   * exists.
+   */
   protected override listen(): void {
     Listeners.get().serve((request) => this.handle(request));
   }

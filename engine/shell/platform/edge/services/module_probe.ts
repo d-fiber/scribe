@@ -37,10 +37,19 @@
 import type { Future } from "@scribe/alchemy";
 import { FileSystems } from "@scribe/alchemy";
 
+/**
+ * Whether a directory the resolver is considering actually holds a runnable service.
+ *
+ * @remarks
+ * A seam of its own so `DirectoryServiceResolver` never touches a filesystem API directly: a test
+ * hands it a probe that answers from memory, which is what keeps resolver tests from needing a
+ * real directory tree on disk to run against.
+ */
 export interface ModuleProbe {
   hasModule(directory: string): Future<boolean>;
 }
 
+/** The {@link ModuleProbe} that checks the real filesystem, the one the resolver uses outside a test. */
 export class FilesystemModuleProbe implements ModuleProbe {
   readonly #entryFile: string;
 
@@ -48,6 +57,16 @@ export class FilesystemModuleProbe implements ModuleProbe {
     this.#entryFile = entryFile;
   }
 
+  /**
+   * The {@link ModuleProbe.hasModule} implementation.
+   *
+   * @remarks
+   * `directory` must exist, be a directory, and contain this probe's entry file, so a path that
+   * merely happens to share a name with an unrelated file is never mistaken for a service. Any
+   * read failure answers `false` rather than throwing, since the resolver is only ever asking
+   * whether a guess panned out, and a filesystem error answering the same as a directory that
+   * simply is not there lets the resolver fall through to its next guess instead of crashing on one.
+   */
   async hasModule(directory: string): Future<boolean> {
     try {
       const disk = FileSystems.get().open();

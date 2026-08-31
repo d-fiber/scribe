@@ -36,6 +36,15 @@
 
 import { environment } from "@scribe/runtime/scholium/env.ts";
 
+/**
+ * How the edge platform is configured for this deployment.
+ *
+ * @remarks
+ * Read once, at boot, through {@link fromEnvironment}, rather than having each collaborator read
+ * its own settings from the environment as it is built: a private constructor is what makes that
+ * the only way to get one, so nothing downstream can end up with a value the environment changed
+ * after boot.
+ */
 export class EdgeConfig {
   /** The directory on disk that holds the deployed functions, one subdirectory per service. */
   readonly functionsRoot: string;
@@ -71,6 +80,16 @@ export class EdgeConfig {
     this.workerTimeoutMs = values.workerTimeoutMs;
   }
 
+  /**
+   * Reads this deployment's edge configuration from the environment.
+   *
+   * @remarks
+   * `functionsRoot`, `memoryLimitMb` and `workerTimeoutMs` are fixed rather than read from a
+   * variable, because they describe the container image and the platform's own isolate limits, not
+   * a choice a deployment makes: nothing in this codebase runs the edge functions from anywhere
+   * else, so a setting for them would be one more value to keep in sync with the image for no
+   * deployment to ever actually change.
+   */
   static fromEnvironment(): EdgeConfig {
     return new EdgeConfig({
       functionsRoot: "/home/deno/functions",
