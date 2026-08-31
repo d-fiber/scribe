@@ -38,7 +38,7 @@ import { equal } from "./equal.ts";
 import { difference, format } from "./error.ts";
 
 /** What a constructor looks like when all that matters is what it builds. */
-// deno-lint-ignore no-explicit-any
+// deno-lint-ignore no-explicit-any -- a constructor's parameters are contravariant, so unknown[] rejects one with typed arguments.
 type Constructor<T> = abstract new (...args: any[]) => T;
 
 /**
