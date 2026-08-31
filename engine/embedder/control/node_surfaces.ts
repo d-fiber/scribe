@@ -37,6 +37,15 @@
 import type { Hono } from "hono";
 import { firstSegmentOf, stripPrefix } from "@scribe/runtime/http/pathname.ts";
 
+/**
+ * A mounted node's own Hono app, together with the request path as that node sees it.
+ *
+ * @remarks
+ * A node is mounted under its own name, so a request routed here has already had that leading
+ * segment matched by the embedder's own dispatch: `subPath` is what remains once that segment is
+ * gone, which is what lets a node's own routes be written as if they mounted at the root, without
+ * knowing what prefix the embedder put them behind.
+ */
 export interface NodeSurface {
   /** The node's own Hono app, mounted once resolution has stripped the node's leading segment. */
   readonly app: Hono;

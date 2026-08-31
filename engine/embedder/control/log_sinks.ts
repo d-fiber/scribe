@@ -99,12 +99,29 @@ export class WorkerLogSinks implements LogRouting {
     return segment !== "" && this.#nodes.has(segment) ? segment : null;
   }
 
+  /**
+   * The {@link LogRouting.claims} implementation.
+   *
+   * @remarks
+   * `node`'s own sink is checked first, so a node with a `_logs.ts` of its own is never routed to
+   * the project root even when one exists: the two are not layered, a node either handles its own
+   * logs or falls all the way through to the root, never both.
+   */
   claims(node: string | null): boolean {
     if (node !== null && this.#withSink.has(node)) return true;
 
     return this.#root;
   }
 
+  /**
+   * The {@link LogRouting.deliver} implementation.
+   *
+   * @remarks
+   * Routes to `node`'s own sink when it has one, otherwise to the project's root sink, matching
+   * exactly what {@link claims} just answered: a caller is expected to check `claims` before
+   * calling this, so the fallback here exists to keep the two in agreement rather than to decide
+   * anything on its own.
+   */
   async deliver(node: string | null, entries: readonly LoggedEntry[]): Future<void> {
     const target = node !== null && this.#withSink.has(node) ? node : null;
 

@@ -41,6 +41,15 @@ import { RequestScope } from "@scribe/runtime/scope.ts";
 
 const FALLBACK_TTL_MS = 300_000;
 
+/**
+ * A capability token's worth: the invocation context a redeemed call replays, and who it proved.
+ *
+ * @remarks
+ * A grant is issued for one invocation and lets a worker call back into the host as if it were
+ * still inside the request that spawned it. `request` and `bodyBytes` are replayed through
+ * `RequestScope.run` so that code sees the same request, and `identity` carries whatever the
+ * original caller proved.
+ */
 export interface CapabilityGrant {
   /** The request the invocation carried, replayed through `RequestScope.run` when this grant is redeemed. */
   readonly request: Request;
@@ -79,6 +88,7 @@ interface StoredGrant extends CapabilityGrant {
   readonly expiresAt: number | null;
 }
 
+/** Raised when a presented capability token names no grant the store still holds. */
 export class UnknownCapabilityToken extends Error {
   constructor() {
     super("The capability token is unknown, expired or already revoked.");

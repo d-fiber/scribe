@@ -53,9 +53,25 @@ const SLOTS: Record<ProjectSlot, SlotSpec> = {
   },
 };
 
+/**
+ * The {@link ProjectHost} this framework installs: a project's own code, imported in-process.
+ *
+ * @remarks
+ * Every slot resolves through a dynamic `@app/` import, cached after the first resolution so a
+ * slot that failed once does not retry the import on every later call.
+ */
 export class InProcessHost implements ProjectHost {
   readonly #resolved = new Map<ProjectSlot, unknown>();
 
+  /**
+   * The {@link ProjectHost.load} implementation.
+   *
+   * @remarks
+   * Whether a failed import logs depends on `degradesSilently`: a theme override is optional by
+   * design, so a project that never wrote one should not see a warning at every boot, while a slot
+   * meant to always exist would need its failure heard. Both currently declared slots degrade
+   * silently, since neither theme override is required.
+   */
   async load<T>(slot: ProjectSlot): Future<T | null> {
     const cached = this.#resolved.get(slot);
     if (cached !== undefined) return cached as T | null;
