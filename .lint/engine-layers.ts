@@ -35,80 +35,67 @@
 // LICENSE file, the LICENSE file governs.
 
 import { forEachModuleSpecifier, type Rule, type Violation } from "./ast.ts";
+import { LAYER_SPECIFIERS } from "./engine_layers.generated.ts";
 
 /**
  * The workspace root, taken from where this rule sits rather than from the process.
  *
- * The file is `<root>/.lint/member-escape.ts`, so one directory up is the root. It is read once,
- * at load, and never per file: a rule runs for every file in the repository and an environment
- * call there is both wasteful and, on some platforms, fatal.
- *
- * Nothing here names the checkout. Cloning the repository under any name moves this file with it.
+ * The file is `<root>/.lint/engine-layers.ts`, so one directory up is the root. It is read once,
+ * at load, and never per file, for the same reason `member-escape.ts` reads it once: a rule runs
+ * for every file in the repository, and an environment call there is both wasteful and, on some
+ * platforms, fatal.
  */
 const ROOT = new URL("../", import.meta.url).pathname.replace(/\/$/, "");
 
-/**
- * The directories a workspace member sits directly under, relative to the root.
- *
- * They are matched as a prefix of the path relative to the root, never as a substring: a
- * generated stub written to `sdk/js/gen/scribe/engine/packages/<name>/` carries both words in its
- * path and belongs to no member, and searching anywhere in the string would take it for one.
- */
-const MEMBER_ROOTS = ["engine/", "packages/"] as const;
-
-/** The members that sit at the root rather than under a directory of their own. */
-const ROOT_MEMBERS = ["alchemy", "sdk/js", "tests"] as const;
-
-/** The member `filename` belongs to, as an absolute directory, or null when it is in none. */
-function memberOf(filename: string): string | null {
+/** The layer `filename` sits in, as one of the keys of {@link LAYER_SPECIFIERS}, or null outside all five. */
+function layerOf(filename: string): string | null {
   const root = `${ROOT}/`;
   if (!filename.startsWith(root)) return null;
 
   const relative = filename.slice(root.length);
-  for (const under of MEMBER_ROOTS) {
-    if (!relative.startsWith(under)) continue;
-
-    const rest = relative.slice(under.length);
-    if (!rest.includes("/")) continue;
-
-    return `${root}${under}${rest.split("/")[0]}/`;
+  for (const layer of Object.keys(LAYER_SPECIFIERS)) {
+    if (relative.startsWith(layer)) return layer;
   }
 
-  for (const member of ROOT_MEMBERS) {
-    if (relative.startsWith(`${member}/`)) return `${root}${member}/`;
-  }
   return null;
 }
 
-/** Where `specifier` lands, read from the directory `filename` sits in. */
-function resolvedFrom(filename: string, specifier: string): string {
-  const segments = filename.split("/").slice(0, -1);
-  for (const step of specifier.split("/")) {
-    if (step === "." || step === "") continue;
-    if (step === "..") segments.pop();
-    else segments.push(step);
-  }
-  return segments.join("/");
+/**
+ * Whether `allowed` clears `specifier`, matching the way an import map itself resolves a
+ * specifier: an entry ending in `/` matches by prefix, and any other entry matches only whole.
+ *
+ * @remarks
+ * `@scribe/foundation` and `@scribe/foundation/cache` are two different entries in the map this
+ * rule reads, not one general `@scribe/foundation/` prefix, because the framework's own `imports`
+ * never declared that general form either: a layer that may read `foundation/cache` was never
+ * handed the rest of the package by the same line. Matching on prefix alone here would grant more
+ * than the `deno.json` this rule replaced ever did.
+ */
+function clears(allowed: readonly string[], specifier: string): boolean {
+  return allowed.some((entry) => entry.endsWith("/") ? specifier.startsWith(entry) : specifier === entry);
 }
 
-export const memberEscape: Rule = {
-  name: "member-escape",
+export const engineLayers: Rule = {
+  name: "engine-layers",
 
   check(sourceFile, filename) {
-    const home = memberOf(filename);
-    if (home === null) return [];
+    const layer = layerOf(filename);
+    if (layer === null) return [];
 
+    const allowed = LAYER_SPECIFIERS[layer];
     const violations: Violation[] = [];
 
     forEachModuleSpecifier(sourceFile, ({ node, specifier }) => {
-      if (!specifier.startsWith(".")) return;
-      if (resolvedFrom(filename, specifier).startsWith(home)) return;
+      if (!specifier.startsWith("@scribe/")) return;
+      if (clears(allowed, specifier)) return;
 
       violations.push({
         node,
-        message: `"${specifier}" climbs out of this member. A file of another member is ` +
-          `reached by the specifier the root deno.json declares for it, or refused by ` +
-          `engine-layers.ts when the layer order forbids it. A path walks around both checks.`,
+        message: `"${specifier}" reaches past what ${layer} may see. The engine keeps a one-way ` +
+          `order, runtime under kernel under embedder under shell, contracts under all four, and ` +
+          `this specifier belongs to a layer above this file or one this file was never handed. ` +
+          `Deno's own resolution no longer refuses this, now that every layer shares one import ` +
+          `map, so this rule is what still does.`,
       });
     });
 
