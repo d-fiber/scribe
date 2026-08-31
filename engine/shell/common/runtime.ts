@@ -40,10 +40,12 @@ import type { Bootstrapper } from "./bootstrapper.ts";
 import { BootSequence } from "./boot_sequence.ts";
 import { SignalWatcher } from "./signals.ts";
 
+/** The lifecycle every platform's runtime follows: boot, arm a shutdown signal, then listen. */
 export abstract class Runtime {
   /** This runtime's label, passed to `BootSequence` and printed ahead of every line it logs. */
   abstract readonly name: string;
 
+  /** Boots this runtime's bootstrappers, arms its shutdown signals, then starts listening. */
   async start(): Future<void> {
     const sequence = new BootSequence(this.name, this.bootstrappers());
     await sequence.boot();
@@ -56,13 +58,19 @@ export abstract class Runtime {
     this.listen();
   }
 
+  /** The bootstrappers `start` runs in order before this runtime listens. Empty by default. */
   protected bootstrappers(): readonly Bootstrapper[] {
     return [];
   }
 
+  /**
+   * The signals that trigger `BootSequence.shutdown` once armed. Empty by default, since not
+   * every platform can watch process signals the way a long-lived server can.
+   */
   protected shutdownSignals(): readonly ShutdownSignal[] {
     return [];
   }
 
+  /** Starts answering requests, implemented per platform. */
   protected abstract listen(): void;
 }

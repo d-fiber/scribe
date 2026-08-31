@@ -41,6 +41,7 @@ import type { ShutdownSignal } from "@scribe/runtime/scholium/process.ts";
 
 export type ShutdownHandler = () => Future<void> | void;
 
+/** Runs a shutdown handler when one of the watched signals arrives, tolerating a signal the host cannot watch. */
 export class SignalWatcher {
   readonly #signals: readonly ShutdownSignal[];
   readonly #onShutdown: ShutdownHandler;
@@ -50,6 +51,10 @@ export class SignalWatcher {
     this.#onShutdown = onShutdown;
   }
 
+  /**
+   * Registers a listener for each signal this watcher was given, logging and skipping any the
+   * host has no listener for rather than letting the whole watch fail.
+   */
   watch(): void {
     for (const signal of this.#signals) {
       try {
