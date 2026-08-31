@@ -38,6 +38,15 @@ import type { MiddlewareHandler } from "hono";
 import { Hono } from "hono";
 import { honoRouter } from "@scribe/kernel/http/routing/hono_router.ts";
 
+/**
+ * A group of routes declared on a Hono app.
+ *
+ * @remarks
+ * Built once through {@link create} rather than instantiated directly, because the Hono app itself
+ * has to exist before `routes` can declare anything on it: `build` is what guarantees the order,
+ * middleware installed first, then routes, every time, so a subclass never has to remember to
+ * call the base constructor's setup in the right sequence itself.
+ */
 export abstract class Router {
   readonly #middleware?: MiddlewareHandler;
 
@@ -45,6 +54,7 @@ export abstract class Router {
     this.#middleware = middleware;
   }
 
+  /** Declares this router's routes on `app`, called once by {@link build} after middleware is installed. */
   protected abstract routes(app: Hono): void;
 
   private build(): Hono {
@@ -54,6 +64,7 @@ export abstract class Router {
     return app;
   }
 
+  /** Builds `this` router as a Hono app: an instance, its middleware installed, then its own routes declared. */
   static create<T extends Router, TArgs extends unknown[]>(
     this: new (...args: TArgs) => T,
     ...args: TArgs
