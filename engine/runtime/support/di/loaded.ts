@@ -34,42 +34,42 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { ScribeServer } from "@scribe/sdk";
-import type { DeclaredNode, DiscoveredLogSink, DiscoveredRoute } from "@scribe/sdk";
-import { wireGeneratedSingletons } from "@scribe/runtime/support/di/loaded.ts";
+/**
+ * Imports `@generated/di.ts` once, so every `@Singleton` class a project wrote registers itself
+ * before anything resolves it.
+ *
+ * @remarks
+ * A class marked `@Singleton` puts itself in the shared container the moment its module is
+ * imported, so there is nothing to call and nothing to order once that import has happened: this
+ * is the whole of what wiring a project's own services takes. It plays the same role for a
+ * project's own services that `mountedPackages` in `../packages/mounted.ts` plays for the
+ * framework's own packages, one file simpler, because a package's `wires` step still has to run
+ * at the right moment while a `@Singleton` class only has to exist.
+ *
+ * A project with no `@Singleton` class writes an empty `di.ts`, and a project `forge` was never
+ * run against writes none at all: the second is read the same as the first, since a worker has to
+ * start whether or not its project uses the container.
+ */
 
-/** What `@generated/routes.ts` exports, which is the whole of what a project serves. */
-interface GeneratedRoutes {
-  /** The nodes the project's manifest arms, with what each one lets in. */
-  readonly nodes: readonly DeclaredNode[];
+import type { Future } from "@scribe/alchemy";
+import { isMissingModule } from "../extensions/missing_module.ts";
 
-  /** Every route found under the directory a node is served by. */
-  readonly routes: readonly DiscoveredRoute[];
-
-  /** The log sinks the project declared, if it declared any. */
-  readonly logSinks?: readonly DiscoveredLogSink[];
-}
+let loaded: Future<void> | null = null;
 
 /**
- * Runs the project this worker was given, and nothing else.
+ * Imports `@generated/di.ts` for its effect, once per process.
  *
- * It is the framework's own entry point and not the project's: what used to be
- * a `main.ts` every project copied is the same few lines everywhere, and the
- * nodes it used to declare are read from `config.yaml` now. The import is
- * dynamic because `@generated/` is resolved by the project's import map and not
- * by the framework's, so a static one would be checked against a map that never
- * carries it.
- *
- * The DI wire runs first: a node's own code may resolve a `@Singleton` the
- * moment it answers a call, and nothing here waits for a node to run before
- * that becomes possible.
+ * @throws When the generated file exists and threw while loading; a project that mounts services
+ * this badly is a fault worth stopping the worker over, not one to start silently without.
  */
-await wireGeneratedSingletons();
+export function wireGeneratedSingletons(): Future<void> {
+  loaded ??= import("@generated/di.ts")
+    .then(() => undefined)
+    .catch((raised: unknown) => {
+      if (isMissingModule(raised)) return;
+      console.error("[di] @generated/di.ts threw while loading:", raised);
+      throw raised;
+    });
 
-const generated = await import("@generated/routes.ts") as unknown as GeneratedRoutes;
-
-await new ScribeServer({
-  routes: generated.routes,
-  nodes: generated.nodes,
-  logSinks: generated.logSinks,
-}).run();
+  return loaded;
+}
