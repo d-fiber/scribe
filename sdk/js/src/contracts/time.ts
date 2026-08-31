@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+/** A duration, stored as milliseconds and read out in whichever unit the caller wants. */
 export class Time {
   readonly #ms: number;
 
@@ -51,35 +52,43 @@ export class Time {
     return this.#ms;
   }
 
+  /** This duration in seconds, so a `Time` compares and does arithmetic like a plain number. */
   valueOf(): number {
     return this.value;
   }
 
+  /** This duration in seconds, as a string. */
   toString(): string {
     return String(this.value);
   }
 
+  /** A duration of `n` seconds. */
   static seconds(n: number): Time {
     return new Time(n * 1_000);
   }
 
+  /** A duration of `n` minutes. */
   static minutes(n: number): Time {
     return new Time(n * 60_000);
   }
 
+  /** A duration of `n` hours. */
   static hours(n: number): Time {
     return new Time(n * 3_600_000);
   }
 
+  /** A duration of `n` days. */
   static days(n: number): Time {
     return new Time(n * 86_400_000);
   }
 
+  /** A duration of `n` milliseconds. */
   static ms(n: number): Time {
     return new Time(n);
   }
 }
 
+/** A byte size, stored as bytes and read out in whichever unit the caller wants. */
 export class Size {
   readonly #bytes: number;
 
@@ -92,18 +101,22 @@ export class Size {
     return this.#bytes;
   }
 
+  /** This size in bytes, so a `Size` compares and does arithmetic like a plain number. */
   valueOf(): number {
     return this.#bytes;
   }
 
+  /** A size of `n` bytes. */
   static bytes(n: number): Size {
     return new Size(n);
   }
 
+  /** A size of `n` kilobytes. */
   static kilobytes(n: number): Size {
     return new Size(n * 1_024);
   }
 
+  /** A size of `n` megabytes. */
   static megabytes(n: number): Size {
     return new Size(n * 1_048_576);
   }

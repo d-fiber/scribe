@@ -34,22 +34,43 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+/** One page of a larger result set: the rows it carries, and where it sits within the whole. */
 export interface Pagination<T> {
   /** The rows this page carries, already sliced to the requested size. */
   items: T[];
 
   /** Where this page sits within the full result set. */
   pagination: {
+    /** How many rows came before this page. */
     offset: number;
+
+    /**
+     * How far the result set is known to reach, not a true count.
+     *
+     * `pagination` builds this from what it fetched, `offset + items.length`, plus one more when
+     * a further row proved there is at least one page beyond this: a caller can tell there is more
+     * without the store ever running a separate count query.
+     */
     total: number;
+
+    /** Whether at least one more row exists past this page. */
     has_more: boolean;
   };
 }
 
+/** An empty {@link Pagination}, for a caller that has nothing to page through. */
 export function emptyPagination<T>(): Pagination<T> {
   return { items: [], pagination: { offset: 0, total: 0, has_more: false } };
 }
 
+/**
+ * Slices `rows` into one {@link Pagination} of `size` items starting at `offset`.
+ *
+ * @remarks
+ * `rows` is expected to carry one row past `size`, the store having been asked for `size + 1`.
+ * That extra row is never returned to the caller: its only job is to prove a further page exists,
+ * which `has_more` reads off its presence, so paging never needs a separate count query.
+ */
 export function pagination<T>(
   rows: readonly T[],
   offset: number,

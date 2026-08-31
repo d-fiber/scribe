@@ -36,6 +36,7 @@
 
 import type { Time } from "./time.ts";
 
+/** A quota of calls a caller may make within a window, and what happens once it is spent. */
 export interface RateLimiter {
   /** How many calls a caller may make within one `window`. */
   limit: number;
