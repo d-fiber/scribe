@@ -44,7 +44,7 @@ import { LogRoutes } from "@scribe/kernel/observability/log_routing.ts";
  *
  * A `_logs.ts` is the only thing that says where logs go, so a project that
  * declared none has said it wants none. The host keeps no destination of its
- * own -- no queue, no collector, no terminal -- because any it kept would put
+ * own, no queue, no collector, no terminal, because any it kept would put
  * every deployment on a path nobody asked for, and would have to be turned off
  * by a setting rather than by not asking for it.
  */
