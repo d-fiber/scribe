@@ -67,8 +67,7 @@ export const BASE: unique symbol = Symbol("scribe.base");
  */
 export function instances<T>(
   module: DiscoveredModule,
-  // deno-lint-ignore no-explicit-any
-  base: abstract new (...args: List<any>) => unknown,
+  base: abstract new (...args: List<unknown>) => unknown,
 ): List<T> {
   return Object.values(module)
     .filter((exported): exported is Instantiable<T> =>
