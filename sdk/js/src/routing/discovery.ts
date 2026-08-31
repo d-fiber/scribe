@@ -36,6 +36,7 @@
 
 export type DiscoveredModule = Readonly<Record<string, unknown>>;
 
+/** One route file the generator found on disk, and what it exports. */
 export interface DiscoveredRoute {
   /** The node this route was found under. */
   readonly node: string;
