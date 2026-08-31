@@ -86,6 +86,7 @@ interface ResolvedNode {
   readonly layers: readonly Contribution[];
 }
 
+/** Everything a worker declares: its nodes and routes, and every capability's own declarations. */
 export interface ServerOptions {
   /** The port to listen on. Read from `WORKER_PORT`, or {@link DEFAULT_PORT}, when omitted. */
   readonly port?: number;
@@ -121,6 +122,7 @@ export interface ServerOptions {
   readonly storages?: readonly WorkerStorage[];
 }
 
+/** A worker built from {@link ServerOptions}: compiles its definition once, and serves it as an HTTP handler. */
 export class ScribeServer {
   readonly #options: ServerOptions;
   readonly #nodes: ResolvedNode[];
@@ -134,6 +136,12 @@ export class ScribeServer {
     }));
   }
 
+  /**
+   * Compiles this server's options into a {@link WorkerDefinition}: every route resolved against
+   * its node, every log sink checked against a declared node, and every capability carried through.
+   *
+   * @throws {RoutingError} When a discovered route or log sink names a node nothing declared.
+   */
   definition(): WorkerDefinition {
     const discovered = this.#options.routes ?? [];
     const nodes = this.#nodes;
@@ -163,10 +171,12 @@ export class ScribeServer {
     });
   }
 
+  /** This server's `definition()` compiled into a request handler, ready to serve. */
   handler(): (request: Request) => Promise<Response> {
     return workerHandler(this.definition());
   }
 
+  /** Compiles this server's definition and serves it, on this server's own configured port. */
   run(signal?: AbortSignal): Promise<void> {
     const definition = this.definition();
     const port = this.#options.port ?? env.number(PORT_SETTING, DEFAULT_PORT);
@@ -186,6 +196,14 @@ export class ScribeServer {
     });
   }
 
+  /**
+   * Refuses a route file discovered under a folder config.yaml declares no node for.
+   *
+   * `compileNode` only ever mounts a route under a node it was told to compile, so without this
+   * check a route under an undeclared folder is simply never matched by any node and never
+   * mounted, with nothing to say why. This turns that silent, unreachable route into a build-time
+   * error naming the file and the folder it needs `api.nodes` to declare.
+   */
   #rejectUndeclaredRoutes(discovered: readonly DiscoveredRoute[]): void {
     const declared = new Set(this.#nodes.map((node) => node.name));
 
