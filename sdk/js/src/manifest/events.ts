@@ -37,6 +37,7 @@
 import type { Listen } from "../contracts/access.ts";
 import type { Size, Time } from "../contracts/time.ts";
 
+/** A message as a queue handler sees it. */
 export interface QueueMessage<T> {
   /** The identifier the queue assigned when this message was enqueued. */
   readonly messageId: string;
@@ -55,6 +56,7 @@ export type QueueHandler<T> = (
   messages: readonly QueueMessage<T>[],
 ) => Promise<readonly string[]> | readonly string[];
 
+/** A queue a worker declares: its delivery shape, and the handler that processes a batch. */
 export interface WorkerQueue<T = unknown> {
   /** The queue's name, used to address it and to derive its identifier. */
   readonly name: string;
@@ -72,6 +74,7 @@ export interface WorkerQueue<T = unknown> {
   readonly handler: QueueHandler<T>;
 }
 
+/** What a hook handler may ask for beyond just running: halting the chain, or rewriting the row. */
 export interface HookOutcome {
   /** Whether this outcome stops the rest of the trigger chain from running. */
   readonly halted?: boolean;
@@ -84,6 +87,7 @@ export type HookHandler = (
   payload: unknown,
 ) => Promise<HookOutcome | void> | HookOutcome | void;
 
+/** A hook a worker declares: the row event it reacts to, and the handler that runs on it. */
 export interface WorkerHook {
   /** The database event this hook reacts to, matching a row insert, update or delete. */
   readonly event: string;
@@ -97,6 +101,7 @@ export interface WorkerHook {
 
 export type CronHandler = () => Promise<void> | void;
 
+/** A scheduled job a worker declares: its schedule, and the handler it invokes. */
 export interface WorkerCron {
   /** The cron's name, used to address it and to derive its identifier. */
   readonly name: string;
@@ -108,6 +113,7 @@ export interface WorkerCron {
   readonly handler: CronHandler;
 }
 
+/** A search index a worker declares: what it indexes, and the engine-specific shape it indexes with. */
 export interface WorkerSearcher {
   /** The name of the table or view this searcher indexes. */
   readonly entity: string;
@@ -122,6 +128,7 @@ export interface WorkerSearcher {
   readonly settings?: unknown;
 }
 
+/** A broadcast channel a worker declares: what it carries, and how open it is by default. */
 export interface WorkerRealtime {
   /** The name of the channel this declaration broadcasts on. */
   readonly channel: string;
@@ -133,6 +140,7 @@ export interface WorkerRealtime {
   readonly listen: Listen;
 }
 
+/** A storage folder a worker declares: where objects resolve to, and what an upload must satisfy. */
 export interface WorkerStorage {
   /** The name this storage folder is declared and addressed under. */
   readonly folder: string;
@@ -147,38 +155,62 @@ export interface WorkerStorage {
   readonly mimeTypes: readonly string[];
 }
 
+/**
+ * `queue` unchanged, typed as a {@link WorkerQueue}.
+ *
+ * @remarks
+ * A worker author writes the declaration as a plain object literal, and this exists so that
+ * literal gets checked and autocompleted against `WorkerQueue<T>` at the call site, the way
+ * `T` is inferred from `payload`'s shape, rather than the author having to annotate the object
+ * by hand or the framework accepting whatever shape shows up.
+ */
 export function defineQueue<T>(queue: WorkerQueue<T>): WorkerQueue<T> {
   return queue;
 }
 
+/** The {@link defineQueue} of a hook declaration. */
 export function defineHook(hook: WorkerHook): WorkerHook {
   return hook;
 }
 
+/** The {@link defineQueue} of a cron declaration. */
 export function defineCron(cron: WorkerCron): WorkerCron {
   return cron;
 }
 
+/** The {@link defineQueue} of a searcher declaration. */
 export function defineSearcher(searcher: WorkerSearcher): WorkerSearcher {
   return searcher;
 }
 
+/** The {@link defineQueue} of a realtime channel declaration. */
 export function defineRealtime(realtime: WorkerRealtime): WorkerRealtime {
   return realtime;
 }
 
+/** The {@link defineQueue} of a storage folder declaration. */
 export function defineStorage(storage: WorkerStorage): WorkerStorage {
   return storage;
 }
 
+/** The identifier `WorkerDefinition` indexes `queue` by, its name prefixed so it cannot collide with a hook or cron of the same name. */
 export function queueIdOf(queue: WorkerQueue<never>): string {
   return `queue:${queue.name}`;
 }
 
+/**
+ * The identifier `WorkerDefinition` indexes `hook` by.
+ *
+ * @remarks
+ * Several hooks can react to the same `event` at different priorities, so the event name alone
+ * would collide; `ordinal`, the hook's position in the worker's own declaration order, is what
+ * keeps each one addressable.
+ */
 export function hookIdOf(hook: WorkerHook, ordinal: number): string {
   return `hook:${hook.event}:${ordinal}`;
 }
 
+/** The identifier `WorkerDefinition` indexes `cron` by, its name prefixed so it cannot collide with a queue or hook of the same name. */
 export function cronIdOf(cron: WorkerCron): string {
   return `cron:${cron.name}`;
 }

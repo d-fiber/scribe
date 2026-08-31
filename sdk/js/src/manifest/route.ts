@@ -42,6 +42,7 @@ export type RouteHandler = (
   ctx: RequestContext,
 ) => Response | Promise<Response>;
 
+/** One route a worker declares: its method and path, who may call it, and the handler that answers it. */
 export interface WorkerRoute {
   /** The HTTP method this route answers. */
   readonly method: RouteMethod;
@@ -71,10 +72,22 @@ export interface WorkerRoute {
   readonly handler: RouteHandler;
 }
 
+/** The identifier `WorkerDefinition` indexes `route` by, unique as long as no node mounts the same method and path twice. */
 export function routeIdOf(node: string, route: WorkerRoute): string {
   return `${node}:${route.method}:${route.path}`;
 }
 
+/**
+ * The key `WorkerDefinition` groups `route` under to catch two routes that would collide at
+ * request time despite carrying different {@link routeIdOf} identifiers.
+ *
+ * @remarks
+ * `:id` and `:user_id` at the same position in a path are two different route identifiers but the
+ * same route to an incoming request, since neither the method nor the path shape tells them apart.
+ * Replacing every path parameter with the same placeholder is what turns that collision into an
+ * equal key `WorkerDefinition` can detect at manifest build time instead of at the first ambiguous
+ * request.
+ */
 export function routingKeyOf(node: string, route: WorkerRoute): string {
   const anonymous = route.path.replace(/:[^/]+/g, ":*");
   return `${node}:${route.method}:${anonymous}`;
