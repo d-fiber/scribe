@@ -76,6 +76,7 @@ const EMPTY: QueryState = {
   countExact: false,
 };
 
+/** How `DatabaseQuery.order` sorts one column. */
 export interface OrderOptions {
   /** Whether this column sorts largest first. Ascending when omitted. */
   readonly descending?: boolean;
@@ -84,6 +85,7 @@ export interface OrderOptions {
   readonly nullsFirst?: boolean;
 }
 
+/** One page of rows a query answered, alongside how many rows it matched in total. */
 export interface Page<Row> {
   /** The rows this page carries, in the order the query returned them. */
   readonly rows: readonly Row[];
@@ -92,22 +94,26 @@ export interface Page<Row> {
   readonly count: number;
 }
 
+/** An immutable, chainable query against one table, sent to the host only once a result is read. */
 export class DatabaseQuery<Row extends object> {
   constructor(
     readonly table: string,
     readonly state: QueryState = EMPTY,
   ) {}
 
+  /** Narrows the columns a row carries to `columns`, replacing any earlier selection. */
   select(...columns: readonly (keyof Row & string)[]): DatabaseQuery<Row> {
     return this.#with({ select: columns });
   }
 
+  /** Adds the filters `build` produces, alongside whatever this query already filters on. */
   where(build: (columns: FilterBuilder<Row>) => Filter | readonly Filter[]): DatabaseQuery<Row> {
     const produced = build(filters<Row>());
     const added = Array.isArray(produced) ? produced : [produced as Filter];
     return this.#with({ where: [...this.state.where, ...added] });
   }
 
+  /** Adds a filter group where any one of `build`'s filters may match, instead of requiring all. */
   either(build: (columns: FilterBuilder<Row>) => readonly Filter[]): DatabaseQuery<Row> {
     const group = create(FilterGroupSchema, {
       filters: [...build(filters<Row>())],
@@ -116,6 +122,7 @@ export class DatabaseQuery<Row extends object> {
     return this.#with({ groups: [...this.state.groups, group] });
   }
 
+  /** Adds `column` to the sort order, appended after whatever this query already orders by. */
   order(column: keyof Row & string, options: OrderOptions = {}): DatabaseQuery<Row> {
     const entry = create(OrderSchema, {
       column,
@@ -125,43 +132,52 @@ export class DatabaseQuery<Row extends object> {
     return this.#with({ order: [...this.state.order, entry] });
   }
 
+  /** Caps the rows this query answers to `count`. */
   limit(count: number): DatabaseQuery<Row> {
     return this.#with({ limit: count });
   }
 
+  /** Skips `start` matching rows before the ones this query answers. */
   offset(start: number): DatabaseQuery<Row> {
     return this.#with({ offset: start });
   }
 
+  /** Narrows this query to the inclusive row range from `from` to `to`. */
   range(from: number, to: number): DatabaseQuery<Row> {
     return this.#with({ offset: from, limit: to - from + 1 });
   }
 
+  /** Runs this query and answers every matching row. */
   async rows(): Promise<readonly Row[]> {
     const result = await this.#execute(Operation.SELECT);
     return decodeJson<Row[]>(result.data) ?? [];
   }
 
+  /** Runs this query for a single row, or `null` when nothing matched. */
   async first(): Promise<Row | null> {
     const result = await this.#with({ single: true, limit: 1 }).#execute(Operation.SELECT);
     return decodeJson<Row>(result.data);
   }
 
+  /** Runs this query and answers one page of rows alongside the total match count. */
   async page(): Promise<Page<Row>> {
     const result = await this.#with({ countExact: true }).#execute(Operation.SELECT);
     return { rows: decodeJson<Row[]>(result.data) ?? [], count: Number(result.count) };
   }
 
+  /** Inserts `payload` into this query's table and answers the rows the host wrote back. */
   async insert(payload: Partial<Row> | readonly Partial<Row>[]): Promise<readonly Row[]> {
     const result = await this.#execute(Operation.INSERT, payload);
     return decodeJson<Row[]>(result.data) ?? [];
   }
 
+  /** Updates the rows this query matches with `payload` and answers the ones the host wrote back. */
   async update(payload: Partial<Row>): Promise<readonly Row[]> {
     const result = await this.#execute(Operation.UPDATE, payload);
     return decodeJson<Row[]>(result.data) ?? [];
   }
 
+  /** Inserts `payload`, updating on a conflict over `onConflict` instead, and answers the rows written back. */
   async upsert(
     payload: Partial<Row> | readonly Partial<Row>[],
     onConflict: readonly (keyof Row & string)[] = [],
@@ -170,6 +186,7 @@ export class DatabaseQuery<Row extends object> {
     return decodeJson<Row[]>(result.data) ?? [];
   }
 
+  /** Deletes the rows this query matches and answers the ones the host removed. */
   async remove(): Promise<readonly Row[]> {
     const result = await this.#execute(Operation.DELETE);
     return decodeJson<Row[]>(result.data) ?? [];

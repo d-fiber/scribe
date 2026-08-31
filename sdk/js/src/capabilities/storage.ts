@@ -43,6 +43,7 @@ import { raiseOn } from "./error.ts";
 
 const CAPABILITY = "storage";
 
+/** Where a stored object lives: its declared folder, the folder's path template filled in, and its own name. */
 export interface ObjectLocation {
   /** The name of the declared storage folder this object lives under. */
   readonly folder: string;
@@ -54,6 +55,7 @@ export interface ObjectLocation {
   readonly filename: string;
 }
 
+/** An object already written to storage, and what the store knows about it. */
 export interface StoredObject {
   /** The object's full path, folder and filename resolved together. */
   readonly path: string;
