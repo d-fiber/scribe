@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals, assertRejects } from "@std/assert";
 import { cache, CallScope, CapabilityError, database, host, UnaryServer } from "../mod.ts";
 import {
@@ -85,7 +87,7 @@ async function withHost(
   }
 }
 
-Deno.test("a database query travels as a description the host executes", async () => {
+Scribe.test("a database query travels as a description the host executes", async () => {
   const capture: Capture = { query: null, token: "", trace: "" };
 
   await withHost(capture, [{ id: "1", name: "Fiber", admin_id: "a" }], async () => {
@@ -116,7 +118,7 @@ Deno.test("a database query travels as a description the host executes", async (
   assertEquals(query?.range?.limit, 20);
 });
 
-Deno.test("the capability token of the invocation is replayed on every outgoing call", async () => {
+Scribe.test("the capability token of the invocation is replayed on every outgoing call", async () => {
   const capture: Capture = { query: null, token: "", trace: "" };
 
   await withHost(capture, [], async () => {
@@ -130,7 +132,7 @@ Deno.test("the capability token of the invocation is replayed on every outgoing 
   assertEquals(capture.trace, "trace-42");
 });
 
-Deno.test("a page reads the exact count the host answered", async () => {
+Scribe.test("a page reads the exact count the host answered", async () => {
   const capture: Capture = { query: null, token: "", trace: "" };
 
   await withHost(capture, [{ id: "1", name: "Fiber", admin_id: "a" }], async () => {
@@ -143,7 +145,7 @@ Deno.test("a page reads the exact count the host answered", async () => {
   assertEquals(capture.query?.countExact, true);
 });
 
-Deno.test("a failing capability raises instead of returning a silent null", async () => {
+Scribe.test("a failing capability raises instead of returning a silent null", async () => {
   const capture: Capture = { query: null, token: "", trace: "" };
 
   await withHost(capture, [], async () => {
@@ -157,7 +159,7 @@ Deno.test("a failing capability raises instead of returning a silent null", asyn
   });
 });
 
-Deno.test("calling a capability before the handshake says so instead of hanging", async () => {
+Scribe.test("calling a capability before the handshake says so instead of hanging", async () => {
   host.disconnect();
 
   await assertRejects(() => database.from<Brand>("brands").rows());
@@ -196,7 +198,7 @@ async function withCountingHost(
 
 const SCOPE = { capabilityToken: "token-42", traceId: "trace-42", invocationId: "inv", hostEndpoint: "", node: "" };
 
-Deno.test("three reads read one at a time pay one round trip each", async () => {
+Scribe.test("three reads read one at a time pay one round trip each", async () => {
   await withCountingHost(async (calls) => {
     await CallScope.run(SCOPE, async () => {
       await database.from<Brand>("brands").rows();
@@ -209,7 +211,7 @@ Deno.test("three reads read one at a time pay one round trip each", async () => 
   });
 });
 
-Deno.test("the same three reads given together pay one round trip in total", async () => {
+Scribe.test("the same three reads given together pay one round trip in total", async () => {
   await withCountingHost(async (calls) => {
     const answers = await CallScope.run(SCOPE, () =>
       database.all([
@@ -224,7 +226,7 @@ Deno.test("the same three reads given together pay one round trip in total", asy
   });
 });
 
-Deno.test("a batch answers its queries in the order they were given, not the order they finished", async () => {
+Scribe.test("a batch answers its queries in the order they were given, not the order they finished", async () => {
   await withCountingHost(async () => {
     const answers = await CallScope.run(SCOPE, () =>
       database.all([
@@ -237,7 +239,7 @@ Deno.test("a batch answers its queries in the order they were given, not the ord
   });
 });
 
-Deno.test("a batch of nothing reaches the host not at all", async () => {
+Scribe.test("a batch of nothing reaches the host not at all", async () => {
   await withCountingHost(async (calls) => {
     const answers = await CallScope.run(SCOPE, () => database.all([]));
 

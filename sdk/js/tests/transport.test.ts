@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals, assertRejects } from "@std/assert";
 import { create, fromBinary } from "@bufbuild/protobuf";
 import {
@@ -101,7 +103,7 @@ async function withWorker(run: (client: UnaryClient) => Promise<void>): Promise<
   }
 }
 
-Deno.test("the host discovers the worker by asking for its manifest", async () => {
+Scribe.test("the host discovers the worker by asking for its manifest", async () => {
   await withWorker(async (client) => {
     const manifest = await client.call(Registration.method.describe, {
       hostProtocolVersion: PROTOCOL_VERSION,
@@ -116,7 +118,7 @@ Deno.test("the host discovers the worker by asking for its manifest", async () =
   });
 });
 
-Deno.test("a major protocol mismatch is refused at the handshake", async () => {
+Scribe.test("a major protocol mismatch is refused at the handshake", async () => {
   await withWorker(async (client) => {
     const failure = await assertRejects(
       () =>
@@ -133,7 +135,7 @@ Deno.test("a major protocol mismatch is refused at the handshake", async () => {
   });
 });
 
-Deno.test("an invocation crosses the wire and comes back as a reply", async () => {
+Scribe.test("an invocation crosses the wire and comes back as a reply", async () => {
   await withWorker(async (client) => {
     const reply = await client.call(
       WorkerService.method.invoke,
@@ -149,7 +151,7 @@ Deno.test("an invocation crosses the wire and comes back as a reply", async () =
   });
 });
 
-Deno.test("an unknown procedure answers a failure, not an empty body", async () => {
+Scribe.test("an unknown procedure answers a failure, not an empty body", async () => {
   await withWorker(async (client) => {
     const response = await fetch(new URL("/scribe.v1.Nope/Call", client.endpoint), {
       method: "POST",

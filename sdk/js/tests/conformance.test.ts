@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assert, assertEquals } from "@std/assert";
 import { PROTOCOL_VERSION } from "../mod.ts";
 import { Registration } from "../gen/scribe/protocol/manifest_pb.ts";
@@ -67,13 +69,13 @@ async function protoFiles(): Promise<string[]> {
   return found;
 }
 
-Deno.test("the SDK announces the version the framework carries", async () => {
+Scribe.test("the SDK announces the version the framework carries", async () => {
   const manifest = JSON.parse(await Deno.readTextFile(new URL("deno.json", scribeRoot)));
 
   assertEquals(PROTOCOL_VERSION, manifest.version);
 });
 
-Deno.test("every .proto of the contract has its generated stub in the SDK", async () => {
+Scribe.test("every .proto of the contract has its generated stub in the SDK", async () => {
   const missing: string[] = [];
 
   for (const proto of await protoFiles()) {
@@ -89,7 +91,7 @@ Deno.test("every .proto of the contract has its generated stub in the SDK", asyn
   assertEquals(missing, [], "run `koko-kernel gen proto` to regenerate the stubs");
 });
 
-Deno.test("the procedure paths a foreign SDK must implement are stable", () => {
+Scribe.test("the procedure paths a foreign SDK must implement are stable", () => {
   assertEquals(procedurePath(Registration.method.describe), "/scribe.v1.Registration/Describe");
   assertEquals(procedurePath(WorkerService.method.invoke), "/scribe.v1.Worker/Invoke");
   assertEquals(
@@ -107,7 +109,7 @@ Deno.test("the procedure paths a foreign SDK must implement are stable", () => {
   assertEquals(procedurePath(LogDispatch.method.handle), "/scribe.v1.LogDispatch/Handle");
 });
 
-Deno.test("the generated stubs are versioned, not gitignored", async () => {
+Scribe.test("the generated stubs are versioned, not gitignored", async () => {
   const stub = new URL("gen/scribe/protocol/manifest_pb.ts", sdkRoot);
   const source = await Deno.readTextFile(stub);
 

@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { create } from "@bufbuild/protobuf";
 import {
@@ -134,7 +136,7 @@ function delivery(node: string, actions: readonly string[]) {
   });
 }
 
-Deno.test("the manifest names every node that declared a sink, and the root one", () => {
+Scribe.test("the manifest names every node that declared a sink, and the root one", () => {
   const manifest = describeWorker(projectWith(BOTH).definition());
 
   assertEquals(
@@ -144,7 +146,7 @@ Deno.test("the manifest names every node that declared a sink, and the root one"
   assertEquals(manifest.rootLogSink, true);
 });
 
-Deno.test("a project with no _logs.ts declares none, and is delivered nothing", async () => {
+Scribe.test("a project with no _logs.ts declares none, and is delivered nothing", async () => {
   reset();
   const definition = projectWith([]).definition();
   const manifest = describeWorker(definition);
@@ -157,7 +159,7 @@ Deno.test("a project with no _logs.ts declares none, and is delivered nothing", 
   assertEquals(delivered, []);
 });
 
-Deno.test("a node's entries go to that node's sink and to no other", async () => {
+Scribe.test("a node's entries go to that node's sink and to no other", async () => {
   reset();
   const definition = projectWith(BOTH).definition();
 
@@ -167,7 +169,7 @@ Deno.test("a node's entries go to that node's sink and to no other", async () =>
   assertEquals(actionsOf("root"), []);
 });
 
-Deno.test("a node with no _logs.ts of its own falls back to the root sink", async () => {
+Scribe.test("a node with no _logs.ts of its own falls back to the root sink", async () => {
   reset();
   const definition = projectWith(BOTH).definition();
 
@@ -177,7 +179,7 @@ Deno.test("a node with no _logs.ts of its own falls back to the root sink", asyn
   assertEquals(actionsOf("app"), []);
 });
 
-Deno.test("what belongs to no node reaches the root sink alone", async () => {
+Scribe.test("what belongs to no node reaches the root sink alone", async () => {
   reset();
   const definition = projectWith(BOTH).definition();
 
@@ -188,7 +190,7 @@ Deno.test("what belongs to no node reaches the root sink alone", async () => {
   assertEquals(actionsOf("app"), []);
 });
 
-Deno.test("without a root _logs.ts, what no node claimed is delivered nowhere", async () => {
+Scribe.test("without a root _logs.ts, what no node claimed is delivered nowhere", async () => {
   reset();
   const definition = projectWith([sink("app", { AppLogs })]).definition();
 
@@ -198,7 +200,7 @@ Deno.test("without a root _logs.ts, what no node claimed is delivered nowhere", 
   assertEquals(delivered, []);
 });
 
-Deno.test("an entry arrives stripped of the empty strings the wire carries", async () => {
+Scribe.test("an entry arrives stripped of the empty strings the wire carries", async () => {
   reset();
   const definition = projectWith([sink(null, { ProjectLogs })]).definition();
 
@@ -230,13 +232,13 @@ Deno.test("an entry arrives stripped of the empty strings the wire carries", asy
   });
 });
 
-Deno.test("a sink that throws does not fail the delivery", async () => {
+Scribe.test("a sink that throws does not fail the delivery", async () => {
   const definition = projectWith([sink(null, { BrokenLogs })]).definition();
 
   await deliverLogs(definition, delivery("", ["GET /health"]));
 });
 
-Deno.test("a _logs.ts under a folder config.yaml declares no node for is refused", () => {
+Scribe.test("a _logs.ts under a folder config.yaml declares no node for is refused", () => {
   assertThrows(
     () =>
       new ScribeServer({
@@ -250,7 +252,7 @@ Deno.test("a _logs.ts under a folder config.yaml declares no node for is refused
   );
 });
 
-Deno.test("a _logs.ts that exports no sink is a project that has not written one", () => {
+Scribe.test("a _logs.ts that exports no sink is a project that has not written one", () => {
   const manifest = describeWorker(projectWith([sink("app", {})]).definition());
 
   assertEquals(manifest.nodes.map((node) => node.logSink), [false, false]);
@@ -309,7 +311,7 @@ function actions(count: number, from = 0): LoggedEntry[] {
   return Array.from({ length: count }, (_, index) => logged(`GET /${from + index}`));
 }
 
-Deno.test("each sees every entry, in the order it arrived", async () => {
+Scribe.test("each sees every entry, in the order it arrived", async () => {
   const sink = new Blocks(0);
 
   await sink.receive(actions(3));
@@ -317,7 +319,7 @@ Deno.test("each sees every entry, in the order it arrived", async () => {
   assertEquals(sink.seen, ["GET /0", "GET /1", "GET /2"]);
 });
 
-Deno.test("a block is handed over only once it is full", async () => {
+Scribe.test("a block is handed over only once it is full", async () => {
   const sink = new Blocks(3);
 
   await sink.receive(actions(2));
@@ -327,7 +329,7 @@ Deno.test("a block is handed over only once it is full", async () => {
   assertEquals(sink.blocks, [["GET /0", "GET /1", "GET /2"]]);
 });
 
-Deno.test("a delivery longer than the block is cut, and the remainder waits", async () => {
+Scribe.test("a delivery longer than the block is cut, and the remainder waits", async () => {
   const sink = new Blocks(2);
 
   await sink.receive(actions(5));
@@ -339,7 +341,7 @@ Deno.test("a delivery longer than the block is cut, and the remainder waits", as
   assertEquals(sink.blocks.at(-1), ["GET /4"]);
 });
 
-Deno.test("flushing an empty sink hands over nothing", async () => {
+Scribe.test("flushing an empty sink hands over nothing", async () => {
   const sink = new Blocks(2);
 
   await sink.flush();
@@ -347,7 +349,7 @@ Deno.test("flushing an empty sink hands over nothing", async () => {
   assertEquals(sink.blocks, []);
 });
 
-Deno.test("a block size of zero hands over each delivery as it arrives", async () => {
+Scribe.test("a block size of zero hands over each delivery as it arrives", async () => {
   const sink = new Blocks(0);
 
   await sink.receive(actions(2));
@@ -356,7 +358,7 @@ Deno.test("a block size of zero hands over each delivery as it arrives", async (
   assertEquals(sink.blocks, [["GET /0", "GET /1"], ["GET /2"]]);
 });
 
-Deno.test("a sink that names no size gathers a hundred entries", async () => {
+Scribe.test("a sink that names no size gathers a hundred entries", async () => {
   const sink = new Default();
 
   await sink.receive(actions(99));
@@ -367,7 +369,7 @@ Deno.test("a sink that names no size gathers a hundred entries", async () => {
   assertEquals(sink.blocks[0].length, 100);
 });
 
-Deno.test("a sink that reads neither way drops what it takes without failing", async () => {
+Scribe.test("a sink that reads neither way drops what it takes without failing", async () => {
   const sink = new Silent();
 
   await sink.receive(actions(150));
@@ -390,17 +392,17 @@ function plain(entry: LoggedEntry): string {
   return formatEntry(entry).replaceAll(/\x1b\[[0-9;]*m/g, "");
 }
 
-Deno.test("an exchange that went fine closes on its status alone", () => {
+Scribe.test("an exchange that went fine closes on its status alone", () => {
   assertEquals(plain(exchange({ method: "GET", status: 200 })), "┌ GET    /brand\n└ 200");
 });
 
-Deno.test("a failed exchange closes on what the response said", () => {
+Scribe.test("a failed exchange closes on what the response said", () => {
   assertEquals(
     plain(exchange({ method: "GET", status: 404, preview: '{"error":"no such brand"}' })),
     '┌ GET    /brand\n└ 404  {"error":"no such brand"}',
   );
 });
 
-Deno.test("an entry that is not an exchange stays on one line", () => {
+Scribe.test("an entry that is not an exchange stays on one line", () => {
   assertEquals(plain(logged("cron/sweep")), "INFO  cron/sweep");
 });

@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals } from "@std/assert";
 import { create } from "@bufbuild/protobuf";
 import {
@@ -119,7 +121,7 @@ function invocationFor(routeId: string, body: unknown = undefined) {
   });
 }
 
-Deno.test("an invocation reaches its handler and the response becomes a reply", async () => {
+Scribe.test("an invocation reaches its handler and the response becomes a reply", async () => {
   const worker = workerWith([
     {
       node: "admin",
@@ -140,14 +142,14 @@ Deno.test("an invocation reaches its handler and the response becomes a reply", 
   });
 });
 
-Deno.test("an unknown route identifier fails loudly instead of guessing", async () => {
+Scribe.test("an unknown route identifier fails loudly instead of guessing", async () => {
   const reply = await invoke(workerWith([]), invocationFor("admin:get:/nope"), HOST);
 
   assertEquals(reply.status, 500);
   assertEquals(reply.failure?.code, "unknown_route");
 });
 
-Deno.test("a handler that throws answers a failure the host can log", async () => {
+Scribe.test("a handler that throws answers a failure the host can log", async () => {
   const worker = workerWith([
     {
       node: "admin",
