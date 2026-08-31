@@ -67,7 +67,6 @@ import { CallScope } from "./scope.ts";
  * @param hostEndpoint - Where the token this invocation carries can be redeemed, which is the
  * replica that sent it and not necessarily the one the handshake announced.
  */
-// deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
 export async function invoke(
   worker: WorkerDefinition,
   invocation: Invocation,
@@ -82,7 +81,7 @@ export async function invoke(
     );
   }
 
-  return CallScope.run(scopeOf(invocation, mounted.node, hostEndpoint), async () => {
+  return await CallScope.run(scopeOf(invocation, mounted.node, hostEndpoint), async () => {
     try {
       const response = await mounted.route.handler(new RequestContext(invocation));
       return await replyFrom(invocation.invocationId, response);
@@ -131,7 +130,6 @@ export async function deliverLogs(
  *
  * @param hostEndpoint - Where the token this batch carries can be redeemed.
  */
-// deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
 export async function handleBatch(
   worker: WorkerDefinition,
   batch: Batch,
@@ -158,7 +156,7 @@ export async function handleBatch(
     enqueuedAt: Number(message.enqueuedAt),
   }));
 
-  return CallScope.run(
+  return await CallScope.run(
     {
       capabilityToken: batch.capabilityToken,
       traceId: batch.traceId,
@@ -196,7 +194,6 @@ export async function handleBatch(
  *
  * @param hostEndpoint - Where the token this event carries can be redeemed.
  */
-// deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
 export async function handleEvent(
   worker: WorkerDefinition,
   event: Event,
@@ -212,7 +209,7 @@ export async function handleEvent(
     });
   }
 
-  return CallScope.run(
+  return await CallScope.run(
     {
       capabilityToken: event.capabilityToken,
       traceId: event.traceId,
@@ -244,7 +241,6 @@ export async function handleEvent(
  *
  * @param hostEndpoint - Where the token this trigger carries can be redeemed.
  */
-// deno-lint-ignore require-await -- async turns a synchronous throw into a rejected promise, which every caller relies on.
 export async function triggerCron(
   worker: WorkerDefinition,
   trigger: CronTrigger,
@@ -260,7 +256,7 @@ export async function triggerCron(
     });
   }
 
-  return CallScope.run(
+  return await CallScope.run(
     {
       capabilityToken: trigger.capabilityToken,
       traceId: trigger.traceId,
