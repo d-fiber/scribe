@@ -34,6 +34,15 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+/** Reads one schema field's raw value into the shape validation expects, per the field's own kind. */
 export interface FieldResolver {
+  /**
+   * `raw` coerced into this field's own shape, or something validation later rejects when it
+   * cannot be.
+   *
+   * `isForm` matters because a form field arrives as a string no matter what it holds, `"true"` for
+   * a boolean and a numeric string for a number, while a parsed JSON body already carries typed
+   * values that only need checking rather than parsing.
+   */
   resolve(raw: unknown, isForm: boolean): unknown;
 }

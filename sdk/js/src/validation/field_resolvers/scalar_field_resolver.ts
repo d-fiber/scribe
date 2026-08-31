@@ -37,9 +37,14 @@
 import type { ScalarCtor } from "../schema.ts";
 import type { FieldResolver } from "./field_resolver.ts";
 
+/** The {@link FieldResolver} for a plain scalar field: a string, a number, a boolean, or a file. */
 export class ScalarFieldResolver implements FieldResolver {
   constructor(private readonly ctor: ScalarCtor | typeof File) {}
 
+  /**
+   * The {@link FieldResolver.resolve} implementation: coerces `raw` to this resolver's own
+   * constructor, reading form fields (always strings) differently from a parsed JSON body.
+   */
   resolve(raw: unknown, isForm: boolean): unknown {
     if (this.ctor === String) return typeof raw === "string" ? raw.trim() : "";
 

@@ -41,7 +41,9 @@ import type { FieldResolver } from "./field_resolver.ts";
 import { NestedFieldResolver } from "./nested_field_resolver.ts";
 import { ScalarFieldResolver } from "./scalar_field_resolver.ts";
 
+/** Builds the {@link FieldResolver} a schema field's own constructor calls for. */
 export class FieldResolverFactory {
+  /** The resolver for `ctor`: array, nested, or scalar, read off which marker `ctor` carries, if any. */
   static for(ctor: BodyFieldCtor | FormFieldCtor): FieldResolver {
     if (isArrMarker(ctor)) {
       // deno-lint-ignore no-explicit-any
