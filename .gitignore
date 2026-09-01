@@ -4,6 +4,9 @@
 /tools/*
 !/tools/.gitkeep
 
+/web/*
+!/web/.gitkeep
+
 node_modules/
 
 sdk/dart/.dart_tool/
