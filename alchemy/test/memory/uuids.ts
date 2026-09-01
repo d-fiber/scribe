@@ -44,7 +44,7 @@ const WIDTH = 12;
  * Identifiers that follow one another, and still read as the shape their version describes.
  *
  * @remarks
- * It is what a test puts in `Uuids`. Both halves matter: a case can name `"…-000000000001"`
+ * It is what a test puts in `Uuids`. Both halves matter: a case can name `"...-000000000001"`
  * because it knows the first one handed out will be that, and anything that parses what it was
  * given still finds a well formed identifier rather than a counter in a string.
  *

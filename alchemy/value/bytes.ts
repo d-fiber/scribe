@@ -50,7 +50,7 @@ const GIGABYTE = 1024 * MEGABYTE;
  * language this vocabulary is modelled on, and a limit on an upload has nothing to do with a
  * rectangle.
  *
- * It reads the way {@link Duration} does, on purpose: a named way in, and an `in…` getter for every
+ * It reads the way {@link Duration} does, on purpose: a named way in, and an `in...` getter for every
  * unit it was not written in.
  *
  * @example
