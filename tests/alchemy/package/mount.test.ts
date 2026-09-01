@@ -36,7 +36,7 @@
 
 import "@scribe/runtime/scholium/runner.ts";
 import { equals, expect, isA, isFalse, isTrue, Scribe, throwsA } from "@scribe/alchemy/test";
-import { Constraint, type LifecycleSteps, mount, Package } from "@scribe/alchemy";
+import { Constraint, type DependencySource, type LifecycleSteps, mount, Package } from "@scribe/alchemy";
 
 const realtime = Package.named("realtime").version("1.2.0").runsOn("^3.0.0").build();
 
@@ -101,7 +101,10 @@ Scribe.test("the dependencies of a built manifest cannot be added to", () => {
 
   expect(
     () => {
-      (declared.dependencies as Record<string, Constraint>).smuggled = Constraint.parse("^9.0.0");
+      (declared.dependencies as Record<string, DependencySource>).smuggled = {
+        kind: "sdk",
+        constraint: Constraint.parse("^9.0.0"),
+      };
     },
     throwsA(isA(TypeError)),
     "a built manifest took a dependency nobody declared",

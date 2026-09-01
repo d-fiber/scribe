@@ -54,7 +54,84 @@ Scribe.test("a manifest carries what the chain gave it", () => {
   );
   expect(declared.version.toString(), equals("1.2.0"), "the manifest lost its version");
   expect(declared.scribe.toString(), equals("^3.0.0"), "the manifest lost the framework it runs on");
-  expect(declared.dependencies["audiences"]?.toString(), equals("^1.0.0"), "the manifest lost its dependency");
+
+  const dependency = declared.dependencies["audiences"];
+  expect(dependency?.kind, equals("sdk"), "a version constraint stopped being an sdk dependency");
+  expect(
+    dependency?.kind === "sdk" ? dependency.constraint.toString() : null,
+    equals("^1.0.0"),
+    "the manifest lost its dependency",
+  );
+});
+
+Scribe.test("a dependency can be given as a local path", () => {
+  const declared = Package.named("realtime")
+    .version("1.2.0")
+    .runsOn("^3.0.0")
+    .dependsOn({ audiences: { path: "../audiences" } })
+    .build();
+
+  const dependency = declared.dependencies["audiences"];
+  expect(dependency?.kind, equals("path"), "a path stopped being a path dependency");
+  expect(dependency?.kind === "path" ? dependency.path : null, equals("../audiences"));
+});
+
+Scribe.test("a dependency can be given as a git repository", () => {
+  const declared = Package.named("realtime")
+    .version("1.2.0")
+    .runsOn("^3.0.0")
+    .dependsOn({
+      audiences: {
+        git: { url: "https://example.com/scribe_packages.git", ref: "audiences-v1.0.0", path: "audiences" },
+      },
+    })
+    .build();
+
+  const dependency = declared.dependencies["audiences"];
+  expect(dependency?.kind, equals("git"), "a git block stopped being a git dependency");
+  expect(
+    dependency?.kind === "git" ? [dependency.url, dependency.ref, dependency.path] : null,
+    equals(["https://example.com/scribe_packages.git", "audiences-v1.0.0", "audiences"]),
+  );
+});
+
+Scribe.test("a git dependency with no ref and no path names both as absent", () => {
+  const declared = Package.named("realtime")
+    .version("1.2.0")
+    .runsOn("^3.0.0")
+    .dependsOn({ audiences: { git: { url: "https://example.com/audiences.git" } } })
+    .build();
+
+  const dependency = declared.dependencies["audiences"];
+  expect(
+    dependency?.kind === "git" ? [dependency.ref, dependency.path] : null,
+    equals([null, null]),
+  );
+});
+
+Scribe.test("a dependency named with both a path and a git repository is refused", () => {
+  expect(
+    () =>
+      Package.named("realtime")
+        .version("1.0.0")
+        .runsOn("^3.0.0")
+        .dependsOn({
+          audiences: { path: "../audiences", git: { url: "https://example.com/audiences.git" } } as never,
+        }),
+    throwsA(
+      having(isA(DeclarationError), (raised) => raised.message, "message", contains("something other than a version")),
+    ),
+  );
+});
+
+Scribe.test("a git dependency with no url is refused", () => {
+  expect(
+    () =>
+      Package.named("realtime").version("1.0.0").runsOn("^3.0.0").dependsOn({
+        audiences: { git: { url: "" } },
+      }),
+    throwsA(having(isA(DeclarationError), (raised) => raised.message, "message", contains("gives git no url"))),
+  );
 });
 
 Scribe.test("a package that says nothing beyond its version and its framework is a package", () => {

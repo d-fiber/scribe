@@ -102,10 +102,18 @@ export type {
   AwaitingVersion,
   Buildable,
   Dependencies,
+  DependencyValue,
 } from "./package/package.ts";
 
 export { mount } from "./package/manifest.ts";
-export type { Lifecycle, LifecycleStep, LifecycleSteps, Manifest, MountedPackage } from "./package/manifest.ts";
+export type {
+  DependencySource,
+  Lifecycle,
+  LifecycleStep,
+  LifecycleSteps,
+  Manifest,
+  MountedPackage,
+} from "./package/manifest.ts";
 
 export { isValidPackageName, packageNameProblem, RESERVED_PACKAGE_NAMES } from "./package/name.ts";
 

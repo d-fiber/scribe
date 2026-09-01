@@ -37,7 +37,7 @@
 import { ScribeError } from "../error/scribe_error.ts";
 import { Constraint } from "./constraint.ts";
 import { Version } from "./version.ts";
-import type { Manifest } from "./manifest.ts";
+import type { DependencySource, Manifest } from "./manifest.ts";
 import { packageNameProblem } from "./name.ts";
 
 /** Raised when a manifest says something a package is not allowed to say. */
@@ -54,15 +54,30 @@ export class DeclarationError extends ScribeError {}
 export const DEFAULT_DESCRIPTION = "Say in one sentence what this package does.";
 
 /**
- * The packages a manifest asks for, from a package name to the constraint it accepts.
+ * One way {@link Dependencies} may write where a dependency comes from.
  *
  * @remarks
- * A plain record of strings rather than a list of `{ name, constraint }` pairs, because a manifest
- * cannot declare the same dependency twice: the key doing double duty as both the name and the
- * uniqueness check is what makes a duplicate a type error a caller writes, not a runtime refusal
- * this class has to detect.
+ * A version constraint on its own is the sdk form, the ordinary one, the same idea as a
+ * `pubspec.yaml` writing `sdk: flutter` for a package the SDK already carries. A `path` names a
+ * copy beside the package that depends on it, and a `git` names a repository, a `ref` optional the
+ * way it is in a `pubspec.yaml`, and a `path` inside it optional too, for a repository that carries
+ * more than one package.
  */
-export type Dependencies = Readonly<Record<string, string>>;
+export type DependencyValue =
+  | string
+  | Readonly<{ path: string }>
+  | Readonly<{ git: Readonly<{ url: string; ref?: string; path?: string }> }>;
+
+/**
+ * The packages a manifest asks for, from a package name to where it comes from.
+ *
+ * @remarks
+ * A plain record rather than a list of `{ name, source }` pairs, because a manifest cannot declare
+ * the same dependency twice: the key doing double duty as both the name and the uniqueness check is
+ * what makes a duplicate a type error a caller writes, not a runtime refusal this class has to
+ * detect.
+ */
+export type Dependencies = Readonly<Record<string, DependencyValue>>;
 
 /** The last step, once everything required has been said. */
 export interface Buildable {
@@ -146,7 +161,7 @@ export class Package
   #description: string = DEFAULT_DESCRIPTION;
   #version: Version | null = null;
   #scribe: Constraint | null = null;
-  #dependencies: Map<string, Constraint> = new Map();
+  #dependencies: Map<string, DependencySource> = new Map();
 
   private constructor(name: string) {
     this.#name = name;
@@ -191,11 +206,11 @@ export class Package
   }
 
   /**
-   * The {@link AwaitingDependencies.dependsOn} step: validates each name and constraint and
-   * refuses a package that names itself, before storing the rest.
+   * The {@link AwaitingDependencies.dependsOn} step: validates each name and source and refuses a
+   * package that names itself, before storing the rest.
    */
   dependsOn(dependencies: Dependencies): Buildable {
-    for (const [name, constraint] of Object.entries(dependencies)) {
+    for (const [name, value] of Object.entries(dependencies)) {
       const problem = packageNameProblem(name);
       if (problem !== null) throw new DeclarationError(problem);
       if (name === this.#name) {
@@ -203,7 +218,7 @@ export class Package
           `"${name}" asks for itself. A package cannot be its own dependency.`,
         );
       }
-      this.#dependencies.set(name, Constraint.parse(constraint));
+      this.#dependencies.set(name, parseDependencySource(name, value));
     }
     return this;
   }
@@ -231,4 +246,38 @@ export class Package
       dependencies: Object.freeze(Object.fromEntries(this.#dependencies)),
     });
   }
+}
+
+/**
+ * The source `name` names, as {@link DependencyValue} let it write it.
+ *
+ * @throws {DeclarationError} When `value` names both a path and a git repository, neither, an
+ * unread key under either, or a git repository with no url.
+ */
+function parseDependencySource(name: string, value: DependencyValue): DependencySource {
+  if (typeof value === "string") {
+    return Object.freeze({ kind: "sdk" as const, constraint: Constraint.parse(value) });
+  }
+
+  const keys = Object.keys(value);
+  if (keys.length !== 1 || (keys[0] !== "path" && keys[0] !== "git")) {
+    throw new DeclarationError(
+      `"${name}" is written as something other than a version, a path, or a git repository.`,
+    );
+  }
+
+  if ("path" in value) {
+    return Object.freeze({ kind: "path" as const, path: value.path });
+  }
+
+  const git = value.git;
+  const unknown = Object.keys(git).filter((key) => key !== "url" && key !== "ref" && key !== "path");
+  if (unknown.length > 0) {
+    throw new DeclarationError(`"${name}" names ${unknown.join(", ")} under git, which is not read.`);
+  }
+  if (git.url.trim() === "") {
+    throw new DeclarationError(`"${name}" gives git no url.`);
+  }
+
+  return Object.freeze({ kind: "git" as const, url: git.url, ref: git.ref ?? null, path: git.path ?? null });
 }
