@@ -136,7 +136,7 @@ class DeferredHook<T> implements DeclaredHook<T> {
  * handed over the moment the hook opens, which is the first emit or {@link openHooks}.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const signedUp = hook<{ userId: string }>({ event: "audience.signed_up" });
  * await signedUp.emit({ userId });
  * ```

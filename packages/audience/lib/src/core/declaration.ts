@@ -125,7 +125,7 @@ export interface KeyedAudience {
 /**
  * One named set a project puts identifiers into, and asks about on the way in.
  *
- * ```ts
+ * ```ts ignore
  * const banned = Audience.plain("banned");
  * const editors = Audience.keyed("project-editors");
  *

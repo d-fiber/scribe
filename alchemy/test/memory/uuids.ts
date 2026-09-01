@@ -49,7 +49,7 @@ const WIDTH = 12;
  * given still finds a well formed identifier rather than a counter in a string.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const drawn = new SequentialUuids();
  * Uuids.use(drawn);
  *

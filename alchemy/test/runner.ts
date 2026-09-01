@@ -140,7 +140,7 @@ export interface Declarations {
  * How a case is declared, and the only name a test file needs to import to declare one.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * Scribe.group("discovery", () => {
  *   Scribe.test("sorts what it finds by name", async () => {
  *     const files = mock<FileSystem>({ named: "files" });

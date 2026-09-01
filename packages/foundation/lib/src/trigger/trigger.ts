@@ -180,7 +180,7 @@ export interface TriggerMethods<TRow extends object> {
 /**
  * A table trigger: declaring it and arming it are the same thing.
  *
- * ```ts
+ * ```ts ignore
  * const orders = Trigger.of<OrdersRow>();
  *
  * export const onOrderCreated = orders.onInsert(
@@ -226,7 +226,7 @@ export class Trigger {
   /**
    * The five methods, bound to the type of the rows the table holds.
    *
-   * ```ts
+   * ```ts ignore
    * const orders = Trigger.of<OrdersRow>();
    * ```
    *

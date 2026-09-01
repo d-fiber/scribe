@@ -45,7 +45,7 @@ import type { Duration } from "../../value/duration.ts";
  * only where the case says it does, which is what lets a case about an hour take no time at all.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const now = new FixedNow(DateTime.parse("2026-01-01T00:00:00Z").millisecondsSinceEpoch);
  * Now.use(now);
  *

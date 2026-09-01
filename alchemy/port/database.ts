@@ -222,7 +222,7 @@ export interface Tables<S extends DeclaredDatabaseSchema> {
  * host has filled {@link Databases}. Nothing is reached until a row is asked for.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const db = schema<AudienceSchema>();
  *
  * const held = await db.table("memberships").where((f) => f.account.is(accountId)).get();

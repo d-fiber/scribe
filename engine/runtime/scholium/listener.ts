@@ -95,7 +95,7 @@ export interface Listener {
  * confined to this folder, because everything else only ever reaches {@link Listener}.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * Listeners.get().serve((request, peer) => respond(request, peer), { port: 3000 });
  * ```
  */

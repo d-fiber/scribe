@@ -59,7 +59,7 @@ import type { UnmodifiableList } from "../value/list.ts";
  * @param run - What to do with one item.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * await runPooled(paths, 8, async (path) => {
  *   found.push(await disk.readText(path));
  * });

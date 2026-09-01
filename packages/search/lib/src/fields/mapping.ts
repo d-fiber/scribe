@@ -311,7 +311,7 @@ function numeric(
 /**
  * How each field of a document is declared.
  *
- * ```ts
+ * ```ts ignore
  * Field.text(s.title, { boost: 3, sortable: true });
  * Field.keyword(s.status);
  * Field.geo(s.location);

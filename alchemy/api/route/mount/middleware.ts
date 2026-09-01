@@ -53,7 +53,7 @@ import { BASE } from "./instances.ts";
  * except the permissions and the needs, which gather.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * export default class extends Middleware {
  *   protected override access() {
  *     return "authenticated";

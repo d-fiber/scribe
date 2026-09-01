@@ -54,7 +54,7 @@ import type { Matcher } from "./matcher.ts";
  * @throws {AssertionError} When `actual` does not hold.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * expect(found, equals(["audience", "realtime"]));
  * expect(page.hasMore, isTrue, "a page with a row to spare says there is nothing after it");
  * expect(() => registry.declare(name, second), throwsA(isA(DuplicateDeclarationError)));

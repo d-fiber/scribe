@@ -45,7 +45,7 @@ import type { Environment } from "../../port/env.ts";
  * unset variable does.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * Environments.use(new MemoryEnvironment({ REDIS_URL: "redis://localhost:6379" }));
  * ```
  */

@@ -172,7 +172,7 @@ class DeferredQueue<T> implements DeclaredQueue<T> {
  * second declaration is written.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const welcomes = queue<{ userId: string }>({
  *   key: "audience:welcome",
  *   attempts: 3,

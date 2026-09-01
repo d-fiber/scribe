@@ -64,7 +64,7 @@ export interface HookDefinition<R> {
 /**
  * An extension point: the framework declares it, the project subscribes to it.
  *
- * ```ts
+ * ```ts ignore
  * export const signInHook = new Hook<SignInPayload>({ name: "auth.sign-in" });
  * export const signUpHook = new Hook<SignUpPayload, Result>({
  *   name: "auth.sign-up",

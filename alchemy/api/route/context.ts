@@ -152,7 +152,7 @@ const NOWHERE: IpLocation = { city: "", country: "" };
  * what is absent is null rather than missing, so an endpoint reads a call in straight lines.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * protected override async run(ctx: RequestContext): Future<Response> {
  *   if (!ctx.id) return this.response.unauthorized();
  *

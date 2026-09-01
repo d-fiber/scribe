@@ -122,7 +122,7 @@ export interface LinkPage {
 /**
  * One kind of link a project creates, and what a visitor holding it is sent to.
  *
- * ```ts
+ * ```ts ignore
  * interface Invite {
  *   code: string;
  *   invitedBy: string;

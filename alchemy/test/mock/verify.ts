@@ -102,7 +102,7 @@ export interface Checked {
  * an exact number.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * verify(() => files.list("/packages")).once();
  * verify(() => log.write(anything<string>())).atLeast(3);
  * ```

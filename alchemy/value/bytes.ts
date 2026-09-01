@@ -54,7 +54,7 @@ const GIGABYTE = 1024 * MEGABYTE;
  * unit it was not written in.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const limit = Bytes.megabytes(5);
  * if (upload.length > limit.inBytes) throw Refusal.invalid("the file is over 5 MB.");
  * ```

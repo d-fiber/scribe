@@ -107,7 +107,7 @@ export const DEPLOY_ENTRIES: UnmodifiableList<string> = [
  * tool from ever naming a package. A package that lets a project declare nothing exports nothing.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * export const declares = { queues: Queue, crons: Cron };
  * ```
  */

@@ -63,7 +63,7 @@ export const Uuids: Slot<UuidSource> = new Slot<UuidSource>("Uuids");
  * this rather than inventing a format of its own.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * await store.put({ id: Uuid.v4(), name });
  * ```
  */

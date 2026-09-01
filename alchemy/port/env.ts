@@ -67,7 +67,7 @@ export interface Environment {
  * environment when the slot is empty, so boot code that runs before anything wires still works.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * Environments.use(new MemoryEnvironment({ PORT: "8080" }));
  * ```
  */

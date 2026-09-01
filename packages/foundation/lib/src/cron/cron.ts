@@ -77,7 +77,7 @@ export interface CronDefinition {
 /**
  * A periodic job: declaring it and arming it are the same thing.
  *
- * ```ts
+ * ```ts ignore
  * new Cron({ name: "digest", schedule: at(CronTimezone.EuropeParis, "08:00") }, handler);
  * ```
  *

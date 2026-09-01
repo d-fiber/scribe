@@ -150,7 +150,7 @@ function htmlResponse(html: string, status: number, permissions: PagePermissions
  * constant added in this file and a method that names it.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * return HtmlPage.render(confirmationPage);
  * return HtmlPage.renderForm(passwordResetPage);
  * ```

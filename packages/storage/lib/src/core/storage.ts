@@ -70,7 +70,7 @@ export interface StorageMediaSpec {
 /**
  * A folder of a storage tree, the path it renders, and the resources declared under it.
  *
- * ```ts
+ * ```ts ignore
  * export const users = Storage.public("users/{userId}");
  * export const avatar = users.image("avatar", { extensions: ["png"], maxSize: Bytes.megabytes(10) });
  *

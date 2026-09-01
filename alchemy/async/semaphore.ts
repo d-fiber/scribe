@@ -63,7 +63,7 @@ export type Release = () => void;
  * forever is waiting on the places never coming back, which is a caller that forgot to release.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const writes = new Semaphore(4);
  * await Future.wait(rows.map((row) => writes.run(() => store.put(row))));
  * ```

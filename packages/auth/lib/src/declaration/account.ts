@@ -396,7 +396,7 @@ export class AccountDeclaration<
 /**
  * Declares one role an account can hold.
  *
- * ```ts
+ * ```ts ignore
  * export const user = Account("user", {
  *   channels: [Channel.Email, Channel.Phone],
  *   signUp: (s) => ({

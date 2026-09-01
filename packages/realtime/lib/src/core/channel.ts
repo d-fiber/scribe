@@ -52,7 +52,7 @@ export type BroadcastOf<T extends object, L extends Listen> = L extends Listen.G
 /**
  * A named channel, the payload it carries, and the three ways to address it.
  *
- * ```ts
+ * ```ts ignore
  * interface Order { orderId: string; total: number }
  *
  * const order = Realtime.granted<Order>("order", { key: "orderId" });

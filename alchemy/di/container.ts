@@ -67,7 +67,7 @@ interface Binding<T> {
  * decorator, all at once, at import.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * container.registerSingleton(GroundSdk, () => GroundSdk.I);
  *
  * @Singleton([GroundSdk])

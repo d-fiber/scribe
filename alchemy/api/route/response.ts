@@ -134,7 +134,7 @@ function fixedResponder(
  * knowing which endpoint it came from, which is what makes a generated client possible.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * return this.response.ok({ data: { id } });
  * return this.response.notFound({ message: "No brand with that identifier." });
  * ```

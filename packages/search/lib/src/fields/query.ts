@@ -78,7 +78,7 @@ export function textMatch(text: string, fields: readonly string[]): SearchQuery 
 /**
  * One search under construction, which every declaration's query builds into a plan.
  *
- * ```ts
+ * ```ts ignore
  * q.text(params.text)
  *   .filter(params.status && f.field("status"))
  *   .sort(sorts.newest);

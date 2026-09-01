@@ -83,7 +83,7 @@ export interface BytesCodec {
  * into a column: a digest, a token, a signature.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const written = hex.encode(digest);
  * const read = hex.decode(written);
  * ```

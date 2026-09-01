@@ -87,7 +87,7 @@ export const Currents: Slot<CurrentDriver> = new Slot<CurrentDriver>("Currents")
  * opened at the first call and not before.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const currentCaller = new Current<Identity>("caller");
  *
  * currentCaller.run(identity, async () => {

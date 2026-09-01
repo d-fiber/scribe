@@ -101,7 +101,7 @@ export function recorderOrRefuse(value: unknown, calledFrom: string): Recorder {
  * Nothing carries from one case to the next, and there is no state to put back by hand.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const files = mock<FileSystem>({ named: "files" });
  * when(() => files.list("/packages")).thenReturn(["realtime"]);
  * ```

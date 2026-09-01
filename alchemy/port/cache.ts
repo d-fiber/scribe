@@ -228,7 +228,7 @@ class DeferredCache<T> implements Cache<T> {
  * reached until the first call, so importing the package before the host is up is safe.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const members = cache<CachedMembership>({ key: "audience:member", ttl: Duration.days(7) });
  * ```
  */

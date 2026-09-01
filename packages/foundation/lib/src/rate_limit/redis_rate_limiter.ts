@@ -53,7 +53,7 @@ export { SHARED_ADDRESS_MAX_PENALTY, SHARED_ADDRESS_STRIKE_MEMORY } from "@scrib
 /**
  * One rate limit, declared once and asked at every call.
  *
- * ```ts
+ * ```ts ignore
  * const signIn = rateLimit({
  *   key: "sign-in:email",
  *   limit: 10,

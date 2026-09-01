@@ -43,6 +43,9 @@ jobs:
       - name: Type check
         run: deno task check
 
+      - name: Check that documented examples still compile
+        run: deno task check:examples
+
       - name: Lint
         run: deno task lint
 

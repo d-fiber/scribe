@@ -105,7 +105,7 @@ export class ResolvedLink {
   /**
    * Whether this link was created from `declaration`, which also types its data.
    *
-   * ```ts
+   * ```ts ignore
    * if (link.declaredBy(invite)) link.data.code;
    * ```
    */

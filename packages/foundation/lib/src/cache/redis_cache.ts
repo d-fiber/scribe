@@ -68,7 +68,7 @@ export const DEFAULT_TTL: Duration = Duration.days(15);
 /**
  * A namespace of cached entries, with one name, one ttl and one value type.
  *
- * ```ts
+ * ```ts ignore
  * const sessions = new RedisCache<Session>({ key: "session", ttl: Duration.minutes(5) });
  *
  * await sessions.add("u1", session);   // only a Session goes in

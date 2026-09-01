@@ -69,7 +69,7 @@ export type CommandAnswer =
  * `code` is zero, `stdout` and `stderr` are empty.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * Commands.use(new MemoryCommands({ code: 1, stderr: new TextEncoder().encode("no such file") }));
  * ```
  */

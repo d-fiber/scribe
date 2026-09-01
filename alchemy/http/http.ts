@@ -89,7 +89,7 @@ export interface Http {
    * client holds, and a streamed answer, which outlives the call that started it and would be cut
    * off by a client closed underneath it.
    *
-   * ```ts
+   * ```ts ignore
    * const client = http.open();
    * try {
    *   const answer = await client.send(request);

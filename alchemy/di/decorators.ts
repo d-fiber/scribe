@@ -72,7 +72,7 @@ export interface SingletonOptions {
  * @param deps - What to resolve for each constructor parameter, in order.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * @Singleton([GroundSdk, NetworkService], { as: AdminService })
  * class AdminServiceImpl implements AdminService {
  *   constructor(private readonly groundSdk: GroundSdk, private readonly network: NetworkService) {}

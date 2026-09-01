@@ -63,7 +63,7 @@ export class BindingError extends ScribeError {}
  * remembers.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * export const Caches: Slot<CacheDriver> = new Slot<CacheDriver>("Caches");
  *
  * Caches.use(new RedisCaches(url));

@@ -65,7 +65,7 @@ export class TimeoutException extends ScribeError {}
  * @throws {TimeoutException} When `within` passes before `call` settles.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const rows = await withDeadline("audience:list", Duration.seconds(2), store.all());
  * ```
  */

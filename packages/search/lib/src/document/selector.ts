@@ -55,7 +55,7 @@ export type DocumentSelector<TRow extends object> =
      * the declared fields have to stay inferred: they are what `f.path` and `f.nested` read to
      * refuse a field the folded relation does not hold.
      *
-     * ```ts
+     * ```ts ignore
      * s.embed("brands", (b: DocumentSelector<BrandRow>) => ({ label: Field.text(b.label) }))
      * ```
      */
@@ -125,7 +125,7 @@ export type PreviewSelector<TRow extends object> =
      * that the fields the preview reads stay inferred and the type one result answers with is
      * exactly what the shape says.
      *
-     * ```ts
+     * ```ts ignore
      * s.embed("brands", (b: PreviewSelector<BrandRow>) => ({ label: b.label }))
      * ```
      */

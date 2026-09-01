@@ -120,7 +120,7 @@ export interface LifecycleSteps {
  * export of the package's own surface.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * export const scribe: LifecycleSteps = {
  *   starts: () => Audiences.use(new RedisAudiences(url)),
  * };

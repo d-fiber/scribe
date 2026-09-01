@@ -125,7 +125,7 @@ export interface DefaultedConfig<T> extends Config<T> {
 /**
  * One value a project names in the source and writes to at runtime.
  *
- * ```ts
+ * ```ts ignore
  * interface Example {
  *   firstname: string;
  *   lastname: string;

@@ -91,7 +91,7 @@ export const REFUSAL_KINDS: UnmodifiableList<RefusalKind> = [
  * built carrying a kind that does not match what it says.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const audience = declared.get(name);
  * if (!audience) throw Refusal.missing(`no audience is declared under "${name}".`);
  * ```

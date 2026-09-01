@@ -256,7 +256,7 @@ export function withMessage(expected: string): Matcher<unknown> {
  * name is what the failure calls that part, since a function has none.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * expect(
  *   () => hex.decode("zz"),
  *   throwsA(having(isA(FormatException), (raised) => raised.source, "source", equals("zz"))),

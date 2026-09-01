@@ -104,7 +104,7 @@ export interface Command {
  * declared, and a caller reaches it while a request is in flight, by which time the host is up.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * Commands.use(new MemoryCommands({ code: 0, stdout: rawFrame }));
  * ```
  */

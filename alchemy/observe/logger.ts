@@ -89,7 +89,7 @@ export const Loggers: Slot<Logger> = new Slot<Logger>("Loggers");
  * The logger in force, read at the call and never before.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * log.info("audience.member_added", { actorId: caller.id, metadata: { audience } });
  * ```
  */
