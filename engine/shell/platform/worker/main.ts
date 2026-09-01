@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "../../common/settings.ts";
+
 import { ScribeServer } from "@scribe/sdk";
 import type { DeclaredNode, DiscoveredLogSink, DiscoveredRoute } from "@scribe/sdk";
 import { wireGeneratedSingletons } from "@scribe/runtime/support/di/loaded.ts";
