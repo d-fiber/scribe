@@ -44,7 +44,7 @@ say() {
   echo "[$SCOPE] $1"
 }
 
-[ -f "$ROOT/packages/foundation/deno.json" ] || {
+[ -f "$ROOT/packages/foundation/package.yaml" ] || {
   echo "[$SCOPE] packages/ is empty, so this checkout is not a whole one." >&2
   exit 1
 }
