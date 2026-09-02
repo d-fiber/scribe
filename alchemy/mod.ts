@@ -192,5 +192,28 @@ export type {
   Tables,
 } from "./port/database.ts";
 
+export { Column } from "./schema/column.ts";
+export type {
+  ColumnDefinition,
+  ColumnMetadata,
+  ColumnOptions,
+  ColumnReference,
+  ColumnType,
+  ColumnTypeOptions,
+  OnDelete,
+} from "./schema/column.ts";
+export { declaredEnums, Enum, forgetEnums } from "./schema/enum.ts";
+export type { DeclaredEnum } from "./schema/enum.ts";
+export { CompositeType, declaredCompositeTypes, forgetCompositeTypes } from "./schema/composite.ts";
+export type { DeclaredCompositeType } from "./schema/composite.ts";
+export { declaredTables, forgetTables, Table } from "./schema/table.ts";
+export type { DeclaredTable } from "./schema/table.ts";
+export { declaredSqlFunctions, forgetSqlFunctions, SqlFunction } from "./schema/function.ts";
+export type { DeclaredSqlFunction, SqlFunctionOptions } from "./schema/function.ts";
+export { declaredSqlTriggers, forgetSqlTriggers, SqlTrigger } from "./schema/trigger.ts";
+export type { DeclaredSqlTrigger, SqlTriggerEvent, SqlTriggerOptions, SqlTriggerTiming } from "./schema/trigger.ts";
+export { declaredSqlCronJobs, forgetSqlCronJobs, SqlCronJob } from "./schema/cron_job.ts";
+export type { DeclaredSqlCronJob, SqlCronJobOptions } from "./schema/cron_job.ts";
+
 export { ListOf, Nested, Required } from "./api/body/mod.ts";
 export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema, PrimitiveType } from "./api/body/mod.ts";
