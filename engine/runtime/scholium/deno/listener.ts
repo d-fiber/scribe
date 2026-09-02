@@ -34,44 +34,48 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Runners, type TestRunner } from "@scribe/alchemy/test";
-
-import { currentStack } from "@scribe/runtime/scholium/host.ts";
-import { TestWrapperRunner as DenoRunner } from "@scribe/runtime/scholium/deno/runner.ts";
+import type { Future } from "@scribe/alchemy";
+import type {
+  BoundListener,
+  Listener,
+  ListenOptions,
+  RemotePeer,
+  RequestHandler,
+} from "@scribe/runtime/scholium/listener.ts";
 
 /**
- * The {@link TestRunner} this stack hands every case declared through `Scribe` to, or null when
- * this stack has none yet.
+ * The socket this process actually opens under Deno, as the port describes a listener.
  *
  * @remarks
- * A file that only imports this module for its install-on-import effect, without ever declaring a
- * case through `Scribe`, must not fail just for being loaded on a stack that has no runner: the
- * failure that matters is `Scribe.test` reaching an unfilled {@link Runners}, which already reports
- * clearly on its own, not this function refusing on its behalf.
+ * It is the only file in this folder that knows how a socket is opened here. Whatever this
+ * process actually runs on decides what that means; the day it changes, this class is rewritten
+ * and nothing that reaches it through the port notices.
  */
-function localRunner(): TestRunner | null {
-  switch (currentStack()) {
-    case "deno":
-      return new DenoRunner();
-    case "node":
-    case "bun":
-      return null;
+export class LocalListener implements Listener {
+  /**
+   * The {@link Listener.serve} implementation.
+   *
+   * @remarks
+   * `handler` is wrapped rather than passed straight to the host's own serve call, because the host
+   * hands the connection info alongside the request and `handler` wants the peer address alone,
+   * already extracted: this is where that translation happens, once, instead of in every caller.
+   */
+  serve(handler: RequestHandler, options?: ListenOptions): BoundListener {
+    const wrapped = (request: Request, info: Deno.ServeHandlerInfo): Response | Future<Response> =>
+      handler(request, _peerOf(info));
+
+    const bound = options === undefined
+      ? Deno.serve(wrapped)
+      : Deno.serve({ port: options.port, hostname: options.hostname }, wrapped);
+
+    return {
+      port: (bound.addr as Deno.NetAddr).port,
+      shutdown: () => bound.shutdown(),
+    };
   }
 }
 
-/**
- * Fills {@link Runners} with this stack's runner, unless something already filled it or this
- * stack has none yet.
- *
- * @remarks
- * It runs on import, because `Scribe` reads the slot the moment a case is declared and a test file
- * declares its cases as it is read. The guard leaves a suite that wired its own runner alone.
- */
-export function installRunner(): void {
-  if (Runners.configured) return;
-
-  const runner = localRunner();
-  if (runner) Runners.use(runner);
+/** The peer a raw connection names, read down to what {@link RequestHandler} is given. */
+function _peerOf(info: Deno.ServeHandlerInfo): RemotePeer {
+  return { hostname: info.remoteAddr.transport === "tcp" ? info.remoteAddr.hostname : null };
 }
-
-installRunner();

@@ -34,44 +34,39 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Runners, type TestRunner } from "@scribe/alchemy/test";
-
-import { currentStack } from "@scribe/runtime/scholium/host.ts";
-import { TestWrapperRunner as DenoRunner } from "@scribe/runtime/scholium/deno/runner.ts";
+import type { Command, CommandOptions, CommandResult } from "@scribe/alchemy";
 
 /**
- * The {@link TestRunner} this stack hands every case declared through `Scribe` to, or null when
- * this stack has none yet.
+ * The subprocesses this process can start under Deno, as the port describes a command runner.
  *
  * @remarks
- * A file that only imports this module for its install-on-import effect, without ever declaring a
- * case through `Scribe`, must not fail just for being loaded on a stack that has no runner: the
- * failure that matters is `Scribe.test` reaching an unfilled {@link Runners}, which already reports
- * clearly on its own, not this function refusing on its behalf.
+ * It is the only file in this folder that starts a program that is not this one, which is what
+ * lets a test stand a fixed answer behind the port without a binary being installed. Whether a
+ * program may be started at all is the deployment's business, set by what the process was allowed
+ * to run, not by a check this class could make.
  */
-function localRunner(): TestRunner | null {
-  switch (currentStack()) {
-    case "deno":
-      return new DenoRunner();
-    case "node":
-    case "bun":
-      return null;
+export class LocalCommands implements Command {
+  /** Runs `program` with `args`, feeding it `options.stdin` when there is any, and reads it whole. */
+  async run(program: string, args: readonly string[], options?: CommandOptions): Promise<CommandResult> {
+    const input = options?.stdin;
+    const spawned = new Deno.Command(program, {
+      args: [...args],
+      stdin: input === undefined ? "null" : "piped",
+      stdout: "piped",
+      stderr: "piped",
+    });
+
+    if (input === undefined) {
+      const { code, stdout, stderr } = await spawned.output();
+      return { code, stdout, stderr };
+    }
+
+    const child = spawned.spawn();
+    const writer = child.stdin.getWriter();
+    await writer.write(input);
+    await writer.close();
+
+    const { code, stdout, stderr } = await child.output();
+    return { code, stdout, stderr };
   }
 }
-
-/**
- * Fills {@link Runners} with this stack's runner, unless something already filled it or this
- * stack has none yet.
- *
- * @remarks
- * It runs on import, because `Scribe` reads the slot the moment a case is declared and a test file
- * declares its cases as it is read. The guard leaves a suite that wired its own runner alone.
- */
-export function installRunner(): void {
-  if (Runners.configured) return;
-
-  const runner = localRunner();
-  if (runner) Runners.use(runner);
-}
-
-installRunner();

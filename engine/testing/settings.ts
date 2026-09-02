@@ -43,9 +43,10 @@ import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
 import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
 import { Commands, Environments, FileSystems } from "@scribe/alchemy";
-import { LocalCommands } from "@scribe/runtime/scholium/commands.ts";
-import { environment, LocalEnvironment, optional } from "@scribe/runtime/scholium/env.ts";
-import { LocalFileSystems } from "@scribe/runtime/scholium/files.ts";
+import { LocalCommands } from "@scribe/runtime/scholium/deno/commands.ts";
+import { LocalEnvironment } from "@scribe/runtime/scholium/deno/env.ts";
+import { LocalFileSystems } from "@scribe/runtime/scholium/deno/files.ts";
+import { environment, optional } from "@scribe/runtime/scholium/env.ts";
 
 export function installTestSettings(): void {
   if (cacheSettings.configured) return;

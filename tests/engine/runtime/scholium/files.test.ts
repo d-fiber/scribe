@@ -39,7 +39,7 @@ import { equals, expect, expectLater, isNot, isNotNull, isTrue, same, Scribe, th
 import { FileSystems } from "@scribe/alchemy";
 import type { FileSystem } from "@scribe/alchemy";
 import { MemoryFileSystem } from "@scribe/alchemy/test";
-import { LocalFiles, LocalFileSystems } from "@scribe/runtime/scholium/files.ts";
+import { LocalFiles, LocalFileSystems } from "@scribe/runtime/scholium/deno/files.ts";
 
 async function inADirectory(body: (disk: LocalFiles, root: string) => Promise<void>): Promise<void> {
   const disk = new LocalFiles();

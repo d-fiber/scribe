@@ -37,28 +37,27 @@
 import type { Environment } from "@scribe/alchemy";
 import { Environments } from "@scribe/alchemy";
 
+import { currentStack } from "@scribe/runtime/scholium/host.ts";
+import { LocalEnvironment as DenoEnvironment } from "@scribe/runtime/scholium/deno/env.ts";
+
 /**
- * The environment this process was started in, as the port describes one.
+ * The {@link Environment} this process falls back to before anything fills {@link Environments}.
  *
  * @remarks
- * It is the only file in this folder that reads the host's own environment, which is what lets a
- * test put a fixed set of values behind the port without the machine it runs on showing through.
- * Every read answers the way the host's own reader does: an unset name is `undefined`, and a name
- * set to the empty string is `""`.
+ * Picked once, by {@link currentStack}, rather than at every call: the answer cannot change while
+ * the process runs, and a package that reads a setting while it wires itself does so many times.
  */
-export class LocalEnvironment implements Environment {
-  /** The value set for `name`, or `undefined` when the process holds none. */
-  get(name: string): string | undefined {
-    return Deno.env.get(name);
-  }
-
-  /** Every name and value the process was started with. */
-  toObject(): Record<string, string> {
-    return Deno.env.toObject();
+function localEnvironment(): Environment {
+  switch (currentStack()) {
+    case "deno":
+      return new DenoEnvironment();
+    case "node":
+    case "bun":
+      throw new Error(`No Environment implementation ships for the "${currentStack()}" stack yet.`);
   }
 }
 
-const _local = new LocalEnvironment();
+const _local = localEnvironment();
 
 /**
  * What a setting is read through: what filled {@link Environments} when a host or a test did, and

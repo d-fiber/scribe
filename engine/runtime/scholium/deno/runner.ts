@@ -34,39 +34,30 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Command, CommandOptions, CommandResult } from "@scribe/alchemy";
+import type { CaseBody, TestRunner } from "@scribe/alchemy/test";
 
 /**
- * The subprocesses this process can start, as the port describes a command runner.
+ * The {@link TestRunner} that hands every case declared through `Scribe` to `Deno.test`.
  *
  * @remarks
- * It is the only file in this folder that starts a program that is not this one, which is what
- * lets a test stand a fixed answer behind the port without a binary being installed. Whether a
- * program may be started at all is the deployment's business, set by what the process was allowed
- * to run, not by a check this class could make.
+ * It is the one seam between a case and the host, and it lives in the framework rather than in a
+ * package because that is the whole point of the split: a package writes against `Scribe` and
+ * `expect`, and what actually holds a case and runs it is the framework's to provide. A case body
+ * arrives already wrapped by `Scribe`, so there is nothing to do here but register it.
  */
-export class LocalCommands implements Command {
-  /** Runs `program` with `args`, feeding it `options.stdin` when there is any, and reads it whole. */
-  async run(program: string, args: readonly string[], options?: CommandOptions): Promise<CommandResult> {
-    const input = options?.stdin;
-    const spawned = new Deno.Command(program, {
-      args: [...args],
-      stdin: input === undefined ? "null" : "piped",
-      stdout: "piped",
-      stderr: "piped",
-    });
+export class TestWrapperRunner implements TestRunner {
+  /** Registers `body` under `name` as a case that runs. */
+  test(name: string, body: CaseBody): void {
+    Deno.test(name, body);
+  }
 
-    if (input === undefined) {
-      const { code, stdout, stderr } = await spawned.output();
-      return { code, stdout, stderr };
-    }
+  /** Registers `body` under `name` as a case the host holds and does not run. */
+  skip(name: string, body: CaseBody): void {
+    Deno.test({ name, ignore: true, fn: body });
+  }
 
-    const child = spawned.spawn();
-    const writer = child.stdin.getWriter();
-    await writer.write(input);
-    await writer.close();
-
-    const { code, stdout, stderr } = await child.output();
-    return { code, stdout, stderr };
+  /** Registers `body` under `name` and narrows the file to the cases marked this way. */
+  only(name: string, body: CaseBody): void {
+    Deno.test({ name, only: true, fn: body });
   }
 }

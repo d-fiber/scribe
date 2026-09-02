@@ -62,16 +62,20 @@ const SEALED_ENGINE_LAYERS = [
 /**
  * Where inside the engine layers the host is allowed to be named.
  *
- * `engine/runtime/scholium/` is the container: everything that reaches the host through a
- * listener, a process boundary or the platform's own test runner lives there. Two older files
- * stand outside it, each already its own single, named place rather than a scatter, and each
- * staying there for a reason of its own: `current.ts` fills its port at import rather than at
- * boot, on purpose, and moving it would change when it runs; `constant_time.ts` is read by a
- * package outside this repository, and moving it would mean editing that package's own source
- * instead of this one.
+ * `engine/runtime/scholium/deno/`, `.../node/` and `.../bun/` are the container: each holds one
+ * stack's own implementation of a listener, a process boundary or the platform's own test runner,
+ * and only there. The rest of `engine/runtime/scholium/`, the contracts and the dispatchers that
+ * pick one of the three, names no host directly and is held to the same seal as everywhere else.
+ * Two older files stand outside the container too, each already its own single, named place
+ * rather than a scatter, and each staying there for a reason of its own: `current.ts` fills its
+ * port at import rather than at boot, on purpose, and moving it would change when it runs;
+ * `constant_time.ts` is read by a package outside this repository, and moving it would mean
+ * editing that package's own source instead of this one.
  */
 const ENGINE_HOST_EXCEPTIONS = [
-  "engine/runtime/scholium/",
+  "engine/runtime/scholium/deno/",
+  "engine/runtime/scholium/node/",
+  "engine/runtime/scholium/bun/",
   "engine/runtime/current.ts",
   "engine/runtime/support/crypto/constant_time.ts",
 ];

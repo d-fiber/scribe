@@ -36,8 +36,9 @@
 
 import ts from "typescript";
 import { FileSystems } from "@scribe/alchemy";
-import { LocalFileSystems } from "@scribe/runtime/scholium/files.ts";
-import { LocalProcess, Processes } from "@scribe/runtime/scholium/process.ts";
+import { LocalFileSystems } from "@scribe/runtime/scholium/deno/files.ts";
+import { LocalProcess } from "@scribe/runtime/scholium/deno/process.ts";
+import { Processes } from "@scribe/runtime/scholium/process.ts";
 import { RULES } from "./rules.ts";
 
 FileSystems.use(new LocalFileSystems());

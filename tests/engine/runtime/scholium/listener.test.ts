@@ -37,7 +37,7 @@
 import "@scribe/runtime/scholium/runner.ts";
 import { equals, expect, expectLater, isNotNull, isTrue, Scribe, throwsA } from "@scribe/alchemy/test";
 import type { BoundListener, RemotePeer } from "@scribe/runtime/scholium/listener.ts";
-import { LocalListener } from "@scribe/runtime/scholium/listener.ts";
+import { LocalListener } from "@scribe/runtime/scholium/deno/listener.ts";
 
 async function withListener(
   handler: (request: Request, peer: RemotePeer) => Response,

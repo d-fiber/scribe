@@ -38,7 +38,8 @@ import "@scribe/runtime/scholium/runner.ts";
 import { allOf, equals, expect, isA, isTrue, Scribe, throwsA, withMessage } from "@scribe/alchemy/test";
 import { Environments } from "@scribe/alchemy";
 import { MemoryEnvironment } from "@scribe/alchemy/test";
-import { environment, LocalEnvironment, optional, required } from "@scribe/runtime/scholium/env.ts";
+import { LocalEnvironment } from "@scribe/runtime/scholium/deno/env.ts";
+import { environment, optional, required } from "@scribe/runtime/scholium/env.ts";
 
 function withEnvironment(values: Record<string, string>, body: () => void): void {
   const held = Environments.configured ? Environments.get() : null;

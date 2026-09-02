@@ -36,7 +36,7 @@
 
 import "@scribe/runtime/scholium/runner.ts";
 import { equals, expect, expectLater, isA, Scribe, throwsA } from "@scribe/alchemy/test";
-import { LocalCommands } from "@scribe/runtime/scholium/commands.ts";
+import { LocalCommands } from "@scribe/runtime/scholium/deno/commands.ts";
 
 function text(bytes: Uint8Array): string {
   return new TextDecoder().decode(bytes);

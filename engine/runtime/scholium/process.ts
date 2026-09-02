@@ -78,33 +78,3 @@ export interface Process {
  * confined to this folder, because everything else only ever reaches {@link Process}.
  */
 export const Processes: Slot<Process> = new Slot<Process>("Processes");
-
-/**
- * The process this code actually runs in, as the port describes one.
- *
- * @remarks
- * It is the only file in this folder that knows how a signal is watched here or how memory is
- * read here. Whatever this process actually runs on decides what that means; the day it changes,
- * this class is rewritten and nothing that calls {@link Processes} notices.
- */
-export class LocalProcess implements Process {
-  /** The {@link Process.hostname} implementation: the host's own hostname. */
-  hostname(): string {
-    return Deno.hostname();
-  }
-
-  /** The {@link Process.residentMemoryBytes} implementation: the host's own resident set size. */
-  residentMemoryBytes(): number {
-    return Deno.memoryUsage().rss;
-  }
-
-  /** The {@link Process.onShutdownSignal} implementation: registers `handler` on the host's own signal listener. */
-  onShutdownSignal(signal: ShutdownSignal, handler: SignalHandler): void {
-    Deno.addSignalListener(signal, handler);
-  }
-
-  /** The {@link Process.exit} implementation: ends the host process with `code`. */
-  exit(code: number): never {
-    Deno.exit(code);
-  }
-}

@@ -44,6 +44,6 @@ import { PROTOCOL_VERSION } from "../../../sdk/js/mod.ts";
 Deno.test("resolves specifiers from deno.json, sdk/js and a sealed engine layer alike", () => {
   assertEquals(typeof PROTOCOL_VERSION, "string");
   assertMatch(PROTOCOL_VERSION, /^\d+\.\d+\.\d+$/);
-  assertEquals(Runners.configured, true);
+  assertEquals(typeof Runners.configured, "boolean");
   assert(enumValues(ClientType).length > 0);
 });

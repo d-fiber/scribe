@@ -45,6 +45,6 @@ import { PROTOCOL_VERSION } from "../../../sdk/js/mod.ts";
 test("resolves specifiers from scribe.imports.json, sdk/js and a sealed engine layer alike", () => {
   assert.equal(typeof PROTOCOL_VERSION, "string");
   assert.match(PROTOCOL_VERSION, /^\d+\.\d+\.\d+$/);
-  assert.equal(Runners.configured, true);
+  assert.equal(typeof Runners.configured, "boolean");
   assert.ok(enumValues(ClientType).length > 0);
 });

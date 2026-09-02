@@ -38,7 +38,7 @@ import type { FileSystem, FileSystemDriver, FileSystemEntity, Future, List } fro
 import { Bytes } from "@scribe/alchemy";
 
 /**
- * The disk this process runs on, as the port describes a file system.
+ * The disk this process runs on under Deno, as the port describes a file system.
  *
  * @remarks
  * It is the only file in this folder that knows a disk exists, which is what lets a test put
@@ -164,7 +164,7 @@ export class LocalFiles implements FileSystem {
 }
 
 /**
- * What opens the disk for a caller that asked the port for one.
+ * What opens the disk for a caller that asked the port for one, under Deno.
  *
  * @remarks
  * One instance answers every ask, because nothing is held: a file system is a set of calls on
