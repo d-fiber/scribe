@@ -97,3 +97,49 @@ export function withDeadline<R>(
     })
     .finally(() => clearTimeout(timer));
 }
+
+/**
+ * The same contract as {@link withDeadline}, built on one `Promise` instead of a race chained
+ * through a `catch` and a `finally`.
+ *
+ * @remarks
+ * `withDeadline` is a second promise for the timer, the one `Promise.race` returns, and one each
+ * for `.catch` and `.finally`, four in total for every call whether or not the deadline is ever
+ * reached. Settling the same promise directly from the timer and from `call`'s own `then` halves
+ * that to two, at the cost of writing the race by hand instead of composing it.
+ *
+ * @param scope - What is being waited on, written in brackets at the head of the message, the way
+ * every log line of the repo is written.
+ * @param within - How long the call has.
+ * @param call - What is being waited on, already started.
+ *
+ * @throws {TimeoutException} When `within` passes before `call` settles.
+ */
+export function withDeadlineLite<R>(
+  scope: string,
+  within: Duration,
+  call: Future<R>,
+): Future<R> {
+  return new Promise<R>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new TimeoutException(`[${scope}] exceeded ${within.inMilliseconds}ms`));
+      call.catch((late) =>
+        console.error(
+          `[${scope}] settled after its deadline was already treated as a failure:`,
+          late,
+        )
+      );
+    }, within.inMilliseconds);
+
+    call.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}

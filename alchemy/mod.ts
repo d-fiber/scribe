@@ -81,7 +81,7 @@ export { base64, base64Url, hex, json, utf8 } from "./value/convert.ts";
 export type { BytesCodec, Codec } from "./value/convert.ts";
 
 export { ExponentialBackoff } from "./async/backoff.ts";
-export { TimeoutException, withDeadline } from "./async/deadline.ts";
+export { TimeoutException, withDeadline, withDeadlineLite } from "./async/deadline.ts";
 export { runPooled } from "./async/pool.ts";
 export { Semaphore } from "./async/semaphore.ts";
 export type { Release } from "./async/semaphore.ts";
