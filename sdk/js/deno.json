@@ -19,7 +19,6 @@
     "@scribe/alchemy/test": "../../alchemy/test/mod.ts",
     "@scribe/runtime/scholium/deno/runner.ts": "../../engine/runtime/scholium/deno/runner.ts",
     "@scribe/runtime/scholium/host.ts": "../../engine/runtime/scholium/host.ts",
-    "@scribe/runtime/scholium/node/runner.ts": "../../engine/runtime/scholium/node/runner.ts",
     "@scribe/runtime/scholium/runner.ts": "../../engine/runtime/scholium/runner.ts",
     "@std/assert": "jsr:@std/assert@1"
   }

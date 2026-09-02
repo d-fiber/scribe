@@ -38,7 +38,6 @@ import { Runners, type TestRunner } from "@scribe/alchemy/test";
 
 import { currentStack } from "@scribe/runtime/scholium/host.ts";
 import { TestWrapperRunner as DenoRunner } from "@scribe/runtime/scholium/deno/runner.ts";
-import { TestWrapperRunner as NodeRunner } from "@scribe/runtime/scholium/node/runner.ts";
 
 /**
  * The {@link TestRunner} this stack hands every case declared through `Scribe` to, or null when
@@ -55,7 +54,6 @@ function localRunner(): TestRunner | null {
     case "deno":
       return new DenoRunner();
     case "node":
-      return new NodeRunner();
     case "bun":
       return null;
   }

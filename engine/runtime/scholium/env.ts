@@ -39,7 +39,6 @@ import { Environments } from "@scribe/alchemy";
 
 import { currentStack } from "@scribe/runtime/scholium/host.ts";
 import { LocalEnvironment as DenoEnvironment } from "@scribe/runtime/scholium/deno/env.ts";
-import { LocalEnvironment as NodeEnvironment } from "@scribe/runtime/scholium/node/env.ts";
 
 /**
  * The {@link Environment} this process falls back to before anything fills {@link Environments}.
@@ -53,7 +52,6 @@ function localEnvironment(): Environment {
     case "deno":
       return new DenoEnvironment();
     case "node":
-      return new NodeEnvironment();
     case "bun":
       throw new Error(`No Environment implementation ships for the "${currentStack()}" stack yet.`);
   }

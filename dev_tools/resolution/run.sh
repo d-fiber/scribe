@@ -44,10 +44,6 @@ run_deno() {
   (cd "$ROOT" && deno test --allow-env --allow-sys --allow-read dev_tools/resolution/deno/sample.test.ts)
 }
 
-run_node() {
-  (cd "$HERE/node" && node --import ./register.mjs --test sample.test.mjs tests/*.ts)
-}
-
 run_bun() {
   bash "$HERE/bun/generate.sh"
   (cd "$HERE/bun" && bun test --tsconfig-override=./generated.tsconfig.json sample.test.ts)
@@ -55,15 +51,13 @@ run_bun() {
 
 case "${1:-all}" in
   deno) run_deno ;;
-  node) run_node ;;
   bun) run_bun ;;
   all)
     run_deno
-    run_node
     run_bun
     ;;
   *)
-    echo "usage: $0 [deno|node|bun|all]" >&2
+    echo "usage: $0 [deno|bun|all]" >&2
     exit 1
     ;;
 esac
