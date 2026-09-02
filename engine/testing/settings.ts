@@ -42,18 +42,45 @@ import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
 import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
 import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
+import type { Command, Environment, FileSystemDriver } from "@scribe/alchemy";
 import { Commands, Environments, FileSystems } from "@scribe/alchemy";
-import { LocalCommands } from "@scribe/runtime/scholium/deno/commands.ts";
-import { LocalEnvironment } from "@scribe/runtime/scholium/deno/env.ts";
-import { LocalFileSystems } from "@scribe/runtime/scholium/deno/files.ts";
+import { LocalCommands as BunCommands } from "@scribe/runtime/scholium/bun/commands.ts";
+import { LocalEnvironment as BunEnvironment } from "@scribe/runtime/scholium/bun/env.ts";
+import { LocalFileSystems as BunFileSystems } from "@scribe/runtime/scholium/bun/files.ts";
+import { LocalCommands as DenoCommands } from "@scribe/runtime/scholium/deno/commands.ts";
+import { LocalEnvironment as DenoEnvironment } from "@scribe/runtime/scholium/deno/env.ts";
+import { LocalFileSystems as DenoFileSystems } from "@scribe/runtime/scholium/deno/files.ts";
 import { environment, optional } from "@scribe/runtime/scholium/env.ts";
+import { currentStack } from "@scribe/runtime/scholium/host.ts";
+
+/**
+ * The `Environment`, `FileSystemDriver` and `Command` this process's own stack provides.
+ *
+ * @remarks
+ * A `node` stack has none yet: `engine/runtime/scholium/bun/` and `.../deno/` are the only two
+ * sub-folders this framework ships, and reaching this on any other stack is a refusal rather than
+ * a guess.
+ *
+ * @throws {Error} When {@link currentStack} answers `node`.
+ */
+function corePorts(): { environment: Environment; fileSystems: FileSystemDriver; commands: Command } {
+  switch (currentStack()) {
+    case "deno":
+      return { environment: new DenoEnvironment(), fileSystems: new DenoFileSystems(), commands: new DenoCommands() };
+    case "bun":
+      return { environment: new BunEnvironment(), fileSystems: new BunFileSystems(), commands: new BunCommands() };
+    case "node":
+      throw new Error(`No scholium implementation ships for the "${currentStack()}" stack yet.`);
+  }
+}
 
 export function installTestSettings(): void {
   if (cacheSettings.configured) return;
 
-  Environments.use(new LocalEnvironment());
-  FileSystems.use(new LocalFileSystems());
-  Commands.use(new LocalCommands());
+  const { environment: localEnvironment, fileSystems: localFileSystems, commands: localCommands } = corePorts();
+  Environments.use(localEnvironment);
+  FileSystems.use(localFileSystems);
+  Commands.use(localCommands);
 
   scribe.wires?.();
 
