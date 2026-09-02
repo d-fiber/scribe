@@ -34,46 +34,37 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Runners, type TestRunner } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, expectLater, isA, Scribe, throwsA } from "@scribe/alchemy/test";
+import { LocalCommands } from "@scribe/runtime/scholium/node/commands.ts";
 
-import { currentStack } from "@scribe/runtime/scholium/host.ts";
-import { TestWrapperRunner as DenoRunner } from "@scribe/runtime/scholium/deno/runner.ts";
-import { TestWrapperRunner as NodeRunner } from "@scribe/runtime/scholium/node/runner.ts";
-
-/**
- * The {@link TestRunner} this stack hands every case declared through `Scribe` to, or null when
- * this stack has none yet.
- *
- * @remarks
- * A file that only imports this module for its install-on-import effect, without ever declaring a
- * case through `Scribe`, must not fail just for being loaded on a stack that has no runner: the
- * failure that matters is `Scribe.test` reaching an unfilled {@link Runners}, which already reports
- * clearly on its own, not this function refusing on its behalf.
- */
-function localRunner(): TestRunner | null {
-  switch (currentStack()) {
-    case "deno":
-      return new DenoRunner();
-    case "node":
-      return new NodeRunner();
-    case "bun":
-      return null;
-  }
+function text(bytes: Uint8Array): string {
+  return new TextDecoder().decode(bytes);
 }
 
-/**
- * Fills {@link Runners} with this stack's runner, unless something already filled it or this
- * stack has none yet.
- *
- * @remarks
- * It runs on import, because `Scribe` reads the slot the moment a case is declared and a test file
- * declares its cases as it is read. The guard leaves a suite that wired its own runner alone.
- */
-export function installRunner(): void {
-  if (Runners.configured) return;
+Scribe.test("a program that exits zero answers its stdout and an empty stderr", async () => {
+  const result = await new LocalCommands().run("echo", ["hello", "scholium"]);
 
-  const runner = localRunner();
-  if (runner) Runners.use(runner);
-}
+  expect(result.code, equals(0));
+  expect(text(result.stdout).trim(), equals("hello scholium"));
+  expect(text(result.stderr), equals(""));
+});
 
-installRunner();
+Scribe.test("a program that exits non-zero answers its code rather than throwing", async () => {
+  const result = await new LocalCommands().run("false", []);
+
+  expect(result.code, equals(1));
+});
+
+Scribe.test("stdin is fed to the program only when the caller gives one", async () => {
+  const result = await new LocalCommands().run("cat", [], { stdin: new TextEncoder().encode("piped in") });
+
+  expect(text(result.stdout), equals("piped in"));
+});
+
+Scribe.test("a program the platform cannot find refuses rather than answering a code", async () => {
+  await expectLater(
+    () => new LocalCommands().run("scholium-test-program-that-does-not-exist", []),
+    throwsA(isA(Error)),
+  );
+});

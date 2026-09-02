@@ -34,46 +34,27 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Runners, type TestRunner } from "@scribe/alchemy/test";
+import process from "node:process";
 
-import { currentStack } from "@scribe/runtime/scholium/host.ts";
-import { TestWrapperRunner as DenoRunner } from "@scribe/runtime/scholium/deno/runner.ts";
-import { TestWrapperRunner as NodeRunner } from "@scribe/runtime/scholium/node/runner.ts";
+import type { Environment } from "@scribe/alchemy";
 
 /**
- * The {@link TestRunner} this stack hands every case declared through `Scribe` to, or null when
- * this stack has none yet.
+ * The environment this process was started in under Node, as the port describes one.
  *
  * @remarks
- * A file that only imports this module for its install-on-import effect, without ever declaring a
- * case through `Scribe`, must not fail just for being loaded on a stack that has no runner: the
- * failure that matters is `Scribe.test` reaching an unfilled {@link Runners}, which already reports
- * clearly on its own, not this function refusing on its behalf.
+ * It is the only file in this folder that reads the host's own environment, which is what lets a
+ * test put a fixed set of values behind the port without the machine it runs on showing through.
+ * Every read answers the way the host's own reader does: an unset name is `undefined`, and a name
+ * set to the empty string is `""`.
  */
-function localRunner(): TestRunner | null {
-  switch (currentStack()) {
-    case "deno":
-      return new DenoRunner();
-    case "node":
-      return new NodeRunner();
-    case "bun":
-      return null;
+export class LocalEnvironment implements Environment {
+  /** The value set for `name`, or `undefined` when the process holds none. */
+  get(name: string): string | undefined {
+    return process.env[name];
+  }
+
+  /** Every name and value the process was started with. */
+  toObject(): Record<string, string> {
+    return { ...process.env } as Record<string, string>;
   }
 }
-
-/**
- * Fills {@link Runners} with this stack's runner, unless something already filled it or this
- * stack has none yet.
- *
- * @remarks
- * It runs on import, because `Scribe` reads the slot the moment a case is declared and a test file
- * declares its cases as it is read. The guard leaves a suite that wired its own runner alone.
- */
-export function installRunner(): void {
-  if (Runners.configured) return;
-
-  const runner = localRunner();
-  if (runner) Runners.use(runner);
-}
-
-installRunner();

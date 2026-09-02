@@ -34,46 +34,39 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Runners, type TestRunner } from "@scribe/alchemy/test";
+import { hostname } from "node:os";
+import process from "node:process";
 
-import { currentStack } from "@scribe/runtime/scholium/host.ts";
-import { TestWrapperRunner as DenoRunner } from "@scribe/runtime/scholium/deno/runner.ts";
-import { TestWrapperRunner as NodeRunner } from "@scribe/runtime/scholium/node/runner.ts";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, isTrue, Scribe } from "@scribe/alchemy/test";
+import { LocalProcess } from "@scribe/runtime/scholium/node/process.ts";
 
-/**
- * The {@link TestRunner} this stack hands every case declared through `Scribe` to, or null when
- * this stack has none yet.
- *
- * @remarks
- * A file that only imports this module for its install-on-import effect, without ever declaring a
- * case through `Scribe`, must not fail just for being loaded on a stack that has no runner: the
- * failure that matters is `Scribe.test` reaching an unfilled {@link Runners}, which already reports
- * clearly on its own, not this function refusing on its behalf.
- */
-function localRunner(): TestRunner | null {
-  switch (currentStack()) {
-    case "deno":
-      return new DenoRunner();
-    case "node":
-      return new NodeRunner();
-    case "bun":
-      return null;
+Scribe.test("hostname answers what the platform's own reader answers", () => {
+  expect(new LocalProcess().hostname(), equals(hostname()));
+});
+
+Scribe.test("resident memory is a real, positive count of bytes", () => {
+  const bytes = new LocalProcess().residentMemoryBytes();
+
+  expect(Number.isFinite(bytes), isTrue, "the platform must answer a real number");
+  expect(bytes > 0, isTrue, "a running process holds some resident memory");
+});
+
+Scribe.test("a watched signal runs the handler it was given", async () => {
+  const target = new LocalProcess();
+  let fired = false;
+  const handler = () => {
+    fired = true;
+  };
+
+  target.onShutdownSignal("SIGTERM", handler);
+
+  try {
+    process.kill(process.pid, "SIGTERM");
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(fired, isTrue, "the handler must run when the watched signal arrives");
+  } finally {
+    process.off("SIGTERM", handler);
   }
-}
-
-/**
- * Fills {@link Runners} with this stack's runner, unless something already filled it or this
- * stack has none yet.
- *
- * @remarks
- * It runs on import, because `Scribe` reads the slot the moment a case is declared and a test file
- * declares its cases as it is read. The guard leaves a suite that wired its own runner alone.
- */
-export function installRunner(): void {
-  if (Runners.configured) return;
-
-  const runner = localRunner();
-  if (runner) Runners.use(runner);
-}
-
-installRunner();
+});

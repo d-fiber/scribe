@@ -34,46 +34,36 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Runners, type TestRunner } from "@scribe/alchemy/test";
+import { test } from "node:test";
 
-import { currentStack } from "@scribe/runtime/scholium/host.ts";
-import { TestWrapperRunner as DenoRunner } from "@scribe/runtime/scholium/deno/runner.ts";
-import { TestWrapperRunner as NodeRunner } from "@scribe/runtime/scholium/node/runner.ts";
+import type { CaseBody, TestRunner } from "@scribe/alchemy/test";
 
 /**
- * The {@link TestRunner} this stack hands every case declared through `Scribe` to, or null when
- * this stack has none yet.
+ * The {@link TestRunner} that hands every case declared through `Scribe` to `node:test`.
  *
  * @remarks
- * A file that only imports this module for its install-on-import effect, without ever declaring a
- * case through `Scribe`, must not fail just for being loaded on a stack that has no runner: the
- * failure that matters is `Scribe.test` reaching an unfilled {@link Runners}, which already reports
- * clearly on its own, not this function refusing on its behalf.
+ * It is the one seam between a case and the host, and it lives in the framework rather than in a
+ * package because that is the whole point of the split: a package writes against `Scribe` and
+ * `expect`, and what actually holds a case and runs it is the framework's to provide. A case body
+ * arrives already wrapped by `Scribe`, so there is nothing to do here but register it.
+ *
+ * `only` narrows a run to the cases declared this way under Deno, which only holds under Node when
+ * the process itself is started with `--test-only`: nothing here can turn that flag on from
+ * inside a case, since `node:test` reads it before any file is loaded.
  */
-function localRunner(): TestRunner | null {
-  switch (currentStack()) {
-    case "deno":
-      return new DenoRunner();
-    case "node":
-      return new NodeRunner();
-    case "bun":
-      return null;
+export class TestWrapperRunner implements TestRunner {
+  /** Registers `body` under `name` as a case that runs. */
+  test(name: string, body: CaseBody): void {
+    test(name, body);
+  }
+
+  /** Registers `body` under `name` as a case the host holds and does not run. */
+  skip(name: string, body: CaseBody): void {
+    test(name, { skip: true }, body);
+  }
+
+  /** Registers `body` under `name` and narrows the file to the cases marked this way. */
+  only(name: string, body: CaseBody): void {
+    test(name, { only: true }, body);
   }
 }
-
-/**
- * Fills {@link Runners} with this stack's runner, unless something already filled it or this
- * stack has none yet.
- *
- * @remarks
- * It runs on import, because `Scribe` reads the slot the moment a case is declared and a test file
- * declares its cases as it is read. The guard leaves a suite that wired its own runner alone.
- */
-export function installRunner(): void {
-  if (Runners.configured) return;
-
-  const runner = localRunner();
-  if (runner) Runners.use(runner);
-}
-
-installRunner();

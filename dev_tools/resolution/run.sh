@@ -45,7 +45,7 @@ run_deno() {
 }
 
 run_node() {
-  (cd "$HERE/node" && node --import ./register.mjs --test sample.test.mjs)
+  (cd "$HERE/node" && node --import ./register.mjs --test sample.test.mjs tests/*.ts)
 }
 
 run_bun() {
