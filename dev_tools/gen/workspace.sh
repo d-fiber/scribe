@@ -103,6 +103,8 @@ deno_json=$(jq --argjson layerImports "$layer_imports" '
 ' scribe.workspace.json)
 printf '%s\n' "$deno_json" > deno.json
 
+jq '{imports}' <<<"$deno_json" > scribe.imports.json
+
 sealed_json='{"alchemy/": []}'
 for layer in "${SEALED_LAYERS[@]}"; do
   declared=$(jq --arg layer "$layer" '.[] | select(.layer == $layer) | .collection | keys' <<<"$layers_json")
@@ -163,4 +165,4 @@ TS_LICENSE_HEADER='// Copyright (C) 2026 Fiber
     "$(jq '.' <<<"$sealed_json")"
 } > .lint/engine_layers.generated.ts
 
-deno fmt deno.json .lint/engine_layers.generated.ts >/dev/null
+deno fmt deno.json scribe.imports.json .lint/engine_layers.generated.ts >/dev/null

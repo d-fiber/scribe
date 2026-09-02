@@ -34,15 +34,16 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import assert from "node:assert/strict";
-import { test } from "node:test";
+import { assert, assertEquals, assertMatch } from "@std/assert";
 
 import "@scribe/runtime/scholium/runner.ts";
 import { Runners } from "@scribe/alchemy/test";
-import { PROTOCOL_VERSION } from "../../sdk/js/mod.ts";
+import { ClientType, enumValues } from "@scribe/contracts/enums.ts";
+import { PROTOCOL_VERSION } from "../../../sdk/js/mod.ts";
 
-test("resolves the two @scribe/* specifiers sdk/js/deno.json declares, and loads real source", () => {
-  assert.equal(typeof PROTOCOL_VERSION, "string");
-  assert.match(PROTOCOL_VERSION, /^\d+\.\d+\.\d+$/);
-  assert.equal(Runners.configured, true);
+Deno.test("resolves specifiers from deno.json, sdk/js and a sealed engine layer alike", () => {
+  assertEquals(typeof PROTOCOL_VERSION, "string");
+  assertMatch(PROTOCOL_VERSION, /^\d+\.\d+\.\d+$/);
+  assertEquals(Runners.configured, true);
+  assert(enumValues(ClientType).length > 0);
 });

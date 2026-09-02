@@ -34,34 +34,16 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { expect, test } from "bun:test";
 
-const denoJsonUrl = new URL("../../sdk/js/deno.json", import.meta.url);
-const denoJsonDir = new URL("../../sdk/js/", import.meta.url);
-const { imports } = JSON.parse(readFileSync(denoJsonUrl, "utf8"));
+import "@scribe/runtime/scholium/runner.ts";
+import { Runners } from "@scribe/alchemy/test";
+import { ClientType, enumValues } from "@scribe/contracts/enums.ts";
+import { PROTOCOL_VERSION } from "../../../sdk/js/mod.ts";
 
-const specifierMap = new Map();
-for (const [specifier, target] of Object.entries(imports)) {
-  if (target.startsWith("npm:") || target.startsWith("jsr:")) continue;
-  specifierMap.set(specifier, new URL(target, denoJsonDir).href);
-}
-
-export function resolve(specifier, context, nextResolve) {
-  const rewritten = specifierMap.get(specifier);
-  if (rewritten) return { url: rewritten, shortCircuit: true };
-  return nextResolve(specifier, context);
-}
-
-export async function load(url, context, nextLoad) {
-  if (url.endsWith(".ts")) {
-    const esbuild = await import("esbuild");
-    const source = readFileSync(fileURLToPath(url), "utf8");
-    const { code } = esbuild.transformSync(source, {
-      loader: "ts",
-      format: "esm",
-    });
-    return { format: "module", source: code, shortCircuit: true };
-  }
-  return nextLoad(url, context);
-}
+test("resolves specifiers from scribe.imports.json, sdk/js and a sealed engine layer alike", () => {
+  expect(typeof PROTOCOL_VERSION).toBe("string");
+  expect(PROTOCOL_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
+  expect(Runners.configured).toBe(true);
+  expect(enumValues(ClientType).length).toBeGreaterThan(0);
+});
