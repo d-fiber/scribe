@@ -49,6 +49,9 @@ say() {
   exit 1
 }
 
+say "writing deno.json from scribe.workspace.json"
+(cd "$ROOT" && bash dev_tools/gen/workspace.sh)
+
 say "running the workspace, offline"
 (cd "$ROOT" && deno task test)
 

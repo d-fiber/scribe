@@ -100,7 +100,7 @@ deno_json=$(jq --argjson layerImports "$layer_imports" '
   ($layerImports | keys) as $owned |
   ($current | with_entries(select(.key as $k | ($owned | index($k)) | not))) as $kept |
   .imports = ($kept + $layerImports | to_entries | sort_by(.key) | from_entries)
-' deno.json)
+' scribe.workspace.json)
 printf '%s\n' "$deno_json" > deno.json
 
 sealed_json='{"alchemy/": []}'

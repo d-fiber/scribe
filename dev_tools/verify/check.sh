@@ -49,6 +49,9 @@ say() {
   exit 1
 }
 
+say "writing deno.json from scribe.workspace.json"
+(cd "$ROOT" && bash dev_tools/gen/workspace.sh)
+
 say "linting the workspace"
 (cd "$ROOT" && deno lint)
 (cd "$ROOT" && deno run --allow-read --allow-env .lint/run.ts)

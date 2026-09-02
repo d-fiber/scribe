@@ -46,7 +46,7 @@ say() {
 
 cd "$ROOT"
 
-version=$(python3 -c "import json;print(json.load(open('deno.json'))['version'])")
+version=$(python3 -c "import json;print(json.load(open('scribe.workspace.json'))['version'])")
 tag="v$version"
 
 if git rev-parse "$tag" >/dev/null 2>&1; then

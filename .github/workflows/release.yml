@@ -31,7 +31,7 @@ jobs:
       - name: Refuse to release a version that was never tagged
         run: |
           set -eu
-          version=$(python3 -c "import json;print(json.load(open('deno.json'))['version'])")
+          version=$(python3 -c "import json;print(json.load(open('scribe.workspace.json'))['version'])")
           git fetch --tags origin
 
           if ! git rev-parse "v$version" >/dev/null 2>&1; then
@@ -60,7 +60,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -eu
-          version=$(python3 -c "import json;print(json.load(open('deno.json'))['version'])")
+          version=$(python3 -c "import json;print(json.load(open('scribe.workspace.json'))['version'])")
           existing=$(gh pr list --base main --head dev --state open --json number --jq '.[0].number // empty')
 
           if [ -n "$existing" ]; then

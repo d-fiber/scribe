@@ -70,7 +70,7 @@ async function protoFiles(): Promise<string[]> {
 }
 
 Scribe.test("the SDK announces the version the framework carries", async () => {
-  const manifest = JSON.parse(await Deno.readTextFile(new URL("deno.json", scribeRoot)));
+  const manifest = JSON.parse(await Deno.readTextFile(new URL("scribe.workspace.json", scribeRoot)));
 
   assertEquals(PROTOCOL_VERSION, manifest.version);
 });
