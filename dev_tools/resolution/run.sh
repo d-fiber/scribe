@@ -46,7 +46,7 @@ run_deno() {
 
 run_bun() {
   bash "$HERE/bun/generate.sh"
-  (cd "$HERE/bun" && bun test --tsconfig-override=./generated.tsconfig.json sample.test.ts)
+  (cd "$HERE/bun" && bun test --tsconfig-override=./generated.tsconfig.json sample.test.ts tests/)
 }
 
 case "${1:-all}" in

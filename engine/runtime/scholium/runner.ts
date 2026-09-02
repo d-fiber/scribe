@@ -48,13 +48,21 @@ import { TestWrapperRunner as DenoRunner } from "@scribe/runtime/scholium/deno/r
  * case through `Scribe`, must not fail just for being loaded on a stack that has no runner: the
  * failure that matters is `Scribe.test` reaching an unfilled {@link Runners}, which already reports
  * clearly on its own, not this function refusing on its behalf.
+ *
+ * `bun/runner.ts` is reached by a dynamic import, never a static one, unlike `deno/runner.ts`:
+ * it imports `bun:test`, a scheme Deno's module loader refuses outright, at parse time rather than
+ * at first use, so a static import would fail to even load this file under Deno, whichever branch
+ * of the switch below actually runs.
  */
-function localRunner(): TestRunner | null {
+async function localRunner(): Promise<TestRunner | null> {
   switch (currentStack()) {
     case "deno":
       return new DenoRunner();
+    case "bun": {
+      const { TestWrapperRunner } = await import("@scribe/runtime/scholium/bun/runner.ts");
+      return new TestWrapperRunner();
+    }
     case "node":
-    case "bun":
       return null;
   }
 }
@@ -65,13 +73,16 @@ function localRunner(): TestRunner | null {
  *
  * @remarks
  * It runs on import, because `Scribe` reads the slot the moment a case is declared and a test file
- * declares its cases as it is read. The guard leaves a suite that wired its own runner alone.
+ * declares its cases as it is read. The guard leaves a suite that wired its own runner alone. The
+ * top-level `await` below is what keeps this synchronous in effect despite {@link localRunner}
+ * being async: a module that awaits at its own top level blocks whoever imports it until that
+ * await settles, so a test file's own top-level code still only runs once this has.
  */
-export function installRunner(): void {
+export async function installRunner(): Promise<void> {
   if (Runners.configured) return;
 
-  const runner = localRunner();
+  const runner = await localRunner();
   if (runner) Runners.use(runner);
 }
 
-installRunner();
+await installRunner();
