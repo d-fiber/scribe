@@ -36,6 +36,7 @@
     "@jsquash/webp/encode": "npm:@jsquash/webp@1.5.0/encode.js",
     "@nats-io/jetstream": "jsr:@nats-io/jetstream@3.4.0",
     "@nats-io/transport-deno": "jsr:@nats-io/transport-deno@3.4.0",
+    "@nats-io/transport-node": "npm:@nats-io/transport-node@3.4.0",
     "@opensearch-project/opensearch": "npm:@opensearch-project/opensearch@2.13.0",
     "@opensearch-project/opensearch/": "npm:/@opensearch-project/opensearch@2.13.0/",
     "@scribe/alchemy": "./alchemy/mod.ts",
