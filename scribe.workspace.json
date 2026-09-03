@@ -29,9 +29,11 @@
     ]
   },
   "imports": {
+    "@aws-sdk/client-sqs": "npm:@aws-sdk/client-sqs@3.1125.0",
     "@bufbuild/protobuf": "npm:@bufbuild/protobuf@2.14.0",
     "@bufbuild/protobuf/codegenv2": "npm:@bufbuild/protobuf@2.14.0/codegenv2",
     "@bufbuild/protobuf/wkt": "npm:@bufbuild/protobuf@2.14.0/wkt",
+    "@google-cloud/pubsub": "npm:@google-cloud/pubsub@6.0.1",
     "@jsquash/webp/decode": "npm:@jsquash/webp@1.5.0/decode.js",
     "@jsquash/webp/encode": "npm:@jsquash/webp@1.5.0/encode.js",
     "@nats-io/jetstream": "jsr:@nats-io/jetstream@3.4.0",
