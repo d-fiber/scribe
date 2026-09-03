@@ -52,14 +52,14 @@
  * needs to happen at import or after boot.
  */
 
-import { Caches, Claims, Crons, Databases, FileSystems, Hooks, Queues, RateLimiters, Triggers } from "@scribe/alchemy";
+import { Caches, Claims, Crons, Databases, Hooks, Queues, RateLimiters, Triggers } from "@scribe/alchemy";
 import { Clients } from "@scribe/alchemy/http";
 import { Loggers } from "@scribe/alchemy/observe";
 import { Now } from "@scribe/alchemy";
 import type { LifecycleSteps } from "@scribe/alchemy";
 import { EXTENSION_CRON, EXTENSION_QUEUE } from "@scribe/contracts/extensions.ts";
-import { cronRegistry, cronRunner } from "./cron.ts";
-import { queueRunner } from "./queue.ts";
+import { Cron, cronRegistry, cronRunner } from "./cron.ts";
+import { Queue, queueRunner } from "./queue.ts";
 import { syncDeclaredSources, triggerRegistry, triggerRunner } from "./trigger.ts";
 import { extensions, OptionalExtension, runDeclarations } from "@scribe/runtime/support/extensions/mod.ts";
 import { FetchClients } from "./src/http/fetch_client.ts";
@@ -70,13 +70,21 @@ import { InlineHooks } from "./src/hook/inline_hooks.ts";
 import { ScheduledCrons } from "./src/cron/scheduled_crons.ts";
 import { OutboxTriggers } from "./src/trigger/outbox_triggers.ts";
 import { PostgrestDatabases } from "./src/database/postgrest_databases.ts";
-import { LocalFileSystems } from "./src/files/local_files.ts";
 import { RedisRateLimiters } from "./src/rate_limit/redis_rate_limiter.ts";
 import { ConsoleLogger } from "./src/observe/console_logger.ts";
 import { SystemNow } from "./src/observe/system_now.ts";
 
 export type { CacheSettings, DatabaseSettings, QueueSettings } from "./src/settings.ts";
-export { optional, required } from "./src/environment.ts";
+
+/**
+ * The kinds a project may declare against this package, bucket to the symbol it imports.
+ *
+ * @remarks
+ * Read by `scribe gen code`, which is the only reader: it is what tells the tool that mounting
+ * "foundation" gives a project a "queues" and a "crons" bucket to write into, without either the
+ * framework or the tool ever naming this package.
+ */
+export const declares = { queues: Queue, crons: Cron };
 
 /**
  * When this package runs, which is once, at import, to answer the slots its drivers are for.
@@ -110,7 +118,6 @@ export const scribe: LifecycleSteps = {
     if (!Crons.configured) Crons.use(new ScheduledCrons());
     if (!Triggers.configured) Triggers.use(new OutboxTriggers());
     if (!Databases.configured) Databases.use(new PostgrestDatabases());
-    if (!FileSystems.configured) FileSystems.use(new LocalFileSystems());
   },
 
   starts: async () => {

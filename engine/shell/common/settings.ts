@@ -36,17 +36,78 @@
 
 import { cacheSettings } from "@scribe/foundation/cache";
 import { databaseSettings } from "@scribe/foundation/database";
-import { required } from "@scribe/foundation";
 import { queueSettings } from "@scribe/foundation/queue";
+import type { QueueSettings } from "@scribe/foundation";
 import { RedisRateLimiters } from "@scribe/foundation/rate_limit";
 import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
 import { runMounted } from "@scribe/runtime/support/packages/mounted.ts";
 import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
 import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
-import { RateLimiters } from "@scribe/alchemy";
+import type { Command, Environment, FileSystemDriver } from "@scribe/alchemy";
+import { Commands, Environments, FileSystems, RateLimiters } from "@scribe/alchemy";
+import { LocalCommands as BunCommands } from "@scribe/runtime/scholium/bun/commands.ts";
+import { LocalEnvironment as BunEnvironment } from "@scribe/runtime/scholium/bun/env.ts";
+import { LocalFileSystems as BunFileSystems } from "@scribe/runtime/scholium/bun/files.ts";
+import { LocalListener as BunListener } from "@scribe/runtime/scholium/bun/listener.ts";
+import { LocalProcess as BunProcess } from "@scribe/runtime/scholium/bun/process.ts";
+import { LocalCommands as DenoCommands } from "@scribe/runtime/scholium/deno/commands.ts";
+import { LocalEnvironment as DenoEnvironment } from "@scribe/runtime/scholium/deno/env.ts";
+import { LocalFileSystems as DenoFileSystems } from "@scribe/runtime/scholium/deno/files.ts";
+import { LocalListener as DenoListener } from "@scribe/runtime/scholium/deno/listener.ts";
+import { LocalProcess as DenoProcess } from "@scribe/runtime/scholium/deno/process.ts";
+import { environment, required } from "@scribe/runtime/scholium/env.ts";
+import { currentStack } from "@scribe/runtime/scholium/host.ts";
+import { type Listener, Listeners } from "@scribe/runtime/scholium/listener.ts";
+import { type Process, Processes } from "@scribe/runtime/scholium/process.ts";
 import { workerSettings } from "@scribe/runtime/support/settings/worker.ts";
 import { KNOWN_JWT_ALGORITHMS } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
+
+/**
+ * The `Environment`, `FileSystemDriver` and `Command` this process's own stack provides.
+ *
+ * @remarks
+ * A `node` stack has none yet: `engine/runtime/scholium/bun/` and `.../deno/` are the only two
+ * sub-folders this framework ships, and reaching this on any other stack is a boot-time refusal
+ * rather than a guess.
+ *
+ * @throws {Error} When {@link currentStack} answers `node`.
+ */
+function corePorts(): { environment: Environment; fileSystems: FileSystemDriver; commands: Command } {
+  switch (currentStack()) {
+    case "deno":
+      return { environment: new DenoEnvironment(), fileSystems: new DenoFileSystems(), commands: new DenoCommands() };
+    case "bun":
+      return { environment: new BunEnvironment(), fileSystems: new BunFileSystems(), commands: new BunCommands() };
+    case "node":
+      throw new Error(`No scholium implementation ships for the "${currentStack()}" stack yet.`);
+  }
+}
+
+/**
+ * The `Listener` and `Process` this process's own stack provides.
+ *
+ * @remarks
+ * Split from {@link corePorts} because these two wire later in this file, after settings that
+ * only need `environment()` to already answer.
+ *
+ * @throws {Error} When {@link currentStack} answers `node`.
+ */
+function serverPorts(): { listener: Listener; process: Process } {
+  switch (currentStack()) {
+    case "deno":
+      return { listener: new DenoListener(), process: new DenoProcess() };
+    case "bun":
+      return { listener: new BunListener(), process: new BunProcess() };
+    case "node":
+      throw new Error(`No scholium implementation ships for the "${currentStack()}" stack yet.`);
+  }
+}
+
+const { environment: localEnvironment, fileSystems: localFileSystems, commands: localCommands } = corePorts();
+Environments.use(localEnvironment);
+FileSystems.use(localFileSystems);
+Commands.use(localCommands);
 
 /**
  * The port the persistent runtime listens on when the deployment names none.
@@ -63,14 +124,43 @@ const DEFAULT_PORT = 3000;
 const DEFAULT_MAX_INFLIGHT_BODY_MB = 256;
 
 function maxInflightBodyBytes(): number {
-  const declared = Number(Deno.env.get("API_MAX_INFLIGHT_BODY_MB"));
+  const declared = Number(environment().get("API_MAX_INFLIGHT_BODY_MB"));
   const megabytes = Number.isFinite(declared) && declared > 0 ? declared : DEFAULT_MAX_INFLIGHT_BODY_MB;
 
   return megabytes * 1024 * 1024;
 }
 
+/**
+ * Which broker the queue is declared against, and what that broker needs to reach it.
+ *
+ * @remarks
+ * `QUEUE_DRIVER` defaults to `"nats"`, so a deployment that has never heard of the other two
+ * boots exactly as it did before this setting existed. Neither `sqs` nor `pubsub` reads a
+ * credential from here: both SDKs resolve one from the identity the compute runs as, which is
+ * the point of offering a queue that authenticates by IAM rather than by a secret this settings
+ * object would otherwise have to carry.
+ *
+ * @throws {Error} When `QUEUE_DRIVER` names anything this framework does not carry a driver for.
+ */
+function queueSettingsFromEnvironment(): QueueSettings {
+  const driver = environment().get("QUEUE_DRIVER") || "nats";
+
+  switch (driver) {
+    case "nats":
+      return { driver: "nats", natsUrl: required("NATS_URL") };
+    case "sqs":
+      return { driver: "sqs", region: required("AWS_REGION") };
+    case "pubsub":
+      return { driver: "pubsub", projectId: required("GOOGLE_CLOUD_PROJECT") };
+    default:
+      throw new Error(
+        `QUEUE_DRIVER names "${driver}", which this framework does not know. It knows nats, sqs, pubsub.`,
+      );
+  }
+}
+
 cacheSettings.use({ redisUrl: required("REDIS_URL") });
-queueSettings.use({ natsUrl: required("NATS_URL") });
+queueSettings.use(queueSettingsFromEnvironment());
 databaseSettings.use({
   restUrl: required("REST_INTERNAL_URL"),
   anonKey: required("ANON_KEY"),
@@ -85,7 +175,7 @@ databaseSettings.use({
  * quietest way to lock every caller out at the next rotation.
  */
 function jwtAlgorithms(): readonly string[] {
-  const declared = Deno.env.get("JWT_ALGORITHMS");
+  const declared = environment().get("JWT_ALGORITHMS");
   if (!declared) return [];
 
   const named = declared.split(",").map((name) => name.trim()).filter((name) => name !== "");
@@ -101,15 +191,22 @@ function jwtAlgorithms(): readonly string[] {
 }
 
 identitySettings.use({
-  authUrl: Deno.env.get("AUTH_INTERNAL_URL"),
+  authUrl: environment().get("AUTH_INTERNAL_URL"),
   anonKey: required("ANON_KEY"),
   serviceRoleKey: required("SERVICE_KEY"),
-  jwtSecret: Deno.env.get("JWT_SECRET"),
+  jwtSecret: environment().get("JWT_SECRET"),
   jwtAlgorithms: jwtAlgorithms(),
 });
 firewallSettings.use({ internalSecret: required("INTERNAL_SECRET") });
 deviceSettings.use({ payloadPrivateKeyHex: required("DEVICE_PAYLOAD_PRIVATE_KEY") });
-httpSettings.use({ port: Number(Deno.env.get("PORT") ?? DEFAULT_PORT), maxInflightBodyBytes: maxInflightBodyBytes() });
+httpSettings.use({
+  port: Number(environment().get("PORT") ?? DEFAULT_PORT),
+  maxInflightBodyBytes: maxInflightBodyBytes(),
+});
+
+const { listener: localListener, process: localProcess } = serverPorts();
+Listeners.use(localListener);
+Processes.use(localProcess);
 
 RateLimiters.use(new RedisRateLimiters());
 
@@ -139,17 +236,17 @@ const WORKER_HANDSHAKE_DELAY_MS = 1_000;
  * gateway exposes it.
  */
 function publicNodes(): readonly string[] {
-  const declared = Deno.env.get("GATEWAY_PUBLIC_NODES");
+  const declared = environment().get("GATEWAY_PUBLIC_NODES");
   if (!declared) return [];
 
   return declared.split(",").map((name) => name.trim()).filter((name) => name !== "");
 }
 
 workerSettings.use({
-  endpoint: Deno.env.get("WORKER_ENDPOINT") || null,
-  callbackUrl: Deno.env.get("WORKER_CALLBACK_URL") || null,
-  callbackPort: Number(Deno.env.get("WORKER_CALLBACK_PORT") ?? WORKER_CALLBACK_PORT),
-  callbackHostname: Deno.env.get("WORKER_CALLBACK_HOSTNAME") || WORKER_CALLBACK_HOSTNAME,
+  endpoint: environment().get("WORKER_ENDPOINT") || null,
+  callbackUrl: environment().get("WORKER_CALLBACK_URL") || null,
+  callbackPort: Number(environment().get("WORKER_CALLBACK_PORT") ?? WORKER_CALLBACK_PORT),
+  callbackHostname: environment().get("WORKER_CALLBACK_HOSTNAME") || WORKER_CALLBACK_HOSTNAME,
   handshakeAttempts: WORKER_HANDSHAKE_ATTEMPTS,
   handshakeDelayMs: WORKER_HANDSHAKE_DELAY_MS,
   publicNodes: publicNodes(),

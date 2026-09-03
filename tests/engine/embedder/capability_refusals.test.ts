@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { create } from "@bufbuild/protobuf";
 import {
@@ -69,7 +71,7 @@ import { storageDelete, storageList } from "@scribe/storage/lib/src/capability/w
 
 const UNDECLARED = "nothing_declares_this";
 
-Deno.test("every auth procedure refuses a role no declaration answers to, and names it", async () => {
+Scribe.test("every auth procedure refuses a role no declaration answers to, and names it", async () => {
   const account = create(AccountRequestSchema, { accountId: "a", role: UNDECLARED });
   const device = create(DeviceRequestSchema, { accountId: "a", role: UNDECLARED, deviceId: "d" });
 
@@ -90,11 +92,11 @@ Deno.test("every auth procedure refuses a role no declaration answers to, and na
   }
 });
 
-Deno.test("a process that loaded no declaration lists no role rather than refusing", async () => {
+Scribe.test("a process that loaded no declaration lists no role rather than refusing", async () => {
   assertEquals((await authListRoles()).roles, []);
 });
 
-Deno.test("every realtime procedure refuses a request naming no channel", async () => {
+Scribe.test("every realtime procedure refuses a request naming no channel", async () => {
   const refusals = [
     (await realtimeBroadcast(create(BroadcastRequestSchema, { action: "created", entityId: "1" }))).error,
     (await realtimeGrant(create(GrantRequestSchema, { accountIds: ["a"] }))).error,
@@ -107,7 +109,7 @@ Deno.test("every realtime procedure refuses a request naming no channel", async 
   }
 });
 
-Deno.test("every search procedure refuses an index this process never declared, and names it", async () => {
+Scribe.test("every search procedure refuses an index this process never declared, and names it", async () => {
   const queue = create(QueueRequestSchema, { index: UNDECLARED, ids: ["1"] });
 
   const refusals = [
@@ -122,14 +124,14 @@ Deno.test("every search procedure refuses an index this process never declared, 
   }
 });
 
-Deno.test("a delete naming no object removes nothing and refuses nothing", async () => {
+Scribe.test("a delete naming no object removes nothing and refuses nothing", async () => {
   const answer = await storageDelete(create(DeleteRequestSchema, { objects: [] }));
 
   assertEquals(answer.error, undefined);
   assertEquals(answer.deleted, 0);
 });
 
-Deno.test("a delete naming an object with no folder is refused before any bucket is reached", async () => {
+Scribe.test("a delete naming an object with no folder is refused before any bucket is reached", async () => {
   const answer = await storageDelete(
     create(DeleteRequestSchema, { objects: [create(ObjectRefSchema, { filename: "a.png" })] }),
   );
@@ -137,7 +139,7 @@ Deno.test("a delete naming an object with no folder is refused before any bucket
   assertEquals(answer.error?.code, "invalid_object");
 });
 
-Deno.test("a delete whose folder no project declared is refused under its own code", async () => {
+Scribe.test("a delete whose folder no project declared is refused under its own code", async () => {
   const answer = await storageDelete(
     create(DeleteRequestSchema, {
       objects: [create(ObjectRefSchema, { folder: UNDECLARED, filename: "a.png" })],
@@ -148,7 +150,7 @@ Deno.test("a delete whose folder no project declared is refused under its own co
   assertStringIncludes(answer.error?.message ?? "", UNDECLARED);
 });
 
-Deno.test("a listing naming no folder is refused, and one naming an undeclared folder says so", async () => {
+Scribe.test("a listing naming no folder is refused, and one naming an undeclared folder says so", async () => {
   assertEquals((await storageList(create(ListRequestSchema, {}))).error?.code, "invalid_object");
   assertEquals((await storageList(create(ListRequestSchema, { folder: UNDECLARED }))).error?.code, "unknown_folder");
 });

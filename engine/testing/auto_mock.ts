@@ -34,15 +34,25 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-// deno-lint-ignore-file no-explicit-any
 import "@scribe/testing/settings.ts";
 
+/** A recording proxy over `real`, produced by `createAutoMock`, that answers calls through `when` or the real object. */
 export interface AutoMock<T> {
+  /** The proxied stand-in for `real`, recording every call and answering through a configured override when one exists. */
   readonly target: T;
+  // deno-lint-ignore no-explicit-any -- a test writes impl against the real method's own parameter types, which unknown[] would reject.
   when(path: string, impl: (...args: any[]) => unknown): void;
   calls(path: string): unknown[][];
 }
 
+/**
+ * How `createAutoMock` should answer a call nothing has configured.
+ *
+ * @remarks
+ * Without `defaultImpl`, an unconfigured call throws rather than returning `undefined`, so a test
+ * that reaches a method it never called `when` on fails loudly instead of silently proceeding with
+ * a missing value. `defaultImpl` opts out of that for mocks where most calls are safe to no-op.
+ */
 export interface AutoMockOptions {
   defaultImpl?(path: string, args: unknown[]): unknown;
 }
@@ -51,6 +61,7 @@ export function createAutoMock<T extends object>(
   real: T,
   options: AutoMockOptions = {},
 ): AutoMock<T> {
+  // deno-lint-ignore no-explicit-any -- see AutoMock.when: an override keeps the same parameter type it was given.
   const overrides = new Map<string, (...args: any[]) => unknown>();
   const calls = new Map<string, unknown[][]>();
 

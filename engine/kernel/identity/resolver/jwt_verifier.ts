@@ -42,7 +42,15 @@ import type { JWTPayload, JWTVerifyResult } from "jose";
 const _SYMMETRIC_ALGS = ["HS256"];
 const _ASYMMETRIC_ALGS = ["ES256", "RS256"];
 
-/** Every algorithm this framework can verify a bearer token with. */
+/**
+ * Every algorithm this framework can verify a bearer token with.
+ *
+ * @remarks
+ * `engine/shell/common/settings.ts` checks a deployment's own declared `jwtAlgorithms` against
+ * this list at boot, so a typo or an algorithm this framework has no verifier for fails loudly
+ * before the process starts serving requests, rather than silently refusing every token signed
+ * with it once traffic arrives.
+ */
 export const KNOWN_JWT_ALGORITHMS: readonly string[] = [..._SYMMETRIC_ALGS, ..._ASYMMETRIC_ALGS];
 
 const _AUDIENCE = "authenticated";
@@ -163,7 +171,21 @@ function verificationFor(alg: string | undefined): Verification | null {
   return null;
 }
 
+/**
+ * Verifies a caller's JWT against this deployment's own key material.
+ *
+ * @remarks
+ * Picks the symmetric or the asymmetric path from the token's own `alg` header rather than trying
+ * both, since a deployment may configure only one scheme and there is no reason to spend a JWKS
+ * fetch verifying a token whose algorithm names a scheme this deployment never turned on.
+ */
 export class JwtVerifier {
+  /**
+   * Answers `jwt`'s payload once it verifies against `"authenticated"`, the audience end-user
+   * tokens carry, and proves to be an end-user token rather than another kind this deployment
+   * issues; `null` on any other outcome, including a malformed token or an algorithm nothing here
+   * has key material for.
+   */
   static async verify(jwt: string): Future<JWTPayload | null> {
     try {
       const verification = verificationFor(decodeProtectedHeader(jwt).alg);

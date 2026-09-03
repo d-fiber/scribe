@@ -34,55 +34,56 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, having, isA, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { contains, equals, expect, having, isA, Scribe, throwsA } from "@scribe/alchemy/test";
 import { Constraint, Version, VersionError } from "@scribe/alchemy";
 
 function allows(constraint: string, version: string): boolean {
   return Constraint.parse(constraint).allows(Version.parse(version));
 }
 
-Deno.test("a caret constraint accepts its own version", () => {
+Scribe.test("a caret constraint accepts its own version", () => {
   expect(allows("^1.2.3", "1.2.3"), equals(true), "^1.2.3 refuses 1.2.3");
 });
 
-Deno.test("a caret constraint stops below the next major", () => {
+Scribe.test("a caret constraint stops below the next major", () => {
   expect(allows("^1.2.3", "1.9.9"), equals(true), "^1.2.3 refuses 1.9.9");
   expect(allows("^1.2.3", "2.0.0"), equals(false), "^1.2.3 accepts 2.0.0");
 });
 
-Deno.test("a caret constraint below one stops at the next minor", () => {
+Scribe.test("a caret constraint below one stops at the next minor", () => {
   expect(allows("^0.1.2", "0.1.9"), equals(true), "^0.1.2 refuses 0.1.9");
   expect(allows("^0.1.2", "0.2.0"), equals(false), "^0.1.2 accepts 0.2.0");
 });
 
-Deno.test("an exact constraint accepts that version and no other", () => {
+Scribe.test("an exact constraint accepts that version and no other", () => {
   expect(allows("1.2.3", "1.2.3"), equals(true), "1.2.3 refuses itself");
   expect(allows("1.2.3", "1.2.4"), equals(false), "1.2.3 accepts 1.2.4");
 });
 
-Deno.test("bounds written side by side narrow each other", () => {
+Scribe.test("bounds written side by side narrow each other", () => {
   expect(allows(">=1.0.0 <2.0.0", "1.5.0"), equals(true), ">=1.0.0 <2.0.0 refuses 1.5.0");
   expect(allows(">=1.0.0 <2.0.0", "2.0.0"), equals(false), ">=1.0.0 <2.0.0 accepts 2.0.0");
 });
 
-Deno.test("any accepts every version", () => {
+Scribe.test("any accepts every version", () => {
   expect(allows("any", "0.0.1"), equals(true), "any refuses 0.0.1");
 });
 
-Deno.test("a constraint refuses a bound it cannot read", () => {
+Scribe.test("a constraint refuses a bound it cannot read", () => {
   expect(
     () => Constraint.parse("~1.2.3"),
     throwsA(having(isA(VersionError), (raised) => raised.message, "message", contains("is not a bound"))),
   );
 });
 
-Deno.test("two caret constraints on the same major meet", () => {
+Scribe.test("two caret constraints on the same major meet", () => {
   const met = Constraint.parse("^1.2.0").intersect(Constraint.parse("^1.4.0"));
   expect(met?.allows(Version.parse("1.4.0")), equals(true), "^1.2.0 and ^1.4.0 refuse 1.4.0");
   expect(met?.allows(Version.parse("1.3.0")), equals(false), "^1.2.0 and ^1.4.0 accept 1.3.0");
 });
 
-Deno.test("two caret constraints on different majors meet nowhere", () => {
+Scribe.test("two caret constraints on different majors meet nowhere", () => {
   expect(
     Constraint.parse("^1.0.0").intersect(Constraint.parse("^2.0.0")),
     equals(null),
@@ -90,6 +91,6 @@ Deno.test("two caret constraints on different majors meet nowhere", () => {
   );
 });
 
-Deno.test("a constraint keeps the text it was written as", () => {
+Scribe.test("a constraint keeps the text it was written as", () => {
   expect(Constraint.parse("^1.2.3").toString(), equals("^1.2.3"), "the constraint is shown as something else");
 });

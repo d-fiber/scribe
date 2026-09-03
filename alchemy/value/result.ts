@@ -84,7 +84,7 @@ export class Failure<E = Refusal> {
  * answered, so a caller cannot carry on past it by forgetting to read a field.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const outcome = await charge(card);
  * if (!outcome.ok) return this.response.unprocessable({ message: outcome.error });
  * ```

@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, having, isA, isFalse, isTrue, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { contains, equals, expect, having, isA, isFalse, isTrue, Scribe, throwsA } from "@scribe/alchemy/test";
 import { compileNode, RoutingError } from "@scribe/alchemy/route";
 import type { DiscoveredRoute } from "@scribe/alchemy/route";
 import type { Contribution } from "@scribe/alchemy/route";
@@ -120,7 +121,7 @@ const NODE_SAYS_EVERYTHING: Contribution = {
   webhookVerified: false,
 };
 
-Deno.test("a route may not answer a caller the middleware above it refused", () => {
+Scribe.test("a route may not answer a caller the middleware above it refused", () => {
   expect(
     () => compileNode("admin", [], [found({ default: OpenReader }, [{ default: AdminRoot }])]),
     throwsA(isA(RoutingError)),
@@ -128,28 +129,28 @@ Deno.test("a route may not answer a caller the middleware above it refused", () 
   );
 });
 
-Deno.test("the refusal names the file and says a route narrows rather than widens", () => {
+Scribe.test("the refusal names the file and says a route narrows rather than widens", () => {
   expect(
     () => compileNode("admin", [], [found({ default: OpenReader }, [{ default: AdminRoot }])]),
     throwsA(having(isA(RoutingError), (raised) => raised.message, "message", contains("lib/admin/brands/index.ts"))),
   );
 });
 
-Deno.test("a route under a closed node inherits what the node allows", () => {
+Scribe.test("a route under a closed node inherits what the node allows", () => {
   const compiled = compileNode("admin", [], [found({ default: Reader }, [{ default: AdminRoot }])]);
 
   expect(compiled.length, equals(1));
   expect(compiled[0].route.access, equals(["authenticated"]));
 });
 
-Deno.test("a node that answered for the whole tree spares every route beneath it the declaration", () => {
+Scribe.test("a node that answered for the whole tree spares every route beneath it the declaration", () => {
   const compiled = compileNode("admin", [NODE_SAYS_EVERYTHING], [found({ default: Reader })]);
 
   expect(compiled.length, equals(1));
   expect(compiled[0].route.webhookVerified, isFalse);
 });
 
-Deno.test("nothing anywhere says whether a signature is checked, and the node will not compile", () => {
+Scribe.test("nothing anywhere says whether a signature is checked, and the node will not compile", () => {
   expect(
     () =>
       compileNode("admin", [{ ...NOTHING, access: "authenticated", rateLimit: EVERY_MINUTE }], [found({
@@ -159,7 +160,7 @@ Deno.test("nothing anywhere says whether a signature is checked, and the node wi
   );
 });
 
-Deno.test("a route says out loud that no signature is checked, and compiles", () => {
+Scribe.test("a route says out loud that no signature is checked, and compiles", () => {
   const compiled = compileNode(
     "admin",
     [{ ...NOTHING, access: "authenticated", rateLimit: EVERY_MINUTE }],
@@ -169,20 +170,20 @@ Deno.test("a route says out loud that no signature is checked, and compiles", ()
   expect(compiled[0].route.webhookVerified, isFalse);
 });
 
-Deno.test("a signature the root requires is not lifted by the route beneath it", () => {
+Scribe.test("a signature the root requires is not lifted by the route beneath it", () => {
   const compiled = compileNode("admin", [], [found({ default: UnsignedReader }, [{ default: AdminRoot }])]);
 
   expect(compiled[0].route.webhookVerified, isTrue, "the route lifted the check its root required");
 });
 
-Deno.test("a file that re-exports a base mounts the route it wrote, and no other", () => {
+Scribe.test("a file that re-exports a base mounts the route it wrote, and no other", () => {
   const compiled = compileNode("admin", [NODE_SAYS_EVERYTHING], [found({ default: Reader, Get, Post })]);
 
   expect(compiled.length, equals(1), "a re-exported base was mounted as a route of its own");
   expect(compiled[0].route.method, equals("get"));
 });
 
-Deno.test("a re-exported base never becomes a route that answers nothing", async () => {
+Scribe.test("a re-exported base never becomes a route that answers nothing", async () => {
   const compiled = compileNode("admin", [NODE_SAYS_EVERYTHING], [found({ default: Reader, Get })]);
   const answered = await compiled[0].route.handler(new RequestContext(CALL));
 

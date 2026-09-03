@@ -34,10 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, Scribe } from "@scribe/alchemy/test";
 import { Duration, ExponentialBackoff } from "@scribe/alchemy";
 
-Deno.test("ExponentialBackoff doubles from the base and stops at the ceiling", () => {
+Scribe.test("ExponentialBackoff doubles from the base and stops at the ceiling", () => {
   const backoff = new ExponentialBackoff(Duration.milliseconds(1_000), Duration.milliseconds(30_000));
 
   expect(backoff.delayFor(1).inMilliseconds, equals(1_000));
@@ -47,20 +48,20 @@ Deno.test("ExponentialBackoff doubles from the base and stops at the ceiling", (
   expect(backoff.delayFor(50).inMilliseconds, equals(30_000));
 });
 
-Deno.test("ExponentialBackoff never returns more than the ceiling, even at attempt 1", () => {
+Scribe.test("ExponentialBackoff never returns more than the ceiling, even at attempt 1", () => {
   const backoff = new ExponentialBackoff(Duration.milliseconds(5_000), Duration.milliseconds(1_000));
 
   expect(backoff.delayFor(1).inMilliseconds, equals(1_000));
 });
 
-Deno.test("ExponentialBackoff treats attempt 0 and negatives as the first attempt", () => {
+Scribe.test("ExponentialBackoff treats attempt 0 and negatives as the first attempt", () => {
   const backoff = new ExponentialBackoff(Duration.milliseconds(500), Duration.milliseconds(10_000));
 
   expect(backoff.delayFor(0).inMilliseconds, equals(500));
   expect(backoff.delayFor(-3).inMilliseconds, equals(500));
 });
 
-Deno.test("ExponentialBackoff honours a custom factor", () => {
+Scribe.test("ExponentialBackoff honours a custom factor", () => {
   const backoff = new ExponentialBackoff(Duration.milliseconds(100), Duration.milliseconds(100_000), 3);
 
   expect(backoff.delayFor(2).inMilliseconds, equals(300));

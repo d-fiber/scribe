@@ -34,13 +34,27 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Artefacts } from "./artefacts.ts";
 import type { Future } from "../async/future.ts";
 import type { Constraint } from "./constraint.ts";
 import type { Version } from "./version.ts";
 
 /** A step a package runs at one of the three moments of its life. */
 export type LifecycleStep = () => void | Future<void>;
+
+/**
+ * One way a manifest may say where a dependency comes from.
+ *
+ * @remarks
+ * A `"sdk"` source is the ordinary one, a package this checkout already carries at a version the
+ * constraint accepts, the same idea as a `pubspec.yaml` writing `sdk: flutter` for a package the
+ * Flutter SDK ships. A `"path"` and a `"git"` source name a copy the checkout never pinned, and
+ * neither carries a constraint: what they name is trusted as it is, the way a `path:` or a `git:`
+ * dependency of a `pubspec.yaml` is.
+ */
+export type DependencySource =
+  | Readonly<{ kind: "sdk"; constraint: Constraint }>
+  | Readonly<{ kind: "path"; path: string }>
+  | Readonly<{ kind: "git"; url: string; ref: string | null; path: string | null }>;
 
 /** What a package says about itself, and the whole of what its manifest holds. */
 export interface Manifest {
@@ -64,7 +78,7 @@ export interface Manifest {
   readonly scribe: Constraint;
 
   /**
-   * The packages this one may import, each against the versions it accepts.
+   * The packages this one may import, each from where its manifest said it comes.
    *
    * @remarks
    * It is a frozen record rather than a map because a manifest that came out of
@@ -72,18 +86,7 @@ export interface Manifest {
    * a `ReadonlyMap` refuses a write to whoever reads the type and accepts one from whoever asserts
    * past it, which is every tool that normalises a manifest on the way to a lock file.
    */
-  readonly dependencies: Readonly<Record<string, Constraint>>;
-
-  /**
-   * What this package hands the stack: its SQL, its `.proto` files, its ops.
-   *
-   * @remarks
-   * A manifest with no `scribe:` block hands over nothing, and that is the whole of the rule.
-   * Nothing falls back on a conventional path, so a directory the manifest does not name is one
-   * nothing plays, mounts or compiles, and a package that needs none of it says so by leaving the
-   * block out.
-   */
-  readonly artefacts: Artefacts;
+  readonly dependencies: Readonly<Record<string, DependencySource>>;
 }
 
 /**
@@ -117,7 +120,7 @@ export interface LifecycleSteps {
  * export of the package's own surface.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * export const scribe: LifecycleSteps = {
  *   starts: () => Audiences.use(new RedisAudiences(url)),
  * };

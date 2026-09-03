@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals, assertThrows } from "@std/assert";
 import { createAutoMock } from "@scribe/testing/auto_mock.ts";
 
@@ -55,7 +57,7 @@ class Root {
   }
 }
 
-Deno.test("createAutoMock: throws on an unconfigured call", () => {
+Scribe.test("createAutoMock: throws on an unconfigured call", () => {
   const mock = createAutoMock(new Root());
   assertThrows(
     () => mock.target.branch.leaf.ping("a"),
@@ -64,27 +66,27 @@ Deno.test("createAutoMock: throws on an unconfigured call", () => {
   );
 });
 
-Deno.test("createAutoMock: when() overrides a specific nested path", () => {
+Scribe.test("createAutoMock: when() overrides a specific nested path", () => {
   const mock = createAutoMock(new Root());
   mock.when("branch.leaf.ping", (value: string) => `fake:${value}`);
 
   assertEquals(mock.target.branch.leaf.ping("a"), "fake:a");
 });
 
-Deno.test("createAutoMock: never calls the real implementation", () => {
+Scribe.test("createAutoMock: never calls the real implementation", () => {
   const mock = createAutoMock(new Root());
   mock.when("branch.leaf.ping", () => "fake");
 
   assertEquals(mock.target.branch.leaf.ping("a"), "fake");
 });
 
-Deno.test("createAutoMock: defaultImpl handles any unconfigured call", () => {
+Scribe.test("createAutoMock: defaultImpl handles any unconfigured call", () => {
   const mock = createAutoMock(new Root(), { defaultImpl: () => "default" });
 
   assertEquals(mock.target.branch.leaf.ping("a"), "default");
 });
 
-Deno.test(
+Scribe.test(
   "createAutoMock: calls() records every invocation's arguments",
   () => {
     const mock = createAutoMock(new Root(), { defaultImpl: () => "default" });
@@ -106,7 +108,7 @@ class LazyResource {
   }
 }
 
-Deno.test(
+Scribe.test(
   "createAutoMock: reads a real getter with the real object as `this`, keeping its lazy cache intact",
   () => {
     const real = new LazyResource();

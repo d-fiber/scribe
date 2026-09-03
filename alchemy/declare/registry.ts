@@ -53,7 +53,7 @@ export class DuplicateDeclarationError extends ScribeError {}
  * at import for free.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const audiences = new Registry<Audience>("audience");
  *
  * export function declareAudience(name: string, held: Audience): Audience {

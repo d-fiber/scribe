@@ -39,31 +39,62 @@ import type { RateLimiter } from "../contracts/rate_limit.ts";
 import type { RouteHandler } from "../manifest/route.ts";
 import type { Contribution } from "./contribution.ts";
 
+/**
+ * The base every route-level middleware extends, contributing checks without terminating the
+ * request.
+ *
+ * @remarks
+ * `access`, `permissions`, `rateLimit`, `needs` and `webhookVerified` are read once per route,
+ * when `tree.ts` discovers it, and merged with whatever the endpoint and the node contribute; a
+ * request never re-runs them. `wrap` is different: `tree.ts` calls it once too, at the same
+ * build-time step, but the function it returns is folded into the route's actual handler chain by
+ * `wrapAll`, so unlike the other five, what `wrap` produces does run on every request.
+ */
 export abstract class Middleware {
+  /** The caller kind this middleware restricts access to, or `null` to leave that to another layer. */
   protected access(): Caller | readonly Caller[] | null {
     return null;
   }
 
+  /** The permissions this middleware requires, on top of whatever another layer already requires. */
   protected permissions(): readonly string[] {
     return [];
   }
 
+  /** The rate limiter this middleware sets, or `null` to leave the limit to another layer. */
   protected rateLimit(): RateLimiter | null {
     return null;
   }
 
+  /** The extra context this middleware requires, on top of whatever another layer already requires. */
   protected needs(): readonly Need[] {
     return [];
   }
 
+  /** Whether this middleware requires a verified webhook, or `null` to leave that to another layer. */
   protected webhookVerified(): boolean | null {
     return null;
   }
 
+  /**
+   * Wraps `handler`, or answers it unchanged when this middleware has nothing to add around it.
+   *
+   * @remarks
+   * Called once, while the route is being built, but the closure it returns becomes part of the
+   * handler chain the host invokes on every request to the route. This class's other check
+   * methods only ever produce metadata read once.
+   */
   protected wrap(handler: RouteHandler): RouteHandler {
     return handler;
   }
 
+  /**
+   * Collects this middleware's access, rate limit and webhook requirements into one `Contribution`.
+   *
+   * @remarks
+   * Called once, when `tree.ts` discovers the route this middleware applies to, and merged there
+   * with whatever the endpoint and the node itself contribute.
+   */
   contribution(): Contribution {
     return {
       access: this.access(),
@@ -77,4 +108,5 @@ export abstract class Middleware {
   }
 }
 
+/** A middleware that wraps every route a node declares, rather than one route in particular. */
 export abstract class NodeRoot extends Middleware {}

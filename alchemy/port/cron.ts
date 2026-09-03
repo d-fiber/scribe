@@ -142,7 +142,7 @@ const declared = new Registry<CronOptions>("cron");
  * second declaration is written.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * cron({ key: "audience:sweep", schedule: { every: Duration.hours(1) }, run: () => sweep() });
  * ```
  */

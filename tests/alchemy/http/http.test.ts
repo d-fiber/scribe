@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
 import {
   contains,
   equals,
@@ -45,6 +46,7 @@ import {
   isFalse,
   isTrue,
   mock,
+  Scribe,
   throwsA,
   verify,
   when,
@@ -81,7 +83,7 @@ function standing(): { client: Client; opened: number } {
   return counted;
 }
 
-Deno.test("a one-off verb opens a client, runs one exchange and closes it", async () => {
+Scribe.test("a one-off verb opens a client, runs one exchange and closes it", async () => {
   const standingBy = standing();
   when(() => standingBy.client.get("https://example.test/health", undefined))
     .thenResolve(mock<HttpResponse>());
@@ -92,7 +94,7 @@ Deno.test("a one-off verb opens a client, runs one exchange and closes it", asyn
   verify(() => standingBy.client.close()).once();
 });
 
-Deno.test("the client is closed even when the exchange fails", async () => {
+Scribe.test("the client is closed even when the exchange fails", async () => {
   const standingBy = standing();
   when(() => standingBy.client.post("https://example.test/orders", undefined))
     .thenReject(new Error("refused the connection"));
@@ -105,7 +107,7 @@ Deno.test("the client is closed even when the exchange fails", async () => {
   verify(() => standingBy.client.close()).once();
 });
 
-Deno.test("delete is spelled in full, which a free function could not be", async () => {
+Scribe.test("delete is spelled in full, which a free function could not be", async () => {
   const standingBy = standing();
   when(() => standingBy.client.delete("https://example.test/orders/7", undefined))
     .thenResolve(mock<HttpResponse>());
@@ -115,7 +117,7 @@ Deno.test("delete is spelled in full, which a free function could not be", async
   verify(() => standingBy.client.delete("https://example.test/orders/7", undefined)).once();
 });
 
-Deno.test("read hands back the body the client read", async () => {
+Scribe.test("read hands back the body the client read", async () => {
   const standingBy = standing();
   when(() => standingBy.client.read("https://example.test/version", undefined))
     .thenResolve("1.2.0");
@@ -123,7 +125,7 @@ Deno.test("read hands back the body the client read", async () => {
   expect(await http.read("https://example.test/version"), equals("1.2.0"));
 });
 
-Deno.test("a client taken by hand is not closed by anybody else", () => {
+Scribe.test("a client taken by hand is not closed by anybody else", () => {
   const standingBy = standing();
 
   const taken = http.open();
@@ -132,13 +134,13 @@ Deno.test("a client taken by hand is not closed by anybody else", () => {
   expect(standingBy.opened, equals(1));
 });
 
-Deno.test("nothing opens a client until a call is made", () => {
+Scribe.test("nothing opens a client until a call is made", () => {
   const standingBy = standing();
 
   expect(standingBy.opened, equals(0));
 });
 
-Deno.test("an outbound call has a finite deadline and refuses a redirect unless it was asked to follow", async () => {
+Scribe.test("an outbound call has a finite deadline and refuses a redirect unless it was asked to follow", async () => {
   const seen: BaseRequest[] = [];
   const client = new Recording(seen);
 
@@ -148,7 +150,7 @@ Deno.test("an outbound call has a finite deadline and refuses a redirect unless 
   expect(seen[0].followRedirects, isFalse, "an outbound call followed a redirect nobody asked it to follow");
 });
 
-Deno.test("a caller that means to follow a redirect says so, and how far", async () => {
+Scribe.test("a caller that means to follow a redirect says so, and how far", async () => {
   const seen: BaseRequest[] = [];
   const client = new Recording(seen);
 
@@ -158,7 +160,7 @@ Deno.test("a caller that means to follow a redirect says so, and how far", async
   expect(seen[0].maxRedirects, equals(2));
 });
 
-Deno.test("what a refusal names of an address is the host and the path, and nothing of the query", async () => {
+Scribe.test("what a refusal names of an address is the host and the path, and nothing of the query", async () => {
   const client = new Recording([], 403);
 
   try {

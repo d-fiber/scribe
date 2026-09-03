@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, having, isA, isFalse, isTrue, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { contains, equals, expect, having, isA, isFalse, isTrue, Scribe, throwsA } from "@scribe/alchemy/test";
 import { Node, Servers, standardNode, standardNodeNames } from "@scribe/alchemy/server";
 import { type Caller, Middleware, type RateLimit } from "@scribe/alchemy/route";
 import { Duration } from "@scribe/alchemy";
@@ -51,7 +52,7 @@ class Signed extends Middleware {
   }
 }
 
-Deno.test("a node says what it is called and whether it is public", () => {
+Scribe.test("a node says what it is called and whether it is public", () => {
   const node = new Node({ name: "app", public: true, description: "What the mobile app calls." });
 
   expect(node.name, equals("app"));
@@ -59,23 +60,23 @@ Deno.test("a node says what it is called and whether it is public", () => {
   expect(node.description, equals("What the mobile app calls."));
 });
 
-Deno.test("a node that says nothing about itself describes nothing rather than empty text", () => {
+Scribe.test("a node that says nothing about itself describes nothing rather than empty text", () => {
   expect(new Node({ name: "app", public: false }).description, equals(null));
   expect(new Node({ name: "app", public: false }).public, isFalse, "a node declared private says it is public");
 });
 
-Deno.test("a node the framework knows carries what the framework decided, before anything else", () => {
+Scribe.test("a node the framework knows carries what the framework decided, before anything else", () => {
   const layers = new Node({ name: "app", public: true }).layers();
 
   expect(layers.length, equals(1), "a standard node did not carry the framework's own layer");
   expect(layers[0].access, equals("authenticated"));
 });
 
-Deno.test("a node the framework does not know carries nothing until it says so", () => {
+Scribe.test("a node the framework does not know carries nothing until it says so", () => {
   expect(new Node({ name: "favorites", public: true }).layers().length, equals(0));
 });
 
-Deno.test("every middleware becomes a layer, after the one the framework decided", () => {
+Scribe.test("every middleware becomes a layer, after the one the framework decided", () => {
   const node = new Node({ name: "app", public: true, middleware: [new Throttled(), new Signed()] });
 
   const layers = node.layers();
@@ -85,12 +86,12 @@ Deno.test("every middleware becomes a layer, after the one the framework decided
   expect(layers[2].access, equals("authenticated"));
 });
 
-Deno.test("the five nodes the framework mounts are the five it knows", () => {
+Scribe.test("the five nodes the framework mounts are the five it knows", () => {
   expect(standardNodeNames(), equals(["public", "app", "admin", "services", "webhook"]));
   expect(standardNode("app")?.caller, equals("authenticated"));
   expect(standardNode("favorites"), equals(null));
 });
 
-Deno.test("nothing listens until the host says what listens", () => {
+Scribe.test("nothing listens until the host says what listens", () => {
   expect(() => Servers.get(), throwsA(having(isA(Error), (raised) => raised.message, "message", contains("Servers"))));
 });

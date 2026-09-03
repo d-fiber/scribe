@@ -39,7 +39,16 @@ import type { Future } from "@scribe/alchemy";
 import { jwtVerify } from "jose";
 import type { TokenVerifier } from "./token_verifier.ts";
 
+/**
+ * The {@link TokenVerifier} for a symmetric JWT, checked against this deployment's shared secret.
+ *
+ * @remarks
+ * A symmetric scheme means signing and verifying use the same secret, which is what `JWT_SECRET`
+ * is: whichever component signed a token, PostgREST, the auth package, or this gateway, any of
+ * them can verify one issued by another, at the cost of every one of them having to hold the key.
+ */
 export class HmacTokenVerifier implements TokenVerifier {
+  /** The only algorithm this verifier accepts: the one an octet secret is valid for. */
   readonly algorithms = ["HS256"] as const;
 
   readonly #secret: Uint8Array;
@@ -48,6 +57,15 @@ export class HmacTokenVerifier implements TokenVerifier {
     this.#secret = utf8.encode(secret);
   }
 
+  /**
+   * Builds a verifier over `secret`, or `null` when no secret is configured.
+   *
+   * @remarks
+   * `null` rather than a verifier that always refuses, for the same reason
+   * {@link JwksTokenVerifier.fromAuthUrl} answers `null`: `factory.ts` needs to tell a deployment
+   * that never turned symmetric verification on apart from one that did and is simply seeing every
+   * token fail, and only excludes the first from the algorithms it accepts at all.
+   */
   static fromSecret(secret: string | undefined): HmacTokenVerifier | null {
     return secret ? new HmacTokenVerifier(secret) : null;
   }

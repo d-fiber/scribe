@@ -34,6 +34,14 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+/**
+ * The keys and the JWKS address this deployment verifies a bearer token against.
+ *
+ * @remarks
+ * `authUrl` is the only field that can be absent: a project that mounts no identity package has
+ * no service to ask for a JWKS, so the token verifier falls back to refusing every asymmetric
+ * token instead of blocking the process from starting without one.
+ */
 export interface IdentitySettings {
   /**
    * The address of the service that publishes the JWKS, when one is mounted.
@@ -69,15 +77,21 @@ export interface IdentitySettings {
   readonly jwtAlgorithms: readonly string[];
 }
 
+/** The secret an internal call carries to prove it originated inside the deployment. */
 export interface FirewallSettings {
+  /** The shared secret that marks a call as coming from inside the deployment, not from an outside caller. */
   readonly internalSecret: string;
 }
 
+/** The key this deployment decrypts an incoming device payload with. */
 export interface DeviceSettings {
+  /** The device payload's private key, hex-encoded, used to decrypt what a device encrypted with it. */
   readonly payloadPrivateKeyHex: string;
 }
 
+/** What this process listens on, and how much of a request body it will hold in memory at once. */
 export interface HttpSettings {
+  /** The TCP port this process listens on. */
   readonly port: number;
 
   /**
@@ -92,7 +106,17 @@ export interface HttpSettings {
   readonly maxInflightBodyBytes: number;
 }
 
+/**
+ * How this replica finds its worker, and how the worker calls back into it.
+ *
+ * @remarks
+ * A deployment that runs no worker leaves `endpoint` `null` and the rest of the shape unused.
+ * When there is a worker, the callback fields exist because a capability grant lives only in the
+ * memory of the replica that issued it: the worker has to reach that exact replica back, never a
+ * shared service name that a load balancer could route to a different one.
+ */
 export interface WorkerSettings {
+  /** The worker's own address, or `null` when this deployment runs no worker. */
   readonly endpoint: string | null;
 
   /**
@@ -105,6 +129,8 @@ export interface WorkerSettings {
    * replica by hostname, meaning a host running outside the container network.
    */
   readonly callbackUrl: string | null;
+
+  /** The port the callback address falls back to deriving from the replica's own hostname when `callbackUrl` is unset. */
   readonly callbackPort: number;
 
   /**
@@ -117,7 +143,19 @@ export interface WorkerSettings {
    * one whose port is published, wants the address the worker actually calls and nothing else.
    */
   readonly callbackHostname: string;
+
+  /** How many times the host retries the worker's `Describe` call during the handshake before giving up. */
   readonly handshakeAttempts: number;
+
+  /** How long the host waits between handshake attempts, in milliseconds. */
   readonly handshakeDelayMs: number;
+
+  /**
+   * The node names the gateway routes publicly, as the deployment declares them.
+   *
+   * @remarks
+   * A node absent here that declares itself internal is left alone; only the other direction, a
+   * node marked internal that the gateway exposes anyway, is refused.
+   */
   readonly publicNodes: readonly string[];
 }

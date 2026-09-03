@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import "@scribe/testing/settings.ts";
 import { type BodyIntake, readBoundedBody } from "@scribe/kernel/http/serve/body_reader.ts";
 import { stripPrefix } from "@scribe/runtime/http/pathname.ts";
@@ -71,11 +73,11 @@ function textOf(intake: BodyIntake): string {
   return new TextDecoder().decode(bodyOf(intake));
 }
 
-Deno.test("readBoundedBody returns the whole body when it fits", async () => {
+Scribe.test("readBoundedBody returns the whole body when it fits", async () => {
   assertEquals(textOf(await readBoundedBody(jsonRequest('{"a":1}'), MAX_BODY_BYTES)), '{"a":1}');
 });
 
-Deno.test("readBoundedBody reassembles a body split across chunks", async () => {
+Scribe.test("readBoundedBody reassembles a body split across chunks", async () => {
   const stream = new ReadableStream({
     start(controller) {
       controller.enqueue(new TextEncoder().encode("hello "));
@@ -91,14 +93,14 @@ Deno.test("readBoundedBody reassembles a body split across chunks", async () => 
   assertEquals(textOf(await readBoundedBody(req, MAX_BODY_BYTES)), "hello world");
 });
 
-Deno.test("readBoundedBody refuses past the bound instead of buffering on", async () => {
+Scribe.test("readBoundedBody refuses past the bound instead of buffering on", async () => {
   const intake = await readBoundedBody(jsonRequest("x".repeat(50)), 10);
 
   assertEquals(intake.ok, false);
   assertEquals(intake.ok ? null : intake.refusal, "too-large");
 });
 
-Deno.test("readBoundedBody fills the declared buffer once instead of copying twice", async () => {
+Scribe.test("readBoundedBody fills the declared buffer once instead of copying twice", async () => {
   const stream = new ReadableStream({
     start(controller) {
       controller.enqueue(new TextEncoder().encode("hello "));
@@ -111,7 +113,7 @@ Deno.test("readBoundedBody fills the declared buffer once instead of copying twi
   assertEquals(textOf(await readBoundedBody(req, MAX_BODY_BYTES, 11)), "hello world");
 });
 
-Deno.test("readBoundedBody trims a body that came in under its declared length", async () => {
+Scribe.test("readBoundedBody trims a body that came in under its declared length", async () => {
   const bytes = bodyOf(await readBoundedBody(jsonRequest('{"a":1}'), MAX_BODY_BYTES, 64));
 
   assertEquals(
@@ -122,7 +124,7 @@ Deno.test("readBoundedBody trims a body that came in under its declared length",
   assertEquals(bytes.byteLength, 7);
 });
 
-Deno.test("readBoundedBody holds on to nothing more than the body that arrived", async () => {
+Scribe.test("readBoundedBody holds on to nothing more than the body that arrived", async () => {
   const declared = 8 * 1024 * 1024;
 
   const bytes = bodyOf(await readBoundedBody(jsonRequest('{"a":1}'), MAX_BODY_BYTES, declared));
@@ -135,7 +137,7 @@ Deno.test("readBoundedBody holds on to nothing more than the body that arrived",
   );
 });
 
-Deno.test("readBoundedBody keeps the single buffer when the body fills what it declared", async () => {
+Scribe.test("readBoundedBody keeps the single buffer when the body fills what it declared", async () => {
   const body = '{"a":1}';
   const bytes = bodyOf(await readBoundedBody(jsonRequest(body), MAX_BODY_BYTES, body.length));
 
@@ -143,7 +145,7 @@ Deno.test("readBoundedBody keeps the single buffer when the body fills what it d
   assertEquals(bytes.buffer.byteLength, body.length, "an honest content-length must not cost a second copy");
 });
 
-Deno.test("readBoundedBody refuses a body that overruns what it declared", async () => {
+Scribe.test("readBoundedBody refuses a body that overruns what it declared", async () => {
   const intake = await readBoundedBody(jsonRequest("x".repeat(50)), MAX_BODY_BYTES, 10);
 
   assertEquals(
@@ -153,13 +155,13 @@ Deno.test("readBoundedBody refuses a body that overruns what it declared", async
   );
 });
 
-Deno.test("readBoundedBody treats a body-less request as empty, not as an error", async () => {
+Scribe.test("readBoundedBody treats a body-less request as empty, not as an error", async () => {
   const req = new Request("http://api.test/", { method: "GET" });
 
   assertEquals(bodyOf(await readBoundedBody(req, MAX_BODY_BYTES)).byteLength, 0);
 });
 
-Deno.test("readBoundedBody tells a body that stopped mid-flight apart from one that was never sent", async () => {
+Scribe.test("readBoundedBody tells a body that stopped mid-flight apart from one that was never sent", async () => {
   const stream = new ReadableStream({
     start(controller) {
       controller.enqueue(new TextEncoder().encode('{"amount":10'));
@@ -177,7 +179,7 @@ Deno.test("readBoundedBody tells a body that stopped mid-flight apart from one t
   );
 });
 
-Deno.test("admitBody charges a non-multipart request to the in-flight budget too", () => {
+Scribe.test("admitBody charges a non-multipart request to the in-flight budget too", () => {
   const admission = admitBody(jsonRequest("{}"));
   try {
     assert(admission);
@@ -195,7 +197,7 @@ Deno.test("admitBody charges a non-multipart request to the in-flight budget too
   assertEquals(inflightBodyBytes(), 0);
 });
 
-Deno.test("admitBody holds a non-multipart request to its own declared length", () => {
+Scribe.test("admitBody holds a non-multipart request to its own declared length", () => {
   const req = new Request("http://api.test/", {
     method: "POST",
     headers: { "content-type": "application/json", "content-length": "512" },
@@ -212,7 +214,7 @@ Deno.test("admitBody holds a non-multipart request to its own declared length", 
   }
 });
 
-Deno.test("admitBody refuses an over-declared length and falls back on the undeclared size", () => {
+Scribe.test("admitBody refuses an over-declared length and falls back on the undeclared size", () => {
   const req = new Request("http://api.test/", {
     method: "POST",
     headers: {
@@ -231,7 +233,7 @@ Deno.test("admitBody refuses an over-declared length and falls back on the undec
   }
 });
 
-Deno.test("admitBody reserves exactly what it will let itself buffer", () => {
+Scribe.test("admitBody reserves exactly what it will let itself buffer", () => {
   const admission = admitBody(upload(1_000));
   try {
     assertEquals(
@@ -245,7 +247,7 @@ Deno.test("admitBody reserves exactly what it will let itself buffer", () => {
   }
 });
 
-Deno.test("admitBody reserves the undeclared size when the length is missing or unusable", () => {
+Scribe.test("admitBody reserves the undeclared size when the length is missing or unusable", () => {
   for (const declared of [null, 0, -1, MAX_BODY_BYTES + 1]) {
     const admission = admitBody(upload(declared));
     try {
@@ -258,7 +260,7 @@ Deno.test("admitBody reserves the undeclared size when the length is missing or 
   }
 });
 
-Deno.test("admitBody refuses once the in-flight budget is spent, and frees it back", () => {
+Scribe.test("admitBody refuses once the in-flight budget is spent, and frees it back", () => {
   const held = [];
   try {
     for (let i = 0; i < 2; i++) {
@@ -279,7 +281,7 @@ Deno.test("admitBody refuses once the in-flight budget is spent, and frees it ba
   assertEquals(inflightBodyBytes(), 0, "releasing must return the budget");
 });
 
-Deno.test("admitBody spends the budget the deployment configured, not a compiled-in one", () => {
+Scribe.test("admitBody spends the budget the deployment configured, not a compiled-in one", () => {
   const configured = httpSettings.get();
   httpSettings.use({ ...configured, maxInflightBodyBytes: MAX_BODY_BYTES });
 
@@ -302,14 +304,14 @@ Deno.test("admitBody spends the budget the deployment configured, not a compiled
   assertEquals(inflightBodyBytes(), 0);
 });
 
-Deno.test("stripPrefix removes the service segment and nothing else", () => {
+Scribe.test("stripPrefix removes the service segment and nothing else", () => {
   assertEquals(stripPrefix("/queue/drain", "queue"), "/drain");
   assertEquals(stripPrefix("/queue", "queue"), "/");
   assertEquals(stripPrefix("/other/drain", "queue"), "/other/drain");
   assertEquals(stripPrefix("/queued/drain", "queue"), "/queued/drain");
 });
 
-Deno.test("rewriteRequest carries the body bytes across the rewrite", async () => {
+Scribe.test("rewriteRequest carries the body bytes across the rewrite", async () => {
   const bodyBytes = new TextEncoder().encode('{"kept":true}');
   const original = new Request("http://api.test/queue/drain", {
     method: "POST",
@@ -322,7 +324,7 @@ Deno.test("rewriteRequest carries the body bytes across the rewrite", async () =
   assertEquals(await rewritten.text(), '{"kept":true}');
 });
 
-Deno.test("rewriteRequest keeps the query string the surface prefix hid", () => {
+Scribe.test("rewriteRequest keeps the query string the surface prefix hid", () => {
   const rewritten = rewriteRequest(
     new Request("http://api.test/admin/team/roles?offset=40&size=10"),
     null,
@@ -335,7 +337,7 @@ Deno.test("rewriteRequest keeps the query string the surface prefix hid", () => 
   assertEquals(url.searchParams.get("size"), "10");
 });
 
-Deno.test("rewriteRequest adds no query string when the request carried none", () => {
+Scribe.test("rewriteRequest adds no query string when the request carried none", () => {
   const rewritten = rewriteRequest(
     new Request("http://api.test/admin/team/roles"),
     null,
@@ -345,7 +347,7 @@ Deno.test("rewriteRequest adds no query string when the request carried none", (
   assertEquals(rewritten.url, "http://api.test/team/roles");
 });
 
-Deno.test("rewriteRequest sends only the view, not the buffer behind it", async () => {
+Scribe.test("rewriteRequest sends only the view, not the buffer behind it", async () => {
   const backing = new TextEncoder().encode('PADDING{"kept":true}');
   const view = backing.subarray(7);
 
@@ -358,7 +360,7 @@ Deno.test("rewriteRequest sends only the view, not the buffer behind it", async 
   assertEquals(await rewritten.text(), '{"kept":true}');
 });
 
-Deno.test("rewriteRequest drops the body on a method that cannot carry one", () => {
+Scribe.test("rewriteRequest drops the body on a method that cannot carry one", () => {
   const rewritten = rewriteRequest(
     new Request("http://api.test/queue/status", { method: "GET" }),
     new TextEncoder().encode("ignored"),

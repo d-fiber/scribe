@@ -40,8 +40,8 @@ import type { LoggedEntry } from "@scribe/alchemy/observe";
 /**
  * Where the project decided its own entries should go, when it decided at all.
  *
- * The port exists because the decision lives in project code -- a `_logs.ts`
- * running in the worker -- while the entries are raised in `kernel/`, which
+ * The port exists because the decision lives in project code, in a `_logs.ts`
+ * running in the worker, while the entries are raised in `kernel/`, which
  * cannot import `project/`. The host asks two questions and hands over a batch;
  * everything about how a sink was declared stays on the other side.
  *

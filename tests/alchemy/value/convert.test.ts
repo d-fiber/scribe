@@ -34,28 +34,41 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, fail, having, isA, isFalse, isTrue, lessThan, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import {
+  contains,
+  equals,
+  expect,
+  fail,
+  having,
+  isA,
+  isFalse,
+  isTrue,
+  lessThan,
+  Scribe,
+  throwsA,
+} from "@scribe/alchemy/test";
 import { base64, base64Url, FormatException, hex, json, utf8 } from "@scribe/alchemy";
 
 const BYTES = new Uint8Array([0, 1, 127, 128, 255]);
 
-Deno.test("what a codec writes, the same codec reads back", () => {
+Scribe.test("what a codec writes, the same codec reads back", () => {
   expect(hex.decode(hex.encode(BYTES)), equals(BYTES));
   expect(base64.decode(base64.encode(BYTES)), equals(BYTES));
   expect(base64Url.decode(base64Url.encode(BYTES)), equals(BYTES));
   expect(utf8.decode(utf8.encode("héllo")), equals("héllo"));
 });
 
-Deno.test("hexadecimal is written two lowercase characters per byte", () => {
+Scribe.test("hexadecimal is written two lowercase characters per byte", () => {
   expect(hex.encode(BYTES), equals("00017f80ff"));
 });
 
-Deno.test("base64 pads, and the address alphabet does not", () => {
+Scribe.test("base64 pads, and the address alphabet does not", () => {
   expect(base64.encode(new Uint8Array([1])), equals("AQ=="));
   expect(base64Url.encode(new Uint8Array([1])), equals("AQ"));
 });
 
-Deno.test("the address alphabet writes no character an address would take for its own", () => {
+Scribe.test("the address alphabet writes no character an address would take for its own", () => {
   const written = base64Url.encode(new Uint8Array([251, 255, 190]));
 
   expect(written.includes("+"), equals(false));
@@ -63,7 +76,7 @@ Deno.test("the address alphabet writes no character an address would take for it
   expect(written.includes("="), equals(false));
 });
 
-Deno.test("text that does not have the shape it is read as refuses, and says what was read", () => {
+Scribe.test("text that does not have the shape it is read as refuses, and says what was read", () => {
   expect(
     () => hex.decode("zz"),
     throwsA(having(isA(FormatException), (raised) => raised.message, "message", contains("2 characters read"))),
@@ -79,7 +92,7 @@ Deno.test("text that does not have the shape it is read as refuses, and says wha
   );
 });
 
-Deno.test("a long offending text is cut short in the message it raises", () => {
+Scribe.test("a long offending text is cut short in the message it raises", () => {
   expect(
     () => json.decode("{".repeat(200)),
     throwsA(having(
@@ -91,35 +104,35 @@ Deno.test("a long offending text is cut short in the message it raises", () => {
   );
 });
 
-Deno.test("a value written as JSON reads back as what it was", () => {
+Scribe.test("a value written as JSON reads back as what it was", () => {
   expect(json.decode(json.encode({ id: "ada", tags: [1, 2] })), equals({ id: "ada", tags: [1, 2] }));
 });
 
-Deno.test("bytes that spell no text refuse rather than answering the replacement character", () => {
+Scribe.test("bytes that spell no text refuse rather than answering the replacement character", () => {
   expect(
     () => utf8.decode(new Uint8Array([0xff, 0xfe])),
     throwsA(having(isA(FormatException), (raised) => raised.message, "message", contains("Expected utf-8"))),
   );
 });
 
-Deno.test("a refusal that shows nothing carries nothing to show", () => {
+Scribe.test("a refusal that shows nothing carries nothing to show", () => {
   expect(
     () => utf8.decode(new Uint8Array([0xff])),
     throwsA(isA(FormatException)),
   );
 });
 
-Deno.test("a value that writes to nothing is written as the absence JSON has", () => {
+Scribe.test("a value that writes to nothing is written as the absence JSON has", () => {
   expect(json.encode(undefined), equals("null"));
   expect(json.decode("null"), equals(null));
 });
 
-Deno.test("text is written as the bytes it takes, not as the characters it has", () => {
+Scribe.test("text is written as the bytes it takes, not as the characters it has", () => {
   expect(utf8.encode("é").length, equals(2));
   expect(utf8.encode("a").length, equals(1));
 });
 
-Deno.test("an empty input goes through every codec and comes back empty", () => {
+Scribe.test("an empty input goes through every codec and comes back empty", () => {
   expect(hex.encode(new Uint8Array(0)), equals(""));
   expect(hex.decode("").length, equals(0));
   expect(base64.encode(new Uint8Array(0)), equals(""));
@@ -127,29 +140,29 @@ Deno.test("an empty input goes through every codec and comes back empty", () => 
   expect(utf8.decode(new Uint8Array(0)), equals(""));
 });
 
-Deno.test("base64 writes the padding its length calls for, and reads it back either way", () => {
+Scribe.test("base64 writes the padding its length calls for, and reads it back either way", () => {
   expect(base64.encode(new Uint8Array([1, 2])), equals("AQI="));
   expect(base64.encode(new Uint8Array([1, 2, 3])), equals("AQID"));
   expect(base64.decode("AQI"), equals(new Uint8Array([1, 2])));
 });
 
-Deno.test("base64 reads back only what it writes, so one value has one text", () => {
+Scribe.test("base64 reads back only what it writes, so one value has one text", () => {
   expect([...base64.decode("QQ==")], equals([65]));
   expect(() => base64.decode("QR"), throwsA(isA(FormatException)), "a second text for the byte 65 was taken");
   expect(() => base64.decode("QV"), throwsA(isA(FormatException)), "a third text for the byte 65 was taken");
 });
 
-Deno.test("base64 for an address refuses the alphabet it does not write", () => {
+Scribe.test("base64 for an address refuses the alphabet it does not write", () => {
   expect(() => base64Url.decode("-_+/"), throwsA(isA(FormatException)), "the standard alphabet was taken");
   expect(() => base64Url.decode("QQ=="), throwsA(isA(FormatException)), "padding was taken");
 });
 
-Deno.test("hexadecimal is read in the case it is written, and no other", () => {
+Scribe.test("hexadecimal is read in the case it is written, and no other", () => {
   expect([...hex.decode("deadbeef")], equals([222, 173, 190, 239]));
   expect(() => hex.decode("DEADBEEF"), throwsA(isA(FormatException)), "a second text for one digest was taken");
 });
 
-Deno.test("what a codec refuses says how much was read and never what was read", () => {
+Scribe.test("what a codec refuses says how much was read and never what was read", () => {
   const token = "eyJhbGciOiJIUzI1NiJ9.SECRET-abcdefghij.sig";
 
   try {

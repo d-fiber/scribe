@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals } from "@std/assert";
 import { type DiscoveredLogSink, LogSink, ScribeServer } from "@scribe/sdk";
 import type { Manifest } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
@@ -119,7 +121,7 @@ async function attach(
   return { sinks: new WorkerLogSinks(client, manifest), manifest };
 }
 
-Deno.test("the node of an entry is the first segment, when it names a node", async () => {
+Scribe.test("the node of an entry is the first segment, when it names a node", async () => {
   const { sinks } = await attach([ROOT_SINK, APP_SINK]);
 
   assertEquals(sinks.nodeOf("/app/brand/42"), "app");
@@ -129,7 +131,7 @@ Deno.test("the node of an entry is the first segment, when it names a node", asy
   assertEquals(sinks.nodeOf(""), null);
 });
 
-Deno.test("a node is claimed by its own sink, and by the root one otherwise", async () => {
+Scribe.test("a node is claimed by its own sink, and by the root one otherwise", async () => {
   const { sinks } = await attach([ROOT_SINK, APP_SINK]);
 
   assertEquals(sinks.claims("app"), true);
@@ -137,7 +139,7 @@ Deno.test("a node is claimed by its own sink, and by the root one otherwise", as
   assertEquals(sinks.claims(null), true);
 });
 
-Deno.test("without a root _log.ts, only the nodes that declared one are claimed", async () => {
+Scribe.test("without a root _log.ts, only the nodes that declared one are claimed", async () => {
   const { sinks } = await attach([APP_SINK]);
 
   assertEquals(sinks.claims("app"), true);
@@ -145,7 +147,7 @@ Deno.test("without a root _log.ts, only the nodes that declared one are claimed"
   assertEquals(sinks.claims(null), false);
 });
 
-Deno.test("a project that declared nothing claims nothing", async () => {
+Scribe.test("a project that declared nothing claims nothing", async () => {
   const { sinks, manifest } = await attach([]);
 
   assertEquals(manifest.rootLogSink, false);
@@ -153,7 +155,7 @@ Deno.test("a project that declared nothing claims nothing", async () => {
   assertEquals(sinks.claims(null), false);
 });
 
-Deno.test("a node's entries cross to that node's sink", async () => {
+Scribe.test("a node's entries cross to that node's sink", async () => {
   const { sinks } = await attach([ROOT_SINK, APP_SINK]);
 
   await sinks.deliver("app", [entry("GET /brand", "app")]);
@@ -165,7 +167,7 @@ Deno.test("a node's entries cross to that node's sink", async () => {
   ]]);
 });
 
-Deno.test("a node with no sink of its own crosses to the root one", async () => {
+Scribe.test("a node with no sink of its own crosses to the root one", async () => {
   const { sinks } = await attach([ROOT_SINK, APP_SINK]);
 
   await sinks.deliver("admin", [entry("GET /secret", "admin")]);
@@ -174,7 +176,7 @@ Deno.test("a node with no sink of its own crosses to the root one", async () => 
   assertEquals(delivered[0].entries[0].action, "GET /secret");
 });
 
-Deno.test("what belongs to no node crosses to the root sink", async () => {
+Scribe.test("what belongs to no node crosses to the root sink", async () => {
   const { sinks } = await attach([ROOT_SINK, APP_SINK]);
 
   await sinks.deliver(null, [entry("GET /health", null)]);
@@ -183,7 +185,7 @@ Deno.test("what belongs to no node crosses to the root sink", async () => {
   assertEquals(delivered[0].entries[0].node, null);
 });
 
-Deno.test("the metadata of an exchange survives the crossing", async () => {
+Scribe.test("the metadata of an exchange survives the crossing", async () => {
   const { sinks } = await attach([ROOT_SINK]);
 
   await sinks.deliver(null, [entry("GET /health", null)]);
@@ -192,7 +194,7 @@ Deno.test("the metadata of an exchange survives the crossing", async () => {
   assertEquals(delivered[0].entries[0].level, "info");
 });
 
-Deno.test("the preview of a failed response crosses with the rest of the metadata", async () => {
+Scribe.test("the preview of a failed response crosses with the rest of the metadata", async () => {
   const { sinks } = await attach([ROOT_SINK]);
   const failed: LoggedEntry = {
     level: "warn",

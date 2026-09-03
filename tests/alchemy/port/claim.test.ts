@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assert, assertEquals, assertFalse } from "@std/assert";
 import { type ClaimDriver, claimOnce, type ClaimOptions, Claims } from "@scribe/alchemy";
 
@@ -63,21 +65,21 @@ function through<T>(driver: ClaimDriver, body: () => Promise<T>): Promise<T> {
 
 const ASKING: ClaimOptions = { whenUnavailable: "refuse", scope: "test" };
 
-Deno.test("the first caller takes the claim and the second is told it did not", async () => {
+Scribe.test("the first caller takes the claim and the second is told it did not", async () => {
   await through(new TakenOnce(), async () => {
     assert(await claimOnce("once", 30, ASKING), "the first caller was refused");
     assertFalse(await claimOnce("once", 30, ASKING), "a second caller was told it took the same claim");
   });
 });
 
-Deno.test("two names are two claims", async () => {
+Scribe.test("two names are two claims", async () => {
   await through(new TakenOnce(), async () => {
     assert(await claimOnce("a", 30, ASKING));
     assert(await claimOnce("b", 30, ASKING), "a claim on one name blocked another");
   });
 });
 
-Deno.test("a store nobody can reach answers what the caller asked it to", async () => {
+Scribe.test("a store nobody can reach answers what the caller asked it to", async () => {
   await through(new Unreachable(), async () => {
     assertEquals(
       await claimOnce("nonce", 30, { whenUnavailable: "allow", scope: "device-payload" }),

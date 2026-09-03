@@ -39,8 +39,20 @@ import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
 
 let inflightBytes = 0;
 
+/**
+ * What admitting a request body reserved against the process-wide byte budget, and its ceiling.
+ *
+ * @remarks
+ * `HttpSettings.maxInflightBodyBytes` bounds the whole process, not one request, because bodies
+ * sit in buffers outside the V8 heap and add up across every request in flight at once: without a
+ * shared reservation, a burst of large uploads could exhaust memory well before any single request
+ * looked large enough to refuse on its own.
+ */
 export interface BodyAdmission {
+  /** The bytes reserved against the process budget for this request, released by `releaseBody` once the handler answers. */
   readonly reservedBytes: number;
+
+  /** The ceiling the body reader may read up to for this request. */
   readonly maxBodyBytes: number;
 
   /**

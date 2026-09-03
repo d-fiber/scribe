@@ -39,7 +39,7 @@ import type { BodySchema, NestedMarker, ScalarCtor } from "../schema.ts";
 import type { FieldResolver } from "./field_resolver.ts";
 import { ScalarFieldResolver } from "./scalar_field_resolver.ts";
 
-type ArrayItemCtor =
+export type ArrayItemCtor =
   | ScalarCtor
   | typeof File
   | NestedMarker<BodySchema>
@@ -51,9 +51,23 @@ function _isNestedMarker(
   return typeof ctor === "object" && ctor !== null && "_nested" in ctor;
 }
 
+/** The {@link FieldResolver} for a field marked as an array: resolves `raw` element by element. */
 export class ArrayFieldResolver implements FieldResolver {
   constructor(private readonly itemCtor: ArrayItemCtor) {}
 
+  /**
+   * The {@link FieldResolver.resolve} implementation: `null` unless `raw` is an array, each element
+   * resolved in turn.
+   *
+   * @remarks
+   * The three item kinds disagree on what one bad element does to the rest of the array. A file
+   * array drops whatever is not a `File` and keeps the rest, since a form can legitimately submit a
+   * mix of files and empty slots. A scalar array keeps its length, an element that failed to coerce
+   * becomes `null` in place rather than being dropped or refusing the field. A nested object array
+   * refuses the whole field the moment one element fails its own schema: `applyBodySchema` has no
+   * way to hand back a partially valid record, so there is nothing short of `null` it could put in
+   * that slot.
+   */
   resolve(raw: unknown, isForm: boolean): unknown {
     if (!Array.isArray(raw)) return null;
 

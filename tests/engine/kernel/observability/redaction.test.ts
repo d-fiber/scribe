@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { previewOf } from "@scribe/kernel/observability/body_preview.ts";
 import { isSensitiveKey, redactIfJson, redactSensitive } from "@scribe/kernel/observability/redaction.ts";
 import { assert, assertEquals, assertStringIncludes } from "@std/assert";
@@ -45,7 +47,7 @@ function jsonResponse(body: unknown, status: number): Response {
   });
 }
 
-Deno.test("redactSensitive hides every key the pattern matches, whatever its case", () => {
+Scribe.test("redactSensitive hides every key the pattern matches, whatever its case", () => {
   assertEquals(
     redactSensitive({
       access_token: "secret-value",
@@ -66,7 +68,7 @@ Deno.test("redactSensitive hides every key the pattern matches, whatever its cas
   );
 });
 
-Deno.test("redactSensitive reaches into nested objects and arrays", () => {
+Scribe.test("redactSensitive reaches into nested objects and arrays", () => {
   assertEquals(
     redactSensitive({
       user: { id: "u1", session: { access_token: "t" } },
@@ -79,30 +81,30 @@ Deno.test("redactSensitive reaches into nested objects and arrays", () => {
   );
 });
 
-Deno.test("redactSensitive leaves scalars and null untouched", () => {
+Scribe.test("redactSensitive leaves scalars and null untouched", () => {
   assertEquals(redactSensitive("plain"), "plain");
   assertEquals(redactSensitive(42), 42);
   assertEquals(redactSensitive(null), null);
 });
 
-Deno.test("redactIfJson hands back non-json text unchanged", () => {
+Scribe.test("redactIfJson hands back non-json text unchanged", () => {
   assertEquals(redactIfJson("not json at all"), "not json at all");
   assertEquals(redactIfJson(""), "");
 });
 
-Deno.test("redactIfJson redacts a json payload it can parse", () => {
+Scribe.test("redactIfJson redacts a json payload it can parse", () => {
   assertEquals(
     redactIfJson('{"password":"hunter2","id":"u1"}'),
     '{"password":"[redacted]","id":"u1"}',
   );
 });
 
-Deno.test("previewOf stays silent on a successful response", async () => {
+Scribe.test("previewOf stays silent on a successful response", async () => {
   assertEquals(await previewOf(jsonResponse({ data: { ok: true } }, 200)), "");
   assertEquals(await previewOf(jsonResponse({ data: { ok: true } }, 302)), "");
 });
 
-Deno.test("previewOf never prints a secret carried by an error body", async () => {
+Scribe.test("previewOf never prints a secret carried by an error body", async () => {
   const preview = await previewOf(
     jsonResponse({ code: "bad_request", access_token: "leaked" }, 400),
   );
@@ -111,7 +113,7 @@ Deno.test("previewOf never prints a secret carried by an error body", async () =
   assert(!preview.includes("leaked"), "a token must never reach the console");
 });
 
-Deno.test("previewOf elides a long body from both ends", async () => {
+Scribe.test("previewOf elides a long body from both ends", async () => {
   const preview = await previewOf(
     new Response("x".repeat(2_000), { status: 500 }),
   );
@@ -120,7 +122,7 @@ Deno.test("previewOf elides a long body from both ends", async () => {
   assert(preview.length < 2_000, "the whole body must not reach the console");
 });
 
-Deno.test("previewOf stops reading a streamed body instead of holding all of it", async () => {
+Scribe.test("previewOf stops reading a streamed body instead of holding all of it", async () => {
   const megabytes = 4;
   const stream = new ReadableStream({
     start(controller) {
@@ -141,7 +143,7 @@ Deno.test("previewOf stops reading a streamed body instead of holding all of it"
   assert(preview.length < 100, "the size is what travels, not a prefix cut mid-object");
 });
 
-Deno.test("previewOf leaves the response readable by the caller, streamed or not", async () => {
+Scribe.test("previewOf leaves the response readable by the caller, streamed or not", async () => {
   const stream = new ReadableStream({
     start(controller) {
       controller.enqueue(new TextEncoder().encode('{"code":"conflict"}'));
@@ -155,7 +157,7 @@ Deno.test("previewOf leaves the response readable by the caller, streamed or not
   assertEquals(await response.json(), { code: "conflict" });
 });
 
-Deno.test("previewOf leaves the response readable by the caller", async () => {
+Scribe.test("previewOf leaves the response readable by the caller", async () => {
   const response = jsonResponse({ code: "conflict" }, 409);
 
   await previewOf(response);
@@ -163,7 +165,7 @@ Deno.test("previewOf leaves the response readable by the caller", async () => {
   assertEquals(await response.json(), { code: "conflict" });
 });
 
-Deno.test("redactSensitive covers the secret-bearing names the old pattern missed", () => {
+Scribe.test("redactSensitive covers the secret-bearing names the old pattern missed", () => {
   assertEquals(
     redactSensitive({
       api_key: "ak_live_1",
@@ -192,7 +194,7 @@ Deno.test("redactSensitive covers the secret-bearing names the old pattern misse
   );
 });
 
-Deno.test("redactSensitive matches whole words, so an innocent name stays readable", () => {
+Scribe.test("redactSensitive matches whole words, so an innocent name stays readable", () => {
   assertEquals(
     redactSensitive({
       keyword: "search terms",
@@ -213,7 +215,7 @@ Deno.test("redactSensitive matches whole words, so an innocent name stays readab
   );
 });
 
-Deno.test("isSensitiveKey splits on separators and on camel humps alike", () => {
+Scribe.test("isSensitiveKey splits on separators and on camel humps alike", () => {
   for (const sensitive of ["key", "API_KEY", "apiKey", "x-app-key", "refreshToken", "otpCode"]) {
     assert(isSensitiveKey(sensitive), sensitive);
   }
@@ -230,7 +232,7 @@ function nested(depth: number, leaf: unknown): unknown {
   return held;
 }
 
-Deno.test("redactSensitive names what it will not walk instead of falling over", () => {
+Scribe.test("redactSensitive names what it will not walk instead of falling over", () => {
   const walked = redactSensitive(nested(20_000, { password: "hunter2" }));
 
   assertEquals(
@@ -241,13 +243,13 @@ Deno.test("redactSensitive names what it will not walk instead of falling over",
   assertStringIncludes(JSON.stringify(walked), "[too deep]");
 });
 
-Deno.test("redactIfJson withholds a body it parsed and could not walk", () => {
+Scribe.test("redactIfJson withholds a body it parsed and could not walk", () => {
   const deep = redactIfJson(JSON.stringify(nested(20_000, { access_token: "leaked" })));
 
   assert(!deep.includes("leaked"), "handing on what could not be redacted is handing on the secret");
 });
 
-Deno.test("redactIfJson still hands on what is not json at all", () => {
+Scribe.test("redactIfJson still hands on what is not json at all", () => {
   assertEquals(
     redactIfJson("upstream refused the connection"),
     "upstream refused the connection",
@@ -255,7 +257,7 @@ Deno.test("redactIfJson still hands on what is not json at all", () => {
   );
 });
 
-Deno.test("previewOf never prints a secret a deep body buried", async () => {
+Scribe.test("previewOf never prints a secret a deep body buried", async () => {
   const preview = await previewOf(
     new Response(JSON.stringify(nested(20_000, { password: "hunter2" })), { status: 500 }),
   );

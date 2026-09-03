@@ -69,7 +69,7 @@ const SECOND = 1_000;
  * to somebody else cannot be moved under them.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const startedAt = DateTime.now();
  * const deadline = startedAt.add(Duration.minutes(5));
  * if (DateTime.now().isAfter(deadline)) throw Refusal.conflict("the hold has run out.");

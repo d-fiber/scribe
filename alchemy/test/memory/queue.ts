@@ -60,11 +60,13 @@ export class MemoryQueue<T> implements DeclaredQueue<T> {
     this.#options = options;
   }
 
+  /** The {@link DeclaredQueue.push} implementation: appends `data` to {@link pushed} without delivering it. */
   push(data: T): Future<void> {
     this.pushed.push(data);
     return Promise.resolve();
   }
 
+  /** The {@link DeclaredQueue.pushMany} implementation: `push` applied to every message of `batch`. */
   pushMany(batch: UnmodifiableList<T>): Future<void> {
     this.pushed.push(...batch);
     return Promise.resolve();
@@ -100,6 +102,10 @@ export class MemoryQueues implements QueueDriver {
   /** Every key the host asked to have drained. */
   readonly draining: string[] = [];
 
+  /**
+   * The {@link QueueDriver.open} implementation: opens a {@link MemoryQueue} for `options.key`,
+   * or hands back the one already opened under that key.
+   */
   open<T>(options: DeclaredQueueOptions): DeclaredQueue<T> {
     const already = this.opened.get(options.key);
     if (already !== undefined) return already as unknown as DeclaredQueue<T>;
@@ -109,6 +115,7 @@ export class MemoryQueues implements QueueDriver {
     return held;
   }
 
+  /** The {@link QueueDriver.consume} implementation: records `options.key` in {@link draining} without draining anything itself. */
   consume(options: DeclaredQueueOptions): void {
     this.draining.push(options.key);
   }

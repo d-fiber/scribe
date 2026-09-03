@@ -55,7 +55,7 @@ export type DocumentSelector<TRow extends object> =
      * the declared fields have to stay inferred: they are what `f.path` and `f.nested` read to
      * refuse a field the folded relation does not hold.
      *
-     * ```ts
+     * ```ts ignore
      * s.embed("brands", (b: DocumentSelector<BrandRow>) => ({ label: Field.text(b.label) }))
      * ```
      */
@@ -125,7 +125,7 @@ export type PreviewSelector<TRow extends object> =
      * that the fields the preview reads stay inferred and the type one result answers with is
      * exactly what the shape says.
      *
-     * ```ts
+     * ```ts ignore
      * s.embed("brands", (b: PreviewSelector<BrandRow>) => ({ label: b.label }))
      * ```
      */
@@ -155,16 +155,14 @@ export type PreviewOf<TRow extends object, S> = {
     : never;
 };
 
-// deno-lint-ignore no-explicit-any
-type AnySelector = any;
-
 /** Hands a document declaration a selector over `TRow`. */
 export function documentSelector<TRow extends object>(): DocumentSelector<TRow> {
   const embed = (
     relation: string,
-    builder: (s: AnySelector) => DocumentShape,
+    builder: (s: unknown) => DocumentShape,
     options?: EmbedOptions,
-  ): AnySelector => new EmbeddedField(relation, builder(documentSelector()), options?.nested ?? false, options);
+  ): EmbeddedField<DocumentShape, boolean> =>
+    new EmbeddedField(relation, builder(documentSelector()), options?.nested ?? false, options);
 
   return proxyOver({ embed });
 }
@@ -173,9 +171,9 @@ export function documentSelector<TRow extends object>(): DocumentSelector<TRow> 
 export function previewSelector<TRow extends object>(): PreviewSelector<TRow> {
   const embed = (
     relation: string,
-    builder: (s: AnySelector) => PreviewShape,
+    builder: (s: unknown) => PreviewShape,
     options?: { many?: boolean; inner?: boolean },
-  ): AnySelector =>
+  ): PreviewEmbed<object, PreviewShape, boolean> =>
     new PreviewEmbed(
       relation,
       builder(previewSelector()),

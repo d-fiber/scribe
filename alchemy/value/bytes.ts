@@ -50,11 +50,11 @@ const GIGABYTE = 1024 * MEGABYTE;
  * language this vocabulary is modelled on, and a limit on an upload has nothing to do with a
  * rectangle.
  *
- * It reads the way {@link Duration} does, on purpose: a named way in, and an `in…` getter for every
+ * It reads the way {@link Duration} does, on purpose: a named way in, and an `in...` getter for every
  * unit it was not written in.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const limit = Bytes.megabytes(5);
  * if (upload.length > limit.inBytes) throw Refusal.invalid("the file is over 5 MB.");
  * ```

@@ -41,7 +41,7 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 SCOPE="changelog"
 
 ORDER="BREAKING SECURITY DEV BUGFIX PERF REVERT REFACTO DOC TEST CI CHORE"
-BOOKKEEPING='^(CHANGELOG\.md|deno\.json|sdk/js/deno\.json|sdk/js/src/protocol/version\.ts)$'
+BOOKKEEPING='^(CHANGELOG\.md|scribe\.workspace\.json|sdk/js/deno\.json|sdk/js/src/protocol/version\.ts)$'
 
 say() {
   echo "[$SCOPE] $1"
@@ -49,7 +49,7 @@ say() {
 
 cd "$ROOT"
 
-version=$(python3 -c "import json;print(json.load(open('deno.json'))['version'])")
+version=$(python3 -c "import json;print(json.load(open('scribe.workspace.json'))['version'])")
 previous=$(git tag --list 'v*' --sort=-v:refname | head -1)
 
 if [ -n "$previous" ] && [ "${previous#v}" = "$version" ]; then

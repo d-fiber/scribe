@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { TtlLru } from "@scribe/runtime/support/cache/ttl_lru.ts";
 import { assertEquals } from "@std/assert";
 
@@ -52,7 +54,7 @@ function cache(max = 3, ttlMs = 5_000): { lru: TtlLru<string>; clock: Clock } {
   return { lru: new TtlLru<string>({ max, ttlMs, now: clock.now }), clock };
 }
 
-Deno.test("a value written is a value read back", () => {
+Scribe.test("a value written is a value read back", () => {
   const { lru } = cache();
 
   lru.set("a", "one");
@@ -61,7 +63,7 @@ Deno.test("a value written is a value read back", () => {
   assertEquals(lru.get("missing"), null);
 });
 
-Deno.test("an entry stops answering once its window has passed", () => {
+Scribe.test("an entry stops answering once its window has passed", () => {
   const { lru, clock } = cache();
 
   lru.set("a", "one");
@@ -73,7 +75,7 @@ Deno.test("an entry stops answering once its window has passed", () => {
   assertEquals(lru.size, 0, "the expired entry must be dropped on the read, not left to pile up");
 });
 
-Deno.test("a write refreshes the window rather than keeping the first one", () => {
+Scribe.test("a write refreshes the window rather than keeping the first one", () => {
   const { lru, clock } = cache();
 
   lru.set("a", "one");
@@ -84,7 +86,7 @@ Deno.test("a write refreshes the window rather than keeping the first one", () =
   assertEquals(lru.get("a"), "two");
 });
 
-Deno.test("a full cache drops the least recently read entry, not the oldest written", () => {
+Scribe.test("a full cache drops the least recently read entry, not the oldest written", () => {
   const { lru } = cache(3);
 
   lru.set("a", "one");
@@ -101,7 +103,7 @@ Deno.test("a full cache drops the least recently read entry, not the oldest writ
   assertEquals(lru.size, 3, "the bound is what keeps this off the process's memory");
 });
 
-Deno.test("clear forgets everything, which is what a revocation asks for", () => {
+Scribe.test("clear forgets everything, which is what a revocation asks for", () => {
   const { lru } = cache();
 
   lru.set("a", "one");
@@ -113,7 +115,7 @@ Deno.test("clear forgets everything, which is what a revocation asks for", () =>
   assertEquals(lru.size, 0);
 });
 
-Deno.test("a max under one still holds an entry instead of holding none", () => {
+Scribe.test("a max under one still holds an entry instead of holding none", () => {
   const { lru } = cache(0);
 
   lru.set("a", "one");

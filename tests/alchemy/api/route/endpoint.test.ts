@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, Scribe } from "@scribe/alchemy/test";
 import {
   type Caller,
   type Invoked,
@@ -95,11 +96,11 @@ class Guarded extends Post {
   }
 }
 
-Deno.test("an endpoint carries the verb its base names, and nothing else declares it", () => {
+Scribe.test("an endpoint carries the verb its base names, and nothing else declares it", () => {
   expect(new Bare().method, equals("post"));
 });
 
-Deno.test("an endpoint that declares nothing requires nothing", () => {
+Scribe.test("an endpoint that declares nothing requires nothing", () => {
   const contributed = new Bare().contribution();
 
   expect(contributed.access, equals(null));
@@ -108,7 +109,7 @@ Deno.test("an endpoint that declares nothing requires nothing", () => {
   expect(contributed.needs, equals([]));
 });
 
-Deno.test("what an endpoint declares is read without running it", () => {
+Scribe.test("what an endpoint declares is read without running it", () => {
   const contributed = new Guarded().contribution();
 
   expect(contributed.access, equals("authenticated"));
@@ -118,7 +119,7 @@ Deno.test("what an endpoint declares is read without running it", () => {
   expect(contributed.needs, equals([NEEDS_DEVICE]));
 });
 
-Deno.test("what an endpoint says about itself is read the same way", () => {
+Scribe.test("what an endpoint says about itself is read the same way", () => {
   expect(
     new Guarded().documentation(),
     equals({
@@ -128,7 +129,7 @@ Deno.test("what an endpoint says about itself is read the same way", () => {
   );
 });
 
-Deno.test("handling a call answers what run answered, whether it awaited or not", async () => {
+Scribe.test("handling a call answers what run answered, whether it awaited or not", async () => {
   const answer = await new Bare().handle(new RequestContext(CALL));
 
   expect(answer.status, equals(200));

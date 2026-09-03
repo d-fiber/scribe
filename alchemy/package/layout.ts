@@ -34,30 +34,28 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { ARTEFACTS_KEY } from "./artefacts.ts";
 import type { UnmodifiableList } from "../value/list.ts";
 
 /** The file that makes a directory a package, and the only one it cannot do without. */
 export const MANIFEST = "package.yaml";
 
-/** The six keys a manifest holds, and there is no seventh. */
+/** The five keys a manifest holds, and there is no sixth. */
 export const MANIFEST_KEYS: UnmodifiableList<string> = [
   "name",
   "description",
   "version",
   "environment",
   "dependencies",
-  ARTEFACTS_KEY,
 ];
 
 /**
- * A directory a package customarily carries, and what it means when it does.
+ * A directory a package carries, and what it means when it does.
  *
  * @remarks
- * It describes the shape most packages settle on, and it decides nothing. What a package is made of
- * is read off its tree; what it hands the stack is declared under `scribe:`, where the keys are
- * ours and the paths are the package's, so a package may name these directories anything and put
- * them anywhere inside itself.
+ * What a package hands the stack is read off its tree and never declared: `deploy/` has a fixed,
+ * closed shape, and a reader finds the SQL, the fragments and the recipes by walking it. That is
+ * why `deploy/` is required even for a package that hands over nothing, which still carries
+ * `deploy/db/init/` and `deploy/db/migrations/`, empty.
  */
 export interface PackageDirectory {
   /** What the directory is called, at the root of the package. */
@@ -66,7 +64,7 @@ export interface PackageDirectory {
   /** What being there means. */
   readonly holds: string;
 
-  /** Whether a package without it is still a package. Every one of them is optional but `lib`. */
+  /** Whether a package without it is still a package. */
   readonly required: boolean;
 }
 
@@ -74,15 +72,18 @@ export interface PackageDirectory {
  * What a directory has to hold to be a package, and what it customarily holds besides.
  *
  * @remarks
- * Only `lib` is load-bearing. The rest is the layout a reader expects to find, not a list anything
- * is looked up in: a package that puts its migrations somewhere of its own invention declares that
- * place under `scribe:` and they run, and a package that puts them in `db/` without declaring them
- * finds that nothing runs them.
+ * `lib` and `deploy` are load-bearing. `lib` is the code; `deploy` is everything a running stack
+ * reads, and it is required because its shape is what stands in for a declaration: a package that
+ * hands the stack nothing still carries an empty `deploy/db/`. The rest is the layout a reader
+ * expects to find.
  */
 export const PACKAGE_LAYOUT: UnmodifiableList<PackageDirectory> = [
   { name: "lib", holds: "the surface a project imports, and the code behind it", required: true },
-  { name: "db", holds: "the SQL that makes the package's tables, and what changes them", required: false },
-  { name: "ops", holds: "what the package adds to the compose, and what its services weigh", required: false },
+  {
+    name: "deploy",
+    holds: "everything the stack reads: the SQL, the compose fragments, the recipes, the configuration",
+    required: true,
+  },
   { name: "protocol", holds: "the contract between the host and a worker, one file per capability", required: false },
   { name: "tests", holds: "what proves the package does what it says", required: false },
   { name: "examples", holds: "the ten lines somebody reads before the documentation", required: false },
@@ -93,7 +94,7 @@ export function isPackageDirectory(name: string): boolean {
   return PACKAGE_LAYOUT.some((directory) => directory.name === name);
 }
 
-/** What a package cannot be without: the manifest, and `lib`. */
+/** What a package cannot be without: the manifest, `lib`, and `deploy`. */
 export function requiredEntries(): UnmodifiableList<string> {
   return [MANIFEST, ...PACKAGE_LAYOUT.filter((one) => one.required).map((one) => one.name)];
 }

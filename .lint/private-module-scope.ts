@@ -34,91 +34,48 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export default {
+import { forEachModuleSpecifier, namedSpecifiersOf, type Rule, sourceNameOf, type Violation } from "./ast.ts";
+
+/** Whether a specifier's directory, relative to the file that wrote it, stays inside its own tree. */
+function isAllowedDir(dir: string): boolean {
+  if (dir === "" || dir === ".") return true;
+  return dir.split("/").every((segment) => segment === "..");
+}
+
+export const privateModuleScope: Rule = {
   name: "private-module-scope",
-  rules: {
-    "private-module-scope": {
-      create(ctx: Deno.lint.RuleContext) {
-        function isAllowedDir(dir: string): boolean {
-          if (dir === "" || dir === ".") return true;
-          return dir.split("/").every((s) => s === "..");
-        }
 
-        function check(node: Deno.lint.Node, source: string) {
-          if (!source.startsWith(".")) return;
+  check(sourceFile) {
+    const violations: Violation[] = [];
 
-          const segments = source.split("/");
-          const filename = segments[segments.length - 1];
+    forEachModuleSpecifier(sourceFile, ({ node, specifier }) => {
+      if (!specifier.startsWith(".")) return;
 
-          if (!filename.startsWith("_")) return;
+      const segments = specifier.split("/");
+      const name = segments[segments.length - 1];
+      const dir = segments.slice(0, -1).join("/");
+      if (isAllowedDir(dir)) return;
 
-          const dir = segments.slice(0, -1).join("/");
-          if (!isAllowedDir(dir)) {
-            ctx.report({
-              node,
-              message:
-                `"${filename}" is a private module (starts with _) and can only be imported from its own directory or any of its subdirectories.`,
-            });
-          }
-        }
-        function checkPrivateIdentifiers(
-          _: Deno.lint.Node,
-          source: string,
-          specifiers: Deno.lint.Node[],
-        ) {
-          if (!source.startsWith(".")) return;
+      if (name.startsWith("_")) {
+        violations.push({
+          node,
+          message: `"${name}" is a private module (starts with _) and can only be imported ` +
+            `from its own directory or any of its subdirectories.`,
+        });
+      }
 
-          const segments = source.split("/");
-          const dir = segments.slice(0, -1).join("/");
-          if (isAllowedDir(dir)) return;
+      for (const specifierNode of namedSpecifiersOf(node)) {
+        const privateName = sourceNameOf(specifierNode);
+        if (!privateName.startsWith("_")) continue;
 
-          for (const specifier of specifiers) {
-            let privateName: string | undefined;
+        violations.push({
+          node: specifierNode,
+          message: `"${privateName}" starts with _ and is private to its directory it cannot ` +
+            `be used outside of its folder or its descendants.`,
+        });
+      }
+    });
 
-            if (specifier.type === "ImportSpecifier") {
-              privateName = (specifier.imported as { name: string }).name;
-            } else if (specifier.type === "ExportSpecifier") {
-              privateName = (specifier.local as { name: string }).name;
-            }
-
-            if (privateName?.startsWith("_")) {
-              ctx.report({
-                node: specifier,
-                message:
-                  `"${privateName}" starts with _ and is private to its directory it cannot be used outside of its folder or its descendants.`,
-              });
-            }
-          }
-        }
-
-        return {
-          ImportDeclaration(node) {
-            const source = (node.source as { value: string }).value;
-            check(node, source);
-            checkPrivateIdentifiers(
-              node,
-              source,
-              node.specifiers as Deno.lint.Node[],
-            );
-          },
-          ExportAllDeclaration(node) {
-            if (node.source) {
-              check(node, (node.source as { value: string }).value);
-            }
-          },
-          ExportNamedDeclaration(node) {
-            if (node.source) {
-              const source = (node.source as { value: string }).value;
-              check(node, source);
-              checkPrivateIdentifiers(
-                node,
-                source,
-                node.specifiers as Deno.lint.Node[],
-              );
-            }
-          },
-        };
-      },
-    },
+    return violations;
   },
-} satisfies Deno.lint.Plugin;
+};

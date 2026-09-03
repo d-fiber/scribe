@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import {
   ipv4ToInt,
   isInSubnetPrefix,
@@ -63,7 +65,7 @@ function withPeer<T>(
   return RequestScope.run(req, new Uint8Array(0), run, peer);
 }
 
-Deno.test("resolveClientIp reads x-real-ip and ignores client-controlled hops", () => {
+Scribe.test("resolveClientIp reads x-real-ip and ignores client-controlled hops", () => {
   const resolved = resolveClientIp(
     headers({
       "x-real-ip": "9.9.9.9",
@@ -76,7 +78,7 @@ Deno.test("resolveClientIp reads x-real-ip and ignores client-controlled hops", 
   assertEquals(resolved, "9.9.9.9");
 });
 
-Deno.test("resolveClientIp yields nothing when the peer is not a trusted proxy", () => {
+Scribe.test("resolveClientIp yields nothing when the peer is not a trusted proxy", () => {
   assertEquals(
     resolveClientIp(headers({ "x-real-ip": "10.8.0.5" }), PUBLIC_PEER),
     "",
@@ -84,11 +86,11 @@ Deno.test("resolveClientIp yields nothing when the peer is not a trusted proxy",
   );
 });
 
-Deno.test("resolveClientIp yields nothing when there is no peer at all", () => {
+Scribe.test("resolveClientIp yields nothing when there is no peer at all", () => {
   assertEquals(resolveClientIp(headers({ "x-real-ip": "10.8.0.5" }), null), "");
 });
 
-Deno.test("resolveClientIp never reads a hop header, whoever the peer is", () => {
+Scribe.test("resolveClientIp never reads a hop header, whoever the peer is", () => {
   assertEquals(
     resolveClientIp(
       headers({ "x-forwarded-for": "203.0.113.9", "cf-connecting-ip": "1.1.1.1" }),
@@ -99,7 +101,7 @@ Deno.test("resolveClientIp never reads a hop header, whoever the peer is", () =>
   );
 });
 
-Deno.test("resolveClientIp hands back a plain IPv4, mapping unwrapped", () => {
+Scribe.test("resolveClientIp hands back a plain IPv4, mapping unwrapped", () => {
   assertEquals(
     resolveClientIp(headers({ "x-real-ip": "::ffff:9.9.9.9" }), TRUSTED_PEER),
     "9.9.9.9",
@@ -107,7 +109,7 @@ Deno.test("resolveClientIp hands back a plain IPv4, mapping unwrapped", () => {
   );
 });
 
-Deno.test("resolveClientIp refuses a header that does not name an address", () => {
+Scribe.test("resolveClientIp refuses a header that does not name an address", () => {
   for (
     const written of [
       "not-an-ip",
@@ -127,12 +129,12 @@ Deno.test("resolveClientIp refuses a header that does not name an address", () =
   }
 });
 
-Deno.test("resolveClientIp keeps an IPv6 the proxy reported", () => {
+Scribe.test("resolveClientIp keeps an IPv6 the proxy reported", () => {
   assertEquals(resolveClientIp(headers({ "x-real-ip": "2001:db8::1" }), TRUSTED_PEER), "2001:db8::1");
   assertEquals(resolveClientIp(headers({ "x-real-ip": "::1" }), TRUSTED_PEER), "::1");
 });
 
-Deno.test("isIpAddress accepts what a proxy reports and nothing else", () => {
+Scribe.test("isIpAddress accepts what a proxy reports and nothing else", () => {
   for (const written of ["9.9.9.9", "0.0.0.0", "255.255.255.255", "::1", "2001:db8::1", "fe80::1"]) {
     assert(isIpAddress(written), `${written} is an address`);
   }
@@ -141,7 +143,7 @@ Deno.test("isIpAddress accepts what a proxy reports and nothing else", () => {
   }
 });
 
-Deno.test("isTrustedProxy only accepts private peers", () => {
+Scribe.test("isTrustedProxy only accepts private peers", () => {
   for (const peer of ["127.0.0.1", "172.18.0.4", "10.0.0.9", "192.168.1.20"]) {
     assert(isTrustedProxy(peer), `${peer} runs on the internal network`);
   }
@@ -159,7 +161,7 @@ Deno.test("isTrustedProxy only accepts private peers", () => {
   );
 });
 
-Deno.test("isTrustedProxy accepts an internal peer reported IPv4-mapped", () => {
+Scribe.test("isTrustedProxy accepts an internal peer reported IPv4-mapped", () => {
   for (const peer of ["::ffff:127.0.0.1", "::ffff:172.18.0.4", "::ffff:10.0.0.9"]) {
     assert(
       isTrustedProxy(peer),
@@ -170,14 +172,14 @@ Deno.test("isTrustedProxy accepts an internal peer reported IPv4-mapped", () => 
   assertFalse(isTrustedProxy("::ffff:8.8.8.8"), "mapping a public address does not make it internal");
 });
 
-Deno.test("isTrustedProxy accepts the two IPv6 forms of the internal network", () => {
+Scribe.test("isTrustedProxy accepts the two IPv6 forms of the internal network", () => {
   assert(isTrustedProxy("::1"));
   assert(isTrustedProxy("fd00::1"));
   assertFalse(isTrustedProxy("fe80::1"), "link-local is not a proxy");
   assertFalse(isTrustedProxy("2001:db8::1"));
 });
 
-Deno.test("isPrivateIp covers loopback, RFC1918, link-local and CGNAT", () => {
+Scribe.test("isPrivateIp covers loopback, RFC1918, link-local and CGNAT", () => {
   for (
     const ip of [
       "127.0.0.1",
@@ -201,7 +203,7 @@ Deno.test("isPrivateIp covers loopback, RFC1918, link-local and CGNAT", () => {
   }
 });
 
-Deno.test("isPrivateIp judges the address, not its IPv6 wrapper", () => {
+Scribe.test("isPrivateIp judges the address, not its IPv6 wrapper", () => {
   assertFalse(
     isPrivateIp("::ffff:8.8.8.8"),
     "a mapped public address is public: calling it private drops the client's geolocation",
@@ -209,14 +211,14 @@ Deno.test("isPrivateIp judges the address, not its IPv6 wrapper", () => {
   assert(isPrivateIp("::ffff:10.0.0.9"));
 });
 
-Deno.test("isPrivateIp does not mistake a public address for loopback", () => {
+Scribe.test("isPrivateIp does not mistake a public address for loopback", () => {
   assertFalse(
     isPrivateIp("::1234:5678"),
     "only ::1 itself is loopback, not everything that starts with it",
   );
 });
 
-Deno.test("ipv4ToInt refuses what is not four plain octets", () => {
+Scribe.test("ipv4ToInt refuses what is not four plain octets", () => {
   assertEquals(ipv4ToInt("10.8.0.5"), 168296453);
   assertEquals(ipv4ToInt("0.0.0.0"), 0);
   assertEquals(ipv4ToInt("255.255.255.255"), 4294967295);
@@ -226,13 +228,13 @@ Deno.test("ipv4ToInt refuses what is not four plain octets", () => {
   }
 });
 
-Deno.test("normalizeIp unwraps the IPv4 mapping and leaves the rest alone", () => {
+Scribe.test("normalizeIp unwraps the IPv4 mapping and leaves the rest alone", () => {
   assertEquals(normalizeIp("::ffff:10.8.0.5"), "10.8.0.5");
   assertEquals(normalizeIp(" 10.8.0.5 "), "10.8.0.5");
   assertEquals(normalizeIp("fd00::1"), "fd00::1");
 });
 
-Deno.test("isInSubnetPrefix refuses a prefix without its trailing dot", () => {
+Scribe.test("isInSubnetPrefix refuses a prefix without its trailing dot", () => {
   assertFalse(
     isInSubnetPrefix("10.8.0.5", "10.8.0"),
     "a malformed WG_SUBNET_PREFIX must fail closed, never open the admin API",
@@ -240,18 +242,18 @@ Deno.test("isInSubnetPrefix refuses a prefix without its trailing dot", () => {
   assert(isInSubnetPrefix("10.8.0.5", "10.8.0."));
 });
 
-Deno.test("isInSubnetPrefix is not fooled by a prefix-shaped string", () => {
+Scribe.test("isInSubnetPrefix is not fooled by a prefix-shaped string", () => {
   assertFalse(isInSubnetPrefix("10.80.0.5", "10.8."));
   assertFalse(isInSubnetPrefix("not-an-ip", "10.8.0."));
   assertFalse(isInSubnetPrefix("10.8.0.5.6", "10.8.0."));
   assertFalse(isInSubnetPrefix("10.8.0.evil", "10.8.0."));
 });
 
-Deno.test("isInSubnetPrefix unwraps IPv4-mapped IPv6 addresses", () => {
+Scribe.test("isInSubnetPrefix unwraps IPv4-mapped IPv6 addresses", () => {
   assert(isInSubnetPrefix("::ffff:10.8.0.5", "10.8.0."));
 });
 
-Deno.test("request.ip() carries the trusted-peer rule end to end", () => {
+Scribe.test("request.ip() carries the trusted-peer rule end to end", () => {
   assertEquals(
     withPeer(TRUSTED_PEER, { "x-real-ip": "10.8.0.5" }, () => request.ip()),
     "10.8.0.5",

@@ -44,6 +44,17 @@ const API_PREFIXES = ["api/", "api/public/", "api/internal/"] as const;
 const NAMESPACED_PREFIXES: readonly string[] = ["", ...API_PREFIXES];
 const FLAT_PREFIXES: readonly string[] = API_PREFIXES;
 
+/**
+ * The {@link ServiceResolver} that reads a request path against `functionsRoot`'s own subdirectories.
+ *
+ * @remarks
+ * A service is a directory the probe can find, not a declaration this codebase reads, because the
+ * edge platform deploys each function as its own file tree: the resolver's job is to guess which
+ * tree a path belongs to, first by checking the two-segment namespaced form a project may have
+ * opted into, then by falling back to the flat form every deployment supports. Each guess is
+ * cached, since the probe reaches the filesystem and a directory that exists now will exist again
+ * on the next request for the same path.
+ */
 export class DirectoryServiceResolver implements ServiceResolver {
   readonly #root: string;
   readonly #probe: ModuleProbe;
@@ -62,6 +73,11 @@ export class DirectoryServiceResolver implements ServiceResolver {
     this.#flatMatches = flatMatches;
   }
 
+  /**
+   * The {@link ServiceResolver.resolve} implementation: tries a namespaced match on the first two
+   * path segments first, falls back to a flat match on the first segment alone, and otherwise
+   * treats the first segment as the service name directly.
+   */
   async resolve(pathname: string): Future<ResolvedService | null> {
     const segments = pathname.split("/").filter(Boolean);
     if (segments.length === 0) return null;

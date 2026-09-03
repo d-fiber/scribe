@@ -162,7 +162,7 @@ function write(value: unknown, depth: number, seen: Set<object>): string {
 
   if (held instanceof Date) return `Date(${held.toISOString()})`;
   if (held instanceof RegExp) return held.toString();
-  if (held instanceof Error) return `${held.name}(${quote(held.message)})`;
+  if (held instanceof Error) return `${held.name}(${quote(held.message ?? "")})`;
 
   seen.add(held);
   const written = writeStructure(held, depth, seen);

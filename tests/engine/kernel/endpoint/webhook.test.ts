@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { importSigningKey, matchesAnyCandidate } from "@scribe/kernel/endpoint/webhook/signature.ts";
 import {
   isFreshTimestamp,
@@ -88,7 +90,7 @@ function withHeaders<T>(
   return RequestScope.run(req, new TextEncoder().encode(body), run, "127.0.0.1");
 }
 
-Deno.test("readSignedRequest keeps only the signature part of each entry", () => {
+Scribe.test("readSignedRequest keeps only the signature part of each entry", () => {
   const signed = withHeaders(
     {
       "webhook-id": "msg_1",
@@ -103,7 +105,7 @@ Deno.test("readSignedRequest keeps only the signature part of each entry", () =>
   assertEquals(signed?.rawBody, "{}");
 });
 
-Deno.test("readSignedRequest refuses a delivery missing any of the three headers", () => {
+Scribe.test("readSignedRequest refuses a delivery missing any of the three headers", () => {
   const complete = {
     "webhook-id": "msg_1",
     "webhook-timestamp": "1700000000",
@@ -122,7 +124,7 @@ Deno.test("readSignedRequest refuses a delivery missing any of the three headers
   }
 });
 
-Deno.test("readSignedRequest refuses a signature header carrying no signature", () => {
+Scribe.test("readSignedRequest refuses a signature header carrying no signature", () => {
   assertEquals(
     withHeaders(
       {
@@ -137,7 +139,7 @@ Deno.test("readSignedRequest refuses a signature header carrying no signature", 
   );
 });
 
-Deno.test("readSignedRequest refuses a header offering more signatures than a rotation needs", () => {
+Scribe.test("readSignedRequest refuses a header offering more signatures than a rotation needs", () => {
   const many = Array.from({ length: MAX_SIGNATURE_CANDIDATES + 1 }, (_, at) => `v1,AAAA${at}`).join(" ");
 
   assertEquals(
@@ -155,7 +157,7 @@ Deno.test("readSignedRequest refuses a header offering more signatures than a ro
   );
 });
 
-Deno.test("readSignedRequest still takes as many signatures as a rotation needs", () => {
+Scribe.test("readSignedRequest still takes as many signatures as a rotation needs", () => {
   const rotation = Array.from({ length: MAX_SIGNATURE_CANDIDATES }, (_, at) => `v1,AAAA${at}`).join(" ");
 
   assertEquals(
@@ -172,25 +174,25 @@ Deno.test("readSignedRequest still takes as many signatures as a rotation needs"
   );
 });
 
-Deno.test("isFreshTimestamp accepts the window and refuses either side of it", () => {
+Scribe.test("isFreshTimestamp accepts the window and refuses either side of it", () => {
   assert(isFreshTimestamp(String(nowSeconds())));
   assert(isFreshTimestamp(String(nowSeconds() - MAX_TIMESTAMP_SKEW_S + 5)));
   assertFalse(isFreshTimestamp(String(nowSeconds() - MAX_TIMESTAMP_SKEW_S - 5)));
   assertFalse(isFreshTimestamp(String(nowSeconds() + MAX_TIMESTAMP_SKEW_S + 5)));
 });
 
-Deno.test("isFreshTimestamp refuses what is not a number", () => {
+Scribe.test("isFreshTimestamp refuses what is not a number", () => {
   for (const bad of ["", "soon", "NaN", "Infinity"]) {
     assertFalse(isFreshTimestamp(bad), `"${bad}" is not a timestamp`);
   }
 });
 
-Deno.test("importSigningKey refuses a secret without its whsec_ prefix", async () => {
+Scribe.test("importSigningKey refuses a secret without its whsec_ prefix", async () => {
   assertEquals(await importSigningKey("nope"), null);
   assertEquals(await importSigningKey(""), null);
 });
 
-Deno.test("matchesAnyCandidate accepts a genuine signature among decoys", async () => {
+Scribe.test("matchesAnyCandidate accepts a genuine signature among decoys", async () => {
   const signed: SignedWebhookRequest = {
     id: "msg_1",
     timestamp: String(nowSeconds()),
@@ -209,7 +211,7 @@ Deno.test("matchesAnyCandidate accepts a genuine signature among decoys", async 
   );
 });
 
-Deno.test("matchesAnyCandidate refuses a signature computed on another body", async () => {
+Scribe.test("matchesAnyCandidate refuses a signature computed on another body", async () => {
   const timestamp = String(nowSeconds());
   const genuine = await sign({
     id: "msg_1",
@@ -231,7 +233,7 @@ Deno.test("matchesAnyCandidate refuses a signature computed on another body", as
   );
 });
 
-Deno.test("matchesAnyCandidate skips an unreadable candidate instead of throwing", async () => {
+Scribe.test("matchesAnyCandidate skips an unreadable candidate instead of throwing", async () => {
   const key = await importSigningKey(SECRET);
   assert(key);
 
@@ -245,7 +247,7 @@ Deno.test("matchesAnyCandidate skips an unreadable candidate instead of throwing
   );
 });
 
-Deno.test("the replay claim outlives every timestamp the freshness check accepts", async () => {
+Scribe.test("the replay claim outlives every timestamp the freshness check accepts", async () => {
   const seen: number[] = [];
   const kvSet = stub(
     kv(),
@@ -271,7 +273,7 @@ Deno.test("the replay claim outlives every timestamp the freshness check accepts
   );
 });
 
-Deno.test("a future-dated delivery stays claimed for as long as it stays fresh", () => {
+Scribe.test("a future-dated delivery stays claimed for as long as it stays fresh", () => {
   const signedAt = nowSeconds() + MAX_TIMESTAMP_SKEW_S;
   const firstDeliveryAt = nowSeconds();
   const lastFreshAt = signedAt + MAX_TIMESTAMP_SKEW_S;

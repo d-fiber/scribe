@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import "@scribe/testing/settings.ts";
 import type { GrantSource } from "@scribe/contracts/grants.ts";
 import { GrantsResolver } from "@scribe/runtime/support/ports/grants.ts";
@@ -63,7 +65,7 @@ function sourceGranting(role: string | null, permissions: string[] = [], delayMs
   return { calls };
 }
 
-Deno.test("an account the deployment grants nothing is asked about once, not once per request", async () => {
+Scribe.test("an account the deployment grants nothing is asked about once, not once per request", async () => {
   const { calls } = sourceGranting(null);
 
   for (let request = 0; request < 5; request++) {
@@ -77,7 +79,7 @@ Deno.test("an account the deployment grants nothing is asked about once, not onc
   );
 });
 
-Deno.test("a burst on a cold account costs the source one pair of queries", async () => {
+Scribe.test("a burst on a cold account costs the source one pair of queries", async () => {
   const { calls } = sourceGranting("lead", ["brand.read"], 10);
 
   const answers = await Promise.all(
@@ -89,7 +91,7 @@ Deno.test("a burst on a cold account costs the source one pair of queries", asyn
   assertEquals(answers.every((granted) => granted?.role === "lead"), true);
 });
 
-Deno.test("a granted account is answered from this process without reaching the source again", async () => {
+Scribe.test("a granted account is answered from this process without reaching the source again", async () => {
   const { calls } = sourceGranting("lead", ["brand.read"]);
 
   assertEquals((await GrantsResolver.resolve("u1"))?.permissions, ["brand.read"]);
@@ -98,7 +100,7 @@ Deno.test("a granted account is answered from this process without reaching the 
   assertEquals(calls.roleOf, 1);
 });
 
-Deno.test("invalidating an account sends the next call back to the source", async () => {
+Scribe.test("invalidating an account sends the next call back to the source", async () => {
   const { calls } = sourceGranting("lead", ["brand.read"]);
 
   await GrantsResolver.resolve("u1");
@@ -108,7 +110,7 @@ Deno.test("invalidating an account sends the next call back to the source", asyn
   assertEquals(calls.roleOf, 2, "a demotion the process never learns of is a demotion that did not happen");
 });
 
-Deno.test("invalidating everybody sends every account back to the source", async () => {
+Scribe.test("invalidating everybody sends every account back to the source", async () => {
   const { calls } = sourceGranting("lead", ["brand.read"]);
 
   await GrantsResolver.resolve("u1");
@@ -120,7 +122,7 @@ Deno.test("invalidating everybody sends every account back to the source", async
   assertEquals(calls.roleOf, 4);
 });
 
-Deno.test("a source that fails is asked again rather than remembered as a refusal", async () => {
+Scribe.test("a source that fails is asked again rather than remembered as a refusal", async () => {
   installValkeryMock();
   let attempts = 0;
   GrantsResolver.use({

@@ -44,11 +44,14 @@ import type { RateLimit } from "@scribe/alchemy/route";
 
 export type { ApiContext } from "./context.ts";
 
+/** An `ApiEndpoint` restricted to the service caller role and gated behind the internal secret firewall. */
 export abstract class ServiceEndpoint extends ApiEndpoint {
+  /** Fixed to the service caller role; a `ServiceEndpoint` never answers any other. */
   protected access(): Caller | readonly Caller[] {
     return "service";
   }
 
+  /** 5000 calls a minute by default, with a one-hour penalty; a subclass may tighten it. */
   protected rateLimit(): RateLimit {
     return {
       limit: 5000,
@@ -58,6 +61,14 @@ export abstract class ServiceEndpoint extends ApiEndpoint {
     };
   }
 
+  /**
+   * Verifies the internal secret and the body size before deferring to `ApiEndpoint.execute`.
+   *
+   * @remarks
+   * Both checks run before `super.execute()`, which is the one that reaches Redis for the access
+   * check and the rate limit: a caller without the secret, or a body already too large, is
+   * refused without spending that round trip.
+   */
   protected override execute(): Future<Response> {
     if (!InternalSecretFirewall.verify()) {
       return Promise.resolve(this.response.unauthorized());

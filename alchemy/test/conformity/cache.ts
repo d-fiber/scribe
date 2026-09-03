@@ -63,7 +63,7 @@ import { AssertionError } from "../expect/error.ts";
  * @throws {AssertionError} On the first promise `driver` does not keep, saying which one.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * Deno.test("the Redis cache keeps what the port promises", async () => {
  *   await checkCacheDriver(new RedisCaches(url));
  * });

@@ -36,11 +36,32 @@
 
 import type { Future } from "@scribe/alchemy";
 
+/**
+ * The service a request path resolved to, and where its worker is found on disk.
+ *
+ * @remarks
+ * `service` and `servicePath` travel together because the two answer different questions later in
+ * the pipeline: the authorizer and the request tag need the name, the dispatcher needs the path,
+ * and neither can be derived from the other once a request has been resolved through a namespaced
+ * or a flat match.
+ */
 export interface ResolvedService {
+  /** The service name a request resolved to, used to authorize it and to tag it downstream. */
   readonly service: string;
+
+  /** The on-disk path of the resolved service, passed to the dispatcher to load its worker. */
   readonly servicePath: string;
 }
 
+/**
+ * Turns a request path into the service that answers it.
+ *
+ * @remarks
+ * A seam of its own, separate from {@link DirectoryServiceResolver}'s concrete filesystem lookup,
+ * so `EdgeFunctionsRuntime` never has to know whether a service lives on disk under a namespaced
+ * prefix, a flat one, or somewhere else entirely: swapping the resolution strategy is a new
+ * implementation of this interface, not a change to the runtime that calls it.
+ */
 export interface ServiceResolver {
   resolve(pathname: string): Future<ResolvedService | null>;
 }

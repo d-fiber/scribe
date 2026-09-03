@@ -34,12 +34,14 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assert, assertEquals } from "@std/assert";
 
 const SDK_ROOT = new URL("../../", import.meta.url).pathname;
 
 const SDK_SQL_DIRS = [
-  `${SDK_ROOT}packages/auth/db/init`,
+  `${SDK_ROOT}packages/auth/deploy/db/init`,
 ];
 
 async function isDirectory(path: string): Promise<boolean> {
@@ -72,7 +74,7 @@ async function allSql(roots: string[]): Promise<string> {
 export function registerAccountCascadeTests(label: string, extraRoots: string[] = []): void {
   const roots = [...SDK_SQL_DIRS, ...extraRoots];
 
-  Deno.test(`${label}: pending-token cleanup is scheduled`, async () => {
+  Scribe.test(`${label}: pending-token cleanup is scheduled`, async () => {
     const sql = await allSql(roots);
     assert(
       sql.includes("cleanup-pending-tokens"),
@@ -80,7 +82,7 @@ export function registerAccountCascadeTests(label: string, extraRoots: string[] 
     );
   });
 
-  Deno.test(`${label}: an account of any role cascades into what hangs off it`, async () => {
+  Scribe.test(`${label}: an account of any role cascades into what hangs off it`, async () => {
     const sql = await allSql(roots);
     const references = [
       ...sql.matchAll(

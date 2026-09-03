@@ -37,10 +37,18 @@
 import { Caller } from "../contracts/access.ts";
 import type { Contribution } from "../routing/contribution.ts";
 
+/** One of the framework's own reserved nodes, and the access rules every route under it inherits. */
 export interface StandardNode {
+  /** The reserved node name this standard declaration answers for. */
   readonly name: string;
+
+  /** The caller kind every route under this node is restricted to, before any layer narrows it further. */
   readonly caller: Caller;
+
+  /** Whether this node is reachable directly, rather than only through another node's dispatch. */
   readonly public: boolean;
+
+  /** Whether every route under this node requires an already-verified webhook. `null` when it doesn't decide. */
   readonly webhookVerified: boolean | null;
 }
 
@@ -54,14 +62,20 @@ const STANDARD_NODES: readonly StandardNode[] = [
 
 const byName = new Map(STANDARD_NODES.map((node) => [node.name, node]));
 
+/** The {@link StandardNode} reserved under `name`, or `null` when `name` names no reserved node. */
 export function standardNode(name: string): StandardNode | null {
   return byName.get(name) ?? null;
 }
 
+/** Every reserved node name, `"public"`, `"app"`, `"admin"`, `"services"` and `"webhook"`. */
 export function standardNodeNames(): readonly string[] {
   return STANDARD_NODES.map((node) => node.name);
 }
 
+/**
+ * `node`'s access and webhook rules as a {@link Contribution}, so `Node.layers()` can fold a
+ * standard node into the same merge every declared middleware goes through.
+ */
 export function standardContribution(node: StandardNode): Contribution {
   return {
     access: node.caller,

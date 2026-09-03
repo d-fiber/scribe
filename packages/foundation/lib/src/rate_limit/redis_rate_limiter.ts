@@ -53,7 +53,7 @@ export { SHARED_ADDRESS_MAX_PENALTY, SHARED_ADDRESS_STRIKE_MEMORY } from "@scrib
 /**
  * One rate limit, declared once and asked at every call.
  *
- * ```ts
+ * ```ts ignore
  * const signIn = rateLimit({
  *   key: "sign-in:email",
  *   limit: 10,
@@ -225,6 +225,7 @@ export class RedisRateLimiter implements RateLimiter {
  * `rateLimit` and the host fills {@link RateLimiters} with this at boot.
  */
 export class RedisRateLimiters implements RateLimiterDriver {
+  /** The {@link RateLimiterDriver.open} implementation: a new {@link RedisRateLimiter} for `options`. */
   open(options: RateLimitOptions): RateLimiter {
     return new RedisRateLimiter(options);
   }

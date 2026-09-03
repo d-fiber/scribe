@@ -89,6 +89,7 @@ const methods: Record<ProtoMethod, HonoMethod> = {
 
 export type NodeResolver = (node: NodeDeclaration) => Hono;
 
+/** Raised when the manifest cannot be mounted: an unnamed node, a route naming an undeclared node, or a route with no rate limit. */
 export class NodeMountError extends Error {
   constructor(message: string) {
     super(message);

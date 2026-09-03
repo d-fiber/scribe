@@ -36,31 +36,38 @@
 
 import { unawaited } from "@scribe/alchemy";
 import type { Future } from "@scribe/alchemy";
+import { Processes } from "@scribe/runtime/scholium/process.ts";
+import type { ShutdownSignal } from "@scribe/runtime/scholium/process.ts";
 
 export type ShutdownHandler = () => Future<void> | void;
 
+/** Runs a shutdown handler when one of the watched signals arrives, tolerating a signal the host cannot watch. */
 export class SignalWatcher {
-  readonly #signals: readonly Deno.Signal[];
+  readonly #signals: readonly ShutdownSignal[];
   readonly #onShutdown: ShutdownHandler;
 
-  constructor(signals: readonly Deno.Signal[], onShutdown: ShutdownHandler) {
+  constructor(signals: readonly ShutdownSignal[], onShutdown: ShutdownHandler) {
     this.#signals = signals;
     this.#onShutdown = onShutdown;
   }
 
+  /**
+   * Registers a listener for each signal this watcher was given, logging and skipping any the
+   * host has no listener for rather than letting the whole watch fail.
+   */
   watch(): void {
     for (const signal of this.#signals) {
       try {
-        Deno.addSignalListener(signal, () => unawaited(this.#handle(signal)));
+        Processes.get().onShutdownSignal(signal, () => unawaited(this.#handle(signal)));
       } catch {
         console.warn(`[shell:signals] ${signal} not available on this platform.`);
       }
     }
   }
 
-  async #handle(signal: Deno.Signal): Future<void> {
+  async #handle(signal: ShutdownSignal): Future<void> {
     console.info(`[shell:signals] ${signal} received, shutting down.`);
     await this.#onShutdown();
-    Deno.exit(0);
+    Processes.get().exit(0);
   }
 }

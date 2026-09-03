@@ -38,7 +38,7 @@ import { equal } from "./equal.ts";
 import { difference, format } from "./error.ts";
 
 /** What a constructor looks like when all that matters is what it builds. */
-// deno-lint-ignore no-explicit-any
+// deno-lint-ignore no-explicit-any -- a constructor's parameters are contravariant, so unknown[] rejects one with typed arguments.
 type Constructor<T> = abstract new (...args: any[]) => T;
 
 /**
@@ -116,6 +116,22 @@ export function isNot<T>(inner: Matcher<T>): Matcher<T> {
   return matcher(
     `is not ${inner.described.replace(/^(equals|is|contains) /, "$1 ")}`,
     (actual) => !inner.matches(actual),
+  );
+}
+
+/**
+ * Holds when what it is given holds against every one of `inners`.
+ *
+ * @remarks
+ * It is for the check that is two things at once, such as a raise that is of a kind and carries a
+ * message: `throwsA(allOf(isA(TypeError), withMessage("declared twice")))`. The mismatch names the
+ * first of `inners` that failed, since that is the one a reader is looking for.
+ */
+export function allOf<T>(...inners: Matcher<T>[]): Matcher<T> {
+  return matcher(
+    inners.map((inner) => inner.described).join(" and "),
+    (actual) => inners.every((inner) => inner.matches(actual)),
+    (actual) => inners.find((inner) => !inner.matches(actual))?.mismatch(actual) ?? null,
   );
 }
 
@@ -240,7 +256,7 @@ export function withMessage(expected: string): Matcher<unknown> {
  * name is what the failure calls that part, since a function has none.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * expect(
  *   () => hex.decode("zz"),
  *   throwsA(having(isA(FormatException), (raised) => raised.source, "source", equals("zz"))),

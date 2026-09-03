@@ -36,7 +36,16 @@
 
 import { SecretFirewall } from "./secret_firewall.ts";
 
+/**
+ * Checks a request's own named header against a caller-supplied list of valid keys.
+ *
+ * @remarks
+ * Neither the header name nor the keys are fixed here, unlike {@link InternalSecretFirewall}'s
+ * single hardcoded header: a deployment can guard more than one admin surface, each behind its own
+ * header and its own set of keys, without this class needing to know how many or which.
+ */
 export class AppKeyFirewall extends SecretFirewall {
+  /** Whether the request in scope's `headerName` matches one of `validKeys`, compared in constant time. */
   static verify(headerName: string, validKeys: readonly string[]): boolean {
     return this.verifyHeader(headerName, validKeys);
   }

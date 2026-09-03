@@ -36,7 +36,9 @@
 
 import type { Future } from "@scribe/alchemy";
 
+/** A step `BootSequence` runs at boot, and optionally again at shutdown. */
 export interface Bootstrapper {
+  /** This bootstrapper's label in a boot or shutdown failure logged by `BootSequence`. */
   readonly name: string;
   boot(): Future<void> | void;
   shutdown?(): Future<void> | void;

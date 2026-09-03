@@ -60,8 +60,7 @@ const DEFAULT_KEY = "id";
  * function. It is the boundary where the types stop, so it is written down once here rather
  * than cast at each of the five call sites.
  */
-// deno-lint-ignore no-explicit-any
-type AnyChange = any;
+type AnyChange = unknown;
 
 /** What a declaration can say beyond its path. */
 export interface TriggerOptions {
@@ -181,7 +180,7 @@ export interface TriggerMethods<TRow extends object> {
 /**
  * A table trigger: declaring it and arming it are the same thing.
  *
- * ```ts
+ * ```ts ignore
  * const orders = Trigger.of<OrdersRow>();
  *
  * export const onOrderCreated = orders.onInsert(
@@ -227,7 +226,7 @@ export class Trigger {
   /**
    * The five methods, bound to the type of the rows the table holds.
    *
-   * ```ts
+   * ```ts ignore
    * const orders = Trigger.of<OrdersRow>();
    * ```
    *

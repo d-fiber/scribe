@@ -34,18 +34,20 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assert, assertEquals } from "@std/assert";
 import { TrieRouter } from "hono/router/trie-router";
 import { honoRouter } from "@scribe/kernel/http/routing/hono_router.ts";
 
-Deno.test("the framework names its router instead of letting hono choose one", () => {
+Scribe.test("the framework names its router instead of letting hono choose one", () => {
   assert(
     honoRouter().router instanceof TrieRouter,
     "hono chose the router, and its default compiles every route into one regular expression",
   );
 });
 
-Deno.test("a route table far past what a regular expression takes still answers", async () => {
+Scribe.test("a route table far past what a regular expression takes still answers", async () => {
   const app = honoRouter();
   for (let i = 0; i < 14_000; i++) app.get(`/r${i}/:id`, (c) => c.text(`${i}`));
 

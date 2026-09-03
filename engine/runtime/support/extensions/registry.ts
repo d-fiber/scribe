@@ -36,15 +36,38 @@
 
 import { type Future, Registry } from "@scribe/alchemy";
 
+/**
+ * A named, lazily loaded piece of optional functionality.
+ *
+ * @remarks
+ * `packages/foundation/lib/foundation.ts` registers one for `queues` and one for `crons`: a
+ * project that never wrote a `queues.ts` or a `crons.ts` still boots, because loading only
+ * happens when something actually asks for that extension by name, never at registration.
+ */
 export interface Extension {
+  /** This extension's registered name, looked up by `ExtensionRegistry.load`. */
   readonly name: string;
   load(): Future<unknown | null>;
 }
 
+/**
+ * Every {@link Extension} a package has registered, loaded on demand and memoized after the first load.
+ *
+ * @remarks
+ * Memoizing matters because loading a project's declarations file is itself the thing that runs
+ * its top-level code, `new Queue(...)` and the like: loading it twice would register every
+ * declaration twice, which is exactly the duplicate-name refusal `Registry.declare` exists to
+ * catch.
+ */
 export class ExtensionRegistry {
   readonly #declared = new Registry<Extension>("extension");
   readonly #loaded = new Map<string, Future<unknown | null>>();
 
+  /**
+   * Declares `extension`, reachable afterward by {@link load} under its own name.
+   *
+   * @throws {DuplicateDeclarationError} When another extension already registered under the same name.
+   */
   register(extension: Extension): void {
     this.#declared.declare(extension.name, extension);
   }
@@ -54,6 +77,11 @@ export class ExtensionRegistry {
     return this.#declared.named(name) !== null;
   }
 
+  /**
+   * Loads the extension registered as `name`, memoizing the result so a second call answers the
+   * same promise instead of loading again. Answers `null`, logged rather than thrown, when
+   * nothing is registered under `name`.
+   */
   load(name: string): Future<unknown | null> {
     const memoized = this.#loaded.get(name);
     if (memoized !== undefined) return memoized;
@@ -69,6 +97,7 @@ export class ExtensionRegistry {
     return loading;
   }
 
+  /** The name of every extension registered so far, whether or not it has been loaded. */
   registered(): readonly string[] {
     return this.#declared.all().map((extension) => extension.name);
   }

@@ -1,6 +1,0 @@
-{
-  "imports": {
-    "@scribe/contracts/": "../contracts/",
-    "@scribe/runtime/": "./"
-  }
-}

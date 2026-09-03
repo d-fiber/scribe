@@ -34,8 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "../../common/settings.ts";
+
 import { ScribeServer } from "@scribe/sdk";
 import type { DeclaredNode, DiscoveredLogSink, DiscoveredRoute } from "@scribe/sdk";
+import { wireGeneratedSingletons } from "@scribe/runtime/support/di/loaded.ts";
 
 /** What `@generated/routes.ts` exports, which is the whole of what a project serves. */
 interface GeneratedRoutes {
@@ -53,12 +56,18 @@ interface GeneratedRoutes {
  * Runs the project this worker was given, and nothing else.
  *
  * It is the framework's own entry point and not the project's: what used to be
- * a `main.ts` every project copied is the same four lines everywhere, and the
+ * a `main.ts` every project copied is the same few lines everywhere, and the
  * nodes it used to declare are read from `config.yaml` now. The import is
  * dynamic because `@generated/` is resolved by the project's import map and not
  * by the framework's, so a static one would be checked against a map that never
  * carries it.
+ *
+ * The DI wire runs first: a node's own code may resolve a `@Singleton` the
+ * moment it answers a call, and nothing here waits for a node to run before
+ * that becomes possible.
  */
+await wireGeneratedSingletons();
+
 const generated = await import("@generated/routes.ts") as unknown as GeneratedRoutes;
 
 await new ScribeServer({

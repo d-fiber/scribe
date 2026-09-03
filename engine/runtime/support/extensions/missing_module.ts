@@ -41,9 +41,9 @@ const MISSING_MODULE_CODE = "ERR_MODULE_NOT_FOUND";
  * The message fragments that answer for a thrown value carrying no code.
  *
  * They are a fallback rather than the test. Deno words the same failure three
- * ways -- `Module not found` for a path it cannot find, `Import ... not a
+ * ways: `Module not found` for a path it cannot find, `Import ... not a
  * dependency` for a bare specifier, and that one gains `and not in import map`
- * inside a workspace -- so matching on prose misses the case an unmounted
+ * inside a workspace. Matching on prose alone misses the case an unmounted
  * project produces on every boot.
  */
 const MISSING_MODULE_MARKERS = [

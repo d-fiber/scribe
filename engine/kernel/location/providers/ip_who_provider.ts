@@ -36,11 +36,14 @@
 
 import { AbstractGeolocationProvider, type IpLocation } from "../provider.ts";
 
+/** The {@link AbstractGeolocationProvider} that asks ipwho.is, one of the four `GeolocationResolver` falls back through. */
 export class IpWhoProvider extends AbstractGeolocationProvider {
+  /** The `buildUrl` implementation: ipwho.is's own lookup endpoint for `ip`. */
   buildUrl(ip: string): string {
     return `https://ipwho.is/${encodeURIComponent(ip)}`;
   }
 
+  /** The `parse` implementation: `null` when ipwho.is reports `success: false`, its `city` and `country_code` otherwise. */
   parse(data: unknown): IpLocation | null {
     if (this.field(data, "success") === "false") return null;
     return this.location(this.field(data, "city"), this.field(data, "country_code"));

@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import "@scribe/testing/settings.ts";
 import type { Grants } from "@scribe/contracts/grants.ts";
 import { RbacIdentity, RequestIdentity } from "@scribe/kernel/identity/request_identity.ts";
@@ -67,7 +69,7 @@ function resolvingTo(identity: ResolvedJwtIdentity | null, granted: Grants | nul
   return { restore: () => mocks.forEach((mock) => mock.restore()) };
 }
 
-Deno.test("a bearer that is not three non-empty segments never reaches the resolver", async () => {
+Scribe.test("a bearer that is not three non-empty segments never reaches the resolver", async () => {
   let calls = 0;
   const mock = installMock(JwtIdentityResolver, "resolveIdentity", () => {
     calls++;
@@ -88,7 +90,7 @@ Deno.test("a bearer that is not three non-empty segments never reaches the resol
   }
 });
 
-Deno.test("no bearer at all resolves to nobody", async () => {
+Scribe.test("no bearer at all resolves to nobody", async () => {
   const resolver = resolvingTo({ id: "u1", claims: {} });
   try {
     assertEquals(await withBearer(null, () => RequestIdentity.isConnected()), false);
@@ -97,7 +99,7 @@ Deno.test("no bearer at all resolves to nobody", async () => {
   }
 });
 
-Deno.test("a caller the deployment grants nothing is still a caller", async () => {
+Scribe.test("a caller the deployment grants nothing is still a caller", async () => {
   const resolver = resolvingTo({ id: "u1", claims: {} }, null);
   try {
     assertEquals(await withBearer(JWT, () => RequestIdentity.isConnected()), true);
@@ -109,7 +111,7 @@ Deno.test("a caller the deployment grants nothing is still a caller", async () =
   }
 });
 
-Deno.test("the role a caller carries is the word the deployment granted, whatever it is", async () => {
+Scribe.test("the role a caller carries is the word the deployment granted, whatever it is", async () => {
   const resolver = resolvingTo({ id: "a1", claims: {} });
   try {
     assertEquals(await withBearer(JWT, () => RequestIdentity.role()), "shift-lead");
@@ -121,7 +123,7 @@ Deno.test("the role a caller carries is the word the deployment granted, whateve
   }
 });
 
-Deno.test("a caller with no address is a caller like any other", async () => {
+Scribe.test("a caller with no address is a caller like any other", async () => {
   const resolver = resolvingTo({ id: "u1", claims: {} });
   try {
     assertEquals(await withBearer(JWT, () => RequestIdentity.isConnected()), true);
@@ -130,7 +132,7 @@ Deno.test("a caller with no address is a caller like any other", async () => {
   }
 });
 
-Deno.test("everything the token asserted travels, and nothing here reads it", async () => {
+Scribe.test("everything the token asserted travels, and nothing here reads it", async () => {
   const resolver = resolvingTo({
     id: "u1",
     claims: { email: "u@x.io", tenant: "acme", app_metadata: { role: "admin" } },
@@ -153,7 +155,7 @@ Deno.test("everything the token asserted travels, and nothing here reads it", as
   }
 });
 
-Deno.test("the identity is resolved once per request, however many times it is read", async () => {
+Scribe.test("the identity is resolved once per request, however many times it is read", async () => {
   let calls = 0;
   const mocks = [
     installMock(JwtIdentityResolver, "resolveIdentity", () => {
@@ -177,7 +179,7 @@ Deno.test("the identity is resolved once per request, however many times it is r
   }
 });
 
-Deno.test("what the caller holds is never handed out for anyone to change", async () => {
+Scribe.test("what the caller holds is never handed out for anyone to change", async () => {
   const resolver = resolvingTo({ id: "u1", claims: {} }, { role: "lead", permissions: ["brand.read"] });
 
   try {
@@ -194,7 +196,7 @@ Deno.test("what the caller holds is never handed out for anyone to change", asyn
   }
 });
 
-Deno.test("holding nothing and having proved nothing both grant nothing", async () => {
+Scribe.test("holding nothing and having proved nothing both grant nothing", async () => {
   const anonymous = resolvingTo(null);
   try {
     assertEquals(await withBearer(JWT, () => RbacIdentity.grants(["brand.read"])), false);

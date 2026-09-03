@@ -49,6 +49,7 @@ export class MemoryCrons implements CronDriver {
   /** Every run taken, by the key it answers to. */
   readonly taken: Map<string, CronOptions> = new Map<string, CronOptions>();
 
+  /** The {@link CronDriver.schedule} implementation: records `options` under {@link taken} without firing anything. */
   schedule(options: CronOptions): DeclaredCron {
     this.taken.set(options.key, options);
     return { key: options.key, schedule: options.schedule };

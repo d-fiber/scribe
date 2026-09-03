@@ -36,15 +36,30 @@
 
 import type { Future } from "@scribe/alchemy";
 import { ServerResponse } from "@scribe/alchemy/route";
+import { environment } from "@scribe/runtime/scholium/env.ts";
 import { FRAMEWORK_SECRETS } from "@scribe/contracts/secrets.ts";
 import { readBoundedBody } from "@scribe/kernel/http/serve/body_reader.ts";
 import { MAX_BODY_BYTES } from "@scribe/runtime/http/limits.ts";
 import type { EdgePlatform } from "../platform.ts";
 import type { WorkerDispatcher } from "./worker_dispatcher.ts";
 
+/**
+ * The resource ceilings applied to a worker isolate before it starts.
+ *
+ * @remarks
+ * Carried as its own shape, separate from {@link EdgeConfig}, because a dispatcher only needs the
+ * three values that shape an isolate: handing it the whole configuration would let it reach
+ * `jwtSecret` or `authUrl`, values that have nothing to do with spinning up a worker and that a
+ * dispatcher has no reason to see.
+ */
 export interface WorkerLimits {
+  /** The memory ceiling given to the worker, in megabytes. */
   readonly memoryLimitMb: number;
+
+  /** How long the worker has to answer before it is killed, in milliseconds. */
   readonly workerTimeoutMs: number;
+
+  /** The import map path the worker resolves its imports against. */
   readonly importMapPath: string;
 }
 
@@ -63,6 +78,14 @@ function withoutSecrets(environment: readonly string[][]): string[][] {
   return environment.filter(([name]) => !FRAMEWORK_SECRETS.has(name)).map((pair) => [...pair]);
 }
 
+/**
+ * Dispatches a request to a freshly created worker isolate on the edge platform.
+ *
+ * @remarks
+ * The environment it hands the worker is the host's own, minus `FRAMEWORK_SECRETS`: a worker
+ * runs project code, and the framework's own secrets are not part of what a project should be
+ * able to read.
+ */
 export class EdgeWorkerDispatcher implements WorkerDispatcher {
   readonly #platform: EdgePlatform;
   readonly #limits: WorkerLimits;
@@ -71,13 +94,21 @@ export class EdgeWorkerDispatcher implements WorkerDispatcher {
   constructor(
     platform: EdgePlatform,
     limits: WorkerLimits,
-    envVars: string[][] = Object.entries(Deno.env.toObject()),
+    envVars: string[][] = Object.entries(environment().toObject()),
   ) {
     this.#platform = platform;
     this.#limits = limits;
     this.#envVars = withoutSecrets(envVars);
   }
 
+  /**
+   * Creates a worker for `servicePath` and answers `request` through it.
+   *
+   * @remarks
+   * The body is read and bounded before the worker is asked for, so a body that is refused never
+   * costs an isolate, in `#forward`. A failure anywhere in this path, including one from the
+   * worker itself, is answered as an unexpected error rather than left to escape unhandled.
+   */
   async dispatch(request: Request, servicePath: string): Future<Response> {
     try {
       const forwarded = await this.#forward(request);

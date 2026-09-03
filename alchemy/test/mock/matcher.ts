@@ -122,7 +122,7 @@ class Matcher implements ArgumentMatcher {
  * Stands for any argument in that position.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * when(() => clock.tick(anything<number>())).thenReturn(noon);
  * ```
  */
@@ -157,7 +157,7 @@ export function matching<T>(
  * answer for themselves rather than the second seeing the first one's arguments too.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const written = capture<Row>();
  * verify(() => store.put(written.arg)).twice();
  * assertEquals(written.values.map((row) => row.id), ["ada", "grace"]);

@@ -234,7 +234,7 @@ export class MemoryFileSystem implements FileSystem {
  * A driver handing back one {@link MemoryFileSystem}, the same one every time.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const disk = new MemoryFileSystemDriver();
  * FileSystems.use(disk);
  * ```

@@ -34,8 +34,6 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-// deno-lint-ignore-file no-explicit-any
-
 import type { Future } from "@scribe/alchemy";
 import { create } from "@bufbuild/protobuf";
 import {
@@ -64,7 +62,9 @@ import {
   UnsafeFilterError,
 } from "@scribe/foundation/database";
 import { decodeJson, encodeJson } from "../control/json.ts";
+import type { PostgrestClient } from "@supabase/postgrest-js";
 
+// deno-lint-ignore no-explicit-any -- the builder type differs at each chained call, picked by a runtime Operation, so no single type covers every stage.
 function applyOperator(builder: any, filter: Filter): any {
   const value = decodeJson(filter.value);
   const negated = filter.negated ? builder.not : builder;
@@ -151,6 +151,7 @@ function disjunction(group: FilterGroup): string {
   return group.filters.map(disjunctionTerm).join(",");
 }
 
+// deno-lint-ignore no-explicit-any -- see applyOperator: the builder type varies by chained call.
 function applyFilters(builder: any, where: FilterGroup | undefined): any {
   if (!where) return builder;
 
@@ -220,7 +221,8 @@ function selection(query: Query): string {
   return query.select.length > 0 ? query.select.join(",") : "*";
 }
 
-function started(query: Query, db: any): any {
+// deno-lint-ignore no-explicit-any -- see applyOperator: the builder type varies by chained call.
+function started(query: Query, db: PostgrestClient): any {
   const payload = query.payload === undefined ? undefined : decodeJson(query.payload);
 
   switch (query.operation) {
@@ -244,6 +246,7 @@ function started(query: Query, db: any): any {
   }
 }
 
+// deno-lint-ignore no-explicit-any -- see applyOperator: the builder type varies by chained call.
 function shaped(builder: any, query: Query): any {
   let current = builder;
 
@@ -267,7 +270,7 @@ function shaped(builder: any, query: Query): any {
 }
 
 async function runRpc(query: Query): Future<QueryResult> {
-  const db = PostgrestClients.service() as any;
+  const db = PostgrestClients.service();
   const { data, error } = await db.rpc(query.rpcName, decodeJson(query.rpcArgs) ?? {});
 
   return create(QueryResultSchema, {
@@ -295,7 +298,7 @@ export async function executeQuery(query: Query): Future<QueryResult> {
     });
   }
 
-  const db = PostgrestClients.service() as any;
+  const db = PostgrestClients.service();
 
   let builder = started(query, db);
   builder = applyFilters(builder, query.where);

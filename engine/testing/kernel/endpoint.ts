@@ -44,17 +44,49 @@ import { fakeDevice } from "../runtime/device.ts";
 
 const _DEVICE_CACHE_KEY = "device:resolved";
 
+/**
+ * What `callEndpoint` sends: the request's shape, plus the identity and device it is made as.
+ *
+ * @remarks
+ * A device is filled with `fakeDevice()` by default rather than left out, because a test endpoint
+ * that calls `ctx.device()` would otherwise fail on a case that never meant to exercise the device
+ * path at all: a case that cares tests it explicitly by passing `device: null` or a payload of its
+ * own.
+ */
 export interface ApiCallOptions {
+  /** The device payload the call carries, or `null` for none; defaults to `fakeDevice()` when omitted. */
   readonly device?: RequestDevice | null;
+
+  /** Extra headers merged onto the request, taking precedence over the ones this helper sets. */
   readonly headers?: Record<string, string>;
+
+  /** The HTTP method the request is sent with. */
   readonly method?: string;
+
+  /** The request path. */
   readonly path?: string;
+
+  /** The identity the request is made as, or `null`/omitted for an anonymous call. */
   readonly identity?: RequestUser | null;
+
+  /** The bearer token sent when `identity` is set. */
   readonly token?: string;
 }
 
+/**
+ * What `callEndpoint` returns once the endpoint under test has answered.
+ *
+ * @remarks
+ * The body is parsed for the caller rather than left as a raw `Response`, since a test assertion
+ * almost always wants a value out of the body, not the object that carries one: `{ _raw: text }`
+ * for the rare case where the response is not JSON still lets a test see what actually came back
+ * instead of the parse failing silently.
+ */
 export interface ApiCallResult {
+  /** The response's HTTP status code. */
   readonly status: number;
+
+  /** The response body, parsed as JSON, or `{ _raw: text }` when it does not parse. */
   readonly body: Record<string, unknown>;
 }
 

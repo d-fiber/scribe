@@ -34,29 +34,30 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { contains, equals, expect, having, isA, throwsA } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { contains, equals, expect, having, isA, Scribe, throwsA } from "@scribe/alchemy/test";
 import { Version, VersionError } from "@scribe/alchemy";
 
-Deno.test("a version reads its three numbers", () => {
+Scribe.test("a version reads its three numbers", () => {
   const version = Version.parse("1.2.3");
   expect([version.major, version.minor, version.patch], equals([1, 2, 3]), "1.2.3 does not read as one, two, three");
 });
 
-Deno.test("a version refuses a pre-release suffix", () => {
+Scribe.test("a version refuses a pre-release suffix", () => {
   expect(
     () => Version.parse("1.2.3-beta.1"),
     throwsA(having(isA(VersionError), (raised) => raised.message, "message", contains("is not a version"))),
   );
 });
 
-Deno.test("a version refuses two numbers", () => {
+Scribe.test("a version refuses two numbers", () => {
   expect(
     () => Version.parse("1.2"),
     throwsA(having(isA(VersionError), (raised) => raised.message, "message", contains("is not a version"))),
   );
 });
 
-Deno.test("versions order by major, then minor, then patch", () => {
+Scribe.test("versions order by major, then minor, then patch", () => {
   const ordered = ["0.9.9", "1.0.0", "1.0.1", "1.1.0", "2.0.0"].map(
     Version.parse,
   );
@@ -66,7 +67,7 @@ Deno.test("versions order by major, then minor, then patch", () => {
   }
 });
 
-Deno.test(
+Scribe.test(
   "the next breaking version raises the major once there is one",
   () => {
     expect(
@@ -77,7 +78,7 @@ Deno.test(
   },
 );
 
-Deno.test(
+Scribe.test(
   "the next breaking version raises the minor before the first major",
   () => {
     expect(
@@ -88,7 +89,7 @@ Deno.test(
   },
 );
 
-Deno.test(
+Scribe.test(
   "the next breaking version raises the patch when nothing else is set",
   () => {
     expect(

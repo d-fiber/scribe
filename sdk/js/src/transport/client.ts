@@ -81,13 +81,27 @@ export type Fetcher = (request: Request) => Promise<Response>;
 
 const httpFetcher: Fetcher = (request) => fetch(request);
 
+/**
+ * The calling side of a unary RPC: encodes the request, sends it, and decodes the reply.
+ *
+ * @remarks
+ * `credentials` is a thunk rather than a fixed value because it is read inside {@link call}, at the
+ * moment a call actually goes out, not when this client was built. A worker's ambient scope can
+ * hold a different token from one call to the next, so resolving it fresh per call is what keeps a
+ * client usable across calls instead of freezing whichever token happened to be current when it
+ * was constructed.
+ */
 export class UnaryClient {
   constructor(
+    /** The host this client sends every call to. */
     readonly endpoint: string,
+    /** Read fresh at the start of each {@link call}, so this client always sends the live scope's token. */
     readonly credentials: () => CallCredentials,
+    /** What actually sends the HTTP request, `fetch` unless a test substitutes its own. */
     readonly fetcher: Fetcher = httpFetcher,
   ) {}
 
+  /** Calls `method` on the host with `input`, and answers its decoded reply. */
   async call<I extends DescMessage, O extends DescMessage>(
     method: DescMethodUnary<I, O>,
     input: MessageInitShape<I>,
@@ -134,6 +148,16 @@ export class UnaryClient {
   }
 }
 
+/**
+ * The `TransportFailure` an error response at `status` carries, decoding `body` as a protocol
+ * `Failure` when there is one to decode.
+ *
+ * @remarks
+ * A body can be empty or fail to decode as a `Failure` message when the response never reached the
+ * host's own handler, a proxy or a load balancer answering on its behalf. Falling back to a generic
+ * failure built from the HTTP status is what keeps that case from throwing on the decode instead of
+ * reporting what actually happened.
+ */
 function failureFrom(status: number, body: Uint8Array): TransportFailure {
   if (body.length === 0) {
     return new TransportFailure(

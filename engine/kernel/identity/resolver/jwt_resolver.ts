@@ -44,7 +44,15 @@ import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
 import { http } from "@scribe/alchemy/http";
 import type { JWTPayload } from "jose";
 
-/** Who a bearer token names, and everything it asserts about them. */
+/**
+ * Who a bearer token names, and everything it asserts about them.
+ *
+ * @remarks
+ * `id` and `claims` are kept apart because only `id` is something this framework acts on: it is
+ * what an owned row is keyed by, so it has to be a fact the framework can rely on. `claims` is
+ * carried through untouched instead, exactly for the deployments that put something meaningful
+ * there.
+ */
 export interface ResolvedJwtIdentity {
   /** What the token names as the subject, which is what an owned row is keyed on. */
   readonly id: string;
@@ -75,7 +83,15 @@ interface _CachedJwtIdentity extends ResolvedJwtIdentity {
 
 const _FETCH_TIMEOUT: Duration = Duration.seconds(5);
 
-/** How long a resolved identity stays in the shared cache, and how long its revocation entry must outlive it. */
+/**
+ * How long a resolved identity stays in the shared cache.
+ *
+ * @remarks
+ * The same value is handed to `IdentityRevocation.remember` as the fingerprint index's own expiry,
+ * so an entry `revoke` would need to find never outlives the cache entry it belongs to: a token
+ * that has already fallen out of the shared cache has nothing left in the fingerprint index for a
+ * revocation to drop either.
+ */
 const _CACHE_TTL: Duration = Duration.minutes(5);
 
 /**
@@ -107,7 +123,15 @@ function _expired(exp: number | null): boolean {
   return exp !== null && exp <= Date.now() / 1_000;
 }
 
-/** Who the identity service says the token names, when it was asked directly. */
+/**
+ * Who the identity service says the token names, when it was asked directly.
+ *
+ * @remarks
+ * Called only when `recheckRequired` says the cached claims are not enough, since asking GoTrue on
+ * every resolution would put a network round trip on every authenticated request. Where
+ * `_identityFromClaims` trusts the token's own signature, this trusts GoTrue's live answer, which
+ * is the one source that can say an identity has changed since the token was issued.
+ */
 function _parseGoTrueUser(
   raw: Record<string, unknown>,
 ): ResolvedJwtIdentity | null {
@@ -120,12 +144,11 @@ function _parseGoTrueUser(
 /**
  * The identity the token itself asserts.
  *
- * GoTrue puts the same three values in the access token that it returns from
- * `/user`, and the signature has just been checked, so the HTTP call buys
- * nothing but freshness, which {@link IdentityRevocation.recheckRequired}
- * asks for by name when it is actually needed.
+ * @remarks
+ * GoTrue puts the same three values in the access token that it returns from `/user`, and the
+ * signature has just been checked, so the HTTP call buys nothing but freshness, which
+ * {@link IdentityRevocation.recheckRequired} asks for by name when it is actually needed.
  */
-/** Who the token says it names, read from the token alone, without asking anybody. */
 function _identityFromClaims(payload: JWTPayload): ResolvedJwtIdentity | null {
   const { sub, ...claims } = payload;
   if (typeof sub !== "string" || !sub) return null;
@@ -133,6 +156,7 @@ function _identityFromClaims(payload: JWTPayload): ResolvedJwtIdentity | null {
   return { id: sub, claims };
 }
 
+/** Resolves the identity behind a bearer JWT, cached in front of the signature check and GoTrue. */
 export class JwtIdentityResolver {
   private static readonly _cache: Cache<_CachedJwtIdentity> = cache<_CachedJwtIdentity>({
     key: IDENTITY_CACHE_KEY,

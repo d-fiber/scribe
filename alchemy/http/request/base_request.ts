@@ -39,21 +39,28 @@ import type { Client } from "../client/client.ts";
 import type { StreamedResponse } from "../response/streamed_response.ts";
 import { ScribeError } from "../../error/scribe_error.ts";
 
+/** What a client does when the answer to a request is a redirect. */
+export type Redirect = "error" | "follow" | "manual";
+
 /**
  * What every request has, whatever carries its body.
  *
+ * @remarks
  * A request is **sealed by its first send**: `finalize` hands the body over once and refuses
  * afterwards, and the fields stop accepting writes. Without that, a request reused after a
  * redirect or a retry would send a stream somebody has already drained.
  */
-/** What a client does when the answer to a request is a redirect. */
-export type Redirect = "error" | "follow" | "manual";
-
 export abstract class BaseRequest {
-  /** The method, upper-cased. */
+  /**
+   * The method, upper-cased.
+   *
+   * A client sends this as-is on the wire, and HTTP method names are conventionally upper-case;
+   * normalizing here means a caller who wrote `"get"` and one who wrote `"GET"` produce the same
+   * request instead of two servers disagreeing on whether the difference matters.
+   */
   readonly method: string;
 
-  /** Where the request goes. */
+  /** Where the request goes, parsed once so every collaborator reads the same `URL` rather than re-parsing a string. */
   readonly url: URL;
 
   readonly #headers = new Headers();
@@ -80,7 +87,14 @@ export abstract class BaseRequest {
     return this.#headers;
   }
 
-  /** How many bytes the body holds, or `null` when that is not known ahead of time. */
+  /**
+   * How many bytes the body holds, or `null` when that is not known ahead of time.
+   *
+   * A subclass whose body is a fixed buffer answers its exact length; one whose body is a stream
+   * from an unknown source, a file read lazily, a generator, cannot know the total before it has
+   * read the whole thing, so it answers `null` rather than lying with a guess a `Content-Length`
+   * header would then hold a client to.
+   */
   abstract get contentLength(): number | null;
 
   /**
@@ -107,7 +121,12 @@ export abstract class BaseRequest {
     this.redirect = value ? "follow" : "manual";
   }
 
-  /** How many redirects are followed before the client gives up. */
+  /**
+   * How many redirects are followed before the client gives up.
+   *
+   * Bounded rather than unlimited, because a redirect can point back at itself: a server that
+   * loops, by mistake or on purpose, would otherwise hang a request forever instead of failing it.
+   */
   get maxRedirects(): number {
     return this.#maxRedirects;
   }
@@ -116,7 +135,13 @@ export abstract class BaseRequest {
     this.#maxRedirects = value;
   }
 
-  /** Whether the connection is kept open for a later request. */
+  /**
+   * Whether the connection is kept open for a later request.
+   *
+   * Lives on the request, not on the client, for the same reason {@link timeoutMs} does: a caller
+   * making one throwaway call to an otherwise long-lived client should be able to say so without
+   * changing how every other request through that client behaves.
+   */
   get persistentConnection(): boolean {
     return this.#persistentConnection;
   }
@@ -140,7 +165,13 @@ export abstract class BaseRequest {
     this.#timeoutMs = value;
   }
 
-  /** Whether this request has already been handed over. */
+  /**
+   * Whether this request has already been handed over.
+   *
+   * Exposed as its own read, separate from calling {@link finalize} to find out, because checking
+   * must never have the side effect of sealing: a caller inspecting a request before deciding
+   * whether to configure it further cannot be the thing that finalizes it.
+   */
   get finalized(): boolean {
     return this.#finalized;
   }
@@ -157,12 +188,26 @@ export abstract class BaseRequest {
     return ByteStream.fromBytes(new Uint8Array(0));
   }
 
-  /** Sends this request through `client`, and answers before the body has arrived. */
+  /**
+   * Sends this request through `client`, and answers before the body has arrived.
+   *
+   * @remarks
+   * The response streams rather than waiting for the whole body, so a caller reading a large
+   * reply is not forced to hold it all in memory first: a caller who wants the whole thing asks
+   * `StreamedResponse` for it.
+   */
   send(client: Client): Promise<StreamedResponse> {
     return client.send(this);
   }
 
-  /** Refuses a change to a request that has already been sent. */
+  /**
+   * Refuses a change to a request that has already been sent.
+   *
+   * @remarks
+   * `#checkFinalized` is private, so a subclass in `request.ts` cannot call it directly to guard
+   * its own setters. This protected wrapper is the one seam that lets a subclass reuse the same
+   * check rather than reimplementing it against its own finalized flag.
+   */
   protected checkFinalized(): void {
     this.#checkFinalized();
   }
@@ -170,7 +215,7 @@ export abstract class BaseRequest {
   /**
    * Refuses a change to a request that has already been handed over.
    *
-   * @throws {Error} When this request has been finalized.
+   * @throws {ScribeError} When this request has been finalized.
    */
   #checkFinalized(): void {
     if (!this.#finalized) return;

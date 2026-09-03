@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, Scribe } from "@scribe/alchemy/test";
 import { Current, type CurrentDriver, Currents, type CurrentStore } from "@scribe/alchemy";
 
 function stacking(): CurrentDriver {
@@ -56,14 +57,14 @@ function stacking(): CurrentDriver {
   };
 }
 
-Deno.test("a place nobody set answers nothing rather than refusing", () => {
+Scribe.test("a place nobody set answers nothing rather than refusing", () => {
   Currents.use(stacking());
   const caller = new Current<string>("caller");
 
   expect(caller.get(), equals(null));
 });
 
-Deno.test("a value is held for whoever runs under the body that set it", () => {
+Scribe.test("a value is held for whoever runs under the body that set it", () => {
   Currents.use(stacking());
   const caller = new Current<string>("caller");
 
@@ -73,7 +74,7 @@ Deno.test("a value is held for whoever runs under the body that set it", () => {
   expect(caller.get(), equals(null));
 });
 
-Deno.test("a place set inside another hides it, and gives it back on the way out", () => {
+Scribe.test("a place set inside another hides it, and gives it back on the way out", () => {
   Currents.use(stacking());
   const caller = new Current<string>("caller");
 
@@ -85,7 +86,7 @@ Deno.test("a place set inside another hides it, and gives it back on the way out
   expect(seen, equals(["grace", "ada"]));
 });
 
-Deno.test("two places named the same are two places", () => {
+Scribe.test("two places named the same are two places", () => {
   Currents.use(stacking());
   const first = new Current<string>("caller");
   const second = new Current<string>("caller");
@@ -93,7 +94,7 @@ Deno.test("two places named the same are two places", () => {
   first.run("ada", () => expect(second.get(), equals(null)));
 });
 
-Deno.test("nothing opens a store until the place is used", () => {
+Scribe.test("nothing opens a store until the place is used", () => {
   let opened = 0;
   Currents.use({
     open<T>(): CurrentStore<T> {

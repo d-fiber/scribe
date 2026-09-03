@@ -39,6 +39,8 @@ import { Hono } from "hono";
 import { honoRouter } from "@scribe/kernel/http/routing/hono_router.ts";
 import { majorOf, PROTOCOL_VERSION } from "@scribe/sdk";
 import type { Manifest, NodeDeclaration } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
+import { Listeners } from "@scribe/runtime/scholium/listener.ts";
+import { Processes } from "@scribe/runtime/scholium/process.ts";
 import { workerSettings } from "@scribe/runtime/support/settings/worker.ts";
 import { capabilityHandler } from "../capabilities/server.ts";
 import { CapabilityTokens } from "../capabilities/tokens.ts";
@@ -65,7 +67,7 @@ function wait(ms: number): Future<void> {
  */
 function callbackAddress(): string {
   const { callbackUrl, callbackPort } = workerSettings.get();
-  return callbackUrl ?? `http://${Deno.hostname()}:${callbackPort}`;
+  return callbackUrl ?? `http://${Processes.get().hostname()}:${callbackPort}`;
 }
 
 async function handshake(client: WorkerClient, token: string): Future<Manifest> {
@@ -155,10 +157,10 @@ export const WorkerHost = {
     const endpoint = settings.endpoint;
     if (endpoint === null) return;
 
-    Deno.serve(
-      { port: settings.callbackPort, hostname: settings.callbackHostname },
-      capabilityHandler(),
-    );
+    Listeners.get().serve(capabilityHandler(), {
+      port: settings.callbackPort,
+      hostname: settings.callbackHostname,
+    });
 
     const token = issueBootstrap();
 

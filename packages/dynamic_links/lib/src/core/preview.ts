@@ -58,7 +58,7 @@ let rule: LinkPreviewRule | null = null;
 /**
  * Declares what every link of this process shows when it is unfurled.
  *
- * ```ts
+ * ```ts ignore
  * onLinkPreview((link, locale) => ({
  *   title: translate(locale, `links.${link.name}.title`, link.data),
  * }));

@@ -51,12 +51,13 @@ import { wireSearch } from "./src/capability/wire.ts";
 import { capabilities } from "@scribe/contracts/capability.ts";
 import type { LifecycleSteps } from "@scribe/alchemy";
 import { extensions, OptionalExtension, runDeclarations } from "@scribe/runtime/support/extensions/mod.ts";
-import { required } from "@scribe/foundation";
+import { required } from "@scribe/runtime/scholium/env.ts";
 import { SEARCH_EXTENSION } from "./src/core/extension.ts";
 import { syncDeclaredIndices } from "./src/db/indices.ts";
 import { searchSettings } from "./src/settings.ts";
 import { OpenSearchTransport } from "./src/transport/opensearch.ts";
 import { SearchTransports } from "./src/transport/registry.ts";
+import { Search } from "./src/core/search.ts";
 
 export { Search } from "./src/core/search.ts";
 export type {
@@ -91,6 +92,16 @@ export type { SearchBacklog } from "./src/db/outbox.ts";
 export type { SearchIndexRow, SearchOutboxRow, SearchSourceRow } from "./src/db/tables.ts";
 
 export { drainSearchOutbox, searchDrain } from "./src/sync/drain.ts";
+
+/**
+ * The kinds a project may declare against this package, bucket to the symbol it imports.
+ *
+ * @remarks
+ * Read by `scribe gen code`, which is the only reader: it is what tells the tool that mounting
+ * "search" gives a project a "searchers" bucket to write into, without either the framework or the
+ * tool ever naming this package.
+ */
+export const declares = { searchers: Search };
 
 /**
  * When this package runs: the cluster at import, the mappings once the database answers.

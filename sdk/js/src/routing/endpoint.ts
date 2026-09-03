@@ -39,44 +39,83 @@ import type { RateLimiter } from "../contracts/rate_limit.ts";
 import type { RequestContext } from "../runtime/context.ts";
 import type { Contribution } from "./contribution.ts";
 
+/** What an endpoint reports about itself to documentation tooling. */
 export interface EndpointDocumentation {
+  /** The HTTP method the endpoint this describes answers. */
   readonly method: RouteMethod;
+
+  /** What the endpoint does, or `null` when its subclass never overrides {@link Endpoint.description}. */
   readonly description: string | null;
 }
 
+/**
+ * The base every concrete endpoint extends, turning its own checks and `run` into a route handler.
+ *
+ * @remarks
+ * The check methods below (`access`, `permissions`, `rateLimit`, `rateLimitKey`, `needs`,
+ * `webhookVerified`) are read once, when `tree.ts` discovers this endpoint's route, never on a
+ * live request. Their result is merged with whatever the route's `_middleware.ts` files and its
+ * node contribute, and the merged outcome becomes the route's static `access` and `rateLimit`
+ * metadata; a route that ends up with neither set refuses to build at all. `run` never sees this
+ * merge happen and never needs to: by the time it runs, the host has already enforced it.
+ */
 export abstract class Endpoint {
+  /** The HTTP method this endpoint answers, fixed by the concrete subclass. */
   abstract readonly method: RouteMethod;
 
+  /** The caller kind this endpoint restricts access to, or `null` to leave that to another layer. */
   protected access(): Caller | readonly Caller[] | null {
     return null;
   }
 
+  /** The permissions this endpoint requires, on top of whatever another layer already requires. */
   protected permissions(): readonly string[] {
     return [];
   }
 
+  /** The rate limiter this endpoint sets, or `null` to leave the limit to another layer. */
   protected rateLimit(): RateLimiter | null {
     return null;
   }
 
+  /** The rate limit key this endpoint sets, or `null` to leave the key to another layer. */
   protected rateLimitKey(): string | null {
     return null;
   }
 
+  /** The extra context this endpoint requires, on top of whatever another layer already requires. */
   protected needs(): readonly Need[] {
     return [];
   }
 
+  /** Whether this endpoint requires a verified webhook, or `null` to leave that to another layer. */
   protected webhookVerified(): boolean | null {
     return null;
   }
 
+  /** What this endpoint does, or `null` when a subclass has nothing to add to its documentation. */
   protected description(): string | null {
     return null;
   }
 
+  /**
+   * Produces the response to `ctx`.
+   *
+   * @remarks
+   * By the time this runs, the host has already enforced the access, rate limit and webhook
+   * requirements `contribution()` declared for this route: `run` never checks them again, and has
+   * no way to refuse a request on those grounds from inside itself.
+   */
   protected abstract run(ctx: RequestContext): Response | Promise<Response>;
 
+  /**
+   * Collects this endpoint's access, rate limit and webhook requirements into one `Contribution`.
+   *
+   * @remarks
+   * Called once, when `tree.ts` discovers this endpoint's route, and merged there with whatever
+   * `_middleware.ts` files and the node itself contribute. It is the merged result the host
+   * enforces before a request ever reaches `run`, not a fresh call to this method per request.
+   */
   contribution(): Contribution {
     return {
       access: this.access(),
@@ -89,31 +128,43 @@ export abstract class Endpoint {
     };
   }
 
+  /** The summary of this endpoint reported to documentation tooling: its method and description. */
   documentation(): EndpointDocumentation {
     return { method: this.method, description: this.description() };
   }
 
+  /** Runs this endpoint against `ctx`, resolving a synchronous and an asynchronous `run` the same way. */
   handle(ctx: RequestContext): Promise<Response> {
     return Promise.resolve(this.run(ctx));
   }
 }
 
+/** An endpoint that answers GET requests. */
 export abstract class Get extends Endpoint {
+  /** This endpoint always answers a GET request. */
   override readonly method: RouteMethod = "get";
 }
 
+/** An endpoint that answers POST requests. */
 export abstract class Post extends Endpoint {
+  /** This endpoint always answers a POST request. */
   override readonly method: RouteMethod = "post";
 }
 
+/** An endpoint that answers PUT requests. */
 export abstract class Put extends Endpoint {
+  /** This endpoint always answers a PUT request. */
   override readonly method: RouteMethod = "put";
 }
 
+/** An endpoint that answers PATCH requests. */
 export abstract class Patch extends Endpoint {
+  /** This endpoint always answers a PATCH request. */
   override readonly method: RouteMethod = "patch";
 }
 
+/** An endpoint that answers DELETE requests. */
 export abstract class Delete extends Endpoint {
+  /** This endpoint always answers a DELETE request. */
   override readonly method: RouteMethod = "delete";
 }

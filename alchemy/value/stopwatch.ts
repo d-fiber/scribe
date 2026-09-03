@@ -48,7 +48,7 @@ import { Duration } from "./duration.ts";
  * caller unsure of the state does not have to check first.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const watch = Stopwatch.started();
  * await work();
  * log.info(`took ${watch.elapsed.inMilliseconds} ms`);

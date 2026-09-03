@@ -40,8 +40,14 @@ jobs:
           key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
+      - name: Write deno.json from scribe.workspace.json
+        run: bash dev_tools/gen/workspace.sh
+
       - name: Type check
         run: deno task check
+
+      - name: Check that documented examples still compile
+        run: deno task check:examples
 
       - name: Lint
         run: deno task lint
@@ -106,6 +112,9 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
+      - name: Write deno.json from scribe.workspace.json
+        run: bash dev_tools/gen/workspace.sh
+
       - name: Check the formatting
         run: deno fmt --check
 
@@ -131,7 +140,7 @@ jobs:
 
           git diff --quiet CHANGELOG.md && exit 0
 
-          version=$(python3 -c "import json;print(json.load(open('deno.json'))['version'])")
+          version=$(python3 -c "import json;print(json.load(open('scribe.workspace.json'))['version'])")
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add CHANGELOG.md
@@ -153,6 +162,9 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
+      - name: Write deno.json from scribe.workspace.json
+        run: bash dev_tools/gen/workspace.sh
+
       - name: Report the Deno dependencies that moved
         run: |
           set -eu
@@ -170,7 +182,7 @@ jobs:
               echo ""
             done
             echo "Imports pinned by URL are invisible here too. Today that is"
-            echo '`jose`, pinned to a fixed version of deno.land/x in deno.json.'
+            echo '`jose`, pinned to a fixed version of deno.land/x in scribe.workspace.json.'
           } >> "$GITHUB_STEP_SUMMARY"
 
   protocol:

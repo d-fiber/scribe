@@ -38,6 +38,17 @@ import type { Future } from "@scribe/alchemy";
 import { decodeProtectedHeader } from "jose";
 import type { TokenVerifier } from "./token_verifier.ts";
 
+/**
+ * The {@link TokenVerifier} `factory.ts` builds for a deployment: one entry point over however
+ * many schemes it has configured.
+ *
+ * @remarks
+ * Reading the token's own `alg` header only ever picks which wrapped verifier answers, it never
+ * decides whether the token is valid: each wrapped verifier still hands its own fixed algorithm
+ * list to jose, so a token whose header lies about its algorithm is routed nowhere useful rather
+ * than verified against the wrong key. That split is what lets this class combine a symmetric and
+ * an asymmetric verifier without either one having to trust what the other configured.
+ */
 export class AlgorithmTokenVerifier implements TokenVerifier {
   readonly #byAlgorithm: ReadonlyMap<string, TokenVerifier>;
 
@@ -51,10 +62,27 @@ export class AlgorithmTokenVerifier implements TokenVerifier {
     this.#byAlgorithm = byAlgorithm;
   }
 
+  /**
+   * Every algorithm at least one wrapped verifier accepts, in no particular order.
+   *
+   * @remarks
+   * Answers only to satisfy the {@link TokenVerifier} interface this class itself implements;
+   * nothing here reads it back. The routing that matters is `#byAlgorithm`, filled from the same
+   * wrapped verifiers in the constructor.
+   */
   get algorithms(): readonly string[] {
     return [...this.#byAlgorithm.keys()];
   }
 
+  /**
+   * The {@link TokenVerifier.verify} implementation.
+   *
+   * @remarks
+   * Refuses outright, without asking any wrapped verifier, when the token's header names an
+   * algorithm nothing was configured for: a deployment that only turned on symmetric verification
+   * should not spend a network round trip checking an asymmetric token against a JWKS that was
+   * never fetched for that purpose.
+   */
   verify(token: string): Future<boolean> {
     const verifier = this.#verifierFor(token);
     return verifier === null ? Promise.resolve(false) : verifier.verify(token);

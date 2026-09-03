@@ -38,16 +38,31 @@ import type { Caller, Need } from "../contracts/access.ts";
 import type { RateLimiter } from "../contracts/rate_limit.ts";
 import type { RouteHandler } from "../manifest/route.ts";
 
+/** One layer's contribution to a route's rules, merged with every other layer that applies to it. */
 export interface Contribution {
+  /** The caller kind this layer restricts a route to, or `null` when it leaves access to another layer. */
   readonly access: Caller | readonly Caller[] | null;
+
+  /** The permissions this layer adds. `merge` concatenates every layer's list rather than replacing it. */
   readonly permissions: readonly string[];
+
+  /** The rate limit this layer sets, or `null` when it leaves the limit to another layer. */
   readonly rateLimit: RateLimiter | null;
+
+  /** The rate limit key this layer sets, or `null` when it leaves the key to another layer. */
   readonly rateLimitKey: string | null;
+
+  /** The extra context this layer adds. `merge` concatenates every layer's list rather than replacing it. */
   readonly needs: readonly Need[];
+
+  /** Whether this layer marks the route as requiring a verified webhook, or `null` to leave that to another layer. */
   readonly webhookVerified: boolean | null;
+
+  /** How this layer wraps a handler, or `null` when it contributes nothing to `wrapAll`. */
   readonly wrap: ((handler: RouteHandler) => RouteHandler) | null;
 }
 
+/** The identity element `merge` starts folding from: a layer that leaves every rule to the others. */
 export const NOTHING: Contribution = {
   access: null,
   permissions: [],
@@ -58,6 +73,17 @@ export const NOTHING: Contribution = {
   wrap: null,
 };
 
+/**
+ * Folds `layers` into the one set of rules a route runs under.
+ *
+ * @remarks
+ * `layers` is expected outermost first: the node's own contribution, then each `_middleware.ts`
+ * from the root down to the route's folder, then the endpoint's own. A scalar field, `access`,
+ * `rateLimit`, `rateLimitKey`, `webhookVerified`, takes whichever layer set it last, so the layer
+ * closest to the route always wins over one further out. `permissions` and `needs` instead
+ * concatenate every layer that contributed one, since those are additive rather than a single
+ * choice one layer makes for the whole route.
+ */
 export function merge(layers: readonly Contribution[]): Contribution {
   return layers.reduce<Contribution>((carried, layer) => ({
     access: layer.access ?? carried.access,
@@ -70,6 +96,15 @@ export function merge(layers: readonly Contribution[]): Contribution {
   }), NOTHING);
 }
 
+/**
+ * Wraps `handler` in every layer's {@link Contribution.wrap}, outermost layer running first.
+ *
+ * @remarks
+ * `layers` arrives outermost first, the same order {@link merge} takes, so building from the right
+ * end is what makes the outermost middleware the one that actually runs first: each layer wraps
+ * what the layers after it in the array already produced, ending with the node's own contribution
+ * as the outside of the whole chain.
+ */
 export function wrapAll(
   layers: readonly Contribution[],
   handler: RouteHandler,

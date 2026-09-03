@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals, assertThrows } from "@std/assert";
 import {
   Caller,
@@ -134,7 +136,7 @@ function serverWith(routes: readonly DiscoveredRoute[]): ScribeServer {
   return new ScribeServer({ routes, nodes: [{ name: "app", public: true, root: new AppNode() }] });
 }
 
-Deno.test("one file answers as many methods as it declares classes", () => {
+Scribe.test("one file answers as many methods as it declares classes", () => {
   const definition = serverWith([
     route({ path: "/brand/:brandId", module: { ReadBrand, DeleteBrand } }),
   ]).definition();
@@ -145,7 +147,7 @@ Deno.test("one file answers as many methods as it declares classes", () => {
   ]);
 });
 
-Deno.test("a route inherits the access and the rate limit of its node", () => {
+Scribe.test("a route inherits the access and the rate limit of its node", () => {
   const definition = serverWith([route({ module: { ReadBrand } })]).definition();
   const [entry] = definition.routes;
 
@@ -153,13 +155,13 @@ Deno.test("a route inherits the access and the rate limit of its node", () => {
   assertEquals(entry.route.rateLimit.limit, 120);
 });
 
-Deno.test("the closest declaration wins on the rate limit", () => {
+Scribe.test("the closest declaration wins on the rate limit", () => {
   const definition = serverWith([route({ module: { DeleteBrand } })]).definition();
 
   assertEquals(definition.routes[0].route.rateLimit.limit, 30);
 });
 
-Deno.test("permissions accumulate down the tree instead of replacing each other", () => {
+Scribe.test("permissions accumulate down the tree instead of replacing each other", () => {
   const definition = serverWith([
     route({
       path: "/brand/:brandId/update/name",
@@ -171,7 +173,7 @@ Deno.test("permissions accumulate down the tree instead of replacing each other"
   assertEquals(definition.routes[0].route.requiredPermissions, ["brand:update", "brand:name"]);
 });
 
-Deno.test("a branch wraps every handler below it", async () => {
+Scribe.test("a branch wraps every handler below it", async () => {
   const definition = serverWith([
     route({ path: "/brand/:brandId/update/name", module: { UpdateName }, branches: [{ UpdateBranch }] }),
   ]).definition();
@@ -181,13 +183,13 @@ Deno.test("a branch wraps every handler below it", async () => {
   assertEquals(response.headers.get("x-wrapped"), "branch");
 });
 
-Deno.test("the rate limit key is derived from the path when nobody names it", () => {
+Scribe.test("the rate limit key is derived from the path when nobody names it", () => {
   const definition = serverWith([route({ module: { ReadBrand } })]).definition();
 
   assertEquals(definition.routes[0].route.rateLimitKey, "app:get:/brand");
 });
 
-Deno.test("a file declaring the same method twice is refused", () => {
+Scribe.test("a file declaring the same method twice is refused", () => {
   class OtherRead extends Get {
     protected override run(): Response {
       return response.ok();
@@ -201,7 +203,7 @@ Deno.test("a file declaring the same method twice is refused", () => {
   );
 });
 
-Deno.test("a route nobody grants access to is refused instead of served open", () => {
+Scribe.test("a route nobody grants access to is refused instead of served open", () => {
   const server = new ScribeServer({
     routes: [route({ node: "partners", module: { ReadBrand } })],
     nodes: [{ name: "partners", public: true }],
@@ -210,7 +212,7 @@ Deno.test("a route nobody grants access to is refused instead of served open", (
   assertThrows(() => server.definition(), RoutingError, "without any access");
 });
 
-Deno.test("a folder config.yaml declares no node for is never served", () => {
+Scribe.test("a folder config.yaml declares no node for is never served", () => {
   const server = new ScribeServer({
     routes: [route({ node: "example", module: { ReadBrand } })],
     nodes: [{ name: "app", public: true }],
@@ -219,7 +221,7 @@ Deno.test("a folder config.yaml declares no node for is never served", () => {
   assertThrows(() => server.definition(), RoutingError, "config.yaml declares no node for");
 });
 
-Deno.test("a standard node carries its caller without any root class", () => {
+Scribe.test("a standard node carries its caller without any root class", () => {
   const definition = new ScribeServer({
     routes: [route({ node: "admin", branches: [{ Browsing }], module: { ReadBrand } })],
     nodes: [{ name: "admin", public: true }],
@@ -228,7 +230,7 @@ Deno.test("a standard node carries its caller without any root class", () => {
   assertEquals(definition.routes[0].route.access, Caller.Admin);
 });
 
-Deno.test("the declared visibility is the one that reaches the manifest", () => {
+Scribe.test("the declared visibility is the one that reaches the manifest", () => {
   const definition = new ScribeServer({
     routes: [route({ node: "admin", branches: [{ Browsing }], module: { ReadBrand } })],
     nodes: [{ name: "admin", public: false }],
@@ -237,7 +239,7 @@ Deno.test("the declared visibility is the one that reaches the manifest", () => 
   assertEquals(definition.nodes.map((node) => [node.name, node.public]), [["admin", false]]);
 });
 
-Deno.test("a declared node reaches the manifest even with no route of its own", () => {
+Scribe.test("a declared node reaches the manifest even with no route of its own", () => {
   const definition = new ScribeServer({ nodes: [{ name: "admin", public: true }] })
     .definition();
 
@@ -245,7 +247,7 @@ Deno.test("a declared node reaches the manifest even with no route of its own", 
   assertEquals(definition.routes, []);
 });
 
-Deno.test("a declared node carries the root it was given", () => {
+Scribe.test("a declared node carries the root it was given", () => {
   class Elevated extends NodeRoot {
     protected override access(): Caller {
       return Caller.Admin;
@@ -266,7 +268,7 @@ Deno.test("a declared node carries the root it was given", () => {
   assertEquals(definition.nodes[0].public, false);
 });
 
-Deno.test("the manifest carries the nodes and their visibility", () => {
+Scribe.test("the manifest carries the nodes and their visibility", () => {
   const server = new ScribeServer({
     routes: [route({ module: { ReadBrand } })],
     nodes: [{ name: "app", public: true, root: new AppNode() }, {

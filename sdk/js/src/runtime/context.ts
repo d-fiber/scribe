@@ -40,16 +40,30 @@ import { Caller as ProtoCaller } from "../../gen/scribe/protocol/common_pb.ts";
 import { parseBodyBytes, parseFormBytes } from "../validation/body.ts";
 import type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema } from "../validation/schema.ts";
 
+/** The account that made a request, resolved from its identity. */
 export interface RequestUser {
+  /** The identifier of the account making this request. */
   readonly id: string;
+
+  /** The email address of the account making this request. */
   readonly email: string;
+
+  /** The kind of caller the identity resolved to. */
   readonly caller: Caller;
+
+  /** The role the identity carries. Empty when the identity carries none. */
   readonly role: string;
+
+  /** The permissions the identity's role grants. */
   readonly permissions: readonly string[];
 }
 
+/** Where a request's IP address resolved to geographically. */
 export interface RequestIpLocation {
+  /** The city the request's IP address resolved to. Empty when it could not be resolved. */
   readonly city: string;
+
+  /** The country the request's IP address resolved to. Empty when it could not be resolved. */
   readonly country: string;
 }
 
@@ -64,9 +78,11 @@ const callers: Record<ProtoCaller, Caller> = {
   [ProtoCaller.WEBHOOK]: Caller.Webhook,
 };
 
+/** The request a node is handling, wrapping the invocation the host sent it. */
 export class RequestContext {
   constructor(readonly invocation: Invocation) {}
 
+  /** The account making this request, or `null` for an anonymous or unauthenticated caller. */
   get user(): RequestUser | null {
     const identity = this.invocation.identity;
     if (!identity || identity.id === "") return null;
@@ -80,63 +96,78 @@ export class RequestContext {
     };
   }
 
+  /** The identifier of the account making this request, or `null` for an unauthenticated caller. */
   get id(): string | null {
     return this.user?.id ?? null;
   }
 
+  /** The identifier the host assigned to this invocation. */
   get invocationId(): string {
     return this.invocation.invocationId;
   }
 
+  /** The identifier this request's trace is carried under, across every node it passes through. */
   get traceId(): string {
     return this.invocation.traceId;
   }
 
+  /** The HTTP method this request was made with, in upper case. */
   get method(): string {
     return decodeMethod(this.invocation.request?.method ?? 0).toUpperCase();
   }
 
+  /** The path this request was made to, path parameters unresolved. */
   get path(): string {
     return this.invocation.request?.path ?? "";
   }
 
+  /** The IP address this request was made from. */
   get ip(): string {
     return this.invocation.request?.ip ?? "";
   }
 
+  /** The `User-Agent` header this request carried. */
   get userAgent(): string {
     return this.invocation.request?.userAgent ?? "";
   }
 
+  /** The identifier of the session this request carries, or `null` for a request without one. */
   get sessionId(): string | null {
     const session = this.invocation.request?.sessionId ?? "";
     return session === "" ? null : session;
   }
 
+  /** This request's path parameters, keyed by the name their route declared them under. */
   get pathParams(): Readonly<Record<string, string>> {
     return this.invocation.request?.pathParams ?? {};
   }
 
+  /** This request's path parameter named `name`, or `null` when its route declares none by that name. */
   param(name: string): string | null {
     return this.pathParams[name] ?? null;
   }
 
+  /** This request's query parameter named `key`, or `null` when it carries none by that name. */
   query(key: string): string | null {
     return this.invocation.request?.query[key] ?? null;
   }
 
+  /** This request's header named `name`, matched case-insensitively, or `null` when absent. */
   header(name: string): string | null {
     return this.invocation.request?.headers[name.toLowerCase()] ?? null;
   }
 
+  /** This request's body, parsed and validated against `schema`, or `null` when it carries none. */
   body<S extends BodySchema>(schema: S): BodyFromSchema<S> | null {
     return parseBodyBytes(schema, this.#bytes());
   }
 
+  /** This request's form body, parsed and validated against `schema`, or `null` when it carries none. */
   form<S extends FormSchema>(schema: S): Promise<FormFromSchema<S> | null> {
     return parseFormBytes(schema, this.#bytes(), this.header("content-type") ?? "");
   }
 
+  /** This request's body, parsed as JSON without validation, or `null` when it is empty or not valid JSON. */
   raw(): unknown | null {
     const bytes = this.#bytes();
     if (!bytes || bytes.byteLength === 0) return null;
@@ -148,11 +179,13 @@ export class RequestContext {
     }
   }
 
+  /** The device this request was made from, or `null` when the invocation carries none. */
   device(): RequestDevice | null {
     const device = this.invocation.device;
     return device && device.deviceId !== "" ? device : null;
   }
 
+  /** Where this request's IP address resolved to geographically. */
   location(): RequestIpLocation {
     return {
       city: this.invocation.location?.city ?? "",

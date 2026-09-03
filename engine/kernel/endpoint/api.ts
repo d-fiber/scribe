@@ -45,11 +45,18 @@ import { RouteEndpoint } from "./route.ts";
 export { ApiContext } from "./context.ts";
 export { RouteEndpoint } from "./route.ts";
 
+/** A `RouteEndpoint` gated behind an access check and a rate limit before it runs. */
 export abstract class ApiEndpoint extends RouteEndpoint {
+  /** The rate limit this endpoint enforces, checked against `rateLimitKey`. */
   protected abstract rateLimit(): RateLimit;
 
+  /** The caller role, or roles, allowed to reach this endpoint. */
   protected abstract access(): Caller | readonly Caller[];
 
+  /**
+   * Whether this endpoint's webhook signature has already been verified elsewhere, satisfying
+   * the `webhook` caller role. Defaults to false, since most endpoints never claim that role.
+   */
   protected webhookVerified(): boolean {
     return false;
   }
@@ -76,10 +83,22 @@ export abstract class ApiEndpoint extends RouteEndpoint {
     return this.run(new ApiContext());
   }
 
+  /**
+   * The key `rateLimit` is checked against.
+   *
+   * @remarks
+   * The constructor name means every instance of the same endpoint class shares one budget, and
+   * two different endpoint classes never draw from each other's, even when the same caller
+   * reaches both.
+   */
   protected rateLimitKey(): string {
     return this.constructor.name;
   }
 
+  /**
+   * Constructs an instance with `args` and answers a request through `execute`, gated by the
+   * access check and rate limit.
+   */
   static handle<T extends ApiEndpoint, TArgs extends unknown[]>(
     this: new (...args: TArgs) => T,
     ...args: TArgs

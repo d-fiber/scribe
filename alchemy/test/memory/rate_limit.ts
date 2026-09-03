@@ -81,6 +81,10 @@ export class MemoryRateLimiter implements RateLimiter {
     return this.#options.key;
   }
 
+  /**
+   * The {@link RateLimiter.check} implementation: counts the call in a map keyed by `prefix` and
+   * `suffix`, refusing and doubling the held-out penalty once the caller is already over.
+   */
   check(prefix = "", suffix = ""): Future<RateLimitOutcome> {
     const at = Now.get().millisecondsSinceEpoch();
     const held = this.#of(prefix, suffix, at);
@@ -106,12 +110,14 @@ export class MemoryRateLimiter implements RateLimiter {
     return Promise.resolve({ ok: false, retryAfter: Math.ceil(capped / 1000), strikes: held.strikes });
   }
 
+  /** The {@link RateLimiter.isBlocked} implementation: reads the caller's held-out state without counting a call. */
   isBlocked(prefix = "", suffix = ""): Future<boolean> {
     const at = Now.get().millisecondsSinceEpoch();
     const held = this.#spent.get(`${prefix}:${suffix}`);
     return Promise.resolve(held !== undefined && held.until !== null && at < held.until);
   }
 
+  /** The {@link RateLimiter.unmeasured} implementation: answers as if the full quota were still open. */
   unmeasured(): RateLimitOutcome {
     return { ok: true, remaining: this.#options.limit };
   }
@@ -140,6 +146,10 @@ export class MemoryRateLimiters implements RateLimiterDriver {
   /** Every limiter opened so far, by the key it was opened under. */
   readonly opened: Map<string, MemoryRateLimiter> = new Map<string, MemoryRateLimiter>();
 
+  /**
+   * The {@link RateLimiterDriver.open} implementation: opens a {@link MemoryRateLimiter} for
+   * `options.key`, or hands back the one already opened under that key.
+   */
   open(options: RateLimitOptions): RateLimiter {
     const already = this.opened.get(options.key);
     if (already !== undefined) return already;

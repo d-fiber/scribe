@@ -37,20 +37,55 @@
 import type { Future } from "@scribe/alchemy";
 import type { Caller, RateLimit, RouteMethod } from "@scribe/alchemy/route";
 
+/**
+ * What a route's handler is handed once its access checks and rate limit have passed.
+ *
+ * @remarks
+ * Deliberately thin: `pathParams` is the one thing a handler cannot read any other way, since it
+ * only exists once the router has matched a path against this route's own pattern. Everything else
+ * a handler might need, the request body, a header, the caller's identity, is read through a
+ * request-scoped accessor instead of being threaded through here, which is what lets this shape
+ * stay the same no matter how much a handler ends up reading.
+ */
 export interface RouteInvocation {
+  /** The path parameters this route matched, keyed by their declared name. */
   readonly pathParams: Readonly<Record<string, string>>;
 }
 
 export type RouteHandler = (invocation: RouteInvocation) => Response | Future<Response>;
 
+/**
+ * One declared route: its method and path, who may call it, and the handler that answers it.
+ *
+ * @remarks
+ * Everything a router needs to decide whether a request even reaches the handler lives on this
+ * shape rather than inside the handler itself, so `descriptor_mount.ts` can check access and the
+ * rate limit before the handler ever runs, and refuse a request that fails either without the
+ * handler's own code having to repeat that check on every route.
+ */
 export interface RouteDescriptor {
+  /** The HTTP method this route answers. */
   readonly method: RouteMethod;
+
+  /** The route's path pattern, relative to the prefix `under` composes it with. */
   readonly path: string;
+
+  /** Who may call this route, one caller or several, checked before the handler runs. */
   readonly access: Caller | readonly Caller[];
+
+  /** The rate limit this route enforces per caller. */
   readonly rateLimit: RateLimit;
+
+  /** The key the rate limit is tracked under, distinguishing this route's budget from every other's. */
   readonly rateLimitKey: string;
+
+  /** The permissions a caller must hold beyond passing `access`, when this route needs more than identity. */
   readonly requiredPermissions?: readonly string[];
+
+  /** Whether this route already checked a webhook signature, so the generic caller check does not ask for one too. */
   readonly webhookVerified?: boolean;
+
+  /** The function that answers a request once `access`, `rateLimit` and any required permission have passed. */
   readonly handler: RouteHandler;
 }
 

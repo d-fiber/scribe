@@ -34,10 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { levelForStatus } from "@scribe/kernel/observability/level.ts";
 import { assertEquals } from "@std/assert";
 
-Deno.test("levelForStatus blames the caller for a 4xx and the host for a 5xx", () => {
+Scribe.test("levelForStatus blames the caller for a 4xx and the host for a 5xx", () => {
   assertEquals(levelForStatus(200), "info");
   assertEquals(levelForStatus(304), "info");
   assertEquals(levelForStatus(399), "info");

@@ -40,7 +40,17 @@ import { isMissingModule } from "./missing_module.ts";
 
 export type ExtensionImporter = () => Future<unknown>;
 
+/**
+ * An {@link Extension} whose module may not exist in a project at all.
+ *
+ * @remarks
+ * `queues.ts` and `crons.ts` are conventions, not requirements: a project that never wrote one
+ * should not see its boot fail over a module that was never meant to be there. `load`'s own
+ * distinction between "not installed" and "present but broken" is what lets this class tell the
+ * two apart, only the second is worth an error in the log.
+ */
 export class OptionalExtension implements Extension {
+  /** This extension's name, used to label the console output when it is skipped or fails to load. */
   readonly name: string;
 
   readonly #importer: ExtensionImporter;
@@ -50,6 +60,11 @@ export class OptionalExtension implements Extension {
     this.#importer = importer;
   }
 
+  /**
+   * The {@link Extension.load} implementation: runs `importer`, and answers `null` instead of
+   * throwing both when the module is simply not installed and when it fails to import for another
+   * reason, logging which of the two happened so the difference is not lost.
+   */
   async load(): Future<unknown | null> {
     try {
       return await this.#importer();

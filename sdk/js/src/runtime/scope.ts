@@ -37,6 +37,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { CallCredentials } from "../transport/client.ts";
 
+/** What identifies the invocation currently in scope, carried through every capability call it makes. */
 export interface CallScopeState {
   /** The grant the host handed this call, and the one every capability call inside it replays. */
   readonly capabilityToken: string;

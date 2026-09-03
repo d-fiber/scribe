@@ -36,11 +36,43 @@
 
 import type { Future } from "@scribe/alchemy";
 
+/**
+ * Decides whether a request may reach `service`, before the edge runtime dispatches it to a worker.
+ *
+ * @remarks
+ * The check happens here, ahead of dispatch, rather than inside the worker itself, because a
+ * worker isolate is not free to start: refusing a request before one is spun up is what keeps an
+ * unauthenticated flood from costing this deployment a worker per attempt. Two implementations
+ * exist, one for a deployment that verifies a JWT and one for a deployment that verifies none, so
+ * the rest of the edge runtime never has to branch on whether verification is turned on.
+ */
 export interface RequestAuthorizer {
+  /**
+   * `null` to let `request` through to `service`, or the response to answer instead when it is
+   * refused.
+   */
   authorize(request: Request, service: string): Future<Response | null>;
 }
 
+/**
+ * The {@link RequestAuthorizer} a deployment gets when `config.verifyJwt` is turned off.
+ *
+ * @remarks
+ * `factory.ts` chooses this over {@link JwtRequestAuthorizer} at boot, once, based on that one
+ * setting. Nothing downstream of the choice has to know it was made: every caller reads the same
+ * `RequestAuthorizer` interface, so a deployment that trusts its own network perimeter instead of
+ * a token never carries a branch for the case it opted out of.
+ */
 export class OpenRequestAuthorizer implements RequestAuthorizer {
+  /**
+   * The {@link RequestAuthorizer.authorize} implementation: always `null`.
+   *
+   * @remarks
+   * There is nothing to check when JWT verification is off, so this answers `null` unconditionally
+   * rather than the caller skipping the authorizer altogether: keeping the same interface on both
+   * paths is what let `JwtRequestAuthorizer` be swapped in later without touching whatever calls
+   * `authorize`.
+   */
   authorize(): Future<Response | null> {
     return Promise.resolve(null);
   }

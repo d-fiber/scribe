@@ -36,21 +36,69 @@
 
 import type { Future } from "@scribe/alchemy";
 
+/**
+ * A running worker isolate, answering requests handed to it one at a time.
+ *
+ * @remarks
+ * `fetch` is the whole surface because it is the whole surface the platform's own isolate exposes:
+ * this interface names nothing the edge platform does not already give back from
+ * `EdgeRuntime.userWorkers.create`, so the dispatcher that calls it never has to know it is
+ * talking to a vendor object rather than one of our own.
+ */
 export interface EdgeWorker {
   fetch(request: Request): Future<Response>;
 }
 
+/**
+ * What spinning up an {@link EdgeWorker} isolate takes.
+ *
+ * @remarks
+ * Mirrors the shape `EdgeRuntime.userWorkers.create` itself accepts, field for field, so that
+ * building one of these is the whole job of turning an {@link EdgeConfig} and a resolved service
+ * into a call the platform understands, with nothing left to translate at the call site.
+ */
 export interface EdgeWorkerOptions {
+  /** The on-disk path of the service this worker serves, under the functions root. */
   readonly servicePath: string;
+
+  /** The memory ceiling given to this worker isolate, in megabytes. */
   readonly memoryLimitMb: number;
+
+  /** How long this worker isolate has to answer before it is killed, in milliseconds. */
   readonly workerTimeoutMs: number;
+
+  /** Whether this worker skips the platform's module cache, forcing every import to resolve fresh. */
   readonly noModuleCache: boolean;
+
+  /** The import map this worker resolves its imports against, or `null` to use the platform default. */
   readonly importMapPath: string | null;
+
+  /** The environment variables this worker starts with, each entry a `[name, value]` pair. */
   readonly envVars: string[][];
 }
 
+/**
+ * What this edge host offers: spinning up a worker isolate, and tagging a request forwarded to one.
+ *
+ * @remarks
+ * The seam exists so that nothing else in `engine/shell/platform/edge/` names the global
+ * `EdgeRuntime` directly. That global is injected by the vendor's own runtime, not something a
+ * test can construct, so `EdgeFunctionsRuntime` is built against this interface and a test hands
+ * it a fake instead of needing the real edge environment to run at all.
+ */
 export interface EdgePlatform {
   createWorker(options: EdgeWorkerOptions): Future<EdgeWorker>;
+
+  /**
+   * Ties `forwarded`, the request actually sent to the worker, back to `original`, the one the
+   * caller sent, in whatever way the platform's own observability tooling expects.
+   *
+   * @remarks
+   * The dispatcher builds `forwarded` as a new `Request` object, so without this call the platform
+   * has no way to know the two are the same invocation: a trace that ends at `original` and a
+   * worker log that starts at `forwarded` would read as two unrelated events instead of one
+   * request's path through the system.
+   */
   tagRequest(original: Request, forwarded: Request): void;
 }
 
@@ -61,11 +109,36 @@ declare const EdgeRuntime: {
   applySupabaseTag(original: Request, forwarded: Request): void;
 };
 
+/**
+ * The {@link EdgePlatform} this deployment runs on.
+ *
+ * @remarks
+ * `EdgeRuntime` is not imported: it is a global the platform's own runtime injects before this
+ * module runs, declared here only so the compiler knows its shape. Wrapping it in a class rather
+ * than reaching it directly is what lets `EdgeFunctionsRuntime` depend on {@link EdgePlatform}
+ * instead, and never notice the difference between the real thing and a test double.
+ */
 export class SupabaseEdgePlatform implements EdgePlatform {
+  /**
+   * The {@link EdgePlatform.createWorker} implementation.
+   *
+   * @remarks
+   * Delegates straight to the platform's own `userWorkers.create`, since `EdgeWorkerOptions` was
+   * already shaped to match what that call expects: there is nothing left for this method to
+   * translate, only to name.
+   */
   createWorker(options: EdgeWorkerOptions): Future<EdgeWorker> {
     return EdgeRuntime.userWorkers.create(options);
   }
 
+  /**
+   * The {@link EdgePlatform.tagRequest} implementation.
+   *
+   * @remarks
+   * Delegates to the platform's own `applySupabaseTag`, the specific mechanism this vendor's
+   * runtime exposes for linking a forwarded request back to the one that arrived; a platform with
+   * a different tracing hook would only need a new {@link EdgePlatform}, never a change here.
+   */
   tagRequest(original: Request, forwarded: Request): void {
     EdgeRuntime.applySupabaseTag(original, forwarded);
   }

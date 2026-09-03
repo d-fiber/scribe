@@ -37,6 +37,7 @@
 import type { Future } from "@scribe/alchemy";
 import type { Bootstrapper } from "./bootstrapper.ts";
 
+/** Boots a runtime's bootstrappers in order, and unwinds only the ones that started if one fails. */
 export class BootSequence {
   readonly #runtime: string;
   readonly #bootstrappers: readonly Bootstrapper[];
@@ -48,6 +49,10 @@ export class BootSequence {
     this.#bootstrappers = bootstrappers;
   }
 
+  /**
+   * Boots every bootstrapper in order, and shuts down whatever already booted before re-throwing
+   * the first one that fails, so a failed boot never leaves a partial set of services running.
+   */
   async boot(): Future<void> {
     for (const bootstrapper of this.#bootstrappers) {
       try {
@@ -67,6 +72,11 @@ export class BootSequence {
     );
   }
 
+  /**
+   * Shuts down every booted bootstrapper in reverse order, once. A second call while the first is
+   * still running, or after it finished, does nothing. A bootstrapper's own shutdown failure is
+   * logged rather than thrown, so one that fails does not stop the rest from getting a chance.
+   */
   async shutdown(): Future<void> {
     if (this.#shuttingDown) return;
     this.#shuttingDown = true;

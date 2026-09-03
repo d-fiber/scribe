@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isFalse, isTrue } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, isFalse, isTrue, Scribe } from "@scribe/alchemy/test";
 import type { DatabaseDriver, DeclaredDatabaseSchema, Query } from "@scribe/alchemy";
 import { Databases, Failure, Ok, Refusal, schema } from "@scribe/alchemy";
 
@@ -130,13 +131,13 @@ class OneTable implements DatabaseDriver {
   }
 }
 
-Deno.test("declaring a table touches nothing, so an import before boot is safe", () => {
+Scribe.test("declaring a table touches nothing, so an import before boot is safe", () => {
   const members = schema<Schema>().table("__audience_members__");
 
   expect(typeof members.where, equals("function"), "declaring a table did not hand back a query");
 });
 
-Deno.test("a table is asked for at the first row, not at the declaration", async () => {
+Scribe.test("a table is asked for at the first row, not at the declaration", async () => {
   const driver = new OneTable();
   const members = schema<Schema>().table("__audience_members__");
 
@@ -147,7 +148,7 @@ Deno.test("a table is asked for at the first row, not at the declaration", async
   expect(driver.asked, equals(["__audience_members__"]), "the table was not asked for by the first read");
 });
 
-Deno.test("narrowing a query carries every step through to the driver", async () => {
+Scribe.test("narrowing a query carries every step through to the driver", async () => {
   const driver = new OneTable();
   Databases.use(driver);
 
@@ -164,7 +165,7 @@ Deno.test("narrowing a query carries every step through to the driver", async ()
   );
 });
 
-Deno.test("reading answers rows, and a write answers an outcome rather than a yes or a no", async () => {
+Scribe.test("reading answers rows, and a write answers an outcome rather than a yes or a no", async () => {
   Databases.use(new OneTable());
   const members = schema<Schema>().table("__audience_members__");
 
@@ -175,7 +176,7 @@ Deno.test("reading answers rows, and a write answers an outcome rather than a ye
   expect(written.ok ? written.data : -1, equals(1), "a write that went through did not say how many rows it touched");
 });
 
-Deno.test("a write the backend refused carries why, so a caller knows whether to try again", async () => {
+Scribe.test("a write the backend refused carries why, so a caller knows whether to try again", async () => {
   Databases.use(new OneTable());
   const members = schema<Schema>().table("__audience_members__");
 
@@ -185,7 +186,7 @@ Deno.test("a write the backend refused carries why, so a caller knows whether to
   expect(refused.ok ? "" : refused.error.kind, equals("conflict"), "the refusal did not say what kind it was");
 });
 
-Deno.test("a delete that removed nothing says which nothing it was", async () => {
+Scribe.test("a delete that removed nothing says which nothing it was", async () => {
   Databases.use(new OneTable());
   const members = schema<Schema>().table("__audience_members__");
 

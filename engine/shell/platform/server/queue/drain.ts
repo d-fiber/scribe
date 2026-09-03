@@ -48,16 +48,20 @@ const _RATE_LIMIT: RateLimit = {
   maxPenalty: Duration.minutes(1),
 };
 
+/** Drains every declared queue once, and answers what each one processed. */
 export class QueueDrainEndpoint extends ServiceEndpoint {
+  /** 1000 calls a minute, tighter than `ServiceEndpoint`'s default. */
   protected override rateLimit(): RateLimit {
     return _RATE_LIMIT;
   }
 
+  /** Runs one drain pass over every declared queue. */
   protected async run(_ctx: ApiContext): Future<Response> {
     return this.response.ok({ data: await queueRunner.run() });
   }
 }
 
+/** Drains one named queue once, and answers what it processed. */
 export class QueueDrainOneEndpoint extends ServiceEndpoint {
   readonly #name: string;
 
@@ -66,10 +70,12 @@ export class QueueDrainOneEndpoint extends ServiceEndpoint {
     this.#name = name;
   }
 
+  /** 1000 calls a minute, tighter than `ServiceEndpoint`'s default. */
   protected override rateLimit(): RateLimit {
     return _RATE_LIMIT;
   }
 
+  /** Runs one drain pass over the named queue, refusing a name nothing declared. */
   protected async run(_ctx: ApiContext): Future<Response> {
     const result = await queueRunner.runOne(this.#name);
     if (result === null) {
@@ -82,11 +88,14 @@ export class QueueDrainOneEndpoint extends ServiceEndpoint {
   }
 }
 
+/** Answers what every declared queue currently holds, without draining any of them. */
 export class QueueStatusEndpoint extends ServiceEndpoint {
+  /** 1000 calls a minute, tighter than `ServiceEndpoint`'s default. */
   protected override rateLimit(): RateLimit {
     return _RATE_LIMIT;
   }
 
+  /** Answers the current status of every declared queue. */
   protected async run(_ctx: ApiContext): Future<Response> {
     return this.response.ok({ data: await queueStatus.all() });
   }

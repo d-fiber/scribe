@@ -34,7 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { equals, expect, isFalse, isTrue } from "@scribe/alchemy/test";
+import "@scribe/runtime/scholium/runner.ts";
+import { equals, expect, isFalse, isTrue, Scribe } from "@scribe/alchemy/test";
 import { type Contribution, merge, NOTHING } from "@scribe/alchemy/route";
 import { Duration } from "@scribe/alchemy";
 
@@ -49,13 +50,13 @@ const ROOT_OF_ADMIN_NODE = layer({
   webhookVerified: true,
 });
 
-Deno.test("a route cannot answer a caller the layer above it did not allow", () => {
+Scribe.test("a route cannot answer a caller the layer above it did not allow", () => {
   const settled = merge([ROOT_OF_ADMIN_NODE, layer({ access: "anonymous" })]);
 
   expect(settled.access, equals([]), "the leaf widened what the root had closed");
 });
 
-Deno.test("a route narrows an inherited access to the callers it names", () => {
+Scribe.test("a route narrows an inherited access to the callers it names", () => {
   const settled = merge([
     layer({ access: ["authenticated", "service"] }),
     layer({ access: "service" }),
@@ -64,13 +65,13 @@ Deno.test("a route narrows an inherited access to the callers it names", () => {
   expect(settled.access, equals(["service"]));
 });
 
-Deno.test("a route that says nothing about access keeps what the layer above allowed", () => {
+Scribe.test("a route that says nothing about access keeps what the layer above allowed", () => {
   const settled = merge([ROOT_OF_ADMIN_NODE, layer({})]);
 
   expect(settled.access, equals(["authenticated"]));
 });
 
-Deno.test("the strictest rate limit of the layers is the one that holds", () => {
+Scribe.test("the strictest rate limit of the layers is the one that holds", () => {
   const settled = merge([
     ROOT_OF_ADMIN_NODE,
     layer({ rateLimit: { limit: 1_000_000, window: Duration.seconds(1), penalty: Duration.milliseconds(1) } }),
@@ -79,7 +80,7 @@ Deno.test("the strictest rate limit of the layers is the one that holds", () => 
   expect(settled.rateLimit?.limit, equals(5), "the leaf raised the ceiling the root had set");
 });
 
-Deno.test("a route may lower a rate limit the layer above it set", () => {
+Scribe.test("a route may lower a rate limit the layer above it set", () => {
   const settled = merge([
     ROOT_OF_ADMIN_NODE,
     layer({ rateLimit: { limit: 1, window: Duration.minutes(1), penalty: Duration.minutes(5) } }),
@@ -88,29 +89,29 @@ Deno.test("a route may lower a rate limit the layer above it set", () => {
   expect(settled.rateLimit?.limit, equals(1));
 });
 
-Deno.test("a layer may require a checked signature, and no layer beneath may lift it", () => {
+Scribe.test("a layer may require a checked signature, and no layer beneath may lift it", () => {
   const settled = merge([ROOT_OF_ADMIN_NODE, layer({ webhookVerified: false })]);
 
   expect(settled.webhookVerified, isTrue, "the leaf lifted the signature check the root required");
 });
 
-Deno.test("a layer beneath may require a signature nothing above asked for", () => {
+Scribe.test("a layer beneath may require a signature nothing above asked for", () => {
   const settled = merge([layer({}), layer({ webhookVerified: true })]);
 
   expect(settled.webhookVerified, isTrue);
 });
 
-Deno.test("nothing anywhere leaves the signature unchecked rather than deciding", () => {
+Scribe.test("nothing anywhere leaves the signature unchecked rather than deciding", () => {
   expect(merge([layer({}), layer({})]).webhookVerified, equals(null));
 });
 
-Deno.test("a permission asked higher up is kept, and the two lists gather", () => {
+Scribe.test("a permission asked higher up is kept, and the two lists gather", () => {
   const settled = merge([ROOT_OF_ADMIN_NODE, layer({ permissions: ["favorites:write"] })]);
 
   expect(settled.permissions, equals(["admin:all", "favorites:write"]));
 });
 
-Deno.test("merging nothing at all answers the layer that says nothing", () => {
+Scribe.test("merging nothing at all answers the layer that says nothing", () => {
   const settled = merge([]);
 
   expect(settled.access, equals(null));

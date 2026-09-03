@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { HmacTokenVerifier } from "@scribe/shell/platform/edge/authorization/hmac_token_verifier.ts";
 import { SignJWT } from "jose";
 import { assert, assertEquals, assertFalse } from "@std/assert";
@@ -48,14 +50,14 @@ function signed(alg: string): Promise<string> {
     .sign(new TextEncoder().encode(SECRET));
 }
 
-Deno.test("the shared-secret verifier takes the algorithm it declares", async () => {
+Scribe.test("the shared-secret verifier takes the algorithm it declares", async () => {
   const verifier = new HmacTokenVerifier(SECRET);
 
   assertEquals(verifier.algorithms, ["HS256"]);
   assert(await verifier.verify(await signed("HS256")));
 });
 
-Deno.test("the shared-secret verifier takes no algorithm it does not declare", async () => {
+Scribe.test("the shared-secret verifier takes no algorithm it does not declare", async () => {
   const verifier = new HmacTokenVerifier(SECRET);
 
   for (const alg of ["HS384", "HS512"]) {
@@ -66,7 +68,7 @@ Deno.test("the shared-secret verifier takes no algorithm it does not declare", a
   }
 });
 
-Deno.test("the shared-secret verifier refuses a token signed with another secret", async () => {
+Scribe.test("the shared-secret verifier refuses a token signed with another secret", async () => {
   const other = await new SignJWT({ sub: "u1" })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -76,7 +78,7 @@ Deno.test("the shared-secret verifier refuses a token signed with another secret
   assertFalse(await new HmacTokenVerifier(SECRET).verify(other));
 });
 
-Deno.test("fromSecret answers nothing when the deployment declares no secret", () => {
+Scribe.test("fromSecret answers nothing when the deployment declares no secret", () => {
   assertEquals(HmacTokenVerifier.fromSecret(undefined), null);
   assertEquals(HmacTokenVerifier.fromSecret(""), null);
 });

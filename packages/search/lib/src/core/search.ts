@@ -125,7 +125,7 @@ export interface DocumentStep<TRow extends object> {
   /**
    * Declares the fields of the document, each one naming the column it reads.
    *
-   * ```ts
+   * ```ts ignore
    * .document((s) => ({
    *   name: Field.text(s.name, { boost: 3, sortable: true }),
    *   status: Field.keyword(s.status),
@@ -157,7 +157,7 @@ export interface QueryStep<P extends DocumentProperties, TPreview, S extends Dec
   /**
    * Names the sorts a query may pick, so a caller's `sort` parameter maps onto one of them.
    *
-   * ```ts
+   * ```ts ignore
    * .sorts((f) => ({ newest: f.sort("created_at", SortOrder.Desc), name: f.keyword("name", SortOrder.Asc) }))
    * ```
    */
@@ -199,13 +199,13 @@ interface Draft {
   settings: IndexSettings;
 }
 
-// deno-lint-ignore no-explicit-any
+// deno-lint-ignore no-explicit-any -- the builder chain below crosses several constrained generics (DocumentShape, DocumentProperties), each rejecting unknown at a different step.
 type Loose = any;
 
 /**
  * How an index is declared, and the only way to obtain one.
  *
- * ```ts
+ * ```ts ignore
  * const stores = Search.on<StoreRow>("stores", "store_id")
  *   .document((s) => ({
  *     name: Field.text(s.name, { boost: 3, sortable: true }),

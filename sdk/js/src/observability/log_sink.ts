@@ -57,6 +57,7 @@ const LEVELS: Record<LogLevel, LoggedLevel> = {
  * somewhere, so it should not have to know how they travelled.
  */
 export interface LoggedEntry {
+  /** How severe this entry is. */
   readonly level: LoggedLevel;
 
   /**
@@ -69,13 +70,23 @@ export interface LoggedEntry {
 
   /** What happened: a route for an exchange, a name for anything else. */
   readonly action: string;
+
+  /** The kind of thing that caused this entry, or `null` when nothing named one. */
   readonly actorType: string | null;
+
+  /** The identifier of the thing that caused this entry, or `null` when nothing named one. */
   readonly actorId: string | null;
+
+  /** Whatever else the caller attached to this entry. */
   readonly metadata: Record<string, unknown>;
 
   /** Milliseconds since the epoch, as `Date.now` gives them. */
   readonly timestamp: number;
+
+  /** The trace this entry's request belongs to, or `null` for an entry raised outside one. */
   readonly traceId: string | null;
+
+  /** The invocation this entry's request belongs to, or `null` for an entry raised outside one. */
   readonly invocationId: string | null;
 }
 
@@ -119,7 +130,7 @@ const LINGER_MS = 5_000;
  *
  * Declare one by exporting a subclass from a `_logs.ts`: at the root of a node
  * to take that node's entries, or at `lib/_logs.ts` to take everything no node
- * claimed. A node with none produces nothing -- the framework keeps no
+ * claimed. A node with none produces nothing, since the framework keeps no
  * destination of its own, so declaring a sink is what turns logging on rather
  * than what redirects it.
  *
@@ -161,7 +172,7 @@ export abstract class LogSink {
    * This is the framework's way in, and a sink has no reason to override it:
    * {@link each} and {@link block} are where a project decides anything. What
    * they throw is caught and reported by the caller, so a sink that fails
-   * cannot break the exchange it was describing -- but the rest of that
+   * cannot break the exchange it was describing, though the rest of that
    * delivery is lost with it.
    */
   async receive(entries: readonly LoggedEntry[]): Promise<void> {

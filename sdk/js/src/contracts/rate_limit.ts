@@ -36,9 +36,17 @@
 
 import type { Time } from "./time.ts";
 
+/** A quota of calls a caller may make within a window, and what happens once it is spent. */
 export interface RateLimiter {
+  /** How many calls a caller may make within one `window`. */
   limit: number;
+
+  /** How long a limit window lasts before it resets. */
   window: Time;
+
+  /** How long a caller that exceeds the limit is refused for, before the next escalation. */
   penalty: Time;
+
+  /** The ceiling the penalty escalates to on repeated refusals. Grows without bound when omitted. */
   maxPenalty?: Time;
 }

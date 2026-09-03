@@ -1,0 +1,4 @@
+{
+  "@scribe/contracts/": "../contracts/",
+  "@scribe/runtime/": "./"
+}

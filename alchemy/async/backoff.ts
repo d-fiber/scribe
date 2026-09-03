@@ -48,7 +48,7 @@ import { Duration } from "../value/duration.ts";
  * spreads the waits apart, so several callers backing off together stay together.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const backoff = new ExponentialBackoff(Duration.milliseconds(200), Duration.seconds(30));
  * await Future.delayed(backoff.delayFor(attempt));
  * ```

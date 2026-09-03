@@ -36,19 +36,55 @@
 
 import type { ClientType, DeviceCategory, DeviceOs, DeviceThemeMode, Localization } from "@scribe/contracts/enums.ts";
 
+/**
+ * The device claims a caller sends with a request, decrypted from its encrypted payload.
+ *
+ * @remarks
+ * `DevicePayloadValidator.validate` produces this shape only once the payload has been decrypted,
+ * its binding matches the request it rode with, and its `iat` is still fresh, so a caller cannot
+ * forge these fields without the deployment's own private key. Nothing here proves the device
+ * itself is telling the truth about its hardware or its build.
+ */
 export interface RequestDevice {
+  /** What the caller calls this device, kept across launches of the application. */
   device_id: string;
+
+  /** Which kind of program is calling. */
   client: ClientType;
+
+  /** Which operating system the device runs. */
   os: DeviceOs;
+
+  /** Which model of hardware, as the platform reports it. */
   model: string;
+
+  /** Which build of the application is calling, when it says. */
   app_version?: string;
+
+  /** Whether this is a real handset rather than a simulator or emulator. */
   is_physical_device: boolean;
+
+  /** What kind of device it is, such as a phone or a tablet. */
   device_category: DeviceCategory;
+
+  /** Where a push notification reaches this device, when it accepted them. */
   notification_token?: string;
+
+  /** What this device holds to prove it is the same one across calls, when it holds one. */
   device_token?: string;
+
+  /** What the device asks to be answered in. */
   localization: Localization;
+
+  /** Whether the device is asking for the light or the dark rendering. */
   theme_mode: DeviceThemeMode;
+
+  /** What binds this payload to the request it rode in on; `DevicePayloadValidator` refuses a mismatch. */
   binding: string;
+
+  /** When this payload was issued, checked for staleness before it is accepted. */
   iat: number;
+
+  /** What makes this payload usable once and no more, claimed through `claimNonce`. */
   nonce?: string;
 }

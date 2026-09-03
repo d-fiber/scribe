@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
 import {
   contains,
   equals,
@@ -43,12 +44,13 @@ import {
   isA,
   isFalse,
   isTrue,
+  Scribe,
   SequentialUuids,
   throwsA,
 } from "@scribe/alchemy/test";
 import { DateTime, Duration, FormatException, Now, Uuid, Uuids } from "@scribe/alchemy";
 
-Deno.test("now reads the source in force, so a case decides what time it is", () => {
+Scribe.test("now reads the source in force, so a case decides what time it is", () => {
   const fixed = new FixedNow(DateTime.parse("2026-01-01T00:00:00.000Z").millisecondsSinceEpoch);
   Now.use(fixed);
 
@@ -58,7 +60,7 @@ Deno.test("now reads the source in force, so a case decides what time it is", ()
   expect(DateTime.now().toIso8601String(), equals("2026-01-01T02:00:00.000Z"));
 });
 
-Deno.test("an instant never moves, so what a caller adds reaches nobody else", () => {
+Scribe.test("an instant never moves, so what a caller adds reaches nobody else", () => {
   const at = DateTime.fromMillisecondsSinceEpoch(1000);
 
   const later = at.add(Duration.seconds(5));
@@ -67,7 +69,7 @@ Deno.test("an instant never moves, so what a caller adds reaches nobody else", (
   expect(later.millisecondsSinceEpoch, equals(6000));
 });
 
-Deno.test("the difference between two instants is a duration, and it may be negative", () => {
+Scribe.test("the difference between two instants is a duration, and it may be negative", () => {
   const first = DateTime.fromMillisecondsSinceEpoch(1000);
   const second = first.add(Duration.minutes(3));
 
@@ -75,7 +77,7 @@ Deno.test("the difference between two instants is a duration, and it may be nega
   expect(first.difference(second).inMinutes, equals(-3));
 });
 
-Deno.test("one instant knows whether it comes before another, after it, or at the same moment", () => {
+Scribe.test("one instant knows whether it comes before another, after it, or at the same moment", () => {
   const at = DateTime.fromMillisecondsSinceEpoch(1000);
   const later = at.add(Duration.milliseconds(1));
 
@@ -84,14 +86,14 @@ Deno.test("one instant knows whether it comes before another, after it, or at th
   expect(at.isAtSameMomentAs(DateTime.fromMillisecondsSinceEpoch(1000)), equals(true));
 });
 
-Deno.test("parsing something that names no instant refuses instead of answering a broken one", () => {
+Scribe.test("parsing something that names no instant refuses instead of answering a broken one", () => {
   expect(
     () => DateTime.parse("the day before yesterday"),
     throwsA(having(isA(FormatException), (raised) => raised.message, "message", contains("Expected a date"))),
   );
 });
 
-Deno.test("a duration says how long in every unit it was not written in", () => {
+Scribe.test("a duration says how long in every unit it was not written in", () => {
   const held = Duration.minutes(90);
 
   expect(held.inHours, equals(1.5));
@@ -99,7 +101,7 @@ Deno.test("a duration says how long in every unit it was not written in", () => 
   expect(held.inMilliseconds, equals(5_400_000));
 });
 
-Deno.test("counting identifiers follow one another and still read as their version", () => {
+Scribe.test("counting identifiers follow one another and still read as their version", () => {
   const drawn = new SequentialUuids();
   Uuids.use(drawn);
 
@@ -108,19 +110,19 @@ Deno.test("counting identifiers follow one another and still read as their versi
   expect(drawn.handed.length, equals(2));
 });
 
-Deno.test("the epoch is the instant every count here is measured from", () => {
+Scribe.test("the epoch is the instant every count here is measured from", () => {
   expect(DateTime.epoch.millisecondsSinceEpoch, equals(0));
   expect(DateTime.epoch.toIso8601String(), equals("1970-01-01T00:00:00.000Z"));
 });
 
-Deno.test("an instant says how far it is from the epoch in both units", () => {
+Scribe.test("an instant says how far it is from the epoch in both units", () => {
   const at = DateTime.fromMillisecondsSinceEpoch(2500);
 
   expect(at.millisecondsSinceEpoch, equals(2500));
   expect(at.secondsSinceEpoch, equals(2.5));
 });
 
-Deno.test("an instant prints as the one way an instant is written", () => {
+Scribe.test("an instant prints as the one way an instant is written", () => {
   const at = DateTime.fromMillisecondsSinceEpoch(1000);
 
   expect(at.toString(), equals("1970-01-01T00:00:01.000Z"));
@@ -128,20 +130,20 @@ Deno.test("an instant prints as the one way an instant is written", () => {
   expect(at.isBefore(DateTime.fromMillisecondsSinceEpoch(1001)), equals(true));
 });
 
-Deno.test("two instants of the same moment are equal however each was built", () => {
+Scribe.test("two instants of the same moment are equal however each was built", () => {
   const written = DateTime.fromMillisecondsSinceEpoch(1000);
 
   expect(written.equals(DateTime.parse("1970-01-01T00:00:01.000Z")), isTrue, "the same moment was not equal to itself");
   expect(written.equals(DateTime.fromMillisecondsSinceEpoch(1001)), isFalse);
 });
 
-Deno.test("what is parsed reads back as what it was written from", () => {
+Scribe.test("what is parsed reads back as what it was written from", () => {
   const written = "2026-08-23T14:05:06.789Z";
 
   expect(DateTime.parse(written).toIso8601String(), equals(written));
 });
 
-Deno.test("a source can be set outright, not only moved forward", () => {
+Scribe.test("a source can be set outright, not only moved forward", () => {
   const now = new FixedNow(0);
   Now.use(now);
 
@@ -150,7 +152,7 @@ Deno.test("a source can be set outright, not only moved forward", () => {
   expect(DateTime.now().millisecondsSinceEpoch, equals(5000));
 });
 
-Deno.test("the two versions differ where the version is written, and nowhere else", () => {
+Scribe.test("the two versions differ where the version is written, and nowhere else", () => {
   Uuids.use(new SequentialUuids());
 
   const four = Uuid.v4();

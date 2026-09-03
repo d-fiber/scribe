@@ -40,6 +40,7 @@ import type { WorkerCron, WorkerHook, WorkerQueue, WorkerRealtime, WorkerSearche
 import { cronIdOf, hookIdOf, queueIdOf } from "./events.ts";
 import { routeIdOf, routingKeyOf, type WorkerRoute } from "./route.ts";
 
+/** Raised when a worker's manifest is internally inconsistent: an undeclared node, a duplicate route or identifier. */
 export class ManifestError extends Error {
   constructor(message: string) {
     super(message);
@@ -47,39 +48,87 @@ export class ManifestError extends Error {
   }
 }
 
+/** One node a worker declares, as the manifest reports it. */
 export interface NodeManifest {
+  /** The node's name, the one a route or a log sink declares itself under. */
   readonly name: string;
+
+  /** Whether this node is reachable directly, rather than only through another node's dispatch. */
   readonly public: boolean;
+
+  /** Whether this node carries its own `_logs.ts`, rather than falling to the default sink. */
   readonly logSink: boolean;
 }
 
+/** One route mounted under a node, alongside the identifier the manifest indexes it by. */
 export interface MountedRoute {
+  /** The node this route was mounted under. */
   readonly node: string;
+
+  /** The route's identifier, unique across the whole worker. */
   readonly routeId: string;
+
+  /** The route itself, as it was declared. */
   readonly route: WorkerRoute;
 }
 
+/** What a worker declares to build its `WorkerDefinition` from. */
 export interface WorkerInput {
+  /** The nodes this worker declares. None when omitted. */
   readonly nodes?: readonly NodeManifest[];
+
+  /** The routes this worker mounts. None when omitted. */
   readonly routes?: readonly MountedRoute[];
+
+  /** The queues this worker declares. None when omitted. */
   readonly queues?: readonly WorkerQueue<never>[];
+
+  /** The hooks this worker declares. None when omitted. */
   readonly hooks?: readonly WorkerHook[];
+
+  /** The cron jobs this worker declares. None when omitted. */
   readonly crons?: readonly WorkerCron[];
+
+  /** The searchers this worker declares. None when omitted. */
   readonly searchers?: readonly WorkerSearcher[];
+
+  /** The realtime channels this worker declares. None when omitted. */
   readonly realtimes?: readonly WorkerRealtime[];
+
+  /** The storage folders this worker declares. None when omitted. */
   readonly storages?: readonly WorkerStorage[];
+
+  /** Where this worker's log sinks are registered. A fresh, empty registry when omitted. */
   readonly sinks?: SinkRegistry;
 }
 
+/** A worker's manifest, resolved and indexed from its `WorkerInput`, and validated against the nodes it declares. */
 export class WorkerDefinition {
+  /** The nodes this worker declares. */
   readonly nodes: readonly NodeManifest[];
+
+  /** The routes this worker mounts. */
   readonly routes: readonly MountedRoute[];
+
+  /** This worker's queues, indexed by the identifier {@link queueIdOf} derives from their name. */
   readonly queues: ReadonlyMap<string, WorkerQueue<never>>;
+
+  /** This worker's hooks, indexed by the identifier {@link hookIdOf} derives from their event and ordinal. */
   readonly hooks: ReadonlyMap<string, WorkerHook>;
+
+  /** This worker's cron jobs, indexed by the identifier {@link cronIdOf} derives from their name. */
   readonly crons: ReadonlyMap<string, WorkerCron>;
+
+  /** The searchers this worker declares. */
   readonly searchers: readonly WorkerSearcher[];
+
+  /** The realtime channels this worker declares. */
   readonly realtimes: readonly WorkerRealtime[];
+
+  /** The storage folders this worker declares. */
   readonly storages: readonly WorkerStorage[];
+
+  /** Where this worker's log sinks are registered. */
   readonly sinks: SinkRegistry;
 
   readonly #byRouteId: Map<string, MountedRoute>;
@@ -103,18 +152,22 @@ export class WorkerDefinition {
     this.#rejectAmbiguousRoutes();
   }
 
+  /** The route mounted under `routeId`, or `null` when no route carries that identifier. */
   routeFor(routeId: string): MountedRoute | null {
     return this.#byRouteId.get(routeId) ?? null;
   }
 
+  /** The queue identified by `queueId`, or `null` when no queue carries that identifier. */
   queueFor(queueId: string): WorkerQueue<never> | null {
     return this.queues.get(queueId) ?? null;
   }
 
+  /** The hook identified by `hookId`, or `null` when no hook carries that identifier. */
   hookFor(hookId: string): WorkerHook | null {
     return this.hooks.get(hookId) ?? null;
   }
 
+  /** The cron job identified by `cronId`, or `null` when no job carries that identifier. */
   cronFor(cronId: string): WorkerCron | null {
     return this.crons.get(cronId) ?? null;
   }
@@ -160,6 +213,7 @@ export class WorkerDefinition {
   }
 }
 
+/** `route` as a {@link MountedRoute} under `node`, its identifier derived by {@link routeIdOf}. */
 export function mountedRoute(node: string, route: WorkerRoute): MountedRoute {
   return { node, routeId: routeIdOf(node, route), route };
 }

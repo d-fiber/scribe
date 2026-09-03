@@ -34,12 +34,14 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { Semaphore } from "@scribe/alchemy";
 import { sleep } from "@scribe/runtime/support/async/sleep.ts";
 import { assert, assertEquals } from "@std/assert";
 import { Duration } from "@scribe/alchemy";
 
-Deno.test("Semaphore lets through up to its limit without waiting", async () => {
+Scribe.test("Semaphore lets through up to its limit without waiting", async () => {
   const gate = new Semaphore(3);
 
   await gate.acquire();
@@ -50,7 +52,7 @@ Deno.test("Semaphore lets through up to its limit without waiting", async () => 
   assertEquals(gate.waiting, 0);
 });
 
-Deno.test("Semaphore queues the callers past its limit", async () => {
+Scribe.test("Semaphore queues the callers past its limit", async () => {
   const gate = new Semaphore(1);
   const held = await gate.acquire();
 
@@ -68,14 +70,14 @@ Deno.test("Semaphore queues the callers past its limit", async () => {
   assert(admitted);
 });
 
-Deno.test("Semaphore treats a limit below one as one", async () => {
+Scribe.test("Semaphore treats a limit below one as one", async () => {
   const gate = new Semaphore(0);
   await gate.acquire();
 
   assertEquals(gate.inFlight, 1);
 });
 
-Deno.test("Semaphore.run never lets the peak exceed the limit", async () => {
+Scribe.test("Semaphore.run never lets the peak exceed the limit", async () => {
   const gate = new Semaphore(2);
   let inFlight = 0;
   let peak = 0;
@@ -93,7 +95,7 @@ Deno.test("Semaphore.run never lets the peak exceed the limit", async () => {
   assert(peak <= 2, `peak was ${peak}`);
 });
 
-Deno.test("Semaphore.run releases its slot even when the call throws", async () => {
+Scribe.test("Semaphore.run releases its slot even when the call throws", async () => {
   const gate = new Semaphore(1);
 
   await gate.run(() => Promise.reject(new Error("boom"))).catch(() => {});
@@ -103,7 +105,7 @@ Deno.test("Semaphore.run releases its slot even when the call throws", async () 
   assertEquals(gate.inFlight, 1);
 });
 
-Deno.test("giving the same place back twice gives back one place, not two", async () => {
+Scribe.test("giving the same place back twice gives back one place, not two", async () => {
   const gate = new Semaphore(2);
   const first = await gate.acquire();
   await gate.acquire();

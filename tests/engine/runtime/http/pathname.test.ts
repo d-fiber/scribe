@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { firstSegmentOf, originOf, pathnameOf, searchOf, stripPrefix } from "@scribe/runtime/http/pathname.ts";
 import { assertEquals } from "@std/assert";
 
@@ -90,7 +92,7 @@ function* pathnames(): Generator<string> {
   yield "///";
 }
 
-Deno.test("pathnameOf agrees with new URL on every hostile segment shape", () => {
+Scribe.test("pathnameOf agrees with new URL on every hostile segment shape", () => {
   let checked = 0;
 
   for (const pathname of pathnames()) {
@@ -110,7 +112,7 @@ Deno.test("pathnameOf agrees with new URL on every hostile segment shape", () =>
   assertEquals(checked > 2000, true, "the sweep must stay broad");
 });
 
-Deno.test("pathnameOf falls back so percent-encoded dots cannot escape", () => {
+Scribe.test("pathnameOf falls back so percent-encoded dots cannot escape", () => {
   const escapes = [
     "/%2e%2e/admin",
     "/%2E%2E/admin",
@@ -129,7 +131,7 @@ Deno.test("pathnameOf falls back so percent-encoded dots cannot escape", () => {
   }
 });
 
-Deno.test("pathnameOf reads the framework's own paths without allocating a URL", () => {
+Scribe.test("pathnameOf reads the framework's own paths without allocating a URL", () => {
   const real = [
     "/admin/team/roles",
     "/app/devops/remote-config",
@@ -150,7 +152,7 @@ Deno.test("pathnameOf reads the framework's own paths without allocating a URL",
   assertEquals(pathnameOf(`${ORIGIN}?page=2`), "/");
 });
 
-Deno.test("originOf yields the same base as URL.origin for rewriting", () => {
+Scribe.test("originOf yields the same base as URL.origin for rewriting", () => {
   const urls = [
     `${ORIGIN}/admin/team`,
     "http://api.test:8000/admin/team",
@@ -168,7 +170,7 @@ Deno.test("originOf yields the same base as URL.origin for rewriting", () => {
   }
 });
 
-Deno.test("searchOf reads the same query string as URL.search", () => {
+Scribe.test("searchOf reads the same query string as URL.search", () => {
   const urls = [
     `${ORIGIN}/admin/team`,
     `${ORIGIN}/admin/team?offset=40&size=10`,
@@ -188,7 +190,7 @@ Deno.test("searchOf reads the same query string as URL.search", () => {
   }
 });
 
-Deno.test("firstSegmentOf and stripPrefix keep the split semantics they replace", () => {
+Scribe.test("firstSegmentOf and stripPrefix keep the split semantics they replace", () => {
   for (const pathname of pathnames()) {
     assertEquals(
       firstSegmentOf(pathname),
@@ -206,7 +208,7 @@ Deno.test("firstSegmentOf and stripPrefix keep the split semantics they replace"
   }
 });
 
-Deno.test("stripPrefix removes the service segment and nothing else", () => {
+Scribe.test("stripPrefix removes the service segment and nothing else", () => {
   assertEquals(stripPrefix("/queue/drain", "queue"), "/drain");
   assertEquals(stripPrefix("/queue", "queue"), "/");
   assertEquals(stripPrefix("/queue/", "queue"), "/");

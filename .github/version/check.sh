@@ -58,8 +58,8 @@ OWNER="larsanov.inc@gmail.com"
 # it on its own: the changelog section and the tag are both written by the CI from
 # whatever number this file holds, so whoever changes it decides what ships.
 if [ -n "${BASE:-}" ] && [ -n "${HEAD:-}" ]; then
-  for commit in $(git rev-list "$BASE..$HEAD" -- deno.json); do
-    git show "$commit" -- deno.json | grep -q '^[+-].*"version"' || continue
+  for commit in $(git rev-list "$BASE..$HEAD" -- scribe.workspace.json); do
+    git show "$commit" -- scribe.workspace.json | grep -q '^[+-].*"version"' || continue
     author=$(git log -1 --format=%ae "$commit" | tr '[:upper:]' '[:lower:]')
     [ "$author" = "$OWNER" ] && continue
 
@@ -71,16 +71,16 @@ being asked. Take the version out of your commit and let $OWNER bump it."
   done
 fi
 
-declared=$(python3 -c "import json;print(json.load(open('deno.json')).get('version',''))")
+declared=$(python3 -c "import json;print(json.load(open('scribe.workspace.json')).get('version',''))")
 
-[ -n "$declared" ] || fail "deno.json carries no version."
+[ -n "$declared" ] || fail "scribe.workspace.json carries no version."
 
 case "$declared" in
   *.*.*) ;;
-  *) fail "deno.json says \"$declared\", which is not a version. Write three numbers, as in \"1.0.2\"." ;;
+  *) fail "scribe.workspace.json says \"$declared\", which is not a version. Write three numbers, as in \"1.0.2\"." ;;
 esac
 
-say "the version is $declared, and deno.json is what says so"
+say "the version is $declared, and scribe.workspace.json is what says so"
 
 previous=$(git tag --list 'v*' --sort=-v:refname | head -1)
 

@@ -68,7 +68,7 @@ export interface EndpointDocumentation {
  * what puts a call through the result.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * export default class extends Get {
  *   protected override access() {
  *     return "authenticated";

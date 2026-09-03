@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { fromBinary } from "@bufbuild/protobuf";
 import { FailureSchema } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
@@ -54,7 +56,7 @@ async function call(path: string): Promise<{ status: number; code: string; messa
   return { status: response.status, code: failure.code, message: failure.message };
 }
 
-Deno.test("a procedure nothing behind it can answer honestly is left to the named 501", async () => {
+Scribe.test("a procedure nothing behind it can answer honestly is left to the named 501", async () => {
   const path = procedurePath(Storage.method.upload);
   const answer = await call(path);
 
@@ -63,7 +65,7 @@ Deno.test("a procedure nothing behind it can answer honestly is left to the name
   assertStringIncludes(answer.message, path);
 });
 
-Deno.test("a path the contract does not declare takes the same road", async () => {
+Scribe.test("a path the contract does not declare takes the same road", async () => {
   const answer = await call("/scribe.v1.Nope/Call");
 
   assertEquals(answer.status, 501);
@@ -78,7 +80,7 @@ function reach(path: string, token: string | null, body = new Uint8Array()): Req
   return new Request(new URL(path, "http://host.test"), { method: "POST", headers, body: body as BodyInit });
 }
 
-Deno.test("the capability port answers a caller holding nothing the same way whatever it asks for", async () => {
+Scribe.test("the capability port answers a caller holding nothing the same way whatever it asks for", async () => {
   const port = capabilityHandler();
 
   const answers = await Promise.all(
@@ -93,7 +95,7 @@ Deno.test("the capability port answers a caller holding nothing the same way wha
   );
 });
 
-Deno.test("the capability port refuses before it reads the body", async () => {
+Scribe.test("the capability port refuses before it reads the body", async () => {
   const port = capabilityHandler();
   const request = reach(procedurePath(Database.method.execute), null, new Uint8Array(1024 * 1024));
 
@@ -107,7 +109,7 @@ Deno.test("the capability port refuses before it reads the body", async () => {
   );
 });
 
-Deno.test("the capability port lets a token holder through to the named 501", async () => {
+Scribe.test("the capability port lets a token holder through to the named 501", async () => {
   const port = capabilityHandler();
   const token = CapabilityTokens.issue({
     request: new Request("http://worker.bootstrap/"),
@@ -129,7 +131,7 @@ Deno.test("the capability port lets a token holder through to the named 501", as
   }
 });
 
-Deno.test("a token that has run out reaches no procedure at all", async () => {
+Scribe.test("a token that has run out reaches no procedure at all", async () => {
   const port = capabilityHandler();
   const token = CapabilityTokens.issue({
     request: new Request("http://worker.bootstrap/"),

@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { EdgeWorkerDispatcher } from "@scribe/shell/platform/edge/dispatch/edge_worker_dispatcher.ts";
 import type { EdgePlatform, EdgeWorker, EdgeWorkerOptions } from "@scribe/shell/platform/edge/platform.ts";
 import { MAX_BODY_BYTES } from "@scribe/runtime/http/limits.ts";
@@ -72,7 +74,7 @@ function dispatcher(platform: EdgePlatform) {
   return new EdgeWorkerDispatcher(platform, LIMITS);
 }
 
-Deno.test("EdgeWorkerDispatcher passes the configured limits to the platform", async () => {
+Scribe.test("EdgeWorkerDispatcher passes the configured limits to the platform", async () => {
   const platform = new FakePlatform();
 
   await dispatcher(platform).dispatch(
@@ -87,7 +89,7 @@ Deno.test("EdgeWorkerDispatcher passes the configured limits to the platform", a
   assertEquals(platform.options?.noModuleCache, false);
 });
 
-Deno.test("EdgeWorkerDispatcher stamps x-request-start and tags the request", async () => {
+Scribe.test("EdgeWorkerDispatcher stamps x-request-start and tags the request", async () => {
   const platform = new FakePlatform();
 
   await dispatcher(platform).dispatch(
@@ -100,7 +102,7 @@ Deno.test("EdgeWorkerDispatcher stamps x-request-start and tags the request", as
   assertEquals(platform.tagged, 1);
 });
 
-Deno.test("EdgeWorkerDispatcher forwards the body of a write request", async () => {
+Scribe.test("EdgeWorkerDispatcher forwards the body of a write request", async () => {
   const platform = new FakePlatform();
 
   await dispatcher(platform).dispatch(
@@ -112,7 +114,7 @@ Deno.test("EdgeWorkerDispatcher forwards the body of a write request", async () 
   assertEquals(await platform.received!.text(), "payload");
 });
 
-Deno.test("EdgeWorkerDispatcher sends no body on GET and HEAD", async () => {
+Scribe.test("EdgeWorkerDispatcher sends no body on GET and HEAD", async () => {
   for (const method of ["GET", "HEAD"]) {
     const platform = new FakePlatform();
 
@@ -125,7 +127,7 @@ Deno.test("EdgeWorkerDispatcher sends no body on GET and HEAD", async () => {
   }
 });
 
-Deno.test("EdgeWorkerDispatcher turns a platform failure into a 500", async () => {
+Scribe.test("EdgeWorkerDispatcher turns a platform failure into a 500", async () => {
   const response = await dispatcher(new FakePlatform(true)).dispatch(
     new Request("http://localhost/app"),
     "/functions/app",
@@ -136,7 +138,7 @@ Deno.test("EdgeWorkerDispatcher turns a platform failure into a 500", async () =
   assertEquals(body.code, "internal_error");
 });
 
-Deno.test("EdgeWorkerDispatcher hands the platform the environment it was built with", async () => {
+Scribe.test("EdgeWorkerDispatcher hands the platform the environment it was built with", async () => {
   const platform = new FakePlatform();
   const envVars = [["A", "1"], ["B", "2"]];
 
@@ -148,7 +150,7 @@ Deno.test("EdgeWorkerDispatcher hands the platform the environment it was built 
   assertEquals(platform.options?.envVars, envVars);
 });
 
-Deno.test("EdgeWorkerDispatcher reads the environment once, not per dispatch", async () => {
+Scribe.test("EdgeWorkerDispatcher reads the environment once, not per dispatch", async () => {
   const platform = new FakePlatform();
   const subject = new EdgeWorkerDispatcher(platform, LIMITS);
 
@@ -168,7 +170,7 @@ Deno.test("EdgeWorkerDispatcher reads the environment once, not per dispatch", a
   }
 });
 
-Deno.test("EdgeWorkerDispatcher hands the isolate none of the framework's own secrets", async () => {
+Scribe.test("EdgeWorkerDispatcher hands the isolate none of the framework's own secrets", async () => {
   const platform = new FakePlatform();
   const environment = [
     ["JWT_SECRET", "the-signing-secret"],
@@ -193,7 +195,7 @@ Deno.test("EdgeWorkerDispatcher hands the isolate none of the framework's own se
   );
 });
 
-Deno.test("EdgeWorkerDispatcher keeps a project's own variables, whatever they are named", async () => {
+Scribe.test("EdgeWorkerDispatcher keeps a project's own variables, whatever they are named", async () => {
   const platform = new FakePlatform();
 
   await new EdgeWorkerDispatcher(platform, LIMITS, [["MY_API_KEY", "kept"]]).dispatch(
@@ -208,7 +210,7 @@ Deno.test("EdgeWorkerDispatcher keeps a project's own variables, whatever they a
   );
 });
 
-Deno.test("EdgeWorkerDispatcher withholds the header that proves an internal call", async () => {
+Scribe.test("EdgeWorkerDispatcher withholds the header that proves an internal call", async () => {
   const platform = new FakePlatform();
 
   await dispatcher(platform).dispatch(
@@ -230,7 +232,7 @@ Deno.test("EdgeWorkerDispatcher withholds the header that proves an internal cal
   );
 });
 
-Deno.test("EdgeWorkerDispatcher refuses a body past the ceiling, and buys no isolate with it", async () => {
+Scribe.test("EdgeWorkerDispatcher refuses a body past the ceiling, and buys no isolate with it", async () => {
   const platform = new FakePlatform();
   const overrun = new ReadableStream({
     start(controller) {

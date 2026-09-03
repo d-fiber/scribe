@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals } from "@std/assert";
 import { Hono } from "hono";
 import type { LoggedEntry } from "@scribe/alchemy/observe";
@@ -84,7 +86,7 @@ async function exchange(response: () => Response): Promise<LoggedEntry> {
   return taken[0];
 }
 
-Deno.test("an exchange that went fine carries its verb and status, and no preview", async () => {
+Scribe.test("an exchange that went fine carries its verb and status, and no preview", async () => {
   const entry = await exchange(() => new Response("[]", { status: 200 }));
 
   assertEquals(entry.metadata, { method: "GET", status: 200 });
@@ -92,7 +94,7 @@ Deno.test("an exchange that went fine carries its verb and status, and no previe
   assertEquals(entry.action, "/brand");
 });
 
-Deno.test("a refused exchange carries what the response said", async () => {
+Scribe.test("a refused exchange carries what the response said", async () => {
   const entry = await exchange(() =>
     new Response('{"error":"no such brand"}', {
       status: 404,
@@ -108,7 +110,7 @@ Deno.test("a refused exchange carries what the response said", async () => {
   assertEquals(entry.level, "warn");
 });
 
-Deno.test("a secret in a failed body never reaches the entry", async () => {
+Scribe.test("a secret in a failed body never reaches the entry", async () => {
   const entry = await exchange(() =>
     new Response(JSON.stringify({ apiKey: "sk-live-42", detail: "denied" }), {
       status: 403,
@@ -122,7 +124,7 @@ Deno.test("a secret in a failed body never reaches the entry", async () => {
   assertEquals(preview.includes("denied"), true);
 });
 
-Deno.test("the client still reads a body the preview has already read", async () => {
+Scribe.test("the client still reads a body the preview has already read", async () => {
   taken.length = 0;
   LogRoutes.use(capturing);
 

@@ -38,29 +38,44 @@ import type { Contribution } from "../routing/contribution.ts";
 import type { Middleware, NodeRoot } from "../routing/middleware.ts";
 import { standardContribution, standardNode } from "./standard_nodes.ts";
 
+/** What declares a {@link Node}: its name, its reachability, and what its routes inherit. */
 export interface NodeInput {
+  /** The node's name, used to address it and to mount routes under it. */
   readonly name: string;
+
+  /** Whether this node is reachable directly, rather than only through another node's dispatch. */
   readonly public: boolean;
+
+  /** What this node is for. Absent when the node carries none. */
   readonly description?: string;
+
+  /** The node's own contribution, layered under every route it mounts. Absent for a node with none. */
   readonly node?: NodeRoot;
+
+  /** The middleware this node's routes inherit, in the order they contribute. */
   readonly middleware?: readonly Middleware[];
 }
 
+/** A declared node, and the accessors that read its {@link NodeInput} without exposing it directly. */
 export class Node {
   constructor(readonly input: NodeInput) {}
 
+  /** The node's name, used to address it and to mount routes under it. */
   get name(): string {
     return this.input.name;
   }
 
+  /** Whether this node is reachable directly, rather than only through another node's dispatch. */
   get public(): boolean {
     return this.input.public;
   }
 
+  /** What this node is for, or `null` when {@link NodeInput.description} was left out. */
   get description(): string | null {
     return this.input.description ?? null;
   }
 
+  /** This node's contributions in inheritance order: its standard node, then its middleware, then its own routes. */
   layers(): readonly Contribution[] {
     const standard = standardNode(this.input.name);
 

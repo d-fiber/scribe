@@ -50,10 +50,18 @@ export const MAX_TIMESTAMP_SKEW_S = 5 * 60;
  */
 export const MAX_SIGNATURE_CANDIDATES = 8;
 
+/** A webhook delivery's identity and body, read off its headers before any signature is checked. */
 export interface SignedWebhookRequest {
+  /** The delivery's identifier, from the `webhook-id` header. */
   readonly id: string;
+
+  /** The delivery's timestamp, from the `webhook-timestamp` header, checked by `isFreshTimestamp`. */
   readonly timestamp: string;
+
+  /** The signatures the `webhook-signature` header offered, each checked in turn against a rotated secret. */
   readonly candidateSignatures: readonly string[];
+
+  /** The request body exactly as received, over which every candidate signature is verified. */
   readonly rawBody: string;
 }
 

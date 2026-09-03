@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { Duration } from "@scribe/alchemy";
 import type { Caller } from "@scribe/alchemy/route";
 import { ApiContext, ApiEndpoint } from "@scribe/kernel/endpoint/api.ts";
@@ -77,7 +79,7 @@ class OpenEndpoint extends ApiEndpoint {
   }
 }
 
-Deno.test("declaring a webhook caller does not by itself open an endpoint", async () => {
+Scribe.test("declaring a webhook caller does not by itself open an endpoint", async () => {
   const limiter = installRateLimiterMock();
   try {
     const result = await callEndpoint(() => UnsignedWebhookEndpoint.handle());
@@ -92,7 +94,7 @@ Deno.test("declaring a webhook caller does not by itself open an endpoint", asyn
   }
 });
 
-Deno.test("an anonymous caller stays open, it declares no proof at all", async () => {
+Scribe.test("an anonymous caller stays open, it declares no proof at all", async () => {
   const limiter = installRateLimiterMock();
   try {
     const result = await callEndpoint(() => OpenEndpoint.handle());

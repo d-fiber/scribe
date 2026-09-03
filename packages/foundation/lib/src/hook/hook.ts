@@ -64,7 +64,7 @@ export interface HookDefinition<R> {
 /**
  * An extension point: the framework declares it, the project subscribes to it.
  *
- * ```ts
+ * ```ts ignore
  * export const signInHook = new Hook<SignInPayload>({ name: "auth.sign-in" });
  * export const signUpHook = new Hook<SignUpPayload, Result>({
  *   name: "auth.sign-up",
@@ -77,6 +77,7 @@ export interface HookDefinition<R> {
  * cannot. The same event can carry both.
  */
 export class Hook<T, R = void> {
+  /** The event name this hook was declared under, and how a subscriber and a caller find it. */
   readonly name: string;
 
   readonly #inline: InlineChain<T, R>;
@@ -100,7 +101,13 @@ export class Hook<T, R = void> {
     hookRegistry.add(this);
   }
 
-  /** How many subscribers this hook has, both kinds counted. */
+  /**
+   * How many subscribers this hook has, both kinds counted.
+   *
+   * @remarks
+   * `run` checks this before doing anything else, so a hook nobody wired short-circuits to the
+   * cached {@link #unhandled} answer instead of building an emission it would immediately discard.
+   */
   handlers(): number {
     return this.#inline.size + this.#background.size;
   }

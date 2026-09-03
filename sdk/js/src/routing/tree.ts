@@ -43,6 +43,7 @@ import { Endpoint } from "./endpoint.ts";
 import { instances } from "./instances.ts";
 import { Middleware } from "./middleware.ts";
 
+/** Raised when a worker's declared nodes and routes cannot be compiled into a consistent tree. */
 export class RoutingError extends Error {
   constructor(message: string) {
     super(message);
@@ -50,6 +51,16 @@ export class RoutingError extends Error {
   }
 }
 
+/**
+ * The endpoints `discovered`'s module exports, one per HTTP method it answers.
+ *
+ * @remarks
+ * A route file that instantiates `Get` twice, deliberately or by a copy-paste, would otherwise
+ * silently keep only the last one and drop the other's access and rate limit checks along with it.
+ * Refusing the duplicate here is what turns that into a build-time error instead of a route that
+ * quietly answers one of its two declared methods without any of the checks the missing one meant
+ * to enforce.
+ */
 function endpointsOf(discovered: DiscoveredRoute): Endpoint[] {
   const found = instances<Endpoint>(discovered.module, Endpoint);
 
@@ -67,12 +78,32 @@ function endpointsOf(discovered: DiscoveredRoute): Endpoint[] {
   return [...byMethod.values()];
 }
 
+/**
+ * The contribution of every `_middleware.ts` along `discovered`'s ancestor directories, root
+ * first.
+ *
+ * @remarks
+ * `discovered.branches` already carries the modules in that root-to-route order, so flattening
+ * them in place is what keeps a route's own folder the last, and therefore the one {@link merge}
+ * lets override every directory above it.
+ */
 function branchLayers(discovered: DiscoveredRoute): Contribution[] {
   return discovered.branches.flatMap((branch) =>
     instances<Middleware>(branch, Middleware).map((middleware) => middleware.contribution())
   );
 }
 
+/**
+ * Compiles `endpoint`'s route: its layers merged into one set of rules, and its handler wrapped by
+ * every layer that contributes one.
+ *
+ * @remarks
+ * `inherited` is the node's own contribution, `branchLayers` adds each ancestor `_middleware.ts`,
+ * and `endpoint.contribution()` is appended last so its own checks win over anything declared
+ * above it. A route that ends up with no access or no rate limit set anywhere along that chain is
+ * refused rather than built with an implicit default, since a silent default is exactly the gap an
+ * unprotected route would need.
+ */
 function routeOf(
   discovered: DiscoveredRoute,
   endpoint: Endpoint,
@@ -111,6 +142,15 @@ function routeOf(
   };
 }
 
+/**
+ * Every route `discovered` places under `node`, each endpoint of each matching file compiled and
+ * mounted.
+ *
+ * @remarks
+ * `inherited` carries the node's own contribution, a `NodeRoot` middleware included, so it is
+ * threaded through every route this call compiles rather than folded in once: {@link routeOf}
+ * needs it fresh per route to merge against that route's own ancestor chain.
+ */
 export function compileNode(
   node: string,
   inherited: readonly Contribution[],

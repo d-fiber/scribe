@@ -80,6 +80,13 @@ function _grantsNothing(grants: Grants): boolean {
   return grants.role === "" && grants.permissions.length === 0;
 }
 
+/**
+ * What an account is granted, cached in three tiers on top of a pluggable {@link GrantSource}.
+ *
+ * @remarks
+ * All state here is static: one resolver per process, since the two caching tiers below the
+ * source are themselves process-wide.
+ */
 export class GrantsResolver {
   private static readonly _cache: Cache<Grants> = cache<Grants>({ key: "identity:grants", ttl: _CACHE_TTL });
   private static readonly _local = new TtlLru<Grants>({
@@ -89,6 +96,14 @@ export class GrantsResolver {
   private static readonly _inFlight = new Map<string, Future<Grants>>();
   private static _source: GrantSource | null = null;
 
+  /**
+   * Installs `source` as what `resolve` falls back to.
+   *
+   * @remarks
+   * Also drops this process's local cache, since whatever it held was resolved against the
+   * previous source, which a test replacing the source between cases relies on: without the drop,
+   * a grant resolved under the old source would keep answering after the swap.
+   */
   static use(source: GrantSource): void {
     this._source = source;
     this.forget();

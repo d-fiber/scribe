@@ -97,7 +97,7 @@ export interface Answers<T> {
  * member and its arguments are both known without either being named as a string.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * when(() => clock.now()).thenReturn(noon);
  * when(() => store.get(anything<string>())).thenResolve(null);
  * when(() => store.put(row)).thenThrow(new Conflict());

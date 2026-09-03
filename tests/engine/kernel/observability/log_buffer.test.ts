@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import type { LoggedEntry } from "@scribe/alchemy/observe";
 import { LogBuffer } from "@scribe/kernel/observability/log_buffer.ts";
 import { assert, assertEquals } from "@std/assert";
@@ -69,7 +71,7 @@ function recorder(): { buffer: LogBuffer; batches: Published[] } {
   return { buffer, batches };
 }
 
-Deno.test("a recorded entry waits instead of buying a publish of its own", async () => {
+Scribe.test("a recorded entry waits instead of buying a publish of its own", async () => {
   const { buffer, batches } = recorder();
 
   assertEquals(buffer.record(entry("/a")), null, "one entry is not worth a round trip");
@@ -79,7 +81,7 @@ Deno.test("a recorded entry waits instead of buying a publish of its own", async
   await buffer.flush();
 });
 
-Deno.test("a whole burst leaves as one message, not as one message each", async () => {
+Scribe.test("a whole burst leaves as one message, not as one message each", async () => {
   const { buffer, batches } = recorder();
 
   for (let i = 0; i < 50; i++) buffer.record(entry(`/r${i}`));
@@ -91,7 +93,7 @@ Deno.test("a whole burst leaves as one message, not as one message each", async 
   assertEquals(batches[0].entries[49].action, "/r49");
 });
 
-Deno.test("the buffer publishes rather than grows once it is full", async () => {
+Scribe.test("the buffer publishes rather than grows once it is full", async () => {
   const { buffer, batches } = recorder();
 
   let published: Promise<void> | null = null;
@@ -105,7 +107,7 @@ Deno.test("the buffer publishes rather than grows once it is full", async () => 
   assertEquals(buffer.pending, 0, "a full buffer must empty itself, not keep growing");
 });
 
-Deno.test("a lone entry is published on the linger, without anybody asking", async () => {
+Scribe.test("a lone entry is published on the linger, without anybody asking", async () => {
   const { buffer, batches } = recorder();
 
   buffer.record(entry("/quiet"));
@@ -116,7 +118,7 @@ Deno.test("a lone entry is published on the linger, without anybody asking", asy
   assertEquals(buffer.pending, 0);
 });
 
-Deno.test("two nodes never end up in the same batch", async () => {
+Scribe.test("two nodes never end up in the same batch", async () => {
   const { buffer, batches } = recorder();
 
   buffer.record(entry("/app/a", "app"));
@@ -141,7 +143,7 @@ Deno.test("two nodes never end up in the same batch", async () => {
   );
 });
 
-Deno.test("one node failing to publish does not take the others down", async () => {
+Scribe.test("one node failing to publish does not take the others down", async () => {
   const delivered: (string | null)[] = [];
   const buffer = new LogBuffer((node) => {
     delivered.push(node);
@@ -156,7 +158,7 @@ Deno.test("one node failing to publish does not take the others down", async () 
   assertEquals(buffer.pending, 0);
 });
 
-Deno.test("flushing twice does not publish an empty batch", async () => {
+Scribe.test("flushing twice does not publish an empty batch", async () => {
   const { buffer, batches } = recorder();
 
   buffer.record(entry("/a"));
@@ -166,7 +168,7 @@ Deno.test("flushing twice does not publish an empty batch", async () => {
   assertEquals(batches.length, 1);
 });
 
-Deno.test("a publish that fails drops its batch instead of holding it for the next one", async () => {
+Scribe.test("a publish that fails drops its batch instead of holding it for the next one", async () => {
   let attempts = 0;
   const buffer = new LogBuffer(() => {
     attempts++;
@@ -185,7 +187,7 @@ Deno.test("a publish that fails drops its batch instead of holding it for the ne
   assertEquals(attempts, 2, "the next batch must still be attempted");
 });
 
-Deno.test("a flush disarms the linger, so the timer never fires on an empty buffer", async () => {
+Scribe.test("a flush disarms the linger, so the timer never fires on an empty buffer", async () => {
   const { buffer, batches } = recorder();
 
   buffer.record(entry("/a"));

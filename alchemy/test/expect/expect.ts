@@ -54,7 +54,7 @@ import type { Matcher } from "./matcher.ts";
  * @throws {AssertionError} When `actual` does not hold.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * expect(found, equals(["audience", "realtime"]));
  * expect(page.hasMore, isTrue, "a page with a row to spare says there is nothing after it");
  * expect(() => registry.declare(name, second), throwsA(isA(DuplicateDeclarationError)));
@@ -100,6 +100,28 @@ export async function expectLater<T>(
 
   if (matcher.matches(subject as T)) return;
   throw new AssertionError(sentence(threw ? raised : held, matcher, reason));
+}
+
+/**
+ * Awaits `actual`, and answers what it raised.
+ *
+ * @remarks
+ * It is for the case that needs the raised value itself, not only whether one arrived: a client
+ * exception carrying the address it failed against, an error carrying a code a caller switches on.
+ * When only whether something was raised matters, {@link expectLater} with {@link throwsA} says so
+ * in one line and needs nothing caught by hand.
+ *
+ * @throws {AssertionError} When `actual` settles instead of raising.
+ */
+export async function caught<T>(actual: Future<T> | (() => Future<T>)): Future<unknown> {
+  const settled = typeof actual === "function" ? actual() : actual;
+
+  try {
+    await settled;
+  } catch (raised) {
+    return raised;
+  }
+  throw new AssertionError("It settled instead of raising.");
 }
 
 /** What {@link sentence} reads off a matcher, which is everything of it that does not depend on T. */

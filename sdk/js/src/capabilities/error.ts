@@ -36,6 +36,7 @@
 
 import type { Failure } from "../../gen/scribe/protocol/common_pb.ts";
 
+/** Raised when a capability call fails, naming which capability and the host's own failure code. */
 export class CapabilityError extends Error {
   constructor(
     readonly capability: string,
@@ -47,6 +48,15 @@ export class CapabilityError extends Error {
   }
 }
 
+/**
+ * Throws a {@link CapabilityError} for `capability` when `failure` names a real one.
+ *
+ * @remarks
+ * Proto3 gives a plain `string` field no way to tell "not set" from "set to the empty string", so
+ * a host answer that carries no failure still arrives as a `Failure` with `code` defaulted to `""`
+ * rather than as `undefined`. Checking `code === ""` alongside the missing-field case is what keeps
+ * a successful call from being read as a failure with nothing to say.
+ */
 export function raiseOn(capability: string, failure: Failure | undefined): void {
   if (!failure || failure.code === "") return;
   throw new CapabilityError(capability, failure.code, failure.message);

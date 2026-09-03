@@ -49,10 +49,18 @@ import { UnaryServer } from "../transport/server.ts";
 import { deliverLogs, handleBatch, handleEvent, invoke, triggerCron } from "./dispatch.ts";
 import { CallScope } from "./scope.ts";
 
+/** How the worker's server binds and how it can be shut down. */
 export interface ServeOptions {
+  /** The port to listen on. Left to the runtime's own default when omitted. */
   readonly port?: number;
+
+  /** The host address to bind to. Left to the runtime's own default when omitted. */
   readonly hostname?: string;
+
+  /** A signal that shuts the server down when aborted. Runs until the process exits when omitted. */
   readonly signal?: AbortSignal;
+
+  /** Called once the server is actually bound and listening. */
   readonly onListen?: (address: { port: number; hostname: string }) => void;
 }
 
@@ -75,6 +83,17 @@ const DEFAULT_HOSTNAME = "0.0.0.0";
 /** The path an orchestrator asks for to know whether this worker is up. */
 const HEALTH_PATH = "/_health";
 
+/**
+ * Wires `worker`'s dispatch methods, registration, invocation, queue, hook, cron and log delivery,
+ * onto a fresh {@link UnaryServer}.
+ *
+ * @remarks
+ * The registration handshake is refused outright when the host speaks a different protocol
+ * version, since nothing past that point could be trusted to decode correctly. Every other
+ * handler runs its own `CallScope.run` for the one call it is answering, but the handshake itself
+ * happens before any of those, so it also `adopt`s the token it was handed as the process-wide
+ * fallback `CallScope.current` reads when nothing more specific is in flight.
+ */
 export function workerServer(worker: WorkerDefinition): UnaryServer {
   return new UnaryServer()
     .on(Registration.method.describe, (handshake) => {
@@ -125,6 +144,15 @@ export function workerHandler(
   };
 }
 
+/**
+ * Serves `worker` over HTTP, port and hostname read from `options` or their defaults, until the
+ * server stops.
+ *
+ * @remarks
+ * `ScribeServer` calls this to actually bind and listen. It only runs on a runtime `serveRuntime`
+ * recognizes; `workerHandler` is the escape hatch for embedding the same request handling inside a
+ * server this function does not know how to start on its own.
+ */
 export function serveWorker(
   worker: WorkerDefinition,
   options: ServeOptions = {},
@@ -150,6 +178,16 @@ function announce(address: { port: number; hostname: string }): void {
   console.log(`[worker] listening on ${address.hostname}:${address.port}`);
 }
 
+/**
+ * The runtime's own `serve`, read off `globalThis` rather than imported, so this file loads
+ * without error on a runtime that has no such global.
+ *
+ * @remarks
+ * `Deno.serve` is the only implementation this looks for today, but reading it dynamically rather
+ * than importing `Deno` directly is what lets {@link workerHandler} still work as a plain fetch
+ * handler on a runtime that has no global server to bind, without this function's own absence
+ * breaking that path.
+ */
 function serveRuntime(): ServeRuntime {
   const candidate = (globalThis as { Deno?: ServeRuntime }).Deno;
   if (!candidate) {

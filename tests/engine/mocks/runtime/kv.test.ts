@@ -38,6 +38,8 @@
 // module load time, but the `ioredis` client itself is `lazyConnect: true`, so no real
 // connection is attempted and `--allow-net` isn't required (see `.claude/testing.md`).
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { Duration, rateLimit, RateLimiters } from "@scribe/alchemy";
 import { assertEquals } from "@std/assert";
 import { installRateLimiterMock } from "@scribe/foundation/testing";
@@ -46,7 +48,7 @@ function aLimit() {
   return rateLimit({ key: "x", limit: 10, window: Duration.seconds(60), penalty: Duration.seconds(60) });
 }
 
-Deno.test(
+Scribe.test(
   "installRateLimiterMock: defaults to an ok result and restore() empties a port nothing had filled",
   async () => {
     const mock = installRateLimiterMock();
@@ -58,7 +60,7 @@ Deno.test(
   },
 );
 
-Deno.test("installRateLimiterMock: accepts a custom result", async () => {
+Scribe.test("installRateLimiterMock: accepts a custom result", async () => {
   const mock = installRateLimiterMock({ ok: false, retryAfter: 30, strikes: 1 });
 
   const result = await aLimit().check();

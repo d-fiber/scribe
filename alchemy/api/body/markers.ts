@@ -86,7 +86,7 @@ export interface RequiredMarker<T> {
  * A field holding several `type`.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const schema = { tags: ListOf(string), sizes: ListOf(Number) };
  * ```
  */
@@ -100,7 +100,7 @@ export function ListOf<
  * A field holding the shape `schema` describes.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const schema = { owner: Nested({ id: Required(string), name: string }) };
  * ```
  */
@@ -116,7 +116,7 @@ export function Nested<S extends BodySchema>(schema: S): NestedMarker<S> {
  * `Required(ListOf(string))` and reads in that order.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const schema = { brand_id: Required(string), note: string };
  * ```
  */

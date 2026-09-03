@@ -75,34 +75,45 @@ export class MemoryCache<T> implements Cache<T> {
     this.#options = options;
   }
 
+  /** The {@link Cache.get} implementation: reads `id`, forgetting it first if its lifetime has run out. */
   get(id: string): Future<T | null> {
     return Promise.resolve(this.#read(id));
   }
 
+  /** The {@link Cache.getMany} implementation: `get` applied to each of `ids`, in order. */
   getMany(ids: UnmodifiableList<string>): Future<(T | null)[]> {
     return Promise.resolve(ids.map((id) => this.#read(id)));
   }
 
+  /** The {@link Cache.add} implementation: stores `value` under `id`, timed by this cache's own `ttl`. */
   add(id: string, value: T): Future<void> {
     this.#held.set(id, { value, until: this.#expiry() });
     return Promise.resolve();
   }
 
+  /** The {@link Cache.addMany} implementation: `add` applied to each of `entries`. */
   addMany(entries: readonly [string, T][]): Future<void> {
     for (const [id, value] of entries) this.#held.set(id, { value, until: this.#expiry() });
     return Promise.resolve();
   }
 
+  /** The {@link Cache.delete} implementation: forgets `id`, whether or not it was held. */
   delete(id: string): Future<void> {
     this.#held.delete(id);
     return Promise.resolve();
   }
 
+  /** The {@link Cache.deleteMany} implementation: `delete` applied to each of `ids`. */
   deleteMany(...ids: List<string>): Future<void> {
     for (const id of ids) this.#held.delete(id);
     return Promise.resolve();
   }
 
+  /**
+   * The {@link Cache.upsert} implementation: answers the held value when there is one, otherwise
+   * joins an already-running computation for `id` or starts one, so `compute` never runs twice for
+   * callers that ask at the same time.
+   */
   upsert(id: string, compute: () => Future<T>): Future<T> {
     const already = this.#read(id);
     if (already !== null) return Promise.resolve(already);
@@ -123,6 +134,10 @@ export class MemoryCache<T> implements Cache<T> {
     return started;
   }
 
+  /**
+   * The {@link Cache.clear} implementation: empties the whole cache when `pattern` is left out,
+   * otherwise forgets only the identifiers `matcherFor(pattern)` accepts.
+   */
   clear(pattern?: string): Future<void> {
     if (pattern === undefined) {
       this.#held.clear();
@@ -171,6 +186,10 @@ export class MemoryCaches implements CacheDriver {
   /** Every cache opened so far, by the key it was opened under. */
   readonly opened: Map<string, MemoryCache<never>> = new Map<string, MemoryCache<never>>();
 
+  /**
+   * The {@link CacheDriver.open} implementation: opens a {@link MemoryCache} for `options.key`,
+   * or hands back the one already opened under that key.
+   */
   open<T>(options: CacheOptions): Cache<T> {
     const already = this.opened.get(options.key);
     if (already !== undefined) return already as unknown as Cache<T>;

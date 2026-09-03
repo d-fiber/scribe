@@ -87,7 +87,7 @@ export type FormFieldEntry = FormFieldType | RequiredMarker<FormFieldType>;
  * What a JSON body has to be, written as a plain object.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * const schema = { brand_id: Required(string), tags: ListOf(string) };
  * ```
  */

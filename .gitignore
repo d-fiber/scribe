@@ -1,6 +1,10 @@
 .DS_Store
 .env
 
+/deno.json
+/scribe.imports.json
+/dev_tools/resolution/bun/generated.tsconfig.json
+
 /tools/*
 !/tools/.gitkeep
 

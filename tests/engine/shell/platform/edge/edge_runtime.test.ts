@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import type { RequestAuthorizer } from "@scribe/shell/platform/edge/authorization/request_authorizer.ts";
 import type { WorkerDispatcher } from "@scribe/shell/platform/edge/dispatch/worker_dispatcher.ts";
 import { EdgeFunctionsRuntime } from "@scribe/shell/platform/edge/runtime.ts";
@@ -77,7 +79,7 @@ function request() {
   return new Request("http://localhost/public/admin/team");
 }
 
-Deno.test("EdgeFunctionsRuntime dispatches an authorized request to its worker", async () => {
+Scribe.test("EdgeFunctionsRuntime dispatches an authorized request to its worker", async () => {
   const dispatcher = new RecordingDispatcher();
   const runtime = new EdgeFunctionsRuntime({
     resolver: new StaticResolver(SERVICE),
@@ -91,7 +93,7 @@ Deno.test("EdgeFunctionsRuntime dispatches an authorized request to its worker",
   assertEquals(dispatcher.paths, [SERVICE.servicePath]);
 });
 
-Deno.test("EdgeFunctionsRuntime returns the denial and never dispatches", async () => {
+Scribe.test("EdgeFunctionsRuntime returns the denial and never dispatches", async () => {
   const dispatcher = new RecordingDispatcher();
   const runtime = new EdgeFunctionsRuntime({
     resolver: new StaticResolver(SERVICE),
@@ -107,7 +109,7 @@ Deno.test("EdgeFunctionsRuntime returns the denial and never dispatches", async 
   assertEquals(dispatcher.paths, []);
 });
 
-Deno.test("EdgeFunctionsRuntime authorizes before knowing the service exists", async () => {
+Scribe.test("EdgeFunctionsRuntime authorizes before knowing the service exists", async () => {
   const authorizer = new RecordingAuthorizer();
   const runtime = new EdgeFunctionsRuntime({
     resolver: new StaticResolver(null),
@@ -120,7 +122,7 @@ Deno.test("EdgeFunctionsRuntime authorizes before knowing the service exists", a
   assertEquals(authorizer.services, [""]);
 });
 
-Deno.test("EdgeFunctionsRuntime answers missing_function_name when nothing resolves", async () => {
+Scribe.test("EdgeFunctionsRuntime answers missing_function_name when nothing resolves", async () => {
   const runtime = new EdgeFunctionsRuntime({
     resolver: new StaticResolver(null),
     authorizer: new RecordingAuthorizer(),
@@ -134,7 +136,7 @@ Deno.test("EdgeFunctionsRuntime answers missing_function_name when nothing resol
   assertEquals(body.code, "missing_function_name");
 });
 
-Deno.test("EdgeFunctionsRuntime turns a collaborator failure into a 500", async () => {
+Scribe.test("EdgeFunctionsRuntime turns a collaborator failure into a 500", async () => {
   const runtime = new EdgeFunctionsRuntime({
     resolver: {
       resolve: () => Promise.reject(new Error("disk on fire")),

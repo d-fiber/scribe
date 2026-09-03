@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals } from "@std/assert";
 import { create } from "@bufbuild/protobuf";
 import {
@@ -166,7 +168,7 @@ async function withReplicas(
   }
 }
 
-Deno.test("a capability call goes back to the replica that invoked, not the last one that attached", async () => {
+Scribe.test("a capability call goes back to the replica that invoked, not the last one that attached", async () => {
   await withReplicas(async (invoke, replicas) => {
     const [first, second, third] = replicas;
 
@@ -179,7 +181,7 @@ Deno.test("a capability call goes back to the replica that invoked, not the last
   });
 });
 
-Deno.test("every attached replica answers its own invocations, whatever order they attached in", async () => {
+Scribe.test("every attached replica answers its own invocations, whatever order they attached in", async () => {
   await withReplicas(async (invoke, replicas) => {
     for (const replica of replicas) {
       const reply = await invoke(replica);

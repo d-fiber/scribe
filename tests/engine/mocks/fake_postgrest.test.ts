@@ -34,10 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals } from "@std/assert";
 import { FakePostgrestClient } from "@scribe/foundation/testing";
 
-Deno.test("FakePostgrestClient: neq/gt/gte/lt/lte filters", async () => {
+Scribe.test("FakePostgrestClient: neq/gt/gte/lt/lte filters", async () => {
   const db = new FakePostgrestClient({
     widgets: [
       { id: "1", position: 1 },
@@ -69,7 +71,7 @@ Deno.test("FakePostgrestClient: neq/gt/gte/lt/lte filters", async () => {
   ]);
 });
 
-Deno.test("FakePostgrestClient: is/in filters", async () => {
+Scribe.test("FakePostgrestClient: is/in filters", async () => {
   const db = new FakePostgrestClient({
     widgets: [
       { id: "1", archived_at: null },
@@ -91,7 +93,7 @@ Deno.test("FakePostgrestClient: is/in filters", async () => {
   assertEquals((inSet as { id: string }[]).map((r) => r.id).sort(), ["1", "3"]);
 });
 
-Deno.test(
+Scribe.test(
   "FakePostgrestClient: like is case-sensitive, ilike is not, % and _ act as SQL wildcards",
   async () => {
     const db = new FakePostgrestClient({
@@ -131,7 +133,7 @@ Deno.test(
   },
 );
 
-Deno.test(
+Scribe.test(
   "FakePostgrestClient: select(cols) projects only the requested columns",
   async () => {
     const db = new FakePostgrestClient({
@@ -144,7 +146,7 @@ Deno.test(
   },
 );
 
-Deno.test(
+Scribe.test(
   "FakePostgrestClient: maybeSingle returns the first match or null, never an array",
   async () => {
     const db = new FakePostgrestClient({ widgets: [{ id: "1" }] });
@@ -165,7 +167,7 @@ Deno.test(
   },
 );
 
-Deno.test(
+Scribe.test(
   "FakePostgrestClient: order() with multiple columns sorts by the most significant one first",
   async () => {
     const db = new FakePostgrestClient({
@@ -189,7 +191,7 @@ Deno.test(
   },
 );
 
-Deno.test(
+Scribe.test(
   "FakePostgrestClient: seed() replaces a table's rows wholesale",
   () => {
     const db = new FakePostgrestClient({ widgets: [{ id: "1" }] });
@@ -200,7 +202,7 @@ Deno.test(
   },
 );
 
-Deno.test(
+Scribe.test(
   "FakePostgrestClient: rpc() calls the registered handler with its args and returns its result as data",
   async () => {
     const db = new FakePostgrestClient();
@@ -213,7 +215,7 @@ Deno.test(
   },
 );
 
-Deno.test(
+Scribe.test(
   "FakePostgrestClient: rpc() with no registered handler resolves to null data instead of throwing",
   async () => {
     const db = new FakePostgrestClient();

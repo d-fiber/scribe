@@ -47,8 +47,16 @@ def run(command: list[str]) -> str:
     return subprocess.run(command, capture_output=True, text=True, check=True).stdout
 
 
+def commit(revision: str) -> bool:
+    return subprocess.run(["git", "cat-file", "-e", f"{revision}^{{commit}}"], capture_output=True).returncode == 0
+
+
 def authors(base: str, head: str) -> list[tuple[str, str]]:
-    log = run(["git", "log", "--no-merges", "--format=%ae%x00%an", f"{base}..{head}"])
+    # A base that is not a commit is the first push of a branch, where GitHub sends all zeros, and
+    # a force push that replaced the old tip with an unrelated one. Both mean the same thing here:
+    # every commit up to head is new, so that is what gets read.
+    span = f"{base}..{head}" if commit(base) else head
+    log = run(["git", "log", "--no-merges", "--format=%ae%x00%an", span])
 
     seen: dict[str, str] = {}
     for line in log.splitlines():

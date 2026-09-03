@@ -72,11 +72,16 @@ export type { Result } from "./value/result.ts";
 
 export { BindingError, Slot } from "./bind/slot.ts";
 
+export { Container, container } from "./di/container.ts";
+export type { Token } from "./di/container.ts";
+export { Singleton } from "./di/decorators.ts";
+export type { SingletonOptions } from "./di/decorators.ts";
+
 export { base64, base64Url, hex, json, utf8 } from "./value/convert.ts";
 export type { BytesCodec, Codec } from "./value/convert.ts";
 
 export { ExponentialBackoff } from "./async/backoff.ts";
-export { TimeoutException, withDeadline } from "./async/deadline.ts";
+export { TimeoutException, withDeadline, withDeadlineLite } from "./async/deadline.ts";
 export { runPooled } from "./async/pool.ts";
 export { Semaphore } from "./async/semaphore.ts";
 export type { Release } from "./async/semaphore.ts";
@@ -91,33 +96,35 @@ export { ScribeError } from "./error/scribe_error.ts";
 
 export { DeclarationError, DEFAULT_DESCRIPTION, Package } from "./package/package.ts";
 export type {
-  ArtefactsDeclaration,
-  AwaitingArtefacts,
   AwaitingDependencies,
   AwaitingDescription,
   AwaitingFramework,
   AwaitingVersion,
   Buildable,
-  DatabaseDeclaration,
   Dependencies,
+  DependencyValue,
 } from "./package/package.ts";
 
 export { mount } from "./package/manifest.ts";
-export type { Lifecycle, LifecycleStep, LifecycleSteps, Manifest, MountedPackage } from "./package/manifest.ts";
+export type {
+  DependencySource,
+  Lifecycle,
+  LifecycleStep,
+  LifecycleSteps,
+  Manifest,
+  MountedPackage,
+} from "./package/manifest.ts";
 
 export { isValidPackageName, packageNameProblem, RESERVED_PACKAGE_NAMES } from "./package/name.ts";
 
 export {
-  artefactPathProblem,
-  ARTEFACTS_KEY,
-  ARTEFACTS_KEYS,
-  DATABASE_KEYS,
-  handsOverNothing,
-  NO_ARTEFACTS,
-  normaliseArtefactPath,
-  OPS_FRAGMENTS,
-} from "./package/artefacts.ts";
-export type { Artefacts, DatabaseArtefacts } from "./package/artefacts.ts";
+  DATABASE_MOMENTS,
+  DECLARES_EXPORT,
+  DEPLOY,
+  DEPLOY_ENTRIES,
+  REQUIRED_DATABASE_MOMENTS,
+  SERVICE_FRAGMENTS,
+} from "./package/deploy.ts";
 
 export { isPackageDirectory, MANIFEST, MANIFEST_KEYS, PACKAGE_LAYOUT, requiredEntries } from "./package/layout.ts";
 export type { PackageDirectory } from "./package/layout.ts";
@@ -149,15 +156,21 @@ export type {
   TriggerDriver,
 } from "./port/trigger.ts";
 
-export { rateLimit, RateLimiters } from "./port/rate_limit.ts";
-export type { RateLimiter, RateLimiterDriver, RateLimitOptions, RateLimitOutcome } from "./port/rate_limit.ts";
 export { cache, Caches, DEFAULT_CACHE_DEADLINE } from "./port/cache.ts";
 export type { Cache, CacheDriver, CacheOptions } from "./port/cache.ts";
 export { claimOnce, Claims } from "./port/claim.ts";
 export type { ClaimDriver, ClaimOptions, WhenUnavailable } from "./port/claim.ts";
+export { rateLimit, RateLimiters } from "./port/rate_limit.ts";
+export type { RateLimiter, RateLimiterDriver, RateLimitOptions, RateLimitOutcome } from "./port/rate_limit.ts";
 
 export { FileSystems } from "./port/files.ts";
 export type { FileSystem, FileSystemDriver, FileSystemEntity } from "./port/files.ts";
+
+export { Environments } from "./port/env.ts";
+export type { Environment } from "./port/env.ts";
+
+export { Commands } from "./port/commands.ts";
+export type { Command, CommandOptions, CommandResult } from "./port/commands.ts";
 
 export { renderError } from "./diagnostic/render.ts";
 export type { RenderOptions } from "./diagnostic/render.ts";
@@ -178,6 +191,29 @@ export type {
   Query,
   Tables,
 } from "./port/database.ts";
+
+export { Column } from "./schema/column.ts";
+export type {
+  ColumnDefinition,
+  ColumnMetadata,
+  ColumnOptions,
+  ColumnReference,
+  ColumnType,
+  ColumnTypeOptions,
+  OnDelete,
+} from "./schema/column.ts";
+export { declaredEnums, Enum, forgetEnums } from "./schema/enum.ts";
+export type { DeclaredEnum } from "./schema/enum.ts";
+export { CompositeType, declaredCompositeTypes, forgetCompositeTypes } from "./schema/composite.ts";
+export type { DeclaredCompositeType } from "./schema/composite.ts";
+export { declaredTables, forgetTables, Table } from "./schema/table.ts";
+export type { DeclaredTable } from "./schema/table.ts";
+export { declaredSqlFunctions, forgetSqlFunctions, SqlFunction } from "./schema/function.ts";
+export type { DeclaredSqlFunction, SqlFunctionOptions } from "./schema/function.ts";
+export { declaredSqlTriggers, forgetSqlTriggers, SqlTrigger } from "./schema/trigger.ts";
+export type { DeclaredSqlTrigger, SqlTriggerEvent, SqlTriggerOptions, SqlTriggerTiming } from "./schema/trigger.ts";
+export { declaredSqlCronJobs, forgetSqlCronJobs, SqlCronJob } from "./schema/cron_job.ts";
+export type { DeclaredSqlCronJob, SqlCronJobOptions } from "./schema/cron_job.ts";
 
 export { ListOf, Nested, Required } from "./api/body/mod.ts";
 export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema, PrimitiveType } from "./api/body/mod.ts";

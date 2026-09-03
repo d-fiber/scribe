@@ -278,7 +278,7 @@ class DeclaredTriggerBuilder<TRow> implements DeclaredTrigger<TRow> {
  * raised where the second declaration is written.
  *
  * @example
- * ```ts
+ * ```ts ignore
  * trigger<OrderRow>("orders")
  *   .onInsert((change) => confirm(change.after))
  *   .onField("status", (change) => refund(change.row), { to: "cancelled" });

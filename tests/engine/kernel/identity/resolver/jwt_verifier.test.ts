@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import "@scribe/testing/settings.ts";
 import { JwtVerifier } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
 import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
@@ -66,14 +68,14 @@ function endUser(overrides: Claims = {}): Promise<string> {
   });
 }
 
-Deno.test("verify: a well-formed end-user token is accepted", async () => {
+Scribe.test("verify: a well-formed end-user token is accepted", async () => {
   const payload = await JwtVerifier.verify(await endUser());
 
   assertNotEquals(payload, null);
   assertEquals(payload?.sub, "user-1");
 });
 
-Deno.test("verify: a service-role token signed with the same secret is refused", async () => {
+Scribe.test("verify: a service-role token signed with the same secret is refused", async () => {
   const serviceRole = await hs256({
     role: "service_role",
     aud: "authenticated",
@@ -87,36 +89,36 @@ Deno.test("verify: a service-role token signed with the same secret is refused",
   );
 });
 
-Deno.test("verify: an anon token is refused", async () => {
+Scribe.test("verify: an anon token is refused", async () => {
   const anon = await hs256({ role: "anon", aud: "authenticated", sub: "anon" });
 
   assertEquals(await JwtVerifier.verify(anon), null);
 });
 
-Deno.test("verify: a token without a role claim is refused", async () => {
+Scribe.test("verify: a token without a role claim is refused", async () => {
   assertEquals(await JwtVerifier.verify(await hs256({ sub: "user-1", aud: "authenticated" })), null);
 });
 
-Deno.test("verify: a token without a subject is refused", async () => {
+Scribe.test("verify: a token without a subject is refused", async () => {
   assertEquals(await JwtVerifier.verify(await endUser({ sub: undefined })), null);
 });
 
-Deno.test("verify: an empty subject is refused", async () => {
+Scribe.test("verify: an empty subject is refused", async () => {
   assertEquals(await JwtVerifier.verify(await endUser({ sub: "" })), null);
 });
 
-Deno.test("verify: the wrong audience is refused", async () => {
+Scribe.test("verify: the wrong audience is refused", async () => {
   assertEquals(await JwtVerifier.verify(await endUser({ aud: "anon" })), null);
   assertEquals(await JwtVerifier.verify(await endUser({ aud: undefined })), null);
 });
 
-Deno.test("verify: an expired token is refused", async () => {
+Scribe.test("verify: an expired token is refused", async () => {
   const expired = await endUser({ exp: Math.floor(Date.now() / 1000) - 60 });
 
   assertEquals(await JwtVerifier.verify(expired), null);
 });
 
-Deno.test("verify: a token signed with another secret is refused", async () => {
+Scribe.test("verify: a token signed with another secret is refused", async () => {
   const foreign = await new SignJWT({ role: "authenticated", sub: "user-1" })
     .setProtectedHeader({ alg: "HS256" })
     .setAudience("authenticated")
@@ -126,7 +128,7 @@ Deno.test("verify: a token signed with another secret is refused", async () => {
   assertEquals(await JwtVerifier.verify(foreign), null);
 });
 
-Deno.test("verify: alg none is refused", async () => {
+Scribe.test("verify: alg none is refused", async () => {
   const header = btoa(JSON.stringify({ alg: "none", typ: "JWT" }))
     .replace(/=+$/, "");
   const body = btoa(
@@ -141,7 +143,7 @@ Deno.test("verify: alg none is refused", async () => {
   assertEquals(await JwtVerifier.verify(`${header}.${body}.`), null);
 });
 
-Deno.test("verify: an unlisted algorithm is refused", async () => {
+Scribe.test("verify: an unlisted algorithm is refused", async () => {
   const hs512 = await hs256(
     { sub: "user-1", role: "authenticated", aud: "authenticated" },
     "HS512",
@@ -154,7 +156,7 @@ Deno.test("verify: an unlisted algorithm is refused", async () => {
   );
 });
 
-Deno.test("verify: garbage never throws, it returns null", async () => {
+Scribe.test("verify: garbage never throws, it returns null", async () => {
   for (const bad of ["", "   ", "a.b", "a.b.c", "....", "x".repeat(5000)]) {
     assertEquals(await JwtVerifier.verify(bad), null, `"${bad.slice(0, 8)}"`);
   }
@@ -187,7 +189,7 @@ async function errorsOf(run: () => Promise<void>): Promise<string[]> {
   return written;
 }
 
-Deno.test("verify: a deployment with no identity service refuses in silence", async () => {
+Scribe.test("verify: a deployment with no identity service refuses in silence", async () => {
   await withAuthUrl(undefined, async () => {
     const written = await errorsOf(async () => {
       for (let call = 0; call < 5; call++) assertEquals(await JwtVerifier.verify(ASYMMETRIC), null);
@@ -201,7 +203,7 @@ Deno.test("verify: a deployment with no identity service refuses in silence", as
   });
 });
 
-Deno.test("verify: an address that is set and unusable is named once, not once per token", async () => {
+Scribe.test("verify: an address that is set and unusable is named once, not once per token", async () => {
   await withAuthUrl("not a url at all", async () => {
     const written = await errorsOf(async () => {
       for (let call = 0; call < 5; call++) assertEquals(await JwtVerifier.verify(ASYMMETRIC), null);
@@ -212,7 +214,7 @@ Deno.test("verify: an address that is set and unusable is named once, not once p
   });
 });
 
-Deno.test("verify: the key set follows the address, instead of freezing on the first one read", async () => {
+Scribe.test("verify: the key set follows the address, instead of freezing on the first one read", async () => {
   await withAuthUrl("https://first.example", async () => {
     await JwtVerifier.verify(ASYMMETRIC);
   });
@@ -240,13 +242,13 @@ async function declaring(jwtAlgorithms: readonly string[], run: () => Promise<vo
   }
 }
 
-Deno.test("verify: a deployment that declares nothing takes what it has key material for", async () => {
+Scribe.test("verify: a deployment that declares nothing takes what it has key material for", async () => {
   await declaring([], async () => {
     assertNotEquals(await JwtVerifier.verify(await endUser()), null);
   });
 });
 
-Deno.test("verify: a deployment that names its algorithms refuses the ones it did not name", async () => {
+Scribe.test("verify: a deployment that names its algorithms refuses the ones it did not name", async () => {
   await declaring(["ES256"], async () => {
     assertEquals(
       await JwtVerifier.verify(await endUser()),
@@ -257,7 +259,7 @@ Deno.test("verify: a deployment that names its algorithms refuses the ones it di
   });
 });
 
-Deno.test("verify: naming both is what a rotation does while the old tokens live out their hour", async () => {
+Scribe.test("verify: naming both is what a rotation does while the old tokens live out their hour", async () => {
   await declaring(["ES256", "HS256"], async () => {
     assertNotEquals(await JwtVerifier.verify(await endUser()), null);
   });

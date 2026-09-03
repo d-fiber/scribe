@@ -69,6 +69,13 @@ export class WorkerClient {
     readonly fetcher?: Fetcher,
   ) {}
 
+  /**
+   * Asks the worker to describe itself: the handshake call that returns its manifest.
+   *
+   * @remarks
+   * Sends this host's protocol version and callback address alongside `capabilityToken`, so the
+   * worker knows both what it is talking to and where to redeem the token later.
+   */
   describe(capabilityToken: string): Future<Manifest> {
     return this.#channel(capabilityToken, "").call(Registration.method.describe, {
       hostProtocolVersion: PROTOCOL_VERSION,
@@ -77,6 +84,7 @@ export class WorkerClient {
     });
   }
 
+  /** Sends `invocation` to the worker and answers its reply: the call behind every procedure dispatch. */
   invoke(invocation: Invocation): Future<Reply> {
     return this.#channel(invocation.capabilityToken, invocation.traceId).call(
       WorkerService.method.invoke,
@@ -84,6 +92,7 @@ export class WorkerClient {
     );
   }
 
+  /** Hands `messages` to the worker for `queueId`, each carrying its own delivery attempt count. */
   dispatchQueue(
     queueId: string,
     capabilityToken: string,
@@ -103,6 +112,7 @@ export class WorkerClient {
     });
   }
 
+  /** Hands the worker one `event` fired by `hookId`, with `payload` as the trigger's raw bytes. */
   dispatchHook(
     hookId: string,
     event: string,
@@ -120,6 +130,7 @@ export class WorkerClient {
     });
   }
 
+  /** Fires the scheduled run of `cronId` on the worker, carrying when it was due to run. */
   triggerCron(cronId: string, capabilityToken: string, traceId: string, scheduledAt: number) {
     return this.#channel(capabilityToken, traceId).call(CronDispatch.method.trigger, {
       cronId,

@@ -34,10 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals } from "@std/assert";
 import { installAllMock, installMock } from "@scribe/testing/install.ts";
 
-Deno.test("installMock: swaps a value property and restore() puts the original back", () => {
+Scribe.test("installMock: swaps a value property and restore() puts the original back", () => {
   const target = { greet: () => "real" };
   const original = target.greet;
 
@@ -48,7 +50,7 @@ Deno.test("installMock: swaps a value property and restore() puts the original b
   assertEquals(target.greet, original);
 });
 
-Deno.test("installMock: restore() deletes the property if it didn't exist before", () => {
+Scribe.test("installMock: restore() deletes the property if it didn't exist before", () => {
   const target: { extra?: () => string } = {};
 
   const installed = installMock(target, "extra", () => "fake");
@@ -59,7 +61,7 @@ Deno.test("installMock: restore() deletes the property if it didn't exist before
   assertEquals(Object.prototype.hasOwnProperty.call(target, "extra"), false);
 });
 
-Deno.test("installMock: preserves the original enumerable flag across install/restore", () => {
+Scribe.test("installMock: preserves the original enumerable flag across install/restore", () => {
   const target: Record<string, unknown> = {};
   Object.defineProperty(target, "hidden", {
     value: "real",
@@ -77,7 +79,7 @@ Deno.test("installMock: preserves the original enumerable flag across install/re
   assertEquals(Object.getOwnPropertyDescriptor(target, "hidden")?.enumerable, false);
 });
 
-Deno.test("installMock: swaps a static getter and restore() re-installs the getter itself, not a frozen snapshot", () => {
+Scribe.test("installMock: swaps a static getter and restore() re-installs the getter itself, not a frozen snapshot", () => {
   class Target {
     static #calls = 0;
     static get instance(): { call: number } {
@@ -97,7 +99,7 @@ Deno.test("installMock: swaps a static getter and restore() re-installs the gett
   assertEquals(Target.instance, { call: 2 });
 });
 
-Deno.test("installAllMock: copies every own property except length/name/prototype/constructor and _-prefixed ones", () => {
+Scribe.test("installAllMock: copies every own property except length/name/prototype/constructor and _-prefixed ones", () => {
   class Target {
     static a = "real-a";
     static _private = "real-private";
@@ -118,7 +120,7 @@ Deno.test("installAllMock: copies every own property except length/name/prototyp
   assertEquals(Target.b(), "real-b");
 });
 
-Deno.test("installAllMock: restore() reverts every swapped property at once", () => {
+Scribe.test("installAllMock: restore() reverts every swapped property at once", () => {
   class Target {
     static a = 1;
     static b = 2;

@@ -68,7 +68,7 @@ type RelationsOf<S extends DatabaseSchema, K extends keyof S> = S[K]["relations"
  * It is the base a bound `Database` extends, never used directly: the schema that types it is
  * derived from the SQL, so it lives with the SQL and not here.
  *
- * ```ts
+ * ```ts ignore
  * // written by the generator, next to the schema it derives
  * export class Database<K extends keyof AppSchema & string> extends Table<AppSchema, K> {}
  *

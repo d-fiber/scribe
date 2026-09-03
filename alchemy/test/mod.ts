@@ -46,9 +46,10 @@
  * something that runs and nothing here does.
  */
 
-export { expect, expectLater, fail } from "./expect/expect.ts";
+export { caught, expect, expectLater, fail } from "./expect/expect.ts";
 
 export {
+  allOf,
   contains,
   equals,
   greaterThan,
@@ -91,6 +92,9 @@ export { NoCallReadError } from "./mock/recorder.ts";
 export type { Invocation } from "./mock/recorder.ts";
 
 export { MemoryFileSystem, MemoryFileSystemDriver, MissingFileError } from "./memory/files.ts";
+export { MemoryEnvironment } from "./memory/env.ts";
+export { MemoryCommands } from "./memory/commands.ts";
+export type { CommandAnswer, RanCommand } from "./memory/commands.ts";
 export { MemoryCache, MemoryCaches } from "./memory/cache.ts";
 export { MemoryQueue, MemoryQueues } from "./memory/queue.ts";
 export { MemoryHook, MemoryHooks } from "./memory/hook.ts";

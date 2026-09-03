@@ -34,6 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import "@scribe/runtime/scholium/runner.ts";
+import { Scribe } from "@scribe/alchemy/test";
 import { DirectoryServiceResolver } from "@scribe/shell/platform/edge/services/directory_service_resolver.ts";
 import type { ModuleProbe } from "@scribe/shell/platform/edge/services/module_probe.ts";
 import { ResolutionCache } from "@scribe/shell/platform/edge/services/resolution_cache.ts";
@@ -57,7 +59,7 @@ function resolver(...known: string[]) {
   return { probe, resolver: new DirectoryServiceResolver(ROOT, probe) };
 }
 
-Deno.test("DirectoryServiceResolver finds a two-segment service under api/public", async () => {
+Scribe.test("DirectoryServiceResolver finds a two-segment service under api/public", async () => {
   const { resolver: subject } = resolver(`${ROOT}/api/public/admin`);
 
   assertEquals(await subject.resolve("/public/admin/team/roles"), {
@@ -66,7 +68,7 @@ Deno.test("DirectoryServiceResolver finds a two-segment service under api/public
   });
 });
 
-Deno.test("DirectoryServiceResolver finds a two-segment service at the root", async () => {
+Scribe.test("DirectoryServiceResolver finds a two-segment service at the root", async () => {
   const { resolver: subject } = resolver(`${ROOT}/internal/gotrue`);
 
   assertEquals(await subject.resolve("/internal/gotrue/email"), {
@@ -75,7 +77,7 @@ Deno.test("DirectoryServiceResolver finds a two-segment service at the root", as
   });
 });
 
-Deno.test("DirectoryServiceResolver falls back to a single segment under api/", async () => {
+Scribe.test("DirectoryServiceResolver falls back to a single segment under api/", async () => {
   const { resolver: subject } = resolver(`${ROOT}/api/internal/vpn`);
 
   assertEquals(await subject.resolve("/vpn/config"), {
@@ -84,7 +86,7 @@ Deno.test("DirectoryServiceResolver falls back to a single segment under api/", 
   });
 });
 
-Deno.test("DirectoryServiceResolver prefers the two-segment match over the single one", async () => {
+Scribe.test("DirectoryServiceResolver prefers the two-segment match over the single one", async () => {
   const { resolver: subject } = resolver(
     `${ROOT}/api/public/admin`,
     `${ROOT}/api/public`,
@@ -95,7 +97,7 @@ Deno.test("DirectoryServiceResolver prefers the two-segment match over the singl
   assertEquals(resolved?.service, "public/admin");
 });
 
-Deno.test("DirectoryServiceResolver falls back to the bare service path when nothing exists", async () => {
+Scribe.test("DirectoryServiceResolver falls back to the bare service path when nothing exists", async () => {
   const { resolver: subject } = resolver();
 
   assertEquals(await subject.resolve("/unknown/thing"), {
@@ -104,7 +106,7 @@ Deno.test("DirectoryServiceResolver falls back to the bare service path when not
   });
 });
 
-Deno.test("DirectoryServiceResolver returns null on an empty path", async () => {
+Scribe.test("DirectoryServiceResolver returns null on an empty path", async () => {
   const { resolver: subject, probe } = resolver();
 
   assertEquals(await subject.resolve("/"), null);
@@ -112,7 +114,7 @@ Deno.test("DirectoryServiceResolver returns null on an empty path", async () => 
   assertEquals(probe.probed.length, 0);
 });
 
-Deno.test("DirectoryServiceResolver probes the documented prefix order", async () => {
+Scribe.test("DirectoryServiceResolver probes the documented prefix order", async () => {
   const { resolver: subject, probe } = resolver();
 
   await subject.resolve("/a/b");
@@ -128,7 +130,7 @@ Deno.test("DirectoryServiceResolver probes the documented prefix order", async (
   ]);
 });
 
-Deno.test("DirectoryServiceResolver probes the same path only once", async () => {
+Scribe.test("DirectoryServiceResolver probes the same path only once", async () => {
   const { resolver: subject, probe } = resolver(`${ROOT}/api/internal/vpn`);
 
   await subject.resolve("/vpn/config");
@@ -139,7 +141,7 @@ Deno.test("DirectoryServiceResolver probes the same path only once", async () =>
   assertEquals(probe.probed.length, afterFirst);
 });
 
-Deno.test("DirectoryServiceResolver reuses a single-segment match across sub-paths", async () => {
+Scribe.test("DirectoryServiceResolver reuses a single-segment match across sub-paths", async () => {
   const { resolver: subject, probe } = resolver(`${ROOT}/api/internal/vpn`);
 
   await subject.resolve("/vpn/config");
@@ -154,7 +156,7 @@ Deno.test("DirectoryServiceResolver reuses a single-segment match across sub-pat
   ]);
 });
 
-Deno.test("DirectoryServiceResolver remembers that nothing matched", async () => {
+Scribe.test("DirectoryServiceResolver remembers that nothing matched", async () => {
   const { resolver: subject, probe } = resolver();
 
   assertEquals(await subject.resolve("/unknown/thing"), {
@@ -170,7 +172,7 @@ Deno.test("DirectoryServiceResolver remembers that nothing matched", async () =>
   assertEquals(probe.probed.length, afterFirst);
 });
 
-Deno.test("DirectoryServiceResolver keeps resolving once the cache is full", async () => {
+Scribe.test("DirectoryServiceResolver keeps resolving once the cache is full", async () => {
   const probe = new KnownDirectories(new Set([`${ROOT}/api/internal/vpn`]));
   const subject = new DirectoryServiceResolver(
     ROOT,
@@ -192,7 +194,7 @@ Deno.test("DirectoryServiceResolver keeps resolving once the cache is full", asy
   });
 });
 
-Deno.test("ResolutionCache never grows past its limit", () => {
+Scribe.test("ResolutionCache never grows past its limit", () => {
   const cache = new ResolutionCache(4);
 
   for (let index = 0; index < 100; index++) {
