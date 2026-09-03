@@ -37,6 +37,7 @@
 import { cacheSettings } from "@scribe/foundation/cache";
 import { databaseSettings } from "@scribe/foundation/database";
 import { queueSettings } from "@scribe/foundation/queue";
+import type { QueueSettings } from "@scribe/foundation";
 import { RedisRateLimiters } from "@scribe/foundation/rate_limit";
 import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
 import { runMounted } from "@scribe/runtime/support/packages/mounted.ts";
@@ -129,8 +130,37 @@ function maxInflightBodyBytes(): number {
   return megabytes * 1024 * 1024;
 }
 
+/**
+ * Which broker the queue is declared against, and what that broker needs to reach it.
+ *
+ * @remarks
+ * `QUEUE_DRIVER` defaults to `"nats"`, so a deployment that has never heard of the other two
+ * boots exactly as it did before this setting existed. Neither `sqs` nor `pubsub` reads a
+ * credential from here: both SDKs resolve one from the identity the compute runs as, which is
+ * the point of offering a queue that authenticates by IAM rather than by a secret this settings
+ * object would otherwise have to carry.
+ *
+ * @throws {Error} When `QUEUE_DRIVER` names anything this framework does not carry a driver for.
+ */
+function queueSettingsFromEnvironment(): QueueSettings {
+  const driver = environment().get("QUEUE_DRIVER") || "nats";
+
+  switch (driver) {
+    case "nats":
+      return { driver: "nats", natsUrl: required("NATS_URL") };
+    case "sqs":
+      return { driver: "sqs", region: required("AWS_REGION") };
+    case "pubsub":
+      return { driver: "pubsub", projectId: required("GOOGLE_CLOUD_PROJECT") };
+    default:
+      throw new Error(
+        `QUEUE_DRIVER names "${driver}", which this framework does not know. It knows nats, sqs, pubsub.`,
+      );
+  }
+}
+
 cacheSettings.use({ redisUrl: required("REDIS_URL") });
-queueSettings.use({ natsUrl: required("NATS_URL") });
+queueSettings.use(queueSettingsFromEnvironment());
 databaseSettings.use({
   restUrl: required("REST_INTERNAL_URL"),
   anonKey: required("ANON_KEY"),
