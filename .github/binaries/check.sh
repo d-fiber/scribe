@@ -43,7 +43,7 @@ MAXIMUM_BYTES=5242880
 MAXIMUM_NAME="5 MB"
 SAMPLE_BYTES=8192
 
-ALLOWED=""
+ALLOWED="images/logo-transparent.png"
 
 say() {
   echo "[$SCOPE] $1"
@@ -52,8 +52,8 @@ say() {
 cd "$ROOT"
 
 is_allowed() {
-  for allowed in $ALLOWED; do
-    [ "$1" = "$allowed" ] && return 0
+  for entry in $ALLOWED; do
+    [ "$1" = "$entry" ] && return 0
   done
   return 1
 }
