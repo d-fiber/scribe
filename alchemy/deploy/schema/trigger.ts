@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../declare/registry.ts";
-import type { UnmodifiableList } from "../value/list.ts";
+import { Registry } from "../../declare/registry.ts";
+import type { UnmodifiableList } from "../../value/list.ts";
 
 /** When a trigger fires relative to the row event it watches. */
 export type SqlTriggerTiming = "before" | "after" | "instead of";
@@ -101,7 +101,10 @@ const declared = new Registry<DeclaredSqlTrigger>("trigger");
  * });
  * ```
  */
-export function SqlTrigger(name: string, options: SqlTriggerOptions): DeclaredSqlTrigger {
+export function SqlTrigger(
+  name: string,
+  options: SqlTriggerOptions,
+): DeclaredSqlTrigger {
   return declared.declare(name, { name, options });
 }
 

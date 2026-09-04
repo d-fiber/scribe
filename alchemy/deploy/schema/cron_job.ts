@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../declare/registry.ts";
-import type { UnmodifiableList } from "../value/list.ts";
+import { Registry } from "../../declare/registry.ts";
+import type { UnmodifiableList } from "../../value/list.ts";
 
 /** What `SqlCronJob` takes: when it runs, and the SQL it runs. */
 export interface SqlCronJobOptions {
@@ -86,7 +86,10 @@ const declared = new Registry<DeclaredSqlCronJob>("cron job");
  * });
  * ```
  */
-export function SqlCronJob(name: string, options: SqlCronJobOptions): DeclaredSqlCronJob {
+export function SqlCronJob(
+  name: string,
+  options: SqlCronJobOptions,
+): DeclaredSqlCronJob {
   return declared.declare(name, { name, options });
 }
 

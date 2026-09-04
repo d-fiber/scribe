@@ -34,10 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../declare/registry.ts";
+import { Registry } from "../../declare/registry.ts";
 import { columnsOf } from "./column.ts";
 import type { ColumnDefinition, ColumnMetadata } from "./column.ts";
-import type { UnmodifiableList } from "../value/list.ts";
+import type { UnmodifiableList } from "../../value/list.ts";
 
 /** A table exactly as `@Table` declared it. */
 export interface DeclaredTable {
@@ -87,7 +87,10 @@ const declared = new Registry<DeclaredTable>("table");
  * ```
  */
 export function Table(name: string) {
-  return function (_target: Constructible, context: ClassDecoratorContext): void {
+  return function (
+    _target: Constructible,
+    context: ClassDecoratorContext,
+  ): void {
     const metadata = context.metadata as ColumnMetadata;
     declared.declare(name, { name, columns: columnsOf(metadata) });
   };

@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../declare/registry.ts";
-import type { UnmodifiableList } from "../value/list.ts";
+import { Registry } from "../../declare/registry.ts";
+import type { UnmodifiableList } from "../../value/list.ts";
 
 /** An enum exactly as {@link Enum} declared it. */
 export interface DeclaredEnum {
@@ -70,7 +70,10 @@ const declared = new Registry<DeclaredEnum>("enum");
  * Enum("client_type", ["ios", "android", "web"]);
  * ```
  */
-export function Enum(name: string, values: UnmodifiableList<string>): DeclaredEnum {
+export function Enum(
+  name: string,
+  values: UnmodifiableList<string>,
+): DeclaredEnum {
   return declared.declare(name, { name, values });
 }
 

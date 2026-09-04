@@ -55,10 +55,17 @@ export const DEPLOY = "deploy";
  * A directory is harvested whole, subdirectories included, and the files are played in the order
  * their paths sort in. That is what a numeric prefix on a file or a directory is for.
  */
-export const DATABASE_MOMENTS: UnmodifiableList<string> = ["init", "migrations", "provisioning"];
+export const DATABASE_MOMENTS: UnmodifiableList<string> = [
+  "init",
+  "migrations",
+  "provisioning",
+];
 
 /** The moments a package cannot leave out: the container build, and every start after it. */
-export const REQUIRED_DATABASE_MOMENTS: UnmodifiableList<string> = ["init", "migrations"];
+export const REQUIRED_DATABASE_MOMENTS: UnmodifiableList<string> = [
+  "init",
+  "migrations",
+];
 
 /**
  * The names a service fragment goes by, and the whole of them.
@@ -84,14 +91,16 @@ export const SERVICE_FRAGMENTS: UnmodifiableList<string> = [
  *
  * @remarks
  * `db` is the only one a package cannot omit. `services/` holds one directory per service,
- * `recipes/` one per resource type, and the three files are read where they sit: `overlay.yaml`
- * mounts `deploy/db/` into a base service, `configuration.yaml` names what a project tunes and
- * requires, `packages.env` is the package's own slice of the environment.
+ * `recipes/` one per resource type, and the four files are read where they sit: `deploy.ts` is the
+ * source a package's `@Deploy` declares against, `overlay.yaml` mounts `deploy/db/` into a base
+ * service, `configuration.yaml` names what a project tunes and requires, `packages.env` is the
+ * package's own slice of the environment.
  */
 export const DEPLOY_ENTRIES: UnmodifiableList<string> = [
   "db",
   "services",
   "recipes",
+  "deploy.ts",
   "overlay.yaml",
   "configuration.yaml",
   "packages.env",

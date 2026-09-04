@@ -34,10 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../declare/registry.ts";
+import { Registry } from "../../declare/registry.ts";
 import { columnsOf } from "./column.ts";
 import type { ColumnMetadata, ColumnType } from "./column.ts";
-import type { UnmodifiableList } from "../value/list.ts";
+import type { UnmodifiableList } from "../../value/list.ts";
 
 /** A composite type exactly as `@CompositeType` declared it. */
 export interface DeclaredCompositeType {
@@ -80,7 +80,10 @@ const declared = new Registry<DeclaredCompositeType>("type");
  * ```
  */
 export function CompositeType(name: string) {
-  return function (_target: Constructible, context: ClassDecoratorContext): void {
+  return function (
+    _target: Constructible,
+    context: ClassDecoratorContext,
+  ): void {
     const metadata = context.metadata as ColumnMetadata;
     const fields: Record<string, ColumnType> = {};
     for (const [field, definition] of Object.entries(columnsOf(metadata))) {
@@ -91,7 +94,9 @@ export function CompositeType(name: string) {
 }
 
 /** Every composite type this package has declared, in the order it declared them. */
-export function declaredCompositeTypes(): UnmodifiableList<DeclaredCompositeType> {
+export function declaredCompositeTypes(): UnmodifiableList<
+  DeclaredCompositeType
+> {
   return declared.all();
 }
 

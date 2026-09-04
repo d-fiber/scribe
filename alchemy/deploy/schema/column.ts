@@ -74,7 +74,17 @@ export interface ColumnReference {
 
 /** The Postgres type `@Column` takes, one shape per {@link ColumnType} that carries data of its own. */
 export type ColumnTypeOptions =
-  | { readonly type: "uuid" | "text" | "bigint" | "integer" | "boolean" | "timestamptz" | "jsonb" | "bigserial" }
+  | {
+    readonly type:
+      | "uuid"
+      | "text"
+      | "bigint"
+      | "integer"
+      | "boolean"
+      | "timestamptz"
+      | "jsonb"
+      | "bigserial";
+  }
   | { readonly type: "varchar"; readonly length: number }
   | { readonly type: "enum"; readonly name: string }
   | { readonly type: "composite"; readonly name: string };
@@ -167,7 +177,10 @@ export type ColumnMetadata = Record<string, ColumnOptions>;
  * ```
  */
 export function Column(options: ColumnOptions) {
-  return function (_value: undefined, context: ClassFieldDecoratorContext): void {
+  return function (
+    _value: undefined,
+    context: ClassFieldDecoratorContext,
+  ): void {
     const held = context.metadata as ColumnMetadata;
     held[String(context.name)] = options;
   };
@@ -186,7 +199,9 @@ function columnType(options: ColumnOptions): ColumnType {
 }
 
 /** {@link ColumnMetadata} turned into what a table or a composite type carries, by field name. */
-export function columnsOf(metadata: ColumnMetadata): Record<string, ColumnDefinition> {
+export function columnsOf(
+  metadata: ColumnMetadata,
+): Record<string, ColumnDefinition> {
   const columns: Record<string, ColumnDefinition> = {};
 
   for (const [field, options] of Object.entries(metadata)) {

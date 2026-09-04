@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../declare/registry.ts";
-import type { UnmodifiableList } from "../value/list.ts";
+import { Registry } from "../../declare/registry.ts";
+import type { UnmodifiableList } from "../../value/list.ts";
 
 /** What `SqlFunction` takes: a Postgres function's signature and its raw body. */
 export interface SqlFunctionOptions {
@@ -112,7 +112,10 @@ const declared = new Registry<DeclaredSqlFunction>("function");
  * });
  * ```
  */
-export function SqlFunction(name: string, options: SqlFunctionOptions): DeclaredSqlFunction {
+export function SqlFunction(
+  name: string,
+  options: SqlFunctionOptions,
+): DeclaredSqlFunction {
   return declared.declare(name, { name, options });
 }
 
