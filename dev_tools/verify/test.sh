@@ -49,18 +49,30 @@ say() {
   exit 1
 }
 
-say "writing deno.json from scribe.workspace.json"
+say "writing dev_tools/runtime/{deno,bun} from scribe.workspace.json"
 (cd "$ROOT" && bash dev_tools/gen/workspace.sh)
 
+# `test` and `test:net` are targets, declared once in scribe.workspace.json without naming a
+# runtime, and dev_tools/runtime/deno/run.sh is what turns "test:net" into the actual deno flags
+# (--config/--lock, staying at $ROOT, rather than through `deno task`, whose commands run with the
+# config's own directory as their cwd).
 say "running the workspace, offline"
-(cd "$ROOT" && deno task test)
+(cd "$ROOT" && bash dev_tools/runtime/deno/run.sh test)
 
 say "running the workspace, with network access"
-(cd "$ROOT" && deno task test:net)
+(cd "$ROOT" && bash dev_tools/runtime/deno/run.sh test:net)
 
 say "running sdk/js"
 (cd "$ROOT/sdk/js" && deno task test)
 
+# This is not the whole workspace under bun yet: some packages only carry a jsr:-only, Deno-only
+# dependency (@nats-io/transport-deno has no bun-reachable equivalent bound in the import map),
+# which bun cannot resolve at all. What this does prove, on every run, is that specifier
+# resolution and the engine/runtime/scholium/bun/* adapters actually work under a real `bun test`,
+# not just under deno - the gap most likely to go unnoticed if only deno ever ran these.
+say "running the resolution probe under both runtimes"
+(cd "$ROOT" && bash dev_tools/resolution/run.sh all)
+
 echo ""
 say "every suite the CI runs on a push is green."
-say "the end-to-end suites need a stack up and are not part of this, see deno.json."
+say "the end-to-end suites need a stack up and are not part of this, see scribe.workspace.json."

@@ -12,6 +12,7 @@ permissions:
 
 env:
   DENO_VERSION: 2.7.14
+  BUN_VERSION: 1.4.0
 
 concurrency:
   group: tests-${{ github.ref }}
@@ -34,29 +35,47 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/.cache/deno
-          key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
+          key: deno-${{ runner.os }}-${{ hashFiles('dev_tools/runtime/deno/deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
-      - name: Write deno.json from scribe.workspace.json
+      # `check`, `check:examples`, `test`, `test:net`, `lint:builtin` and `lint:custom` are all
+      # targets declared once in scribe.workspace.json without naming a runtime;
+      # dev_tools/runtime/deno/run.sh is what turns a target into deno flags, and is the only
+      # place that does.
+      - name: Write dev_tools/runtime/{deno,bun} from scribe.workspace.json
         run: bash dev_tools/gen/workspace.sh
 
       - name: Type check
-        run: deno task check
+        run: bash dev_tools/runtime/deno/run.sh check
 
       - name: Check that documented examples still compile
-        run: deno task check:examples
+        run: bash dev_tools/runtime/deno/run.sh check:examples
 
       - name: Lint
-        run: deno task lint
+        run: |
+          bash dev_tools/runtime/deno/run.sh lint:builtin
+          bash dev_tools/runtime/deno/run.sh lint:custom
 
       - name: Run tests
-        run: deno task test
+        run: bash dev_tools/runtime/deno/run.sh test
 
       - name: Run tests with network access
-        run: deno task test:net
+        run: bash dev_tools/runtime/deno/run.sh test:net
+
+      # Not the whole workspace under bun yet: a couple of packages carry a jsr:-only, Deno-only
+      # dependency with no bun-reachable equivalent bound in the import map. What this does prove
+      # on every run is that specifier resolution and engine/runtime/scholium/bun/* actually work
+      # under a real `bun test`, not only under deno - the gap most likely to go unnoticed if only
+      # deno ever ran here.
+      - name: Run the resolution probe under bun
+        run: bash dev_tools/resolution/run.sh bun
 
   sdk-js:
     runs-on: ubuntu-latest
@@ -112,11 +131,11 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Write deno.json from scribe.workspace.json
+      - name: Write dev_tools/runtime/{deno,bun} from scribe.workspace.json
         run: bash dev_tools/gen/workspace.sh
 
       - name: Check the formatting
-        run: deno fmt --check
+        run: deno fmt --config dev_tools/runtime/deno/deno.json --check .
 
   tag:
     needs: [engine, sdk-js, binaries, packages, format, protocol, checks]
@@ -162,7 +181,7 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Write deno.json from scribe.workspace.json
+      - name: Write dev_tools/runtime/{deno,bun} from scribe.workspace.json
         run: bash dev_tools/gen/workspace.sh
 
       - name: Report the Deno dependencies that moved
@@ -173,14 +192,18 @@ jobs:
             echo ""
             echo "Dependabot does not read Deno, so this is the only place these show up."
             echo ""
-            for root in engine sdk/js; do
-              echo "### $root"
-              echo ""
-              echo '```'
-              (cd "$root" && deno outdated 2>&1) || echo "could not read $root"
-              echo '```'
-              echo ""
-            done
+            echo "### engine"
+            echo ""
+            echo '```'
+            deno outdated --config dev_tools/runtime/deno/deno.json --lock dev_tools/runtime/deno/deno.lock 2>&1 || echo "could not read engine"
+            echo '```'
+            echo ""
+            echo "### sdk/js"
+            echo ""
+            echo '```'
+            (cd sdk/js && deno outdated 2>&1) || echo "could not read sdk/js"
+            echo '```'
+            echo ""
             echo "Imports pinned by URL are invisible here too. Today that is"
             echo '`jose`, pinned to a fixed version of deno.land/x in scribe.workspace.json.'
           } >> "$GITHUB_STEP_SUMMARY"

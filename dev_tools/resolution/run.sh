@@ -41,7 +41,9 @@ HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT=$(cd "$HERE/../.." && pwd)
 
 run_deno() {
-  (cd "$ROOT" && deno test --allow-env --allow-sys --allow-read dev_tools/resolution/deno/sample.test.ts)
+  (cd "$ROOT" && deno test \
+    --config dev_tools/runtime/deno/deno.json --lock dev_tools/runtime/deno/deno.lock \
+    --allow-env --allow-sys --allow-read dev_tools/resolution/deno/sample.test.ts)
 }
 
 run_bun() {

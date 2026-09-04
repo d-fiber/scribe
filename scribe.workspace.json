@@ -4,12 +4,30 @@
     "packages/*/tests/e2e/fixtures",
     "packages/*/tests/e2e/.e2e"
   ],
-  "tasks": {
-    "check": "deno check engine packages",
-    "check:examples": "deno test --doc --no-run engine alchemy packages",
-    "test": "deno test --allow-env --allow-sys --allow-read --allow-write --allow-run --allow-net=127.0.0.1 --env-file=tests/.env.test --parallel engine packages tests",
-    "test:net": "deno test --allow-env --allow-sys --allow-read --allow-write --allow-run --allow-net --env-file=tests/.env.test --parallel engine packages tests",
-    "lint": "deno lint && deno run --allow-read --allow-env .lint/run.ts",
+  "targets": {
+    "check": {
+      "dirs": ["engine", "packages"]
+    },
+    "check:examples": {
+      "dirs": ["engine", "alchemy", "packages"],
+      "docsOnly": true
+    },
+    "test": {
+      "dirs": ["engine", "packages", "tests"],
+      "envFile": "tests/.env.test",
+      "network": "loopback"
+    },
+    "test:net": {
+      "dirs": ["engine", "packages", "tests"],
+      "envFile": "tests/.env.test",
+      "network": "full"
+    },
+    "lint:custom": {
+      "script": ".lint/run.ts"
+    },
+    "lint:builtin": {}
+  },
+  "tools": {
     "gen:workspace": "bash dev_tools/gen/workspace.sh"
   },
   "fmt": {

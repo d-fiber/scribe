@@ -52,7 +52,7 @@ paths=$(jq '
       end
     )
   | from_entries
-' "$ROOT/scribe.imports.json")
+' "$ROOT/dev_tools/runtime/imports.json")
 
 jq -n --argjson paths "$paths" '{compilerOptions: {baseUrl: "../../..", paths: $paths}}' \
   > "$HERE/generated.tsconfig.json"

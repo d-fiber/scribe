@@ -49,15 +49,18 @@ say() {
   exit 1
 }
 
-say "writing deno.json from scribe.workspace.json"
+say "writing dev_tools/runtime/{deno,bun} from scribe.workspace.json"
 (cd "$ROOT" && bash dev_tools/gen/workspace.sh)
 
+# `check`, `lint:builtin` and `lint:custom` are all targets declared once in
+# scribe.workspace.json without naming a runtime; dev_tools/runtime/deno/run.sh is what turns a
+# target into deno flags (--config/--lock, staying at $ROOT), and is the only place that does.
 say "linting the workspace"
-(cd "$ROOT" && deno lint)
-(cd "$ROOT" && deno run --allow-read --allow-env .lint/run.ts)
+(cd "$ROOT" && bash dev_tools/runtime/deno/run.sh lint:builtin)
+(cd "$ROOT" && bash dev_tools/runtime/deno/run.sh lint:custom)
 
 say "type checking the workspace"
-(cd "$ROOT" && deno task check)
+(cd "$ROOT" && bash dev_tools/runtime/deno/run.sh check)
 
 say "type checking sdk/js"
 (cd "$ROOT/sdk/js" && deno task check)

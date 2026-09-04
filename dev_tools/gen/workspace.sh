@@ -75,6 +75,35 @@ def resolve_path(layer; target):
   end;
 '
 
+# deno's own glob matching for `exclude` breaks on a pattern that mixes a "*" wildcard with a
+# config file that is not itself the directory being scanned — which dev_tools/runtime/deno/ never
+# is, now that deno.json lives under it rather than at the root. A literal (wildcard-free) entry is
+# unaffected, so a "*" entry is expanded here, against the real tree, into the literal paths it
+# currently matches; scribe.workspace.json keeps writing the wildcard, since expansion runs fresh
+# on every gen:workspace and a package added or removed is picked up the same way $layer_imports
+# already is.
+expand_globs() {
+  local patterns out path
+  patterns=$(cat)
+  out="[]"
+  shopt -s nullglob
+  while IFS= read -r pattern; do
+    if [[ "$pattern" == *'*'* ]]; then
+      local matched=0
+      for path in $pattern; do
+        [ -e "$path" ] || continue
+        matched=1
+        out=$(jq --arg p "$path" '. + [$p]' <<<"$out")
+      done
+      [ "$matched" -eq 1 ] || out=$(jq --arg p "$pattern" '. + [$p]' <<<"$out")
+    else
+      out=$(jq --arg p "$pattern" '. + [$p]' <<<"$out")
+    fi
+  done < <(jq -r '.[]' <<<"$patterns")
+  shopt -u nullglob
+  printf '%s' "$out"
+}
+
 layers_json=$(
   for layer in "${LAYER_DIRS[@]}"; do
     jq --arg layer "$layer" '{layer: $layer, collection: .}' "$layer/_collection.json"
@@ -95,15 +124,88 @@ layer_imports=$(jq -n --argjson layers "$layers_json" "$RESOLVE_PATH"'
   from_entries
 ')
 
-deno_json=$(jq --argjson layerImports "$layer_imports" '
+# The logical config: same shape as scribe.workspace.json, root-relative throughout, imports
+# merged with what the layers own. Neither deno nor bun reads this directly — each runtime gets
+# its own translation below, written under dev_tools/runtime/ so the root carries only
+# scribe.workspace.json, the file this repository actually authors by hand.
+merged=$(jq --argjson layerImports "$layer_imports" '
   .imports as $current |
   ($layerImports | keys) as $owned |
   ($current | with_entries(select(.key as $k | ($owned | index($k)) | not))) as $kept |
   .imports = ($kept + $layerImports | to_entries | sort_by(.key) | from_entries)
 ' scribe.workspace.json)
-printf '%s\n' "$deno_json" > deno.json
 
-jq '{imports}' <<<"$deno_json" > scribe.imports.json
+mkdir -p dev_tools/runtime/deno dev_tools/runtime/bun
+
+# dev_tools/runtime/imports.json: the runtime-neutral import map, root-relative, that both
+# translations below read from. `deno task check`, `deno lint` and friends never read this
+# themselves; only the bun tsconfig generation does, and dev_tools/resolution/bun/generate.sh
+# for its own narrower probe.
+jq '{imports}' <<<"$merged" > dev_tools/runtime/imports.json
+
+# dev_tools/runtime/targets.json: what `check`, `test` and friends mean, named without a runtime
+# in sight — which directories, whether a target only wants documented examples, what a "test"
+# target loads as its env file and how much network it needs. `tools` sits next to it for the
+# handful of commands that were never a "pick a runtime" question to begin with (lint is a
+# static-analysis pass over source text, gen:workspace is this very script), so they stay literal
+# shell rather than pretending to a neutrality they don't have. Every dev_tools/runtime/<rt>/run.sh
+# reads this and turns `targets.<name>` into whatever that runtime's own tools call it — adding a
+# third runtime means adding a third run.sh next to it, not touching this file, scribe.workspace.json
+# or the two run.sh scripts already there.
+jq '{targets, tools}' <<<"$merged" > dev_tools/runtime/targets.json
+
+# The deno.json translation. `imports`, `exclude`, `fmt.exclude` and `lint.exclude` are all
+# resolved relative to wherever deno.json itself lives, so every root-relative path gets a
+# "../../../" climb back to the root three levels up (dev_tools/runtime/deno -> dev_tools/runtime
+# -> dev_tools -> root). `deno task <name>` runs with that same directory as its cwd regardless of
+# where it was invoked from: a `targets` task delegates straight to "./run.sh <name>", which sits
+# in that same directory and does its own "cd back to $ROOT" before touching a root-relative path; a
+# `tools` task has no run.sh to delegate to, so it gets a literal "cd ../../.. &&" instead, the same
+# climb every other relative value in this file needs.
+expanded_exclude=$(jq '.exclude' <<<"$merged" | expand_globs)
+expanded_fmt_exclude=$(jq '.fmt.exclude' <<<"$merged" | expand_globs)
+expanded_lint_exclude=$(jq '.lint.exclude' <<<"$merged" | expand_globs)
+
+target_tasks=$(jq '
+  .targets | keys | map({key: ., value: ("./run.sh " + .)}) | from_entries
+' <<<"$merged")
+tool_tasks=$(jq '.tools | with_entries(.value |= ("cd ../../.. && " + .))' <<<"$merged")
+
+deno_json=$(jq \
+  --argjson exclude "$expanded_exclude" \
+  --argjson fmtExclude "$expanded_fmt_exclude" \
+  --argjson lintExclude "$expanded_lint_exclude" \
+  --argjson targetTasks "$target_tasks" \
+  --argjson toolTasks "$tool_tasks" '
+  .imports |= (with_entries(.value |= (if startswith("./") then "../../../" + .[2:] else . end))) |
+  .exclude = ($exclude | map("../../../" + .)) |
+  .fmt.exclude = ($fmtExclude | map("../../../" + .)) |
+  .lint.exclude = ($lintExclude | map("../../../" + .)) |
+  del(.targets, .tools) |
+  .tasks = ($targetTasks + $toolTasks | to_entries | sort_by(.key) | from_entries)
+' <<<"$merged")
+printf '%s\n' "$deno_json" > dev_tools/runtime/deno/deno.json
+
+# The bun translation: bun and tsc both understand a tsconfig's `paths`, not deno.json's
+# `imports`, so the same import map becomes a path map instead. npm:/jsr: specifiers are left out
+# since bun resolves those from its own package registry, the way deno resolves them from its
+# own. `baseUrl` climbs the same three levels dev_tools/runtime/bun/ sits under root, so a
+# root-relative value out of the import map needs no further rewriting, unlike deno.json's.
+bun_paths=$(jq '
+  .imports
+  | to_entries
+  | map(select(.value | (startswith("npm:") or startswith("jsr:")) | not))
+  | map(
+      if (.key | endswith("/")) then
+        {key: (.key + "*"), value: [.value + "*"]}
+      else
+        {key, value: [.value]}
+      end
+    )
+  | from_entries
+' <<<"$merged")
+jq -n --argjson paths "$bun_paths" '{compilerOptions: {baseUrl: "../../..", paths: $paths}}' \
+  > dev_tools/runtime/bun/generated.tsconfig.json
 
 sealed_json='{"alchemy/": []}'
 for layer in "${SEALED_LAYERS[@]}"; do
@@ -165,4 +267,8 @@ TS_LICENSE_HEADER='// Copyright (C) 2026 Fiber
     "$(jq '.' <<<"$sealed_json")"
 } > .lint/engine_layers.generated.ts
 
-deno fmt deno.json scribe.imports.json .lint/engine_layers.generated.ts >/dev/null
+deno fmt --config dev_tools/runtime/deno/deno.json \
+  dev_tools/runtime/deno/deno.json \
+  dev_tools/runtime/imports.json \
+  dev_tools/runtime/bun/generated.tsconfig.json \
+  .lint/engine_layers.generated.ts >/dev/null
