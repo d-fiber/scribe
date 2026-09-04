@@ -35,14 +35,47 @@
 // LICENSE file, the LICENSE file governs.
 
 import ts from "typescript";
+import type { FileSystemDriver } from "@scribe/alchemy";
 import { FileSystems } from "@scribe/alchemy";
-import { LocalFileSystems } from "@scribe/runtime/scholium/deno/files.ts";
-import { LocalProcess } from "@scribe/runtime/scholium/deno/process.ts";
+import { LocalFileSystems as BunFileSystems } from "@scribe/runtime/scholium/bun/files.ts";
+import { LocalProcess as BunProcess } from "@scribe/runtime/scholium/bun/process.ts";
+import { LocalFileSystems as DenoFileSystems } from "@scribe/runtime/scholium/deno/files.ts";
+import { LocalProcess as DenoProcess } from "@scribe/runtime/scholium/deno/process.ts";
+import { currentStack } from "@scribe/runtime/scholium/host.ts";
+import type { Process } from "@scribe/runtime/scholium/process.ts";
 import { Processes } from "@scribe/runtime/scholium/process.ts";
 import { RULES } from "./rules.ts";
 
-FileSystems.use(new LocalFileSystems());
-Processes.use(new LocalProcess());
+/**
+ * This is the one file under `.lint/` that reaches a concrete `FileSystemDriver`/`Process` rather
+ * than staying behind the port everything else here uses: dispatched on {@link currentStack} so
+ * the same rules run under either shell dev_tools/runtime carries a `run.sh` for, `deno` and `bun`
+ * alike, the way `engine/runtime/scholium/env.ts` already dispatches {@link localEnvironment}.
+ */
+function localFileSystems(): FileSystemDriver {
+  switch (currentStack()) {
+    case "deno":
+      return new DenoFileSystems();
+    case "bun":
+      return new BunFileSystems();
+    case "node":
+      throw new Error(`No FileSystemDriver ships for the "${currentStack()}" stack.`);
+  }
+}
+
+function localProcess(): Process {
+  switch (currentStack()) {
+    case "deno":
+      return new DenoProcess();
+    case "bun":
+      return new BunProcess();
+    case "node":
+      throw new Error(`No Process ships for the "${currentStack()}" stack.`);
+  }
+}
+
+FileSystems.use(localFileSystems());
+Processes.use(localProcess());
 
 const disk = FileSystems.get().open();
 
