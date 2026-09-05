@@ -243,6 +243,14 @@ export type {
 
 export { declaredExtensions, Extension, ExtensionBuilder, forgetExtensions } from "./iac/schema/objects/extension.ts";
 export type { DeclaredExtension, ExtensionName, ExtensionOptions } from "./iac/schema/objects/extension.ts";
+export {
+  declaredSequences,
+  forgetSequences,
+  Sequence,
+  SequenceBuilder,
+  SequenceMoment,
+} from "./iac/schema/objects/sequence.ts";
+export type { DeclaredSequence, SequenceDataType, SequenceOwner } from "./iac/schema/objects/sequence.ts";
 
 export { env, resolveValue, resource, setting, sizingToken, template } from "./deploy/value.ts";
 export type {
