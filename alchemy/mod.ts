@@ -192,34 +192,84 @@ export type {
   Tables,
 } from "./port/database.ts";
 
-export { Column } from "./deploy/schema/column.ts";
+export {
+  CollatableColumnBuilder,
+  ColumnBuilder,
+  ColumnFactory,
+  columnsOf,
+  IdentityCapableColumnBuilder,
+} from "./iac/schema/types/column.ts";
 export type {
+  ColumnCommonOptions,
   ColumnDefinition,
-  ColumnMetadata,
+  ColumnMap,
   ColumnOptions,
   ColumnReference,
+  ColumnRowType,
   ColumnType,
   ColumnTypeOptions,
-  OnDelete,
-} from "./deploy/schema/column.ts";
-export { declaredEnums, Enum, forgetEnums } from "./deploy/schema/enum.ts";
-export type { DeclaredEnum } from "./deploy/schema/enum.ts";
-export { CompositeType, declaredCompositeTypes, forgetCompositeTypes } from "./deploy/schema/composite.ts";
-export type { DeclaredCompositeType } from "./deploy/schema/composite.ts";
-export { declaredTables, forgetTables, Table } from "./deploy/schema/table.ts";
-export type { DeclaredTable } from "./deploy/schema/table.ts";
-export { declaredSqlFunctions, forgetSqlFunctions, SqlFunction } from "./deploy/schema/function.ts";
-export type { DeclaredSqlFunction, SqlFunctionOptions } from "./deploy/schema/function.ts";
-export { declaredSqlTriggers, forgetSqlTriggers, SqlTrigger } from "./deploy/schema/trigger.ts";
+  DeferrableOptions,
+  GeneratedOptions,
+  IdentityOptions,
+  IntervalFields,
+  RangeSubtype,
+  ReferentialAction,
+  ReferentialMatch,
+  RowOf,
+  ScalarTsType,
+} from "./iac/schema/types/column.ts";
+export { declaredEnums, Enum, EnumBuilder, forgetEnums } from "./iac/schema/types/enum.ts";
+export type { DeclaredEnum } from "./iac/schema/types/enum.ts";
+export { declaredTypes, forgetTypes, Type, TypeBuilder } from "./iac/schema/types/type.ts";
+export type { DeclaredType } from "./iac/schema/types/type.ts";
+export {
+  declaredIndexes,
+  declaredPolicies,
+  declaredTables,
+  forgetIndexes,
+  forgetPolicies,
+  forgetTables,
+  Table,
+  TableBuilder,
+  TableCheckBuilder,
+  TableCheckFactory,
+  TableExcludeBuilder,
+  TableExcludeFactory,
+  TableForeignKeyBuilder,
+  TableForeignKeyFactory,
+  TableGrantBuilder,
+  TableGrantFactory,
+  TableIndexBuilder,
+  TableIndexFactory,
+  TableMoment,
+  TablePolicyBuilder,
+  TablePolicyFactory,
+  TablePrimaryKeyBuilder,
+  TablePrimaryKeyFactory,
+  TableUniqueBuilder,
+  TableUniqueFactory,
+} from "./iac/schema/table/table.ts";
 export type {
-  DeclaredSqlTrigger,
-  SqlTriggerEvent,
-  SqlTriggerOptions,
-  SqlTriggerTiming,
-} from "./deploy/schema/trigger.ts";
-export { declaredSqlCronJobs, forgetSqlCronJobs, SqlCronJob } from "./deploy/schema/cron_job.ts";
-export type { DeclaredSqlCronJob, SqlCronJobOptions } from "./deploy/schema/cron_job.ts";
-
+  CheckConstraint,
+  DeclaredIndex,
+  DeclaredPolicy,
+  DeclaredTable,
+  ExcludeConstraint,
+  ExcludeElement,
+  IndexAccessMethod,
+  IndexColumn,
+  IndexOptions,
+  PolicyCommand,
+  PolicyKind,
+  PolicyOptions,
+  PolicyRole,
+  PrimaryKeyConstraint,
+  TableForeignKey,
+  TableGrant,
+  TableIndex,
+  TablePolicy,
+  UniqueConstraint,
+} from "./iac/schema/table/table.ts";
 export {
   declaredGrants,
   forgetGrants,
@@ -240,7 +290,6 @@ export type {
   GrantTargetKind,
   Privilege,
 } from "./iac/schema/access/grant.ts";
-
 export { declaredExtensions, Extension, ExtensionBuilder, forgetExtensions } from "./iac/schema/objects/extension.ts";
 export type { DeclaredExtension, ExtensionName, ExtensionOptions } from "./iac/schema/objects/extension.ts";
 export {
@@ -254,7 +303,7 @@ export type { DeclaredSequence, SequenceDataType, SequenceOwner } from "./iac/sc
 export { declaredDrops, Drop, DropDeclaration, DropTarget, forgetDrops } from "./iac/schema/lifecycle/drop.ts";
 export type { DeclaredDrop } from "./iac/schema/lifecycle/drop.ts";
 
-export { env, resolveValue, resource, setting, sizingToken, template } from "./deploy/value.ts";
+export { env, resolveValue, resource, setting, sizingToken, template } from "./iac/value.ts";
 export type {
   DeployValue,
   EnvValue,
@@ -265,9 +314,9 @@ export type {
   SizingTokenValue,
   TemplateValue,
   ValueLike,
-} from "./deploy/value.ts";
+} from "./iac/value.ts";
 
-export { Build, declaredServices, forgetServices, Image, Service } from "./deploy/service.ts";
+export { Build, declaredServices, forgetServices, Image, Service } from "./iac/service.ts";
 export type {
   BuildSource,
   ByteSize,
@@ -297,18 +346,12 @@ export type {
   SocleNetwork,
   UlimitName,
   UlimitValue,
-} from "./deploy/service.ts";
+} from "./iac/service.ts";
 
-export { declaredRecipes, forgetRecipes, Outputs, Recipe, Terraform } from "./deploy/recipe.ts";
-export type {
-  DeclaredRecipe,
-  OutputsClass,
-  RecipeOptions,
-  TerraformClass,
-  TerraformDocument,
-} from "./deploy/recipe.ts";
+export { declaredRecipes, forgetRecipes, Outputs, Recipe, Terraform } from "./iac/recipe.ts";
+export type { DeclaredRecipe, OutputsClass, RecipeOptions, TerraformClass, TerraformDocument } from "./iac/recipe.ts";
 
-export { declaredDeploy, Deploy, forgetDeploy, Role, Sql } from "./deploy/deploy.ts";
+export { declaredDeploy, Deploy, forgetDeploy, Role, Sql } from "./iac/deploy.ts";
 export type {
   ConfigurationOptions,
   DeclaredDeploy,
@@ -322,7 +365,7 @@ export type {
   RoleAttribute,
   RoleOptions,
   SettingOptions,
-} from "./deploy/deploy.ts";
+} from "./iac/deploy.ts";
 
 export { ListOf, Nested, Required } from "./api/body/mod.ts";
 export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema, PrimitiveType } from "./api/body/mod.ts";

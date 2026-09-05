@@ -92,7 +92,7 @@ export const SERVICE_FRAGMENTS: UnmodifiableList<string> = [
  * @remarks
  * `db` is the only one a package cannot omit. `services/` holds one directory per service,
  * `recipes/` one per resource type, and the four files are read where they sit: `deploy.ts` is the
- * source a package's `@Deploy` declares against, `overlay.yaml` mounts `deploy/db/` into a base
+ * source a package's `Deploy` call declares against, `overlay.yaml` mounts `deploy/db/` into a base
  * service, `configuration.yaml` names what a project tunes and requires, `packages.env` is the
  * package's own slice of the environment.
  */

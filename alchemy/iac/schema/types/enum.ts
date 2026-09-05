@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../declare/registry.ts";
-import type { UnmodifiableList } from "../../value/list.ts";
+import { Registry } from "../../../declare/registry.ts";
+import type { UnmodifiableList } from "../../../value/list.ts";
 
 /** An enum exactly as {@link Enum} declared it. */
 export interface DeclaredEnum {
@@ -50,31 +50,50 @@ export interface DeclaredEnum {
 const declared = new Registry<DeclaredEnum>("enum");
 
 /**
- * Declares a Postgres enum type named `name`, accepting `values`, without reaching anything.
+ * A Postgres enum type named `name`, growing one value at a time.
  *
  * @remarks
- * A `@Column` takes this enum by name, `{ type: "enum", name: "client_type" }`, in either order:
- * nothing here checks that the name it took resolves, because a column is built before the rest
- * of the package's schema is known to exist. Whatever renders the SQL is what refuses a name that
- * resolves to nothing.
+ * A column opened with `c.enum("booking_status")` takes this enum by name, in either order:
+ * nothing here checks that the name it took resolves, because a column can be declared before the
+ * rest of the package's schema is known to exist. Whatever renders the SQL is what refuses a name
+ * that resolves to nothing.
  *
- * There is no class decorator for an enum the way there is for a table or a composite type: a
- * TypeScript `enum` cannot be decorated at all, and a plain list of values has nothing else to
- * attach to a class.
+ * `Enum` declares under `name` the moment it is called, holding no value yet: unlike `Table` or
+ * `Type`, nothing here closes the chain, so declaring at the first opportunity is what makes
+ * `DuplicateDeclarationError` land on the line that reused a name, rather than on whichever
+ * `.value` call happens to run last. `values` is the same array `Enum` handed to the `Registry`,
+ * so every `.value` call is read the moment anything reads {@link declaredEnums} back, no matter
+ * how much later that happens to be.
+ */
+export class EnumBuilder {
+  readonly #values: string[];
+
+  /** Opened by `Enum`, never directly. */
+  constructor(name: string) {
+    this.#values = [];
+    declared.declare(name, { name, values: this.#values });
+  }
+
+  /** Adds `value` to the values this enum accepts, in the order Postgres will list them. */
+  value(value: string): this {
+    this.#values.push(value);
+    return this;
+  }
+}
+
+/**
+ * Opens a Postgres enum type named `name`.
  *
- * @throws {DuplicateDeclarationError} When `name` has already been declared, raised where the
- * second declaration is written.
+ * @throws {DuplicateDeclarationError} When `name` has already been declared, raised where this is
+ * called.
  *
  * @example
  * ```ts ignore
- * Enum("client_type", ["ios", "android", "web"]);
+ * Enum("booking_status").value("pending").value("confirmed").value("cancelled");
  * ```
  */
-export function Enum(
-  name: string,
-  values: UnmodifiableList<string>,
-): DeclaredEnum {
-  return declared.declare(name, { name, values });
+export function Enum(name: string): EnumBuilder {
+  return new EnumBuilder(name);
 }
 
 /** Every enum this package has declared, in the order it declared them. */

@@ -46,8 +46,8 @@ import type { UnmodifiableList } from "../value/list.ts";
  * `resource`, `provider` and the rest are typed only as objects: what a `resource.aws_s3_bucket`
  * block holds is decided by the `aws` provider's own schema, and closing that here would mean
  * redeclaring every provider's resource catalogue. This closes the one thing that is universal to
- * every `.tf.json` — its six possible top-level blocks — the same boundary `schema/`'s
- * `SqlFunction.body` draws around a function's raw Postgres.
+ * every `.tf.json` — its six possible top-level blocks — the same boundary `schema/`'s own
+ * `Column.defaultValue` draws around a raw Postgres expression.
  */
 export interface TerraformDocument {
   /** The `terraform` block: required providers and their versions. */

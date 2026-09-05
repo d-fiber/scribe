@@ -39,12 +39,12 @@ import { resolveValue } from "./value.ts";
 import type { DeployValue, Loose, ValueLike } from "./value.ts";
 import type { DeclaredRecipe } from "./recipe.ts";
 import type { DeclaredService } from "./service.ts";
-import type { DeclaredCompositeType } from "./schema/composite.ts";
-import type { DeclaredSqlCronJob } from "./schema/cron_job.ts";
-import type { DeclaredEnum } from "./schema/enum.ts";
-import type { DeclaredSqlFunction } from "./schema/function.ts";
-import type { DeclaredTable } from "./schema/table.ts";
-import type { DeclaredSqlTrigger } from "./schema/trigger.ts";
+import type { DeclaredType } from "./schema/types/type.ts";
+import type { DeclaredEnum } from "./schema/types/enum.ts";
+import type { DeclaredIndex, DeclaredPolicy, DeclaredTable } from "./schema/table/table.ts";
+import type { DeclaredExtension } from "./schema/objects/extension.ts";
+import type { DeclaredGrant } from "./schema/access/grant.ts";
+import type { DeclaredDrop } from "./schema/lifecycle/drop.ts";
 import type { UnmodifiableList } from "../value/list.ts";
 
 /**
@@ -118,8 +118,8 @@ export interface RawSql {
  * Carries `sql` verbatim into whichever `db` moment it is listed under.
  *
  * @remarks
- * Nothing here validates it, the same choice `schema/`'s own `SqlFunction.body` and
- * `Column.defaultValue` make for raw Postgres text no closed vocabulary covers.
+ * Nothing here validates it, the same choice `schema/`'s own `Column.defaultValue` and
+ * `CheckConstraint.expression` make for raw Postgres text no closed vocabulary covers.
  */
 export function Sql(sql: string): RawSql {
   return { kind: "raw", sql };
@@ -129,35 +129,48 @@ export function Sql(sql: string): RawSql {
  * Every SQL schema entry a `db` moment can carry, grouped by kind rather than mixed in one list.
  *
  * @remarks
- * A `DeclaredTable` and a `DeclaredCompositeType` carry the same two fields, `name` and `columns`,
- * with nothing in the JSON that tells them apart — the same is true across the six schema kinds
- * `schema/` already declares. Grouping by field, `tables`, `enums`, `functions`, keeps every entry
- * self-describing without inventing a tag none of those types carry today. `Table` and
- * `CompositeType` are decorators applied above the `Deploy` declaration in the same file;
- * `declaredTables()` and `declaredCompositeTypes()` are what hands their result to `tables` and
- * `compositeTypes` here, since a class decorator has nothing else to return to a caller.
+ * A `DeclaredTable` and a `DeclaredType` carry the same two fields, `name` and `columns`,
+ * with nothing in the JSON that tells them apart — the same is true across most of the schema
+ * kinds `schema/` declares. Grouping by field, `tables`, `enums`, `functions`, keeps every entry
+ * self-describing without inventing a tag none of those types carry today. `Table` is called above
+ * the `Deploy` declaration in the same file, its own first argument naming which of `init`,
+ * `migrations` or `provisioning` it belongs to; `declaredTables()`, `declaredIndexes()`,
+ * `declaredPolicies()` and `declaredGrants()` each take that same moment and hand back only what
+ * was declared for it, which is what fills `tables`, `indexes`, `policies` and `grants` here.
+ * `Type` answers its own declaration the same way `Role` or `Extension` do, but carries no moment
+ * of its own — a composite type always renders under `init`, so `declaredTypes()` takes none.
+ *
+ * Rendered in dependency order regardless of which fields are given: enums, composite types,
+ * tables, indexes, policies, grants, then whatever this moment retires. `schema.md`, in the
+ * framework's own documentation, gives the reasoning behind that order.
  */
 export interface DeploySchema {
-  /** The tables this moment creates. Declared with `@Table`, collected through `declaredTables()`. */
+  /** The tables this moment creates. Declared with `Table`, collected through `declaredTables(moment)`. */
   readonly tables?: UnmodifiableList<DeclaredTable>;
 
-  /** The enums this moment creates. */
+  /** The enums this moment creates. Always `init` in practice — see {@link DeploySchema}'s own remarks. */
   readonly enums?: UnmodifiableList<DeclaredEnum>;
 
-  /** The composite types this moment creates. Declared with `@CompositeType`, collected through `declaredCompositeTypes()`. */
-  readonly compositeTypes?: UnmodifiableList<DeclaredCompositeType>;
+  /** The composite types this moment creates. Declared with `Type`, collected through `declaredTypes()`. Always `init` in practice, the same reason `enums` is. */
+  readonly types?: UnmodifiableList<DeclaredType>;
 
-  /** The functions this moment creates. */
-  readonly functions?: UnmodifiableList<DeclaredSqlFunction>;
+  /** The indexes this moment creates. Declared through `Table`'s own `options.indexes`, collected through `declaredIndexes(moment)`. */
+  readonly indexes?: UnmodifiableList<DeclaredIndex>;
 
-  /** The triggers this moment creates. */
-  readonly triggers?: UnmodifiableList<DeclaredSqlTrigger>;
+  /** The row-level security policies this moment creates. Declared through `Table`'s own `options.policies`, collected through `declaredPolicies(moment)`. */
+  readonly policies?: UnmodifiableList<DeclaredPolicy>;
 
-  /** The scheduled jobs this moment creates. */
-  readonly cronJobs?: UnmodifiableList<DeclaredSqlCronJob>;
+  /** The privilege grants this moment issues. Declared through `Table`'s own `options.grants`, or the standalone `Grant`, collected through `declaredGrants(moment)`. */
+  readonly grants?: UnmodifiableList<DeclaredGrant>;
 
   /** The roles this moment creates. In practice only ever listed under `provisioning`. */
   readonly roles?: UnmodifiableList<DeclaredRole>;
+
+  /** The extensions this moment installs. In practice only ever listed under `provisioning`, alongside a `Role`. */
+  readonly extensions?: UnmodifiableList<DeclaredExtension>;
+
+  /** The objects this moment retires, in practice only ever listed under `migrations`. */
+  readonly drops?: UnmodifiableList<DeclaredDrop>;
 
   /** Raw statements this moment runs, for what nothing else here covers. */
   readonly raw?: UnmodifiableList<RawSql>;
@@ -260,9 +273,6 @@ export interface DeployOptions {
   readonly configuration?: ConfigurationOptions;
 }
 
-/** A class, decorated by `@Deploy`, `new`-constructible with any arguments — all the decorator asks of its target. */
-type Constructible = new (...args: readonly unknown[]) => unknown;
-
 /** A package's whole `deploy/`, exactly as `Deploy` declared it. */
 export interface DeclaredDeploy {
   /** What it was declared with, `configuration.env` resolved. */
@@ -275,11 +285,11 @@ export interface DeclaredDeploy {
 const declared = new Registry<DeclaredDeploy>("deploy");
 
 /**
- * Declares the class it decorates the whole of a package's `deploy/`, described by `options`.
+ * Declares the whole of a package's `deploy/`, described by `options`, without reaching anything.
  *
  * @remarks
  * This is the only declaration `deploy/deploy.ts` needs at its own top level: everything else —
- * a `Service`, a `Recipe`, a `Role`, a `@Table` — is built above it in the same file and handed to
+ * a `Service`, a `Recipe`, a `Role`, a `Table` — is built above it in the same file and handed to
  * `options` explicitly, so nothing under `deploy/` comes from a name `scribe forge` had to go
  * looking for. `scribe forge` renders `deploy/services/`, `deploy/recipes/`, `deploy/db/`,
  * `deploy/configuration.yaml`, `deploy/packages.env` and `deploy/overlay.yaml` from exactly what
@@ -292,30 +302,24 @@ const declared = new Registry<DeclaredDeploy>("deploy");
  *
  * @example
  * ```ts ignore
- * @Deploy({
+ * Deploy({
  *   db: { provisioning: { roles: [Role("supabase_storage_admin", { passwordEnv: "STORAGE_ADMIN_PASSWORD" })] } },
  *   services: [Service("storage", { ... }), Service("imgproxy", { ... })],
  *   recipes: [Recipe("bucket", { ... })],
  *   configuration: { settings: { ... }, requires: [{ name: "objects", type: "bucket" }] },
- * })
- * class StorageDeploy {}
+ * });
  * ```
  */
-export function Deploy(options: DeployOptions) {
-  return function (
-    _target: Constructible,
-    _context: ClassDecoratorContext,
-  ): void {
-    const configuration = resolveConfiguration(options.configuration);
-    const resolved: DeployOptions & {
-      readonly configuration: ResolvedConfigurationOptions;
-    } = {
-      ...options,
-      configuration,
-    };
-    refuseUnknownSettings(resolved);
-    declared.declare("deploy", { options: resolved });
+export function Deploy(options: DeployOptions): DeclaredDeploy {
+  const configuration = resolveConfiguration(options.configuration);
+  const resolved: DeployOptions & {
+    readonly configuration: ResolvedConfigurationOptions;
+  } = {
+    ...options,
+    configuration,
   };
+  refuseUnknownSettings(resolved);
+  return declared.declare("deploy", { options: resolved });
 }
 
 /**
@@ -324,9 +328,9 @@ export function Deploy(options: DeployOptions) {
  *
  * @remarks
  * `setting()` is built before `Deploy` has read `configuration.settings`, the same reason a
- * `@Column`'s foreign key is not checked at the field either: it is only here, once the whole
- * declaration is in hand, that a stray key can be told apart from one that simply has not been
- * declared yet a few lines further down.
+ * column's foreign key is not checked when the column itself is built either: it is only here,
+ * once the whole declaration is in hand, that a stray key can be told apart from one that simply
+ * has not been declared yet a few lines further down.
  */
 function refuseUnknownSettings(
   options: DeployOptions & {
