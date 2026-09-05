@@ -220,6 +220,27 @@ export type {
 export { declaredSqlCronJobs, forgetSqlCronJobs, SqlCronJob } from "./deploy/schema/cron_job.ts";
 export type { DeclaredSqlCronJob, SqlCronJobOptions } from "./deploy/schema/cron_job.ts";
 
+export {
+  declaredGrants,
+  forgetGrants,
+  Grant,
+  GrantBuilder,
+  GrantDeclaration,
+  GrantObjectFactory,
+  GrantWithOn,
+  GrantWithPrivileges,
+} from "./iac/schema/access/grant.ts";
+export type {
+  DbMoment,
+  DeclaredGrant,
+  GrantObject,
+  GrantObjectKind,
+  GrantOptions,
+  GrantRole,
+  GrantTargetKind,
+  Privilege,
+} from "./iac/schema/access/grant.ts";
+
 export { env, resolveValue, resource, setting, sizingToken, template } from "./deploy/value.ts";
 export type {
   DeployValue,
