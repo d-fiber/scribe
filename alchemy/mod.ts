@@ -251,6 +251,8 @@ export {
   SequenceMoment,
 } from "./iac/schema/objects/sequence.ts";
 export type { DeclaredSequence, SequenceDataType, SequenceOwner } from "./iac/schema/objects/sequence.ts";
+export { declaredDrops, Drop, DropDeclaration, DropTarget, forgetDrops } from "./iac/schema/lifecycle/drop.ts";
+export type { DeclaredDrop } from "./iac/schema/lifecycle/drop.ts";
 
 export { env, resolveValue, resource, setting, sizingToken, template } from "./deploy/value.ts";
 export type {
