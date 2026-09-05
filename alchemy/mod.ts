@@ -241,6 +241,9 @@ export type {
   Privilege,
 } from "./iac/schema/access/grant.ts";
 
+export { declaredExtensions, Extension, ExtensionBuilder, forgetExtensions } from "./iac/schema/objects/extension.ts";
+export type { DeclaredExtension, ExtensionName, ExtensionOptions } from "./iac/schema/objects/extension.ts";
+
 export { env, resolveValue, resource, setting, sizingToken, template } from "./deploy/value.ts";
 export type {
   DeployValue,
