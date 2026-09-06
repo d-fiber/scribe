@@ -36,7 +36,8 @@
 
 import { Registry } from "../../../declare/registry.ts";
 import type { UnmodifiableList } from "../../../value/list.ts";
-import type { DbMoment } from "../access/grant.ts";
+import type { DbMoment } from "../moment.ts";
+import { SchemaEntry } from "../moment.ts";
 
 /** The Postgres type a sequence's values are represented as. `bigint` when left out, Postgres's own default. */
 export type SequenceDataType = "smallint" | "integer" | "bigint";
@@ -107,7 +108,6 @@ const declared = new Registry<StoredSequence>("sequence");
  */
 export class SequenceBuilder {
   readonly #name: string;
-  readonly #moment: DbMoment;
   #as?: SequenceDataType;
   #incrementBy?: number;
   #minValue?: number | "none";
@@ -117,10 +117,9 @@ export class SequenceBuilder {
   #cycle?: boolean;
   #ownedBy?: SequenceOwner;
 
-  /** Opened by one of {@link SequenceMoment}'s own methods, never directly. */
-  constructor(name: string, moment: DbMoment) {
+  /** Opened by `Sequence`, never directly. */
+  constructor(name: string) {
     this.#name = name;
-    this.#moment = moment;
   }
 
   /** The Postgres type this sequence's values are represented as. `bigint` when left out, Postgres's own default. */
@@ -172,12 +171,14 @@ export class SequenceBuilder {
   }
 
   /**
-   * Declares this sequence, without reaching anything.
+   * Closes this sequence, ready for a `Schema` batch to declare it under the moment that batch
+   * opened.
    *
    * @throws {DuplicateDeclarationError} When this sequence's name has already been declared,
-   * raised where this is called.
+   * raised where `declareInto` runs — see `Table.columns`'s own remarks for why that is no longer
+   * where this call sits.
    */
-  create(): DeclaredSequence {
+  create(): SchemaEntry<DeclaredSequence> {
     const sequence: DeclaredSequence = {
       name: this.#name,
       as: this.#as ?? null,
@@ -189,55 +190,40 @@ export class SequenceBuilder {
       cycle: this.#cycle === true,
       ownedBy: this.#ownedBy ?? null,
     };
-    declared.declare(this.#name, { moment: this.#moment, sequence });
-    return sequence;
+    return new SchemaEntry((moment) => {
+      declared.declare(this.#name, { moment, sequence });
+      return sequence;
+    });
   }
 }
 
 /**
- * The moment `Sequence`'s `name` renders under, not yet chosen — exposes only the three moments a
- * sequence can belong to, and nothing else, so no other method of `SequenceBuilder` ever appears
- * before the one choice everything else it carries renders under.
- */
-export class SequenceMoment {
-  readonly #name: string;
-
-  /** Opened by `Sequence`, never directly. */
-  constructor(name: string) {
-    this.#name = name;
-  }
-
-  /** Renders this sequence once, against the package's own schema. */
-  init(): SequenceBuilder {
-    return new SequenceBuilder(this.#name, "init");
-  }
-
-  /** Renders this sequence once, applied through `dbmate` as the package evolves. */
-  migrations(): SequenceBuilder {
-    return new SequenceBuilder(this.#name, "migrations");
-  }
-
-  /** Renders this sequence before the package's own schema exists. */
-  provisioning(): SequenceBuilder {
-    return new SequenceBuilder(this.#name, "provisioning");
-  }
-}
-
-/**
- * Opens a Postgres sequence named `name`.
+ * Opens a Postgres sequence named `name`, closed by {@link SequenceBuilder.create}.
+ *
+ * @remarks
+ * `Sequence` no longer takes a moment of its own: `.create`'s own return value declares nothing by
+ * itself, and only renders once handed to one of `Schema`'s own `.init`, `.migrations` or
+ * `.provisioning` batches.
  *
  * @example
  * ```ts ignore
- * Sequence("booking_reference").init().as("integer").minValue(100000).cache(10).create();
+ * dbSchema.init().with((w) => [
+ *   w.sequence("booking_reference").as("integer").minValue(100000).cache(10).create(),
+ * ]);
  * ```
  */
-export function Sequence(name: string): SequenceMoment {
-  return new SequenceMoment(name);
+export function Sequence(name: string): SequenceBuilder {
+  return new SequenceBuilder(name);
 }
 
 /** Every sequence this package has declared for `moment`, in the order it declared them. */
-export function declaredSequences(moment: DbMoment): UnmodifiableList<DeclaredSequence> {
-  return declared.all().filter((entry) => entry.moment === moment).map((entry) => entry.sequence);
+export function declaredSequences(
+  moment: DbMoment,
+): UnmodifiableList<DeclaredSequence> {
+  return declared
+    .all()
+    .filter((entry) => entry.moment === moment)
+    .map((entry) => entry.sequence);
 }
 
 /** Forgets every declared sequence, which is what a test does between cases. */

@@ -241,7 +241,6 @@ export {
   TableGrantFactory,
   TableIndexBuilder,
   TableIndexFactory,
-  TableMoment,
   TablePolicyBuilder,
   TablePolicyFactory,
   TablePrimaryKeyBuilder,
@@ -284,7 +283,6 @@ export {
   GrantWithPrivileges,
 } from "./iac/schema/access/grant.ts";
 export type {
-  DbMoment,
   DeclaredGrant,
   GrantObject,
   GrantObjectKind,
@@ -295,16 +293,13 @@ export type {
 } from "./iac/schema/access/grant.ts";
 export { declaredExtensions, Extension, ExtensionBuilder, forgetExtensions } from "./iac/schema/objects/extension.ts";
 export type { DeclaredExtension, ExtensionName, ExtensionOptions } from "./iac/schema/objects/extension.ts";
-export {
-  declaredSequences,
-  forgetSequences,
-  Sequence,
-  SequenceBuilder,
-  SequenceMoment,
-} from "./iac/schema/objects/sequence.ts";
+export { declaredSequences, forgetSequences, Sequence, SequenceBuilder } from "./iac/schema/objects/sequence.ts";
 export type { DeclaredSequence, SequenceDataType, SequenceOwner } from "./iac/schema/objects/sequence.ts";
 export { declaredDrops, Drop, DropDeclaration, DropTarget, forgetDrops } from "./iac/schema/lifecycle/drop.ts";
 export type { DeclaredDrop } from "./iac/schema/lifecycle/drop.ts";
+export type { DbMoment, SchemaAddable } from "./iac/schema/moment.ts";
+export { SchemaEntry } from "./iac/schema/moment.ts";
+export { dbSchema, Schema, SchemaBatch, SchemaContentFactory } from "./iac/schema/schema.ts";
 
 export { env, resolveValue, resource, setting, sizingToken, template } from "./iac/value.ts";
 export type {

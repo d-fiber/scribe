@@ -37,8 +37,10 @@
 import { Registry } from "../../../declare/registry.ts";
 import type { UnmodifiableList } from "../../../value/list.ts";
 import type { Loose } from "../../value.ts";
-import type { DbMoment, GrantOptions, GrantRole, Privilege } from "../access/grant.ts";
+import type { GrantOptions, GrantRole, Privilege } from "../access/grant.ts";
 import { declareGrant } from "../access/grant.ts";
+import type { DbMoment } from "../moment.ts";
+import { SchemaEntry } from "../moment.ts";
 import type {
   ColumnDefinition,
   ColumnMap,
@@ -785,7 +787,9 @@ export class TableIndexBuilder<HasColumns extends boolean = false> {
    * reach for the object form only when an entry needs a collation, an operator class, or its own
    * sort order.
    */
-  columns(columns: UnmodifiableList<string | IndexColumn>): TableIndexBuilder<true> {
+  columns(
+    columns: UnmodifiableList<string | IndexColumn>,
+  ): TableIndexBuilder<true> {
     this.#columns = columns;
     return this as unknown as TableIndexBuilder<true>;
   }
@@ -969,7 +973,9 @@ export class TableGrantBuilder<HasTo extends boolean = false> {
 /** Opens a privilege revocation on a table, closed by {@link TableRevokeBuilder.from}. */
 export class TableRevokeFactory {
   /** The privileges taken back, or `"all"` for every privilege a table carries. */
-  privileges(privileges: UnmodifiableList<Privilege> | "all"): TableRevokeBuilder {
+  privileges(
+    privileges: UnmodifiableList<Privilege> | "all",
+  ): TableRevokeBuilder {
     return new TableRevokeBuilder(privileges);
   }
 }
@@ -1015,16 +1021,17 @@ export class TableRevokeBuilder<HasFrom extends boolean = false> {
  * A Postgres table under construction, closed by {@link TableBuilder.columns}.
  *
  * @remarks
- * `.init()`, `.migrations()` or `.provisioning()` says which of a package's three `db` moments
- * this table, and everything `.indexes`, `.policies` and `.grants` carry, renders under — `init`,
- * played once against the package's own schema; `migrations`, applied once each through `dbmate`
- * as the package evolves; or `provisioning`, played before the package's own schema exists, where
- * a schema-qualified table has nowhere to go yet. Nothing here refuses `.provisioning()` for a
- * table even though it rarely makes sense there, the same reason a column's `default` is never
- * second-guessed either.
+ * Which of a package's three `db` moments this table, and everything `.indexes`, `.policies` and
+ * `.grants` carry, renders under is no longer a choice made here: it is whichever of `Schema`'s own
+ * `.init`, `.migrations` or `.provisioning` batch the value `.columns` answers is finally handed
+ * to, `init` played once against the package's own schema; `migrations` applied once each through
+ * `dbmate` as the package evolves; `provisioning` played before the package's own schema exists,
+ * where a schema-qualified table has nowhere to go yet. Nothing here refuses a table batched under
+ * `provisioning` even though it rarely makes sense there, the same reason a column's `default` is
+ * never second-guessed either.
  *
  * A foreign key spanning two different moments is not checked either, and is a real hazard this
- * adds: a table declared for `migrations` that references one declared for `provisioning` may run
+ * adds: a table batched under `migrations` that references one batched under `provisioning` may run
  * before the table it points at exists at all, since the three moments are not guaranteed to run
  * in that order relative to each other the way tables within one moment are.
  *
@@ -1043,7 +1050,6 @@ export class TableRevokeBuilder<HasFrom extends boolean = false> {
  */
 export class TableBuilder {
   readonly #name: string;
-  readonly #moment: DbMoment;
   #primaryKey?: PrimaryKeyConstraint;
   #uniques: UnmodifiableList<UniqueConstraint> = [];
   #checks: UnmodifiableList<CheckConstraint> = [];
@@ -1057,10 +1063,9 @@ export class TableBuilder {
   #unlogged?: boolean;
   #rowLevelSecurity?: boolean;
 
-  /** Opened by one of {@link TableMoment}'s own methods, never directly. */
-  constructor(name: string, moment: DbMoment) {
+  /** Opened by `Table`, never directly. */
+  constructor(name: string) {
     this.#name = name;
-    this.#moment = moment;
   }
 
   /**
@@ -1124,7 +1129,9 @@ export class TableBuilder {
    * each entry belongs to.
    */
   indexes(
-    build: (factory: TableIndexFactory) => UnmodifiableList<TableIndexBuilder<true>>,
+    build: (
+      factory: TableIndexFactory,
+    ) => UnmodifiableList<TableIndexBuilder<true>>,
   ): this {
     this.#indexes = build(new TableIndexFactory()).map((index) => index.build());
     return this;
@@ -1161,7 +1168,9 @@ export class TableBuilder {
    * `.revokes` is this method's mirror, taking a default privilege back rather than adding one.
    */
   grants(
-    build: (factory: TableGrantFactory) => UnmodifiableList<TableGrantBuilder<true>>,
+    build: (
+      factory: TableGrantFactory,
+    ) => UnmodifiableList<TableGrantBuilder<true>>,
   ): this {
     this.#grants = build(new TableGrantFactory()).map((grant) => grant.build());
     return this;
@@ -1178,7 +1187,9 @@ export class TableBuilder {
    * unless something takes those privileges back — this is that something, the mirror of `.grants`.
    */
   revokes(
-    build: (factory: TableRevokeFactory) => UnmodifiableList<TableRevokeBuilder<true>>,
+    build: (
+      factory: TableRevokeFactory,
+    ) => UnmodifiableList<TableRevokeBuilder<true>>,
   ): this {
     this.#revokes = build(new TableRevokeFactory()).map((revoke) => revoke.build());
     return this;
@@ -1213,40 +1224,50 @@ export class TableBuilder {
   }
 
   /**
-   * Declares this table's columns, and with them the table itself, without reaching anything.
+   * Closes this table, ready for a `Schema` batch to declare it under the moment that batch opened.
    *
-   * @throws {Error} When `.primaryKey` was called and a column also calls `.isPrimary()`.
+   * @remarks
+   * Nothing is declared yet: the value this answers only registers this table, and everything
+   * `.indexes`, `.policies` and `.grants` carry, once `Schema`'s own `.with` calls its
+   * `declareInto` — see `schema.md`'s own `## Schema` section. A table built here but never handed
+   * to a `Schema` batch never reaches a registry at all.
+   *
+   * @throws {Error} When `.primaryKey` was called and a column also calls `.isPrimary()`, raised
+   * where this is called, before anything is deferred.
    * @throws {DuplicateDeclarationError} When this table's name has already been declared, raised
-   * where this is called — or when one of `.indexes` names an index, or one of `.policies` names a
-   * policy, already declared on this table or any other, since both an index name and a policy
-   * name are unique across the whole package, not per table, regardless of which moment either
-   * declaration belongs to.
+   * where `declareInto` runs — or when one of `.indexes` names an index, or one of `.policies`
+   * names a policy, already declared on this table or any other, since both an index name and a
+   * policy name are unique across the whole package, not per table, regardless of which moment
+   * either declaration belongs to.
    *
    * @example
    * ```ts ignore
-   * Table("__accounts__").init().columns((c) => ({
-   *   id: c.uuid().isPrimary(),
-   *   email: c.varchar(320).isNullable(true),
-   *   createdAt: c.timestamp({ withTimeZone: true }).default("now()"),
-   * }));
+   * dbSchema.init().with((w) => [
+   *   w.table("__accounts__").columns((c) => ({
+   *     id: c.uuid().isPrimary(),
+   *     email: c.varchar(320).isNullable(true),
+   *     createdAt: c.timestamp({ withTimeZone: true }).default("now()"),
+   *   })),
+   * ]);
    *
-   * Table("__account_devices__").migrations()
-   *   .primaryKey((pk) => pk.columns(["account_id", "device_id"]))
-   *   .checks((ck) => [ck.expression("last_seen_at <= now()")])
-   *   .indexes((i) => [i.name("__account_devices___account_idx__").columns(["account_id"])])
-   *   .policies((p) => [p.name("__account_devices_self__").for("select").using("account_id = auth.uid()")])
-   *   .grants((g) => [g.privileges(["select"]).to(["authenticated"])])
-   *   .revokes((r) => [r.privileges("all").from(["authenticated", "anon"])])
-   *   .rowLevelSecurity()
-   *   .columns((c) => ({
-   *     accountId: c.uuid(),
-   *     deviceId: c.uuid(),
-   *     lastSeenAt: c.timestamp({ withTimeZone: true }),
-   *   }));
+   * dbSchema.migrations().with((w) => [
+   *   w.table("__account_devices__")
+   *     .primaryKey((pk) => pk.columns(["account_id", "device_id"]))
+   *     .checks((ck) => [ck.expression("last_seen_at <= now()")])
+   *     .indexes((i) => [i.name("__account_devices___account_idx__").columns(["account_id"])])
+   *     .policies((p) => [p.name("__account_devices_self__").for("select").using("account_id = auth.uid()")])
+   *     .grants((g) => [g.privileges(["select"]).to(["authenticated"])])
+   *     .revokes((r) => [r.privileges("all").from(["authenticated", "anon"])])
+   *     .rowLevelSecurity()
+   *     .columns((c) => ({
+   *       accountId: c.uuid(),
+   *       deviceId: c.uuid(),
+   *       lastSeenAt: c.timestamp({ withTimeZone: true }),
+   *     })),
+   * ]);
    * ```
    */
-  columns(build: (c: ColumnFactory) => ColumnMap): DeclaredTable {
-    const moment = this.#moment;
+  columns(build: (c: ColumnFactory) => ColumnMap): SchemaEntry<DeclaredTable> {
     const columns = columnsOf(build(new ColumnFactory()));
 
     if (
@@ -1259,100 +1280,76 @@ export class TableBuilder {
       );
     }
 
-    const table: DeclaredTable = {
-      name: this.#name,
-      columns,
-      primaryKey: this.#primaryKey ?? null,
-      uniques: this.#uniques,
-      checks: this.#checks,
-      foreignKeys: this.#foreignKeys,
-      excludes: this.#excludes,
-      fillfactor: this.#fillfactor ?? null,
-      unlogged: this.#unlogged === true,
-      rowLevelSecurity: this.#rowLevelSecurity === true,
-      revokes: this.#revokes,
-    };
-    declaredTable.declare(this.#name, { moment, table });
+    return new SchemaEntry((moment) => {
+      const table: DeclaredTable = {
+        name: this.#name,
+        columns,
+        primaryKey: this.#primaryKey ?? null,
+        uniques: this.#uniques,
+        checks: this.#checks,
+        foreignKeys: this.#foreignKeys,
+        excludes: this.#excludes,
+        fillfactor: this.#fillfactor ?? null,
+        unlogged: this.#unlogged === true,
+        rowLevelSecurity: this.#rowLevelSecurity === true,
+        revokes: this.#revokes,
+      };
+      declaredTable.declare(this.#name, { moment, table });
 
-    for (const { name: indexName, ...indexOptions } of this.#indexes) {
-      declaredIndex.declare(indexName, {
-        moment,
-        index: {
-          name: indexName,
-          options: { table: this.#name, ...indexOptions },
-        },
-      });
-    }
+      for (const { name: indexName, ...indexOptions } of this.#indexes) {
+        declaredIndex.declare(indexName, {
+          moment,
+          index: {
+            name: indexName,
+            options: { table: this.#name, ...indexOptions },
+          },
+        });
+      }
 
-    for (const { name: policyName, ...policyOptions } of this.#policies) {
-      declaredPolicy.declare(policyName, {
-        moment,
-        policy: {
-          name: policyName,
-          options: { table: this.#name, ...policyOptions },
-        },
-      });
-    }
+      for (const { name: policyName, ...policyOptions } of this.#policies) {
+        declaredPolicy.declare(policyName, {
+          moment,
+          policy: {
+            name: policyName,
+            options: { table: this.#name, ...policyOptions },
+          },
+        });
+      }
 
-    for (const grantOptions of this.#grants) {
-      declareGrant(
-        { ...grantOptions, on: { kind: "table", name: this.#name } },
-        moment,
-      );
-    }
+      for (const grantOptions of this.#grants) {
+        declareGrant(
+          { ...grantOptions, on: { kind: "table", name: this.#name } },
+          moment,
+        );
+      }
 
-    return table;
+      return table;
+    });
   }
 }
 
 /**
- * The moment `Table`'s `name` renders under, not yet chosen — exposes only the three moments a
- * table can belong to, and nothing else, so no other method of `TableBuilder` ever appears before
- * the one choice every other choice it carries renders under.
- */
-export class TableMoment {
-  readonly #name: string;
-
-  /** Opened by `Table`, never directly. */
-  constructor(name: string) {
-    this.#name = name;
-  }
-
-  /** Renders this table once, against the package's own schema. */
-  init(): TableBuilder {
-    return new TableBuilder(this.#name, "init");
-  }
-
-  /** Renders this table once, applied through `dbmate` as the package evolves. */
-  migrations(): TableBuilder {
-    return new TableBuilder(this.#name, "migrations");
-  }
-
-  /** Renders this table before the package's own schema exists. */
-  provisioning(): TableBuilder {
-    return new TableBuilder(this.#name, "provisioning");
-  }
-}
-
-/**
- * Opens a Postgres table named `name`.
+ * Opens a Postgres table named `name`, closed by {@link TableBuilder.columns}.
  *
  * @remarks
- * `Table` itself carries only a name: {@link TableMoment}, what it rends, only carries the three
- * moments a table can render under. Choosing one, `.init()` chief among them, is what hands back
- * the full `TableBuilder` — `.primaryKey`, `.uniques`, `.columns` and the rest never appear before
- * that choice is made.
+ * `Table` no longer takes a moment of its own: `.columns`'s own return value declares nothing by
+ * itself, and only renders once `Schema`'s own `.init`, `.migrations` or `.provisioning` batch
+ * carries it — `schema.md`'s own `## Schema` section gives the reason. A table built here but never
+ * handed to a `Schema` batch is a declaration nobody ever sees, the same as any other value nothing
+ * reads.
  *
  * @example
  * ```ts ignore
- * Table("__bookings__").init().columns((c) => ({
- *   id: c.uuid().isPrimary(),
- *   status: c.enum("booking_status"),
- * }));
+ * dbSchema.init().with((w) => [
+ *   w.table("__bookings__").columns((c) => ({
+ *     id: c.uuid().isPrimary(),
+ *     status: c.enum("booking_status"),
+ *   })),
+ * ]);
  * ```
  */
-export function Table(name: string): TableMoment {
-  return new TableMoment(name);
+export function Table(name: string): TableBuilder {
+  return new TableBuilder(name);
 }
 
 /** Every table this package has declared for `moment`, in the order it declared them. */

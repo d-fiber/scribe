@@ -36,6 +36,7 @@
 
 import { Registry } from "../../../declare/registry.ts";
 import type { UnmodifiableList } from "../../../value/list.ts";
+import type { DbMoment, SchemaAddable } from "../moment.ts";
 
 /** The kind of object a `Drop` targets, one member per method {@link DropTarget} exposes. */
 type DropObjectKind = "table" | "index" | "type" | "policy" | "extension";
@@ -48,40 +49,58 @@ export type DeclaredDrop =
   | { readonly kind: "policy"; readonly name: string; readonly table: string; readonly cascade: boolean }
   | { readonly kind: "extension"; readonly name: string; readonly cascade: boolean };
 
+/** A retirement, and the moment it belongs to — not part of {@link DeclaredDrop} itself, since which moment a retirement belongs to is where it is filed, not a fact carried on it. */
+interface StoredDrop {
+  /** The moment this retirement belongs to. */
+  readonly moment: DbMoment;
+
+  /** The retirement exactly as `Drop` declared it. */
+  readonly drop: DeclaredDrop;
+}
+
 /** Every retirement this package has declared, by the kind and the name it took together. */
-const declared = new Registry<DeclaredDrop>("drop");
+const declared = new Registry<StoredDrop>("drop");
 
 /**
- * A retirement, declared the moment {@link DropTarget} says what kind of object `name` names,
- * still open to {@link cascade}.
+ * A retirement under construction, still open to {@link cascade}, declared once handed to one of
+ * `Schema`'s own `.init`, `.migrations` or `.provisioning` batches — most often `.migrations`,
+ * since a retirement almost always answers for an object a previous version of the package left
+ * behind.
  *
  * @remarks
- * Naming a kind declares straight away, rather than waiting on a closing call the way `Table` or
- * `Type` wait on `.columns`: every kind takes the same one modifier, so there is nothing left for
- * a closing call to decide, and `DuplicateDeclarationError` reads better landing on the kind that
- * repeated a name than on a `.cascade` call that happens to be last. `cascade` still mutates this
- * same declaration afterward — `declaredDrops()` only ever reads it once the whole chain, however
- * long, has already run.
+ * Unlike `Table` or `Type`, nothing here closes the chain with a call of its own: `Schema`'s own
+ * `.with` reads whatever `.cascade`, or {@link DropTarget} itself, last answered directly, so this
+ * implements {@link SchemaAddable} itself, rather than answering a `SchemaEntry` the way a closing
+ * call would.
  *
  * Nothing here carries an `ifExists` of its own: what the render emits for every declaration in
  * `schema/`, a retirement included, already guards itself — `create` protected against an object
  * already there, `drop` against one already gone — so there is no case where an author would ever
  * want the unprotected form, and no flag left to spell for it.
  */
-export class DropDeclaration {
+export class DropDeclaration implements SchemaAddable<DeclaredDrop> {
+  readonly #key: string;
   readonly #record: { kind: DropObjectKind; name: string; table?: string; cascade: boolean };
 
   /** Opened by one of {@link DropTarget}'s own methods, never directly. */
   constructor(kind: DropObjectKind, name: string, table?: string) {
     this.#record = { kind, name, table, cascade: false };
-    const key = kind === "policy" ? `policy:${table}.${name}` : `${kind}:${name}`;
-    declared.declare(key, this.#record as DeclaredDrop);
+    this.#key = kind === "policy" ? `policy:${table}.${name}` : `${kind}:${name}`;
   }
 
   /** Drops whatever depends on this object too, rather than refusing while a dependent exists. */
   cascade(): this {
     this.#record.cascade = true;
     return this;
+  }
+
+  /**
+   * Registers this retirement for `moment`, called by `Schema`'s own `.with`, never directly.
+   *
+   * @throws {DuplicateDeclarationError} When this object has already been declared as one to drop.
+   */
+  declareInto(moment: DbMoment): DeclaredDrop {
+    return declared.declare(this.#key, { moment, drop: this.#record as DeclaredDrop }).drop;
   }
 }
 
@@ -111,7 +130,7 @@ export class DropTarget {
    * exists x, add constraint x ...`, the idiom that makes a constraint change replayable.
    *
    * @throws {DuplicateDeclarationError} When this table has already been declared as one to drop,
-   * raised where this is called.
+   * raised where `declareInto` runs.
    */
   table(): DropDeclaration {
     return new DropDeclaration("table", this.#name);
@@ -121,7 +140,7 @@ export class DropTarget {
    * Names `name` as an index to retire from a previous version of this package's schema.
    *
    * @throws {DuplicateDeclarationError} When this index has already been declared as one to drop,
-   * raised where this is called.
+   * raised where `declareInto` runs.
    */
   index(): DropDeclaration {
     return new DropDeclaration("index", this.#name);
@@ -132,7 +151,7 @@ export class DropTarget {
    * package's schema.
    *
    * @throws {DuplicateDeclarationError} When this type has already been declared as one to drop,
-   * raised where this is called.
+   * raised where `declareInto` runs.
    */
   type(): DropDeclaration {
     return new DropDeclaration("type", this.#name);
@@ -143,7 +162,7 @@ export class DropTarget {
    * package's schema.
    *
    * @throws {DuplicateDeclarationError} When this policy has already been declared as one to drop
-   * on the same table, raised where this is called.
+   * on the same table, raised where `declareInto` runs.
    */
   policy(table: string): DropDeclaration {
     return new DropDeclaration("policy", this.#name, table);
@@ -153,7 +172,7 @@ export class DropTarget {
    * Names `name` as an extension to retire from a previous version of this package's schema.
    *
    * @throws {DuplicateDeclarationError} When this extension has already been declared as one to
-   * drop, raised where this is called.
+   * drop, raised where `declareInto` runs.
    */
   extension(): DropDeclaration {
     return new DropDeclaration("extension", this.#name);
@@ -162,31 +181,35 @@ export class DropTarget {
 
 /**
  * Opens the retirement of an object named `name` from a previous version of this package's
- * schema, most often listed under `db.migrations` — never for undoing a table, index or other
- * object this same render also declares, which is simply an object nobody should have written
- * down to begin with.
+ * schema — never for undoing a table, index or other object this same render also declares, which
+ * is simply an object nobody should have written down to begin with.
  *
  * @remarks
  * `Drop` never exposes `.cascade` itself: {@link DropTarget}, what it rends, only carries the five
- * kinds a retirement can name. Naming one, `.table()` chief among them, is what declares — there
- * is no closing call the way `Table` waits on `.columns`, since every kind takes the same one
- * modifier and nothing is left for a closing call to decide.
+ * kinds a retirement can name. Naming one, `.table()` chief among them, is what closes the chain —
+ * there is no separate call the way `Table` waits on `.columns`, since every kind takes the same
+ * one modifier and nothing is left for a closing call to decide. `Drop` no longer takes a moment of
+ * its own either: what it builds declares nothing by itself, and only renders once handed to one
+ * of `Schema`'s own batches, most often `.migrations`, since a retirement almost always answers for
+ * an object a previous version of the package left behind.
  *
  * @example
  * ```ts ignore
- * Drop("__legacy_sessions__").table().cascade();
- * Drop("__legacy_sessions___token_idx__").index();
- * Drop("__bookings__self_read__").policy("__bookings__");
- * Drop("hstore").extension();
+ * dbSchema.migrations().with((w) => [
+ *   w.drop("__legacy_sessions__").table().cascade(),
+ *   w.drop("__legacy_sessions___token_idx__").index(),
+ *   w.drop("__bookings__self_read__").policy("__bookings__"),
+ *   w.drop("hstore").extension(),
+ * ]);
  * ```
  */
 export function Drop(name: string): DropTarget {
   return new DropTarget(name);
 }
 
-/** Every retirement this package has declared, in the order it declared them. */
-export function declaredDrops(): UnmodifiableList<DeclaredDrop> {
-  return declared.all();
+/** Every retirement this package has declared for `moment`, in the order it declared them. */
+export function declaredDrops(moment: DbMoment): UnmodifiableList<DeclaredDrop> {
+  return declared.all().filter((entry) => entry.moment === moment).map((entry) => entry.drop);
 }
 
 /** Forgets every declared retirement, which is what a test does between cases. */

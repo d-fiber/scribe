@@ -38,6 +38,8 @@ import { Registry } from "../../../declare/registry.ts";
 import { ColumnFactory, columnsOf } from "./column.ts";
 import type { ColumnMap, ColumnType } from "./column.ts";
 import type { UnmodifiableList } from "../../../value/list.ts";
+import type { DbMoment } from "../moment.ts";
+import { SchemaEntry } from "../moment.ts";
 
 /** A composite type exactly as `Type` declared it. */
 export interface DeclaredType {
@@ -48,8 +50,17 @@ export interface DeclaredType {
   readonly fields: Readonly<Record<string, ColumnType>>;
 }
 
+/** A composite type, and the moment it belongs to — not part of {@link DeclaredType} itself, since which moment a type belongs to is where it is filed, not a fact carried on the type. */
+interface StoredType {
+  /** The moment this type belongs to. */
+  readonly moment: DbMoment;
+
+  /** The composite type exactly as `Type` declared it. */
+  readonly type: DeclaredType;
+}
+
 /** Every type this package has declared, by the name it took. */
-const declared = new Registry<DeclaredType>("type");
+const declared = new Registry<StoredType>("type");
 
 /**
  * Opens a Postgres composite type named `name`, closed by {@link TypeBuilder.fields}.
@@ -70,7 +81,7 @@ export class TypeBuilder {
   }
 
   /**
-   * Declares this type as holding `fields`, without reaching anything.
+   * Closes this type, ready for a `Schema` batch to declare it under the moment that batch opened.
    *
    * @remarks
    * Each entry of `fields` is a {@link ColumnBuilder}, the same vocabulary `Table`'s own `.columns`
@@ -79,35 +90,45 @@ export class TypeBuilder {
    * those given here is silently unused.
    *
    * @throws {DuplicateDeclarationError} When this type's name has already been declared, raised
-   * where this is called.
+   * where `declareInto` runs — see `Table.columns`'s own remarks for why that is no longer where
+   * this call sits.
    */
-  fields(build: (c: ColumnFactory) => ColumnMap): DeclaredType {
+  fields(build: (c: ColumnFactory) => ColumnMap): SchemaEntry<DeclaredType> {
     const columnFields: Record<string, ColumnType> = {};
     for (const [field, definition] of Object.entries(columnsOf(build(new ColumnFactory())))) {
       columnFields[field] = definition.type;
     }
-    return declared.declare(this.#name, { name: this.#name, fields: columnFields });
+    return new SchemaEntry((moment) =>
+      declared.declare(this.#name, { moment, type: { name: this.#name, fields: columnFields } }).type
+    );
   }
 }
 
 /**
  * Opens a Postgres composite type named `name`.
  *
+ * @remarks
+ * `Type` no longer takes a moment of its own: `.fields`'s own return value declares nothing by
+ * itself, and only renders once handed to one of `Schema`'s own `.init`, `.migrations` or
+ * `.provisioning` batches.
+ *
  * @example
  * ```ts ignore
- * Type("location_coordinate").fields((c) => ({
- *   latitude: c.text(),
- *   longitude: c.text(),
- * }));
+ * dbSchema.init().with((w) => [
+ *   w.type("location_coordinate").fields((c) => ({
+ *     latitude: c.text(),
+ *     longitude: c.text(),
+ *   })),
+ * ]);
  * ```
  */
 export function Type(name: string): TypeBuilder {
   return new TypeBuilder(name);
 }
 
-/** Every type this package has declared, in the order it declared them. */
-export function declaredTypes(): UnmodifiableList<DeclaredType> {
-  return declared.all();
+/** Every type this package has declared for `moment`, in the order it declared them. */
+export function declaredTypes(moment: DbMoment): UnmodifiableList<DeclaredType> {
+  return declared.all().filter((entry) => entry.moment === moment).map((entry) => entry.type);
 }
 
 /** Forgets every declared type, which is what a test does between cases. */

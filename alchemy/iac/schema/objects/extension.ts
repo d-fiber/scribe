@@ -37,6 +37,8 @@
 import { Registry } from "../../../declare/registry.ts";
 import type { Loose } from "../../value.ts";
 import type { UnmodifiableList } from "../../../value/list.ts";
+import type { DbMoment } from "../moment.ts";
+import { SchemaEntry } from "../moment.ts";
 
 /**
  * The name of a Postgres extension, spelled the way `create extension` takes it — kept for
@@ -87,8 +89,17 @@ export interface DeclaredExtension {
   readonly options: ExtensionOptions;
 }
 
+/** An extension, and the moment it belongs to — not part of {@link DeclaredExtension} itself, since which moment an extension belongs to is where it is filed, not a fact carried on the extension. */
+interface StoredExtension {
+  /** The moment this extension belongs to. */
+  readonly moment: DbMoment;
+
+  /** The extension exactly as `Extension` declared it. */
+  readonly extension: DeclaredExtension;
+}
+
 /** Every extension this package has declared, by the name it took. */
-const declared = new Registry<DeclaredExtension>("extension");
+const declared = new Registry<StoredExtension>("extension");
 
 /**
  * Opens a Postgres extension named `name`, closed by {@link ExtensionBuilder.install}.
@@ -97,8 +108,8 @@ const declared = new Registry<DeclaredExtension>("extension");
  * `foundation` itself still opens `pg_cron` and `pgcrypto` by hand, in a plain `.sql` file it
  * predates this declaration: this is for a package of one's own that needs an extension `foundation`
  * does not already carry, and does not retrofit what `foundation` already does. An extension is a
- * cluster-wide object shared by every schema, so a package that needs one lists it under
- * `db.provisioning`, alongside a `Role`, rather than under `db.init`.
+ * cluster-wide object shared by every schema, so a package that needs one batches it under
+ * `Schema`'s own `.provisioning`, alongside a `Role`, rather than under `.init`.
  */
 export class ExtensionBuilder {
   readonly #name: ExtensionName;
@@ -130,35 +141,46 @@ export class ExtensionBuilder {
   }
 
   /**
-   * Declares this extension to install, without reaching anything.
+   * Closes this extension, ready for a `Schema` batch to declare it under the moment that batch
+   * opened.
    *
    * @throws {DuplicateDeclarationError} When this extension's name has already been declared,
-   * raised where this is called.
+   * raised where `declareInto` runs — see `Table.columns`'s own remarks for why that is no longer
+   * where this call sits.
    */
-  install(): DeclaredExtension {
-    return declared.declare(this.#name, {
+  install(): SchemaEntry<DeclaredExtension> {
+    const extension: DeclaredExtension = {
       name: this.#name,
       options: { schema: this.#schema, version: this.#version, cascade: this.#cascade },
-    });
+    };
+    return new SchemaEntry((moment) => declared.declare(this.#name, { moment, extension }).extension);
   }
 }
 
 /**
  * Opens a Postgres extension named `name`.
  *
+ * @remarks
+ * `Extension` no longer takes a moment of its own: `.install`'s own return value declares nothing
+ * by itself, and only renders once handed to one of `Schema`'s own `.init`, `.migrations` or
+ * `.provisioning` batches — an extension is a cluster-wide object shared by every schema, so a
+ * package that needs one batches it under `.provisioning`, alongside a `Role`, rather than `.init`.
+ *
  * @example
  * ```ts ignore
- * Extension("pg_trgm").install();
- * Extension("vector").version("0.8.0").install();
+ * dbSchema.provisioning().with((w) => [
+ *   w.extension("pg_trgm").install(),
+ *   w.extension("vector").version("0.8.0").install(),
+ * ]);
  * ```
  */
 export function Extension(name: ExtensionName): ExtensionBuilder {
   return new ExtensionBuilder(name);
 }
 
-/** Every extension this package has declared, in the order it declared them. */
-export function declaredExtensions(): UnmodifiableList<DeclaredExtension> {
-  return declared.all();
+/** Every extension this package has declared for `moment`, in the order it declared them. */
+export function declaredExtensions(moment: DbMoment): UnmodifiableList<DeclaredExtension> {
+  return declared.all().filter((entry) => entry.moment === moment).map((entry) => entry.extension);
 }
 
 /** Forgets every declared extension, which is what a test does between cases. */

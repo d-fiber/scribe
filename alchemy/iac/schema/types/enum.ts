@@ -36,6 +36,7 @@
 
 import { Registry } from "../../../declare/registry.ts";
 import type { UnmodifiableList } from "../../../value/list.ts";
+import type { DbMoment, SchemaAddable } from "../moment.ts";
 
 /** An enum exactly as {@link Enum} declared it. */
 export interface DeclaredEnum {
@@ -46,11 +47,21 @@ export interface DeclaredEnum {
   readonly values: UnmodifiableList<string>;
 }
 
+/** An enum, and the moment it belongs to — not part of {@link DeclaredEnum} itself, since which moment an enum belongs to is where it is filed, not a fact carried on the enum. */
+interface StoredEnum {
+  /** The moment this enum belongs to. */
+  readonly moment: DbMoment;
+
+  /** The enum exactly as `Enum` declared it. */
+  readonly enum: DeclaredEnum;
+}
+
 /** Every enum this package has declared, by the name it took. */
-const declared = new Registry<DeclaredEnum>("enum");
+const declared = new Registry<StoredEnum>("enum");
 
 /**
- * A Postgres enum type named `name`, growing one value at a time.
+ * A Postgres enum type named `name`, growing one value at a time, declared once handed to one of
+ * `Schema`'s own `.init`, `.migrations` or `.provisioning` batches.
  *
  * @remarks
  * A column opened with `c.enum("booking_status")` takes this enum by name, in either order:
@@ -58,20 +69,17 @@ const declared = new Registry<DeclaredEnum>("enum");
  * rest of the package's schema is known to exist. Whatever renders the SQL is what refuses a name
  * that resolves to nothing.
  *
- * `Enum` declares under `name` the moment it is called, holding no value yet: unlike `Table` or
- * `Type`, nothing here closes the chain, so declaring at the first opportunity is what makes
- * `DuplicateDeclarationError` land on the line that reused a name, rather than on whichever
- * `.value` call happens to run last. `values` is the same array `Enum` handed to the `Registry`,
- * so every `.value` call is read the moment anything reads {@link declaredEnums} back, no matter
- * how much later that happens to be.
+ * Unlike `Table` or `Type`, nothing here closes the chain with a call of its own: `Schema`'s own
+ * `.with` reads whatever `.value` last answered directly, so `EnumBuilder` implements
+ * {@link SchemaAddable} itself, rather than answering a `SchemaEntry` the way a closing call would.
  */
-export class EnumBuilder {
-  readonly #values: string[];
+export class EnumBuilder implements SchemaAddable<DeclaredEnum> {
+  readonly #name: string;
+  readonly #values: string[] = [];
 
   /** Opened by `Enum`, never directly. */
   constructor(name: string) {
-    this.#values = [];
-    declared.declare(name, { name, values: this.#values });
+    this.#name = name;
   }
 
   /** Adds `value` to the values this enum accepts, in the order Postgres will list them. */
@@ -79,26 +87,38 @@ export class EnumBuilder {
     this.#values.push(value);
     return this;
   }
+
+  /**
+   * Registers this enum for `moment`, called by `Schema`'s own `.with`, never directly.
+   *
+   * @throws {DuplicateDeclarationError} When this enum's name has already been declared.
+   */
+  declareInto(moment: DbMoment): DeclaredEnum {
+    return declared.declare(this.#name, { moment, enum: { name: this.#name, values: this.#values } }).enum;
+  }
 }
 
 /**
  * Opens a Postgres enum type named `name`.
  *
- * @throws {DuplicateDeclarationError} When `name` has already been declared, raised where this is
- * called.
+ * @remarks
+ * `Enum` no longer takes a moment of its own: nothing it builds declares by itself, and only
+ * renders once handed to one of `Schema`'s own `.init`, `.migrations` or `.provisioning` batches.
  *
  * @example
  * ```ts ignore
- * Enum("booking_status").value("pending").value("confirmed").value("cancelled");
+ * dbSchema.init().with((w) => [
+ *   w.enum("booking_status").value("pending").value("confirmed").value("cancelled"),
+ * ]);
  * ```
  */
 export function Enum(name: string): EnumBuilder {
   return new EnumBuilder(name);
 }
 
-/** Every enum this package has declared, in the order it declared them. */
-export function declaredEnums(): UnmodifiableList<DeclaredEnum> {
-  return declared.all();
+/** Every enum this package has declared for `moment`, in the order it declared them. */
+export function declaredEnums(moment: DbMoment): UnmodifiableList<DeclaredEnum> {
+  return declared.all().filter((entry) => entry.moment === moment).map((entry) => entry.enum);
 }
 
 /** Forgets every declared enum, which is what a test does between cases. */

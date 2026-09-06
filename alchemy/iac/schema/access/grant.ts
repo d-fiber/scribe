@@ -36,6 +36,8 @@
 
 import type { UnmodifiableList } from "../../../value/list.ts";
 import type { Loose } from "../../value.ts";
+import type { DbMoment } from "../moment.ts";
+import { SchemaEntry } from "../moment.ts";
 
 /**
  * A privilege `grant` takes, spelled the way it takes it.
@@ -95,18 +97,6 @@ export interface GrantObject {
 export type GrantRole = Loose<
   "public" | "current_role" | "current_user" | "session_user"
 >;
-
-/**
- * Which of a package's three `db` moments a declaration belongs to — `init`, played once against
- * the package's own schema; `migrations`, applied once each as the package evolves, through
- * `dbmate`; or `provisioning`, played before the package's own schema exists.
- *
- * @remarks
- * Shared with `Table`, which takes one as its first argument — defined here rather than there so
- * that this file, sitting underneath `table.ts` in the dependency graph, does not have to import
- * back from it just to give {@link declareGrant} the same vocabulary.
- */
-export type DbMoment = "init" | "migrations" | "provisioning";
 
 /** What `Grant` takes: what it grants, on what, and to whom. */
 export interface GrantOptions {
@@ -209,10 +199,6 @@ interface GrantAccumulator {
  * opened by `Grant`.
  *
  * @remarks
- * A grant declared here always belongs to the `init` moment — it names a schema, a sequence, a
- * function, a domain, a type or the whole database, none of which `Table`'s own moment has a say
- * over, and `schema/` itself never renders anything but `init` for what is not tied to a table.
- *
  * Splitting "has privileges" and "has on" into four separate classes, rather than one class
  * carrying two phantom flags the way `Table`'s own `TableForeignKeyBuilder` does, is what keeps
  * `.to` entirely absent — not merely uncallable — everywhere but {@link GrantDeclaration}: `.to`
@@ -337,14 +323,18 @@ export class GrantDeclaration {
     return this;
   }
 
-  /** Declares this grant to the roles `roles`, without reaching anything. */
-  to(roles: UnmodifiableList<GrantRole>): DeclaredGrant {
-    return declareGrant({
+  /**
+   * Names the roles granted these privileges, closing the chain: `Schema`'s own `.with` is what
+   * finally registers this grant, for whichever moment its batch opened.
+   */
+  to(roles: UnmodifiableList<GrantRole>): SchemaEntry<DeclaredGrant> {
+    const options: GrantOptions = {
       privileges: this.#accumulator.privileges as UnmodifiableList<Privilege> | "all",
       on: this.#accumulator.on as GrantObject,
       to: roles,
       withGrantOption: this.#accumulator.withGrantOption,
-    }, "init");
+    };
+    return new SchemaEntry((moment) => declareGrant(options, moment));
   }
 }
 
