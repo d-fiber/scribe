@@ -246,6 +246,8 @@ export {
   TablePolicyFactory,
   TablePrimaryKeyBuilder,
   TablePrimaryKeyFactory,
+  TableRevokeBuilder,
+  TableRevokeFactory,
   TableUniqueBuilder,
   TableUniqueFactory,
 } from "./iac/schema/table/table.ts";
@@ -268,6 +270,7 @@ export type {
   TableGrant,
   TableIndex,
   TablePolicy,
+  TableRevoke,
   UniqueConstraint,
 } from "./iac/schema/table/table.ts";
 export {

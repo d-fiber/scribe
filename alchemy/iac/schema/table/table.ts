@@ -230,6 +230,21 @@ export interface TablePolicy extends Omit<PolicyOptions, "table"> {
  */
 export type TableGrant = Omit<GrantOptions, "on">;
 
+/**
+ * One entry of `Table`'s own `.revokes`: the mirror of `.grants`, taking back a privilege Postgres
+ * already grants a role by default rather than adding one — `PUBLIC`'s implicit privileges on a
+ * freshly created table chief among them, which every role inherits unless something takes them
+ * back. Carries no {@link GrantOptions.on} for the same reason {@link TableGrant} does not: the
+ * table it is declared under already says which one.
+ */
+export interface TableRevoke {
+  /** The privileges taken back, or `"all"` for every privilege a table carries. */
+  readonly privileges: UnmodifiableList<Privilege> | "all";
+
+  /** The roles the privileges are taken back from. */
+  readonly from: UnmodifiableList<GrantRole>;
+}
+
 /** A `check` constraint, carried by the table rather than by one column, so it may read several at once. */
 export interface CheckConstraint {
   /** The name this constraint is created under. Postgres picks one on its own when left out. */
@@ -364,6 +379,12 @@ export interface DeclaredTable {
 
   /** Whether this table skips the write-ahead log. */
   readonly unlogged: boolean;
+
+  /** Whether this table refuses every row to every role except through a policy that lets it through. */
+  readonly rowLevelSecurity: boolean;
+
+  /** The privileges taken back from a role on this table, the mirror of `.grants`. */
+  readonly revokes: UnmodifiableList<TableRevoke>;
 }
 
 /** A table, and the moment it belongs to — not part of {@link DeclaredTable} itself, since which moment a table belongs to is where it is filed, not a fact carried on the table. */
@@ -945,6 +966,51 @@ export class TableGrantBuilder<HasTo extends boolean = false> {
   }
 }
 
+/** Opens a privilege revocation on a table, closed by {@link TableRevokeBuilder.from}. */
+export class TableRevokeFactory {
+  /** The privileges taken back, or `"all"` for every privilege a table carries. */
+  privileges(privileges: UnmodifiableList<Privilege> | "all"): TableRevokeBuilder {
+    return new TableRevokeBuilder(privileges);
+  }
+}
+
+/**
+ * A privilege revocation on a table under construction, opened by
+ * {@link TableRevokeFactory.privileges}.
+ *
+ * @remarks
+ * `HasFrom` tracks whether {@link from} was called, the same reason {@link TableGrantBuilder}
+ * takes a `HasTo` of its own: `Table`'s own `.revokes` only accepts `TableRevokeBuilder<true>` in
+ * the array its callback returns, so a revocation with nobody named to take it back from is
+ * refused where it is written, not where `Table` later reads it.
+ */
+export class TableRevokeBuilder<HasFrom extends boolean = false> {
+  /** A phantom marker, never read or assigned, so `HasFrom` forces `TableRevokeBuilder<false>` and `TableRevokeBuilder<true>` apart — see {@link TableForeignKeyBuilder.hasReference} for why a `this`-typed method alone could not. */
+  declare private readonly hasFrom: HasFrom;
+
+  readonly #privileges: UnmodifiableList<Privilege> | "all";
+  #from?: UnmodifiableList<GrantRole>;
+
+  /** Opened by {@link TableRevokeFactory.privileges}, never directly. */
+  constructor(privileges: UnmodifiableList<Privilege> | "all") {
+    this.#privileges = privileges;
+  }
+
+  /** The roles the privileges are taken back from. */
+  from(roles: UnmodifiableList<GrantRole>): TableRevokeBuilder<true> {
+    this.#from = roles;
+    return this as unknown as TableRevokeBuilder<true>;
+  }
+
+  /** This revocation, exactly as `Table` reads it once its own `.revokes` callback returns. */
+  build(this: TableRevokeBuilder<true>): TableRevoke {
+    return {
+      privileges: this.#privileges,
+      from: this.#from as UnmodifiableList<GrantRole>,
+    };
+  }
+}
+
 /**
  * A Postgres table under construction, closed by {@link TableBuilder.columns}.
  *
@@ -986,8 +1052,10 @@ export class TableBuilder {
   #indexes: UnmodifiableList<TableIndex> = [];
   #policies: UnmodifiableList<TablePolicy> = [];
   #grants: UnmodifiableList<TableGrant> = [];
+  #revokes: UnmodifiableList<TableRevoke> = [];
   #fillfactor?: number;
   #unlogged?: boolean;
+  #rowLevelSecurity?: boolean;
 
   /** Opened by one of {@link TableMoment}'s own methods, never directly. */
   constructor(name: string, moment: DbMoment) {
@@ -1069,8 +1137,9 @@ export class TableBuilder {
    * A policy always guards exactly one table, so there is no `table` to repeat here the way a
    * standalone declaration would need one: the table it is declared under already says which table
    * each entry guards. A policy takes effect only once row-level security itself is switched on for
-   * this table — `TableBuilder` carries no such switch today, so a package that wants one still
-   * reaches for a raw `Sql("alter table ... enable row level security")` alongside its policies.
+   * this table, which `.rowLevelSecurity()` does: a table that calls `.policies` without also
+   * calling `.rowLevelSecurity()` still carries every policy, but none of them is ever consulted,
+   * since an unprotected table lets every row through regardless of what a policy would have said.
    */
   policies(
     build: (
@@ -1089,11 +1158,29 @@ export class TableBuilder {
    * repeat here: the table it is declared under already says which one, and `kind: "table"` is
    * implied. A grant on anything else — a schema, a sequence, a function, a domain, a type, or the
    * whole database — is not a table's to carry, and still goes through the standalone `Grant`.
+   * `.revokes` is this method's mirror, taking a default privilege back rather than adding one.
    */
   grants(
     build: (factory: TableGrantFactory) => UnmodifiableList<TableGrantBuilder<true>>,
   ): this {
     this.#grants = build(new TableGrantFactory()).map((grant) => grant.build());
+    return this;
+  }
+
+  /**
+   * The privileges this table takes back from a role, most often `PUBLIC`'s own implicit ones.
+   *
+   * @remarks
+   * Postgres grants a newly created table's owner every privilege on it, and nobody else any —
+   * except `PUBLIC`, which inherits whatever privilege a role would otherwise reach through it, and
+   * PostgREST's `anon`/`authenticated` roles sit behind `PUBLIC` the same as every other role. A
+   * table meant to answer only through row-level security therefore still leaks through `PUBLIC`
+   * unless something takes those privileges back — this is that something, the mirror of `.grants`.
+   */
+  revokes(
+    build: (factory: TableRevokeFactory) => UnmodifiableList<TableRevokeBuilder<true>>,
+  ): this {
+    this.#revokes = build(new TableRevokeFactory()).map((revoke) => revoke.build());
     return this;
   }
 
@@ -1106,6 +1193,22 @@ export class TableBuilder {
   /** Skips the write-ahead log for this table's own writes, trading crash safety and replication for speed. */
   unlogged(value = true): this {
     this.#unlogged = value;
+    return this;
+  }
+
+  /**
+   * Switches row-level security on for this table, so no role sees or writes a row except through
+   * one of `.policies`' own entries — or through a role Postgres always lets bypass it, `BYPASSRLS`
+   * chief among them, which this has no say over.
+   *
+   * @remarks
+   * Row-level security alone does not close off a table: `PUBLIC`'s own default privileges still
+   * let every role read and write through it, policies notwithstanding, since a policy restricts
+   * which rows a privilege reaches rather than granting the privilege itself. A table meant to
+   * answer only through its policies calls `.revokes` alongside this.
+   */
+  rowLevelSecurity(value = true): this {
+    this.#rowLevelSecurity = value;
     return this;
   }
 
@@ -1133,6 +1236,8 @@ export class TableBuilder {
    *   .indexes((i) => [i.name("__account_devices___account_idx__").columns(["account_id"])])
    *   .policies((p) => [p.name("__account_devices_self__").for("select").using("account_id = auth.uid()")])
    *   .grants((g) => [g.privileges(["select"]).to(["authenticated"])])
+   *   .revokes((r) => [r.privileges("all").from(["authenticated", "anon"])])
+   *   .rowLevelSecurity()
    *   .columns((c) => ({
    *     accountId: c.uuid(),
    *     deviceId: c.uuid(),
@@ -1164,6 +1269,8 @@ export class TableBuilder {
       excludes: this.#excludes,
       fillfactor: this.#fillfactor ?? null,
       unlogged: this.#unlogged === true,
+      rowLevelSecurity: this.#rowLevelSecurity === true,
+      revokes: this.#revokes,
     };
     declaredTable.declare(this.#name, { moment, table });
 
