@@ -47,8 +47,8 @@ import { isMissingModule } from "./missing_module.ts";
  * matched or decided while the process is running: by the time this is called the list is a
  * literal in a file on disk.
  *
- * The four kinds stay apart because the host loads them at four different moments. Collapsing
- * them would drag every declaration a project wrote into the earliest of the four, which is what
+ * The six kinds stay apart because the host loads them at six different moments. Collapsing
+ * them would drag every declaration a project wrote into the earliest of the six, which is what
  * the worker runtime pays for in modules it never uses.
  */
 export interface ProjectDeclarations {
@@ -63,9 +63,15 @@ export interface ProjectDeclarations {
 
   /** Loads every search index the project declared. */
   searchers(): Future<unknown[]>;
+
+  /** Loads every init job the project declared, run once by the dedicated `init` container. */
+  inits(): Future<unknown[]>;
+
+  /** Loads every run job the project declared, run on every launch by the dedicated `run` container. */
+  runs(): Future<unknown[]>;
 }
 
-/** The kinds a project may declare, which are the four the generated file exports. */
+/** The kinds a project may declare, which are the six the generated file exports. */
 export type DeclarationKind = keyof ProjectDeclarations;
 
 const NOTHING: ProjectDeclarations = {
@@ -73,6 +79,8 @@ const NOTHING: ProjectDeclarations = {
   crons: () => Promise.resolve([]),
   accounts: () => Promise.resolve([]),
   searchers: () => Promise.resolve([]),
+  inits: () => Promise.resolve([]),
+  runs: () => Promise.resolve([]),
 };
 
 let declared: Future<ProjectDeclarations> | null = null;
