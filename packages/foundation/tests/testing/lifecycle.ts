@@ -34,22 +34,29 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-/**
- * What a test outside foundation may stand this package up with.
- *
- * @remarks
- * The harness under `tests/testing/` is written to be thrown away and rewritten, so nothing
- * outside this package reaches into it directly. What this file names is the part other
- * suites depend on, and changing anything it does not name breaks nobody.
- */
+import "./settings.ts";
+import { PostgrestClients } from "../../lib/src/database/postgrest_clients.ts";
+import { FakePostgrestClient, type FakePostgrestSeed, type Row } from "./database.ts";
+import { type InstalledMock, installMock } from "./install.ts";
+import type { PostgrestClient } from "@supabase/postgrest-js";
 
-export { installRateLimiterMock, installValkeryMock } from "./cache.ts";
-export { FakePostgrestClient } from "./database.ts";
-export type { FakePostgrestSeed, Row, RpcHandler } from "./database.ts";
-export { installDrivers } from "./drivers.ts";
-export { installMock } from "./install.ts";
-export type { InstalledMock } from "./install.ts";
-export { installInitDatabaseFake } from "./lifecycle.ts";
-export type { InstalledDatabaseFake } from "./lifecycle.ts";
-export { recordLog } from "./logger.ts";
-export type { MemoryLogger } from "./logger.ts";
+/** An {@link InstalledMock} that also answers what a table under it holds. */
+export interface InstalledDatabaseFake extends InstalledMock {
+  /** Every row currently held under table `name`. */
+  rows(name: string): Row[];
+}
+
+/**
+ * Stands the `__inits__` table up in memory, for a test of `runDeclaredInits` that never reaches
+ * a real database.
+ */
+export function installInitDatabaseFake(seed: FakePostgrestSeed = {}): InstalledDatabaseFake {
+  const filled: FakePostgrestSeed = { __inits__: [], ...seed };
+  const fake = new FakePostgrestClient(filled);
+  const installed = installMock(PostgrestClients, "service", () => fake as unknown as PostgrestClient);
+
+  return {
+    restore: installed.restore,
+    rows: (name: string) => fake.rows(name),
+  };
+}

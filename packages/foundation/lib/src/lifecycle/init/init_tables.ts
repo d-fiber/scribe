@@ -34,22 +34,33 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-/**
- * What a test outside foundation may stand this package up with.
- *
- * @remarks
- * The harness under `tests/testing/` is written to be thrown away and rewritten, so nothing
- * outside this package reaches into it directly. What this file names is the part other
- * suites depend on, and changing anything it does not name breaks nobody.
- */
+import { Table } from "../../database/table.ts";
 
-export { installRateLimiterMock, installValkeryMock } from "./cache.ts";
-export { FakePostgrestClient } from "./database.ts";
-export type { FakePostgrestSeed, Row, RpcHandler } from "./database.ts";
-export { installDrivers } from "./drivers.ts";
-export { installMock } from "./install.ts";
-export type { InstalledMock } from "./install.ts";
-export { installInitDatabaseFake } from "./lifecycle.ts";
-export type { InstalledDatabaseFake } from "./lifecycle.ts";
-export { recordLog } from "./logger.ts";
-export type { MemoryLogger } from "./logger.ts";
+/** One row of the table that tracks which `@Init` job has already run. */
+export interface InitRow {
+  /** The name the job was declared under — an `@Init` method's own class name. */
+  name: string;
+
+  /** When the job was recorded as having run. */
+  ran_at: string;
+}
+
+/**
+ * The table this package ships, as the query builder needs to see it.
+ *
+ * It is declared here rather than taken from a generated schema because the package owns the
+ * SQL that creates it — the same reason `storage`'s own `StorageSchema` is declared next to its
+ * table rather than derived from a project's own generated file.
+ */
+export type LifecycleInitSchema = {
+  /** Which `@Init` job has already run, one row per job. */
+  __inits__: { row: InitRow };
+};
+
+/** A handle on this package's own table. */
+export class InitTable<K extends keyof LifecycleInitSchema & string> extends Table<LifecycleInitSchema, K> {}
+
+/** The jobs `runDeclaredInits` has already recorded as run. */
+export function inits(): InitTable<"__inits__"> {
+  return new InitTable("__inits__");
+}
