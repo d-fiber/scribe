@@ -36,47 +36,38 @@
 
 import { create } from "@bufbuild/protobuf";
 import {
-  type PushRequest,
-  type PushResult,
-  PushResultSchema,
-} from "@scribe/sdk/gen/scribe/packages/foundation/protocol/queue_pb.ts";
-import { Duration } from "@scribe/alchemy";
-import type { Future } from "@scribe/alchemy";
-import { QueuePublisher, queueRegistry } from "@scribe/foundation/queue";
-import { decodeJson } from "../control/json.ts";
+  type EmitResult,
+  EmitResultSchema,
+  type Event,
+} from "@scribe/sdk/gen/scribe/packages/foundation/protocol/hook_pb.ts";
+import { decodeJson } from "@scribe/sdk";
+import { causeMessage } from "../error_message.ts";
+import { hookRegistry } from "./hook_registry.ts";
 
 /**
- * Puts what a worker sent on one of the queues the host declared.
+ * Runs the handlers the host registered for the event a worker emitted.
  *
  * @remarks
- * The queue has to be declared on the host: a worker names one, it does not create one, and a
- * name nothing answers to is refused under `unknown_queue` rather than silently dropped.
+ * The hook has to be declared on the host, and an event nothing answers to is refused under
+ * `unknown_hook`: a worker emitting into a name that was never registered would otherwise
+ * believe it had been heard.
  *
- * A request carrying several payloads pushes them together and answers one identifier per
- * message, in the order they were given. A failure part way through leaves the messages already
- * pushed on the queue, because nothing here can take one back.
+ * `handled` is how many handlers ran, which is what tells an emitter that a hook exists but
+ * nobody subscribed to it. The handlers run before the answer leaves, so a failure in any one
+ * of them is carried back rather than swallowed.
  */
-export async function queuePush(request: PushRequest): Future<PushResult> {
-  const registered = queueRegistry.get(request.queueId);
-  if (!registered) {
-    return create(PushResultSchema, {
-      error: { code: "unknown_queue", message: `${request.queueId} is not declared by the host.` },
+export async function hookEmit(event: Event): Promise<EmitResult> {
+  const hook = hookRegistry.get(event.event);
+  if (!hook) {
+    return create(EmitResultSchema, {
+      error: { code: "unknown_hook", message: `${event.event} is not declared by the host.` },
     });
   }
 
-  const producer = new QueuePublisher<unknown>(registered);
-  const delay = Number(request.delay?.millis ?? 0n);
-
   try {
-    const messageIds = await Promise.all(
-      request.payloads.map((payload) =>
-        producer.push(decodeJson(payload), delay > 0 ? { delay: Duration.milliseconds(delay) } : {})
-      ),
-    );
-    return create(PushResultSchema, { messageIds });
+    await hook.run(decodeJson(event.payload) as never);
+    return create(EmitResultSchema, { handled: hook.handlers() });
   } catch (cause) {
-    return create(PushResultSchema, {
-      error: { code: "push_failed", message: cause instanceof Error ? cause.message : String(cause) },
-    });
+    return create(EmitResultSchema, { error: { code: "emit_failed", message: causeMessage(cause) } });
   }
 }

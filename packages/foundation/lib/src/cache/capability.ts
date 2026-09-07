@@ -35,7 +35,6 @@
 // LICENSE file, the LICENSE file governs.
 
 import { json } from "@scribe/alchemy";
-import type { Future } from "@scribe/alchemy";
 import { create } from "@bufbuild/protobuf";
 import {
   type DeleteRequest,
@@ -48,8 +47,9 @@ import {
   type SetResult,
   SetResultSchema,
 } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/cache_pb.ts";
-import { kv } from "@scribe/foundation/redis";
-import { decodeJson, encodeJson } from "../control/json.ts";
+import { decodeJson, encodeJson } from "@scribe/sdk";
+import { causeMessage } from "../error_message.ts";
+import { kv } from "../redis/kv.ts";
 
 const PREFIX = "worker";
 
@@ -60,12 +60,12 @@ function keyOf(namespace: string, key: string): string {
 }
 
 function failed(scope: string, cause: unknown): { code: string; message: string } {
-  const message = cause instanceof Error ? cause.message : String(cause);
+  const message = causeMessage(cause);
   console.error(`[worker-cache:${scope}] ${message}`);
   return { code: "cache_failed", message };
 }
 
-export async function cacheGet(request: GetRequest): Future<GetResult> {
+export async function cacheGet(request: GetRequest): Promise<GetResult> {
   const key = request.key;
   if (!key) return create(GetResultSchema, { error: failed("get", "missing key") });
 
@@ -80,7 +80,7 @@ export async function cacheGet(request: GetRequest): Future<GetResult> {
   }
 }
 
-export async function cacheSet(request: SetRequest): Future<SetResult> {
+export async function cacheSet(request: SetRequest): Promise<SetResult> {
   const key = request.key;
   if (!key) return create(SetResultSchema, { error: failed("set", "missing key") });
 
@@ -99,7 +99,7 @@ export async function cacheSet(request: SetRequest): Future<SetResult> {
   }
 }
 
-export async function cacheDelete(request: DeleteRequest): Future<DeleteResult> {
+export async function cacheDelete(request: DeleteRequest): Promise<DeleteResult> {
   const key = request.key;
   if (!key) return create(DeleteResultSchema, { error: failed("delete", "missing key") });
 
@@ -112,7 +112,7 @@ export async function cacheDelete(request: DeleteRequest): Future<DeleteResult> 
   }
 }
 
-async function deleteByPrefix(prefix: string): Future<number> {
+async function deleteByPrefix(prefix: string): Promise<number> {
   let cursor = "0";
   let deleted = 0;
 
