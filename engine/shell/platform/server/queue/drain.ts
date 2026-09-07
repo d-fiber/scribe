@@ -40,7 +40,7 @@ import type { RateLimit } from "@scribe/alchemy/route";
 import { ApiContext } from "@scribe/kernel/endpoint/api_endpoint.ts";
 import { ServiceEndpoint } from "@scribe/kernel/endpoint/service_endpoint.ts";
 import { queueRunner } from "@scribe/foundation/internal/queue_runner";
-import { queueStatus } from "@scribe/foundation/queue";
+import { queueStatus } from "@scribe/foundation";
 
 const _RATE_LIMIT: RateLimit = {
   limit: 1000,

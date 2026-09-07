@@ -34,10 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { cacheSettings } from "@scribe/foundation/cache";
-import { databaseSettings } from "@scribe/foundation/database";
+import { cacheSettings } from "@scribe/foundation";
+import { databaseSettings } from "@scribe/foundation";
 import { scribe } from "@scribe/foundation";
-import { queueSettings } from "@scribe/foundation/queue";
+import { queueSettings } from "@scribe/foundation";
 import { deviceSettings, firewallSettings, httpSettings, identitySettings } from "@scribe/runtime/settings.ts";
 import type { Command, Environment, FileSystemDriver } from "@scribe/alchemy";
 import { Commands, Environments, FileSystems } from "@scribe/alchemy";
