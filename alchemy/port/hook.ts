@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { Lazy } from "../bind/lazy.ts";
 import { Slot } from "../bind/slot.ts";
 import { Registry } from "../declare/registry.ts";
 import type { Future } from "../async/future.ts";
@@ -95,36 +96,33 @@ class DeferredHook<T> implements DeclaredHook<T> {
 
   /** Whoever asked to hear this before the host was up, kept until there is something to open. */
   readonly #waiting: Array<(payload: T) => void | Future<void>> = [];
-  #opened: DeclaredHook<T> | null = null;
+  readonly #hook: Lazy<DeclaredHook<T>>;
 
   constructor(options: HookOptions) {
     this.#options = options;
+    this.#hook = new Lazy(() => {
+      const opened = Hooks.get().open<T>(this.#options);
+      for (const listen of this.#waiting) opened.on(listen);
+      this.#waiting.length = 0;
+      return opened;
+    });
   }
 
   emit(payload: T): Future<void> {
-    return this.#hook().emit(payload);
+    return this.#hook.get().emit(payload);
   }
 
   on(listen: (payload: T) => void | Future<void>): void {
-    if (this.#opened === null) {
+    if (!this.#hook.resolved) {
       this.#waiting.push(listen);
       return;
     }
-    this.#opened.on(listen);
+    this.#hook.get().on(listen);
   }
 
   /** Opens this hook now, which is what {@link openHooks} does to every declared one. */
   open(): void {
-    this.#hook();
-  }
-
-  #hook(): DeclaredHook<T> {
-    if (this.#opened === null) {
-      this.#opened = Hooks.get().open<T>(this.#options);
-      for (const listen of this.#waiting) this.#opened.on(listen);
-      this.#waiting.length = 0;
-    }
-    return this.#opened;
+    this.#hook.get();
   }
 }
 

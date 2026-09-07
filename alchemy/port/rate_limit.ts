@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { Lazy } from "../bind/lazy.ts";
 import { Slot } from "../bind/slot.ts";
 import type { Future } from "../async/future.ts";
 import type { Duration } from "../value/duration.ts";
@@ -153,10 +154,11 @@ export const RateLimiters: Slot<RateLimiterDriver> = new Slot<RateLimiterDriver>
  */
 class DeferredRateLimiter implements RateLimiter {
   readonly #options: RateLimitOptions;
-  #opened: RateLimiter | null = null;
+  readonly #limit: Lazy<RateLimiter>;
 
   constructor(options: RateLimitOptions) {
     this.#options = options;
+    this.#limit = new Lazy(() => RateLimiters.get().open(this.#options));
   }
 
   get key(): string {
@@ -164,19 +166,15 @@ class DeferredRateLimiter implements RateLimiter {
   }
 
   check(prefix?: string, suffix?: string): Future<RateLimitOutcome> {
-    return this.#limit().check(prefix, suffix);
+    return this.#limit.get().check(prefix, suffix);
   }
 
   isBlocked(prefix?: string, suffix?: string): Future<boolean> {
-    return this.#limit().isBlocked(prefix, suffix);
+    return this.#limit.get().isBlocked(prefix, suffix);
   }
 
   unmeasured(): RateLimitOutcome {
-    return this.#limit().unmeasured();
-  }
-
-  #limit(): RateLimiter {
-    return (this.#opened ??= RateLimiters.get().open(this.#options));
+    return this.#limit.get().unmeasured();
   }
 }
 

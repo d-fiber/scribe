@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { Lazy } from "../bind/lazy.ts";
 import { Slot } from "../bind/slot.ts";
 import { Registry } from "../declare/registry.ts";
 import type { Future } from "../async/future.ts";
@@ -141,23 +142,19 @@ export const Queues: Slot<QueueDriver> = new Slot<QueueDriver>("Queues");
  */
 class DeferredQueue<T> implements DeclaredQueue<T> {
   readonly #options: DeclaredQueueOptions;
-  #opened: DeclaredQueue<T> | null = null;
+  readonly #queue: Lazy<DeclaredQueue<T>>;
 
   constructor(options: DeclaredQueueOptions) {
     this.#options = options;
+    this.#queue = new Lazy(() => Queues.get().open<T>(this.#options));
   }
 
   push(data: T): Future<void> {
-    return this.#queue().push(data);
+    return this.#queue.get().push(data);
   }
 
   pushMany(batch: UnmodifiableList<T>): Future<void> {
-    return this.#queue().pushMany(batch);
-  }
-
-  #queue(): DeclaredQueue<T> {
-    if (this.#opened === null) this.#opened = Queues.get().open<T>(this.#options);
-    return this.#opened;
+    return this.#queue.get().pushMany(batch);
   }
 }
 

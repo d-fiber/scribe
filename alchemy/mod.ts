@@ -64,6 +64,8 @@ export type { Uri } from "./value/uri.ts";
 export { Uuid, Uuids } from "./value/uuid.ts";
 export type { UuidSource } from "./value/uuid.ts";
 export type { Expando, Finalizer, WeakReference } from "./value/weak.ts";
+export { base64, base64Url, hex, json, utf8 } from "./value/convert.ts";
+export type { BytesCodec, Codec } from "./value/convert.ts";
 
 export { Pagination } from "./value/pagination.ts";
 export type { PageRequest, PaginationJson } from "./value/pagination.ts";
@@ -71,14 +73,12 @@ export { Failure, Ok, okay } from "./value/result.ts";
 export type { Result } from "./value/result.ts";
 
 export { BindingError, Slot } from "./bind/slot.ts";
+export { Lazy } from "./bind/lazy.ts";
 
 export { Container, container } from "./di/container.ts";
 export type { Token } from "./di/container.ts";
 export { Singleton } from "./di/decorators.ts";
 export type { SingletonOptions } from "./di/decorators.ts";
-
-export { base64, base64Url, hex, json, utf8 } from "./value/convert.ts";
-export type { BytesCodec, Codec } from "./value/convert.ts";
 
 export { ExponentialBackoff } from "./async/backoff.ts";
 export { TimeoutException, withDeadline, withDeadlineLite } from "./async/deadline.ts";

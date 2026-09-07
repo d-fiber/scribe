@@ -38,6 +38,7 @@ import type { Future } from "../async/future.ts";
 import type { List, UnmodifiableList } from "../value/list.ts";
 import { Duration } from "../value/duration.ts";
 import { TimeoutException, withDeadline } from "../async/deadline.ts";
+import { Lazy } from "../bind/lazy.ts";
 import { Slot } from "../bind/slot.ts";
 
 /** What opening a cache takes. */
@@ -153,42 +154,43 @@ export const Caches: Slot<CacheDriver> = new Slot<CacheDriver>("Caches");
  */
 class DeferredCache<T> implements Cache<T> {
   readonly #options: CacheOptions;
-  #opened: Cache<T> | null = null;
+  readonly #store: Lazy<Cache<T>>;
 
   constructor(options: CacheOptions) {
     this.#options = options;
+    this.#store = new Lazy(() => Caches.get().open<T>(this.#options));
   }
 
   get(id: string): Future<T | null> {
-    return this.#read(() => this.#store().get(id));
+    return this.#read(() => this.#store.get().get(id));
   }
 
   getMany(ids: UnmodifiableList<string>): Future<(T | null)[]> {
-    return this.#read(() => this.#store().getMany(ids), () => ids.map(() => null));
+    return this.#read(() => this.#store.get().getMany(ids), () => ids.map(() => null));
   }
 
   add(id: string, value: T): Future<void> {
-    return this.#write(() => this.#store().add(id, value));
+    return this.#write(() => this.#store.get().add(id, value));
   }
 
   addMany(entries: readonly [string, T][]): Future<void> {
-    return this.#write(() => this.#store().addMany(entries));
+    return this.#write(() => this.#store.get().addMany(entries));
   }
 
   delete(id: string): Future<void> {
-    return this.#write(() => this.#store().delete(id));
+    return this.#write(() => this.#store.get().delete(id));
   }
 
   deleteMany(...ids: List<string>): Future<void> {
-    return this.#write(() => this.#store().deleteMany(...ids));
+    return this.#write(() => this.#store.get().deleteMany(...ids));
   }
 
   upsert(id: string, compute: () => Future<T>): Future<T> {
-    return this.#write(() => this.#store().upsert(id, compute));
+    return this.#write(() => this.#store.get().upsert(id, compute));
   }
 
   clear(pattern?: string): Future<void> {
-    return this.#write(() => this.#store().clear(pattern));
+    return this.#write(() => this.#store.get().clear(pattern));
   }
 
   /** How long one call has, which is what the declaration said or the default. */
@@ -213,10 +215,6 @@ class DeferredCache<T> implements Cache<T> {
   /** Runs a write against the deadline. A write that ran out of time always raises. */
   #write<R>(call: () => Future<R>): Future<R> {
     return withDeadline(`cache:${this.#options.key}`, this.#within, call());
-  }
-
-  #store(): Cache<T> {
-    return this.#opened ??= Caches.get().open<T>(this.#options);
   }
 }
 
