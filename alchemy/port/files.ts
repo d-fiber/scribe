@@ -39,7 +39,6 @@ import { Slot } from "../bind/slot.ts";
 import type { Bytes } from "../value/bytes.ts";
 import type { List } from "../value/list.ts";
 
-/** What a name in a directory turns out to be. */
 /**
  * One thing a listing found, whether it holds bytes or other things.
  *

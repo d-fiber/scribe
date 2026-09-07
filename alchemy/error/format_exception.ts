@@ -36,7 +36,6 @@
 
 import { ScribeError } from "./scribe_error.ts";
 
-/** How much of the offending text a message shows before it is cut. */
 /**
  * Text that does not have the shape it was read as.
  *

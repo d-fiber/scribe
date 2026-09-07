@@ -77,6 +77,7 @@ export interface RoleOptions {
 
 /** A Postgres role exactly as `Role` declared it. */
 export interface DeclaredRole {
+  /** Discriminates this entry as a role, for whatever reads it without already knowing its collection. */
   readonly kind: "role";
 
   /** The role's own name, the one a connection string logs in as. */
@@ -108,6 +109,7 @@ export function Role(name: string, options: RoleOptions): DeclaredRole {
 
 /** A SQL statement carried verbatim, for what none of the typed schema entries cover. */
 export interface RawSql {
+  /** Discriminates this entry as a raw statement, for whatever reads it without already knowing its collection. */
   readonly kind: "raw";
 
   /** The statement, exactly as Postgres will run it. */
@@ -203,6 +205,7 @@ export interface IntegerSetting {
   /** What this setting controls, in one sentence a project reads while filling `configuration.yaml` in. */
   readonly doc: string;
 
+  /** Discriminates this {@link SettingOptions} as a whole number. */
   readonly type: "integer";
 
   /** What this setting takes when a project leaves it untouched. */
@@ -214,6 +217,7 @@ export interface BooleanSetting {
   /** What this setting controls, in one sentence a project reads while filling `configuration.yaml` in. */
   readonly doc: string;
 
+  /** Discriminates this {@link SettingOptions} as on or off. */
   readonly type: "boolean";
 
   /** What this setting takes when a project leaves it untouched. */
@@ -225,6 +229,7 @@ export interface StringSetting {
   /** What this setting controls, in one sentence a project reads while filling `configuration.yaml` in. */
   readonly doc: string;
 
+  /** Discriminates this {@link SettingOptions} as text. */
   readonly type: "string";
 
   /** What this setting takes when a project leaves it untouched. */

@@ -876,6 +876,7 @@ export class ColumnFactory {
 /** What `Table` and `Type` take for their fields: a column builder, by the name it holds under. */
 export type ColumnMap = Record<string, ColumnBuilder<ColumnOptions>>;
 
+/** The `ColumnType` a `ColumnBuilder`'s own `options` renders as, once its chain is closed. */
 function columnType(options: ColumnOptions): ColumnType {
   const base: ColumnType = ((): ColumnType => {
     switch (options.type) {

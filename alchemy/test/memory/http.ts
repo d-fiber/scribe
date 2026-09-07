@@ -69,6 +69,12 @@ export class MemoryClient extends BaseClient {
   /** What this client answers with. */
   readonly #answer: MemoryAnswer;
 
+  /**
+   * Builds a client that answers with `answer`.
+   *
+   * @param answer - What every request answers with. Left out, every request succeeds with
+   * status 200 and the body `"ok"`.
+   */
   constructor(answer: MemoryAnswer = {}) {
     super();
     this.#answer = answer;

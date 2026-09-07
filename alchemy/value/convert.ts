@@ -76,19 +76,6 @@ export interface BytesCodec {
 }
 
 /**
- * Bytes written in hexadecimal, two lowercase characters per byte.
- *
- * @remarks
- * It is how a byte string is carried anywhere it has to survive being read by a person or written
- * into a column: a digest, a token, a signature.
- *
- * @example
- * ```ts ignore
- * const written = hex.encode(digest);
- * const read = hex.decode(written);
- * ```
- */
-/**
  * The two characters each byte is written as, one entry per byte value.
  *
  * @remarks
@@ -114,6 +101,19 @@ const _HEX_VALUES: Int8Array = (() => {
   return held;
 })();
 
+/**
+ * Bytes written in hexadecimal, two lowercase characters per byte.
+ *
+ * @remarks
+ * It is how a byte string is carried anywhere it has to survive being read by a person or written
+ * into a column: a digest, a token, a signature.
+ *
+ * @example
+ * ```ts ignore
+ * const written = hex.encode(digest);
+ * const read = hex.decode(written);
+ * ```
+ */
 export const hex: BytesCodec = {
   encode(input: Uint8Array | ArrayBuffer): string {
     const view = input instanceof Uint8Array ? input : new Uint8Array(input);

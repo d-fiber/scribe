@@ -62,6 +62,7 @@ export interface LiteralValue {
 
 /** A value read from the shell environment a stack starts under, `${NAME}` in the rendered YAML. */
 export interface EnvValue {
+  /** Discriminates this {@link DeployValue} as an environment read. */
   readonly kind: "env";
 
   /** The environment variable this value reads. */
@@ -70,6 +71,7 @@ export interface EnvValue {
 
 /** A value a project sets through `deploy/configuration.yaml`, declared by {@link Configuration}. */
 export interface SettingValue {
+  /** Discriminates this {@link DeployValue} as a setting read. */
   readonly kind: "setting";
 
   /** The key this value reads, one `Configuration` in the same file declared under `settings`. */
@@ -89,6 +91,7 @@ export interface SettingValue {
  * token meant for another mechanism.
  */
 export interface SizingTokenValue {
+  /** Discriminates this {@link DeployValue} as a sizing token. */
   readonly kind: "sizingToken";
 
   /** The token name, without its `{{` and `}}`. */
@@ -106,6 +109,7 @@ export interface SizingTokenValue {
  * for a required resource, or one of `host`, `port`, `database` for `"postgres"`.
  */
 export interface ResourceValue {
+  /** Discriminates this {@link DeployValue} as a placed resource's field. */
   readonly kind: "resource";
 
   /** The resource this value reads, by the name it was required under, or `"postgres"`. */
@@ -131,6 +135,7 @@ export function resource(name: string, field: string): ResourceValue {
  * `defaultValue` makes for a raw Postgres expression.
  */
 export interface TemplateValue {
+  /** Discriminates this {@link DeployValue} as raw text. */
   readonly kind: "template";
 
   /** The text this value renders as, verbatim. */

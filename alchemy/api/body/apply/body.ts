@@ -41,6 +41,7 @@ import { applySchema } from "./walk.ts";
 /**
  * The shape `schema` describes, read out of a body that has already been decoded.
  *
+ * @remarks
  * Values arrive typed here, so nothing is read out of text, which is what separates it from
  * {@link applyFormSchema}.
  */
