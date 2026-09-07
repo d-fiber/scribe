@@ -410,6 +410,7 @@ export {
   RuntimeProtocol,
 } from "./protocol/decorators.ts";
 export type { ProtocolSource, ProtoFamily, RegisteredProtocol } from "./protocol/decorators.ts";
+export { declaredNodes, ProtoEnumMember, ProtoMessage, ProtoServiceMember } from "./protocol/members.ts";
 export { Protocol, protocol, ProtocolBuilder, ProtocolContentFactory } from "./protocol/protocol.ts";
 export type { DeclaredNode, ProtocolNode } from "./protocol/protocol.ts";
 export { Message, MessageBuilder } from "./protocol/message/message.ts";
