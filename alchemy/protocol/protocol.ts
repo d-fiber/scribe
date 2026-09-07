@@ -34,32 +34,46 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { Future } from "../async/future.ts";
 import type { UnmodifiableList } from "../value/list.ts";
+import type { DeclaredMessage } from "./message/message.ts";
 import { Message, MessageBuilder } from "./message/message.ts";
-import type { ContractAddable, ProtoFileRef } from "./file.ts";
+import type { DeclaredRpcService } from "./service/service.ts";
 import { RpcService, RpcServiceBuilder } from "./service/service.ts";
-import { ProtoEnum, ProtoEnumBuilder } from "./types/enum.ts";
+import type { DeclaredProtoEnum } from "./types/enum.ts";
+import { EnumFactory, ProtoEnum } from "./types/enum.ts";
+
+/** One declaration a `protocol.builder` callback may return: a message, an enum, or a service — resolved or still under construction. */
+export type ProtocolNode =
+  | DeclaredMessage
+  | DeclaredProtoEnum
+  | RpcServiceBuilder;
+
+/** One declaration exactly as `ProtocolBuilder` resolved it, `RpcServiceBuilder` read down to its own `DeclaredRpcService`. */
+export type DeclaredNode =
+  | DeclaredMessage
+  | DeclaredProtoEnum
+  | DeclaredRpcService;
 
 /**
- * Opens every kind a `ContractFile` batch can carry, passed to {@link ContractFile.with}'s own
- * callback.
+ * Opens every kind a `protocol.builder` callback can carry, passed to it as `b`.
  *
  * @remarks
- * Each method here is exactly its own top-level function — `w.message` and `Message` are the same
- * call, `w.enum` and `ProtoEnum` the same, `w.service` and `RpcService` the same — the same reason
- * `schema/schema.ts`'s own `SchemaContentFactory` exists: autocompletion on `w.` lists precisely the
- * three things a `.proto` file can hold, without a package author needing to import three separate
- * names from `@scribe/alchemy` to write one file.
+ * Each method here is exactly its own top-level function — `b.message` and `Message` are the same
+ * call, `b.enum` and `ProtoEnum` the same, `b.service` and `RpcService` the same — the same reason
+ * `schema/schema.ts`'s own `SchemaContentFactory` exists: autocompletion on `b.` lists precisely
+ * the three things a proto file can hold, without an author needing to import three separate names
+ * from `@scribe/alchemy` to write one `build()` method.
  */
-export class ContractContentFactory {
+export class ProtocolContentFactory {
   /** Opens a proto3 message named `name`. Same call as the top-level `Message`. */
   message(name: string): MessageBuilder {
     return Message(name);
   }
 
-  /** Opens a proto3 enum type named `name`. Same call as the top-level `ProtoEnum`. */
-  enum(name: string): ProtoEnumBuilder {
-    return ProtoEnum(name);
+  /** Declares a proto3 enum type. Same call as the top-level `ProtoEnum`. */
+  enum(build: (e: EnumFactory) => DeclaredProtoEnum): DeclaredProtoEnum {
+    return ProtoEnum(build);
   }
 
   /** Opens a proto3 `service` named `name`. Same call as the top-level `RpcService`. */
@@ -69,77 +83,95 @@ export class ContractContentFactory {
 }
 
 /**
- * One `.proto` file, opened by {@link Contract.file}, closed by {@link with}.
+ * Everything one `@CoreProtocol`/`@RuntimeProtocol`/`@ClientProtocol` class declared in its own
+ * `build()`, sorted by kind and checked for a name reused across two declarations.
  *
  * @remarks
- * `schema/schema.ts`'s own `SchemaBatch` exists because seven kinds of SQL declaration must each
- * choose between three moments a package's own database goes through — a real ambiguity, resolved
- * once for the whole batch. A `.proto` file carries no such ambiguity: `Contract.file` already names
- * the one file every declaration in `.with`'s own array renders into, so this exists for the same
- * reason `SchemaBatch` does — one place that finally pushes into the right registry — without a
- * moment to pick between.
+ * A message and an enum share one namespace, the same rule proto3 itself enforces: `messages` and
+ * `enums` are refused a name in common, but a service may reuse a name either already took, since
+ * proto3 keeps a service's own namespace separate.
+ *
+ * @throws {Error} When two declarations answered by the same `build()` callback share a name in
+ * the namespace proto3 gives them, raised at construction, before `messages`/`enums`/`services`
+ * answer anything.
  */
-export class ContractFile {
-  readonly #file: ProtoFileRef;
+export class ProtocolBuilder {
+  readonly #messages: DeclaredMessage[] = [];
+  readonly #enums: DeclaredProtoEnum[] = [];
+  readonly #services: DeclaredRpcService[] = [];
 
-  /** Opened by {@link Contract.file}, never directly. */
-  constructor(file: ProtoFileRef) {
-    this.#file = file;
-  }
+  /** Opened by `Protocol.builder`, never directly. */
+  constructor(nodes: UnmodifiableList<ProtocolNode>) {
+    const names = new Set<string>();
+    const serviceNames = new Set<string>();
 
-  /**
-   * Declares everything `build` answers, in the order it lists them, for this file.
-   *
-   * @remarks
-   * A `Message`, a `ProtoEnum` or an `RpcService` no longer says its own file: none of the three
-   * registers anything by itself any more, so a value one of them built but never listed here is a
-   * declaration nobody ever sees, the same as any other value nothing reads. `w`, the callback's own
-   * argument, is a shortcut to the same three top-level functions, so nothing under `protocol/`
-   * needs importing by name to write one file.
-   */
-  with(
-    build: (
-      w: ContractContentFactory,
-    ) => UnmodifiableList<ContractAddable<unknown>>,
-  ): void {
-    for (const entry of build(new ContractContentFactory())) {
-      entry.declareInto(this.#file);
+    for (const node of nodes) {
+      const resolved: DeclaredNode = node instanceof RpcServiceBuilder ? node.declaration : node;
+
+      if (resolved.kind === "service") {
+        if (serviceNames.has(resolved.name)) {
+          throw new Error(
+            `"${resolved.name}" names two services in the same build().`,
+          );
+        }
+        serviceNames.add(resolved.name);
+        this.#services.push(resolved);
+        continue;
+      }
+
+      if (names.has(resolved.name)) {
+        throw new Error(
+          `"${resolved.name}" names two messages or enums in the same build().`,
+        );
+      }
+      names.add(resolved.name);
+
+      if (resolved.kind === "message") {
+        this.#messages.push(resolved);
+      } else {
+        this.#enums.push(resolved);
+      }
     }
   }
+
+  /** The messages this batch declared, in the order `build()` gave them. */
+  get messages(): UnmodifiableList<DeclaredMessage> {
+    return this.#messages;
+  }
+
+  /** The enums this batch declared, in the order `build()` gave them. */
+  get enums(): UnmodifiableList<DeclaredProtoEnum> {
+    return this.#enums;
+  }
+
+  /** The services this batch declared, in the order `build()` gave them. */
+  get services(): UnmodifiableList<DeclaredRpcService> {
+    return this.#services;
+  }
 }
 
-/**
- * The single entry point for a `.proto` file written in TypeScript, one call per file.
- *
- * @example
- * ```ts ignore
- * contract.file("protocol/common.proto", "scribe.v1").with((w) => [
- *   w.message("Time").fields((f) => ({ millis: f.int64().number(1) })),
- *   w.enum("Caller")
- *     .value("CALLER_UNSPECIFIED", 0)
- *     .value("CALLER_ANONYMOUS", 1),
- * ]);
- * ```
- */
-export class Contract {
+/** The single entry point a `@CoreProtocol`/`@RuntimeProtocol`/`@ClientProtocol` class's own `build()` calls. */
+export class Protocol {
   /**
-   * Opens the `.proto` file at `path`, under the proto `package` `pkg`, closed by
-   * {@link ContractFile.with}.
+   * Resolves `build`'s own declarations into a {@link ProtocolBuilder}.
    *
    * @remarks
-   * `path` and `pkg` are both required here rather than deduced from where the TypeScript module
-   * that calls this lives: a `.proto` file's own output path and its declared `package` are facts
-   * about the contract the framework and every worker language agree on, the same reason a table's
-   * name in `schema/` is a string the author chose rather than a key derived from a file path.
+   * Answers a `Future` rather than a `ProtocolBuilder` directly so that `build(): Future<ProtocolBuilder>`
+   * on a `ProtocolSource` reads the same as `Init`/`Run`'s own handlers: a method a runner calls
+   * later, even though resolving one of these carries no asynchronous work of its own today.
    */
-  file(path: string, pkg: string): ContractFile {
-    return new ContractFile({ path, package: pkg });
+  builder(
+    build: (b: ProtocolContentFactory) => UnmodifiableList<ProtocolNode>,
+  ): Future<ProtocolBuilder> {
+    return Future.value(
+      new ProtocolBuilder(build(new ProtocolContentFactory())),
+    );
   }
 }
 
 /**
- * The one `Contract` every `alchemy/protocol/**\/*.ts` file writes against — every file of it
- * shares this same instance, the way `schema/schema.ts`'s own `dbSchema` is shared across a
- * package's `schema/`.
+ * The one `Protocol` every `@CoreProtocol`/`@RuntimeProtocol`/`@ClientProtocol` class's own
+ * `build()` calls — every file of it shares this same instance, the way `schema/schema.ts`'s own
+ * `dbSchema` is shared across a package's `schema/`.
  */
-export const contract: Contract = new Contract();
+export const protocol: Protocol = new Protocol();

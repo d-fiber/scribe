@@ -34,9 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../declare/registry.ts";
 import type { UnmodifiableList } from "../../value/list.ts";
-import type { ContractAddable, ProtoFileRef } from "../file.ts";
 
 /** One `rpc` of a {@link DeclaredRpcService}, exactly as {@link RpcServiceBuilder.rpc} recorded it. */
 export interface DeclaredRpc {
@@ -50,8 +48,11 @@ export interface DeclaredRpc {
   readonly response: string;
 }
 
-/** A proto3 `service` exactly as `RpcService` declared it. */
+/** A proto3 `service` exactly as an {@link RpcServiceBuilder} resolved it. */
 export interface DeclaredRpcService {
+  /** Always `"service"` — what a `ProtocolBuilder` reads to tell this apart from a `DeclaredMessage` or a `DeclaredProtoEnum` in the same array. */
+  readonly kind: "service";
+
   /** The name this service is created under. */
   readonly name: string;
 
@@ -59,40 +60,22 @@ export interface DeclaredRpcService {
   readonly rpcs: UnmodifiableList<DeclaredRpc>;
 }
 
-/** An RPC service, and the file it belongs to — not part of {@link DeclaredRpcService} itself, since which file a service belongs to is where it is filed, not a fact carried on the service. */
-interface StoredRpcService {
-  /** The file this service belongs to. */
-  readonly file: ProtoFileRef;
-
-  /** The service exactly as `RpcService` declared it. */
-  readonly service: DeclaredRpcService;
-}
-
-/** Every service this contract has declared, by the name it took. */
-const declared = new Registry<StoredRpcService>("service");
-
 /**
- * A proto3 `service` under construction, growing one `rpc` at a time, declared once handed to a
- * `ContractFile`'s own `.with`.
+ * A proto3 `service` under construction, growing one `rpc` at a time.
  *
  * @remarks
- * Named `RpcService` rather than `Service`: `iac/build/service.ts` already exports `Service` for a
- * Docker service the deployed stack runs, an entirely different thing this would otherwise collide
- * with.
+ * Named `RpcService`/`RpcServiceBuilder` rather than `Service`/`ServiceBuilder`:
+ * `iac/build/service.ts` already exports `Service` for a Docker service the deployed stack runs,
+ * an entirely different thing this would otherwise collide with.
  *
- * `protocol.md`'s own "Le sens de chaque service" gives the vocabulary a `.proto` file's `service`
- * block already carries in this repository: which direction a procedure travels, and who implements
- * it, is a fact about the two processes on either end, not something this builder tracks — the same
- * reason `RpcService` here takes no parameter for it either. Only unary `rpc`s are expressible: the
- * wire is not gRPC (`protocol.md`'s own "Le transport n'est pas gRPC"), and none of the thirteen
- * `.proto` files this contract mirrors declares a streaming one.
- *
- * Unlike `Message`, nothing here closes the chain with a call of its own: `ContractFile`'s own
- * `.with` reads whatever `.rpc` last answered directly, so `RpcServiceBuilder` implements
- * {@link ContractAddable} itself — the same split `schema/schema.md` documents for its own `Enum`
- * and `Drop`, since nothing here says in advance how many procedures a service will carry.
+ * Unlike `Message` or `ProtoEnum`, nothing here closes the chain with a call of its own: `.rpc`
+ * always answers `this`, since nothing says in advance how many procedures a service will carry.
+ * `ProtocolBuilder` reads {@link declaration} to resolve one of these into a
+ * {@link DeclaredRpcService}, the same way it reads a `DeclaredMessage` or a `DeclaredProtoEnum`
+ * directly — a service builder is simply the one of the three that never resolves itself along
+ * the way.
  */
-export class RpcServiceBuilder implements ContractAddable<DeclaredRpcService> {
+export class RpcServiceBuilder {
   readonly #name: string;
   readonly #rpcs: DeclaredRpc[] = [];
 
@@ -107,41 +90,27 @@ export class RpcServiceBuilder implements ContractAddable<DeclaredRpcService> {
     return this;
   }
 
-  /**
-   * Registers this service for `file`, called by `ContractFile`'s own `.with`, never directly.
-   *
-   * @throws {DuplicateDeclarationError} When this service's name has already been declared.
-   */
-  declareInto(file: ProtoFileRef): DeclaredRpcService {
-    const service: DeclaredRpcService = { name: this.#name, rpcs: this.#rpcs };
-    return declared.declare(this.#name, { file, service }).service;
+  /** This service, exactly as `.rpc` has built it so far — read by `ProtocolBuilder`, never called directly by an author. */
+  get declaration(): DeclaredRpcService {
+    return { kind: "service", name: this.#name, rpcs: [...this.#rpcs] };
   }
 }
 
 /**
  * Opens a proto3 `service` named `name`.
  *
+ * @remarks
+ * `protocol.md`'s own "Le sens de chaque service" gives the vocabulary a `.proto` file's `service`
+ * block already carries in this repository: which direction a procedure travels, and who
+ * implements it, is a fact about the two processes on either end, not something this builder
+ * tracks. Only unary `rpc`s are expressible: the wire is not gRPC (`protocol.md`'s own "Le
+ * transport n'est pas gRPC"), and none of the `.proto` files this mirrors declares a streaming one.
+ *
  * @example
  * ```ts ignore
- * contract.file("protocol/logs.proto", "scribe.v1").with((w) => [
- *   w.service("Logging").rpc("Ship", "LogBatch", "LogAck"),
- * ]);
+ * RpcService("Logging").rpc("Ship", "LogBatch", "LogAck");
  * ```
  */
 export function RpcService(name: string): RpcServiceBuilder {
   return new RpcServiceBuilder(name);
-}
-
-/** Every service this contract has declared for `file`, in the order it declared them. */
-export function declaredRpcServices(
-  file: ProtoFileRef,
-): UnmodifiableList<DeclaredRpcService> {
-  return declared.all().filter((entry) => entry.file.path === file.path).map((
-    entry,
-  ) => entry.service);
-}
-
-/** Forgets every declared service, which is what a test does between cases. */
-export function forgetRpcServices(): void {
-  declared.forget();
 }

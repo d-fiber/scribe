@@ -34,15 +34,15 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../declare/registry.ts";
 import type { UnmodifiableList } from "../../value/list.ts";
-import { ContractEntry } from "../file.ts";
-import type { ProtoFileRef } from "../file.ts";
 import { FieldFactory, fieldsOf } from "../types/field.ts";
 import type { FieldDefinition, FieldMap } from "../types/field.ts";
 
-/** A message exactly as `Message` declared it. */
+/** A message exactly as a {@link MessageBuilder} resolved it. */
 export interface DeclaredMessage {
+  /** Always `"message"` — what a `ProtocolBuilder` reads to tell this apart from a `DeclaredProtoEnum` or a `DeclaredRpcService` in the same array. */
+  readonly kind: "message";
+
   /** The name this message is created under. */
   readonly name: string;
 
@@ -56,27 +56,10 @@ export interface DeclaredMessage {
   readonly reservedNames: UnmodifiableList<string>;
 }
 
-/** A message, and the file it belongs to — not part of {@link DeclaredMessage} itself, since which file a message belongs to is where it is filed, not a fact carried on the message. */
-interface StoredMessage {
-  /** The file this message belongs to. */
-  readonly file: ProtoFileRef;
-
-  /** The message exactly as `Message` declared it. */
-  readonly message: DeclaredMessage;
-}
-
-/** Every message this contract has declared, by the name it took. */
-const declared = new Registry<StoredMessage>("message");
-
 /**
  * A proto3 message under construction, closed by {@link MessageBuilder.fields}.
  *
  * @remarks
- * Which `.proto` file this message, and every field it carries, renders into is no longer a choice
- * made here: it is whichever `ContractFile` the value `.fields` answers is finally handed to — the
- * same indirection `schema/table/table.ts`'s own `TableBuilder` documents for a table and its
- * moment.
- *
  * A field opened in `.fields` can carry a reference to another message this contract declares, by
  * name, in either order: nothing here checks that the name it names exists, because a message can
  * be declared before the rest of the contract is known to exist — the same reason `schema/`'s own
@@ -105,27 +88,17 @@ export class MessageBuilder {
   }
 
   /**
-   * Closes this message, ready for a `ContractFile` to declare it under the file that batch opened.
-   *
-   * @remarks
-   * Nothing is declared yet: the value this answers only registers this message once
-   * `ContractFile`'s own `.with` calls its `declareInto` — the same deferral
-   * `schema/table/table.ts`'s own `.columns` documents for a table.
+   * Closes this message, resolving `build`'s own fields into a {@link DeclaredMessage}.
    *
    * @throws {Error} When two fields share the same number, or when a field's number falls in a
-   * range this message reserves, raised where this is called, before anything is deferred.
-   * @throws {DuplicateDeclarationError} When this message's name has already been declared, raised
-   * where `declareInto` runs.
+   * range this message reserves.
    */
-  fields(build: (f: FieldFactory) => FieldMap): ContractEntry<DeclaredMessage> {
+  fields(build: (f: FieldFactory) => FieldMap): DeclaredMessage {
     const fields = fieldsOf(build(new FieldFactory()));
 
     const seen = new Set<number>();
     for (const [fieldName, definition] of Object.entries(fields)) {
-      if (
-        seen.has(definition.number) ||
-        this.#reservedNumbers.includes(definition.number)
-      ) {
+      if (seen.has(definition.number) || this.#reservedNumbers.includes(definition.number)) {
         throw new Error(
           `"${this.#name}" reuses the number ${definition.number} on field "${fieldName}", ` +
             "across two fields, or on a number this message also reserves.",
@@ -134,15 +107,13 @@ export class MessageBuilder {
       seen.add(definition.number);
     }
 
-    return new ContractEntry((file) => {
-      const message: DeclaredMessage = {
-        name: this.#name,
-        fields,
-        reservedNumbers: this.#reservedNumbers,
-        reservedNames: this.#reservedNames,
-      };
-      return declared.declare(this.#name, { file, message }).message;
-    });
+    return {
+      kind: "message",
+      name: this.#name,
+      fields,
+      reservedNumbers: this.#reservedNumbers,
+      reservedNames: this.#reservedNames,
+    };
   }
 }
 
@@ -151,25 +122,9 @@ export class MessageBuilder {
  *
  * @example
  * ```ts ignore
- * contract.file("protocol/common.proto", "scribe.v1").with((w) => [
- *   w.message("Time").fields((f) => ({ millis: f.int64().number(1) })),
- * ]);
+ * Message("Time").fields((f) => ({ millis: f.int64().number(1) }));
  * ```
  */
 export function Message(name: string): MessageBuilder {
   return new MessageBuilder(name);
-}
-
-/** Every message this contract has declared for `file`, in the order it declared them. */
-export function declaredMessages(
-  file: ProtoFileRef,
-): UnmodifiableList<DeclaredMessage> {
-  return declared.all().filter((entry) => entry.file.path === file.path).map((
-    entry,
-  ) => entry.message);
-}
-
-/** Forgets every declared message, which is what a test does between cases. */
-export function forgetMessages(): void {
-  declared.forget();
 }

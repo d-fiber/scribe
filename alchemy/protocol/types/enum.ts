@@ -34,11 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../declare/registry.ts";
 import type { UnmodifiableList } from "../../value/list.ts";
-import type { ContractAddable, ProtoFileRef } from "../file.ts";
 
-/** One value of a {@link DeclaredProtoEnum}, exactly as {@link ProtoEnumBuilder.value} recorded it. */
+/** One value of a {@link DeclaredProtoEnum}, exactly as an {@link EnumValueBuilder} resolved it. */
 export interface DeclaredEnumValue {
   /** The name this value is declared under. */
   readonly name: string;
@@ -47,12 +45,15 @@ export interface DeclaredEnumValue {
   readonly number: number;
 }
 
-/** A proto3 enum exactly as {@link ProtoEnum} declared it. */
+/** A proto3 enum exactly as an {@link EnumWithName} resolved it. */
 export interface DeclaredProtoEnum {
+  /** Always `"enum"` — what a `ProtocolBuilder` reads to tell this apart from a `DeclaredMessage` or a `DeclaredRpcService` in the same array. */
+  readonly kind: "enum";
+
   /** The name this enum is created under. */
   readonly name: string;
 
-  /** The values this enum accepts, in the order {@link ProtoEnumBuilder.value} gave them. The first always numbers `0`, proto3's own required default. */
+  /** The values this enum accepts, in the order `.values` gave them. The first always numbers `0`, proto3's own required default. */
   readonly values: UnmodifiableList<DeclaredEnumValue>;
 
   /** The numbers this enum retires from a previous version of the contract, refused to any {@link values} entry. */
@@ -62,50 +63,41 @@ export interface DeclaredProtoEnum {
   readonly reservedNames: UnmodifiableList<string>;
 }
 
-/** A proto3 enum, and the file it belongs to — not part of {@link DeclaredProtoEnum} itself, since which file an enum belongs to is where it is filed, not a fact carried on the enum. */
-interface StoredEnum {
-  /** The file this enum belongs to. */
-  readonly file: ProtoFileRef;
-
-  /** The enum exactly as `ProtoEnum` declared it. */
-  readonly enum: DeclaredProtoEnum;
-}
-
-/** Every enum this contract has declared, by the name it took. */
-const declared = new Registry<StoredEnum>("enum");
-
-/**
- * A proto3 enum type named `name`, growing one numbered value at a time, declared once handed to
- * a `ContractFile`'s own `.with`.
- *
- * @remarks
- * Named `ProtoEnum` rather than `Enum`: `schema/types/enum.ts` already exports `Enum` for a Postgres
- * enum type, and the two would collide the moment both are re-exported from the same module.
- *
- * A field opened with `f.enum("LogLevel")`, in `types/field.ts`, takes this enum by name: nothing
- * here checks that the name it took resolves, because a field can be declared before the rest of
- * the contract is known to exist — the same choice `schema/types/enum.ts` makes for a column.
- *
- * Unlike `Message`, nothing here closes the chain with a call of its own: `ContractFile`'s own
- * `.with` reads whatever `.value` last answered directly, so `ProtoEnumBuilder` implements
- * {@link ContractAddable} itself, rather than answering a `ContractEntry` the way a closing call
- * would — the same split `schema/schema.md` documents for its own `Enum` and `Drop`.
- */
-export class ProtoEnumBuilder implements ContractAddable<DeclaredProtoEnum> {
+/** One value under construction, opened by {@link EnumValueFactory.value}, closed by {@link number}. */
+export class EnumValueBuilder {
   readonly #name: string;
-  readonly #values: DeclaredEnumValue[] = [];
-  #reservedNumbers: UnmodifiableList<number> = [];
-  #reservedNames: UnmodifiableList<string> = [];
 
-  /** Opened by `ProtoEnum`, never directly. */
+  /** Opened by {@link EnumValueFactory.value}, never directly. */
   constructor(name: string) {
     this.#name = name;
   }
 
-  /** Adds `name`, numbered `number`, to the values this enum accepts, in the order `ProtoEnum` will list them. The first value added must number `0`, proto3's own required default. */
-  value(name: string, number: number): this {
-    this.#values.push({ name, number });
-    return this;
+  /** The number this value takes on the wire, closing it. */
+  number(number: number): DeclaredEnumValue {
+    return { name: this.#name, number };
+  }
+}
+
+/** Opens one value of an enum, passed to {@link EnumWithName.values}'s own callback. */
+export class EnumValueFactory {
+  /** Names this value, closed by {@link EnumValueBuilder.number}. */
+  value(name: string): EnumValueBuilder {
+    return new EnumValueBuilder(name);
+  }
+}
+
+/**
+ * A proto3 enum that has taken its name, still open to {@link reserved}/{@link reservedNames},
+ * closed by {@link values}.
+ */
+export class EnumWithName {
+  readonly #name: string;
+  #reservedNumbers: UnmodifiableList<number> = [];
+  #reservedNames: UnmodifiableList<string> = [];
+
+  /** Opened by {@link EnumFactory.name}, never directly. */
+  constructor(name: string) {
+    this.#name = name;
   }
 
   /** Retires `numbers` from a previous version of this enum, refusing them to any value declared here. */
@@ -121,24 +113,23 @@ export class ProtoEnumBuilder implements ContractAddable<DeclaredProtoEnum> {
   }
 
   /**
-   * Registers this enum for `file`, called by `ContractFile`'s own `.with`, never directly.
+   * Closes this enum, resolving `build`'s own values into a {@link DeclaredProtoEnum}.
    *
-   * @throws {Error} When no value was added, when the first value added does not number `0`, or
+   * @throws {Error} When no value was given, when the first value given does not number `0`, or
    * when a number repeats across two values or falls in a range this enum also reserves.
-   * @throws {DuplicateDeclarationError} When this enum's name has already been declared.
    */
-  declareInto(file: ProtoFileRef): DeclaredProtoEnum {
-    if (this.#values.length === 0 || this.#values[0].number !== 0) {
+  values(build: (v: EnumValueFactory) => UnmodifiableList<DeclaredEnumValue>): DeclaredProtoEnum {
+    const values = build(new EnumValueFactory());
+
+    if (values.length === 0 || values[0].number !== 0) {
       throw new Error(
         `Enum "${this.#name}" must open with a value numbered 0, proto3's own required default.`,
       );
     }
 
     const seen = new Set<number>();
-    for (const entry of this.#values) {
-      if (
-        seen.has(entry.number) || this.#reservedNumbers.includes(entry.number)
-      ) {
+    for (const entry of values) {
+      if (seen.has(entry.number) || this.#reservedNumbers.includes(entry.number)) {
         throw new Error(
           `Enum "${this.#name}" reuses the number ${entry.number} across two values, or on a value this enum also reserves.`,
         );
@@ -146,43 +137,38 @@ export class ProtoEnumBuilder implements ContractAddable<DeclaredProtoEnum> {
       seen.add(entry.number);
     }
 
-    const enumDecl: DeclaredProtoEnum = {
+    return {
+      kind: "enum",
       name: this.#name,
-      values: this.#values,
+      values,
       reservedNumbers: this.#reservedNumbers,
       reservedNames: this.#reservedNames,
     };
-    return declared.declare(this.#name, { file, enum: enumDecl }).enum;
+  }
+}
+
+/** Opens a proto3 enum type, passed to {@link ProtoEnum}'s own callback. */
+export class EnumFactory {
+  /** Names the enum, closed by {@link EnumWithName.values}. */
+  name(name: string): EnumWithName {
+    return new EnumWithName(name);
   }
 }
 
 /**
- * Opens a proto3 enum type named `name`.
+ * Declares a proto3 enum type, `build` naming it and listing its values.
  *
  * @example
  * ```ts ignore
- * contract.file("protocol/logs.proto", "scribe.v1").with((w) => [
- *   w.enum("LogLevel")
- *     .value("LOG_LEVEL_UNSPECIFIED", 0)
- *     .value("LOG_LEVEL_DEBUG", 1)
- *     .value("LOG_LEVEL_INFO", 2),
- * ]);
+ * ProtoEnum((e) =>
+ *   e.name("LogLevel").values((v) => [
+ *     v.value("LOG_LEVEL_UNSPECIFIED").number(0),
+ *     v.value("LOG_LEVEL_DEBUG").number(1),
+ *     v.value("LOG_LEVEL_INFO").number(2),
+ *   ])
+ * );
  * ```
  */
-export function ProtoEnum(name: string): ProtoEnumBuilder {
-  return new ProtoEnumBuilder(name);
-}
-
-/** Every enum this contract has declared for `file`, in the order it declared them. */
-export function declaredProtoEnums(
-  file: ProtoFileRef,
-): UnmodifiableList<DeclaredProtoEnum> {
-  return declared.all().filter((entry) => entry.file.path === file.path).map((
-    entry,
-  ) => entry.enum);
-}
-
-/** Forgets every declared enum, which is what a test does between cases. */
-export function forgetProtoEnums(): void {
-  declared.forget();
+export function ProtoEnum(build: (e: EnumFactory) => DeclaredProtoEnum): DeclaredProtoEnum {
+  return build(new EnumFactory());
 }
