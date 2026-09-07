@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { cacheSettings } from "@scribe/foundation";
-import { databaseSettings } from "@scribe/foundation";
-import { queueSettings } from "@scribe/foundation";
+import { cacheSettings } from "@scribe/foundation/cache";
+import { databaseSettings } from "@scribe/foundation/database";
+import { queueSettings } from "@scribe/foundation/queue";
 import { RedisRateLimiters } from "@scribe/foundation/internal/rate_limiter";
 import { runMounted } from "@scribe/runtime/wiring/packages.ts";
 import {

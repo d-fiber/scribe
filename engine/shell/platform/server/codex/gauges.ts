@@ -41,7 +41,7 @@ import { ApiContext, ApiEndpoint } from "@scribe/kernel/endpoint/api_endpoint.ts
 import type { Caller } from "@scribe/alchemy/route";
 import { inflightBodyBytes } from "@scribe/kernel/http/serve/body_admission.ts";
 import { Processes } from "@scribe/scholium/process.ts";
-import { queueStatus } from "@scribe/foundation";
+import { queueStatus } from "@scribe/foundation/queue";
 
 const _RATE_LIMIT: RateLimit = {
   limit: 600,
