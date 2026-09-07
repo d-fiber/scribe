@@ -36,7 +36,7 @@
 
 import { assert, assertEquals, assertMatch } from "@std/assert";
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { Runners } from "@scribe/alchemy/test";
 import { ClientType, enumValues } from "@scribe/contracts/enums.ts";
 import { PROTOCOL_VERSION } from "../../../sdk/js/mod.ts";

@@ -42,9 +42,14 @@ const NONCE_TTL_S = Math.ceil(
   (DEVICE_PAYLOAD_MAX_AGE_MS + DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS) / 1000,
 );
 
+/**
+ * Claims `nonce` for this device payload, once, and answers whether the claim went through.
+ *
+ * @remarks
+ * A device whose nonce store is down is a device that cannot sign in at all, so a nonce that
+ * cannot be claimed is let through rather than refused.
+ */
 export function claimNonce(nonce: string): Future<boolean> {
-  // A device whose nonce store is down is a device that cannot sign in at all, so a nonce
-  // that cannot be claimed is let through rather than refused.
   return claimOnce(`device:nonce:${nonce}`, NONCE_TTL_S, {
     whenUnavailable: "allow",
     scope: "device-payload",

@@ -37,20 +37,20 @@
 import ts from "typescript";
 import type { FileSystemDriver } from "@scribe/alchemy";
 import { FileSystems } from "@scribe/alchemy";
-import { LocalFileSystems as BunFileSystems } from "@scribe/runtime/scholium/bun/files.ts";
-import { LocalProcess as BunProcess } from "@scribe/runtime/scholium/bun/process.ts";
-import { LocalFileSystems as DenoFileSystems } from "@scribe/runtime/scholium/deno/files.ts";
-import { LocalProcess as DenoProcess } from "@scribe/runtime/scholium/deno/process.ts";
-import { currentStack } from "@scribe/runtime/scholium/host.ts";
-import type { Process } from "@scribe/runtime/scholium/process.ts";
-import { Processes } from "@scribe/runtime/scholium/process.ts";
+import { LocalFileSystems as BunFileSystems } from "@scribe/scholium/bun/files.ts";
+import { LocalProcess as BunProcess } from "@scribe/scholium/bun/process.ts";
+import { LocalFileSystems as DenoFileSystems } from "@scribe/scholium/deno/files.ts";
+import { LocalProcess as DenoProcess } from "@scribe/scholium/deno/process.ts";
+import { currentStack } from "@scribe/scholium/host.ts";
+import type { Process } from "@scribe/scholium/process.ts";
+import { Processes } from "@scribe/scholium/process.ts";
 import { RULES } from "./rules.ts";
 
 /**
  * This is the one file under `.lint/` that reaches a concrete `FileSystemDriver`/`Process` rather
  * than staying behind the port everything else here uses: dispatched on {@link currentStack} so
  * the same rules run under either shell dev_tools/runtime carries a `run.sh` for, `deno` and `bun`
- * alike, the way `engine/runtime/scholium/env.ts` already dispatches {@link localEnvironment}.
+ * alike, the way `engine/scholium/env.ts` already dispatches {@link localEnvironment}.
  */
 function localFileSystems(): FileSystemDriver {
   switch (currentStack()) {

@@ -39,6 +39,7 @@ import type { IpLocation } from "@scribe/alchemy/route";
 import { request } from "@scribe/runtime/http/request.ts";
 import { RequestScope } from "@scribe/runtime/scope.ts";
 
+/** What resolves an IP to a city and a country. */
 export type LocationResolver = (ip: string) => Future<IpLocation>;
 
 const _CACHE_KEY = "location:resolved";
@@ -46,10 +47,26 @@ const _EMPTY: IpLocation = { city: "", country: "" };
 
 let _resolver: LocationResolver | null = null;
 
+/**
+ * Installs `resolver` as what `currentLocation` calls to turn an IP into a place.
+ *
+ * @remarks
+ * A side-effecting import from `kernel/location/` calls this once, so `runtime/` never depends on
+ * the kernel directly: without a resolver installed, `currentLocation` degrades to an empty
+ * location instead of throwing.
+ */
 export function installLocationResolver(resolver: LocationResolver): void {
   _resolver = resolver;
 }
 
+/**
+ * The city and country the request in scope's own IP resolves to.
+ *
+ * @remarks
+ * Memoised on the request's own scope, so however many callers ask within one request, a resolver
+ * installed by `installLocationResolver` runs at most once. Answers `{ city: "", country: "" }`
+ * when nothing installed a resolver.
+ */
 export function currentLocation(): Future<IpLocation> {
   const cached = RequestScope.cache.get<Future<IpLocation>>(_CACHE_KEY);
   if (cached !== undefined) return cached;

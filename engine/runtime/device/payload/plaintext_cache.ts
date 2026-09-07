@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { TtlLru } from "@scribe/runtime/support/cache/ttl_lru.ts";
+import { TtlLru } from "@scribe/runtime/primitives/cache/ttl_lru.ts";
 
 const MAX_CACHED_PAYLOADS = 512;
 

@@ -43,7 +43,7 @@ const MAX_CACHED_RESOLUTIONS = 512;
  * Three answers and not two, the same way {@link PlaintextCache} holds three: `undefined` is a name
  * this process has not looked up, `null` is one it looked up and did not find.
  *
- * It holds no expiry, unlike the table `runtime/support/cache/ttl_lru.ts` carries, because what it
+ * It holds no expiry, unlike the table `runtime/primitives/cache/ttl_lru.ts` carries, because what it
  * remembers is the layout of a directory that is baked into the image: an entry that has stopped
  * being true means the image changed under a running process, which it does not.
  *

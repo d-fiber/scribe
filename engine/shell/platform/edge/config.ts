@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { environment } from "@scribe/runtime/scholium/env.ts";
+import { environment } from "@scribe/scholium/env.ts";
 
 /**
  * How the edge platform is configured for this deployment.

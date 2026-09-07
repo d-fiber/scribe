@@ -38,7 +38,7 @@
 // module load time, but the `ioredis` client itself is `lazyConnect: true`, so no real
 // connection is attempted and `--allow-net` isn't required (see `.claude/testing.md`).
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { Duration, rateLimit, RateLimiters } from "@scribe/alchemy";
 import { assertEquals } from "@std/assert";

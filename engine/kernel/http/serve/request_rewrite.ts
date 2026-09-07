@@ -43,6 +43,15 @@ function bytesOnly(bodyBytes: Uint8Array): ArrayBuffer {
   return coversWholeBuffer ? (bodyBytes.buffer as ArrayBuffer) : (bodyBytes.slice().buffer as ArrayBuffer);
 }
 
+/**
+ * `req` rebuilt on `pathname`, its already-read body reinjected since the original stream cannot
+ * be read twice.
+ *
+ * @remarks
+ * The query string is recovered from `req.url` and recomposed onto `pathname` rather than dropped:
+ * both `pathname` and the search string are read independently downstream, `ctx.query(...)` and a
+ * fresh `URL(...).searchParams`, and either one losing `?offset=...&size=...` breaks pagination.
+ */
 export function rewriteRequest(
   req: Request,
   bodyBytes: Uint8Array | null,

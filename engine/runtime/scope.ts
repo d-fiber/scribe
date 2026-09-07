@@ -63,7 +63,10 @@ function activeState(): RequestState {
  * request's cache is ever visible to the next.
  */
 export interface RequestScopeCache {
+  /** The value cached under `key` for this request, or undefined when nothing was cached there. */
   get<T>(key: string): T | undefined;
+
+  /** Caches `value` under `key`, for the rest of this request. */
   set<T>(key: string, value: T): void;
 }
 
@@ -78,15 +81,37 @@ export interface RequestScopeCache {
  * called directly from a test.
  */
 export interface RequestScopeApi {
+  /**
+   * Opens the scope for the life of `handler`, `req` and `bodyBytes` as the request in flight.
+   *
+   * @remarks
+   * Called by `kernel/http/serve/mod.ts` for a real request, and again by the test harness and by
+   * a capability token's replay, each opening its own scope rather than sharing one.
+   */
   run<T>(
     req: Request,
     bodyBytes: Uint8Array,
     handler: () => T,
     peerAddress?: string | null,
   ): T;
+
+  /** The request in flight. Throws when called outside a scope opened by `run`. */
   get(): Request;
+
+  /** The TCP peer address `run` was given, or null when none was. */
   peer(): string | null;
+
+  /**
+   * Replaces the request in flight with `req` and `bodyBytes`, for a rewrite that changes its path
+   * without opening a new scope.
+   *
+   * @remarks
+   * Clears `cache`: a value computed against the old path would otherwise leak into the rewritten
+   * request.
+   */
   set(req: Request, bodyBytes: Uint8Array): void;
+
+  /** The body bytes `run` or `set` were given, already read and bounded. */
   getBodyBytes(): Uint8Array | null;
 
   /** Per-request scratch storage, cleared whenever `set` swaps in a new request. */

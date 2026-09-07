@@ -1,0 +1,80 @@
+// Copyright (C) 2026 Fiber
+//
+// This Source Code Form is subject to the terms of the Mozilla Public License,
+// v. 2.0. If a copy of the MPL was not distributed with this file, You can
+// obtain one at https://mozilla.org/MPL/2.0/.
+//
+// What you may do:
+// - Use this software for any purpose, including commercially, and build and
+//   sell your own products on top of it.
+// - Change it, and create new works based on it.
+// - Distribute copies of it, with or without your changes.
+// - Combine it with files under any other licence, proprietary ones included,
+//   and licence that larger work on your own terms.
+//
+// What you must do in return:
+// - Keep this notice on every file you received it on.
+// - Publish, under these same terms, the source of every file covered by them
+//   that you distribute, including the ones you changed, so that whoever
+//   receives your version can obtain that source.
+// - Leave Fiber out of it: the name "Fiber", its branding, its logos and its
+//   trademarks may not be used to endorse or promote what you build, and this
+//   licence grants no right to them.
+//
+// Disclaimer:
+// AS FAR AS THE LAW ALLOWS, THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY
+// OR CONDITION OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR
+// NON-INFRINGEMENT. IN NO EVENT SHALL FIBER BE LIABLE FOR ANY DIRECT, INDIRECT,
+// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING BUT NOT
+// LIMITED TO LOSS OF USE, DATA, PROFITS, OR BUSINESS INTERRUPTION) ARISING OUT
+// OF OR RELATED TO THESE TERMS OR THE USE OR NATURE OF THE SOFTWARE, UNDER ANY
+// KIND OF LEGAL CLAIM.
+//
+// This header is a summary written for convenience. Where it differs from the
+// LICENSE file, the LICENSE file governs.
+
+import { Duration } from "@scribe/alchemy";
+import type { Future } from "@scribe/alchemy";
+import { InternalSecretFirewall } from "@scribe/kernel/identity/firewall/internal.ts";
+import { request } from "@scribe/runtime/http/request.ts";
+import { ApiEndpoint } from "./api_endpoint.ts";
+import type { Caller, RateLimit } from "@scribe/alchemy/route";
+
+export type { ApiContext } from "./context.ts";
+
+/** An `ApiEndpoint` restricted to the service caller role and gated behind the internal secret firewall. */
+export abstract class ServiceEndpoint extends ApiEndpoint {
+  /** Fixed to the service caller role; a `ServiceEndpoint` never answers any other. */
+  protected access(): Caller | readonly Caller[] {
+    return "service";
+  }
+
+  /** 5000 calls a minute by default, with a one-hour penalty; a subclass may tighten it. */
+  protected rateLimit(): RateLimit {
+    return {
+      limit: 5000,
+      window: Duration.minutes(1),
+      penalty: Duration.minutes(1),
+      maxPenalty: Duration.hours(1),
+    };
+  }
+
+  /**
+   * Verifies the internal secret and the body size before deferring to `ApiEndpoint.execute`.
+   *
+   * @remarks
+   * Both checks run before `super.execute()`, which is the one that reaches Redis for the access
+   * check and the rate limit: a caller without the secret, or a body already too large, is
+   * refused without spending that round trip.
+   */
+  protected override execute(): Future<Response> {
+    if (!InternalSecretFirewall.verify()) {
+      return Promise.resolve(this.response.unauthorized());
+    }
+    if (request.isBodyTooLarge()) {
+      return Promise.resolve(this.response.payloadTooLarge());
+    }
+    return super.execute();
+  }
+}

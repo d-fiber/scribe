@@ -34,11 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals, assertFalse } from "@std/assert";
 import type { WorkerSettings } from "@scribe/contracts/settings.ts";
-import { workerSettings } from "@scribe/runtime/support/settings/worker.ts";
+import { workerSettings } from "@scribe/runtime/settings/worker.ts";
 import { workerEnabled } from "@scribe/embedder/enabled.ts";
 
 const DEPLOYMENT: WorkerSettings = {

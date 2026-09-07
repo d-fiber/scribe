@@ -43,13 +43,7 @@
  * token instead of blocking the process from starting without one.
  */
 export interface IdentitySettings {
-  /**
-   * The address of the service that publishes the JWKS, when one is mounted.
-   *
-   * Undefined for a project that mounts no identity package: there is no service
-   * to ask, and the verifier answers by refusing asymmetric tokens instead of
-   * keeping the process from starting.
-   */
+  /** The address of the service that publishes the JWKS, when one is mounted. */
   readonly authUrl: string | undefined;
 
   /** The key a caller with no session is given, as the gateway hands it out. */

@@ -51,6 +51,7 @@ const UNCLAIMED: LogRouting = {
 
 let routing: LogRouting = UNCLAIMED;
 
+/** Which {@link LogRouting} the host currently delivers through, {@link UNCLAIMED} until a worker claims it. */
 export const LogRoutes = {
   /** Points the host at the sinks a worker's manifest declared. */
   use(next: LogRouting): void {
@@ -67,6 +68,7 @@ export const LogRoutes = {
     routing = UNCLAIMED;
   },
 
+  /** The routing currently in force. */
   get current(): LogRouting {
     return routing;
   },

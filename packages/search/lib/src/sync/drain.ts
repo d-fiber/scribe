@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { Duration } from "@scribe/alchemy";
-import { extensions } from "@scribe/runtime/support/extensions/mod.ts";
+import { extensions } from "@scribe/runtime/wiring/extensions/mod.ts";
 import { Cron, every } from "@scribe/foundation/cron";
 import { SearchOperation } from "../../contracts/definition.ts";
 import { SEARCH_EXTENSION } from "../core/extension.ts";

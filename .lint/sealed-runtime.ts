@@ -48,10 +48,11 @@ const ROOT = new URL("../", import.meta.url).pathname.replace(/\/$/, "");
 /**
  * The engine layers a package never touches directly, but that reach the host all the same.
  *
- * `engine/runtime/scholium/` is the exception: it is where the host is allowed to be named, and
- * every other file in these five layers reaches it only through the ports declared there.
+ * `engine/scholium/` is the exception: it is where the host is allowed to be named, and every
+ * other file in these six layers reaches it only through the ports declared there.
  */
 const SEALED_ENGINE_LAYERS = [
+  "engine/scholium/",
   "engine/runtime/",
   "engine/kernel/",
   "engine/embedder/",
@@ -62,22 +63,22 @@ const SEALED_ENGINE_LAYERS = [
 /**
  * Where inside the engine layers the host is allowed to be named.
  *
- * `engine/runtime/scholium/deno/`, `.../node/` and `.../bun/` are the container: each holds one
- * stack's own implementation of a listener, a process boundary or the platform's own test runner,
- * and only there. The rest of `engine/runtime/scholium/`, the contracts and the dispatchers that
- * pick one of the three, names no host directly and is held to the same seal as everywhere else.
- * Two older files stand outside the container too, each already its own single, named place
- * rather than a scatter, and each staying there for a reason of its own: `current.ts` fills its
- * port at import rather than at boot, on purpose, and moving it would change when it runs;
- * `constant_time.ts` is read by a package outside this repository, and moving it would mean
- * editing that package's own source instead of this one.
+ * `engine/scholium/deno/`, `.../node/` and `.../bun/` are the container: each holds one stack's
+ * own implementation of a listener, a process boundary or the platform's own test runner, and
+ * only there. The rest of `engine/scholium/`, the contracts and the dispatchers that pick one of
+ * the three, names no host directly and is held to the same seal as everywhere else. Two older
+ * files stand outside the container too, each already its own single, named place rather than a
+ * scatter, and each staying there for a reason of its own: `current.ts` fills its port at import
+ * rather than at boot, on purpose, and moving it would change when it runs; `constant_time.ts` is
+ * read by a package outside this repository, and moving it would mean editing that package's own
+ * source instead of this one.
  */
 const ENGINE_HOST_EXCEPTIONS = [
-  "engine/runtime/scholium/deno/",
-  "engine/runtime/scholium/node/",
-  "engine/runtime/scholium/bun/",
+  "engine/scholium/deno/",
+  "engine/scholium/node/",
+  "engine/scholium/bun/",
   "engine/runtime/current.ts",
-  "engine/runtime/support/crypto/constant_time.ts",
+  "engine/runtime/primitives/crypto/constant_time.ts",
 ];
 
 /**
@@ -89,11 +90,11 @@ const ENGINE_HOST_EXCEPTIONS = [
  * test reads them through the Memory doubles in `@scribe/alchemy/test`. Code in either zone that
  * reaches the runtime directly would not survive the framework changing hosts, and it is the seam
  * this rule keeps sealed. The engine layers that sit above a package carry the same seam: they
- * reach the host through the ports in `engine/runtime/scholium/` instead.
+ * reach the host through the ports in `engine/scholium/` instead.
  *
  * No package carries an exception. `foundation` used to be the one that read the host directly,
  * to fill the drivers every other package reads through; those drivers moved to
- * `engine/runtime/scholium/`, and every package, `foundation` included, is sealed the same way.
+ * `engine/scholium/`, and every package, `foundation` included, is sealed the same way.
  */
 function sealedZone(filename: string): "lib" | "test" | null {
   const root = `${ROOT}/`;
@@ -137,12 +138,12 @@ function importMessage(zone: "lib" | "test", filename: string, specifier: string
   if (isEngineFile(filename)) {
     return `"${specifier}" reaches past the framework to the host runtime under it. ` +
       `engine/kernel, engine/embedder, engine/shell and engine/testing name what they want ` +
-      `through the ports in engine/runtime/scholium/, the one place allowed to name the host.`;
+      `through the ports in engine/scholium/, the one place allowed to name the host.`;
   }
 
   if (zone === "lib") {
     return `"${specifier}" reaches past the framework to the host runtime under it. A package's ` +
-      `lib/ names what it wants through @scribe/alchemy, and engine/runtime/scholium/ fills in ` +
+      `lib/ names what it wants through @scribe/alchemy, and engine/scholium/ fills in ` +
       `what does it. No package, foundation included, is allowed to name the host.`;
   }
 
@@ -157,13 +158,13 @@ function runtimeMessage(zone: "lib" | "test", filename: string): string {
   if (isEngineFile(filename)) {
     return "This reaches the host runtime directly. engine/kernel, engine/embedder, " +
       "engine/shell and engine/testing reach the listener, the process and the rest through " +
-      "the ports in engine/runtime/scholium/, the one place allowed to name the host.";
+      "the ports in engine/scholium/, the one place allowed to name the host.";
   }
 
   if (zone === "lib") {
     return "This reaches the host runtime directly. A package's lib/ reaches the file system, " +
       "the environment, a subprocess and the rest through the ports in @scribe/alchemy, which " +
-      "engine/runtime/scholium/ fills. No package is allowed to name the host.";
+      "engine/scholium/ fills. No package is allowed to name the host.";
   }
 
   return "This reaches the host runtime directly. A package test declares its cases with Scribe, " +

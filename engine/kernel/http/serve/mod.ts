@@ -43,12 +43,22 @@ import { admitBody, inflightBodyBytes, releaseBody } from "@scribe/kernel/http/s
 import { logger } from "@scribe/kernel/observability/logger.ts";
 import "@scribe/kernel/location/ip_location.ts";
 import { RequestScope } from "@scribe/runtime/scope.ts";
-import { Listeners } from "@scribe/runtime/scholium/listener.ts";
-import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
+import { Listeners } from "@scribe/scholium/listener.ts";
+import { httpSettings } from "@scribe/runtime/settings/http.ts";
 import type { Hono } from "hono";
 
 const RETRY_AFTER_S = "5";
 
+/**
+ * Opens the port `httpSettings` names, and answers every request through `handler`.
+ *
+ * @remarks
+ * This is the only place in the repository that opens the port a project's request enters
+ * through, so it is also the only place that bounds a body's read and opens the request scope.
+ * A body is admitted against the process-wide budget before it is read at all, and released in a
+ * `finally` once the handler has answered, since the bytes live in the scope for the whole time
+ * the request is being handled.
+ */
 export function serve(handler: () => Response | Future<Response>): void {
   Listeners.get().serve(async (req, peer) => {
     const admission = admitBody(req);
@@ -69,6 +79,14 @@ export function serve(handler: () => Response | Future<Response>): void {
   }, { port: httpSettings.get().port });
 }
 
+/**
+ * Rewrites the current request onto `subPath` and answers it through `app`.
+ *
+ * @remarks
+ * The rewritten request replaces the scope's own, which empties the per-request cache: a value
+ * memoised against the old pathname, a parsed query string for one, must not leak into the request
+ * under its new path.
+ */
 export function forward(app: Hono, subPath: string): Future<Response> {
   const req = RequestScope.get();
   const bodyBytes = RequestScope.getBodyBytes();
@@ -79,6 +97,15 @@ export function forward(app: Hono, subPath: string): Future<Response> {
   return Promise.resolve(app.fetch(rewritten));
 }
 
+/**
+ * Serves `app` as a function deployed under `name`, journaled, with `name` stripped from the path
+ * before `app` ever sees it.
+ *
+ * @remarks
+ * A deployment exposes each function under its own prefix, `/admin/*`, `/app/*`, that the routes
+ * declared inside `app` must never see: stripping it here is what lets those routes stay written as
+ * if they were mounted at the root.
+ */
 export function serveFunction(app: Hono, name: string): void {
   const root: Hono = logger(app);
 

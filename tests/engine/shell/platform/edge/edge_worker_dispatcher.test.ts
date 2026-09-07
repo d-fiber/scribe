@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { EdgeWorkerDispatcher } from "@scribe/shell/platform/edge/dispatch/edge_worker_dispatcher.ts";
 import type { EdgePlatform, EdgeWorker, EdgeWorkerOptions } from "@scribe/shell/platform/edge/platform.ts";

@@ -51,6 +51,14 @@ function pathStartOf(url: string): number {
   return url.indexOf("/", hostStart);
 }
 
+/**
+ * The path portion of `url`, without its query string or fragment.
+ *
+ * @remarks
+ * Takes a fast, allocation-free path when the pathname is made only of unreserved path characters,
+ * and falls back to `URL` for anything else, percent-encoding included, rather than decoding it by
+ * hand.
+ */
 export function pathnameOf(url: string): string {
   const pathStart = pathStartOf(url);
   if (pathStart === -1) return "/";
@@ -70,11 +78,13 @@ export function pathnameOf(url: string): string {
   return url.slice(pathStart, end);
 }
 
+/** `url` up to, but excluding, its path: the scheme and authority. */
 export function originOf(url: string): string {
   const pathStart = pathStartOf(url);
   return pathStart === -1 ? url : url.slice(0, pathStart);
 }
 
+/** The query string of `url`, its leading `?` included, or empty when there is none. */
 export function searchOf(url: string): string {
   const pathStart = pathStartOf(url);
   const from = pathStart === -1 ? 0 : pathStart;
@@ -99,6 +109,7 @@ function segmentEnd(pathname: string, from: number): number {
   return at;
 }
 
+/** The first path segment of `pathname`, its leading and trailing slashes stripped. */
 export function firstSegmentOf(pathname: string): string {
   const start = segmentStart(pathname);
   return pathname.slice(start, segmentEnd(pathname, start));
@@ -118,6 +129,14 @@ function withoutEmptySegments(rest: string): string {
   return "/" + rest.split("/").filter(Boolean).join("/");
 }
 
+/**
+ * `pathname` with its first segment removed, when that segment equals `prefix` exactly.
+ *
+ * @remarks
+ * Answers `pathname` unchanged when the first segment does not match `prefix` exactly, rather than
+ * merely starting with it: stripping `"api"` must not also match `"apiv2"`. Collapses any empty
+ * segment the removal leaves behind, so `"/api//things"` strips to `"/things"`, not `"//things"`.
+ */
 export function stripPrefix(pathname: string, prefix: string): string {
   const start = segmentStart(pathname);
   const end = segmentEnd(pathname, start);

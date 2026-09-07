@@ -46,6 +46,16 @@
  */
 export const LAYER_SPECIFIERS: Record<string, readonly string[]> = {
   "alchemy/": [],
+  "engine/scholium/": [
+    "@scribe/alchemy",
+    "@scribe/alchemy/body",
+    "@scribe/alchemy/http",
+    "@scribe/alchemy/observe",
+    "@scribe/alchemy/route",
+    "@scribe/alchemy/server",
+    "@scribe/alchemy/test",
+    "@scribe/scholium/",
+  ],
   "engine/contracts/": [
     "@scribe/alchemy",
     "@scribe/alchemy/body",
@@ -93,6 +103,7 @@ export const LAYER_SPECIFIERS: Record<string, readonly string[]> = {
     "@scribe/foundation/trigger",
     "@scribe/kernel/",
     "@scribe/runtime/",
+    "@scribe/scholium/",
   ],
   "engine/embedder/": [
     "@scribe/alchemy",
@@ -135,6 +146,7 @@ export const LAYER_SPECIFIERS: Record<string, readonly string[]> = {
     "@scribe/realtime",
     "@scribe/realtime/testing",
     "@scribe/runtime/",
+    "@scribe/scholium/",
     "@scribe/sdk",
     "@scribe/sdk/",
     "@scribe/search",
@@ -167,6 +179,7 @@ export const LAYER_SPECIFIERS: Record<string, readonly string[]> = {
     "@scribe/foundation/testing",
     "@scribe/foundation/trigger",
     "@scribe/runtime/",
+    "@scribe/scholium/",
     "@scribe/testing/",
   ],
   "engine/shell/": [
@@ -196,6 +209,7 @@ export const LAYER_SPECIFIERS: Record<string, readonly string[]> = {
     "@scribe/foundation/trigger",
     "@scribe/kernel/",
     "@scribe/runtime/",
+    "@scribe/scholium/",
     "@scribe/sdk",
     "@scribe/sdk/",
     "@scribe/shell/",

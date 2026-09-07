@@ -153,6 +153,17 @@ async function locationOf(route: Route) {
   return create(IpLocationSchema, { city: location.city, country: location.country });
 }
 
+/**
+ * The {@link Invocation} the worker receives for `route`, built from the request `RequestScope`
+ * currently holds.
+ *
+ * @remarks
+ * `device` and `location` are each left out unless `route.needs` asks for them: both cost a real
+ * decrypt or a network round trip, which a route that never reads either should not pay for on
+ * every call. Everything else, the identity, the headers this file allow-lists, the body, always
+ * travels, because a worker cannot ask for those piecemeal the way it can for a device or a
+ * location.
+ */
 export async function invocationOf(
   route: Route,
   pathParams: Readonly<Record<string, string>>,

@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import "../../common/settings.ts";
-import "@scribe/runtime/support/edge_runtime_shim.ts";
+import "@scribe/scholium/edge_runtime_shim.ts";
 import { app as codexApp } from "./codex/codex.ts";
 import { app as queueApp } from "./queue/queue.ts";
 import { workerEnabled } from "@scribe/embedder/enabled.ts";

@@ -34,6 +34,16 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+/**
+ * The five internal services named once, here, rather than kept as two hand-written lists that
+ * could drift apart.
+ *
+ * @remarks
+ * `shell/platform/edge/factory.ts` passes {@link INTERNAL_SERVICES} to `JwtRequestAuthorizer`,
+ * which exempts them from JWT verification: they are protected by `x-internal-secret` instead. The
+ * persistent runtime serves none of them under this form, since the surfaces that used to answer
+ * for a module left with it; these five names hold only for the edge runtime now.
+ */
 export const InternalService = {
   AuthConfirm: "auth/confirm",
   Gotrue: "gotrue",
@@ -42,4 +52,5 @@ export const InternalService = {
   Vpn: "vpn",
 } as const;
 
+/** Every value of {@link InternalService}, in the shape `JwtRequestAuthorizer` reads. */
 export const INTERNAL_SERVICES: readonly string[] = Object.values(InternalService);

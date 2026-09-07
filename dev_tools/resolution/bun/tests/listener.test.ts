@@ -34,10 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { equals, expect, expectLater, isNotNull, isTrue, Scribe, throwsA } from "@scribe/alchemy/test";
-import type { BoundListener, RemotePeer } from "@scribe/runtime/scholium/listener.ts";
-import { LocalListener } from "@scribe/runtime/scholium/bun/listener.ts";
+import type { BoundListener, RemotePeer } from "@scribe/scholium/listener.ts";
+import { LocalListener } from "@scribe/scholium/bun/listener.ts";
 
 async function withListener(
   handler: (request: Request, peer: RemotePeer) => Response,

@@ -38,11 +38,18 @@ import { claimOnce } from "@scribe/alchemy";
 import type { Future } from "@scribe/alchemy";
 import { MAX_TIMESTAMP_SKEW_S } from "./signed_request.ts";
 
+/** How long a webhook delivery's identifier is held to catch a replay, twice the freshness window. */
 export const CLAIM_TTL_S = 2 * MAX_TIMESTAMP_SKEW_S;
 
+/**
+ * Claims `id` for this delivery, refusing whichever call for the same identifier arrives second.
+ *
+ * @remarks
+ * The opposite call to the one `claimNonce` makes: an index that cannot answer cannot tell a first
+ * delivery from a replay, and a replayed delivery is exactly what this exists to stop, so
+ * `whenUnavailable` is `"refuse"` here, where a device nonce fails open instead.
+ */
 export function claimWebhookId(id: string): Future<boolean> {
-  // The opposite call to the one `claimNonce` makes: an index that cannot answer cannot tell
-  // a first delivery from a replay, and a replayed delivery is the thing this exists to stop.
   return claimOnce(`webhook:seen:${id}`, CLAIM_TTL_S, {
     whenUnavailable: "refuse",
     scope: "webhook",

@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "@scribe/alchemy";
-import type { ShutdownSignal } from "@scribe/runtime/scholium/process.ts";
+import type { ShutdownSignal } from "@scribe/scholium/process.ts";
 import type { Bootstrapper } from "./bootstrapper.ts";
 import { BootSequence } from "./boot_sequence.ts";
 import { SignalWatcher } from "./signals.ts";

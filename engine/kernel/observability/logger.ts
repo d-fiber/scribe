@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "@scribe/alchemy";
-import "@scribe/runtime/support/edge_runtime_shim.ts";
+import "@scribe/scholium/edge_runtime_shim.ts";
 import type { LoggedLevel } from "@scribe/alchemy/observe";
 import { previewOf } from "@scribe/kernel/observability/body_preview.ts";
 import { levelForStatus } from "@scribe/kernel/observability/level.ts";
@@ -109,6 +109,7 @@ const observeExchange = createMiddleware(async (c, next) => {
   ship(method, route, c.res.status, level, node, preview);
 });
 
+/** `app`, mounted under a request log that records every exchange it answers. */
 export function logger(app: Hono): Hono {
   const root: Hono = honoRouter();
   root.use("*", observeExchange);

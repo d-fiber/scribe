@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { RequestScope } from "@scribe/runtime/scope.ts";
-import { constantTimeEqual } from "@scribe/runtime/support/crypto/constant_time.ts";
+import { constantTimeEqual } from "@scribe/runtime/primitives/crypto/constant_time.ts";
 
 /**
  * What a firewall that checks a shared secret against a header has in common, shared as static helpers.

@@ -40,8 +40,8 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../" && pwd)
 cd "$ROOT"
 
-LAYER_DIRS=(engine/contracts engine/runtime engine/kernel engine/embedder engine/testing engine/shell tests)
-SEALED_LAYERS=(engine/contracts engine/runtime engine/kernel engine/embedder engine/testing engine/shell)
+LAYER_DIRS=(engine/scholium engine/contracts engine/runtime engine/kernel engine/embedder engine/testing engine/shell tests)
+SEALED_LAYERS=(engine/scholium engine/contracts engine/runtime engine/kernel engine/embedder engine/testing engine/shell)
 
 UNIVERSAL_SPECIFIERS='[
   "@scribe/alchemy",

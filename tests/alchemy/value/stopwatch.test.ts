@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { contains, equals, expect, FixedNow, having, isA, isFalse, Scribe, throwsA } from "@scribe/alchemy/test";
 import { DateTime, Duration, FormatException, Now, Stopwatch } from "@scribe/alchemy";
 

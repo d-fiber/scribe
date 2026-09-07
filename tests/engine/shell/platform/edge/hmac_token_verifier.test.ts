@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { HmacTokenVerifier } from "@scribe/shell/platform/edge/authorization/hmac_token_verifier.ts";
 import { SignJWT } from "jose";

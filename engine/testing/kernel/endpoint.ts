@@ -90,6 +90,15 @@ export interface ApiCallResult {
   readonly body: Record<string, unknown>;
 }
 
+/**
+ * Calls `handler` inside a full `RequestScope` built from `body` and `options`, and returns its
+ * answer already parsed.
+ *
+ * @remarks
+ * The scope runs behind a trusted peer, `127.0.0.1`, with `x-real-ip: 1.2.3.4` set: `ctx.ip()` and
+ * anything gated on a trusted proxy then resolve the way a real request behind the gateway would,
+ * without a test having to reconstruct that itself.
+ */
 export function callEndpoint(
   handler: () => Future<Response>,
   body: unknown = {},

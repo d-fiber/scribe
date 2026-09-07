@@ -35,11 +35,17 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "@scribe/alchemy";
-import { fromBase64 } from "@scribe/runtime/support/crypto/base64.ts";
+import { fromBase64 } from "@scribe/runtime/primitives/crypto/base64.ts";
 import type { SignedWebhookRequest } from "./signed_request.ts";
 
 const SECRET_PREFIX = "whsec_";
 
+/**
+ * The HMAC/SHA-256 key `secret` decodes to, or `null` when `secret` is not spelled as expected.
+ *
+ * @remarks
+ * A webhook secret is spelled `whsec_<base64>`; only what follows the prefix is key material.
+ */
 export async function importSigningKey(
   secret: string,
 ): Future<CryptoKey | null> {
@@ -58,6 +64,13 @@ export async function importSigningKey(
   );
 }
 
+/**
+ * Whether `key` verifies any of the signatures `signed` offers.
+ *
+ * @remarks
+ * Each candidate is checked in turn against the same message, `signed`'s own id, timestamp and raw
+ * body: a secret mid-rotation still verifies as long as one of the sender's candidates matches.
+ */
 export async function matchesAnyCandidate(
   key: CryptoKey,
   signed: SignedWebhookRequest,

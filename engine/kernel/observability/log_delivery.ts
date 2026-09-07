@@ -58,4 +58,5 @@ function publishLogs(
   return routing.deliver(node, entries);
 }
 
+/** The request log every route in the host writes to, flushed through {@link publishLogs}. */
 export const logBuffer: LogBuffer = new LogBuffer(publishLogs);

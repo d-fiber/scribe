@@ -37,12 +37,14 @@
 const IPV4_MAPPED_PREFIX = "::ffff:";
 const OCTET = /^(0|[1-9]\d{0,2})$/;
 
+/** `ip`, with an IPv4-mapped IPv6 prefix stripped so a dual-stack socket's address compares like the address it carries. */
 export function normalizeIp(ip: string): string {
   const trimmed = ip.trim();
 
   return trimmed.startsWith(IPV4_MAPPED_PREFIX) ? trimmed.slice(IPV4_MAPPED_PREFIX.length) : trimmed;
 }
 
+/** `ip` as a 32-bit unsigned integer, or null when it is not four valid dotted octets. */
 export function ipv4ToInt(ip: string): number | null {
   const parts = ip.split(".");
   if (parts.length !== 4) return null;
@@ -94,6 +96,13 @@ export function isIpAddress(value: string): boolean {
   }
 }
 
+/**
+ * Whether `ip`, once normalized, starts with the literal dotted-decimal `prefix`.
+ *
+ * @remarks
+ * Refuses a `prefix` that does not end in a dot rather than repairing it: a bare `startsWith`
+ * would let `"10.8"` match `"10.80.0.0"` and beyond, which is a silent hole in a subnet check.
+ */
 export function isInSubnetPrefix(ip: string, prefix: string): boolean {
   if (!prefix.endsWith(".")) return false;
 

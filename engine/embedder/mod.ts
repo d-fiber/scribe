@@ -41,4 +41,5 @@ export { ProjectSlot } from "@scribe/contracts/project_host.ts";
 export type { ProjectHost } from "@scribe/contracts/project_host.ts";
 export { WorkerHost } from "./control/host.ts";
 
+/** The {@link ProjectHost} this process reads a project's own code through. */
 export const projectHost: ProjectHost = new InProcessHost();

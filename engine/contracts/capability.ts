@@ -37,28 +37,22 @@
 import type { Future } from "@scribe/alchemy";
 
 /**
- * How a package answers the procedures its own contract declares.
- *
- * @remarks
- * A worker reaches the host over one wire, and what it may ask for is whatever the packages a
- * project mounted have declared. The host owns the wire and the token, and none of the answers, so
- * a package brings its handlers the way it brings its SQL and its containers.
- *
- * This replaces a list of services written by hand in the host. Four packages were named there, so
- * the framework did not compile without them, and a package nobody here wrote could not answer a
- * worker at all whatever its manifest said.
- *
- * It lives in `contracts` because both sides reach it and neither owns both ends: a package
- * registers, the host runs what was registered.
- */
-
-/**
  * What a capability is handed so it can answer.
  *
  * @remarks
  * It is the transport's server narrowed to the one thing a package may do with it. The types are
  * loose on purpose: the shape of a request is decided by the generated stub a package names, and
  * the host has no business knowing which.
+ *
+ * A worker reaches the host over one wire, and what it may ask for is whatever the packages a
+ * project mounted have declared. The host owns the wire and the token, and none of the answers, so
+ * a package brings its handlers the way it brings its SQL and its containers. This replaces a list
+ * of services written by hand in the host: four packages were named there, so the framework did
+ * not compile without them, and a package nobody here wrote could not answer a worker at all
+ * whatever its manifest said.
+ *
+ * It lives in `contracts` because both sides reach it and neither owns both ends: a package
+ * registers, the host runs what was registered.
  */
 export interface CapabilityWiring {
   /**

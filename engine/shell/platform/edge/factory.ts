@@ -47,6 +47,14 @@ import { EdgeFunctionsRuntime } from "./runtime.ts";
 import { SupabaseEdgePlatform } from "./platform.ts";
 import { DirectoryServiceResolver } from "./services/directory_service_resolver.ts";
 
+/**
+ * The {@link TokenVerifier} this deployment verifies a bearer token with, one algorithm family per
+ * key material `config` actually names.
+ *
+ * @remarks
+ * Each candidate's own static factory answers `null` when its key material is missing, so a
+ * deployment with no JWKS address simply narrows to the HMAC verifier instead of failing here.
+ */
 function tokenVerifier(config: EdgeConfig): TokenVerifier {
   const candidates: readonly (TokenVerifier | null)[] = [
     HmacTokenVerifier.fromSecret(config.jwtSecret),
@@ -58,11 +66,21 @@ function tokenVerifier(config: EdgeConfig): TokenVerifier {
   );
 }
 
+/** The {@link RequestAuthorizer} this deployment authorizes a request with, chosen once from `config.verifyJwt`. */
 function requestAuthorizer(config: EdgeConfig): RequestAuthorizer {
   if (!config.verifyJwt) return new OpenRequestAuthorizer();
   return new JwtRequestAuthorizer(tokenVerifier(config), INTERNAL_SERVICES);
 }
 
+/**
+ * The {@link EdgeFunctionsRuntime} this deployment boots, its three collaborators built from
+ * `config`.
+ *
+ * @remarks
+ * This is the composition root for the edge platform: the one place that decides which
+ * `TokenVerifier`, `RequestAuthorizer` and `WorkerDispatcher` a deployment gets, so that
+ * `EdgeFunctionsRuntime` itself never has to know how any of the three were chosen.
+ */
 export function createEdgeRuntime(
   config: EdgeConfig = EdgeConfig.fromEnvironment(),
 ): EdgeFunctionsRuntime {

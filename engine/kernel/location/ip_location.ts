@@ -111,6 +111,7 @@ export class GeolocationResolver {
   }
 }
 
+/** The location of `ip`, through {@link GeolocationResolver.locate}, installed as the runtime's own location resolver. */
 export function ipLocation(ip: string): Future<IpLocation> {
   return GeolocationResolver.locate(ip);
 }

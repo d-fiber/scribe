@@ -42,10 +42,18 @@ const encoder = new TextEncoder();
 
 const decoder = new TextDecoder();
 
+/** `value` as the protocol's `Json` message: the language's own JSON text, UTF-8 encoded. */
 export function encodeJson(value: unknown): Json {
   return create(JsonSchema, { value: encoder.encode(jsonText.encode(value ?? null)) });
 }
 
+/**
+ * What `json` decodes to, or `null` when it is absent or carries no bytes.
+ *
+ * @remarks
+ * An absent `Json` and an empty one both mean nothing was sent, so both answer `null` rather than
+ * one of them throwing on an empty string that is not valid JSON.
+ */
 export function decodeJson<T = unknown>(json: Json | undefined): T | null {
   if (!json || json.value.length === 0) return null;
   return jsonText.decode(decoder.decode(json.value)) as T;

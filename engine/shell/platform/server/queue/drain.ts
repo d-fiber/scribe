@@ -37,8 +37,8 @@
 import { Duration } from "@scribe/alchemy";
 import type { Future } from "@scribe/alchemy";
 import type { RateLimit } from "@scribe/alchemy/route";
-import { ApiContext } from "@scribe/kernel/endpoint/api.ts";
-import { ServiceEndpoint } from "@scribe/kernel/endpoint/service.ts";
+import { ApiContext } from "@scribe/kernel/endpoint/api_endpoint.ts";
+import { ServiceEndpoint } from "@scribe/kernel/endpoint/service_endpoint.ts";
 import { queueRunner, queueStatus } from "@scribe/foundation/queue";
 
 const _RATE_LIMIT: RateLimit = {
