@@ -126,7 +126,7 @@ export interface LifecycleSteps {
  * };
  * ```
  */
-export interface Lifecycle {
+export interface PackageEntry {
   /** When this package runs, and empty when it runs at none of the three moments. */
   readonly scribe: LifecycleSteps;
 }
@@ -154,7 +154,7 @@ export interface MountedPackage {
  * rather than at each call site means a package that exports none and a package that exports all
  * three are handed to the host in the same shape.
  */
-export function mount(manifest: Manifest, entry: Lifecycle): MountedPackage {
+export function mount(manifest: Manifest, entry: PackageEntry): MountedPackage {
   return {
     manifest,
     wires: entry.scribe.wires ?? null,

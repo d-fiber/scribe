@@ -108,11 +108,11 @@ export type {
 export { mount } from "./package/manifest.ts";
 export type {
   DependencySource,
-  Lifecycle,
   LifecycleStep,
   LifecycleSteps,
   Manifest,
   MountedPackage,
+  PackageEntry,
 } from "./package/manifest.ts";
 
 export { isValidPackageName, packageNameProblem, RESERVED_PACKAGE_NAMES } from "./package/name.ts";
@@ -133,6 +133,12 @@ export { Constraint } from "./package/constraint.ts";
 export { Version, VersionError } from "./package/version.ts";
 
 export { DuplicateDeclarationError, Registry } from "./declare/registry.ts";
+
+export { Init, InitRegistry, initRegistry } from "./lifecycle/init.ts";
+export type { InitHandler, RegisteredInit } from "./lifecycle/init.ts";
+export { Lifecycle } from "./lifecycle/lifecycle.ts";
+export { Run, RunRegistry, runRegistry } from "./lifecycle/run.ts";
+export type { RegisteredRun, RunHandler } from "./lifecycle/run.ts";
 
 export { cron, Crons, forgetCrons, installCrons } from "./port/cron.ts";
 export type { CronDriver, CronOptions, DeclaredCron, DeclaredSchedule, DeclaredTimeOfDay } from "./port/cron.ts";
