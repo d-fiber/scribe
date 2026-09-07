@@ -140,7 +140,7 @@ function maxInflightBodyBytes(): number {
 }
 
 cacheSettings.use({ redisUrl: required("REDIS_URL") });
-queueSettings.use({ driver: "nats", natsUrl: required("NATS_URL") });
+queueSettings.use({ natsUrl: required("NATS_URL") });
 databaseSettings.use({
   restUrl: required("REST_INTERNAL_URL"),
   anonKey: required("ANON_KEY"),
