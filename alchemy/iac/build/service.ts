@@ -34,16 +34,17 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../declare/registry.ts";
+import { Registry } from "../../declare/registry.ts";
 import { resolveValue } from "./value.ts";
 import type { DeployValue, Loose, ValueLike } from "./value.ts";
-import type { UnmodifiableList } from "../value/list.ts";
+import type { UnmodifiableList } from "../../value/list.ts";
 
 /** Where a service's image comes from: a reference already built, or a `Dockerfile` this builds. */
 export type ServiceSource = ImageSource | BuildSource;
 
 /** A service that runs an image pulled from a registry. */
 export interface ImageSource {
+  /** Discriminates this {@link ServiceSource} as an image pulled from a registry. */
   readonly kind: "image";
 
   /** The image reference, tag included, exactly as `docker pull` would take it. */
@@ -52,6 +53,7 @@ export interface ImageSource {
 
 /** A service built from a `Dockerfile` living beside `deploy/deploy.ts`, under `deploy/services/<name>/`. */
 export interface BuildSource {
+  /** Discriminates this {@link ServiceSource} as one built from a Dockerfile. */
   readonly kind: "build";
 
   /** The Dockerfile's name, resolved against the service's own directory. `Dockerfile` when left out. */
@@ -307,7 +309,7 @@ export type LinuxCapability = Loose<
   | "WAKE_ALARM"
 >;
 
-/** What `Service` takes: everything one Compose container and its sizing need. */
+/** A service's options exactly as a `ServiceWithNetworks` resolved them, `environment`/`tuning` still {@link ValueLike}. */
 export interface ServiceOptions {
   /** Where this service's image comes from. */
   readonly source: ServiceSource;
@@ -461,36 +463,253 @@ function resolveMap(
 }
 
 /**
- * Declares a Compose service named `name`, described by `options`, without reaching anything.
+ * A service under construction, named but not yet given a source, opened by `Service`.
  *
  * @remarks
- * One call renders every fragment `deploy/services/<name>/` carries today — `docker-compose.yaml`,
- * `capacity.yaml`, `resources.yaml`, `replicas.yaml`, `tuning.yaml`, `kong.yml` — because all of
- * them describe the same service, and a name split across several hand-written files is a name
- * that can drift between them. `resources.yaml` and `replicas.yaml` need nothing from `options`
- * beyond `capacity` itself: their content is the same three or four `{{<name>_...}}` tokens for
- * every sized service, computed from `name` by `ops/sizing_rules.dart`, so nothing here repeats
- * what that mechanism already knows how to name.
- *
- * @throws {DuplicateDeclarationError} When `name` has already been declared, raised where the
- * second declaration is written.
- *
- * @example
- * ```ts ignore
- * Service("imgproxy", {
- *   source: Image("darthsim/imgproxy:v3.30.1"),
- *   networks: ["app"],
- *   volumes: ["storage-data:/var/lib/storage:ro"],
- *   environment: { IMGPROXY_BIND: ":5001" },
- *   capacity: { weight: 280, runtime: "go", min: "64Mi", dev: "256Mi", cpuShares: 1024 },
- * });
- * ```
+ * `.source` is the only method here, the same reason `Recipe`'s own `RecipeBuilder` exposes only
+ * `.contract`: a service's every other option is genuinely optional, but where its image comes
+ * from is not, and forcing it first keeps `ServiceWithSource`'s own `.networks` — the second and
+ * last field nothing here can default — from ever needing a phantom flag to say whether it was
+ * given.
  */
-export function Service(
-  name: string,
-  options: ServiceOptions,
-): DeclaredService {
-  return declared.declare(name, { name, options: resolveOptions(options) });
+export class ServiceBuilder {
+  readonly #name: string;
+
+  /** Opened by `Service`, never directly. */
+  constructor(name: string) {
+    this.#name = name;
+  }
+
+  /** Where this service's image comes from. */
+  source(source: ServiceSource): ServiceWithSource {
+    return new ServiceWithSource(this.#name, source);
+  }
+}
+
+/** A service under construction, given a source but not yet a network, opened by {@link ServiceBuilder.source}. */
+export class ServiceWithSource {
+  readonly #name: string;
+  readonly #source: ServiceSource;
+
+  /** Opened by {@link ServiceBuilder.source}, never directly. */
+  constructor(name: string, source: ServiceSource) {
+    this.#name = name;
+    this.#source = source;
+  }
+
+  /** The networks this service attaches to. */
+  networks(networks: ServiceNetworks): ServiceWithNetworks {
+    return new ServiceWithNetworks(this.#name, this.#source, networks);
+  }
+}
+
+/**
+ * A service under construction, closed by {@link ServiceWithNetworks.declare}, opened by
+ * {@link ServiceWithSource.networks}.
+ *
+ * @remarks
+ * Every modifier here is optional and free to come in any order: unlike the two fields that open
+ * this chain, nothing past this point has a reason to be given before another. `.declare` renders
+ * every fragment `deploy/services/<name>/` carries today — `docker-compose.yaml`, `capacity.yaml`,
+ * `resources.yaml`, `replicas.yaml`, `tuning.yaml`, `kong.yml` — because all of them describe the
+ * same service, and a name split across several hand-written files is a name that can drift
+ * between them. `resources.yaml` and `replicas.yaml` need nothing from this builder beyond
+ * `.capacity` itself: their content is the same three or four `{{<name>_...}}` tokens for every
+ * sized service, computed from the service's own name by `ops/sizing_rules.dart`, so nothing here
+ * repeats what that mechanism already knows how to name.
+ */
+export class ServiceWithNetworks {
+  readonly #name: string;
+  readonly #source: ServiceSource;
+  readonly #networks: ServiceNetworks;
+  #restart?: RestartPolicy;
+  #profiles?: UnmodifiableList<string>;
+  #securityOpt?: UnmodifiableList<string>;
+  #capDrop?: UnmodifiableList<LinuxCapability>;
+  #capAdd?: UnmodifiableList<LinuxCapability>;
+  #volumes?: UnmodifiableList<string>;
+  #environment?: Readonly<Record<string, ValueLike>>;
+  #healthcheck?: HealthCheck;
+  #dependsOn?: Readonly<Record<string, DependsOnCondition>>;
+  #logging?: LoggingOptions;
+  #command?: UnmodifiableList<string>;
+  #ulimits?: Readonly<Partial<Record<UlimitName, UlimitValue>>>;
+  #capacity?: ServiceCapacity;
+  #tuning?: Readonly<Record<string, ValueLike>>;
+  #kong?: KongService;
+
+  /** Opened by {@link ServiceWithSource.networks}, never directly. */
+  constructor(name: string, source: ServiceSource, networks: ServiceNetworks) {
+    this.#name = name;
+    this.#source = source;
+    this.#networks = networks;
+  }
+
+  /** How Compose restarts this service when it exits. `"unless-stopped"` when left out. */
+  restart(policy: RestartPolicy): this {
+    this.#restart = policy;
+    return this;
+  }
+
+  /** The Compose profiles this service starts under. Always on when left out. */
+  profiles(names: UnmodifiableList<string>): this {
+    this.#profiles = names;
+    return this;
+  }
+
+  /** `security_opt` entries this service's container carries. */
+  securityOpt(entries: UnmodifiableList<string>): this {
+    this.#securityOpt = entries;
+    return this;
+  }
+
+  /** Linux capabilities dropped from this service's container. */
+  capDrop(names: UnmodifiableList<LinuxCapability>): this {
+    this.#capDrop = names;
+    return this;
+  }
+
+  /** Linux capabilities added back to this service's container, beyond what {@link capDrop} removed. */
+  capAdd(names: UnmodifiableList<LinuxCapability>): this {
+    this.#capAdd = names;
+    return this;
+  }
+
+  /**
+   * `"<source>:<target>[:<mode>]"` volume mounts, Compose's own syntax.
+   *
+   * @remarks
+   * A `<source>` that is not an absolute path, does not start with `./`, and does not start with
+   * `{{` is a named volume: it is collected and declared once under the stack's top-level
+   * `volumes:`, so the same name mounted by two services never needs declaring twice, and never
+   * drifts from what is actually mounted.
+   */
+  volumes(mounts: UnmodifiableList<string>): this {
+    this.#volumes = mounts;
+    return this;
+  }
+
+  /** This service's environment, by variable name. */
+  environment(vars: Readonly<Record<string, ValueLike>>): this {
+    this.#environment = vars;
+    return this;
+  }
+
+  /** What proves this service's container is answering. Never checked when left out. */
+  healthcheck(check: HealthCheck): this {
+    this.#healthcheck = check;
+    return this;
+  }
+
+  /** The services this one waits for, and what "waits for" means for each. */
+  dependsOn(deps: Readonly<Record<string, DependsOnCondition>>): this {
+    this.#dependsOn = deps;
+    return this;
+  }
+
+  /** How this service's logs are kept. The framework's own default when left out. */
+  logging(options: LoggingOptions): this {
+    this.#logging = options;
+    return this;
+  }
+
+  /** The command this service's container runs instead of its image's own entrypoint. The image's own when left out. */
+  command(argv: UnmodifiableList<string>): this {
+    this.#command = argv;
+    return this;
+  }
+
+  /** Resource limits raised for this service's container, by the POSIX limit they raise. */
+  ulimits(limits: Readonly<Partial<Record<UlimitName, UlimitValue>>>): this {
+    this.#ulimits = limits;
+    return this;
+  }
+
+  /**
+   * How this service is weighed when a deployment sizes memory and CPU.
+   *
+   * @remarks
+   * Left unset, this service takes no share of a deployment's sizing at all: it carries no
+   * `capacity.yaml`, `resources.yaml` or `replicas.yaml`, the same as a service the framework
+   * never scales today.
+   */
+  capacity(capacity: ServiceCapacity): this {
+    this.#capacity = capacity;
+    return this;
+  }
+
+  /**
+   * Environment overrides read once a deployment has been sized, by variable name.
+   *
+   * @remarks
+   * This is where a service reads back what its own sizing decided — a thread pool size, a worker
+   * count — through {@link sizingToken}. It is written to `tuning.yaml` rather than folded into
+   * `.environment` because the two are read at different moments: `.environment` is fixed at
+   * `deploy.ts`'s own values, `.tuning` is filled in after the sizing rules have run.
+   */
+  tuning(vars: Readonly<Record<string, ValueLike>>): this {
+    this.#tuning = vars;
+    return this;
+  }
+
+  /** What this service answers behind the gateway. Not reachable through it when left out. */
+  kong(service: KongService): this {
+    this.#kong = service;
+    return this;
+  }
+
+  /**
+   * Declares this service, without reaching anything.
+   *
+   * @throws {DuplicateDeclarationError} When this service's name has already been declared, raised
+   * where this is called.
+   *
+   * @example
+   * ```ts ignore
+   * Service("imgproxy")
+   *   .source(Image("darthsim/imgproxy:v3.30.1"))
+   *   .networks(["app"])
+   *   .volumes(["storage-data:/var/lib/storage:ro"])
+   *   .environment({ IMGPROXY_BIND: ":5001" })
+   *   .capacity({ weight: 280, runtime: "go", min: "64Mi", dev: "256Mi", cpuShares: 1024 })
+   *   .declare();
+   * ```
+   */
+  declare(): DeclaredService {
+    const options: ServiceOptions = {
+      source: this.#source,
+      networks: this.#networks,
+      restart: this.#restart,
+      profiles: this.#profiles,
+      securityOpt: this.#securityOpt,
+      capDrop: this.#capDrop,
+      capAdd: this.#capAdd,
+      volumes: this.#volumes,
+      environment: this.#environment,
+      healthcheck: this.#healthcheck,
+      dependsOn: this.#dependsOn,
+      logging: this.#logging,
+      command: this.#command,
+      ulimits: this.#ulimits,
+      capacity: this.#capacity,
+      tuning: this.#tuning,
+      kong: this.#kong,
+    };
+    return declared.declare(this.#name, { name: this.#name, options: resolveOptions(options) });
+  }
+}
+
+/**
+ * Opens a Compose service named `name`, closed by {@link ServiceWithNetworks.declare}.
+ *
+ * @remarks
+ * `Service` itself carries only a name: {@link ServiceBuilder}, what it renders, only carries
+ * `.source`. Giving one is what hands back {@link ServiceWithSource}, which only carries
+ * `.networks` in turn — giving that is what finally hands back {@link ServiceWithNetworks}, where
+ * every other option and `.declare` live.
+ */
+export function Service(name: string): ServiceBuilder {
+  return new ServiceBuilder(name);
 }
 
 /** Every service this package has declared, in the order it declared them. */

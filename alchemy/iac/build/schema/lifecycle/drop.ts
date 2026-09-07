@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../../declare/registry.ts";
-import type { UnmodifiableList } from "../../../value/list.ts";
+import { Registry } from "../../../../declare/registry.ts";
+import type { UnmodifiableList } from "../../../../value/list.ts";
 import type { DbMoment, SchemaAddable } from "../moment.ts";
 
 /** The kind of object a `Drop` targets, one member per method {@link DropTarget} exposes. */

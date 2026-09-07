@@ -199,35 +199,38 @@ export type {
 } from "./port/database.ts";
 
 export {
-  CollatableColumnBuilder,
-  ColumnBuilder,
-  ColumnFactory,
-  columnsOf,
-  IdentityCapableColumnBuilder,
-} from "./iac/schema/types/column.ts";
+  declaredGrants,
+  forgetGrants,
+  Grant,
+  GrantBuilder,
+  GrantDeclaration,
+  GrantObjectFactory,
+  GrantWithOn,
+  GrantWithPrivileges,
+} from "./iac/build/schema/access/grant.ts";
 export type {
-  ColumnCommonOptions,
-  ColumnDefinition,
-  ColumnMap,
-  ColumnOptions,
-  ColumnReference,
-  ColumnRowType,
-  ColumnType,
-  ColumnTypeOptions,
-  DeferrableOptions,
-  GeneratedOptions,
-  IdentityOptions,
-  IntervalFields,
-  RangeSubtype,
-  ReferentialAction,
-  ReferentialMatch,
-  RowOf,
-  ScalarTsType,
-} from "./iac/schema/types/column.ts";
-export { declaredEnums, Enum, EnumBuilder, forgetEnums } from "./iac/schema/types/enum.ts";
-export type { DeclaredEnum } from "./iac/schema/types/enum.ts";
-export { declaredTypes, forgetTypes, Type, TypeBuilder } from "./iac/schema/types/type.ts";
-export type { DeclaredType } from "./iac/schema/types/type.ts";
+  DeclaredGrant,
+  GrantObject,
+  GrantObjectKind,
+  GrantOptions,
+  GrantRole,
+  GrantTargetKind,
+  Privilege,
+} from "./iac/build/schema/access/grant.ts";
+export { declaredDrops, Drop, DropDeclaration, DropTarget, forgetDrops } from "./iac/build/schema/lifecycle/drop.ts";
+export type { DeclaredDrop } from "./iac/build/schema/lifecycle/drop.ts";
+export { SchemaEntry } from "./iac/build/schema/moment.ts";
+export type { DbMoment, SchemaAddable } from "./iac/build/schema/moment.ts";
+export {
+  declaredExtensions,
+  Extension,
+  ExtensionBuilder,
+  forgetExtensions,
+} from "./iac/build/schema/objects/extension.ts";
+export type { DeclaredExtension, ExtensionName, ExtensionOptions } from "./iac/build/schema/objects/extension.ts";
+export { declaredSequences, forgetSequences, Sequence, SequenceBuilder } from "./iac/build/schema/objects/sequence.ts";
+export type { DeclaredSequence, SequenceDataType, SequenceOwner } from "./iac/build/schema/objects/sequence.ts";
+export { dbSchema, Schema, SchemaBatch, SchemaContentFactory } from "./iac/build/schema/schema.ts";
 export {
   declaredIndexes,
   declaredPolicies,
@@ -255,7 +258,7 @@ export {
   TableRevokeFactory,
   TableUniqueBuilder,
   TableUniqueFactory,
-} from "./iac/schema/table/table.ts";
+} from "./iac/build/schema/table/table.ts";
 export type {
   CheckConstraint,
   DeclaredIndex,
@@ -277,37 +280,39 @@ export type {
   TablePolicy,
   TableRevoke,
   UniqueConstraint,
-} from "./iac/schema/table/table.ts";
+} from "./iac/build/schema/table/table.ts";
 export {
-  declaredGrants,
-  forgetGrants,
-  Grant,
-  GrantBuilder,
-  GrantDeclaration,
-  GrantObjectFactory,
-  GrantWithOn,
-  GrantWithPrivileges,
-} from "./iac/schema/access/grant.ts";
+  CollatableColumnBuilder,
+  ColumnBuilder,
+  ColumnFactory,
+  columnsOf,
+  IdentityCapableColumnBuilder,
+} from "./iac/build/schema/types/column.ts";
 export type {
-  DeclaredGrant,
-  GrantObject,
-  GrantObjectKind,
-  GrantOptions,
-  GrantRole,
-  GrantTargetKind,
-  Privilege,
-} from "./iac/schema/access/grant.ts";
-export { declaredExtensions, Extension, ExtensionBuilder, forgetExtensions } from "./iac/schema/objects/extension.ts";
-export type { DeclaredExtension, ExtensionName, ExtensionOptions } from "./iac/schema/objects/extension.ts";
-export { declaredSequences, forgetSequences, Sequence, SequenceBuilder } from "./iac/schema/objects/sequence.ts";
-export type { DeclaredSequence, SequenceDataType, SequenceOwner } from "./iac/schema/objects/sequence.ts";
-export { declaredDrops, Drop, DropDeclaration, DropTarget, forgetDrops } from "./iac/schema/lifecycle/drop.ts";
-export type { DeclaredDrop } from "./iac/schema/lifecycle/drop.ts";
-export type { DbMoment, SchemaAddable } from "./iac/schema/moment.ts";
-export { SchemaEntry } from "./iac/schema/moment.ts";
-export { dbSchema, Schema, SchemaBatch, SchemaContentFactory } from "./iac/schema/schema.ts";
+  ColumnCommonOptions,
+  ColumnDefinition,
+  ColumnMap,
+  ColumnOptions,
+  ColumnReference,
+  ColumnRowType,
+  ColumnType,
+  ColumnTypeOptions,
+  DeferrableOptions,
+  GeneratedOptions,
+  IdentityOptions,
+  IntervalFields,
+  RangeSubtype,
+  ReferentialAction,
+  ReferentialMatch,
+  RowOf,
+  ScalarTsType,
+} from "./iac/build/schema/types/column.ts";
+export { declaredEnums, Enum, EnumBuilder, forgetEnums } from "./iac/build/schema/types/enum.ts";
+export type { DeclaredEnum } from "./iac/build/schema/types/enum.ts";
+export { declaredTypes, forgetTypes, Type, TypeBuilder } from "./iac/build/schema/types/type.ts";
+export type { DeclaredType } from "./iac/build/schema/types/type.ts";
 
-export { env, resolveValue, resource, setting, sizingToken, template } from "./iac/value.ts";
+export { env, resolveValue, resource, setting, sizingToken, template } from "./iac/build/value.ts";
 export type {
   DeployValue,
   EnvValue,
@@ -318,9 +323,9 @@ export type {
   SizingTokenValue,
   TemplateValue,
   ValueLike,
-} from "./iac/value.ts";
+} from "./iac/build/value.ts";
 
-export { Build, declaredServices, forgetServices, Image, Service } from "./iac/service.ts";
+export { Build, declaredServices, forgetServices, Image, Service } from "./iac/build/service.ts";
 export type {
   BuildSource,
   ByteSize,
@@ -350,12 +355,19 @@ export type {
   SocleNetwork,
   UlimitName,
   UlimitValue,
-} from "./iac/service.ts";
+} from "./iac/build/service.ts";
 
-export { declaredRecipes, forgetRecipes, Outputs, Recipe, Terraform } from "./iac/recipe.ts";
-export type { DeclaredRecipe, OutputsClass, RecipeOptions, TerraformClass, TerraformDocument } from "./iac/recipe.ts";
+export { declaredRecipes, forgetRecipes, Recipe, RecipeClassFactory } from "./iac/build/recipe.ts";
+export type {
+  DeclaredRecipe,
+  OutputsClass,
+  RecipeClass,
+  RecipeOptions,
+  TerraformClass,
+  TerraformDocument,
+} from "./iac/build/recipe.ts";
 
-export { declaredDeploy, Deploy, forgetDeploy, Role, Sql } from "./iac/deploy.ts";
+export { declaredDeploy, Deploy, forgetDeploy, Role, Sql } from "./iac/build/deploy.ts";
 export type {
   ConfigurationOptions,
   DeclaredDeploy,
@@ -369,7 +381,15 @@ export type {
   RoleAttribute,
   RoleOptions,
   SettingOptions,
-} from "./iac/deploy.ts";
+} from "./iac/build/deploy.ts";
+
+export { DB } from "./iac/decorators/db/db.ts";
+export { InitDB, InitDbRegistry, initDbRegistry } from "./iac/decorators/db/init.ts";
+export type { InitDbHandler, RegisteredInitDb } from "./iac/decorators/db/init.ts";
+export { MigrationDB, MigrationDbRegistry, migrationDbRegistry } from "./iac/decorators/db/migration.ts";
+export type { MigrationDbHandler, RegisteredMigrationDb } from "./iac/decorators/db/migration.ts";
+export { ProvisioningDB, ProvisioningDbRegistry, provisioningDbRegistry } from "./iac/decorators/db/provisioning.ts";
+export type { ProvisioningDbHandler, RegisteredProvisioningDb } from "./iac/decorators/db/provisioning.ts";
 
 export { ListOf, Nested, Required } from "./api/body/mod.ts";
 export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema, PrimitiveType } from "./api/body/mod.ts";

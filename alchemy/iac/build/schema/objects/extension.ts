@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../../declare/registry.ts";
+import { Registry } from "../../../../declare/registry.ts";
 import type { Loose } from "../../value.ts";
-import type { UnmodifiableList } from "../../../value/list.ts";
+import type { UnmodifiableList } from "../../../../value/list.ts";
 import type { DbMoment } from "../moment.ts";
 import { SchemaEntry } from "../moment.ts";
 

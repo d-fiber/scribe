@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { UnmodifiableList } from "../../value/list.ts";
+import type { UnmodifiableList } from "../../../value/list.ts";
 import { Grant, GrantBuilder } from "./access/grant.ts";
 import { Drop, DropTarget } from "./lifecycle/drop.ts";
 import type { DbMoment, SchemaAddable } from "./moment.ts";
