@@ -156,3 +156,101 @@ Scribe.test("a file sent through a form is carried untouched", async () => {
 
   expect(read?.avatar.name, equals("avatar.png"));
 });
+
+Scribe.test("a number field in a JSON body is taken as sent, without any parsing", () => {
+  expect(parseBodyBytes({ age: Number }, sent({ age: 12 })), equals({ age: 12 }));
+});
+
+Scribe.test("a number field in a JSON body sent as text is refused rather than parsed", () => {
+  expect(parseBodyBytes({ age: Number }, sent({ age: "12" })), equals({ age: null }));
+});
+
+Scribe.test("a boolean field in a JSON body is taken as sent, without any parsing", () => {
+  expect(parseBodyBytes({ active: Boolean }, sent({ active: true })), equals({ active: true }));
+});
+
+Scribe.test("a boolean field in a JSON body sent as text is refused rather than parsed", () => {
+  expect(parseBodyBytes({ active: Boolean }, sent({ active: "true" })), equals({ active: null }));
+});
+
+Scribe.test("an object field in a JSON body is kept as it arrived", () => {
+  expect(parseBodyBytes({ config: Object }, sent({ config: { a: 1 } })), equals({ config: { a: 1 } }));
+});
+
+Scribe.test("an object field sent as a list is refused, since a list is not a plain object", () => {
+  expect(parseBodyBytes({ config: Object }, sent({ config: [1, 2] })), equals({ config: null }));
+});
+
+Scribe.test("an object field sent as null is absent rather than an empty object", () => {
+  expect(parseBodyBytes({ config: Object }, sent({ config: null })), equals({ config: null }));
+});
+
+Scribe.test("a list whose raw value is not an array at all is refused, not read as one item", () => {
+  expect(parseBodyBytes({ counts: ListOf(Number) }, sent({ counts: 5 })), equals({ counts: null }));
+});
+
+Scribe.test("a number field in a form is parsed from its spelling", async () => {
+  const form = await filled([["age", "12"]]);
+  expect(await parseFormBytes({ age: Number }, form.bytes, form.contentType), equals({ age: 12 }));
+});
+
+Scribe.test("a number field in a form sent as something unparseable is refused", async () => {
+  const form = await filled([["age", "not a number"]]);
+  expect(await parseFormBytes({ age: Number }, form.bytes, form.contentType), equals({ age: null }));
+});
+
+Scribe.test("a boolean field in a form is read from the literal spelling true or false", async () => {
+  const asTrue = await filled([["active", "true"]]);
+  expect(await parseFormBytes({ active: Boolean }, asTrue.bytes, asTrue.contentType), equals({ active: true }));
+
+  const asFalse = await filled([["active", "false"]]);
+  expect(await parseFormBytes({ active: Boolean }, asFalse.bytes, asFalse.contentType), equals({ active: false }));
+});
+
+Scribe.test("a boolean field in a form sent as anything else is refused rather than guessed", async () => {
+  const form = await filled([["active", "yes"]]);
+  expect(await parseFormBytes({ active: Boolean }, form.bytes, form.contentType), equals({ active: null }));
+});
+
+Scribe.test("a list of files in a form keeps only the entries that are files", async () => {
+  const first = new File(["a"], "a.png", { type: "image/png" });
+  const second = new File(["b"], "b.png", { type: "image/png" });
+  const form = await filled([["avatars", first], ["avatars", "not a file"], ["avatars", second]]);
+
+  const read = await parseFormBytes({ avatars: ListOf(File) }, form.bytes, form.contentType);
+
+  expect(read?.avatars?.map((file) => file.name), equals(["a.png", "b.png"]));
+});
+
+Scribe.test("a single nested field sent as JSON text in one form field is read against its shape", async () => {
+  const form = await filled([["brand", '{"id":"a"}']]);
+
+  const read = await parseFormBytes(
+    { brand: Required(Nested({ id: Required(String) })) },
+    form.bytes,
+    form.contentType,
+  );
+
+  expect(read, equals({ brand: { id: "a" } }));
+});
+
+Scribe.test("a single nested field sent as text that is not JSON answers nothing rather than throwing", async () => {
+  const form = await filled([["brand", "not json"]]);
+
+  const read = await parseFormBytes(
+    { brand: Required(Nested({ id: Required(String) })) },
+    form.bytes,
+    form.contentType,
+  );
+
+  expect(read, equals(null));
+});
+
+Scribe.test("a list of shapes sent as valid JSON that is not itself an array is refused", async () => {
+  const form = await filled([["members", '{"id":"a"}']]);
+
+  expect(
+    await parseFormBytes({ members: ListOf(Nested({ id: Required(String) })) }, form.bytes, form.contentType),
+    equals({ members: null }),
+  );
+});

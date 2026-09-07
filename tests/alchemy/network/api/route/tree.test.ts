@@ -48,6 +48,7 @@ import {
   Post,
   type RateLimit,
   RequestContext,
+  type RouteHandler,
 } from "@scribe/alchemy/route";
 import { Duration } from "@scribe/alchemy";
 
@@ -188,4 +189,82 @@ Scribe.test("a re-exported base never becomes a route that answers nothing", asy
   const answered = await compiled[0].route.handler(new RequestContext(CALL));
 
   expect(answered.status, equals(200), "the route that was mounted had no body to run");
+});
+
+Scribe.test("nothing anywhere says who may call, and the node will not compile", () => {
+  expect(
+    () =>
+      compileNode("admin", [{ ...NOTHING, rateLimit: EVERY_MINUTE, webhookVerified: false }], [found({
+        default: Reader,
+      })]),
+    throwsA(having(isA(RoutingError), (raised) => raised.message, "message", contains("without any access"))),
+  );
+});
+
+Scribe.test("nothing anywhere says how often a route may be called, and the node will not compile", () => {
+  expect(
+    () =>
+      compileNode("admin", [{ ...NOTHING, access: "authenticated", webhookVerified: false }], [found({
+        default: Reader,
+      })]),
+    throwsA(having(isA(RoutingError), (raised) => raised.message, "message", contains("without any rate limit"))),
+  );
+});
+
+class SecondReader extends Get {
+  protected override run(): Response {
+    return this.response.ok();
+  }
+}
+
+Scribe.test("a file exporting the same verb twice is refused rather than picking one silently", () => {
+  expect(
+    () => compileNode("admin", [NODE_SAYS_EVERYTHING], [found({ default: Reader, alt: SecondReader })]),
+    throwsA(having(isA(RoutingError), (raised) => raised.message, "message", contains("declares GET twice"))),
+  );
+});
+
+Scribe.test("wrapAll runs every layer around the handler, outermost layer outermost", async () => {
+  const order: string[] = [];
+
+  const rootWrap: Contribution = {
+    ...NODE_SAYS_EVERYTHING,
+    wrap: (handler) => async (ctx) => {
+      order.push("root:before");
+      const answered = await handler(ctx);
+      order.push("root:after");
+      return answered;
+    },
+  };
+
+  class BranchLogger extends Middleware {
+    protected override wrap(handler: RouteHandler): RouteHandler {
+      return async (ctx) => {
+        order.push("branch:before");
+        const answered = await handler(ctx);
+        order.push("branch:after");
+        return answered;
+      };
+    }
+  }
+
+  class LoggingReader extends Get {
+    protected override run(): Response {
+      order.push("handler");
+      return this.response.ok();
+    }
+  }
+
+  const compiled = compileNode(
+    "admin",
+    [rootWrap],
+    [found({ default: LoggingReader }, [{ default: BranchLogger }])],
+  );
+  await compiled[0].route.handler(new RequestContext(CALL));
+
+  expect(
+    order,
+    equals(["root:before", "branch:before", "handler", "branch:after", "root:after"]),
+    "the node's own layer did not end up outermost around the branch and the handler",
+  );
 });
