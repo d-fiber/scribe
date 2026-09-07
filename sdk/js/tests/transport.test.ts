@@ -42,14 +42,12 @@ import {
   Caller,
   Get,
   NodeRoot,
-  PROTOCOL_VERSION,
   type RateLimiter,
   response,
   ScribeServer,
   Time,
-  TransportFailure,
-  UnaryClient,
 } from "../mod.ts";
+import { PROTOCOL_VERSION, TransportFailure, UnaryClient } from "../transport.ts";
 import { Registration } from "../gen/scribe/protocol/manifest_pb.ts";
 import { InvocationSchema, RequestSchema, Worker as WorkerService } from "../gen/scribe/protocol/invocation_pb.ts";
 import { FailureSchema, Method as ProtoMethod } from "../gen/scribe/protocol/common_pb.ts";

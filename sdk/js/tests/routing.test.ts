@@ -45,7 +45,6 @@ import {
   Middleware,
   NodeRoot,
   Post,
-  PROTOCOL_VERSION,
   type RateLimiter,
   type RequestContext,
   response,
@@ -54,6 +53,7 @@ import {
   ScribeServer,
   Time,
 } from "../mod.ts";
+import { PROTOCOL_VERSION } from "../transport.ts";
 import { Caller as ProtoCaller, Method as ProtoMethod } from "../gen/scribe/protocol/common_pb.ts";
 import { describeWorker } from "../mod.ts";
 

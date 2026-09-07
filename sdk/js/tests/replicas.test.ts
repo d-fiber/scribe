@@ -44,15 +44,12 @@ import {
   Get,
   host,
   NodeRoot,
-  PROTOCOL_VERSION,
   type RateLimiter,
   response,
   ScribeServer,
   Time,
-  TransportFailure,
-  UnaryClient,
-  UnaryServer,
 } from "../mod.ts";
+import { PROTOCOL_VERSION, TransportFailure, UnaryClient, UnaryServer } from "../transport.ts";
 import { Registration } from "../gen/scribe/protocol/manifest_pb.ts";
 import {
   InvocationSchema,

@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "exports": {
     ".": "./mod.ts",
-    "./protocol": "./gen/scribe/protocol/manifest_pb.ts"
+    "./protocol": "./gen/scribe/protocol/manifest_pb.ts",
+    "./transport": "./transport.ts"
   },
   "tasks": {
     "check": "deno check mod.ts",

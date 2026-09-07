@@ -34,16 +34,23 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { expect, test } from "bun:test";
+/**
+ * What the host side of the wire imports, as opposed to what a worker imports from `mod.ts`.
+ *
+ * @remarks
+ * Nothing here is reached by a worker's own code: `ScribeServer`/`serveWorker` build a
+ * {@link UnaryServer} internally, and no example or fixture worker under this repository's
+ * `packages/*\/tests/e2e/` ever names one of these exports itself. `engine/embedder/` and the
+ * `capability.ts`/`wire.ts` files a package answers a worker's calls from both read this module
+ * instead of `mod.ts`, so that the surface documented as "a worker's only import" stays exactly
+ * that, and a host-only symbol never shows up in a worker author's autocomplete.
+ */
+export { majorOf, PROTOCOL_VERSION, SDK_VERSION, speaksSameContract, WORKER_LANGUAGE } from "./src/protocol/version.ts";
 
-import "@scribe/scholium/runner.ts";
-import { Runners } from "@scribe/alchemy/test";
-import { ClientType, enumValues } from "@scribe/contracts/enums.ts";
-import { PROTOCOL_VERSION } from "../../../sdk/js/transport.ts";
+export { UnaryClient } from "./src/transport/client.ts";
+export type { CallCredentials, Fetcher } from "./src/transport/client.ts";
+export { TransportFailure } from "./src/transport/failure.ts";
+export { failureResponse, metadataOf, UnaryServer } from "./src/transport/server.ts";
+export type { CallMetadata } from "./src/transport/server.ts";
 
-test("resolves specifiers from scribe.imports.json, sdk/js and a sealed engine layer alike", () => {
-  expect(typeof PROTOCOL_VERSION).toBe("string");
-  expect(PROTOCOL_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
-  expect(typeof Runners.configured).toBe("boolean");
-  expect(enumValues(ClientType).length).toBeGreaterThan(0);
-});
+export { decodeJson, encodeJson } from "./src/contracts/json.ts";

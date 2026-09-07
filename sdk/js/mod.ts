@@ -34,8 +34,6 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export { majorOf, PROTOCOL_VERSION, SDK_VERSION, speaksSameContract, WORKER_LANGUAGE } from "./src/protocol/version.ts";
-
 export {
   ClientType,
   DeviceCategory,
@@ -96,8 +94,6 @@ export type { ServeOptions } from "./src/runtime/serve.ts";
 
 export { json, response } from "./src/http/response.ts";
 
-export { decodeJson, encodeJson } from "./src/contracts/json.ts";
-
 export { Arr, Nested, Required } from "./src/validation/schema.ts";
 export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema } from "./src/validation/schema.ts";
 
@@ -131,9 +127,3 @@ export { log } from "./src/observability/logger.ts";
 export { loggedEntry, LogSink } from "./src/observability/log_sink.ts";
 export type { LoggedEntry, LoggedLevel } from "./src/observability/log_sink.ts";
 export { SinkRegistry } from "./src/observability/sink_registry.ts";
-
-export { UnaryClient } from "./src/transport/client.ts";
-export type { CallCredentials, Fetcher } from "./src/transport/client.ts";
-export { TransportFailure } from "./src/transport/failure.ts";
-export { failureResponse, metadataOf, UnaryServer } from "./src/transport/server.ts";
-export type { CallMetadata } from "./src/transport/server.ts";

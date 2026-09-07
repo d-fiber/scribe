@@ -43,13 +43,13 @@ import {
   type DiscoveredRoute,
   Get,
   NodeRoot,
-  PROTOCOL_VERSION,
   type RateLimiter,
   type RequestContext,
   response,
   ScribeServer,
   Time,
 } from "@scribe/sdk";
+import { PROTOCOL_VERSION } from "@scribe/sdk/transport.ts";
 import { HOST_HEADER } from "@scribe/sdk/src/transport/wire.ts";
 import { installRateLimiterMock } from "@scribe/foundation/testing";
 import { RequestScope } from "@scribe/runtime/scope.ts";

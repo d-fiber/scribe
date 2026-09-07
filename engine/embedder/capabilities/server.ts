@@ -36,7 +36,7 @@
 
 import type { Future } from "@scribe/alchemy";
 import { create } from "@bufbuild/protobuf";
-import { type CallMetadata, failureResponse, metadataOf, TransportFailure, UnaryServer } from "@scribe/sdk";
+import { type CallMetadata, failureResponse, metadataOf, TransportFailure, UnaryServer } from "@scribe/sdk/transport.ts";
 import { Logging, type LogAck, LogAckSchema, type LogBatch } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 import { capabilities } from "@scribe/contracts/capability.ts";
 import { CapabilityTokens } from "./tokens.ts";

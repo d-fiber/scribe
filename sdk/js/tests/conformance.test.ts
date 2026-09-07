@@ -37,7 +37,7 @@
 import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { assert, assertEquals } from "@std/assert";
-import { PROTOCOL_VERSION } from "../mod.ts";
+import { PROTOCOL_VERSION } from "../transport.ts";
 import { Registration } from "../gen/scribe/protocol/manifest_pb.ts";
 import { Worker as WorkerService } from "../gen/scribe/protocol/invocation_pb.ts";
 import { QueueDispatch } from "../gen/scribe/packages/foundation/protocol/queue_pb.ts";

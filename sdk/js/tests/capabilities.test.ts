@@ -37,7 +37,8 @@
 import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals, assertRejects } from "@std/assert";
-import { cache, CallScope, CapabilityError, database, host, UnaryServer } from "../mod.ts";
+import { cache, CallScope, CapabilityError, database, host } from "../mod.ts";
+import { UnaryServer } from "../transport.ts";
 import {
   Database,
   FilterOperator,

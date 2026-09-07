@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "@scribe/alchemy";
-import { type Fetcher, PROTOCOL_VERSION, UnaryClient } from "@scribe/sdk";
+import { type Fetcher, PROTOCOL_VERSION, UnaryClient } from "@scribe/sdk/transport.ts";
 import type { Manifest } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import { Registration } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import type { Invocation, Reply } from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
