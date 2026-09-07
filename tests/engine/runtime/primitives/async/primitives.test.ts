@@ -38,7 +38,7 @@ import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { ExponentialBackoff } from "@scribe/alchemy";
 import { runPooled } from "@scribe/alchemy";
-import { sleep } from "@scribe/runtime/primitives/async/sleep.ts";
+import { sleep } from "@scribe/runtime/primitives/sleep.ts";
 import { assert, assertEquals } from "@std/assert";
 import { Duration } from "@scribe/alchemy";
 

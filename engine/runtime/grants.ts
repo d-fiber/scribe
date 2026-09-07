@@ -37,7 +37,7 @@
 import type { Grants, GrantSource } from "@scribe/contracts/grants.ts";
 import { cache, Duration } from "@scribe/alchemy";
 import type { Cache, Future } from "@scribe/alchemy";
-import { TtlLru } from "@scribe/runtime/primitives/cache/ttl_lru.ts";
+import { TtlLru } from "@scribe/runtime/primitives/ttl_lru.ts";
 
 /** How long a resolved answer stays in the shared cache. */
 const _CACHE_TTL: Duration = Duration.minutes(5);

@@ -34,49 +34,15 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { TtlLru } from "@scribe/runtime/primitives/ttl_lru.ts";
-
-const MAX_CACHED_PAYLOADS = 512;
-
-/** What was made of one sealed payload: its plaintext, or the fact that it has none. */
-interface Decoded {
-  /** The text the box held, or null when it could not be opened. */
-  readonly plaintext: string | null;
-}
+import { type Duration, Future } from "@scribe/alchemy";
 
 /**
- * What each sealed payload was decoded to, held for as long as it could still be fresh.
+ * Waits `held` and answers nothing.
  *
  * @remarks
- * Three answers and not two: `undefined` is a payload this process has not seen, `null` is one it
- * has seen and could not open. The second is worth holding, because repeating the same rubbish is
- * otherwise a free way to spend the seventy microseconds an X25519 exchange costs.
- *
- * Eviction is the least recently read entry, not the whole table. Emptying it at the limit made a
- * flood of five hundred distinct payloads throw away every real one at a stroke, and this cache is
- * the only thing standing between a request and that exchange: a caller sending rubbish put every
- * other caller back to full price. The bound still holds, and what a flood costs now is the entries
- * it actually pushed past.
+ * It lives here rather than in `@scribe/alchemy`, which answers the same wait through
+ * `Future.delayed`. This file keeps the name the framework already imports.
  */
-export class PlaintextCache {
-  readonly #held: TtlLru<Decoded>;
-
-  constructor(ttlMs: number, limit: number = MAX_CACHED_PAYLOADS, now: () => number = Date.now) {
-    this.#held = new TtlLru<Decoded>({ max: limit, ttlMs, now });
-  }
-
-  /** What `encrypted` was decoded to, or `undefined` when this process holds no answer for it. */
-  lookup(encrypted: string): string | null | undefined {
-    return this.#held.get(encrypted)?.plaintext;
-  }
-
-  /** Holds what `encrypted` was decoded to, refusal included. */
-  remember(encrypted: string, plaintext: string | null): void {
-    this.#held.set(encrypted, { plaintext });
-  }
-
-  /** How many payloads are held. */
-  get size(): number {
-    return this.#held.size;
-  }
+export function sleep(held: Duration): Future<void> {
+  return Future.delayed(held);
 }
