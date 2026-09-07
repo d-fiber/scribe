@@ -104,6 +104,6 @@ export { MemoryRateLimiter, MemoryRateLimiters } from "./memory/rate_limit.ts";
 export { MemoryClient } from "./memory/http.ts";
 export type { MemoryAnswer } from "./memory/http.ts";
 
-export { checkCacheDriver } from "./conformity/cache.ts";
+export { checkCacheDriver } from "./conformity.ts";
 export { FixedNow } from "./memory/now.ts";
 export { SequentialUuids } from "./memory/uuids.ts";

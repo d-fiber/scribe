@@ -34,12 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "../../async/future.ts";
-import type { CacheDriver } from "../../port/cache.ts";
-import { Duration } from "../../value/duration.ts";
-import { Now } from "../../value/date_time.ts";
-import { FixedNow } from "../memory/now.ts";
-import { AssertionError } from "../expect/error.ts";
+import type { Future } from "../async/future.ts";
+import type { CacheDriver } from "../port/cache.ts";
+import { Duration } from "../value/duration.ts";
+import { Now } from "../value/date_time.ts";
+import { FixedNow } from "./memory/now.ts";
+import { AssertionError } from "./expect/error.ts";
 
 /**
  * Runs every promise the cache port makes against `driver`, and refuses the first one it breaks.
