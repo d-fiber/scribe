@@ -38,15 +38,7 @@ import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals, assertRejects } from "@std/assert";
 import { create, fromBinary } from "@bufbuild/protobuf";
-import {
-  Caller,
-  Get,
-  NodeRoot,
-  type RateLimiter,
-  response,
-  ScribeServer,
-  Time,
-} from "../mod.ts";
+import { Caller, Get, NodeRoot, type RateLimiter, response, ScribeServer, Time } from "../mod.ts";
 import { PROTOCOL_VERSION, TransportFailure, UnaryClient } from "../transport.ts";
 import { Registration } from "../gen/scribe/protocol/manifest_pb.ts";
 import { InvocationSchema, RequestSchema, Worker as WorkerService } from "../gen/scribe/protocol/invocation_pb.ts";
