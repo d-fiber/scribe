@@ -60,10 +60,9 @@ export type DeclaredNode =
  *
  * @remarks
  * Each method here is exactly its own top-level function — `b.message` and `Message` are the same
- * call, `b.enum` and `ProtoEnum` the same, `b.service` and `RpcService` the same — the same reason
- * `schema/schema.ts`'s own `SchemaContentFactory` exists: autocompletion on `b.` lists precisely
- * the three things a proto file can hold, without an author needing to import three separate names
- * from `@scribe/alchemy` to write one `build()` method.
+ * call, `b.enum` and `ProtoEnum` the same, `b.service` and `RpcService` the same: autocompletion on
+ * `b.` lists precisely the three things a proto file can hold, without an author needing to import
+ * three separate names from `@scribe/alchemy` to write one `build()` method.
  */
 export class ProtocolContentFactory {
   /** Opens a proto3 message named `name`. Same call as the top-level `Message`. */
@@ -172,7 +171,6 @@ export class Protocol {
 
 /**
  * The one `Protocol` a `@Proto(...)` class's contract is finally assembled through — every file of
- * it shares this same instance, the way `schema/schema.ts`'s own `dbSchema` is shared across a
- * package's `schema/`.
+ * it shares this same instance.
  */
 export const protocol: Protocol = new Protocol();

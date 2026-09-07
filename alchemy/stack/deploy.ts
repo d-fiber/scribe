@@ -39,12 +39,12 @@ import { resolveValue } from "./common/value.ts";
 import type { DeployValue, Loose, ValueLike } from "./common/value.ts";
 import type { DeclaredRecipe } from "./recipe/build/recipe.ts";
 import type { DeclaredService } from "./service/build/service.ts";
-import type { DeclaredType } from "./schema/build/types/type.ts";
-import type { DeclaredEnum } from "./schema/build/types/enum.ts";
-import type { DeclaredIndex, DeclaredPolicy, DeclaredTable } from "./schema/build/table/table.ts";
-import type { DeclaredExtension } from "./schema/build/objects/extension.ts";
-import type { DeclaredGrant } from "./schema/build/access/grant.ts";
-import type { DeclaredDrop } from "./schema/build/lifecycle/drop.ts";
+import type { DeclaredType } from "./schema/types/type.ts";
+import type { DeclaredEnum } from "./schema/types/enum.ts";
+import type { DeclaredIndex, DeclaredPolicy, DeclaredTable } from "./schema/table/table.ts";
+import type { DeclaredExtension } from "./schema/objects/extension.ts";
+import type { DeclaredGrant } from "./schema/access/grant.ts";
+import type { DeclaredDrop } from "./schema/lifecycle/drop.ts";
 import type { UnmodifiableList } from "../primitives/value/list.ts";
 
 /**
