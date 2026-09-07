@@ -34,11 +34,16 @@
 -- This header is a summary written for convenience. Where it differs from the
 -- LICENSE file, the LICENSE file governs.
 
-create table if not exists public.__inits__ (
+create table if not exists foundation.__inits__ (
   name text primary key,
   ran_at timestamptz not null default now()
 );
 
-alter table public.__inits__ enable row level security;
+alter table foundation.__inits__ enable row level security;
 
-revoke all on public.__inits__ from anon, authenticated;
+revoke all on foundation.__inits__ from anon, authenticated;
+
+grant select, insert on foundation.__inits__ to service_role;
+
+create policy "service_role reads and tracks init jobs" on foundation.__inits__
+  for all to service_role using (true) with check (true);
