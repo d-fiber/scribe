@@ -393,3 +393,15 @@ export type { ProvisioningDbHandler, RegisteredProvisioningDb } from "./iac/deco
 
 export { ListOf, Nested, Required } from "./api/body/mod.ts";
 export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema, PrimitiveType } from "./api/body/mod.ts";
+
+export { ContractEntry } from "./protocol/file.ts";
+export type { ContractAddable, ProtoFileRef } from "./protocol/file.ts";
+export { Contract, contract, ContractContentFactory, ContractFile } from "./protocol/protocol.ts";
+export { declaredMessages, forgetMessages, Message, MessageBuilder } from "./protocol/message/message.ts";
+export type { DeclaredMessage } from "./protocol/message/message.ts";
+export { declaredRpcServices, forgetRpcServices, RpcService, RpcServiceBuilder } from "./protocol/service/service.ts";
+export type { DeclaredRpc, DeclaredRpcService } from "./protocol/service/service.ts";
+export { declaredProtoEnums, forgetProtoEnums, ProtoEnum, ProtoEnumBuilder } from "./protocol/types/enum.ts";
+export type { DeclaredEnumValue, DeclaredProtoEnum } from "./protocol/types/enum.ts";
+export { FieldBuilder, FieldFactory, fieldsOf, MapFieldBuilder, MapValueFactory } from "./protocol/types/field.ts";
+export type { FieldDefinition, FieldMap, FieldType, MapKeyKind, ScalarKind } from "./protocol/types/field.ts";
