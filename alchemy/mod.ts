@@ -54,6 +54,8 @@ export { Completer } from "./primitives/async/stream.ts";
 export type { Stream } from "./primitives/async/stream.ts";
 export { Bytes } from "./primitives/value/bytes.ts";
 export type { Comparable } from "./primitives/value/comparable.ts";
+export { base64, base64Url, hex, json, utf8 } from "./primitives/value/convert.ts";
+export type { BytesCodec, Codec } from "./primitives/value/convert.ts";
 export { DateTime, Now } from "./primitives/value/date_time.ts";
 export type { NowSource } from "./primitives/value/date_time.ts";
 export { Duration } from "./primitives/value/duration.ts";
@@ -64,16 +66,14 @@ export type { Uri } from "./primitives/value/uri.ts";
 export { Uuid, Uuids } from "./primitives/value/uuid.ts";
 export type { UuidSource } from "./primitives/value/uuid.ts";
 export type { Expando, Finalizer, WeakReference } from "./primitives/value/weak.ts";
-export { base64, base64Url, hex, json, utf8 } from "./primitives/value/convert.ts";
-export type { BytesCodec, Codec } from "./primitives/value/convert.ts";
 
 export { Pagination } from "./primitives/value/pagination.ts";
 export type { PageRequest, PaginationJson } from "./primitives/value/pagination.ts";
 export { Failure, Ok, okay } from "./primitives/value/result.ts";
 export type { Result } from "./primitives/value/result.ts";
 
-export { BindingError, Slot } from "./wiring/bind/slot.ts";
 export { Lazy } from "./wiring/bind/lazy.ts";
+export { BindingError, Slot } from "./wiring/bind/slot.ts";
 
 export { Container, container } from "./wiring/di/container.ts";
 export type { Token } from "./wiring/di/container.ts";
@@ -401,15 +401,15 @@ export type { ProvisioningDbHandler, RegisteredProvisioningDb } from "./stack/sc
 export { ListOf, Nested, Required } from "./network/api/body/mod.ts";
 export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema, PrimitiveType } from "./network/api/body/mod.ts";
 
+export { ProtoBuilder, ProtoNamedBuilder, RpcFactory, RpcNameBuilder, RpcRequestBuilder } from "./protocol/builder.ts";
+export type { ProtoEnumBuilder, ProtoMessageBuilder, ProtoServiceBuilder } from "./protocol/builder.ts";
 export { declaredProtocols, forgetProtocols, Proto } from "./protocol/decorators.ts";
 export type { RegisteredProtocol } from "./protocol/decorators.ts";
 export { declaredNodes, ProtoEnum, ProtoMessage, ProtoService } from "./protocol/members.ts";
-export { ProtoBuilder, ProtoNamedBuilder, RpcFactory } from "./protocol/builder.ts";
-export type { ProtoEnumBuilder, ProtoMessageBuilder, ProtoServiceBuilder } from "./protocol/builder.ts";
-export { Protocol, protocol, ProtocolBuilder, ProtocolContentFactory } from "./protocol/protocol.ts";
-export type { DeclaredNode, ProtocolNode } from "./protocol/protocol.ts";
 export { Message, MessageBuilder } from "./protocol/message/message.ts";
 export type { DeclaredMessage } from "./protocol/message/message.ts";
+export { Protocol, protocol, ProtocolBuilder, ProtocolContentFactory } from "./protocol/protocol.ts";
+export type { DeclaredNode, ProtocolNode } from "./protocol/protocol.ts";
 export { RpcService, RpcServiceBuilder } from "./protocol/service/service.ts";
 export type { DeclaredRpc, DeclaredRpcService } from "./protocol/service/service.ts";
 export { EnumFactory, EnumValueBuilder, EnumValueFactory, EnumWithName } from "./protocol/types/enum.ts";

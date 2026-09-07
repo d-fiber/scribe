@@ -37,7 +37,22 @@
 import "@scribe/scholium/runner.ts";
 import { equals, expect, Scribe } from "@scribe/alchemy/test";
 import type { List, ProtoEnumBuilder, ProtoMessageBuilder, ProtoServiceBuilder } from "@scribe/alchemy";
-import { declaredNodes, Proto, ProtoBuilder, protocol, ProtoEnum, ProtoMessage, ProtoService } from "@scribe/alchemy";
+import {
+  declaredNodes,
+  Proto,
+  ProtoBuilder,
+  protocol,
+  ProtoEnum,
+  ProtoMessage,
+  ProtoService,
+  RpcFactory,
+} from "@scribe/alchemy";
+
+Scribe.test("RpcFactory.name(...).request(...).response(...) closes to a plain DeclaredRpc", () => {
+  const rpc = new RpcFactory().name("Get").request("GetRequest").response("GetResult");
+
+  expect(rpc, equals({ name: "Get", request: "GetRequest", response: "GetResult" }));
+});
 
 class Bare extends ProtoBuilder {
   imports(): List<string> {
@@ -61,7 +76,7 @@ Scribe.test("builder(name).fields(...) closes as a message", () => {
 });
 
 Scribe.test("builder(name).rpc(...) closes as a service", () => {
-  const service = new Bare().open("Database").rpc((r) => [r.rpc("Execute", "Query", "QueryResult")]);
+  const service = new Bare().open("Database").rpc((r) => [r.name("Execute").request("Query").response("QueryResult")]);
 
   expect(
     service.declaration,
@@ -75,8 +90,8 @@ Scribe.test("builder(name).rpc(...) closes as a service", () => {
 
 Scribe.test("rpc((r) => [...]) accumulates every entry the callback answers, in order", () => {
   const service = new Bare().open("Database").rpc((r) => [
-    r.rpc("Execute", "Query", "QueryResult"),
-    r.rpc("ExecuteBatch", "QueryBatch", "QueryBatchResult"),
+    r.name("Execute").request("Query").response("QueryResult"),
+    r.name("ExecuteBatch").request("QueryBatch").response("QueryBatchResult"),
   ]);
 
   expect(
@@ -126,7 +141,7 @@ class DatabaseProtocol extends ProtoBuilder {
 
   @ProtoService()
   database(): ProtoServiceBuilder {
-    return this.builder("Database").rpc((r) => [r.rpc("Execute", "Query", "QueryResult")]);
+    return this.builder("Database").rpc((r) => [r.name("Execute").request("Query").response("QueryResult")]);
   }
 }
 

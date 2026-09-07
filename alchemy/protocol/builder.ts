@@ -52,11 +52,43 @@ export type ProtoEnumBuilder = DeclaredProtoEnum;
 /** A service still open to `.rpc(...)`, the one of the three that stays a real builder once `this.builder(...)` answers it. */
 export type ProtoServiceBuilder = RpcServiceBuilder;
 
+/** A procedure that has taken its name, still waiting for {@link RpcNameBuilder.request}. */
+export class RpcNameBuilder {
+  readonly #name: string;
+
+  /** Opened by {@link RpcFactory.name}, never directly. */
+  constructor(name: string) {
+    this.#name = name;
+  }
+
+  /** Names the message this procedure takes, closed by {@link RpcRequestBuilder.response}. */
+  request(request: string): RpcRequestBuilder {
+    return new RpcRequestBuilder(this.#name, request);
+  }
+}
+
+/** A procedure that has taken its name and its request, still waiting for {@link RpcRequestBuilder.response}. */
+export class RpcRequestBuilder {
+  readonly #name: string;
+  readonly #request: string;
+
+  /** Opened by {@link RpcNameBuilder.request}, never directly. */
+  constructor(name: string, request: string) {
+    this.#name = name;
+    this.#request = request;
+  }
+
+  /** Names the message this procedure answers, closing it. */
+  response(response: string): DeclaredRpc {
+    return { name: this.#name, request: this.#request, response };
+  }
+}
+
 /** Opens one procedure of a `.rpc((r) => [...])` array, passed to {@link ProtoNamedBuilder.rpc}'s own callback. */
 export class RpcFactory {
-  /** Names a procedure taking `request` and answering `response`, both message names declared elsewhere in the same contract. */
-  rpc(name: string, request: string, response: string): DeclaredRpc {
-    return { name, request, response };
+  /** Names a procedure, closed by {@link RpcRequestBuilder.response} once `.request(...)` has named what it takes. */
+  name(name: string): RpcNameBuilder {
+    return new RpcNameBuilder(name);
   }
 }
 

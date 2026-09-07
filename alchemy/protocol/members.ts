@@ -143,7 +143,7 @@ export function ProtoEnum() {
  * ```ts ignore
  * @ProtoService()
  * database(): ProtoServiceBuilder {
- *   return this.builder("Database").rpc((r) => [r.rpc("Execute", "Query", "QueryResult")]);
+ *   return this.builder("Database").rpc((r) => [r.name("Execute").request("Query").response("QueryResult")]);
  * }
  * ```
  */
