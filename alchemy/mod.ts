@@ -401,23 +401,18 @@ export type { ProvisioningDbHandler, RegisteredProvisioningDb } from "./stack/sc
 export { ListOf, Nested, Required } from "./network/api/body/mod.ts";
 export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema, PrimitiveType } from "./network/api/body/mod.ts";
 
-export {
-  ClientProtocol,
-  CoreProtocol,
-  declaredProtocols,
-  forgetProtocols,
-  protocolDecorator,
-  RuntimeProtocol,
-} from "./protocol/decorators.ts";
-export type { ProtocolSource, ProtoFamily, RegisteredProtocol } from "./protocol/decorators.ts";
-export { declaredNodes, ProtoEnumMember, ProtoMessage, ProtoServiceMember } from "./protocol/members.ts";
+export { declaredProtocols, forgetProtocols, Proto } from "./protocol/decorators.ts";
+export type { RegisteredProtocol } from "./protocol/decorators.ts";
+export { declaredNodes, ProtoEnum, ProtoMessage, ProtoService } from "./protocol/members.ts";
+export { ProtoBuilder, ProtoNamedBuilder, RpcFactory } from "./protocol/builder.ts";
+export type { ProtoEnumBuilder, ProtoMessageBuilder, ProtoServiceBuilder } from "./protocol/builder.ts";
 export { Protocol, protocol, ProtocolBuilder, ProtocolContentFactory } from "./protocol/protocol.ts";
 export type { DeclaredNode, ProtocolNode } from "./protocol/protocol.ts";
 export { Message, MessageBuilder } from "./protocol/message/message.ts";
 export type { DeclaredMessage } from "./protocol/message/message.ts";
 export { RpcService, RpcServiceBuilder } from "./protocol/service/service.ts";
 export type { DeclaredRpc, DeclaredRpcService } from "./protocol/service/service.ts";
-export { EnumFactory, EnumValueBuilder, EnumValueFactory, EnumWithName, ProtoEnum } from "./protocol/types/enum.ts";
+export { EnumFactory, EnumValueBuilder, EnumValueFactory, EnumWithName } from "./protocol/types/enum.ts";
 export type { DeclaredEnumValue, DeclaredProtoEnum } from "./protocol/types/enum.ts";
 export { FieldBuilder, FieldFactory, fieldsOf, MapFieldBuilder, MapValueFactory } from "./protocol/types/field.ts";
 export type { FieldDefinition, FieldMap, FieldType, MapKeyKind, ScalarKind } from "./protocol/types/field.ts";

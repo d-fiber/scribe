@@ -36,19 +36,21 @@
 
 import "@scribe/scholium/runner.ts";
 import { allOf, equals, expect, isA, Scribe, throwsA, withMessage } from "@scribe/alchemy/test";
+import type { DeclaredMessage, DeclaredProtoEnum, EnumFactory, RpcServiceBuilder } from "@scribe/alchemy";
 import {
-  type DeclaredMessage,
   declaredNodes,
-  type DeclaredProtoEnum,
   Message,
   protocol,
+  ProtocolContentFactory,
   ProtoEnum,
-  ProtoEnumMember,
   ProtoMessage,
-  ProtoServiceMember,
+  ProtoService,
   RpcService,
-  type RpcServiceBuilder,
 } from "@scribe/alchemy";
+
+function openEnum(build: (e: EnumFactory) => DeclaredProtoEnum): DeclaredProtoEnum {
+  return new ProtocolContentFactory().enum(build);
+}
 
 Scribe.test("declaredNodes() answers nothing for a class with no decorated method", () => {
   class Empty {}
@@ -95,26 +97,25 @@ Scribe.test("several @ProtoMessage() methods resolve in the order they appear in
   );
 });
 
-Scribe.test("@ProtoMessage(), @ProtoEnumMember() and @ProtoServiceMember() share one ordered list, not one per kind", () => {
+Scribe.test("@ProtoMessage(), @ProtoEnum() and @ProtoService() share one ordered list, not one per kind", () => {
   class Mixed {
     @ProtoMessage()
     query(): DeclaredMessage {
       return Message("Query").fields((f) => ({ sql: f.string().number(1) }));
     }
 
-    @ProtoEnumMember()
+    @ProtoEnum()
     sortOrder(): DeclaredProtoEnum {
-      return ProtoEnum((e) => e.name("SortOrder").values((v) => [v.value("SORT_ORDER_UNSPECIFIED").number(0)]));
+      return openEnum((e) => e.name("SortOrder").values((v) => [v.value("SORT_ORDER_UNSPECIFIED").number(0)]));
     }
 
-    @ProtoServiceMember()
+    @ProtoService()
     database(): RpcServiceBuilder {
       return RpcService("Database").rpc("Execute", "Query", "Query");
     }
   }
 
   const nodes = declaredNodes(new Mixed());
-  expect(nodes, equals(nodes)); // sanity: resolving twice does not throw
   expect(nodes.length, equals(3));
 });
 
@@ -130,7 +131,7 @@ Scribe.test("declaredNodes() feeds protocol.builder() the same way a build() arr
       return Message("QueryResult").fields((f) => ({ rows: f.bytes().repeated().number(1) }));
     }
 
-    @ProtoServiceMember()
+    @ProtoService()
     database(): RpcServiceBuilder {
       return RpcService("Database").rpc("Execute", "Query", "QueryResult");
     }

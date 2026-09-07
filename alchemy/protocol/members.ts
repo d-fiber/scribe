@@ -37,20 +37,20 @@
 import type { ProtocolNode } from "./protocol.ts";
 
 /**
- * The class-level slot every `@ProtoMessage`/`@ProtoEnumMember`/`@ProtoServiceMember` method
- * writes into, at the class's own `Symbol.metadata`.
+ * The class-level slot every `@ProtoMessage`/`@ProtoEnum`/`@ProtoService` method writes into, at
+ * the class's own `Symbol.metadata`.
  *
  * @remarks
  * A `Symbol.metadata` slot exists once per class, filled the moment each decorated method is
  * evaluated — no instance required, unlike `addInitializer`, which `wiring/declare/job.ts`'s own
  * `jobDecorator` relies on for `@Init`/`@Run`. That difference is deliberate:
- * `decorators.ts`'s own `protocolDecorator` never calls `new target()`, and a member decorator
- * that needed an instance to register itself would force that call, the same laziness `@Lifecycle`
- * trades away on purpose but `@CoreProtocol`/`@RuntimeProtocol`/`@ClientProtocol` do not.
+ * `decorators.ts`'s own `Proto` never calls `new target()`, and a member decorator that needed an
+ * instance to register itself would force that call, the same laziness `@Lifecycle` trades away
+ * on purpose but `@Proto` does not.
  */
 const PROTO_NODES = Symbol("protoNodes");
 
-/** One method `@ProtoMessage`/`@ProtoEnumMember`/`@ProtoServiceMember` marked, not yet called. */
+/** One method `@ProtoMessage`/`@ProtoEnum`/`@ProtoService` marked, not yet called. */
 interface DecoratedNode {
   /** The method this node was declared under, named only for the error a caller raises. */
   readonly methodName: string;
@@ -64,8 +64,8 @@ function entriesOf(metadata: DecoratorMetadata): DecoratedNode[] {
 }
 
 /**
- * Builds the method decorator behind `ProtoMessage`, `ProtoEnumMember` and `ProtoServiceMember` —
- * each names itself only to label the error this raises, the same split `jobDecorator` gives
+ * Builds the method decorator behind `ProtoMessage`, `ProtoEnum` and `ProtoService` — each names
+ * itself only to label the error this raises, the same split `jobDecorator` gives
  * `Init`/`Run`/`InitDB`/`MigrationDB`/`ProvisioningDB`.
  *
  * @throws {Error} When applied to anything but an instance method.
@@ -92,17 +92,17 @@ function memberDecorator(decoratorName: string) {
  * Marks an instance method as declaring one message of the contract its class belongs to.
  *
  * @remarks
- * The method takes no arguments and returns a {@link DeclaredMessage}, exactly what `Message(name)
+ * The method takes no arguments and returns the {@link ProtoMessageBuilder} `this.builder(name)
  * .fields(...)` already resolves to — this decorator changes nothing about how a message is
  * written, only where it is collected from. A class carries as many `@ProtoMessage()` methods as
  * it has messages to declare; two returning the same message name collide the same way two
- * entries of the same `build()` array would, caught by `ProtocolBuilder`'s own constructor once
+ * entries of a `protocol.builder` array would, caught by `ProtocolBuilder`'s own constructor once
  * something reads {@link declaredNodes}.
  *
  * ```ts ignore
  * @ProtoMessage()
- * query(): DeclaredMessage {
- *   return Message("Query").fields((f) => ({ sql: f.string().number(1) }));
+ * query(): ProtoMessageBuilder {
+ *   return this.builder("Query").fields((f) => ({ sql: f.string().number(1) }));
  * }
  * ```
  */
@@ -114,55 +114,55 @@ export function ProtoMessage() {
  * Marks an instance method as declaring one enum of the contract its class belongs to.
  *
  * @remarks
- * Named `ProtoEnumMember`, not `ProtoEnum`: `types/enum.ts` already exports `ProtoEnum` for the
- * value-level opener, and the two would collide at the shared `mod.ts` barrel — the same reason
- * `RpcService` is not named `Service`.
+ * Free to take this name because nothing else in the shared `mod.ts` barrel claims it any more:
+ * the raw value-level opener `types/enum.ts` used to export under `ProtoEnum` is now reached only
+ * through `this.builder(...)` or `ProtocolContentFactory.enum(...)`, never imported by that name
+ * directly — the same reason `RpcService` avoided colliding with `Service` by choosing a different
+ * name instead, except here the collision was closed by retiring the other export.
  *
  * ```ts ignore
- * @ProtoEnumMember()
- * sortOrder(): DeclaredProtoEnum {
- *   return ProtoEnum((e) =>
+ * @ProtoEnum()
+ * sortOrder(): ProtoEnumBuilder {
+ *   return this.builder((e) =>
  *     e.name("SortOrder").values((v) => [v.value("SORT_ORDER_UNSPECIFIED").number(0)])
  *   );
  * }
  * ```
  */
-export function ProtoEnumMember() {
-  return memberDecorator("ProtoEnumMember");
+export function ProtoEnum() {
+  return memberDecorator("ProtoEnum");
 }
 
 /**
  * Marks an instance method as declaring one service of the contract its class belongs to.
  *
  * @remarks
- * The method returns the open {@link RpcServiceBuilder} `RpcService(name).rpc(...)` already
- * answers, never `.declaration` — the same shape a `build()` array already took it in, resolved
- * later by `ProtocolBuilder`'s own constructor.
+ * The method returns the open {@link ProtoServiceBuilder} `this.builder(name).rpc(...)` already
+ * answers, resolved later by `ProtocolBuilder`'s own constructor.
  *
  * ```ts ignore
- * @ProtoServiceMember()
- * database(): RpcServiceBuilder {
- *   return RpcService("Database").rpc("Execute", "Query", "QueryResult");
+ * @ProtoService()
+ * database(): ProtoServiceBuilder {
+ *   return this.builder("Database").rpc((r) => [r.rpc("Execute", "Query", "QueryResult")]);
  * }
  * ```
  */
-export function ProtoServiceMember() {
-  return memberDecorator("ProtoServiceMember");
+export function ProtoService() {
+  return memberDecorator("ProtoService");
 }
 
 /**
- * Every node a `@ProtoMessage`/`@ProtoEnumMember`/`@ProtoServiceMember` method declared on
- * `instance`'s own class, resolved in the order those methods appear in the class body.
+ * Every node a `@ProtoMessage`/`@ProtoEnum`/`@ProtoService` method declared on `instance`'s own
+ * class, resolved in the order those methods appear in the class body.
  *
  * @remarks
  * Reads `instance.constructor`'s own `Symbol.metadata`, filled at class definition, not at
  * `instance`'s construction — the same slot every decorated method already wrote into. A class
- * `build()` calls this once, passing `this`, to feed `protocol.builder`:
+ * never calls this itself: a generation step reads {@link declaredProtocols}, builds one instance
+ * of each registered class, and calls this once per instance to feed `protocol.builder`:
  *
  * ```ts ignore
- * build(): Future<ProtocolBuilder> {
- *   return protocol.builder(() => declaredNodes(this));
- * }
+ * const built = await protocol.builder(() => declaredNodes(new entry.source()));
  * ```
  */
 export function declaredNodes(instance: object): ProtocolNode[] {

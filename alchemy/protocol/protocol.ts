@@ -83,8 +83,9 @@ export class ProtocolContentFactory {
 }
 
 /**
- * Everything one `@CoreProtocol`/`@RuntimeProtocol`/`@ClientProtocol` class declared in its own
- * `build()`, sorted by kind and checked for a name reused across two declarations.
+ * Everything one `protocol.builder` call answered, sorted by kind and checked for a name reused
+ * across two declarations — whether that callback was an array literal or `members.ts`'s own
+ * `declaredNodes(instance)`, `ProtocolBuilder` reads the same `ProtocolNode[]` either way.
  *
  * @remarks
  * A message and an enum share one namespace, the same rule proto3 itself enforces: `messages` and
@@ -150,15 +151,15 @@ export class ProtocolBuilder {
   }
 }
 
-/** The single entry point a `@CoreProtocol`/`@RuntimeProtocol`/`@ClientProtocol` class's own `build()` calls. */
+/** The single entry point a `@Proto(...)` class reaches through, directly or through `members.ts`'s own `declaredNodes`. */
 export class Protocol {
   /**
    * Resolves `build`'s own declarations into a {@link ProtocolBuilder}.
    *
    * @remarks
-   * Answers a `Future` rather than a `ProtocolBuilder` directly so that `build(): Future<ProtocolBuilder>`
-   * on a `ProtocolSource` reads the same as `Init`/`Run`'s own handlers: a method a runner calls
-   * later, even though resolving one of these carries no asynchronous work of its own today.
+   * Answers a `Future` rather than a `ProtocolBuilder` directly so that a generation step reads it
+   * the same as `Init`/`Run`'s own handlers: a method a runner calls later, even though resolving
+   * one of these carries no asynchronous work of its own today.
    */
   builder(
     build: (b: ProtocolContentFactory) => UnmodifiableList<ProtocolNode>,
@@ -170,8 +171,8 @@ export class Protocol {
 }
 
 /**
- * The one `Protocol` every `@CoreProtocol`/`@RuntimeProtocol`/`@ClientProtocol` class's own
- * `build()` calls — every file of it shares this same instance, the way `schema/schema.ts`'s own
- * `dbSchema` is shared across a package's `schema/`.
+ * The one `Protocol` a `@Proto(...)` class's contract is finally assembled through — every file of
+ * it shares this same instance, the way `schema/schema.ts`'s own `dbSchema` is shared across a
+ * package's `schema/`.
  */
 export const protocol: Protocol = new Protocol();

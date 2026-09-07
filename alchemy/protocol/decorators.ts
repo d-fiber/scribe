@@ -36,105 +36,53 @@
 
 import { Registry } from "../wiring/declare/registry.ts";
 import type { UnmodifiableList } from "../primitives/value/list.ts";
-import type { List } from "../primitives/value/list.ts";
-import type { Future } from "../primitives/async/future.ts";
-import type { ProtocolBuilder } from "./protocol.ts";
+import type { ProtoBuilder } from "./builder.ts";
 
-/**
- * Which of the three proto `package` families a `@CoreProtocol`/`@RuntimeProtocol`/`@ClientProtocol`
- * class belongs to — `protocol.md`'s own "Le `package` déclaré dans un `.proto` ne suit pas le
- * chemin du fichier" names the three: `v1` for the socle, shared by everything under `protocol/`;
- * `runtime` for what `foundation` gives a worker; `clients` for what an optional package gives one.
- */
-export type ProtoFamily = "v1" | "runtime" | "clients";
+/** A class built with no arguments, whose instances extend {@link ProtoBuilder} — what `@Proto` requires. */
+type ProtocolConstructor = new () => ProtoBuilder;
 
-/**
- * What a `@CoreProtocol`/`@RuntimeProtocol`/`@ClientProtocol` class must implement — checked by
- * the type of the decorator itself, so a class missing either method is refused where the
- * decorator is written, never later.
- */
-export interface ProtocolSource {
-  /** The `.proto` files this contract needs an `import` for, by path — `"scribe/protocol/common.proto"` for example. Never derived: proto3 requires the statement, so the author names it, the same reason a `Message` field never derives a foreign key's target. */
-  imports(): List<string>;
-
-  /** The messages, enums and services this class declares, resolved through `protocol.builder`. */
-  build(): Future<ProtocolBuilder>;
-}
-
-/** A class built with no arguments, whose instances satisfy `ProtocolSource` — what every family decorator requires. */
-type ProtocolConstructor = new () => ProtocolSource;
-
-/** A `@CoreProtocol`/`@RuntimeProtocol`/`@ClientProtocol` class, exactly as its decorator recorded it. */
+/** A `@Proto(...)` class, exactly as its decorator recorded it. */
 export interface RegisteredProtocol {
   /** The name this class was declared under: its own class name. */
   readonly name: string;
 
-  /** The proto package family this class belongs to. */
-  readonly family: ProtoFamily;
+  /**
+   * The module slug `@Proto` was given, absent for the socle contract.
+   *
+   * @remarks
+   * Carries no proto package or file path of its own: which family a class belongs to —
+   * `scribe.v1`, `scribe.runtime.*` or `scribe.clients.*` — is read from where its own source file
+   * sits in the repository, the same way a package's `deploy/` needs no key in `package.yaml` to
+   * say what it tends to the stack. That reading is a generation step's job, still to be written.
+   */
+  readonly module?: string;
 
-  /** The class itself, not yet instantiated — a generation step builds it and calls `imports()`/`build()` once it is ready to render this class's own output. */
+  /** The class itself, not yet instantiated — a generation step builds it and calls `imports()`/`builder()` once it is ready to render this class's own output. */
   readonly source: ProtocolConstructor;
 }
 
-/** Every `@CoreProtocol`/`@RuntimeProtocol`/`@ClientProtocol` class declared so far, by the class name it took. */
+/** Every `@Proto` class declared so far, by the class name it took. */
 const declared = new Registry<RegisteredProtocol>("protocol");
 
 /**
- * Builds the class decorator behind `CoreProtocol`, `RuntimeProtocol` and `ClientProtocol` — each
- * names its own `family` and calls this once, rather than hand-rolling its own registration, the
- * same split `lifecycle/job.ts`'s own `jobDecorator` gives `Init`/`Run`/`InitDB`/`MigrationDB`/
- * `ProvisioningDB`.
+ * Marks a class as one contract of the host↔worker protocol, named `module` when it belongs to a
+ * package rather than the socle.
  *
  * @remarks
  * Unlike `@Lifecycle`, this never calls `new target()`: nothing here needs an instance yet, only
- * the class itself, since `imports()` and `build()` are called later, by whatever generation step
- * reads `declaredProtocols()` — a class registered here but never read by one declares nothing to
- * anyone, the same as any other value nothing reads.
+ * the class itself, since `imports()` and each decorated method are called later, by whatever
+ * generation step reads {@link declaredProtocols}. A class registered here but never read by one
+ * declares nothing to anyone, the same as any other value nothing reads.
  *
- * Three names rather than one `Protocol(family)` taking a string: a family is a fact the
- * generation step must be able to read from the decorator itself, at a glance, the same reason
- * `@DB` exists next to `@Lifecycle` — see that decorator's own remarks.
+ * @throws {DuplicateDeclarationError} When a class of this name is already declared.
  */
-export function protocolDecorator(family: ProtoFamily) {
+export function Proto(module?: string) {
   return function (target: ProtocolConstructor, _context: ClassDecoratorContext<ProtocolConstructor>): void {
-    declared.declare(target.name, { name: target.name, family, source: target });
+    declared.declare(target.name, { name: target.name, module, source: target });
   };
 }
 
-/**
- * Marks a class as the socle contract, `scribe.v1` — the `.proto` files under `protocol/` itself,
- * shared by every worker regardless of which packages it mounts.
- *
- * @throws {DuplicateDeclarationError} When a class of this name is already declared, under any of
- * the three family decorators.
- */
-export function CoreProtocol() {
-  return protocolDecorator("v1");
-}
-
-/**
- * Marks a class as part of what `foundation` gives a worker, `scribe.runtime.*` — the primitives
- * every project mounts, since `foundation` cannot be left out.
- *
- * @throws {DuplicateDeclarationError} When a class of this name is already declared, under any of
- * the three family decorators.
- */
-export function RuntimeProtocol() {
-  return protocolDecorator("runtime");
-}
-
-/**
- * Marks a class as part of what an optional package gives a worker, `scribe.clients.*` — `auth`,
- * `storage`, `realtime` and `search` today.
- *
- * @throws {DuplicateDeclarationError} When a class of this name is already declared, under any of
- * the three family decorators.
- */
-export function ClientProtocol() {
-  return protocolDecorator("clients");
-}
-
-/** Every `@CoreProtocol`/`@RuntimeProtocol`/`@ClientProtocol` class declared so far, in declaration order. */
+/** Every `@Proto` class declared so far, in declaration order. */
 export function declaredProtocols(): UnmodifiableList<RegisteredProtocol> {
   return declared.all();
 }

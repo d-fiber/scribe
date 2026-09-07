@@ -36,69 +36,46 @@
 
 import "@scribe/scholium/runner.ts";
 import { allOf, equals, expect, hasLength, isA, Scribe, throwsA, withMessage } from "@scribe/alchemy/test";
-import type { Future, List, ProtocolBuilder, ProtocolSource } from "@scribe/alchemy";
-import {
-  ClientProtocol,
-  CoreProtocol,
-  declaredProtocols,
-  DuplicateDeclarationError,
-  forgetProtocols,
-  protocol,
-  RuntimeProtocol,
-} from "@scribe/alchemy";
+import type { List } from "@scribe/alchemy";
+import { declaredProtocols, DuplicateDeclarationError, forgetProtocols, Proto, ProtoBuilder } from "@scribe/alchemy";
 
-abstract class StubSource implements ProtocolSource {
+abstract class StubSource extends ProtoBuilder {
   imports(): List<string> {
     return [];
   }
-
-  build(): Future<ProtocolBuilder> {
-    return protocol.builder(() => []);
-  }
 }
 
-Scribe.test("@CoreProtocol() registers the class under its own name, with the v1 family", () => {
+Scribe.test("@Proto() registers the class under its own name, with no module", () => {
   forgetProtocols();
 
-  @CoreProtocol()
+  @Proto()
   class DecoratorsCoreOne extends StubSource {}
   void DecoratorsCoreOne;
 
   const entry = declaredProtocols().find((registered) => registered.name === "DecoratorsCoreOne");
-  expect(entry?.family, equals("v1"), "the class was not filed under the socle family");
+  expect(entry?.module, equals(undefined), "a bare @Proto() should carry no module");
   expect(entry?.source, equals(DecoratorsCoreOne), "the registry lost the class itself");
 });
 
-Scribe.test("@RuntimeProtocol() registers the class under the runtime family", () => {
+Scribe.test("@Proto(module) carries the module it was given", () => {
   forgetProtocols();
 
-  @RuntimeProtocol()
-  class DecoratorsRuntimeOne extends StubSource {}
-  void DecoratorsRuntimeOne;
+  @Proto("database")
+  class DecoratorsModuleOne extends StubSource {}
+  void DecoratorsModuleOne;
 
-  const entry = declaredProtocols().find((registered) => registered.name === "DecoratorsRuntimeOne");
-  expect(entry?.family, equals("runtime"), "the class was not filed under the runtime family");
-});
-
-Scribe.test("@ClientProtocol() registers the class under the clients family", () => {
-  forgetProtocols();
-
-  @ClientProtocol()
-  class DecoratorsClientOne extends StubSource {}
-  void DecoratorsClientOne;
-
-  const entry = declaredProtocols().find((registered) => registered.name === "DecoratorsClientOne");
-  expect(entry?.family, equals("clients"), "the class was not filed under the clients family");
+  const entry = declaredProtocols().find((registered) => registered.name === "DecoratorsModuleOne");
+  expect(entry?.module, equals("database"));
 });
 
 Scribe.test("declaredProtocols() answers everything declared, in declaration order", () => {
   forgetProtocols();
 
-  @CoreProtocol()
+  @Proto()
   class DecoratorsOrderFirst extends StubSource {}
   void DecoratorsOrderFirst;
 
-  @RuntimeProtocol()
+  @Proto("database")
   class DecoratorsOrderSecond extends StubSource {}
   void DecoratorsOrderSecond;
 
@@ -109,16 +86,16 @@ Scribe.test("declaredProtocols() answers everything declared, in declaration ord
   );
 });
 
-Scribe.test("a name declared twice under the same family is refused", () => {
+Scribe.test("a name declared twice is refused", () => {
   forgetProtocols();
 
-  @CoreProtocol()
+  @Proto()
   class DecoratorsDuplicateSame extends StubSource {}
   void DecoratorsDuplicateSame;
 
   expect(
     () => {
-      @CoreProtocol()
+      @Proto("database")
       class DecoratorsDuplicateSame extends StubSource {}
       void DecoratorsDuplicateSame;
     },
@@ -126,30 +103,10 @@ Scribe.test("a name declared twice under the same family is refused", () => {
   );
 });
 
-Scribe.test("a name declared under one family collides with the same name under another family", () => {
-  forgetProtocols();
-
-  @CoreProtocol()
-  class DecoratorsDuplicateAcrossFamilies extends StubSource {}
-  void DecoratorsDuplicateAcrossFamilies;
-
-  expect(
-    () => {
-      @RuntimeProtocol()
-      class DecoratorsDuplicateAcrossFamilies extends StubSource {}
-      void DecoratorsDuplicateAcrossFamilies;
-    },
-    throwsA(allOf(
-      isA(DuplicateDeclarationError),
-      withMessage('protocol "DecoratorsDuplicateAcrossFamilies" is declared twice'),
-    )),
-  );
-});
-
 Scribe.test("forgetProtocols() empties the registry", () => {
   forgetProtocols();
 
-  @CoreProtocol()
+  @Proto()
   class DecoratorsForgotten extends StubSource {}
   void DecoratorsForgotten;
 
@@ -157,7 +114,7 @@ Scribe.test("forgetProtocols() empties the registry", () => {
   forgetProtocols();
   expect(declaredProtocols(), hasLength(0), "forgetting left a declaration behind");
 
-  @CoreProtocol()
+  @Proto()
   class DecoratorsForgottenAgain extends StubSource {}
   void DecoratorsForgottenAgain;
 

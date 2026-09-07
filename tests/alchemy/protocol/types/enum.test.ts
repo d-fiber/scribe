@@ -36,7 +36,12 @@
 
 import "@scribe/scholium/runner.ts";
 import { allOf, equals, expect, isA, Scribe, throwsA, withMessage } from "@scribe/alchemy/test";
-import { ProtoEnum } from "@scribe/alchemy";
+import type { DeclaredProtoEnum, EnumFactory } from "@scribe/alchemy";
+import { ProtocolContentFactory } from "@scribe/alchemy";
+
+function ProtoEnum(build: (e: EnumFactory) => DeclaredProtoEnum): DeclaredProtoEnum {
+  return new ProtocolContentFactory().enum(build);
+}
 
 Scribe.test("values() resolves in order, first numbered 0", () => {
   const declared = ProtoEnum((e) =>
