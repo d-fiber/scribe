@@ -38,7 +38,8 @@ import type { List } from "../../../../value/list.ts";
 import { applyBodySchema } from "../body.ts";
 import type { BodySchema, PrimitiveType } from "../../field_types.ts";
 import type { NestedMarker } from "../../markers.ts";
-import type { FieldResolver } from "./resolver.ts";
+import { isNestedMarker } from "../../markers.ts";
+import type { FieldResolver } from "./dispatch.ts";
 import { PrimitiveFieldResolver } from "./primitive.ts";
 
 /** Everything a list may be declared to hold, one item at a time. */
@@ -47,13 +48,6 @@ export type ListItemType =
   | typeof File
   | NestedMarker<BodySchema>
   | BodySchema;
-
-/** Whether `type` is a shape wrapped in a marker rather than one written bare. */
-function _isNestedMarker(
-  type: ListItemType,
-): type is NestedMarker<BodySchema> {
-  return typeof type === "object" && type !== null && "_nested" in type;
-}
 
 /**
  * Reads a field holding several values, each of them read the way one would be.
@@ -90,7 +84,7 @@ export class ListFieldResolver implements FieldResolver {
     if (this.itemType === File) {
       return raw.filter((item) => item instanceof File);
     }
-    if (_isNestedMarker(this.itemType)) {
+    if (isNestedMarker(this.itemType)) {
       return this._resolveObjectItems(raw, this.itemType.schema);
     }
     if (typeof this.itemType === "function") {

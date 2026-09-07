@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { PrimitiveType } from "../../field_types.ts";
-import type { FieldResolver } from "./resolver.ts";
+import type { FieldResolver } from "./dispatch.ts";
 
 /**
  * Reads a field holding a single ordinary value.

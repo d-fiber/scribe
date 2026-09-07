@@ -70,5 +70,5 @@ export type { FieldType, ReadRawValue } from "./apply/walk.ts";
 export { applyBodySchema } from "./apply/body.ts";
 export { applyFormSchema } from "./apply/form.ts";
 
-export { resolverFor } from "./apply/resolvers/resolver_for.ts";
-export type { FieldResolver } from "./apply/resolvers/resolver.ts";
+export { resolverFor } from "./apply/resolvers/dispatch.ts";
+export type { FieldResolver } from "./apply/resolvers/dispatch.ts";

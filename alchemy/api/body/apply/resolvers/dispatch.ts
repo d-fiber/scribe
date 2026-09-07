@@ -36,10 +36,29 @@
 
 import type { BodyFieldType, BodySchema, FormFieldType, PrimitiveType } from "../../field_types.ts";
 import { isListMarker, isNestedMarker } from "../../markers.ts";
-import type { FieldResolver } from "./resolver.ts";
 import { ListFieldResolver, type ListItemType } from "./list.ts";
 import { NestedFieldResolver } from "./nested.ts";
 import { PrimitiveFieldResolver } from "./primitive.ts";
+
+/**
+ * What turns one raw field into the value its declaration asked for.
+ *
+ * @remarks
+ * There is one of these per shape a field may take, and {@link resolverFor} decides which. None of
+ * them refuses: a value that does not fit answers null, and it is the reader above that decides
+ * whether a null in that position is a body to refuse or a field that was simply left out.
+ */
+export interface FieldResolver {
+  /**
+   * What `raw` holds once read as the declaration asked.
+   *
+   * @param raw - The value as it arrived, which may be anything at all.
+   * @param isForm - Whether it came from a form, where everything arrives as text and a number has
+   * to be read out of it, rather than from JSON, where it arrived already typed.
+   * @returns The value, or null when `raw` does not hold what was asked for.
+   */
+  resolve(raw: unknown, isForm: boolean): unknown;
+}
 
 /**
  * What reads a field declared as `type`.

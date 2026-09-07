@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { BodyFieldType, FormFieldType } from "../field_types.ts";
-import { resolverFor } from "./resolvers/resolver_for.ts";
+import { resolverFor } from "./resolvers/dispatch.ts";
 import { isRequiredEntry, unwrapFieldType } from "../markers.ts";
 
 /** Everything a field may be declared as, whichever of the two shapes it belongs to. */

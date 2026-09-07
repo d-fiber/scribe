@@ -36,7 +36,7 @@
 
 import { applyBodySchema } from "../body.ts";
 import type { BodySchema } from "../../field_types.ts";
-import type { FieldResolver } from "./resolver.ts";
+import type { FieldResolver } from "./dispatch.ts";
 
 /** Whether `value` is an object written with fields, rather than a list or nothing at all. */
 function _isPlainObject(value: unknown): value is Record<string, unknown> {
