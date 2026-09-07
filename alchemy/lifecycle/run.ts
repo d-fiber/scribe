@@ -34,60 +34,17 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "../async/future.ts";
-import { DuplicateDeclarationError } from "../declare/registry.ts";
-import type { UnmodifiableList } from "../value/list.ts";
-
-/** A declared job, and the handler that runs it on every launch. */
-export interface RegisteredRun {
-  /** The name this job was declared under: the class `@Run` was written on. */
-  readonly name: string;
-
-  /** The body to run once the rest of the stack has answered healthy. */
-  readonly handler: RunHandler;
-}
-
-/**
- * Every `@Run` declared so far, indexed by name.
- *
- * The name has to be unique for the same reason a `Cron` name does: it is what tells two
- * declarations apart, and a collision would mean one of them is silently never run.
- */
-export class RunRegistry {
-  readonly #jobs = new Map<string, RegisteredRun>();
-
-  /** Registers a job, and refuses a name already taken. */
-  add(entry: RegisteredRun): void {
-    if (this.#jobs.has(entry.name)) {
-      throw new DuplicateDeclarationError(
-        `@Run() on "${entry.name}": this class already declared one. A class carries at most one ` +
-          `@Run method.`,
-      );
-    }
-    this.#jobs.set(entry.name, entry);
-  }
-
-  /** The jobs declared so far, in declaration order. */
-  list(): UnmodifiableList<RegisteredRun> {
-    return [...this.#jobs.values()];
-  }
-
-  /** One line naming how many jobs are declared, printed before the runner plays them. */
-  report(): string {
-    const jobs = this.list();
-    if (jobs.length === 0) {
-      return "[run] no job declared";
-    }
-
-    return `[run] ${jobs.length} job(s) declared: ${jobs.map((entry) => entry.name).join(", ")}`;
-  }
-}
-
-/** The registry every `@Run` declaration writes into. */
-export const runRegistry: RunRegistry = new RunRegistry();
+import { jobDecorator, JobRegistry } from "../declare/job.ts";
+import type { JobHandler, RegisteredJob } from "../declare/job.ts";
 
 /** The body of a job that runs on every launch. Throwing stops the runner. */
-export type RunHandler = () => Future<void>;
+export type RunHandler = JobHandler;
+
+/** A declared job, and the handler that runs it on every launch. */
+export type RegisteredRun = RegisteredJob;
+
+/** Every `@Run` declared so far, indexed by name: the class it was written on. */
+export const runRegistry: JobRegistry = new JobRegistry("run");
 
 /**
  * Marks a method as a job that runs once **every time the stack launches**, after everything
@@ -122,19 +79,5 @@ export type RunHandler = () => Future<void>;
  * @throws {Error} When applied to anything but an instance method.
  */
 export function Run() {
-  return function <This extends object, Fn extends RunHandler>(
-    target: Fn,
-    context: ClassMethodDecoratorContext<This, Fn>,
-  ): void {
-    if (context.kind !== "method" || context.static) {
-      throw new Error(
-        `@Run() on "${String(context.name)}": only an instance method can be marked.`,
-      );
-    }
-
-    context.addInitializer(function (this: This): void {
-      const name = (this.constructor as { name: string }).name;
-      runRegistry.add({ name, handler: () => target.call(this) });
-    });
-  };
+  return jobDecorator(runRegistry, "Run");
 }

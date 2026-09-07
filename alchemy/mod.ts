@@ -134,10 +134,12 @@ export { Version, VersionError } from "./package/version.ts";
 
 export { DuplicateDeclarationError, Registry } from "./declare/registry.ts";
 
-export { Init, InitRegistry, initRegistry } from "./lifecycle/init.ts";
+export { jobDecorator, JobRegistry } from "./declare/job.ts";
+export type { JobHandler, RegisteredJob } from "./declare/job.ts";
+export { Init, initRegistry } from "./lifecycle/init.ts";
 export type { InitHandler, RegisteredInit } from "./lifecycle/init.ts";
 export { Lifecycle } from "./lifecycle/lifecycle.ts";
-export { Run, RunRegistry, runRegistry } from "./lifecycle/run.ts";
+export { Run, runRegistry } from "./lifecycle/run.ts";
 export type { RegisteredRun, RunHandler } from "./lifecycle/run.ts";
 
 export { cron, Crons, forgetCrons, installCrons } from "./port/cron.ts";
@@ -384,11 +386,11 @@ export type {
 } from "./iac/build/deploy.ts";
 
 export { DB } from "./iac/decorators/db/db.ts";
-export { InitDB, InitDbRegistry, initDbRegistry } from "./iac/decorators/db/init.ts";
+export { InitDB, initDbRegistry } from "./iac/decorators/db/init.ts";
 export type { InitDbHandler, RegisteredInitDb } from "./iac/decorators/db/init.ts";
-export { MigrationDB, MigrationDbRegistry, migrationDbRegistry } from "./iac/decorators/db/migration.ts";
+export { MigrationDB, migrationDbRegistry } from "./iac/decorators/db/migration.ts";
 export type { MigrationDbHandler, RegisteredMigrationDb } from "./iac/decorators/db/migration.ts";
-export { ProvisioningDB, ProvisioningDbRegistry, provisioningDbRegistry } from "./iac/decorators/db/provisioning.ts";
+export { ProvisioningDB, provisioningDbRegistry } from "./iac/decorators/db/provisioning.ts";
 export type { ProvisioningDbHandler, RegisteredProvisioningDb } from "./iac/decorators/db/provisioning.ts";
 
 export { ListOf, Nested, Required } from "./api/body/mod.ts";

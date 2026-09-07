@@ -34,60 +34,17 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { DuplicateDeclarationError } from "../../../declare/registry.ts";
-import type { Future } from "../../../async/future.ts";
-import type { UnmodifiableList } from "../../../value/list.ts";
-
-/** A declared one-time database job, and the handler that runs it. */
-export interface RegisteredInitDb {
-  /** The name this job was declared under, and the key a runner tracks it as having run under. */
-  readonly name: string;
-
-  /** The body to run the one time this job has never run before. */
-  readonly handler: InitDbHandler;
-}
-
-/**
- * Every `InitDB` declared so far, indexed by name.
- *
- * The name has to be unique because it is the key the tracking table stores: two declarations
- * sharing one would be indistinguishable once either had run.
- */
-export class InitDbRegistry {
-  readonly #jobs = new Map<string, RegisteredInitDb>();
-
-  /** Registers a job, and refuses a name already taken. */
-  add(entry: RegisteredInitDb): void {
-    if (this.#jobs.has(entry.name)) {
-      throw new DuplicateDeclarationError(
-        `new InitDB("${entry.name}"): this name is already declared. An init-db name is the key ` +
-          `it is tracked by, it must be unique.`,
-      );
-    }
-    this.#jobs.set(entry.name, entry);
-  }
-
-  /** The jobs declared so far, in declaration order. */
-  list(): UnmodifiableList<RegisteredInitDb> {
-    return [...this.#jobs.values()];
-  }
-
-  /** One line naming how many jobs are declared, printed before a runner plays them. */
-  report(): string {
-    const jobs = this.list();
-    if (jobs.length === 0) {
-      return "[init-db] no job declared";
-    }
-
-    return `[init-db] ${jobs.length} job(s) declared: ${jobs.map((entry) => entry.name).join(", ")}`;
-  }
-}
-
-/** The registry every `InitDB` declaration writes into. */
-export const initDbRegistry: InitDbRegistry = new InitDbRegistry();
+import { jobDecorator, JobRegistry } from "../../../declare/job.ts";
+import type { JobHandler, RegisteredJob } from "../../../declare/job.ts";
 
 /** The body of a one-time database job. Throwing stops a runner before it tracks this job as done. */
-export type InitDbHandler = () => Future<void>;
+export type InitDbHandler = JobHandler;
+
+/** A declared one-time database job, and the handler that runs it. */
+export type RegisteredInitDb = RegisteredJob;
+
+/** Every `InitDB` declared so far, indexed by name — the key a runner tracks it as having run under. */
+export const initDbRegistry: JobRegistry = new JobRegistry("init-db");
 
 /**
  * Marks a method as a job that runs once, ever, before any of a package's own schema exists —
@@ -118,17 +75,5 @@ export type InitDbHandler = () => Future<void>;
  * @throws {Error} When applied to anything but an instance method.
  */
 export function InitDB() {
-  return function <This extends object, Fn extends InitDbHandler>(
-    target: Fn,
-    context: ClassMethodDecoratorContext<This, Fn>,
-  ): void {
-    if (context.kind !== "method" || context.static) {
-      throw new Error(`@InitDB() on "${String(context.name)}": only an instance method can be marked.`);
-    }
-
-    context.addInitializer(function (this: This): void {
-      const name = (this.constructor as { name: string }).name;
-      initDbRegistry.add({ name, handler: () => target.call(this) });
-    });
-  };
+  return jobDecorator(initDbRegistry, "InitDB");
 }

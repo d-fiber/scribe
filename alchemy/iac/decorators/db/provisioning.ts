@@ -34,60 +34,17 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { DuplicateDeclarationError } from "../../../declare/registry.ts";
-import type { Future } from "../../../async/future.ts";
-import type { UnmodifiableList } from "../../../value/list.ts";
-
-/** A declared one-time provisioning job, and the handler that runs it. */
-export interface RegisteredProvisioningDb {
-  /** The name this job was declared under, and the key a runner tracks it as having run under. */
-  readonly name: string;
-
-  /** The body to run the one time this job has never run before. */
-  readonly handler: ProvisioningDbHandler;
-}
-
-/**
- * Every `ProvisioningDB` declared so far, indexed by name.
- *
- * The name has to be unique because it is the key the tracking table stores: two declarations
- * sharing one would be indistinguishable once either had run.
- */
-export class ProvisioningDbRegistry {
-  readonly #jobs = new Map<string, RegisteredProvisioningDb>();
-
-  /** Registers a job, and refuses a name already taken. */
-  add(entry: RegisteredProvisioningDb): void {
-    if (this.#jobs.has(entry.name)) {
-      throw new DuplicateDeclarationError(
-        `new ProvisioningDB("${entry.name}"): this name is already declared. A provisioning-db ` +
-          `name is the key it is tracked by, it must be unique.`,
-      );
-    }
-    this.#jobs.set(entry.name, entry);
-  }
-
-  /** The jobs declared so far, in declaration order. */
-  list(): UnmodifiableList<RegisteredProvisioningDb> {
-    return [...this.#jobs.values()];
-  }
-
-  /** One line naming how many jobs are declared, printed before a runner plays them. */
-  report(): string {
-    const jobs = this.list();
-    if (jobs.length === 0) {
-      return "[provisioning-db] no job declared";
-    }
-
-    return `[provisioning-db] ${jobs.length} job(s) declared: ${jobs.map((entry) => entry.name).join(", ")}`;
-  }
-}
-
-/** The registry every `ProvisioningDB` declaration writes into. */
-export const provisioningDbRegistry: ProvisioningDbRegistry = new ProvisioningDbRegistry();
+import { jobDecorator, JobRegistry } from "../../../declare/job.ts";
+import type { JobHandler, RegisteredJob } from "../../../declare/job.ts";
 
 /** The body of a one-time provisioning job. Throwing stops a runner before it tracks this job as done. */
-export type ProvisioningDbHandler = () => Future<void>;
+export type ProvisioningDbHandler = JobHandler;
+
+/** A declared one-time provisioning job, and the handler that runs it. */
+export type RegisteredProvisioningDb = RegisteredJob;
+
+/** Every `ProvisioningDB` declared so far, indexed by name — the key a runner tracks it as having run under. */
+export const provisioningDbRegistry: JobRegistry = new JobRegistry("provisioning-db");
 
 /**
  * Marks a method as a job that runs once, ever, before `@InitDB` and before a package's own
@@ -117,17 +74,5 @@ export type ProvisioningDbHandler = () => Future<void>;
  * @throws {Error} When applied to anything but an instance method.
  */
 export function ProvisioningDB() {
-  return function <This extends object, Fn extends ProvisioningDbHandler>(
-    target: Fn,
-    context: ClassMethodDecoratorContext<This, Fn>,
-  ): void {
-    if (context.kind !== "method" || context.static) {
-      throw new Error(`@ProvisioningDB() on "${String(context.name)}": only an instance method can be marked.`);
-    }
-
-    context.addInitializer(function (this: This): void {
-      const name = (this.constructor as { name: string }).name;
-      provisioningDbRegistry.add({ name, handler: () => target.call(this) });
-    });
-  };
+  return jobDecorator(provisioningDbRegistry, "ProvisioningDB");
 }

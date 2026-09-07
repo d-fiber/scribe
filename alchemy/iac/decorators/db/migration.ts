@@ -34,60 +34,17 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { DuplicateDeclarationError } from "../../../declare/registry.ts";
-import type { Future } from "../../../async/future.ts";
-import type { UnmodifiableList } from "../../../value/list.ts";
-
-/** A declared database job, and the handler that runs it on every start after the first. */
-export interface RegisteredMigrationDb {
-  /** The name this job was declared under: the class `@MigrationDB` was written on. */
-  readonly name: string;
-
-  /** The body to run at every start after the first. */
-  readonly handler: MigrationDbHandler;
-}
-
-/**
- * Every `MigrationDB` declared so far, indexed by name.
- *
- * The name has to be unique for the same reason a `Cron` name does: it is what tells two
- * declarations apart, and a collision would mean one of them is silently never run.
- */
-export class MigrationDbRegistry {
-  readonly #jobs = new Map<string, RegisteredMigrationDb>();
-
-  /** Registers a job, and refuses a name already taken. */
-  add(entry: RegisteredMigrationDb): void {
-    if (this.#jobs.has(entry.name)) {
-      throw new DuplicateDeclarationError(
-        `@MigrationDB() on "${entry.name}": this class already declared one. A class carries at ` +
-          `most one @MigrationDB method.`,
-      );
-    }
-    this.#jobs.set(entry.name, entry);
-  }
-
-  /** The jobs declared so far, in declaration order. */
-  list(): UnmodifiableList<RegisteredMigrationDb> {
-    return [...this.#jobs.values()];
-  }
-
-  /** One line naming how many jobs are declared, printed before a runner plays them. */
-  report(): string {
-    const jobs = this.list();
-    if (jobs.length === 0) {
-      return "[migration-db] no job declared";
-    }
-
-    return `[migration-db] ${jobs.length} job(s) declared: ${jobs.map((entry) => entry.name).join(", ")}`;
-  }
-}
-
-/** The registry every `MigrationDB` declaration writes into. */
-export const migrationDbRegistry: MigrationDbRegistry = new MigrationDbRegistry();
+import { jobDecorator, JobRegistry } from "../../../declare/job.ts";
+import type { JobHandler, RegisteredJob } from "../../../declare/job.ts";
 
 /** The body of a job replayed at every start after the first. Throwing stops a runner. */
-export type MigrationDbHandler = () => Future<void>;
+export type MigrationDbHandler = JobHandler;
+
+/** A declared database job, and the handler that runs it on every start after the first. */
+export type RegisteredMigrationDb = RegisteredJob;
+
+/** Every `MigrationDB` declared so far, indexed by name: the class it was written on. */
+export const migrationDbRegistry: JobRegistry = new JobRegistry("migration-db");
 
 /**
  * Marks a method as a job replayed at **every start after the first** — the code counterpart of
@@ -120,17 +77,5 @@ export type MigrationDbHandler = () => Future<void>;
  * @throws {Error} When applied to anything but an instance method.
  */
 export function MigrationDB() {
-  return function <This extends object, Fn extends MigrationDbHandler>(
-    target: Fn,
-    context: ClassMethodDecoratorContext<This, Fn>,
-  ): void {
-    if (context.kind !== "method" || context.static) {
-      throw new Error(`@MigrationDB() on "${String(context.name)}": only an instance method can be marked.`);
-    }
-
-    context.addInitializer(function (this: This): void {
-      const name = (this.constructor as { name: string }).name;
-      migrationDbRegistry.add({ name, handler: () => target.call(this) });
-    });
-  };
+  return jobDecorator(migrationDbRegistry, "MigrationDB");
 }

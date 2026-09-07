@@ -34,60 +34,17 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "../async/future.ts";
-import { DuplicateDeclarationError } from "../declare/registry.ts";
-import type { UnmodifiableList } from "../value/list.ts";
-
-/** A declared one-time job, and the handler that runs it. */
-export interface RegisteredInit {
-  /** The name this job was declared under, and the key a runner tracks it as having run under. */
-  readonly name: string;
-
-  /** The body to run the one time this job has never run before. */
-  readonly handler: InitHandler;
-}
-
-/**
- * Every `Init` declared so far, indexed by name.
- *
- * The name has to be unique because it is the key the tracking table stores: two declarations
- * sharing one would be indistinguishable once either had run.
- */
-export class InitRegistry {
-  readonly #jobs = new Map<string, RegisteredInit>();
-
-  /** Registers a job, and refuses a name already taken. */
-  add(entry: RegisteredInit): void {
-    if (this.#jobs.has(entry.name)) {
-      throw new DuplicateDeclarationError(
-        `new Init("${entry.name}"): this name is already declared. An init name is the key it ` +
-          `is tracked by, it must be unique.`,
-      );
-    }
-    this.#jobs.set(entry.name, entry);
-  }
-
-  /** The jobs declared so far, in declaration order. */
-  list(): UnmodifiableList<RegisteredInit> {
-    return [...this.#jobs.values()];
-  }
-
-  /** One line naming how many jobs are declared, printed before the runner plays them. */
-  report(): string {
-    const jobs = this.list();
-    if (jobs.length === 0) {
-      return "[init] no job declared";
-    }
-
-    return `[init] ${jobs.length} job(s) declared: ${jobs.map((entry) => entry.name).join(", ")}`;
-  }
-}
-
-/** The registry every `Init` declaration writes into. */
-export const initRegistry: InitRegistry = new InitRegistry();
+import { jobDecorator, JobRegistry } from "../declare/job.ts";
+import type { JobHandler, RegisteredJob } from "../declare/job.ts";
 
 /** The body of a one-time job. Throwing stops the runner before it tracks this job as done. */
-export type InitHandler = () => Future<void>;
+export type InitHandler = JobHandler;
+
+/** A declared one-time job, and the handler that runs it. */
+export type RegisteredInit = RegisteredJob;
+
+/** Every `Init` declared so far, indexed by name — the key a runner tracks it as having run under. */
+export const initRegistry: JobRegistry = new JobRegistry("init");
 
 /**
  * Marks a method as a job that runs once, ever, the first time a fresh stack boots — the
@@ -117,19 +74,5 @@ export type InitHandler = () => Future<void>;
  * @throws {Error} When applied to anything but an instance method.
  */
 export function Init() {
-  return function <This extends object, Fn extends InitHandler>(
-    target: Fn,
-    context: ClassMethodDecoratorContext<This, Fn>,
-  ): void {
-    if (context.kind !== "method" || context.static) {
-      throw new Error(
-        `@Init() on "${String(context.name)}": only an instance method can be marked.`,
-      );
-    }
-
-    context.addInitializer(function (this: This): void {
-      const name = (this.constructor as { name: string }).name;
-      initRegistry.add({ name, handler: () => target.call(this) });
-    });
-  };
+  return jobDecorator(initRegistry, "Init");
 }
