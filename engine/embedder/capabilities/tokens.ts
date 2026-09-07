@@ -125,15 +125,16 @@ const SWEEP_EVERY_MS = 1_000;
 
 let sweptAt = 0;
 
-/**
- * Drops every grant that has run out, but not more than once per [SWEEP_EVERY_MS].
- *
- * @param now - The moment the caller is working against.
- */
+/** Whether `grant` has passed the moment it stops being redeemable, as of `now`. */
 function expired(grant: StoredGrant, now: number): boolean {
   return grant.expiresAt !== null && grant.expiresAt <= now;
 }
 
+/**
+ * Drops every grant that has run out, but not more than once per {@link SWEEP_EVERY_MS}.
+ *
+ * @param now - The moment the caller is working against.
+ */
 function sweep(now: number): void {
   if (now - sweptAt < SWEEP_EVERY_MS) return;
   sweptAt = now;

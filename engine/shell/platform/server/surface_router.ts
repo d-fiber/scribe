@@ -56,10 +56,10 @@ const CODEX_PREFIX = "/_codex";
 /**
  * Sends a request to the node that claims it.
  *
- * There is no surface left to choose between: a request names its node in its
- * first segment, and the host holds nothing at the root beyond the two paths
- * above. What a node serves, who may call it and what wraps it are decided by
- * the project and travel in the manifest.
+ * @remarks
+ * There is no surface left to choose between: a request names its node in its first segment, and
+ * the host holds nothing at the root beyond the two paths above. What a node serves, who may call
+ * it and what wraps it are decided by the project and travel in the manifest.
  */
 export class SurfaceRouter {
   readonly #queue: Hono;

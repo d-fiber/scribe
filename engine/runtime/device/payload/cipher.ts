@@ -35,6 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "@scribe/alchemy";
+import { fromBase64 } from "@scribe/runtime/primitives/crypto/base64.ts";
 import { DEVICE_PAYLOAD_MAX_AGE_MS, DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS } from "./freshness.ts";
 import { PlaintextCache } from "./plaintext_cache.ts";
 import { devicePayloadPrivateKey } from "./private_key.ts";
@@ -118,7 +119,7 @@ async function decipher(encrypted: string): Future<string | null> {
 }
 
 function openSealedBox(encrypted: string): SealedBox | null {
-  const bytes = base64Decode(encrypted);
+  const bytes = fromBase64(encrypted);
   if (bytes === null) return null;
   if (bytes.length < EPHEMERAL_KEY_BYTES + NONCE_BYTES + GCM_TAG_BYTES) {
     return null;
@@ -132,17 +133,6 @@ function openSealedBox(encrypted: string): SealedBox | null {
     nonce: bytes.slice(nonceAt, cipherAt),
     cipherWithTag: bytes.slice(cipherAt),
   };
-}
-
-function base64Decode(encoded: string): Uint8Array<ArrayBuffer> | null {
-  try {
-    const binary = atob(encoded);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return bytes;
-  } catch {
-    return null;
-  }
 }
 
 async function deriveAesKey(

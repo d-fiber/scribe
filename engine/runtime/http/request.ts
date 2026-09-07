@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { json } from "@scribe/alchemy";
-import { jwtPayloadUnverified } from "@scribe/runtime/support/crypto/jwt_payload.ts";
+import { jwtPayloadUnverified } from "@scribe/runtime/primitives/crypto/jwt_payload.ts";
 import { resolveClientIp } from "@scribe/runtime/http/ip/mod.ts";
 import { MAX_BODY_BYTES } from "@scribe/runtime/http/limits.ts";
 import { pathnameOf, searchOf } from "@scribe/runtime/http/pathname.ts";
@@ -56,6 +56,7 @@ class RequestReader {
     return this.headers().get(name);
   }
 
+  /** The bearer token carried by the `authorization` header, or null when there is none. */
   token(): string | null {
     const auth = this.authorization();
     if (!auth?.startsWith("Bearer ")) return null;
@@ -83,6 +84,7 @@ class RequestReader {
     return pathnameOf(this.req.url);
   }
 
+  /** This request's query string, parsed once and memoised on the request's own scope. */
   searchParams(): URLSearchParams {
     const cached = RequestScope.cache.get<URLSearchParams>(SEARCH_PARAMS_KEY);
     if (cached !== undefined) return cached;
@@ -100,11 +102,20 @@ class RequestReader {
     return this.req.method;
   }
 
+  /** When the proxy in front of this request first saw it, from `x-request-start`, or undefined. */
   startedAt(): number | undefined {
     const val = this.headers().get("x-request-start");
     return val ? Number(val) : undefined;
   }
 
+  /**
+   * The session identifier carried by this request's bearer token, or null when there is none.
+   *
+   * @remarks
+   * Reads the token's payload without verifying its signature: a forged `session_id` is harmless
+   * here, since it can only ever name a session that does not exist, and verification is what an
+   * access check does with the token separately.
+   */
   sessionId(): string | null {
     const token = this.token();
     if (!token) return null;
@@ -113,20 +124,24 @@ class RequestReader {
     return typeof sessionId === "string" && sessionId ? sessionId : null;
   }
 
+  /** This request's client address, resolved through {@link resolveClientIp}. */
   ip(): string {
     return resolveClientIp(this.headers(), RequestScope.peer());
   }
 
+  /** Whether the declared `content-length` exceeds {@link MAX_BODY_BYTES}. */
   isBodyTooLarge(): boolean {
     return this.contentLength() > MAX_BODY_BYTES;
   }
 
+  /** This request's body, or null when it is empty or larger than {@link MAX_BODY_BYTES}. */
   bytes(): Uint8Array | null {
     const bytes = RequestScope.getBodyBytes();
     if (!bytes || bytes.byteLength === 0) return null;
     return bytes.byteLength > MAX_BODY_BYTES ? null : bytes;
   }
 
+  /** This request's body decoded as JSON, or null when there is no body or it fails to parse. */
   raw(): unknown | null {
     const bytes = this.bytes();
     if (!bytes) return null;
@@ -138,4 +153,5 @@ class RequestReader {
   }
 }
 
+/** The request in scope, read field by field rather than through the raw `Request`. */
 export const request = new RequestReader();

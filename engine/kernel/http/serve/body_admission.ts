@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { MAX_BODY_BYTES, UNDECLARED_BODY_BYTES } from "@scribe/runtime/http/limits.ts";
-import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
+import { httpSettings } from "@scribe/runtime/settings/http.ts";
 
 let inflightBytes = 0;
 
@@ -87,10 +87,12 @@ export function admitBody(req: Request): BodyAdmission | null {
   return { reservedBytes: size, maxBodyBytes: size, declaredBytes: declared };
 }
 
+/** Returns `admission`'s reserved bytes to the process budget, called once its request is answered. */
 export function releaseBody(admission: BodyAdmission): void {
   inflightBytes -= admission.reservedBytes;
 }
 
+/** How many bytes of the process-wide budget are currently reserved by bodies in flight. */
 export function inflightBodyBytes(): number {
   return inflightBytes;
 }

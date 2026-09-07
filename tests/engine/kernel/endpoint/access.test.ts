@@ -34,11 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { Duration } from "@scribe/alchemy";
 import type { Caller } from "@scribe/alchemy/route";
-import { ApiContext, ApiEndpoint } from "@scribe/kernel/endpoint/api.ts";
+import { ApiContext, ApiEndpoint } from "@scribe/kernel/endpoint/api_endpoint.ts";
 import { callEndpoint } from "@scribe/testing/kernel/endpoint.ts";
 import { installRateLimiterMock } from "@scribe/foundation/testing";
 import { assertEquals } from "@std/assert";

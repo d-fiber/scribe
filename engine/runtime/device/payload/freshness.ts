@@ -34,9 +34,27 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+/** How far into the past a payload's `iat` may sit and still count as fresh. */
 export const DEVICE_PAYLOAD_MAX_AGE_MS = 10 * 60 * 1000;
+
+/**
+ * How far into the future a payload's `iat` may sit and still count as fresh.
+ *
+ * @remarks
+ * Far tighter than {@link DEVICE_PAYLOAD_MAX_AGE_MS}: a client clock running ahead is the only
+ * honest reason for a future timestamp at all, and it never runs ahead by minutes the way a
+ * replayed payload can sit unused for minutes in the past.
+ */
 export const DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS = 60 * 1000;
 
+/**
+ * Whether `iat` sits within {@link DEVICE_PAYLOAD_MAX_AGE_MS} in the past or
+ * {@link DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS} in the future of now.
+ *
+ * @remarks
+ * False for anything that is not a finite number, a non-numeric `iat` being as stale as one that
+ * is simply out of window.
+ */
 export function isFresh(iat: unknown): boolean {
   if (typeof iat !== "number" || !Number.isFinite(iat)) return false;
 

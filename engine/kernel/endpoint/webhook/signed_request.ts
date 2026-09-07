@@ -36,6 +36,7 @@
 
 import { RequestScope } from "@scribe/runtime/scope.ts";
 
+/** How far a webhook's own timestamp may drift from now, in either direction, and still be fresh. */
 export const MAX_TIMESTAMP_SKEW_S = 5 * 60;
 
 /**
@@ -65,6 +66,10 @@ export interface SignedWebhookRequest {
   readonly rawBody: string;
 }
 
+/**
+ * The current request's `SignedWebhookRequest`, or `null` when any of the three signing headers is
+ * missing or the signature header names more candidates than `MAX_SIGNATURE_CANDIDATES` allows.
+ */
 export function readSignedRequest(): SignedWebhookRequest | null {
   const req = RequestScope.get();
   const bodyBytes = RequestScope.getBodyBytes();
@@ -89,6 +94,7 @@ export function readSignedRequest(): SignedWebhookRequest | null {
   };
 }
 
+/** Whether `rawTimestamp` falls within `MAX_TIMESTAMP_SKEW_S` of now, in either direction. */
 export function isFreshTimestamp(rawTimestamp: string): boolean {
   const seconds = Number(rawTimestamp);
   if (!Number.isFinite(seconds)) return false;

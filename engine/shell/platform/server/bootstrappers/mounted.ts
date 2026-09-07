@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "@scribe/alchemy";
-import { runMounted } from "@scribe/runtime/support/packages/mounted.ts";
+import { runMounted } from "@scribe/runtime/wiring/packages.ts";
 import type { Bootstrapper } from "../../../common/bootstrapper.ts";
 
 /**

@@ -74,6 +74,7 @@ const MAX_DEPTH = 64;
 /** What stands in for a subtree the walk refused to go into. */
 const TOO_DEEP = "[too deep]";
 
+/** Whether `key`, split on its word boundaries, names something {@link SENSITIVE_WORDS} covers. */
 export function isSensitiveKey(key: string): boolean {
   return key
     .split(WORD_BOUNDARY)

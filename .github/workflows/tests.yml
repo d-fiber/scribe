@@ -71,7 +71,7 @@ jobs:
 
       # Not the whole workspace under bun yet: a couple of packages carry a jsr:-only, Deno-only
       # dependency with no bun-reachable equivalent bound in the import map. What this does prove
-      # on every run is that specifier resolution and engine/runtime/scholium/bun/* actually work
+      # on every run is that specifier resolution and engine/scholium/bun/* actually work
       # under a real `bun test`, not only under deno - the gap most likely to go unnoticed if only
       # deno ever ran here.
       - name: Run the resolution probe under bun

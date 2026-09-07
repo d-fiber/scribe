@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { equal, equals, expect, isFalse, isTrue, Scribe } from "@scribe/alchemy/test";
 
 Scribe.test("a value equals itself whatever it is", () => {

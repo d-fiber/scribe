@@ -40,8 +40,12 @@ import "@scribe/testing/settings.ts";
 export interface AutoMock<T> {
   /** The proxied stand-in for `real`, recording every call and answering through a configured override when one exists. */
   readonly target: T;
+
+  /** Configures `path`, a dotted call path such as `"users.find"`, to answer through `impl`. */
   // deno-lint-ignore no-explicit-any -- a test writes impl against the real method's own parameter types, which unknown[] would reject.
   when(path: string, impl: (...args: any[]) => unknown): void;
+
+  /** Every argument list `path` was called with, in call order, or `[]` if it was never called. */
   calls(path: string): unknown[][];
 }
 
@@ -54,9 +58,20 @@ export interface AutoMock<T> {
  * a missing value. `defaultImpl` opts out of that for mocks where most calls are safe to no-op.
  */
 export interface AutoMockOptions {
+  /** Answers a call `when` never configured, instead of the default: throwing. */
   defaultImpl?(path: string, args: unknown[]): unknown;
 }
 
+/**
+ * Wraps `real` in a recording `Proxy` that answers a call through `when`, `options.defaultImpl`,
+ * or a thrown error naming the exact call path to configure.
+ *
+ * @remarks
+ * The wrap descends into a sub-object lazily, the first time it is read, which is what lets a
+ * test double a whole client without enumerating its surface: `client.users.find` and
+ * `client.posts.find` are two different recorded paths, discovered as a test reaches them rather
+ * than declared up front.
+ */
 export function createAutoMock<T extends object>(
   real: T,
   options: AutoMockOptions = {},

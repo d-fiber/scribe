@@ -68,7 +68,7 @@ say "running sdk/js"
 # This is not the whole workspace under bun yet: some packages only carry a jsr:-only, Deno-only
 # dependency (@nats-io/transport-deno has no bun-reachable equivalent bound in the import map),
 # which bun cannot resolve at all. What this does prove, on every run, is that specifier
-# resolution and the engine/runtime/scholium/bun/* adapters actually work under a real `bun test`,
+# resolution and the engine/scholium/bun/* adapters actually work under a real `bun test`,
 # not just under deno - the gap most likely to go unnoticed if only deno ever ran these.
 say "running the resolution probe under both runtimes"
 (cd "$ROOT" && bash dev_tools/resolution/run.sh all)

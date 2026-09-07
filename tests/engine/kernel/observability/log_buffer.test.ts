@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import type { LoggedEntry } from "@scribe/alchemy/observe";
 import { LogBuffer } from "@scribe/kernel/observability/log_buffer.ts";

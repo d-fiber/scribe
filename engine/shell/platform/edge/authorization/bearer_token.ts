@@ -34,6 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+/** The token `request` carries under `Authorization: Bearer <token>`, or `null` when it carries none. */
 export function bearerToken(request: Request): string | null {
   const [scheme, token] = (request.headers.get("authorization") ?? "").split(
     " ",

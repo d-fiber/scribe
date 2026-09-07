@@ -42,6 +42,14 @@ import { RequestScope } from "@scribe/runtime/scope.ts";
 
 const _DEVICE_CACHE_KEY = "device:resolved";
 
+/**
+ * A complete `RequestDevice`, a physical iPhone in French with the system theme, `overrides`
+ * applied on top.
+ *
+ * @remarks
+ * Every field is filled so a test that only cares about one does not have to build the other
+ * nine just to get a value that type-checks.
+ */
 export function fakeDevice(
   overrides: Partial<RequestDevice> = {},
 ): RequestDevice {
@@ -60,6 +68,7 @@ export function fakeDevice(
   };
 }
 
+/** A bare `Request` to `http://api.test/`, from a trusted peer, `headers` merged in. */
 export function requestWith(
   headers: Record<string, string> = {},
 ): Request {
@@ -68,6 +77,14 @@ export function requestWith(
   });
 }
 
+/**
+ * Runs `body` inside a `RequestScope` carrying `device` and no endpoint, the lighter sibling of
+ * `callEndpoint`.
+ *
+ * @remarks
+ * `device` is written directly rather than defaulted, so a case that wants `null`, no device at
+ * all, can ask for exactly that instead of receiving `fakeDevice()`'s default.
+ */
 export function withRequest<T>(
   device: RequestDevice | null,
   body: () => Future<T>,

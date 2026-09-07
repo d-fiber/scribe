@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "@scribe/alchemy";
-import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
+import { deviceSettings } from "@scribe/runtime/settings/device.ts";
 
 const PKCS8_X25519_HEADER = new Uint8Array([
   0x30,
@@ -63,6 +63,14 @@ export class DeviceKeyError extends Error {}
 
 let imported: Future<CryptoKey> | null = null;
 
+/**
+ * The server's X25519 private key, imported once for the life of the process.
+ *
+ * @remarks
+ * A rejected import is cached too, not retried: the key comes from an environment variable read
+ * at boot, so retrying would not fix it, and caching the rejection is what keeps a misconfigured
+ * key from logging the same failure on every request instead of the one time it is discovered.
+ */
 export function devicePayloadPrivateKey(): Future<CryptoKey> {
   return (imported ??= importPrivateKey());
 }

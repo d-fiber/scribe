@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { AlgorithmTokenVerifier } from "@scribe/shell/platform/edge/authorization/algorithm_token_verifier.ts";
 import type { TokenVerifier } from "@scribe/shell/platform/edge/authorization/token_verifier.ts";

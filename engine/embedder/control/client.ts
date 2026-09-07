@@ -144,6 +144,7 @@ export class WorkerClient {
   /**
    * Hands a node's log entries to the `_logs.ts` that claimed them.
    *
+   * @remarks
    * The reverse of {@link shipLogs}: these entries were raised here and are on
    * their way to project code. No capability token travels with them, because
    * a sink is handed data and is not entitled to call anything back on the

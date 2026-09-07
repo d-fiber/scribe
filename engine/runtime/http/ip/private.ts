@@ -57,6 +57,14 @@ const PRIVATE_V4 = [
   CGNAT,
 ];
 
+/**
+ * Whether `ip` falls in a range this deployment treats as private: loopback, RFC 1918, link-local,
+ * carrier-grade NAT, or their IPv6 equivalents.
+ *
+ * @remarks
+ * `isTrustedProxy` answers a narrower question: CGNAT and link-local count as private here, for
+ * deciding whether an address is fit to publish, but neither is ever one of our own proxies.
+ */
 export function isPrivateIp(ip: string): boolean {
   const address = normalizeIp(ip);
 

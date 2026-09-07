@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { equals, expect, expectLater, isA, Scribe, throwsA } from "@scribe/alchemy/test";
-import { LocalCommands } from "@scribe/runtime/scholium/bun/commands.ts";
+import { LocalCommands } from "@scribe/scholium/bun/commands.ts";
 
 function text(bytes: Uint8Array): string {
   return new TextDecoder().decode(bytes);

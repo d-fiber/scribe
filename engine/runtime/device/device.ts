@@ -46,6 +46,14 @@ import { DevicePayloadValidator } from "./payload/validator.ts";
 const MAX_PAYLOAD_CHARS = 4096;
 const CACHE_KEY = "device:resolved";
 
+/**
+ * Decrypts `encrypted` and validates it against `binding`, or null when either step fails.
+ *
+ * @remarks
+ * Three refusals share the same silent null: an unreadable sealed box, a payload that fails
+ * validation, and a nonce already claimed. None is worth a log line, since each is a normal case
+ * anybody can provoke and a line per attempt is a log an attacker fills.
+ */
 export async function decryptRequestDevice(
   encrypted: string,
   binding: string,
@@ -63,6 +71,14 @@ export async function decryptRequestDevice(
   return device;
 }
 
+/**
+ * The device this request's `x-device-payload` header decrypts and validates to, or null when
+ * there is none to read.
+ *
+ * @remarks
+ * Memoised on the request's own scope: the first caller in a request pays the decryption, and
+ * every later caller in the same request reads back the same pending promise.
+ */
 export function requestDevice(): Future<RequestDevice | null> {
   const cached = RequestScope.cache.get<Future<RequestDevice | null>>(
     CACHE_KEY,

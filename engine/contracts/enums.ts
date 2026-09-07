@@ -37,6 +37,7 @@
 /**
  * The values a string enum declares, in declaration order.
  *
+ * @remarks
  * Useful to check that a value received from a caller is one the enum admits, since
  * TypeScript erases the enum type at runtime and leaves only the object.
  */

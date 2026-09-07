@@ -93,6 +93,13 @@ export class RequestIdentityCache {
   }
 }
 
+/**
+ * Who the request in scope resolved to, or null when nothing proved a call.
+ *
+ * @remarks
+ * Folds an unresolved request into the same null a proven-anonymous one gets; {@link
+ * currentPrincipal} is the accessor that keeps the two apart.
+ */
 export function currentIdentity(): ResolvedIdentity {
   return RequestIdentityCache.resolved() ?? null;
 }

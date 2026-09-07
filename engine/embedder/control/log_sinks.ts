@@ -66,6 +66,7 @@ function wireEntry(entry: LoggedEntry): ReturnType<typeof create<typeof LogEntry
 /**
  * The `_logs.ts` sinks a worker declared, and the delivery to them.
  *
+ * @remarks
  * Built from the manifest at handshake, because that is the only moment the
  * host learns what the project declared. Two sets of names rather than one map:
  * a node has a sink of its own, or it falls back to the root sink, and the
@@ -89,6 +90,7 @@ export class WorkerLogSinks implements LogRouting {
   /**
    * The node a path belongs to, read off its first segment.
    *
+   * @remarks
    * A node is mounted under its own name, so the segment is the answer, but
    * only when it names a node the manifest declared: `/health` must not be
    * reported as coming from a node called "health".

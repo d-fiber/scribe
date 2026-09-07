@@ -40,15 +40,16 @@ import type { LoggedEntry } from "@scribe/alchemy/observe";
 /**
  * Where the project decided its own entries should go, when it decided at all.
  *
- * The port exists because the decision lives in project code, in a `_logs.ts`
- * running in the worker, while the entries are raised in `kernel/`, which
- * cannot import `project/`. The host asks two questions and hands over a batch;
- * everything about how a sink was declared stays on the other side.
+ * @remarks
+ * The port exists because the decision lives in project code, in a `_logs.ts` running in the
+ * worker, while the entries are raised in `kernel/`, which cannot import `embedder/` or the worker
+ * itself. The host asks two questions and hands over a batch; everything about how a sink was
+ * declared stays on the other side.
  *
- * It is the only destination there is. A host that finds no sink drops the
- * entry rather than falling back on one of its own: what a project's logs are
- * worth keeping is the project's decision, and the framework taking it back
- * would put every deployment on a path nobody asked for.
+ * It is the only destination there is. A host that finds no sink drops the entry rather than
+ * falling back on one of its own: what a project's logs are worth keeping is the project's
+ * decision, and the framework taking it back would put every deployment on a path nobody asked
+ * for.
  */
 export interface LogRouting {
   /**

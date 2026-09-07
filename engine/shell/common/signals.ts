@@ -36,9 +36,10 @@
 
 import { unawaited } from "@scribe/alchemy";
 import type { Future } from "@scribe/alchemy";
-import { Processes } from "@scribe/runtime/scholium/process.ts";
-import type { ShutdownSignal } from "@scribe/runtime/scholium/process.ts";
+import { Processes } from "@scribe/scholium/process.ts";
+import type { ShutdownSignal } from "@scribe/scholium/process.ts";
 
+/** The callback `SignalWatcher` runs once, when a watched signal arrives. */
 export type ShutdownHandler = () => Future<void> | void;
 
 /** Runs a shutdown handler when one of the watched signals arrives, tolerating a signal the host cannot watch. */

@@ -61,17 +61,34 @@ function cidr(base: string, bits: number): Ipv4Range {
   return { first, last: first + 2 ** (32 - bits) - 1 };
 }
 
+/** 127.0.0.0/8, the IPv4 loopback range. */
 export const LOOPBACK: Ipv4Range = cidr("127.0.0.0", 8);
+
+/** 10.0.0.0/8, one of the three RFC 1918 private ranges. */
 export const PRIVATE_A: Ipv4Range = cidr("10.0.0.0", 8);
+
+/** 172.16.0.0/12, one of the three RFC 1918 private ranges. */
 export const PRIVATE_B: Ipv4Range = cidr("172.16.0.0", 12);
+
+/** 192.168.0.0/16, one of the three RFC 1918 private ranges. */
 export const PRIVATE_C: Ipv4Range = cidr("192.168.0.0", 16);
+
+/** 169.254.0.0/16, the IPv4 link-local range. */
 export const LINK_LOCAL: Ipv4Range = cidr("169.254.0.0", 16);
+
+/** 100.64.0.0/10, the carrier-grade NAT range a mobile network hands its own devices. */
 export const CGNAT: Ipv4Range = cidr("100.64.0.0", 10);
 
+/** `::1`, the IPv6 loopback address, compared by equality rather than by a range. */
 export const IPV6_LOOPBACK = "::1";
+
+/** The two prefixes, `fc` and `fd`, an IPv6 unique local address starts with. */
 export const IPV6_UNIQUE_LOCAL_PREFIXES: readonly string[] = ["fc", "fd"];
+
+/** The prefix an IPv6 link-local address starts with. */
 export const IPV6_LINK_LOCAL_PREFIX = "fe80:";
 
+/** Whether `value` falls inside any of `ranges`. */
 export function contains(ranges: readonly Ipv4Range[], value: number): boolean {
   return ranges.some((range) => value >= range.first && value <= range.last);
 }

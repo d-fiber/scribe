@@ -18,6 +18,7 @@
   "@scribe/foundation/trigger": "../../packages/foundation/lib/trigger.ts",
   "@scribe/kernel/": "../kernel/",
   "@scribe/runtime/": "../runtime/",
+  "@scribe/scholium/": "../scholium/",
   "@scribe/sdk": "../../sdk/js/mod.ts",
   "@scribe/sdk/": "../../sdk/js/",
   "@scribe/shell/": "./"

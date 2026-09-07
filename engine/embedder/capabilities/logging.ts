@@ -41,6 +41,7 @@ import { type LogAck, LogAckSchema, type LogBatch } from "@scribe/sdk/gen/scribe
 /**
  * Takes what the worker sent, and drops it.
  *
+ * @remarks
  * A node that declared a `_logs.ts` never gets here: its `log()` calls are
  * short-circuited to the sink inside the worker rather than crossing back for
  * an answer the worker already has. What arrives here therefore belongs to a

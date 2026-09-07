@@ -39,7 +39,7 @@ import { installAuthTestSettings } from "./settings.ts";
 installAuthTestSettings();
 
 import { type PendingToken, PendingTokenPurpose } from "../../lib/src/pending_token.ts";
-import { toHex } from "@scribe/runtime/support/crypto/hash.ts";
+import { toHex } from "@scribe/runtime/primitives/crypto/hash.ts";
 import type { AccountRole } from "../../lib/contracts/role.ts";
 import { authSettings } from "../../lib/src/settings.ts";
 

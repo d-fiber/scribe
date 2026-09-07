@@ -47,6 +47,15 @@ import {
 
 const TRUSTED_V4 = [LOOPBACK, PRIVATE_A, PRIVATE_B, PRIVATE_C];
 
+/**
+ * Whether `peerAddress`, the socket's own peer and never a header, is one of this deployment's own
+ * proxies.
+ *
+ * @remarks
+ * Deliberately narrower than {@link isPrivateIp}: it answers loopback and RFC 1918 only, because a
+ * CGNAT or link-local address is private without ever being a proxy we run, and treating it as one
+ * would let a caller behind either write its own `x-real-ip`.
+ */
 export function isTrustedProxy(peerAddress: string | null): boolean {
   if (peerAddress === null) return false;
 

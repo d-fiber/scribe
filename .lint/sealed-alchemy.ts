@@ -87,7 +87,7 @@ export const sealedAlchemy: Rule = {
         node,
         message: "This names the host runtime directly. alchemy/ imports nothing outside " +
           "itself and runs nowhere on its own, so nothing here ever has a host to name. " +
-          "engine/runtime/scholium/ is where a host is named, and alchemy/ is not part of it.",
+          "engine/scholium/ is where a host is named, and alchemy/ is not part of it.",
       });
     });
 

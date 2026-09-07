@@ -41,13 +41,13 @@ import type { Bootstrapper } from "../../../common/bootstrapper.ts";
 /**
  * Publishes the request log entries this replica is still holding.
  *
- * The buffer trades a window of entries for one publish instead of one per
- * request, and this is what keeps a rolling deploy from paying that trade:
- * a replica taken out on SIGTERM publishes what it has before it goes.
+ * @remarks
+ * The buffer trades a window of entries for one publish instead of one per request, and this is
+ * what keeps a rolling deploy from paying that trade: a replica taken out on SIGTERM publishes
+ * what it has before it goes.
  *
- * There is nothing to do at boot. The buffer arms itself on its first entry,
- * and arming it here would only publish an empty batch on a replica that never
- * serves a request.
+ * There is nothing to do at boot. The buffer arms itself on its first entry, and arming it here
+ * would only publish an empty batch on a replica that never serves a request.
  */
 export class RequestLogBootstrapper implements Bootstrapper {
   /** This bootstrapper's label in `BootSequence` logging: `request-log`. */

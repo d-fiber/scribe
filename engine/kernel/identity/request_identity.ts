@@ -37,7 +37,7 @@
 import type { Future } from "@scribe/alchemy";
 import type { RequestUser } from "@scribe/alchemy/route";
 import { request } from "@scribe/runtime/http/request.ts";
-import { GrantsResolver } from "@scribe/runtime/support/ports/grants.ts";
+import { GrantsResolver } from "@scribe/runtime/grants.ts";
 import { JwtIdentityResolver } from "./resolver/jwt_resolver.ts";
 import { RequestIdentityCache, type ResolvedIdentity } from "@scribe/runtime/http/accessors/identity.ts";
 

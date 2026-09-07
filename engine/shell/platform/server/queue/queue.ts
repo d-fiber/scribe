@@ -39,7 +39,7 @@ import { ServerResponse } from "@scribe/alchemy/route";
 import { Router } from "@scribe/kernel/http/routing/router.ts";
 import { serveFunction } from "@scribe/kernel/http/serve/mod.ts";
 import { queueRegistry } from "@scribe/foundation/queue";
-import { extensions } from "@scribe/runtime/support/extensions/mod.ts";
+import { extensions } from "@scribe/runtime/wiring/extensions/mod.ts";
 import { EXTENSION_QUEUE } from "@scribe/contracts/extensions.ts";
 import { Hono } from "hono";
 import { QueueDrainEndpoint, QueueDrainOneEndpoint, QueueStatusEndpoint } from "./drain.ts";

@@ -16,5 +16,6 @@
   "@scribe/foundation/testing": "../../packages/foundation/tests/testing/testing.ts",
   "@scribe/foundation/trigger": "../../packages/foundation/lib/trigger.ts",
   "@scribe/runtime/": "../runtime/",
+  "@scribe/scholium/": "../scholium/",
   "@scribe/testing/": "./"
 }

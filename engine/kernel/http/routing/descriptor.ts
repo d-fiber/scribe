@@ -52,6 +52,7 @@ export interface RouteInvocation {
   readonly pathParams: Readonly<Record<string, string>>;
 }
 
+/** A route's own logic, called once `access`, `rateLimit` and any required permission have passed. */
 export type RouteHandler = (invocation: RouteInvocation) => Response | Future<Response>;
 
 /**
@@ -89,6 +90,14 @@ export interface RouteDescriptor {
   readonly handler: RouteHandler;
 }
 
+/**
+ * `descriptors`, each with `prefix` composed onto its own path.
+ *
+ * @remarks
+ * What `app.route()` does tacitly for a Hono sub-router, done here as data instead: a descriptor
+ * whose path is `"/"` becomes `prefix` alone, the same collapsing Hono itself does, so a list of
+ * routes can compose its children while staying flat and readable as one block.
+ */
 export function under(
   prefix: string,
   descriptors: readonly RouteDescriptor[],

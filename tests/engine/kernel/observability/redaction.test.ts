@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { previewOf } from "@scribe/kernel/observability/body_preview.ts";
 import { isSensitiveKey, redactIfJson, redactSensitive } from "@scribe/kernel/observability/redaction.ts";

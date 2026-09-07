@@ -39,9 +39,18 @@ import "./settings.ts";
 
 /** A patch `installMock` and its variants applied to an object, undone by calling `restore`. */
 export interface InstalledMock {
+  /** Undoes the patch, restoring the property this replaced, or removing it if there was none. */
   restore(): void;
 }
 
+/**
+ * Replaces `target[property]` with `value`, restoring the original property on `restore()`.
+ *
+ * @remarks
+ * A `restore()` that finds no original descriptor deletes the property it added instead of
+ * setting it back to `undefined`: a mock installed on a property the target never had must leave
+ * no trace once it is gone.
+ */
 export function installMock<T extends object, K extends keyof T>(
   target: T,
   property: K,
@@ -64,12 +73,16 @@ export function installMock<T extends object, K extends keyof T>(
   };
 }
 
-// Accessor variant, for singletons whose surface is exposed by getters carried
-// by the *prototype* (`rest`, `broadcast.device`): `installMock` would set a
-// value frozen at install time, whereas a mock must stay dynamic (`DatabaseMock.user`
-// only becomes non-null after `asUser()`). Since `Object.getOwnPropertyDescriptor`
-// returns `undefined` for a prototype getter, `restore()` simply deletes the own
-// property and the original getter reappears.
+/**
+ * Replaces the accessor `target[property]` with `get`, and restores the original on `restore()`.
+ *
+ * @remarks
+ * The accessor variant of {@link installMock}, for singletons whose surface is exposed by getters
+ * carried by the *prototype* (`rest`, `broadcast.device`): `installMock` would set a value frozen
+ * at install time, whereas a mock must stay dynamic (`DatabaseMock.user` only becomes non-null
+ * after `asUser()`). Since `Object.getOwnPropertyDescriptor` returns `undefined` for a prototype
+ * getter, `restore()` simply deletes the own property and the original getter reappears.
+ */
 export function installGetterMock<T extends object, K extends keyof T>(
   target: T,
   property: K,
@@ -91,6 +104,16 @@ export function installGetterMock<T extends object, K extends keyof T>(
   };
 }
 
+/**
+ * Replaces every public property of `target` with the one `mockTarget` carries under the same
+ * name, restoring them all on a single `restore()`.
+ *
+ * @remarks
+ * `length`, `name`, `prototype`, `constructor` and anything starting with `_` are skipped, the
+ * same convention the private-module-scope lint plugin uses for a private member: a mock built
+ * this way stands in for a whole class at once, without a test having to name each member it
+ * wants replaced.
+ */
 export function installAllMock<T extends object>(
   target: T,
   mockTarget: T,

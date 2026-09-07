@@ -56,19 +56,30 @@ export interface NodeSurface {
 
 const surfaces = new Map<string, Hono>();
 
+/**
+ * Every node the current manifest mounted, keyed by name, and the resolution off a request path.
+ *
+ * @remarks
+ * A single process-wide table rather than one carried alongside each manifest, because the surface
+ * router that calls {@link resolve} is set up once and outlives any one attachment.
+ */
 export const NodeSurfaces = {
+  /** Mounts `app` under `name`, replacing whatever was mounted there before. */
   register(name: string, app: Hono): void {
     surfaces.set(name, app);
   },
 
+  /** Forgets every node mounted so far. */
   clear(): void {
     surfaces.clear();
   },
 
+  /** Every node name currently mounted. */
   names(): readonly string[] {
     return [...surfaces.keys()];
   },
 
+  /** The {@link NodeSurface} `pathname`'s first segment names, or `null` when it names no node. */
   resolve(pathname: string): NodeSurface | null {
     const segment = firstSegmentOf(pathname);
     if (segment === "") return null;

@@ -38,42 +38,53 @@ import { cacheSettings } from "@scribe/foundation/cache";
 import { databaseSettings } from "@scribe/foundation/database";
 import { scribe } from "@scribe/foundation";
 import { queueSettings } from "@scribe/foundation/queue";
-import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
-import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
-import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
-import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
+import { deviceSettings } from "@scribe/runtime/settings/device.ts";
+import { firewallSettings } from "@scribe/runtime/settings/firewall.ts";
+import { httpSettings } from "@scribe/runtime/settings/http.ts";
+import { identitySettings } from "@scribe/runtime/settings/identity.ts";
 import type { Command, Environment, FileSystemDriver } from "@scribe/alchemy";
 import { Commands, Environments, FileSystems } from "@scribe/alchemy";
-import { LocalCommands as BunCommands } from "@scribe/runtime/scholium/bun/commands.ts";
-import { LocalEnvironment as BunEnvironment } from "@scribe/runtime/scholium/bun/env.ts";
-import { LocalFileSystems as BunFileSystems } from "@scribe/runtime/scholium/bun/files.ts";
-import { LocalCommands as DenoCommands } from "@scribe/runtime/scholium/deno/commands.ts";
-import { LocalEnvironment as DenoEnvironment } from "@scribe/runtime/scholium/deno/env.ts";
-import { LocalFileSystems as DenoFileSystems } from "@scribe/runtime/scholium/deno/files.ts";
-import { environment, optional } from "@scribe/runtime/scholium/env.ts";
-import { currentStack } from "@scribe/runtime/scholium/host.ts";
+import { LocalCommands as BunCommands } from "@scribe/scholium/bun/commands.ts";
+import { LocalEnvironment as BunEnvironment } from "@scribe/scholium/bun/env.ts";
+import { LocalFileSystems as BunFileSystems } from "@scribe/scholium/bun/files.ts";
+import { LocalCommands as DenoCommands } from "@scribe/scholium/deno/commands.ts";
+import { LocalEnvironment as DenoEnvironment } from "@scribe/scholium/deno/env.ts";
+import { LocalFileSystems as DenoFileSystems } from "@scribe/scholium/deno/files.ts";
+import { environment, optional } from "@scribe/scholium/env.ts";
+import { currentStack } from "@scribe/scholium/host.ts";
+import { pickStack } from "@scribe/scholium/stack.ts";
 
 /**
  * The `Environment`, `FileSystemDriver` and `Command` this process's own stack provides.
  *
  * @remarks
- * A `node` stack has none yet: `engine/runtime/scholium/bun/` and `.../deno/` are the only two
+ * A `node` stack has none yet: `engine/scholium/bun/` and `.../deno/` are the only two
  * sub-folders this framework ships, and reaching this on any other stack is a refusal rather than
  * a guess.
  *
  * @throws {Error} When {@link currentStack} answers `node`.
  */
 function corePorts(): { environment: Environment; fileSystems: FileSystemDriver; commands: Command } {
-  switch (currentStack()) {
-    case "deno":
-      return { environment: new DenoEnvironment(), fileSystems: new DenoFileSystems(), commands: new DenoCommands() };
-    case "bun":
-      return { environment: new BunEnvironment(), fileSystems: new BunFileSystems(), commands: new BunCommands() };
-    case "node":
-      throw new Error(`No scholium implementation ships for the "${currentStack()}" stack yet.`);
-  }
+  return pickStack<{ environment: Environment; fileSystems: FileSystemDriver; commands: Command }>(
+    {
+      deno: () => ({ environment: new DenoEnvironment(), fileSystems: new DenoFileSystems(), commands: new DenoCommands() }),
+      bun: () => ({ environment: new BunEnvironment(), fileSystems: new BunFileSystems(), commands: new BunCommands() }),
+    },
+    `No scholium implementation ships for the "${currentStack()}" stack yet.`,
+  );
 }
 
+/**
+ * Fills every settings slot a suite needs from the environment, with a local fallback for each,
+ * and does nothing on a second call.
+ *
+ * @remarks
+ * The guard is `cacheSettings.configured`: once one slot is filled, all of them are, so a suite
+ * that wired its own settings before importing this module is left alone rather than overwritten.
+ * This runs at import, the last line of the file calling it directly, because a slot refuses to
+ * be read before something calls `.use()` on it and a test cannot be trusted to call this itself
+ * before touching a setting.
+ */
 export function installTestSettings(): void {
   if (cacheSettings.configured) return;
 

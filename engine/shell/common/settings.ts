@@ -39,49 +39,49 @@ import { databaseSettings } from "@scribe/foundation/database";
 import { queueSettings } from "@scribe/foundation/queue";
 import type { QueueSettings } from "@scribe/foundation";
 import { RedisRateLimiters } from "@scribe/foundation/rate_limit";
-import { deviceSettings } from "@scribe/runtime/support/settings/device.ts";
-import { runMounted } from "@scribe/runtime/support/packages/mounted.ts";
-import { firewallSettings } from "@scribe/runtime/support/settings/firewall.ts";
-import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
-import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
+import { deviceSettings } from "@scribe/runtime/settings/device.ts";
+import { runMounted } from "@scribe/runtime/wiring/packages.ts";
+import { firewallSettings } from "@scribe/runtime/settings/firewall.ts";
+import { httpSettings } from "@scribe/runtime/settings/http.ts";
+import { identitySettings } from "@scribe/runtime/settings/identity.ts";
 import type { Command, Environment, FileSystemDriver } from "@scribe/alchemy";
 import { Commands, Environments, FileSystems, RateLimiters } from "@scribe/alchemy";
-import { LocalCommands as BunCommands } from "@scribe/runtime/scholium/bun/commands.ts";
-import { LocalEnvironment as BunEnvironment } from "@scribe/runtime/scholium/bun/env.ts";
-import { LocalFileSystems as BunFileSystems } from "@scribe/runtime/scholium/bun/files.ts";
-import { LocalListener as BunListener } from "@scribe/runtime/scholium/bun/listener.ts";
-import { LocalProcess as BunProcess } from "@scribe/runtime/scholium/bun/process.ts";
-import { LocalCommands as DenoCommands } from "@scribe/runtime/scholium/deno/commands.ts";
-import { LocalEnvironment as DenoEnvironment } from "@scribe/runtime/scholium/deno/env.ts";
-import { LocalFileSystems as DenoFileSystems } from "@scribe/runtime/scholium/deno/files.ts";
-import { LocalListener as DenoListener } from "@scribe/runtime/scholium/deno/listener.ts";
-import { LocalProcess as DenoProcess } from "@scribe/runtime/scholium/deno/process.ts";
-import { environment, required } from "@scribe/runtime/scholium/env.ts";
-import { currentStack } from "@scribe/runtime/scholium/host.ts";
-import { type Listener, Listeners } from "@scribe/runtime/scholium/listener.ts";
-import { type Process, Processes } from "@scribe/runtime/scholium/process.ts";
-import { workerSettings } from "@scribe/runtime/support/settings/worker.ts";
+import { LocalCommands as BunCommands } from "@scribe/scholium/bun/commands.ts";
+import { LocalEnvironment as BunEnvironment } from "@scribe/scholium/bun/env.ts";
+import { LocalFileSystems as BunFileSystems } from "@scribe/scholium/bun/files.ts";
+import { LocalListener as BunListener } from "@scribe/scholium/bun/listener.ts";
+import { LocalProcess as BunProcess } from "@scribe/scholium/bun/process.ts";
+import { LocalCommands as DenoCommands } from "@scribe/scholium/deno/commands.ts";
+import { LocalEnvironment as DenoEnvironment } from "@scribe/scholium/deno/env.ts";
+import { LocalFileSystems as DenoFileSystems } from "@scribe/scholium/deno/files.ts";
+import { LocalListener as DenoListener } from "@scribe/scholium/deno/listener.ts";
+import { LocalProcess as DenoProcess } from "@scribe/scholium/deno/process.ts";
+import { environment, required } from "@scribe/scholium/env.ts";
+import { currentStack } from "@scribe/scholium/host.ts";
+import { type Listener, Listeners } from "@scribe/scholium/listener.ts";
+import { type Process, Processes } from "@scribe/scholium/process.ts";
+import { pickStack } from "@scribe/scholium/stack.ts";
+import { workerSettings } from "@scribe/runtime/settings/worker.ts";
 import { KNOWN_JWT_ALGORITHMS } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
 
 /**
  * The `Environment`, `FileSystemDriver` and `Command` this process's own stack provides.
  *
  * @remarks
- * A `node` stack has none yet: `engine/runtime/scholium/bun/` and `.../deno/` are the only two
+ * A `node` stack has none yet: `engine/scholium/bun/` and `.../deno/` are the only two
  * sub-folders this framework ships, and reaching this on any other stack is a boot-time refusal
  * rather than a guess.
  *
  * @throws {Error} When {@link currentStack} answers `node`.
  */
 function corePorts(): { environment: Environment; fileSystems: FileSystemDriver; commands: Command } {
-  switch (currentStack()) {
-    case "deno":
-      return { environment: new DenoEnvironment(), fileSystems: new DenoFileSystems(), commands: new DenoCommands() };
-    case "bun":
-      return { environment: new BunEnvironment(), fileSystems: new BunFileSystems(), commands: new BunCommands() };
-    case "node":
-      throw new Error(`No scholium implementation ships for the "${currentStack()}" stack yet.`);
-  }
+  return pickStack<{ environment: Environment; fileSystems: FileSystemDriver; commands: Command }>(
+    {
+      deno: () => ({ environment: new DenoEnvironment(), fileSystems: new DenoFileSystems(), commands: new DenoCommands() }),
+      bun: () => ({ environment: new BunEnvironment(), fileSystems: new BunFileSystems(), commands: new BunCommands() }),
+    },
+    `No scholium implementation ships for the "${currentStack()}" stack yet.`,
+  );
 }
 
 /**
@@ -94,14 +94,13 @@ function corePorts(): { environment: Environment; fileSystems: FileSystemDriver;
  * @throws {Error} When {@link currentStack} answers `node`.
  */
 function serverPorts(): { listener: Listener; process: Process } {
-  switch (currentStack()) {
-    case "deno":
-      return { listener: new DenoListener(), process: new DenoProcess() };
-    case "bun":
-      return { listener: new BunListener(), process: new BunProcess() };
-    case "node":
-      throw new Error(`No scholium implementation ships for the "${currentStack()}" stack yet.`);
-  }
+  return pickStack(
+    {
+      deno: () => ({ listener: new DenoListener(), process: new DenoProcess() }),
+      bun: () => ({ listener: new BunListener(), process: new BunProcess() }),
+    },
+    `No scholium implementation ships for the "${currentStack()}" stack yet.`,
+  );
 }
 
 const { environment: localEnvironment, fileSystems: localFileSystems, commands: localCommands } = corePorts();
@@ -123,6 +122,7 @@ const DEFAULT_PORT = 3000;
  */
 const DEFAULT_MAX_INFLIGHT_BODY_MB = 256;
 
+/** `API_MAX_INFLIGHT_BODY_MB`, in bytes, or {@link DEFAULT_MAX_INFLIGHT_BODY_MB} when it names nothing usable. */
 function maxInflightBodyBytes(): number {
   const declared = Number(environment().get("API_MAX_INFLIGHT_BODY_MB"));
   const megabytes = Number.isFinite(declared) && declared > 0 ? declared : DEFAULT_MAX_INFLIGHT_BODY_MB;

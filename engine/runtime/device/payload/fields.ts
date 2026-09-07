@@ -36,12 +36,14 @@
 
 import { enumValues } from "@scribe/contracts/enums.ts";
 
+/** Whether `value` is a non-empty string no longer than `maxLength`. */
 export function boundedString(value: unknown, maxLength: number): boolean {
   return typeof value === "string" &&
     value.length > 0 &&
     value.length <= maxLength;
 }
 
+/** Whether `value` is absent, or a string no longer than `maxLength`. */
 export function optionalBoundedString(
   value: unknown,
   maxLength: number,
@@ -50,6 +52,7 @@ export function optionalBoundedString(
     (typeof value === "string" && value.length <= maxLength);
 }
 
+/** Whether `value` is absent, or a string between `minLength` and `maxLength` characters long. */
 export function optionalSizedString(
   value: unknown,
   minLength: number,
@@ -61,6 +64,7 @@ export function optionalSizedString(
       value.length <= maxLength);
 }
 
+/** Whether `value` is one of the values `options`, an enum object, declares. */
 export function oneOf<T extends object>(value: unknown, options: T): boolean {
   return enumValues(options).includes(value as T[keyof T]);
 }

@@ -37,9 +37,9 @@
 import { hostname } from "node:os";
 import process from "node:process";
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { equals, expect, isTrue, Scribe } from "@scribe/alchemy/test";
-import { LocalProcess } from "@scribe/runtime/scholium/bun/process.ts";
+import { LocalProcess } from "@scribe/scholium/bun/process.ts";
 
 Scribe.test("hostname answers what the platform's own reader answers", () => {
   expect(new LocalProcess().hostname(), equals(hostname()));

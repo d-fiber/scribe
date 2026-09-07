@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import "@scribe/testing/settings.ts";
 import { type BodyIntake, readBoundedBody } from "@scribe/kernel/http/serve/body_reader.ts";
@@ -42,7 +42,7 @@ import { stripPrefix } from "@scribe/runtime/http/pathname.ts";
 import { rewriteRequest } from "@scribe/kernel/http/serve/request_rewrite.ts";
 import { admitBody, inflightBodyBytes, releaseBody } from "@scribe/kernel/http/serve/body_admission.ts";
 import { MAX_BODY_BYTES, UNDECLARED_BODY_BYTES } from "@scribe/runtime/http/limits.ts";
-import { httpSettings } from "@scribe/runtime/support/settings/http.ts";
+import { httpSettings } from "@scribe/runtime/settings/http.ts";
 import { assert, assertEquals } from "@std/assert";
 
 function upload(contentLength: number | null): Request {

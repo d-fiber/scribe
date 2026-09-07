@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "@scribe/alchemy";
-import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
+import { identitySettings } from "@scribe/runtime/settings/identity.ts";
 import { createRemoteJWKSet, decodeProtectedHeader, jwtVerify } from "jose";
 import type { JWTPayload, JWTVerifyResult } from "jose";
 
@@ -77,99 +77,7 @@ function _isEndUserToken(payload: JWTPayload): boolean {
 }
 
 type RemoteKeySet = ReturnType<typeof createRemoteJWKSet>;
-
-let keySetFor: string | undefined;
-let remoteKeys: RemoteKeySet | null = null;
-
-/**
- * The key set of the identity service, built once per address.
- *
- * @remarks
- * Two things were wrong with memoising on nothing but the answer. The set was frozen on the first
- * address ever read, so a slot filled again afterwards was ignored without a word. And a failure
- * was not memoised at all: a deployment that mounts no identity package has no address, so every
- * asymmetric token it was ever shown rebuilt nothing and wrote a line about it, which is a log an
- * attacker fills at will.
- *
- * An absent address is the ordinary state of such a deployment rather than a fault, so it answers
- * `null` in silence. What is worth a line is an address that is set and unusable, and that line is
- * written once for that address.
- */
-function remoteKeySet(): RemoteKeySet | null {
-  const authUrl = identitySettings.get().authUrl;
-  if (!authUrl) return null;
-  if (authUrl === keySetFor) return remoteKeys;
-
-  keySetFor = authUrl;
-  try {
-    remoteKeys = createRemoteJWKSet(new URL("/.well-known/jwks.json", authUrl));
-  } catch (error) {
-    remoteKeys = null;
-    console.error(
-      `[jwt-verifier] no JWKS endpoint at ${authUrl}, asymmetric tokens will be refused:`,
-      error,
-    );
-  }
-
-  return remoteKeys;
-}
-
 type Verification = (jwt: string) => Future<JWTVerifyResult>;
-
-let hmacSecret: string | null = null;
-let hmacKey: Future<CryptoKey> | null = null;
-
-/**
- * The shared secret as a `CryptoKey`, imported once per secret.
- *
- * Handing jose the raw bytes makes it import the key again on every single
- * verification, which measured as a fifth of the whole HS256 cost. The import
- * is keyed on the secret itself so that swapping it, which only tests do,
- * still takes effect.
- */
-function symmetricKey(secret: string): Future<CryptoKey> {
-  if (secret !== hmacSecret || hmacKey === null) {
-    hmacSecret = secret;
-    hmacKey = crypto.subtle.importKey(
-      "raw",
-      new TextEncoder().encode(secret),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["verify"],
-    );
-  }
-
-  return hmacKey;
-}
-
-function verificationFor(alg: string | undefined): Verification | null {
-  if (alg === undefined) return null;
-  if (!_declared(alg)) return null;
-
-  if (_SYMMETRIC_ALGS.includes(alg)) {
-    const secret = identitySettings.get().jwtSecret;
-    if (!secret) return null;
-
-    return async (jwt) =>
-      jwtVerify(jwt, await symmetricKey(secret), {
-        audience: _AUDIENCE,
-        algorithms: _SYMMETRIC_ALGS,
-      });
-  }
-
-  if (_ASYMMETRIC_ALGS.includes(alg)) {
-    const keys = remoteKeySet();
-    if (keys === null) return null;
-
-    return (jwt) =>
-      jwtVerify(jwt, keys, {
-        audience: _AUDIENCE,
-        algorithms: _ASYMMETRIC_ALGS,
-      });
-  }
-
-  return null;
-}
 
 /**
  * Verifies a caller's JWT against this deployment's own key material.
@@ -180,6 +88,96 @@ function verificationFor(alg: string | undefined): Verification | null {
  * fetch verifying a token whose algorithm names a scheme this deployment never turned on.
  */
 export class JwtVerifier {
+  private static _keySetFor: string | undefined;
+  private static _remoteKeys: RemoteKeySet | null = null;
+  private static _hmacSecret: string | null = null;
+  private static _hmacKey: Future<CryptoKey> | null = null;
+
+  /**
+   * The key set of the identity service, built once per address.
+   *
+   * @remarks
+   * Two things were wrong with memoising on nothing but the answer. The set was frozen on the
+   * first address ever read, so a slot filled again afterwards was ignored without a word. And a
+   * failure was not memoised at all: a deployment that mounts no identity package has no address,
+   * so every asymmetric token it was ever shown rebuilt nothing and wrote a line about it, which
+   * is a log an attacker fills at will.
+   *
+   * An absent address is the ordinary state of such a deployment rather than a fault, so it
+   * answers `null` in silence. What is worth a line is an address that is set and unusable, and
+   * that line is written once for that address.
+   */
+  private static _remoteKeySet(): RemoteKeySet | null {
+    const authUrl = identitySettings.get().authUrl;
+    if (!authUrl) return null;
+    if (authUrl === JwtVerifier._keySetFor) return JwtVerifier._remoteKeys;
+
+    JwtVerifier._keySetFor = authUrl;
+    try {
+      JwtVerifier._remoteKeys = createRemoteJWKSet(new URL("/.well-known/jwks.json", authUrl));
+    } catch (error) {
+      JwtVerifier._remoteKeys = null;
+      console.error(
+        `[jwt-verifier] no JWKS endpoint at ${authUrl}, asymmetric tokens will be refused:`,
+        error,
+      );
+    }
+
+    return JwtVerifier._remoteKeys;
+  }
+
+  /**
+   * The shared secret as a `CryptoKey`, imported once per secret.
+   *
+   * Handing jose the raw bytes makes it import the key again on every single
+   * verification, which measured as a fifth of the whole HS256 cost. The import
+   * is keyed on the secret itself so that swapping it, which only tests do,
+   * still takes effect.
+   */
+  private static _symmetricKey(secret: string): Future<CryptoKey> {
+    if (secret !== JwtVerifier._hmacSecret || JwtVerifier._hmacKey === null) {
+      JwtVerifier._hmacSecret = secret;
+      JwtVerifier._hmacKey = crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(secret),
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["verify"],
+      );
+    }
+
+    return JwtVerifier._hmacKey;
+  }
+
+  private static _verificationFor(alg: string | undefined): Verification | null {
+    if (alg === undefined) return null;
+    if (!_declared(alg)) return null;
+
+    if (_SYMMETRIC_ALGS.includes(alg)) {
+      const secret = identitySettings.get().jwtSecret;
+      if (!secret) return null;
+
+      return async (jwt) =>
+        jwtVerify(jwt, await JwtVerifier._symmetricKey(secret), {
+          audience: _AUDIENCE,
+          algorithms: _SYMMETRIC_ALGS,
+        });
+    }
+
+    if (_ASYMMETRIC_ALGS.includes(alg)) {
+      const keys = JwtVerifier._remoteKeySet();
+      if (keys === null) return null;
+
+      return (jwt) =>
+        jwtVerify(jwt, keys, {
+          audience: _AUDIENCE,
+          algorithms: _ASYMMETRIC_ALGS,
+        });
+    }
+
+    return null;
+  }
+
   /**
    * Answers `jwt`'s payload once it verifies against `"authenticated"`, the audience end-user
    * tokens carry, and proves to be an end-user token rather than another kind this deployment
@@ -188,7 +186,7 @@ export class JwtVerifier {
    */
   static async verify(jwt: string): Future<JWTPayload | null> {
     try {
-      const verification = verificationFor(decodeProtectedHeader(jwt).alg);
+      const verification = JwtVerifier._verificationFor(decodeProtectedHeader(jwt).alg);
       if (verification === null) return null;
 
       const { payload } = await verification(jwt);

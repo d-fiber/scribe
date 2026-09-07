@@ -34,11 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import "@scribe/runtime/scholium/runner.ts";
+import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import "@scribe/testing/settings.ts";
 import { JwtVerifier } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
-import { identitySettings } from "@scribe/runtime/support/settings/identity.ts";
+import { identitySettings } from "@scribe/runtime/settings/identity.ts";
 import { assert, assertEquals, assertNotEquals } from "@std/assert";
 import { SignJWT } from "jose";
 

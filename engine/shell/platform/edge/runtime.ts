@@ -36,7 +36,7 @@
 
 import type { Future } from "@scribe/alchemy";
 import { ServerResponse } from "@scribe/alchemy/route";
-import { Listeners } from "@scribe/runtime/scholium/listener.ts";
+import { Listeners } from "@scribe/scholium/listener.ts";
 import { Runtime } from "../../common/runtime.ts";
 import type { RequestAuthorizer } from "./authorization/request_authorizer.ts";
 import type { WorkerDispatcher } from "./dispatch/worker_dispatcher.ts";
@@ -129,7 +129,7 @@ export class EdgeFunctionsRuntime extends Runtime {
    *
    * @remarks
    * Reaches the host through {@link Listeners} rather than opening a socket itself, the same
-   * indirection `engine/runtime/scholium/` uses everywhere a host capability is needed: this file
+   * indirection `engine/scholium/` uses everywhere a host capability is needed: this file
    * never has to know how a socket is opened on the platform underneath it, only that `serve`
    * exists.
    */

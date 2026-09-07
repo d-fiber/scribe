@@ -53,5 +53,6 @@ export enum ProjectSlot {
  * theme override without first checking whether one exists.
  */
 export interface ProjectHost {
+  /** The value `slot` holds, or `null` when the project never provided one. */
   load<T>(slot: ProjectSlot): Future<T | null>;
 }
