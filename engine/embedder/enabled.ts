@@ -41,7 +41,7 @@ import { workerSettings } from "@scribe/runtime/settings.ts";
  *
  * @remarks
  * The answer is two fields of the settings and nothing else, but asking `WorkerHost`
- * for it costs the module that answers: `control/host.ts` carries the capability
+ * for it costs the module that answers: `control/worker_host.ts` carries the capability
  * server, the protocol stubs and the SDK, and reaching it pulls four hundred and
  * forty-six modules into every process that boots. A worker is opt-in, so the
  * common answer is no, and the common case used to pay for the other one.
