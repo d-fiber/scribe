@@ -36,7 +36,8 @@
 
 import type { Future } from "@scribe/alchemy";
 import { create } from "@bufbuild/protobuf";
-import { Caller as ProtoCaller, Method as ProtoMethod, Need } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
+import { Caller as ProtoCaller, Need } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
+import { protoMethodOf } from "./methods.ts";
 import {
   DeviceSchema,
   IdentitySchema,
@@ -52,14 +53,6 @@ import { currentIdentity } from "@scribe/runtime/http/accessors/identity.ts";
 import { currentLocation } from "@scribe/runtime/http/accessors/location.ts";
 import { request } from "@scribe/runtime/http/request.ts";
 import { RequestScope } from "@scribe/runtime/scope.ts";
-
-const methods: Record<string, ProtoMethod> = {
-  GET: ProtoMethod.GET,
-  POST: ProtoMethod.POST,
-  PUT: ProtoMethod.PUT,
-  PATCH: ProtoMethod.PATCH,
-  DELETE: ProtoMethod.DELETE,
-};
 
 /**
  * The request headers a worker is allowed to see.
@@ -176,7 +169,7 @@ export async function invocationOf(
     routeId: route.routeId,
     capabilityToken,
     request: create(RequestSchema, {
-      method: methods[request.method()] ?? ProtoMethod.UNSPECIFIED,
+      method: protoMethodOf(request.method()),
       path: request.path(),
       pathParams: { ...pathParams },
       query: queryOf(),

@@ -34,31 +34,29 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Context, Hono } from "hono";
-import { Caller as ProtoCaller, Method as ProtoMethod } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
+import type { Hono } from "hono";
+import { Caller as ProtoCaller } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
 import type {
   Manifest,
   NodeDeclaration,
   RateLimiter as ProtoRateLimiter,
   Route,
 } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
-import type { Reply } from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
 import { Duration } from "@scribe/alchemy";
-import type { Future } from "@scribe/alchemy";
-import type { Caller } from "@scribe/alchemy/route";
-import { isAllowed } from "@scribe/kernel/endpoint/access.ts";
-import type { RateLimit } from "@scribe/alchemy/route";
-import { withinRateLimit } from "@scribe/kernel/endpoint/rate_limit.ts";
-import { ServerResponse } from "@scribe/alchemy/route";
-import { RbacIdentity } from "@scribe/kernel/identity/request_identity.ts";
-import { currentIdentity } from "@scribe/runtime/http/accessors/identity.ts";
-import { request } from "@scribe/runtime/http/request.ts";
-import { RequestScope } from "@scribe/runtime/scope.ts";
-import { CapabilityTokens } from "../capabilities/tokens.ts";
-import { invocationOf } from "./invocation.ts";
+import type { Caller, RateLimit } from "@scribe/alchemy/route";
+import { honoMethodOf } from "./methods.ts";
+import { serve } from "./dispatch.ts";
 import type { WorkerClient } from "./client.ts";
 
-type HonoMethod = "get" | "post" | "put" | "patch" | "delete";
+export type NodeResolver = (node: NodeDeclaration) => Hono;
+
+/** Raised when the manifest cannot be mounted: an unnamed node, a route naming an undeclared node, or a route with no rate limit. */
+export class NodeMountError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NodeMountError";
+  }
+}
 
 /**
  * What each caller of the protocol is, in the vocabulary the host reasons with.
@@ -77,25 +75,6 @@ const callers: Record<ProtoCaller, Caller> = {
   [ProtoCaller.SERVICE]: "service",
   [ProtoCaller.WEBHOOK]: "webhook",
 };
-
-const methods: Record<ProtoMethod, HonoMethod> = {
-  [ProtoMethod.UNSPECIFIED]: "get",
-  [ProtoMethod.GET]: "get",
-  [ProtoMethod.POST]: "post",
-  [ProtoMethod.PUT]: "put",
-  [ProtoMethod.PATCH]: "patch",
-  [ProtoMethod.DELETE]: "delete",
-};
-
-export type NodeResolver = (node: NodeDeclaration) => Hono;
-
-/** Raised when the manifest cannot be mounted: an unnamed node, a route naming an undeclared node, or a route with no rate limit. */
-export class NodeMountError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "NodeMountError";
-  }
-}
 
 /**
  * The limit `route` declares, refusing a route that declares none.
@@ -134,7 +113,7 @@ function limitOf(route: Route): RateLimit {
  * The callers and the limit were derived from the protobuf on every request, which is a handful of
  * allocations per call for a value that cannot change while the worker stays attached.
  */
-interface MountedRoute {
+export interface MountedRoute {
   /** The route the manifest declared, as the invocation still needs it. */
   readonly route: Route;
 
@@ -151,67 +130,6 @@ function mountedRoute(route: Route): MountedRoute {
     access: route.access.map((caller) => callers[caller]),
     limit: limitOf(route),
   };
-}
-
-function responseOf(reply: Reply): Response {
-  if (reply.failure) {
-    console.error(`[worker-invoke] ${reply.failure.code}: ${reply.failure.message}`);
-    return ServerResponse.unexpected();
-  }
-
-  return new Response(reply.body.byteLength > 0 ? (reply.body as BodyInit) : null, {
-    status: reply.status,
-    headers: reply.headers,
-  });
-}
-
-/**
- * Answers a call on `mounted`, once the caller cleared access, the quota and the permissions.
- *
- * @remarks
- * The quota is answered before the permissions, which is both the order {@link ApiEndpoint} uses
- * and the only one that means anything. The other way round, a caller already over its quota was
- * still told whether it holds the permission: the refusal it had earned was computed, its token
- * spent, and then dropped for a more informative one. Probing what a route requires was therefore
- * free however tight the limit was, which is the one thing the limit was there to prevent.
- */
-async function serve(mounted: MountedRoute, client: WorkerClient, c: Context): Future<Response> {
-  const { route } = mounted;
-
-  const [allowed, withinLimit] = await Promise.all([
-    isAllowed(mounted.access, route.webhookVerified),
-    withinRateLimit(route.rateLimitKey, mounted.limit),
-  ]);
-
-  if (!allowed) return ServerResponse.unauthorized();
-  if (!withinLimit) return ServerResponse.tooManyRequests();
-
-  if (route.requiredPermissions.length > 0 && !(await RbacIdentity.grants(route.requiredPermissions))) {
-    return ServerResponse.forbidden({
-      code: "not_permitted",
-      message: "You do not have the required permission to perform this action.",
-    });
-  }
-
-  const traceId = crypto.randomUUID();
-  const token = CapabilityTokens.issue({
-    request: RequestScope.get(),
-    bodyBytes: request.bytes() ?? new Uint8Array(),
-    identity: currentIdentity(),
-    traceId,
-    invocationId: "",
-  });
-
-  try {
-    const invocation = await invocationOf(route, c.req.param(), token, traceId);
-    return responseOf(await client.invoke(invocation));
-  } catch (cause) {
-    const message = cause instanceof Error ? cause.message : String(cause);
-    console.error(`[worker-invoke] ${route.routeId} failed: ${message}`);
-    return ServerResponse.serviceUnavailable();
-  } finally {
-    CapabilityTokens.revoke(token);
-  }
 }
 
 export function mountManifest(
@@ -238,7 +156,7 @@ export function mountManifest(
     }
 
     const prepared = mountedRoute(route);
-    app[methods[route.method]](route.path, (c) => serve(prepared, client, c));
+    app[honoMethodOf(route.method)](route.path, (c) => serve(prepared, client, c));
     mounted += 1;
   }
 
