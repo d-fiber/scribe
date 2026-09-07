@@ -84,7 +84,7 @@
     "@scribe/realtime/testing/settings": "./packages/realtime/tests/testing/settings.ts",
     "@scribe/remote_configs/": "./packages/remote_configs/",
     "@scribe/remote_configs/testing/settings": "./packages/remote_configs/tests/testing/settings.ts",
-    "@scribe/runtime/device/device.ts": "./engine/runtime/device/device.ts",
+    "@scribe/runtime/device/device.ts": "./engine/runtime/device/mod.ts",
     "@scribe/runtime/http/accessors/identity.ts": "./engine/runtime/http/accessors/identity.ts",
     "@scribe/runtime/http/accessors/location.ts": "./engine/runtime/http/accessors/location.ts",
     "@scribe/runtime/http/caller.ts": "./engine/runtime/http/caller.ts",
