@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Future } from "../async/future.ts";
-import type { UnmodifiableList } from "../value/list.ts";
+import { Future } from "../primitives/async/future.ts";
+import type { UnmodifiableList } from "../primitives/value/list.ts";
 import type { DeclaredMessage } from "./message/message.ts";
 import { Message, MessageBuilder } from "./message/message.ts";
 import type { DeclaredRpcService } from "./service/service.ts";

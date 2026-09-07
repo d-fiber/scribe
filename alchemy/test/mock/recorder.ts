@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { UnmodifiableList } from "../../value/list.ts";
-import { ScribeError } from "../../error/scribe_error.ts";
+import type { UnmodifiableList } from "../../primitives/value/list.ts";
+import { ScribeError } from "../../primitives/error/scribe_error.ts";
 import { equal } from "../expect/equal.ts";
 import { format } from "../expect/error.ts";
 import { type ArgumentMatcher, isMatcher } from "./matcher.ts";

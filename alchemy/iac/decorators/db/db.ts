@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Lifecycle } from "../../../lifecycle/lifecycle.ts";
+import { Lifecycle } from "../../../wiring/lifecycle/lifecycle.ts";
 
 /**
  * Marks a class as one this framework instantiates itself, the moment the class is evaluated —

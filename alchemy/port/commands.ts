@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "../async/future.ts";
-import { Slot } from "../bind/slot.ts";
+import type { Future } from "../primitives/async/future.ts";
+import { Slot } from "../wiring/bind/slot.ts";
 
 /**
  * What a program left behind once it exited.

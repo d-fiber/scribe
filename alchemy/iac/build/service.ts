@@ -34,10 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../declare/registry.ts";
+import { Registry } from "../../wiring/declare/registry.ts";
 import { resolveValue } from "./value.ts";
 import type { DeployValue, Loose, ValueLike } from "./value.ts";
-import type { UnmodifiableList } from "../../value/list.ts";
+import type { UnmodifiableList } from "../../primitives/value/list.ts";
 
 /** Where a service's image comes from: a reference already built, or a `Dockerfile` this builds. */
 export type ServiceSource = ImageSource | BuildSource;

@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { NowSource } from "../../value/date_time.ts";
-import type { Duration } from "../../value/duration.ts";
+import type { NowSource } from "../../primitives/value/date_time.ts";
+import type { Duration } from "../../primitives/value/duration.ts";
 
 /**
  * A source of time that stands still until the case moves it.

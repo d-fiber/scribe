@@ -34,10 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Lazy } from "../bind/lazy.ts";
-import { Slot } from "../bind/slot.ts";
-import { Registry } from "../declare/registry.ts";
-import type { Future } from "../async/future.ts";
+import { Lazy } from "../wiring/bind/lazy.ts";
+import { Slot } from "../wiring/bind/slot.ts";
+import { Registry } from "../wiring/declare/registry.ts";
+import type { Future } from "../primitives/async/future.ts";
 
 /** What declaring a hook takes. */
 export interface HookOptions {

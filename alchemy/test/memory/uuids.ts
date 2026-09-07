@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { UnmodifiableList } from "../../value/list.ts";
-import type { UuidSource } from "../../value/uuid.ts";
+import type { UnmodifiableList } from "../../primitives/value/list.ts";
+import type { UuidSource } from "../../primitives/value/uuid.ts";
 
 /** How many digits the counter fills in the last field of the identifier. */
 const WIDTH = 12;

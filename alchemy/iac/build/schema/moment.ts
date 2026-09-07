@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../../declare/registry.ts";
-import type { UnmodifiableList } from "../../../value/list.ts";
+import { Registry } from "../../../wiring/declare/registry.ts";
+import type { UnmodifiableList } from "../../../primitives/value/list.ts";
 
 /**
  * Which of a package's three `db` moments a declaration belongs to — `init`, played once against

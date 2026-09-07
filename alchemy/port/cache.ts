@@ -34,12 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "../async/future.ts";
-import type { List, UnmodifiableList } from "../value/list.ts";
-import { Duration } from "../value/duration.ts";
-import { TimeoutException, withDeadline } from "../async/deadline.ts";
-import { Lazy } from "../bind/lazy.ts";
-import { Slot } from "../bind/slot.ts";
+import type { Future } from "../primitives/async/future.ts";
+import type { List, UnmodifiableList } from "../primitives/value/list.ts";
+import { Duration } from "../primitives/value/duration.ts";
+import { TimeoutException, withDeadline } from "../primitives/async/deadline.ts";
+import { Lazy } from "../wiring/bind/lazy.ts";
+import { Slot } from "../wiring/bind/slot.ts";
 
 /** What opening a cache takes. */
 export interface CacheOptions {

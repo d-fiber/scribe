@@ -34,10 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { BaseClient } from "../../http/client/base_client.ts";
-import { ByteStream } from "../../http/byte_stream.ts";
-import type { BaseRequest } from "../../http/request/base_request.ts";
-import { StreamedResponse } from "../../http/response/streamed_response.ts";
+import { BaseClient } from "../../network/http/client/base_client.ts";
+import { ByteStream } from "../../network/http/byte_stream.ts";
+import type { BaseRequest } from "../../network/http/request/base_request.ts";
+import { StreamedResponse } from "../../network/http/response/streamed_response.ts";
 
 /** The one answer a {@link MemoryClient} gives back, whatever it is handed. */
 export interface MemoryAnswer {

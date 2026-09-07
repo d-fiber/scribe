@@ -48,51 +48,51 @@
  * already wrote.
  */
 
-export { Future, unawaited } from "./async/future.ts";
-export type { FutureOr } from "./async/future.ts";
-export { Completer } from "./async/stream.ts";
-export type { Stream } from "./async/stream.ts";
-export { Bytes } from "./value/bytes.ts";
-export type { Comparable } from "./value/comparable.ts";
-export { DateTime, Now } from "./value/date_time.ts";
-export type { NowSource } from "./value/date_time.ts";
-export { Duration } from "./value/duration.ts";
-export type { LatLng } from "./value/lat_lng.ts";
-export type { List, UnmodifiableList } from "./value/list.ts";
-export { Stopwatch } from "./value/stopwatch.ts";
-export type { Uri } from "./value/uri.ts";
-export { Uuid, Uuids } from "./value/uuid.ts";
-export type { UuidSource } from "./value/uuid.ts";
-export type { Expando, Finalizer, WeakReference } from "./value/weak.ts";
-export { base64, base64Url, hex, json, utf8 } from "./value/convert.ts";
-export type { BytesCodec, Codec } from "./value/convert.ts";
+export { Future, unawaited } from "./primitives/async/future.ts";
+export type { FutureOr } from "./primitives/async/future.ts";
+export { Completer } from "./primitives/async/stream.ts";
+export type { Stream } from "./primitives/async/stream.ts";
+export { Bytes } from "./primitives/value/bytes.ts";
+export type { Comparable } from "./primitives/value/comparable.ts";
+export { DateTime, Now } from "./primitives/value/date_time.ts";
+export type { NowSource } from "./primitives/value/date_time.ts";
+export { Duration } from "./primitives/value/duration.ts";
+export type { LatLng } from "./primitives/value/lat_lng.ts";
+export type { List, UnmodifiableList } from "./primitives/value/list.ts";
+export { Stopwatch } from "./primitives/value/stopwatch.ts";
+export type { Uri } from "./primitives/value/uri.ts";
+export { Uuid, Uuids } from "./primitives/value/uuid.ts";
+export type { UuidSource } from "./primitives/value/uuid.ts";
+export type { Expando, Finalizer, WeakReference } from "./primitives/value/weak.ts";
+export { base64, base64Url, hex, json, utf8 } from "./primitives/value/convert.ts";
+export type { BytesCodec, Codec } from "./primitives/value/convert.ts";
 
-export { Pagination } from "./value/pagination.ts";
-export type { PageRequest, PaginationJson } from "./value/pagination.ts";
-export { Failure, Ok, okay } from "./value/result.ts";
-export type { Result } from "./value/result.ts";
+export { Pagination } from "./primitives/value/pagination.ts";
+export type { PageRequest, PaginationJson } from "./primitives/value/pagination.ts";
+export { Failure, Ok, okay } from "./primitives/value/result.ts";
+export type { Result } from "./primitives/value/result.ts";
 
-export { BindingError, Slot } from "./bind/slot.ts";
-export { Lazy } from "./bind/lazy.ts";
+export { BindingError, Slot } from "./wiring/bind/slot.ts";
+export { Lazy } from "./wiring/bind/lazy.ts";
 
-export { Container, container } from "./di/container.ts";
-export type { Token } from "./di/container.ts";
-export { Singleton } from "./di/decorators.ts";
-export type { SingletonOptions } from "./di/decorators.ts";
+export { Container, container } from "./wiring/di/container.ts";
+export type { Token } from "./wiring/di/container.ts";
+export { Singleton } from "./wiring/di/decorators.ts";
+export type { SingletonOptions } from "./wiring/di/decorators.ts";
 
-export { ExponentialBackoff } from "./async/backoff.ts";
-export { TimeoutException, withDeadline, withDeadlineLite } from "./async/deadline.ts";
-export { runPooled } from "./async/pool.ts";
-export { Semaphore } from "./async/semaphore.ts";
-export type { Release } from "./async/semaphore.ts";
+export { ExponentialBackoff } from "./primitives/async/backoff.ts";
+export { TimeoutException, withDeadline, withDeadlineLite } from "./primitives/async/deadline.ts";
+export { runPooled } from "./primitives/async/pool.ts";
+export { Semaphore } from "./primitives/async/semaphore.ts";
+export type { Release } from "./primitives/async/semaphore.ts";
 
-export { Current, Currents } from "./scope/current.ts";
-export type { CurrentDriver, CurrentStore } from "./scope/current.ts";
+export { Current, Currents } from "./wiring/scope/current.ts";
+export type { CurrentDriver, CurrentStore } from "./wiring/scope/current.ts";
 
-export { FormatException } from "./error/format_exception.ts";
-export { Refusal, REFUSAL_KINDS } from "./error/refusal.ts";
-export type { RefusalKind } from "./error/refusal.ts";
-export { ScribeError } from "./error/scribe_error.ts";
+export { FormatException } from "./primitives/error/format_exception.ts";
+export { Refusal, REFUSAL_KINDS } from "./primitives/error/refusal.ts";
+export type { RefusalKind } from "./primitives/error/refusal.ts";
+export { ScribeError } from "./primitives/error/scribe_error.ts";
 
 export { DeclarationError, DEFAULT_DESCRIPTION, Package } from "./package/package.ts";
 export type {
@@ -132,15 +132,15 @@ export type { PackageDirectory } from "./package/layout.ts";
 export { Constraint } from "./package/constraint.ts";
 export { Version, VersionError } from "./package/version.ts";
 
-export { DuplicateDeclarationError, Registry } from "./declare/registry.ts";
+export { DuplicateDeclarationError, Registry } from "./wiring/declare/registry.ts";
 
-export { jobDecorator, JobRegistry } from "./declare/job.ts";
-export type { JobHandler, RegisteredJob } from "./declare/job.ts";
-export { Init, initRegistry } from "./lifecycle/init.ts";
-export type { InitHandler, RegisteredInit } from "./lifecycle/init.ts";
-export { Lifecycle } from "./lifecycle/lifecycle.ts";
-export { Run, runRegistry } from "./lifecycle/run.ts";
-export type { RegisteredRun, RunHandler } from "./lifecycle/run.ts";
+export { jobDecorator, JobRegistry } from "./wiring/declare/job.ts";
+export type { JobHandler, RegisteredJob } from "./wiring/declare/job.ts";
+export { Init, initRegistry } from "./wiring/lifecycle/init.ts";
+export type { InitHandler, RegisteredInit } from "./wiring/lifecycle/init.ts";
+export { Lifecycle } from "./wiring/lifecycle/lifecycle.ts";
+export { Run, runRegistry } from "./wiring/lifecycle/run.ts";
+export type { RegisteredRun, RunHandler } from "./wiring/lifecycle/run.ts";
 
 export { cron, Crons, forgetCrons, installCrons } from "./port/cron.ts";
 export type { CronDriver, CronOptions, DeclaredCron, DeclaredSchedule, DeclaredTimeOfDay } from "./port/cron.ts";
@@ -180,10 +180,10 @@ export type { Environment } from "./port/env.ts";
 export { Commands } from "./port/commands.ts";
 export type { Command, CommandOptions, CommandResult } from "./port/commands.ts";
 
-export { renderError } from "./diagnostic/render.ts";
-export type { RenderOptions } from "./diagnostic/render.ts";
-export { foldFrames, framesOf } from "./diagnostic/stack.ts";
-export type { Frame } from "./diagnostic/stack.ts";
+export { renderError } from "./primitives/diagnostic/render.ts";
+export type { RenderOptions } from "./primitives/diagnostic/render.ts";
+export { foldFrames, framesOf } from "./primitives/diagnostic/stack.ts";
+export type { Frame } from "./primitives/diagnostic/stack.ts";
 
 export { Databases, schema } from "./port/database.ts";
 export type {
@@ -393,8 +393,8 @@ export type { MigrationDbHandler, RegisteredMigrationDb } from "./iac/decorators
 export { ProvisioningDB, provisioningDbRegistry } from "./iac/decorators/db/provisioning.ts";
 export type { ProvisioningDbHandler, RegisteredProvisioningDb } from "./iac/decorators/db/provisioning.ts";
 
-export { ListOf, Nested, Required } from "./api/body/mod.ts";
-export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema, PrimitiveType } from "./api/body/mod.ts";
+export { ListOf, Nested, Required } from "./network/api/body/mod.ts";
+export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema, PrimitiveType } from "./network/api/body/mod.ts";
 
 export {
   ClientProtocol,

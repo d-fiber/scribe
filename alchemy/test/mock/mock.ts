@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { List, UnmodifiableList } from "../../value/list.ts";
-import { ScribeError } from "../../error/scribe_error.ts";
+import type { List, UnmodifiableList } from "../../primitives/value/list.ts";
+import { ScribeError } from "../../primitives/error/scribe_error.ts";
 import { currentIntent, describe, type Invocation, keepCaptured, note, Recorder } from "./recorder.ts";
 
 /** Where a double keeps its memory, hidden from the type it stands for. */

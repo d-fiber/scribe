@@ -34,10 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "../async/future.ts";
-import { Slot } from "../bind/slot.ts";
-import type { Bytes } from "../value/bytes.ts";
-import type { List } from "../value/list.ts";
+import type { Future } from "../primitives/async/future.ts";
+import { Slot } from "../wiring/bind/slot.ts";
+import type { Bytes } from "../primitives/value/bytes.ts";
+import type { List } from "../primitives/value/list.ts";
 
 /**
  * One thing a listing found, whether it holds bytes or other things.

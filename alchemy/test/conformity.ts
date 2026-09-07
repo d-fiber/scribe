@@ -34,10 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "../async/future.ts";
+import type { Future } from "../primitives/async/future.ts";
 import type { CacheDriver } from "../port/cache.ts";
-import { Duration } from "../value/duration.ts";
-import { Now } from "../value/date_time.ts";
+import { Duration } from "../primitives/value/duration.ts";
+import { Now } from "../primitives/value/date_time.ts";
 import { FixedNow } from "./memory/now.ts";
 import { AssertionError } from "./expect/error.ts";
 

@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { ScribeError } from "../error/scribe_error.ts";
+import { ScribeError } from "../primitives/error/scribe_error.ts";
 
 /** Raised when a text cannot be read as a version, or as a constraint over versions. */
 export class VersionError extends ScribeError {}

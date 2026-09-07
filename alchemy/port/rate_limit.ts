@@ -34,10 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Lazy } from "../bind/lazy.ts";
-import { Slot } from "../bind/slot.ts";
-import type { Future } from "../async/future.ts";
-import type { Duration } from "../value/duration.ts";
+import { Lazy } from "../wiring/bind/lazy.ts";
+import { Slot } from "../wiring/bind/slot.ts";
+import type { Future } from "../primitives/async/future.ts";
+import type { Duration } from "../primitives/value/duration.ts";
 
 /** What opening a rate limit takes. */
 export interface RateLimitOptions {

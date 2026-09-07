@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { ScribeError } from "../error/scribe_error.ts";
+import { ScribeError } from "../primitives/error/scribe_error.ts";
 import { Constraint } from "./constraint.ts";
 import { Version } from "./version.ts";
 import type { DependencySource, Manifest } from "./manifest.ts";

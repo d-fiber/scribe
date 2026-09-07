@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { jobDecorator, JobRegistry } from "../../../declare/job.ts";
-import type { JobHandler, RegisteredJob } from "../../../declare/job.ts";
+import { jobDecorator, JobRegistry } from "../../../wiring/declare/job.ts";
+import type { JobHandler, RegisteredJob } from "../../../wiring/declare/job.ts";
 
 /** The body of a one-time database job. Throwing stops a runner before it tracks this job as done. */
 export type InitDbHandler = JobHandler;

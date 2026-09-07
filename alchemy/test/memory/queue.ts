@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "../../async/future.ts";
-import type { UnmodifiableList } from "../../value/list.ts";
+import type { Future } from "../../primitives/async/future.ts";
+import type { UnmodifiableList } from "../../primitives/value/list.ts";
 import type { DeclaredQueue, DeclaredQueueOptions, QueueDriver, QueueMessage } from "../../port/queue.ts";
 import { openKeyed } from "./opener.ts";
 

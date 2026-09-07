@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../declare/registry.ts";
+import { Registry } from "../../wiring/declare/registry.ts";
 import { resolveValue } from "./value.ts";
 import type { DeployValue, Loose, ValueLike } from "./value.ts";
 import type { DeclaredRecipe } from "./recipe.ts";
@@ -45,7 +45,7 @@ import type { DeclaredIndex, DeclaredPolicy, DeclaredTable } from "./schema/tabl
 import type { DeclaredExtension } from "./schema/objects/extension.ts";
 import type { DeclaredGrant } from "./schema/access/grant.ts";
 import type { DeclaredDrop } from "./schema/lifecycle/drop.ts";
-import type { UnmodifiableList } from "../../value/list.ts";
+import type { UnmodifiableList } from "../../primitives/value/list.ts";
 
 /**
  * A Postgres attribute a provisioned role can carry, spelled the way `create role` takes it —

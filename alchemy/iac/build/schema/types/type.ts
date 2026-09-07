@@ -36,7 +36,7 @@
 
 import { ColumnFactory, columnsOf } from "./column.ts";
 import type { ColumnMap, ColumnType } from "./column.ts";
-import type { UnmodifiableList } from "../../../../value/list.ts";
+import type { UnmodifiableList } from "../../../../primitives/value/list.ts";
 import type { DbMoment } from "../moment.ts";
 import { MomentRegistry, SchemaEntry } from "../moment.ts";
 

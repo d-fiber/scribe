@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { List } from "../../value/list.ts";
+import type { List } from "../../primitives/value/list.ts";
 import { equal } from "./equal.ts";
 
 /**

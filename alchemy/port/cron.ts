@@ -34,11 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Slot } from "../bind/slot.ts";
-import { Registry } from "../declare/registry.ts";
-import type { Future } from "../async/future.ts";
-import type { UnmodifiableList } from "../value/list.ts";
-import type { Duration } from "../value/duration.ts";
+import { Slot } from "../wiring/bind/slot.ts";
+import { Registry } from "../wiring/declare/registry.ts";
+import type { Future } from "../primitives/async/future.ts";
+import type { UnmodifiableList } from "../primitives/value/list.ts";
+import type { Duration } from "../primitives/value/duration.ts";
 
 /** A time of day, told in whole hours and minutes. */
 export interface DeclaredTimeOfDay {

@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { UnmodifiableList } from "../../value/list.ts";
+import type { UnmodifiableList } from "../../primitives/value/list.ts";
 
 /** One value of a {@link DeclaredProtoEnum}, exactly as an {@link EnumValueBuilder} resolved it. */
 export interface DeclaredEnumValue {

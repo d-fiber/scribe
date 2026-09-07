@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Slot } from "../bind/slot.ts";
+import { Slot } from "../wiring/bind/slot.ts";
 
 /**
  * The settings a process was started with, read by name.

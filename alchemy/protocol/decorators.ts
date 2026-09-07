@@ -34,10 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../declare/registry.ts";
-import type { UnmodifiableList } from "../value/list.ts";
-import type { List } from "../value/list.ts";
-import type { Future } from "../async/future.ts";
+import { Registry } from "../wiring/declare/registry.ts";
+import type { UnmodifiableList } from "../primitives/value/list.ts";
+import type { List } from "../primitives/value/list.ts";
+import type { Future } from "../primitives/async/future.ts";
 import type { ProtocolBuilder } from "./protocol.ts";
 
 /**

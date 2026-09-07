@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { List, UnmodifiableList } from "../../value/list.ts";
+import type { List, UnmodifiableList } from "../../primitives/value/list.ts";
 
 /** The brand that separates a matcher from an ordinary argument of the same shape. */
 const MATCHER = Symbol.for("scribe.alchemy.matcher");

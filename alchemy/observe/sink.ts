@@ -34,9 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "../async/future.ts";
+import type { Future } from "../primitives/async/future.ts";
 import type { LoggedLevel } from "./level.ts";
-import type { UnmodifiableList } from "../value/list.ts";
+import type { UnmodifiableList } from "../primitives/value/list.ts";
 
 /**
  * One thing worth recording, in the shape a sink reads it.

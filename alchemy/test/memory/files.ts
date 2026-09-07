@@ -34,11 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "../../async/future.ts";
-import { ScribeError } from "../../error/scribe_error.ts";
+import type { Future } from "../../primitives/async/future.ts";
+import { ScribeError } from "../../primitives/error/scribe_error.ts";
 import type { FileSystem, FileSystemDriver, FileSystemEntity } from "../../port/files.ts";
-import { Bytes } from "../../value/bytes.ts";
-import type { List } from "../../value/list.ts";
+import { Bytes } from "../../primitives/value/bytes.ts";
+import type { List } from "../../primitives/value/list.ts";
 
 /** A path that was read while nothing was held there. */
 export class MissingFileError extends ScribeError {}

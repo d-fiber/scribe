@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "../../async/future.ts";
+import type { Future } from "../../primitives/async/future.ts";
 import type { DeclaredHook, HookDriver, HookOptions } from "../../port/hook.ts";
 import { openKeyed } from "./opener.ts";
 
