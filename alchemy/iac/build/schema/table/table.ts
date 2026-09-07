@@ -34,13 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../../../declare/registry.ts";
 import type { UnmodifiableList } from "../../../../value/list.ts";
 import type { Loose } from "../../value.ts";
 import type { GrantOptions, GrantRole, Privilege } from "../access/grant.ts";
 import { declareGrant } from "../access/grant.ts";
 import type { DbMoment } from "../moment.ts";
-import { SchemaEntry } from "../moment.ts";
+import { MomentRegistry, SchemaEntry } from "../moment.ts";
 import type {
   ColumnDefinition,
   ColumnMap,
@@ -389,41 +388,14 @@ export interface DeclaredTable {
   readonly revokes: UnmodifiableList<TableRevoke>;
 }
 
-/** A table, and the moment it belongs to — not part of {@link DeclaredTable} itself, since which moment a table belongs to is where it is filed, not a fact carried on the table. */
-interface StoredTable {
-  /** The moment this table belongs to. */
-  readonly moment: DbMoment;
-
-  /** The table exactly as `Table` declared it. */
-  readonly table: DeclaredTable;
-}
-
-/** An index, and the moment its table belongs to. */
-interface StoredIndex {
-  /** The moment this index's table belongs to. */
-  readonly moment: DbMoment;
-
-  /** The index exactly as `Table` declared it. */
-  readonly index: DeclaredIndex;
-}
-
-/** A policy, and the moment its table belongs to. */
-interface StoredPolicy {
-  /** The moment this policy's table belongs to. */
-  readonly moment: DbMoment;
-
-  /** The policy exactly as `Table` declared it. */
-  readonly policy: DeclaredPolicy;
-}
-
 /** Every table this package has declared, by the name it took, alongside the moment it was declared for. */
-const declaredTable = new Registry<StoredTable>("table");
+const declaredTable = new MomentRegistry<DeclaredTable>("table");
 
 /** Every index this package has declared, by the name it took, regardless of which table's `Table` carried it. */
-const declaredIndex = new Registry<StoredIndex>("index");
+const declaredIndex = new MomentRegistry<DeclaredIndex>("index");
 
 /** Every policy this package has declared, by the name it took, regardless of which table's `Table` carried it. */
-const declaredPolicy = new Registry<StoredPolicy>("policy");
+const declaredPolicy = new MomentRegistry<DeclaredPolicy>("policy");
 
 /** Opens a table's composite primary key, closed by {@link TablePrimaryKeyBuilder.columns}. */
 export class TablePrimaryKeyFactory {
@@ -1294,25 +1266,19 @@ export class TableBuilder {
         rowLevelSecurity: this.#rowLevelSecurity === true,
         revokes: this.#revokes,
       };
-      declaredTable.declare(this.#name, { moment, table });
+      declaredTable.declare(this.#name, moment, table);
 
       for (const { name: indexName, ...indexOptions } of this.#indexes) {
-        declaredIndex.declare(indexName, {
-          moment,
-          index: {
-            name: indexName,
-            options: { table: this.#name, ...indexOptions },
-          },
+        declaredIndex.declare(indexName, moment, {
+          name: indexName,
+          options: { table: this.#name, ...indexOptions },
         });
       }
 
       for (const { name: policyName, ...policyOptions } of this.#policies) {
-        declaredPolicy.declare(policyName, {
-          moment,
-          policy: {
-            name: policyName,
-            options: { table: this.#name, ...policyOptions },
-          },
+        declaredPolicy.declare(policyName, moment, {
+          name: policyName,
+          options: { table: this.#name, ...policyOptions },
         });
       }
 
@@ -1353,13 +1319,8 @@ export function Table(name: string): TableBuilder {
 }
 
 /** Every table this package has declared for `moment`, in the order it declared them. */
-export function declaredTables(
-  moment: DbMoment,
-): UnmodifiableList<DeclaredTable> {
-  return declaredTable
-    .all()
-    .filter((entry) => entry.moment === moment)
-    .map((entry) => entry.table);
+export function declaredTables(moment: DbMoment): UnmodifiableList<DeclaredTable> {
+  return declaredTable.at(moment);
 }
 
 /** Forgets every declared table, which is what a test does between cases. */
@@ -1368,13 +1329,8 @@ export function forgetTables(): void {
 }
 
 /** Every index this package has declared for `moment`, in the order it declared them. */
-export function declaredIndexes(
-  moment: DbMoment,
-): UnmodifiableList<DeclaredIndex> {
-  return declaredIndex
-    .all()
-    .filter((entry) => entry.moment === moment)
-    .map((entry) => entry.index);
+export function declaredIndexes(moment: DbMoment): UnmodifiableList<DeclaredIndex> {
+  return declaredIndex.at(moment);
 }
 
 /** Forgets every declared index, which is what a test does between cases. */
@@ -1383,13 +1339,8 @@ export function forgetIndexes(): void {
 }
 
 /** Every policy this package has declared for `moment`, in the order it declared them. */
-export function declaredPolicies(
-  moment: DbMoment,
-): UnmodifiableList<DeclaredPolicy> {
-  return declaredPolicy
-    .all()
-    .filter((entry) => entry.moment === moment)
-    .map((entry) => entry.policy);
+export function declaredPolicies(moment: DbMoment): UnmodifiableList<DeclaredPolicy> {
+  return declaredPolicy.at(moment);
 }
 
 /** Forgets every declared policy, which is what a test does between cases. */

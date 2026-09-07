@@ -34,10 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../../../declare/registry.ts";
 import type { UnmodifiableList } from "../../../../value/list.ts";
 import type { DbMoment } from "../moment.ts";
-import { SchemaEntry } from "../moment.ts";
+import { MomentRegistry, SchemaEntry } from "../moment.ts";
 
 /** The Postgres type a sequence's values are represented as. `bigint` when left out, Postgres's own default. */
 export type SequenceDataType = "smallint" | "integer" | "bigint";
@@ -84,17 +83,8 @@ export interface DeclaredSequence {
   readonly ownedBy: SequenceOwner | null;
 }
 
-/** A sequence, and the moment it belongs to — not part of {@link DeclaredSequence} itself, since which moment a sequence belongs to is where it is filed, not a fact carried on the sequence. */
-interface StoredSequence {
-  /** The moment this sequence belongs to. */
-  readonly moment: DbMoment;
-
-  /** The sequence exactly as `Sequence` declared it. */
-  readonly sequence: DeclaredSequence;
-}
-
 /** Every sequence this package has declared, by the name it took. */
-const declared = new Registry<StoredSequence>("sequence");
+const declared = new MomentRegistry<DeclaredSequence>("sequence");
 
 /**
  * A Postgres sequence under construction, closed by {@link SequenceBuilder.create}.
@@ -190,10 +180,7 @@ export class SequenceBuilder {
       cycle: this.#cycle === true,
       ownedBy: this.#ownedBy ?? null,
     };
-    return new SchemaEntry((moment) => {
-      declared.declare(this.#name, { moment, sequence });
-      return sequence;
-    });
+    return new SchemaEntry((moment) => declared.declare(this.#name, moment, sequence));
   }
 }
 
@@ -217,13 +204,8 @@ export function Sequence(name: string): SequenceBuilder {
 }
 
 /** Every sequence this package has declared for `moment`, in the order it declared them. */
-export function declaredSequences(
-  moment: DbMoment,
-): UnmodifiableList<DeclaredSequence> {
-  return declared
-    .all()
-    .filter((entry) => entry.moment === moment)
-    .map((entry) => entry.sequence);
+export function declaredSequences(moment: DbMoment): UnmodifiableList<DeclaredSequence> {
+  return declared.at(moment);
 }
 
 /** Forgets every declared sequence, which is what a test does between cases. */

@@ -34,11 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../../../declare/registry.ts";
 import type { Loose } from "../../value.ts";
 import type { UnmodifiableList } from "../../../../value/list.ts";
 import type { DbMoment } from "../moment.ts";
-import { SchemaEntry } from "../moment.ts";
+import { MomentRegistry, SchemaEntry } from "../moment.ts";
 
 /**
  * The name of a Postgres extension, spelled the way `create extension` takes it — kept for
@@ -89,17 +88,8 @@ export interface DeclaredExtension {
   readonly options: ExtensionOptions;
 }
 
-/** An extension, and the moment it belongs to — not part of {@link DeclaredExtension} itself, since which moment an extension belongs to is where it is filed, not a fact carried on the extension. */
-interface StoredExtension {
-  /** The moment this extension belongs to. */
-  readonly moment: DbMoment;
-
-  /** The extension exactly as `Extension` declared it. */
-  readonly extension: DeclaredExtension;
-}
-
 /** Every extension this package has declared, by the name it took. */
-const declared = new Registry<StoredExtension>("extension");
+const declared = new MomentRegistry<DeclaredExtension>("extension");
 
 /**
  * Opens a Postgres extension named `name`, closed by {@link ExtensionBuilder.install}.
@@ -153,7 +143,7 @@ export class ExtensionBuilder {
       name: this.#name,
       options: { schema: this.#schema, version: this.#version, cascade: this.#cascade },
     };
-    return new SchemaEntry((moment) => declared.declare(this.#name, { moment, extension }).extension);
+    return new SchemaEntry((moment) => declared.declare(this.#name, moment, extension));
   }
 }
 
@@ -180,7 +170,7 @@ export function Extension(name: ExtensionName): ExtensionBuilder {
 
 /** Every extension this package has declared for `moment`, in the order it declared them. */
 export function declaredExtensions(moment: DbMoment): UnmodifiableList<DeclaredExtension> {
-  return declared.all().filter((entry) => entry.moment === moment).map((entry) => entry.extension);
+  return declared.at(moment);
 }
 
 /** Forgets every declared extension, which is what a test does between cases. */

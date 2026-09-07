@@ -34,12 +34,11 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../../../declare/registry.ts";
 import { ColumnFactory, columnsOf } from "./column.ts";
 import type { ColumnMap, ColumnType } from "./column.ts";
 import type { UnmodifiableList } from "../../../../value/list.ts";
 import type { DbMoment } from "../moment.ts";
-import { SchemaEntry } from "../moment.ts";
+import { MomentRegistry, SchemaEntry } from "../moment.ts";
 
 /** A composite type exactly as `Type` declared it. */
 export interface DeclaredType {
@@ -50,17 +49,8 @@ export interface DeclaredType {
   readonly fields: Readonly<Record<string, ColumnType>>;
 }
 
-/** A composite type, and the moment it belongs to — not part of {@link DeclaredType} itself, since which moment a type belongs to is where it is filed, not a fact carried on the type. */
-interface StoredType {
-  /** The moment this type belongs to. */
-  readonly moment: DbMoment;
-
-  /** The composite type exactly as `Type` declared it. */
-  readonly type: DeclaredType;
-}
-
 /** Every type this package has declared, by the name it took. */
-const declared = new Registry<StoredType>("type");
+const declared = new MomentRegistry<DeclaredType>("type");
 
 /**
  * Opens a Postgres composite type named `name`, closed by {@link TypeBuilder.fields}.
@@ -99,7 +89,7 @@ export class TypeBuilder {
       columnFields[field] = definition.type;
     }
     return new SchemaEntry((moment) =>
-      declared.declare(this.#name, { moment, type: { name: this.#name, fields: columnFields } }).type
+      declared.declare(this.#name, moment, { name: this.#name, fields: columnFields })
     );
   }
 }
@@ -128,7 +118,7 @@ export function Type(name: string): TypeBuilder {
 
 /** Every type this package has declared for `moment`, in the order it declared them. */
 export function declaredTypes(moment: DbMoment): UnmodifiableList<DeclaredType> {
-  return declared.all().filter((entry) => entry.moment === moment).map((entry) => entry.type);
+  return declared.at(moment);
 }
 
 /** Forgets every declared type, which is what a test does between cases. */

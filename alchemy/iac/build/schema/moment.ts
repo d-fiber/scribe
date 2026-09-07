@@ -34,6 +34,9 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
+import { Registry } from "../../../declare/registry.ts";
+import type { UnmodifiableList } from "../../../value/list.ts";
+
 /**
  * Which of a package's three `db` moments a declaration belongs to — `init`, played once against
  * the package's own schema; `migrations`, applied once each as the package evolves, through
@@ -83,5 +86,47 @@ export class SchemaEntry<T> implements SchemaAddable<T> {
   /** Runs the deferred registration this entry wraps, for `moment`, and answers what it declares. */
   declareInto(moment: DbMoment): T {
     return this.#finish(moment);
+  }
+}
+
+/**
+ * Everything of one kind a package declared across its three `db` moments, filed by name and read
+ * back one moment at a time.
+ *
+ * @remarks
+ * `Table`, `Enum`, `Extension`, `Sequence` and `Type` each keep one of these, and `Table` keeps
+ * three, one for its tables, one for its indexes and one for its policies: none of them carries its
+ * own moment any more, `## Schema` in `schema.md` gives the reason, so each needs the same pairing
+ * of a name-keyed {@link Registry} with the moment its declaration was filed under. `Grant` is the
+ * one exception, and stays outside this class rather than being forced into it: two grants never
+ * collide on a name, so it keeps a plain array instead of a `Registry` — `access/grant.ts`'s own
+ * remarks give the reason.
+ */
+export class MomentRegistry<T> {
+  readonly #held: Registry<{ moment: DbMoment; value: T }>;
+
+  /** Opens a registry for declarations of `kind`, the same word a bare {@link Registry} would take. */
+  constructor(kind: string) {
+    this.#held = new Registry(kind);
+  }
+
+  /**
+   * Records that `name` was declared for `moment`, and answers what was declared under it.
+   *
+   * @throws {DuplicateDeclarationError} When `name` was already taken, regardless of which moment
+   * it was taken for.
+   */
+  declare(name: string, moment: DbMoment, value: T): T {
+    return this.#held.declare(name, { moment, value }).value;
+  }
+
+  /** Everything declared for `moment`, in the order it was declared. */
+  at(moment: DbMoment): UnmodifiableList<T> {
+    return this.#held.all().filter((entry) => entry.moment === moment).map((entry) => entry.value);
+  }
+
+  /** Forgets everything declared, which is what a test does between cases. */
+  forget(): void {
+    this.#held.forget();
   }
 }

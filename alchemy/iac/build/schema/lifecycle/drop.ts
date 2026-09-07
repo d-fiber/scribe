@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../../../declare/registry.ts";
 import type { UnmodifiableList } from "../../../../value/list.ts";
+import { MomentRegistry } from "../moment.ts";
 import type { DbMoment, SchemaAddable } from "../moment.ts";
 
 /** The kind of object a `Drop` targets, one member per method {@link DropTarget} exposes. */
@@ -49,17 +49,8 @@ export type DeclaredDrop =
   | { readonly kind: "policy"; readonly name: string; readonly table: string; readonly cascade: boolean }
   | { readonly kind: "extension"; readonly name: string; readonly cascade: boolean };
 
-/** A retirement, and the moment it belongs to — not part of {@link DeclaredDrop} itself, since which moment a retirement belongs to is where it is filed, not a fact carried on it. */
-interface StoredDrop {
-  /** The moment this retirement belongs to. */
-  readonly moment: DbMoment;
-
-  /** The retirement exactly as `Drop` declared it. */
-  readonly drop: DeclaredDrop;
-}
-
 /** Every retirement this package has declared, by the kind and the name it took together. */
-const declared = new Registry<StoredDrop>("drop");
+const declared = new MomentRegistry<DeclaredDrop>("drop");
 
 /**
  * A retirement under construction, still open to {@link cascade}, declared once handed to one of
@@ -100,7 +91,7 @@ export class DropDeclaration implements SchemaAddable<DeclaredDrop> {
    * @throws {DuplicateDeclarationError} When this object has already been declared as one to drop.
    */
   declareInto(moment: DbMoment): DeclaredDrop {
-    return declared.declare(this.#key, { moment, drop: this.#record as DeclaredDrop }).drop;
+    return declared.declare(this.#key, moment, this.#record as DeclaredDrop);
   }
 }
 
@@ -209,7 +200,7 @@ export function Drop(name: string): DropTarget {
 
 /** Every retirement this package has declared for `moment`, in the order it declared them. */
 export function declaredDrops(moment: DbMoment): UnmodifiableList<DeclaredDrop> {
-  return declared.all().filter((entry) => entry.moment === moment).map((entry) => entry.drop);
+  return declared.at(moment);
 }
 
 /** Forgets every declared retirement, which is what a test does between cases. */

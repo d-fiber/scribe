@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../../../declare/registry.ts";
 import type { UnmodifiableList } from "../../../../value/list.ts";
+import { MomentRegistry } from "../moment.ts";
 import type { DbMoment, SchemaAddable } from "../moment.ts";
 
 /** An enum exactly as {@link Enum} declared it. */
@@ -47,17 +47,8 @@ export interface DeclaredEnum {
   readonly values: UnmodifiableList<string>;
 }
 
-/** An enum, and the moment it belongs to — not part of {@link DeclaredEnum} itself, since which moment an enum belongs to is where it is filed, not a fact carried on the enum. */
-interface StoredEnum {
-  /** The moment this enum belongs to. */
-  readonly moment: DbMoment;
-
-  /** The enum exactly as `Enum` declared it. */
-  readonly enum: DeclaredEnum;
-}
-
 /** Every enum this package has declared, by the name it took. */
-const declared = new Registry<StoredEnum>("enum");
+const declared = new MomentRegistry<DeclaredEnum>("enum");
 
 /**
  * A Postgres enum type named `name`, growing one value at a time, declared once handed to one of
@@ -94,7 +85,7 @@ export class EnumBuilder implements SchemaAddable<DeclaredEnum> {
    * @throws {DuplicateDeclarationError} When this enum's name has already been declared.
    */
   declareInto(moment: DbMoment): DeclaredEnum {
-    return declared.declare(this.#name, { moment, enum: { name: this.#name, values: this.#values } }).enum;
+    return declared.declare(this.#name, moment, { name: this.#name, values: this.#values });
   }
 }
 
@@ -118,7 +109,7 @@ export function Enum(name: string): EnumBuilder {
 
 /** Every enum this package has declared for `moment`, in the order it declared them. */
 export function declaredEnums(moment: DbMoment): UnmodifiableList<DeclaredEnum> {
-  return declared.all().filter((entry) => entry.moment === moment).map((entry) => entry.enum);
+  return declared.at(moment);
 }
 
 /** Forgets every declared enum, which is what a test does between cases. */
