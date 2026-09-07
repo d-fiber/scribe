@@ -53,7 +53,7 @@ export const provisioningDbRegistry: JobRegistry = new JobRegistry("provisioning
  * depend on but that a `Role` or an `Extension` cannot express: reaching a service to reserve a
  * name, minting a credential nothing in the schema itself needs to know about yet.
  *
- * ```ts
+ * ```ts ignore
  * @DB()
  * export class Bootstrap {
  *   @ProvisioningDB()

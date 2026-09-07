@@ -52,7 +52,7 @@ export const runRegistry: JobRegistry = new JobRegistry("run");
  * nothing is tracked: a `@Run` method plays on every `scribe run`/`scribe deploy`, restart
  * included, never only the first one.
  *
- * ```ts
+ * ```ts ignore
  * @Lifecycle()
  * export class Seeds {
  *   @Init()

@@ -51,7 +51,7 @@ export const initRegistry: JobRegistry = new JobRegistry("init");
  * potentially slow, one-time work a project or a package cannot do without: seeding a default
  * account, backfilling a table, calling out to provision something external.
  *
- * ```ts
+ * ```ts ignore
  * @Lifecycle()
  * export class Seeds {
  *   @Init()

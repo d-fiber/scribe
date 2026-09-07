@@ -52,7 +52,7 @@ export const migrationDbRegistry: JobRegistry = new JobRegistry("migration-db");
  * schema entry cannot express on its own: backfilling a column just added, translating rows into
  * a shape a migration's own SQL only set up.
  *
- * ```ts
+ * ```ts ignore
  * @DB()
  * export class Backfills {
  *   @MigrationDB()

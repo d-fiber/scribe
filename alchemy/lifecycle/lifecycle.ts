@@ -49,7 +49,7 @@ type Constructible = new () => object;
  * as soon as the class is defined, which is also the moment `@Init`/`@Run` register whatever they
  * marked.
  *
- * ```ts
+ * ```ts ignore
  * @Lifecycle()
  * export class Seeds {
  *   @Init()

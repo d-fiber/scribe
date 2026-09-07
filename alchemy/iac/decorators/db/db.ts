@@ -48,7 +48,7 @@ import { Lifecycle } from "../../../lifecycle/lifecycle.ts";
  * class that only carries database jobs reads as one at a glance, the way `@Init`/`@Run` already
  * read as generic jobs under a bare `@Lifecycle`.
  *
- * ```ts
+ * ```ts ignore
  * @DB()
  * export class Seeds {
  *   @InitDB()

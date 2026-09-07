@@ -52,7 +52,7 @@ export const initDbRegistry: JobRegistry = new JobRegistry("init-db");
  * one-time database work no schema entry covers: seeding a row whose value has to be generated,
  * calling out to a service to mint a credential a first table depends on.
  *
- * ```ts
+ * ```ts ignore
  * @DB()
  * export class Seeds {
  *   @InitDB()
