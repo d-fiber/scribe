@@ -38,7 +38,7 @@ import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import "@scribe/testing/settings.ts";
 import { ClientType, DeviceCategory, DeviceOs, DeviceThemeMode, Localization } from "@scribe/contracts/enums.ts";
-import { decryptRequestDevice, requestDevice } from "@scribe/runtime/device/device.ts";
+import { decryptRequestDevice, requestDevice } from "@scribe/runtime/device/decrypt.ts";
 import {
   DEVICE_PAYLOAD_MAX_AGE_MS,
   DEVICE_PAYLOAD_MAX_FUTURE_SKEW_MS,

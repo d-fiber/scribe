@@ -37,7 +37,7 @@
 import { wrote } from "@scribe/foundation/database";
 import type { RequestDevice } from "@scribe/contracts/device.ts";
 import type { DeviceCategory, DeviceOs } from "@scribe/contracts/enums.ts";
-import { requestDevice } from "@scribe/runtime/device/device.ts";
+import { requestDevice } from "@scribe/runtime/device/decrypt.ts";
 import { currentLocation } from "@scribe/runtime/http/accessors/location.ts";
 import { request } from "@scribe/runtime/http/request.ts";
 import type { AccountDevice } from "../../contracts/device.ts";

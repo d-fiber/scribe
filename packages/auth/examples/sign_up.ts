@@ -1,4 +1,4 @@
-import { requestDevice } from "@scribe/runtime/device/device.ts";
+import { requestDevice } from "@scribe/runtime/device/decrypt.ts";
 import { SignUpError } from "@scribe/auth/sign_up";
 import { operator, user } from "./declaration.ts";
 

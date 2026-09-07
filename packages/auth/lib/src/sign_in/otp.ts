@@ -37,7 +37,7 @@
 import { SignOutScope } from "../../contracts/account.ts";
 import { Duration } from "@scribe/alchemy";
 import { Failure, Ok, type Result } from "@scribe/alchemy";
-import { requestDevice } from "@scribe/runtime/device/device.ts";
+import { requestDevice } from "@scribe/runtime/device/decrypt.ts";
 import { sha256Hex } from "@scribe/runtime/primitives/crypto/hash.ts";
 import { rateLimit } from "@scribe/alchemy";
 import type { RateLimiter } from "@scribe/alchemy";
