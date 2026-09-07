@@ -38,7 +38,7 @@ import { cacheSettings } from "@scribe/foundation/cache";
 import { databaseSettings } from "@scribe/foundation/database";
 import { queueSettings } from "@scribe/foundation/queue";
 import type { QueueSettings } from "@scribe/foundation";
-import { RedisRateLimiters } from "@scribe/foundation/rate_limit";
+import { RedisRateLimiters } from "@scribe/foundation/internal/rate_limiter";
 import { deviceSettings } from "@scribe/runtime/settings/device.ts";
 import { runMounted } from "@scribe/runtime/wiring/packages.ts";
 import { firewallSettings } from "@scribe/runtime/settings/firewall.ts";

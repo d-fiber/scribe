@@ -37,7 +37,7 @@
 import { type Future, initRegistry } from "@scribe/alchemy";
 import { EXTENSION_INIT } from "@scribe/contracts/extensions.ts";
 import { extensions } from "@scribe/runtime/wiring/extensions/mod.ts";
-import { inits } from "@scribe/foundation/lifecycle";
+import { inits } from "@scribe/foundation/internal/lifecycle_tables";
 
 /**
  * Loads whatever the project declared, then plays each job that has never run before.
