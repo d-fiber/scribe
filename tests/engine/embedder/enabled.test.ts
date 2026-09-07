@@ -38,7 +38,7 @@ import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals, assertFalse } from "@std/assert";
 import type { WorkerSettings } from "@scribe/contracts/settings.ts";
-import { workerSettings } from "@scribe/runtime/settings/worker.ts";
+import { workerSettings } from "@scribe/runtime/settings.ts";
 import { workerEnabled } from "@scribe/embedder/enabled.ts";
 
 const DEPLOYMENT: WorkerSettings = {

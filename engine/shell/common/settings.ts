@@ -38,11 +38,8 @@ import { cacheSettings } from "@scribe/foundation/cache";
 import { databaseSettings } from "@scribe/foundation/database";
 import { queueSettings } from "@scribe/foundation/queue";
 import { RedisRateLimiters } from "@scribe/foundation/internal/rate_limiter";
-import { deviceSettings } from "@scribe/runtime/settings/device.ts";
 import { runMounted } from "@scribe/runtime/wiring/packages.ts";
-import { firewallSettings } from "@scribe/runtime/settings/firewall.ts";
-import { httpSettings } from "@scribe/runtime/settings/http.ts";
-import { identitySettings } from "@scribe/runtime/settings/identity.ts";
+import { deviceSettings, firewallSettings, httpSettings, identitySettings, workerSettings } from "@scribe/runtime/settings.ts";
 import type { Command, Environment, FileSystemDriver } from "@scribe/alchemy";
 import { Commands, Environments, FileSystems, RateLimiters } from "@scribe/alchemy";
 import { LocalCommands as BunCommands } from "@scribe/scholium/bun/commands.ts";
@@ -60,7 +57,6 @@ import { currentStack } from "@scribe/scholium/host.ts";
 import { type Listener, Listeners } from "@scribe/scholium/listener.ts";
 import { type Process, Processes } from "@scribe/scholium/process.ts";
 import { pickStack } from "@scribe/scholium/stack.ts";
-import { workerSettings } from "@scribe/runtime/settings/worker.ts";
 import { KNOWN_JWT_ALGORITHMS } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
 
 /**

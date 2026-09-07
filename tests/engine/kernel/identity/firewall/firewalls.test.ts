@@ -38,7 +38,7 @@ import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import "@scribe/testing/settings.ts";
 import { AppKeyFirewall } from "@scribe/kernel/identity/firewall/app_key.ts";
-import { firewallSettings } from "@scribe/runtime/settings/firewall.ts";
+import { firewallSettings } from "@scribe/runtime/settings.ts";
 import { InternalSecretFirewall } from "@scribe/kernel/identity/firewall/internal.ts";
 import { constantTimeEqual } from "@scribe/runtime/primitives/crypto/constant_time.ts";
 import { RequestScope } from "@scribe/runtime/scope.ts";

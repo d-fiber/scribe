@@ -34,10 +34,36 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { DeviceSettings } from "@scribe/contracts/settings.ts";
+import type {
+  DeviceSettings,
+  FirewallSettings,
+  HttpSettings,
+  IdentitySettings,
+  WorkerSettings,
+} from "@scribe/contracts/settings.ts";
 import { Slot } from "@scribe/alchemy";
 
 /** The device payload settings the host fills once at boot. */
 export const deviceSettings: Slot<DeviceSettings> = new Slot<DeviceSettings>(
   "device",
+);
+
+/** The firewall settings the host fills once at boot. */
+export const firewallSettings: Slot<FirewallSettings> = new Slot<FirewallSettings>(
+  "firewall",
+);
+
+/** The HTTP settings the host fills once at boot. */
+export const httpSettings: Slot<HttpSettings> = new Slot<HttpSettings>(
+  "http",
+);
+
+/** The identity settings the host fills once at boot. */
+export const identitySettings: Slot<IdentitySettings> = new Slot<IdentitySettings>(
+  "identity",
+);
+
+/** The worker settings the host fills once at boot. */
+export const workerSettings: Slot<WorkerSettings> = new Slot<WorkerSettings>(
+  "worker",
 );

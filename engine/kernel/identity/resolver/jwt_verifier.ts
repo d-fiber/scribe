@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "@scribe/alchemy";
-import { identitySettings } from "@scribe/runtime/settings/identity.ts";
+import { identitySettings } from "@scribe/runtime/settings.ts";
 import { createRemoteJWKSet, decodeProtectedHeader, jwtVerify } from "jose";
 import type { JWTPayload, JWTVerifyResult } from "jose";
 

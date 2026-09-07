@@ -28,7 +28,7 @@
     "lint:builtin": {}
   },
   "tools": {
-    "gen:workspace": "bash dev_tools/gen/workspace.sh"
+    "gen:workspace": "bash dev_tools/generate/workspace.sh"
   },
   "fmt": {
     "lineWidth": 120,
@@ -106,7 +106,6 @@
     "@scribe/runtime/primitives/crypto/constant_time.ts": "./engine/runtime/primitives/crypto/constant_time.ts",
     "@scribe/runtime/primitives/crypto/hash.ts": "./engine/runtime/primitives/crypto/hash.ts",
     "@scribe/runtime/wiring/extensions/mod.ts": "./engine/runtime/wiring/extensions/mod.ts",
-    "@scribe/runtime/settings/identity.ts": "./engine/runtime/settings/identity.ts",
     "@scribe/scholium/env.ts": "./engine/scholium/env.ts",
     "@scribe/scholium/runner.ts": "./engine/scholium/runner.ts",
     "@scribe/search/": "./packages/search/",

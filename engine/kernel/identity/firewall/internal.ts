@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { firewallSettings } from "@scribe/runtime/settings/firewall.ts";
+import { firewallSettings } from "@scribe/runtime/settings.ts";
 import { SecretFirewall } from "@scribe/kernel/identity/firewall/secret_firewall.ts";
 
 const HEADER = "x-internal-secret";

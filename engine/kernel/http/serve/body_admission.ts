@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { MAX_BODY_BYTES, UNDECLARED_BODY_BYTES } from "@scribe/runtime/http/limits.ts";
-import { httpSettings } from "@scribe/runtime/settings/http.ts";
+import { httpSettings } from "@scribe/runtime/settings.ts";
 
 let inflightBytes = 0;
 

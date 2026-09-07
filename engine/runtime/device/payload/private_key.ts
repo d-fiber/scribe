@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "@scribe/alchemy";
-import { deviceSettings } from "@scribe/runtime/settings/device.ts";
+import { deviceSettings } from "@scribe/runtime/settings.ts";
 
 const PKCS8_X25519_HEADER = new Uint8Array([
   0x30,

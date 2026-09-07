@@ -44,7 +44,7 @@ import { logger } from "@scribe/kernel/observability/logger.ts";
 import "@scribe/kernel/location/ip_location.ts";
 import { RequestScope } from "@scribe/runtime/scope.ts";
 import { Listeners } from "@scribe/scholium/listener.ts";
-import { httpSettings } from "@scribe/runtime/settings/http.ts";
+import { httpSettings } from "@scribe/runtime/settings.ts";
 import type { Hono } from "hono";
 
 const RETRY_AFTER_S = "5";

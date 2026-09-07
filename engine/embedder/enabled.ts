@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { workerSettings } from "@scribe/runtime/settings/worker.ts";
+import { workerSettings } from "@scribe/runtime/settings.ts";
 
 /**
  * Whether this deployment runs a worker, read without opening the host that serves it.

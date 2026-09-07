@@ -41,7 +41,7 @@ import { majorOf, PROTOCOL_VERSION } from "@scribe/sdk";
 import type { Manifest, NodeDeclaration } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
 import { Listeners } from "@scribe/scholium/listener.ts";
 import { Processes } from "@scribe/scholium/process.ts";
-import { workerSettings } from "@scribe/runtime/settings/worker.ts";
+import { workerSettings } from "@scribe/runtime/settings.ts";
 import { capabilityHandler } from "../capabilities/server.ts";
 import { CapabilityTokens } from "../capabilities/tokens.ts";
 import { LogRoutes } from "@scribe/kernel/observability/log_routing.ts";
