@@ -112,6 +112,35 @@ export interface FieldDefinition {
   readonly optional: boolean;
 }
 
+/** The highest field number proto3 allows, past which the wire format has no room left to encode one. */
+const MAX_FIELD_NUMBER = 536_870_911;
+
+/** The range proto3 reserves for its own implementation, refused to every field. */
+const RESERVED_FIELD_NUMBERS: readonly [start: number, end: number] = [19_000, 19_999];
+
+/**
+ * Refuses a field number proto3 itself would refuse, the same check `protoc` runs once a `.proto`
+ * reaches it — run here instead, at the call that names the number, so a typo surfaces where it
+ * was made rather than the day a renderer finally emits text for `protoc` to read.
+ *
+ * @throws {Error} When `tag` is not a positive integer, exceeds {@link MAX_FIELD_NUMBER}, or falls
+ * inside {@link RESERVED_FIELD_NUMBERS}.
+ */
+function validateFieldNumber(tag: number): void {
+  if (!Number.isInteger(tag) || tag < 1 || tag > MAX_FIELD_NUMBER) {
+    throw new Error(
+      `${tag} is not a valid proto3 field number: it must be an integer between 1 and ${MAX_FIELD_NUMBER}.`,
+    );
+  }
+
+  const [start, end] = RESERVED_FIELD_NUMBERS;
+  if (tag >= start && tag <= end) {
+    throw new Error(
+      `${tag} falls inside ${start}-${end}, the range proto3 reserves for its own implementation.`,
+    );
+  }
+}
+
 /**
  * A field under construction, opened by one of {@link FieldFactory}'s type methods and refined by
  * {@link repeated}, {@link optional} and finally {@link number}, in any order before the last one.
@@ -160,8 +189,12 @@ export class FieldBuilder<HasNumber extends boolean = false> {
    * message, or one that message also reserves: that check belongs to `Message.fields`, the same
    * place `schema/table/table.ts`'s own `.columns` refuses a composite primary key declared twice,
    * once every field of the message is known at once.
+   *
+   * @throws {Error} When `tag` falls outside the range proto3 allows a field number, or inside the
+   * range it reserves for itself — see {@link validateFieldNumber}.
    */
   number(this: FieldBuilder<boolean>, tag: number): FieldBuilder<true> {
+    validateFieldNumber(tag);
     this.#number = tag;
     return this as unknown as FieldBuilder<true>;
   }
@@ -202,8 +235,15 @@ export class MapFieldBuilder<HasNumber extends boolean = false> {
     this.#value = value;
   }
 
-  /** The field number this field takes on the wire, closing the chain — see {@link FieldBuilder.number}'s own remarks, which apply here unchanged. */
+  /**
+   * The field number this field takes on the wire, closing the chain — see
+   * {@link FieldBuilder.number}'s own remarks, which apply here unchanged.
+   *
+   * @throws {Error} When `tag` falls outside the range proto3 allows a field number, or inside the
+   * range it reserves for itself — see {@link validateFieldNumber}.
+   */
   number(this: MapFieldBuilder<boolean>, tag: number): MapFieldBuilder<true> {
+    validateFieldNumber(tag);
     this.#number = tag;
     return this as unknown as MapFieldBuilder<true>;
   }

@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import "@scribe/scholium/runner.ts";
-import { equals, expect, Scribe } from "@scribe/alchemy/test";
+import { allOf, equals, expect, isA, Scribe, throwsA, withMessage } from "@scribe/alchemy/test";
 import { FieldFactory, fieldsOf } from "@scribe/alchemy";
 
 Scribe.test("fieldsOf() resolves a scalar field and a map field, by field name", () => {
@@ -83,4 +83,70 @@ Scribe.test("enum and message field types name the declaration they reference", 
 
   expect(enumField.type, equals({ kind: "enum", name: "LogLevel" }));
   expect(messageField.type, equals({ kind: "message", name: "Time" }));
+});
+
+Scribe.test("number(1) and number(536_870_911) are the two ends of the range proto3 allows", () => {
+  const lowest = new FieldFactory().string().number(1).build();
+  const highest = new FieldFactory().string().number(536_870_911).build();
+
+  expect(lowest.number, equals(1));
+  expect(highest.number, equals(536_870_911));
+});
+
+Scribe.test("number(0) is refused, proto3 field numbers start at 1", () => {
+  expect(
+    () => new FieldFactory().string().number(0),
+    throwsA(allOf(isA(Error), withMessage("0 is not a valid proto3 field number"))),
+  );
+});
+
+Scribe.test("a negative number is refused", () => {
+  expect(
+    () => new FieldFactory().string().number(-1),
+    throwsA(allOf(isA(Error), withMessage("-1 is not a valid proto3 field number"))),
+  );
+});
+
+Scribe.test("a non-integer number is refused", () => {
+  expect(
+    () => new FieldFactory().string().number(1.5),
+    throwsA(allOf(isA(Error), withMessage("1.5 is not a valid proto3 field number"))),
+  );
+});
+
+Scribe.test("a number past 536_870_911 is refused", () => {
+  expect(
+    () => new FieldFactory().string().number(536_870_912),
+    throwsA(allOf(isA(Error), withMessage("536870912 is not a valid proto3 field number"))),
+  );
+});
+
+Scribe.test("18999 and 20000, just outside the reserved window, are accepted", () => {
+  const before = new FieldFactory().string().number(18_999).build();
+  const after = new FieldFactory().string().number(20_000).build();
+
+  expect(before.number, equals(18_999));
+  expect(after.number, equals(20_000));
+});
+
+Scribe.test("a number inside 19000-19999 is refused, the range proto3 reserves for itself", () => {
+  expect(
+    () => new FieldFactory().string().number(19_000),
+    throwsA(allOf(isA(Error), withMessage("19000 falls inside 19000-19999"))),
+  );
+  expect(
+    () => new FieldFactory().string().number(19_500),
+    throwsA(allOf(isA(Error), withMessage("19500 falls inside 19000-19999"))),
+  );
+  expect(
+    () => new FieldFactory().string().number(19_999),
+    throwsA(allOf(isA(Error), withMessage("19999 falls inside 19000-19999"))),
+  );
+});
+
+Scribe.test("a map field's number is validated the same way a scalar field's is", () => {
+  expect(
+    () => new FieldFactory().map("string", (v) => v.int32()).number(19_500),
+    throwsA(allOf(isA(Error), withMessage("19500 falls inside 19000-19999"))),
+  );
 });
