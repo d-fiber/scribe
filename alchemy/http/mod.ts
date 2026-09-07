@@ -52,8 +52,8 @@
 export { http } from "./http.ts";
 export type { Http } from "./http.ts";
 
-export { Clients } from "./client/clients.ts";
-export type { ClientDriver } from "./client/clients.ts";
+export { Clients } from "./client/client_slot.ts";
+export type { ClientDriver } from "./client/client_slot.ts";
 
 export { BaseClient } from "./client/base_client.ts";
 export { DEFAULT_MAX_RESPONSE, DEFAULT_REDIRECT, DEFAULT_REQUEST_TIMEOUT } from "./client/client.ts";

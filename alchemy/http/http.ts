@@ -36,7 +36,7 @@
 
 import type { Future } from "../async/future.ts";
 import type { Client, RequestOptions } from "./client/client.ts";
-import { Clients } from "./client/clients.ts";
+import { Clients } from "./client/client_slot.ts";
 import type { HttpResponse } from "./response/response.ts";
 
 /**
