@@ -47,17 +47,28 @@ async function grantsAll(required: readonly string[]): Future<boolean> {
   return required.every((permission) => granted.includes(permission));
 }
 
+/**
+ * Answers `c` on behalf of `descriptor`, once the caller clears access, the quota and any required
+ * permission, in that order.
+ *
+ * @remarks
+ * The access check and the rate limit travel together in one `Promise.all`, the same reasoning as
+ * the worker routes `embedder/control/mount.ts` mounts: the limiter does not need to know who is
+ * calling, so it runs alongside the lookup rather than waiting on it. The three responses stay
+ * ordered access, then quota, then permission, matching `mount.ts`: a caller already over its quota
+ * must never learn whether it holds the permission a route requires, since that answer would be
+ * free to probe for however tight the limit was.
+ */
 async function serve(descriptor: RouteDescriptor, c: Context): Future<Response> {
   const callers = callersOf(descriptor.access);
 
-  // Same reasoning as the worker routes in embedder/control/mount.ts: the limiter
-  // does not need to know who is calling, so it runs alongside the lookup.
   const [allowed, withinLimit] = await Promise.all([
     isAllowed(callers, descriptor.webhookVerified ?? false),
     withinRateLimit(descriptor.rateLimitKey, descriptor.rateLimit),
   ]);
 
   if (!allowed) return ServerResponse.unauthorized();
+  if (!withinLimit) return ServerResponse.tooManyRequests();
 
   const required = descriptor.requiredPermissions ?? [];
   if (required.length > 0 && !(await grantsAll(required))) {
@@ -67,11 +78,10 @@ async function serve(descriptor: RouteDescriptor, c: Context): Future<Response> 
     });
   }
 
-  if (!withinLimit) return ServerResponse.tooManyRequests();
-
   return descriptor.handler({ pathParams: c.req.param() });
 }
 
+/** Mounts each of `descriptors` on `app`, gated by its own access check, quota and permissions. */
 export function mountDescriptors(app: Hono, descriptors: readonly RouteDescriptor[]): void {
   for (const descriptor of descriptors) {
     app[descriptor.method](descriptor.path, (c) => serve(descriptor, c));
