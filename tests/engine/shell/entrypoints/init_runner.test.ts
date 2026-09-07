@@ -58,9 +58,10 @@ Scribe.test("a method runs bound to its own instance, and may read its own state
     ran = false;
 
     @Init()
-    async run(): Future<void> {
+    run(): Future<void> {
       this.ran = true;
       seen = this.ran;
+      return Promise.resolve();
     }
   }
   void TestInitRunBound;
@@ -81,8 +82,9 @@ Scribe.test("runDeclaredInits() runs a job that has never run before, then track
   @Lifecycle()
   class TestInitRunOnce {
     @Init()
-    async run(): Future<void> {
+    run(): Future<void> {
       calls++;
+      return Promise.resolve();
     }
   }
   void TestInitRunOnce;
@@ -104,8 +106,9 @@ Scribe.test("runDeclaredInits() skips a job already tracked", async () => {
   @Lifecycle()
   class TestInitRunSkip {
     @Init()
-    async run(): Future<void> {
+    run(): Future<void> {
       calls++;
+      return Promise.resolve();
     }
   }
   void TestInitRunSkip;
@@ -128,15 +131,16 @@ Scribe.test("runDeclaredInits() stops at the first failure without tracking it o
   @Lifecycle()
   class TestInitRunFails {
     @Init()
-    async run(): Future<void> {
+    run(): Future<void> {
       throw new Error("boom");
     }
   }
   @Lifecycle()
   class TestInitRunZzzAfter {
     @Init()
-    async run(): Future<void> {
+    run(): Future<void> {
       ranAfter = true;
+      return Promise.resolve();
     }
   }
   void TestInitRunFails;

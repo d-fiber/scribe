@@ -55,8 +55,9 @@ Scribe.test("runDeclaredRuns() plays a declared job", async () => {
   @Lifecycle()
   class TestRunPlaysOnce {
     @Run()
-    async run(): Future<void> {
+    run(): Future<void> {
       calls++;
+      return Promise.resolve();
     }
   }
   void TestRunPlaysOnce;
@@ -72,8 +73,9 @@ Scribe.test("runDeclaredRuns() plays the same job again on a second call, unlike
   @Lifecycle()
   class TestRunPlaysEveryTime {
     @Run()
-    async run(): Future<void> {
+    run(): Future<void> {
       calls++;
+      return Promise.resolve();
     }
   }
   void TestRunPlaysEveryTime;
@@ -90,15 +92,16 @@ Scribe.test("runDeclaredRuns() stops at the first failure without running what i
   @Lifecycle()
   class TestRunFails {
     @Run()
-    async run(): Future<void> {
+    run(): Future<void> {
       throw new Error("boom");
     }
   }
   @Lifecycle()
   class TestRunZzzAfter {
     @Run()
-    async run(): Future<void> {
+    run(): Future<void> {
       ranAfter = true;
+      return Promise.resolve();
     }
   }
   void TestRunFails;
