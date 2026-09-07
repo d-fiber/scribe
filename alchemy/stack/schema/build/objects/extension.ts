@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Loose } from "../../value.ts";
+import type { Loose } from "../../../common/value.ts";
 import type { UnmodifiableList } from "../../../../primitives/value/list.ts";
 import type { DbMoment } from "../moment.ts";
 import { MomentRegistry, SchemaEntry } from "../moment.ts";

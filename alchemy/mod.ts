@@ -209,7 +209,7 @@ export {
   GrantObjectFactory,
   GrantWithOn,
   GrantWithPrivileges,
-} from "./iac/build/schema/access/grant.ts";
+} from "./stack/schema/build/access/grant.ts";
 export type {
   DeclaredGrant,
   GrantObject,
@@ -218,21 +218,26 @@ export type {
   GrantRole,
   GrantTargetKind,
   Privilege,
-} from "./iac/build/schema/access/grant.ts";
-export { declaredDrops, Drop, DropDeclaration, DropTarget, forgetDrops } from "./iac/build/schema/lifecycle/drop.ts";
-export type { DeclaredDrop } from "./iac/build/schema/lifecycle/drop.ts";
-export { SchemaEntry } from "./iac/build/schema/moment.ts";
-export type { DbMoment, SchemaAddable } from "./iac/build/schema/moment.ts";
+} from "./stack/schema/build/access/grant.ts";
+export { declaredDrops, Drop, DropDeclaration, DropTarget, forgetDrops } from "./stack/schema/build/lifecycle/drop.ts";
+export type { DeclaredDrop } from "./stack/schema/build/lifecycle/drop.ts";
+export { SchemaEntry } from "./stack/schema/build/moment.ts";
+export type { DbMoment, SchemaAddable } from "./stack/schema/build/moment.ts";
 export {
   declaredExtensions,
   Extension,
   ExtensionBuilder,
   forgetExtensions,
-} from "./iac/build/schema/objects/extension.ts";
-export type { DeclaredExtension, ExtensionName, ExtensionOptions } from "./iac/build/schema/objects/extension.ts";
-export { declaredSequences, forgetSequences, Sequence, SequenceBuilder } from "./iac/build/schema/objects/sequence.ts";
-export type { DeclaredSequence, SequenceDataType, SequenceOwner } from "./iac/build/schema/objects/sequence.ts";
-export { dbSchema, Schema, SchemaBatch, SchemaContentFactory } from "./iac/build/schema/schema.ts";
+} from "./stack/schema/build/objects/extension.ts";
+export type { DeclaredExtension, ExtensionName, ExtensionOptions } from "./stack/schema/build/objects/extension.ts";
+export {
+  declaredSequences,
+  forgetSequences,
+  Sequence,
+  SequenceBuilder,
+} from "./stack/schema/build/objects/sequence.ts";
+export type { DeclaredSequence, SequenceDataType, SequenceOwner } from "./stack/schema/build/objects/sequence.ts";
+export { dbSchema, Schema, SchemaBatch, SchemaContentFactory } from "./stack/schema/build/schema.ts";
 export {
   declaredIndexes,
   declaredPolicies,
@@ -260,7 +265,7 @@ export {
   TableRevokeFactory,
   TableUniqueBuilder,
   TableUniqueFactory,
-} from "./iac/build/schema/table/table.ts";
+} from "./stack/schema/build/table/table.ts";
 export type {
   CheckConstraint,
   DeclaredIndex,
@@ -282,14 +287,14 @@ export type {
   TablePolicy,
   TableRevoke,
   UniqueConstraint,
-} from "./iac/build/schema/table/table.ts";
+} from "./stack/schema/build/table/table.ts";
 export {
   CollatableColumnBuilder,
   ColumnBuilder,
   ColumnFactory,
   columnsOf,
   IdentityCapableColumnBuilder,
-} from "./iac/build/schema/types/column.ts";
+} from "./stack/schema/build/types/column.ts";
 export type {
   ColumnCommonOptions,
   ColumnDefinition,
@@ -308,13 +313,13 @@ export type {
   ReferentialMatch,
   RowOf,
   ScalarTsType,
-} from "./iac/build/schema/types/column.ts";
-export { declaredEnums, Enum, EnumBuilder, forgetEnums } from "./iac/build/schema/types/enum.ts";
-export type { DeclaredEnum } from "./iac/build/schema/types/enum.ts";
-export { declaredTypes, forgetTypes, Type, TypeBuilder } from "./iac/build/schema/types/type.ts";
-export type { DeclaredType } from "./iac/build/schema/types/type.ts";
+} from "./stack/schema/build/types/column.ts";
+export { declaredEnums, Enum, EnumBuilder, forgetEnums } from "./stack/schema/build/types/enum.ts";
+export type { DeclaredEnum } from "./stack/schema/build/types/enum.ts";
+export { declaredTypes, forgetTypes, Type, TypeBuilder } from "./stack/schema/build/types/type.ts";
+export type { DeclaredType } from "./stack/schema/build/types/type.ts";
 
-export { env, resolveValue, resource, setting, sizingToken, template } from "./iac/build/value.ts";
+export { env, resolveValue, resource, setting, sizingToken, template } from "./stack/common/value.ts";
 export type {
   DeployValue,
   EnvValue,
@@ -325,9 +330,9 @@ export type {
   SizingTokenValue,
   TemplateValue,
   ValueLike,
-} from "./iac/build/value.ts";
+} from "./stack/common/value.ts";
 
-export { Build, declaredServices, forgetServices, Image, Service } from "./iac/build/service.ts";
+export { Build, declaredServices, forgetServices, Image, Service } from "./stack/service/build/service.ts";
 export type {
   BuildSource,
   ByteSize,
@@ -357,9 +362,9 @@ export type {
   SocleNetwork,
   UlimitName,
   UlimitValue,
-} from "./iac/build/service.ts";
+} from "./stack/service/build/service.ts";
 
-export { declaredRecipes, forgetRecipes, Recipe, RecipeClassFactory } from "./iac/build/recipe.ts";
+export { declaredRecipes, forgetRecipes, Recipe, RecipeClassFactory } from "./stack/recipe/build/recipe.ts";
 export type {
   DeclaredRecipe,
   OutputsClass,
@@ -367,9 +372,9 @@ export type {
   RecipeOptions,
   TerraformClass,
   TerraformDocument,
-} from "./iac/build/recipe.ts";
+} from "./stack/recipe/build/recipe.ts";
 
-export { declaredDeploy, Deploy, forgetDeploy, Role, Sql } from "./iac/build/deploy.ts";
+export { declaredDeploy, Deploy, forgetDeploy, Role, Sql } from "./stack/deploy.ts";
 export type {
   ConfigurationOptions,
   DeclaredDeploy,
@@ -383,15 +388,15 @@ export type {
   RoleAttribute,
   RoleOptions,
   SettingOptions,
-} from "./iac/build/deploy.ts";
+} from "./stack/deploy.ts";
 
-export { DB } from "./iac/decorators/db/db.ts";
-export { InitDB, initDbRegistry } from "./iac/decorators/db/init.ts";
-export type { InitDbHandler, RegisteredInitDb } from "./iac/decorators/db/init.ts";
-export { MigrationDB, migrationDbRegistry } from "./iac/decorators/db/migration.ts";
-export type { MigrationDbHandler, RegisteredMigrationDb } from "./iac/decorators/db/migration.ts";
-export { ProvisioningDB, provisioningDbRegistry } from "./iac/decorators/db/provisioning.ts";
-export type { ProvisioningDbHandler, RegisteredProvisioningDb } from "./iac/decorators/db/provisioning.ts";
+export { DB } from "./stack/schema/decorators/db.ts";
+export { InitDB, initDbRegistry } from "./stack/schema/decorators/init.ts";
+export type { InitDbHandler, RegisteredInitDb } from "./stack/schema/decorators/init.ts";
+export { MigrationDB, migrationDbRegistry } from "./stack/schema/decorators/migration.ts";
+export type { MigrationDbHandler, RegisteredMigrationDb } from "./stack/schema/decorators/migration.ts";
+export { ProvisioningDB, provisioningDbRegistry } from "./stack/schema/decorators/provisioning.ts";
+export type { ProvisioningDbHandler, RegisteredProvisioningDb } from "./stack/schema/decorators/provisioning.ts";
 
 export { ListOf, Nested, Required } from "./network/api/body/mod.ts";
 export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema, PrimitiveType } from "./network/api/body/mod.ts";

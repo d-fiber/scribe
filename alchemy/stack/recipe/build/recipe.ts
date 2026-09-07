@@ -34,10 +34,10 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Registry } from "../../wiring/declare/registry.ts";
-import type { UnmodifiableList } from "../../primitives/value/list.ts";
-import type { DeployValue, ValueLike } from "./value.ts";
-import { resolveValue } from "./value.ts";
+import { Registry } from "../../../wiring/declare/registry.ts";
+import type { UnmodifiableList } from "../../../primitives/value/list.ts";
+import type { DeployValue, ValueLike } from "../../common/value.ts";
+import { resolveValue } from "../../common/value.ts";
 
 /**
  * A minimal OpenTofu document, typed at the level `tofu` itself is structured at and no deeper.

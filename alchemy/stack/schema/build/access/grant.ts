@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { UnmodifiableList } from "../../../../primitives/value/list.ts";
-import type { Loose } from "../../value.ts";
+import type { Loose } from "../../../common/value.ts";
 import type { DbMoment } from "../moment.ts";
 import { SchemaEntry } from "../moment.ts";
 
