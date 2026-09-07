@@ -49,18 +49,18 @@ say() {
   exit 1
 }
 
-say "writing dev_tools/runtime/{deno,bun} from scribe.workspace.json"
-(cd "$ROOT" && bash dev_tools/gen/workspace.sh)
+say "writing dev_tools/workspace/generated from scribe.workspace.json"
+(cd "$ROOT" && bash dev_tools/generate/workspace.sh)
 
 # `test` and `test:net` are targets, declared once in scribe.workspace.json without naming a
-# runtime, and dev_tools/runtime/deno/run.sh is what turns "test:net" into the actual deno flags
-# (--config/--lock, staying at $ROOT, rather than through `deno task`, whose commands run with the
-# config's own directory as their cwd).
+# runtime, and dev_tools/workspace/dispatch-deno.sh is what turns "test:net" into the actual deno
+# flags (--config/--lock, staying at $ROOT, rather than through `deno task`, whose commands run
+# with the config's own directory as their cwd).
 say "running the workspace, offline"
-(cd "$ROOT" && bash dev_tools/runtime/deno/run.sh test)
+(cd "$ROOT" && bash dev_tools/workspace/dispatch-deno.sh test)
 
 say "running the workspace, with network access"
-(cd "$ROOT" && bash dev_tools/runtime/deno/run.sh test:net)
+(cd "$ROOT" && bash dev_tools/workspace/dispatch-deno.sh test:net)
 
 say "running sdk/js"
 (cd "$ROOT/sdk/js" && deno task test)
@@ -71,7 +71,7 @@ say "running sdk/js"
 # resolution and the engine/scholium/bun/* adapters actually work under a real `bun test`,
 # not just under deno - the gap most likely to go unnoticed if only deno ever ran these.
 say "running the resolution probe under both runtimes"
-(cd "$ROOT" && bash dev_tools/resolution/run.sh all)
+(cd "$ROOT" && bash dev_tools/cross_runtime_proof/run.sh all)
 
 echo ""
 say "every suite the CI runs on a push is green."

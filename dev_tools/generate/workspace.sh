@@ -76,12 +76,12 @@ def resolve_path(layer; target):
 '
 
 # deno's own glob matching for `exclude` breaks on a pattern that mixes a "*" wildcard with a
-# config file that is not itself the directory being scanned — which dev_tools/runtime/deno/ never
-# is, now that deno.json lives under it rather than at the root. A literal (wildcard-free) entry is
-# unaffected, so a "*" entry is expanded here, against the real tree, into the literal paths it
-# currently matches; scribe.workspace.json keeps writing the wildcard, since expansion runs fresh
-# on every gen:workspace and a package added or removed is picked up the same way $layer_imports
-# already is.
+# config file that is not itself the directory being scanned — which dev_tools/workspace/generated/
+# never is, now that deno.json lives under it rather than at the root. A literal (wildcard-free)
+# entry is unaffected, so a "*" entry is expanded here, against the real tree, into the literal
+# paths it currently matches; scribe.workspace.json keeps writing the wildcard, since expansion
+# runs fresh on every gen:workspace and a package added or removed is picked up the same way
+# $layer_imports already is.
 expand_globs() {
   local patterns out path
   patterns=$(cat)
@@ -126,7 +126,7 @@ layer_imports=$(jq -n --argjson layers "$layers_json" "$RESOLVE_PATH"'
 
 # The logical config: same shape as scribe.workspace.json, root-relative throughout, imports
 # merged with what the layers own. Neither deno nor bun reads this directly — each runtime gets
-# its own translation below, written under dev_tools/runtime/ so the root carries only
+# its own translation below, written under dev_tools/workspace/generated/ so the root carries only
 # scribe.workspace.json, the file this repository actually authors by hand.
 merged=$(jq --argjson layerImports "$layer_imports" '
   .imports as $current |
@@ -135,39 +135,40 @@ merged=$(jq --argjson layerImports "$layer_imports" '
   .imports = ($kept + $layerImports | to_entries | sort_by(.key) | from_entries)
 ' scribe.workspace.json)
 
-mkdir -p dev_tools/runtime/deno dev_tools/runtime/bun
+mkdir -p dev_tools/workspace/generated
 
-# dev_tools/runtime/imports.json: the runtime-neutral import map, root-relative, that both
-# translations below read from. `deno task check`, `deno lint` and friends never read this
-# themselves; only the bun tsconfig generation does, and dev_tools/resolution/bun/generate.sh
-# for its own narrower probe.
-jq '{imports}' <<<"$merged" > dev_tools/runtime/imports.json
+# dev_tools/workspace/generated/imports.json: the runtime-neutral import map, root-relative, that
+# both translations below read from. `deno task check`, `deno lint` and friends never read this
+# themselves; only the bun tsconfig generation does, and
+# dev_tools/cross_runtime_proof/bun/generate-tsconfig.sh for its own narrower probe.
+jq '{imports}' <<<"$merged" > dev_tools/workspace/generated/imports.json
 
-# dev_tools/runtime/targets.json: what `check`, `test` and friends mean, named without a runtime
-# in sight — which directories, whether a target only wants documented examples, what a "test"
-# target loads as its env file and how much network it needs. `tools` sits next to it for the
-# handful of commands that were never a "pick a runtime" question to begin with (lint is a
+# dev_tools/workspace/generated/targets.json: what `check`, `test` and friends mean, named without
+# a runtime in sight — which directories, whether a target only wants documented examples, what a
+# "test" target loads as its env file and how much network it needs. `tools` sits next to it for
+# the handful of commands that were never a "pick a runtime" question to begin with (lint is a
 # static-analysis pass over source text, gen:workspace is this very script), so they stay literal
-# shell rather than pretending to a neutrality they don't have. Every dev_tools/runtime/<rt>/run.sh
-# reads this and turns `targets.<name>` into whatever that runtime's own tools call it — adding a
-# third runtime means adding a third run.sh next to it, not touching this file, scribe.workspace.json
-# or the two run.sh scripts already there.
-jq '{targets, tools}' <<<"$merged" > dev_tools/runtime/targets.json
+# shell rather than pretending to a neutrality they don't have. Every
+# dev_tools/workspace/dispatch-<rt>.sh reads this and turns `targets.<name>` into whatever that
+# runtime's own tools call it — adding a third runtime means adding a third dispatch-<rt>.sh next
+# to it, not touching this file, scribe.workspace.json or the two dispatch scripts already there.
+jq '{targets, tools}' <<<"$merged" > dev_tools/workspace/generated/targets.json
 
 # The deno.json translation. `imports`, `exclude`, `fmt.exclude` and `lint.exclude` are all
 # resolved relative to wherever deno.json itself lives, so every root-relative path gets a
-# "../../../" climb back to the root three levels up (dev_tools/runtime/deno -> dev_tools/runtime
-# -> dev_tools -> root). `deno task <name>` runs with that same directory as its cwd regardless of
-# where it was invoked from: a `targets` task delegates straight to "./run.sh <name>", which sits
-# in that same directory and does its own "cd back to $ROOT" before touching a root-relative path; a
-# `tools` task has no run.sh to delegate to, so it gets a literal "cd ../../.. &&" instead, the same
-# climb every other relative value in this file needs.
+# "../../../" climb back to the root three levels up (dev_tools/workspace/generated ->
+# dev_tools/workspace -> dev_tools -> root). `deno task <name>` runs with that same directory as
+# its cwd regardless of where it was invoked from: a `targets` task delegates to
+# "../dispatch-deno.sh <name>", one level up in dev_tools/workspace/ where the hand-written
+# dispatch script lives, which does its own "cd back to $ROOT" before touching a root-relative
+# path; a `tools` task has no dispatch script to delegate to, so it gets a literal
+# "cd ../../.. &&" instead, the same climb every other relative value in this file needs.
 expanded_exclude=$(jq '.exclude' <<<"$merged" | expand_globs)
 expanded_fmt_exclude=$(jq '.fmt.exclude' <<<"$merged" | expand_globs)
 expanded_lint_exclude=$(jq '.lint.exclude' <<<"$merged" | expand_globs)
 
 target_tasks=$(jq '
-  .targets | keys | map({key: ., value: ("./run.sh " + .)}) | from_entries
+  .targets | keys | map({key: ., value: ("../dispatch-deno.sh " + .)}) | from_entries
 ' <<<"$merged")
 tool_tasks=$(jq '.tools | with_entries(.value |= ("cd ../../.. && " + .))' <<<"$merged")
 
@@ -184,12 +185,12 @@ deno_json=$(jq \
   del(.targets, .tools) |
   .tasks = ($targetTasks + $toolTasks | to_entries | sort_by(.key) | from_entries)
 ' <<<"$merged")
-printf '%s\n' "$deno_json" > dev_tools/runtime/deno/deno.json
+printf '%s\n' "$deno_json" > dev_tools/workspace/generated/deno.json
 
 # The bun translation: bun and tsc both understand a tsconfig's `paths`, not deno.json's
 # `imports`, so the same import map becomes a path map instead. npm:/jsr: specifiers are left out
 # since bun resolves those from its own package registry, the way deno resolves them from its
-# own. `baseUrl` climbs the same three levels dev_tools/runtime/bun/ sits under root, so a
+# own. `baseUrl` climbs the same three levels dev_tools/workspace/generated/ sits under root, so a
 # root-relative value out of the import map needs no further rewriting, unlike deno.json's.
 bun_paths=$(jq '
   .imports
@@ -205,7 +206,7 @@ bun_paths=$(jq '
   | from_entries
 ' <<<"$merged")
 jq -n --argjson paths "$bun_paths" '{compilerOptions: {baseUrl: "../../..", paths: $paths}}' \
-  > dev_tools/runtime/bun/generated.tsconfig.json
+  > dev_tools/workspace/generated/bun.tsconfig.json
 
 sealed_json='{"alchemy/": []}'
 for layer in "${SEALED_LAYERS[@]}"; do
@@ -267,8 +268,8 @@ TS_LICENSE_HEADER='// Copyright (C) 2026 Fiber
     "$(jq '.' <<<"$sealed_json")"
 } > .lint/engine_layers.generated.ts
 
-deno fmt --config dev_tools/runtime/deno/deno.json \
-  dev_tools/runtime/deno/deno.json \
-  dev_tools/runtime/imports.json \
-  dev_tools/runtime/bun/generated.tsconfig.json \
+deno fmt --config dev_tools/workspace/generated/deno.json \
+  dev_tools/workspace/generated/deno.json \
+  dev_tools/workspace/generated/imports.json \
+  dev_tools/workspace/generated/bun.tsconfig.json \
   .lint/engine_layers.generated.ts >/dev/null

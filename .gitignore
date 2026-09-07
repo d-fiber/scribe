@@ -1,11 +1,11 @@
 .DS_Store
 .env
 
-/dev_tools/runtime/deno/deno.json
-/dev_tools/runtime/imports.json
-/dev_tools/runtime/targets.json
-/dev_tools/runtime/bun/generated.tsconfig.json
-/dev_tools/resolution/bun/generated.tsconfig.json
+/dev_tools/workspace/generated/deno.json
+/dev_tools/workspace/generated/imports.json
+/dev_tools/workspace/generated/targets.json
+/dev_tools/workspace/generated/bun.tsconfig.json
+/dev_tools/cross_runtime_proof/bun/generated.tsconfig.json
 
 /tools/*
 !/tools/.gitkeep

@@ -42,32 +42,32 @@ jobs:
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/.cache/deno
-          key: deno-${{ runner.os }}-${{ hashFiles('dev_tools/runtime/deno/deno.lock') }}
+          key: deno-${{ runner.os }}-${{ hashFiles('dev_tools/workspace/generated/deno.lock') }}
           restore-keys: deno-${{ runner.os }}-
 
       # `check`, `check:examples`, `test`, `test:net`, `lint:builtin` and `lint:custom` are all
       # targets declared once in scribe.workspace.json without naming a runtime;
-      # dev_tools/runtime/deno/run.sh is what turns a target into deno flags, and is the only
-      # place that does.
-      - name: Write dev_tools/runtime/{deno,bun} from scribe.workspace.json
-        run: bash dev_tools/gen/workspace.sh
+      # dev_tools/workspace/dispatch-deno.sh is what turns a target into deno flags, and is the
+      # only place that does.
+      - name: Write dev_tools/workspace/generated from scribe.workspace.json
+        run: bash dev_tools/generate/workspace.sh
 
       - name: Type check
-        run: bash dev_tools/runtime/deno/run.sh check
+        run: bash dev_tools/workspace/dispatch-deno.sh check
 
       - name: Check that documented examples still compile
-        run: bash dev_tools/runtime/deno/run.sh check:examples
+        run: bash dev_tools/workspace/dispatch-deno.sh check:examples
 
       - name: Lint
         run: |
-          bash dev_tools/runtime/deno/run.sh lint:builtin
-          bash dev_tools/runtime/deno/run.sh lint:custom
+          bash dev_tools/workspace/dispatch-deno.sh lint:builtin
+          bash dev_tools/workspace/dispatch-deno.sh lint:custom
 
       - name: Run tests
-        run: bash dev_tools/runtime/deno/run.sh test
+        run: bash dev_tools/workspace/dispatch-deno.sh test
 
       - name: Run tests with network access
-        run: bash dev_tools/runtime/deno/run.sh test:net
+        run: bash dev_tools/workspace/dispatch-deno.sh test:net
 
       # Not the whole workspace under bun yet: a couple of packages carry a jsr:-only, Deno-only
       # dependency with no bun-reachable equivalent bound in the import map. What this does prove
@@ -75,7 +75,7 @@ jobs:
       # under a real `bun test`, not only under deno - the gap most likely to go unnoticed if only
       # deno ever ran here.
       - name: Run the resolution probe under bun
-        run: bash dev_tools/resolution/run.sh bun
+        run: bash dev_tools/cross_runtime_proof/run.sh bun
 
   sdk-js:
     runs-on: ubuntu-latest
@@ -131,11 +131,11 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Write dev_tools/runtime/{deno,bun} from scribe.workspace.json
-        run: bash dev_tools/gen/workspace.sh
+      - name: Write dev_tools/workspace/generated from scribe.workspace.json
+        run: bash dev_tools/generate/workspace.sh
 
       - name: Check the formatting
-        run: deno fmt --config dev_tools/runtime/deno/deno.json --check .
+        run: deno fmt --config dev_tools/workspace/generated/deno.json --check .
 
   tag:
     needs: [engine, sdk-js, binaries, packages, format, protocol, checks]
@@ -181,8 +181,8 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Write dev_tools/runtime/{deno,bun} from scribe.workspace.json
-        run: bash dev_tools/gen/workspace.sh
+      - name: Write dev_tools/workspace/generated from scribe.workspace.json
+        run: bash dev_tools/generate/workspace.sh
 
       - name: Report the Deno dependencies that moved
         run: |
@@ -195,7 +195,7 @@ jobs:
             echo "### engine"
             echo ""
             echo '```'
-            deno outdated --config dev_tools/runtime/deno/deno.json --lock dev_tools/runtime/deno/deno.lock 2>&1 || echo "could not read engine"
+            deno outdated --config dev_tools/workspace/generated/deno.json --lock dev_tools/workspace/generated/deno.lock 2>&1 || echo "could not read engine"
             echo '```'
             echo ""
             echo "### sdk/js"

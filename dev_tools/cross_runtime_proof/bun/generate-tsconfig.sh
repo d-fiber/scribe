@@ -38,28 +38,21 @@
 set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-ROOT=$(cd "$HERE/../.." && pwd)
+ROOT=$(cd "$HERE/../../.." && pwd)
 
-run_deno() {
-  (cd "$ROOT" && deno test \
-    --config dev_tools/runtime/deno/deno.json --lock dev_tools/runtime/deno/deno.lock \
-    --allow-env --allow-sys --allow-read dev_tools/resolution/deno/sample.test.ts)
-}
+paths=$(jq '
+  .imports
+  | to_entries
+  | map(select(.value | (startswith("npm:") or startswith("jsr:")) | not))
+  | map(
+      if (.key | endswith("/")) then
+        {key: (.key + "*"), value: [.value + "*"]}
+      else
+        {key, value: [.value]}
+      end
+    )
+  | from_entries
+' "$ROOT/dev_tools/workspace/generated/imports.json")
 
-run_bun() {
-  bash "$HERE/bun/generate.sh"
-  (cd "$HERE/bun" && bun test --tsconfig-override=./generated.tsconfig.json sample.test.ts tests/)
-}
-
-case "${1:-all}" in
-  deno) run_deno ;;
-  bun) run_bun ;;
-  all)
-    run_deno
-    run_bun
-    ;;
-  *)
-    echo "usage: $0 [deno|bun|all]" >&2
-    exit 1
-    ;;
-esac
+jq -n --argjson paths "$paths" '{compilerOptions: {baseUrl: "../../..", paths: $paths}}' \
+  > "$HERE/generated.tsconfig.json"

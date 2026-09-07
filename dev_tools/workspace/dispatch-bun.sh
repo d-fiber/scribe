@@ -35,22 +35,18 @@
 # This header is a summary written for convenience. Where it differs from the
 # LICENSE file, the LICENSE file governs.
 #
-# Turns a runtime-neutral target from dev_tools/runtime/targets.json into an actual `deno` command.
-# This is the only file in the repository that knows what flag deno wants for "give this test
-# network access" or "only check documented examples" — scribe.workspace.json names the target,
-# dev_tools/gen/workspace.sh never translates it, and dev_tools/verify/*.sh and CI call this script
-# instead of spelling deno flags out themselves. A future runtime gets its own
-# dev_tools/runtime/<name>/run.sh next to this one; nothing here changes for it to exist.
+# Turns a runtime-neutral target from dev_tools/workspace/generated/targets.json into an actual
+# `bun` command — the bun counterpart of dev_tools/workspace/dispatch-deno.sh, see that file for
+# why this exists.
 #
-# usage: run.sh <target-name>
+# usage: dispatch-bun.sh <target-name>
 
 set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-ROOT=$(cd "$HERE/../../.." && pwd)
-CONFIG="$HERE/deno.json"
-LOCK="$HERE/deno.lock"
-TARGETS="$ROOT/dev_tools/runtime/targets.json"
+ROOT=$(cd "$HERE/../.." && pwd)
+TSCONFIG="$HERE/generated/bun.tsconfig.json"
+TARGETS="$ROOT/dev_tools/workspace/generated/targets.json"
 
 name="${1:-}"
 [ -n "$name" ] || {
@@ -59,7 +55,7 @@ name="${1:-}"
 }
 
 [ -f "$TARGETS" ] || {
-  echo "$0: $TARGETS is missing. Run \`bash dev_tools/gen/workspace.sh\` first." >&2
+  echo "$0: $TARGETS is missing. Run \`bash dev_tools/generate/workspace.sh\` first." >&2
   exit 1
 }
 
@@ -69,43 +65,40 @@ target=$(jq --arg name "$name" '.targets[$name] // empty' "$TARGETS")
   exit 1
 }
 
-# "lint:builtin" carries no dirs, script, docsOnly or network — a whole-tree scan against deno's
-# own exclude rules is not a shape any other target has, so it is named directly rather than
-# forced into that vocabulary. A runtime with no built-in linter of its own just refuses this
-# target, the way dev_tools/runtime/bun/run.sh does.
 if [ "$name" = "lint:builtin" ]; then
-  cd "$ROOT"
-  exec deno lint --config "$CONFIG" .
+  echo "$0: bun has no linter of its own that this repository uses — see lint:custom." >&2
+  exit 1
+fi
+
+docs_only=$(jq -r '.docsOnly // false' <<<"$target")
+if [ "$docs_only" = "true" ]; then
+  echo "$0: \"$name\" only exists as a deno concept — \`--doc\` doctests have no bun equivalent." >&2
+  exit 1
 fi
 
 script=$(jq -r '.script // empty' <<<"$target")
 env_file=$(jq -r '.envFile // empty' <<<"$target")
 network=$(jq -r '.network // empty' <<<"$target")
-docs_only=$(jq -r '.docsOnly // false' <<<"$target")
 
 cd "$ROOT"
 
 if [ -n "$script" ]; then
-  exec deno run --allow-read --allow-env --config "$CONFIG" --lock "$LOCK" "$script"
+  exec bun run --tsconfig-override="$TSCONFIG" "$script"
 fi
 
 dirs=()
 while IFS= read -r dir; do dirs+=("$dir"); done < <(jq -r '.dirs[]' <<<"$target")
 
-if [ "$docs_only" = "true" ]; then
-  exec deno test --doc --no-run --config "$CONFIG" --lock "$LOCK" "${dirs[@]}"
-fi
-
 if [ -n "$network" ]; then
-  net_flag="--allow-net=127.0.0.1"
-  [ "$network" = "full" ] && net_flag="--allow-net"
-
+  # bun runs unsandboxed: there is no permission flag standing in for "loopback only" vs "full
+  # network", the way deno's --allow-net does, so both `test` and `test:net` run identically here.
   env_flag=()
   [ -n "$env_file" ] && env_flag=(--env-file="$env_file")
 
-  exec deno test --config "$CONFIG" --lock "$LOCK" \
-    --allow-env --allow-sys --allow-read --allow-write --allow-run \
-    "$net_flag" "${env_flag[@]}" --parallel "${dirs[@]}"
+  exec bun test --tsconfig-override="$TSCONFIG" "${env_flag[@]}" "${dirs[@]}"
 fi
 
-exec deno check --config "$CONFIG" --lock "$LOCK" "${dirs[@]}"
+echo "$0: \"$name\" is not wired up for bun yet — bun has no equivalent of deno's own type checker," \
+  "and a project-wide tsc pass needs a fuller tsconfig (target/lib/strict) than" \
+  "$TSCONFIG's path map alone." >&2
+exit 1

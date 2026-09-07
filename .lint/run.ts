@@ -49,8 +49,8 @@ import { RULES } from "./rules.ts";
 /**
  * This is the one file under `.lint/` that reaches a concrete `FileSystemDriver`/`Process` rather
  * than staying behind the port everything else here uses: dispatched on {@link currentStack} so
- * the same rules run under either shell dev_tools/runtime carries a `run.sh` for, `deno` and `bun`
- * alike, the way `engine/scholium/env.ts` already dispatches {@link localEnvironment}.
+ * the same rules run under either shell dev_tools/workspace carries a `dispatch-<rt>.sh` for,
+ * `deno` and `bun` alike, the way `engine/scholium/env.ts` already dispatches {@link localEnvironment}.
  */
 function localFileSystems(): FileSystemDriver {
   switch (currentStack()) {

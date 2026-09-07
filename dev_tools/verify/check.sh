@@ -49,18 +49,19 @@ say() {
   exit 1
 }
 
-say "writing dev_tools/runtime/{deno,bun} from scribe.workspace.json"
-(cd "$ROOT" && bash dev_tools/gen/workspace.sh)
+say "writing dev_tools/workspace/generated from scribe.workspace.json"
+(cd "$ROOT" && bash dev_tools/generate/workspace.sh)
 
 # `check`, `lint:builtin` and `lint:custom` are all targets declared once in
-# scribe.workspace.json without naming a runtime; dev_tools/runtime/deno/run.sh is what turns a
-# target into deno flags (--config/--lock, staying at $ROOT), and is the only place that does.
+# scribe.workspace.json without naming a runtime; dev_tools/workspace/dispatch-deno.sh is what
+# turns a target into deno flags (--config/--lock, staying at $ROOT), and is the only place that
+# does.
 say "linting the workspace"
-(cd "$ROOT" && bash dev_tools/runtime/deno/run.sh lint:builtin)
-(cd "$ROOT" && bash dev_tools/runtime/deno/run.sh lint:custom)
+(cd "$ROOT" && bash dev_tools/workspace/dispatch-deno.sh lint:builtin)
+(cd "$ROOT" && bash dev_tools/workspace/dispatch-deno.sh lint:custom)
 
 say "type checking the workspace"
-(cd "$ROOT" && bash dev_tools/runtime/deno/run.sh check)
+(cd "$ROOT" && bash dev_tools/workspace/dispatch-deno.sh check)
 
 say "type checking sdk/js"
 (cd "$ROOT/sdk/js" && deno task check)
