@@ -35,11 +35,29 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "@scribe/alchemy";
+import { create } from "@bufbuild/protobuf";
 import { type CallMetadata, failureResponse, metadataOf, TransportFailure, UnaryServer } from "@scribe/sdk";
-import { Logging } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
+import { Logging, type LogAck, LogAckSchema, type LogBatch } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 import { capabilities } from "@scribe/contracts/capability.ts";
 import { CapabilityTokens } from "./tokens.ts";
-import { shipLogs } from "./logging.ts";
+
+/**
+ * Takes what the worker sent, and drops it.
+ *
+ * @remarks
+ * A node that declared a `_logs.ts` never gets here: its `log()` calls are
+ * short-circuited to the sink inside the worker rather than crossing back for
+ * an answer the worker already has. What arrives here therefore belongs to a
+ * project that declared no sink, and the host has nowhere to put it. There
+ * is no collector behind it any more, and printing it would be the framework
+ * deciding what a project's logs are worth.
+ *
+ * The capability stays because the worker cannot know that from its side: it
+ * calls, and it is answered.
+ */
+function shipLogs(_batch: LogBatch): Future<LogAck> {
+  return Promise.resolve(create(LogAckSchema, {}));
+}
 
 /**
  * Wraps `handler` so it only runs once the call's capability token has been replayed.
