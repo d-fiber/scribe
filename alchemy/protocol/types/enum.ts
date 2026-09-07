@@ -118,7 +118,9 @@ export class EnumWithName {
    * @throws {Error} When no value was given, when the first value given does not number `0`, or
    * when a number repeats across two values or falls in a range this enum also reserves.
    */
-  values(build: (v: EnumValueFactory) => UnmodifiableList<DeclaredEnumValue>): DeclaredProtoEnum {
+  values(
+    build: (v: EnumValueFactory) => UnmodifiableList<DeclaredEnumValue>,
+  ): DeclaredProtoEnum {
     const values = build(new EnumValueFactory());
 
     if (values.length === 0 || values[0].number !== 0) {
@@ -129,7 +131,10 @@ export class EnumWithName {
 
     const seen = new Set<number>();
     for (const entry of values) {
-      if (seen.has(entry.number) || this.#reservedNumbers.includes(entry.number)) {
+      if (
+        seen.has(entry.number) ||
+        this.#reservedNumbers.includes(entry.number)
+      ) {
         throw new Error(
           `Enum "${this.#name}" reuses the number ${entry.number} across two values, or on a value this enum also reserves.`,
         );
@@ -169,6 +174,8 @@ export class EnumFactory {
  * );
  * ```
  */
-export function ProtoEnum(build: (e: EnumFactory) => DeclaredProtoEnum): DeclaredProtoEnum {
+export function ProtoEnum(
+  build: (e: EnumFactory) => DeclaredProtoEnum,
+): DeclaredProtoEnum {
   return build(new EnumFactory());
 }

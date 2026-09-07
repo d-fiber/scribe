@@ -35,8 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { UnmodifiableList } from "../../primitives/value/list.ts";
-import { FieldFactory, fieldsOf } from "../types/field.ts";
 import type { FieldDefinition, FieldMap } from "../types/field.ts";
+import { FieldFactory, fieldsOf } from "../types/field.ts";
 
 /** A message exactly as a {@link MessageBuilder} resolved it. */
 export interface DeclaredMessage {
@@ -98,7 +98,10 @@ export class MessageBuilder {
 
     const seen = new Set<number>();
     for (const [fieldName, definition] of Object.entries(fields)) {
-      if (seen.has(definition.number) || this.#reservedNumbers.includes(definition.number)) {
+      if (
+        seen.has(definition.number) ||
+        this.#reservedNumbers.includes(definition.number)
+      ) {
         throw new Error(
           `"${this.#name}" reuses the number ${definition.number} on field "${fieldName}", ` +
             "across two fields, or on a number this message also reserves.",
