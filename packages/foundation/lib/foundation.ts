@@ -57,11 +57,13 @@ import { Clients } from "@scribe/alchemy/http";
 import { Loggers } from "@scribe/alchemy/observe";
 import { Now } from "@scribe/alchemy";
 import type { LifecycleSteps } from "@scribe/alchemy";
+import { capabilities } from "@scribe/contracts/capability.ts";
 import { EXTENSION_CRON, EXTENSION_QUEUE } from "@scribe/contracts/extensions.ts";
+import { wireFoundation } from "./src/capability/wire.ts";
 import { Cron, cronRegistry, cronRunner } from "./cron.ts";
 import { Queue, queueRunner } from "./queue.ts";
 import { syncDeclaredSources, triggerRegistry, triggerRunner } from "./trigger.ts";
-import { extensions, OptionalExtension, runDeclarations } from "@scribe/runtime/support/extensions/mod.ts";
+import { extensions, OptionalExtension, runDeclarations } from "@scribe/runtime/wiring/extensions/mod.ts";
 import { FetchClients } from "./src/http/fetch_client.ts";
 import { RedisCaches } from "./src/cache/redis_caches.ts";
 import { RedisClaims } from "./src/redis/claim_once.ts";
@@ -118,6 +120,8 @@ export const scribe: LifecycleSteps = {
     if (!Crons.configured) Crons.use(new ScheduledCrons());
     if (!Triggers.configured) Triggers.use(new OutboxTriggers());
     if (!Databases.configured) Databases.use(new PostgrestDatabases());
+
+    capabilities.register(wireFoundation);
   },
 
   starts: async () => {

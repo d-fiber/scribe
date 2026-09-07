@@ -34,42 +34,15 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "@scribe/alchemy";
-import { create } from "@bufbuild/protobuf";
-import {
-  type EmitResult,
-  EmitResultSchema,
-  type Event,
-} from "@scribe/sdk/gen/scribe/packages/foundation/protocol/hook_pb.ts";
-import { hookRegistry } from "@scribe/foundation/hook";
-import { decodeJson } from "../control/json.ts";
-
 /**
- * Runs the handlers the host registered for the event a worker emitted.
+ * The message `cause` carries: its own, for an `Error`, or its string form for anything else a
+ * `catch` received.
  *
  * @remarks
- * The hook has to be declared on the host, and an event nothing answers to is refused under
- * `unknown_hook`: a worker emitting into a name that was never registered would otherwise
- * believe it had been heard.
- *
- * `handled` is how many handlers ran, which is what tells an emitter that a hook exists but
- * nobody subscribed to it. The handlers run before the answer leaves, so a failure in any one
- * of them is carried back rather than swallowed.
+ * Every capability this package answers a worker with catches a failure from a client it does
+ * not control, Postgres, Redis or NATS, and turns it into the same shape of wire error. This is
+ * the one line that turn repeated across all four before it moved here.
  */
-export async function hookEmit(event: Event): Future<EmitResult> {
-  const hook = hookRegistry.get(event.event);
-  if (!hook) {
-    return create(EmitResultSchema, {
-      error: { code: "unknown_hook", message: `${event.event} is not declared by the host.` },
-    });
-  }
-
-  try {
-    await hook.run(decodeJson(event.payload) as never);
-    return create(EmitResultSchema, { handled: hook.handlers() });
-  } catch (cause) {
-    return create(EmitResultSchema, {
-      error: { code: "emit_failed", message: cause instanceof Error ? cause.message : String(cause) },
-    });
-  }
+export function causeMessage(cause: unknown): string {
+  return cause instanceof Error ? cause.message : String(cause);
 }

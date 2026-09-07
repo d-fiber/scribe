@@ -34,33 +34,40 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { failureResponse, metadataOf, TransportFailure, UnaryServer } from "@scribe/sdk";
-import { Cache } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/cache_pb.ts";
-import { Queue } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/queue_pb.ts";
-import { Hook } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/hook_pb.ts";
-import { Database } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
+import type { Future } from "@scribe/alchemy";
+import { type CallMetadata, failureResponse, metadataOf, TransportFailure, UnaryServer } from "@scribe/sdk";
 import { Logging } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
 import { capabilities } from "@scribe/contracts/capability.ts";
 import { CapabilityTokens } from "./tokens.ts";
-import { cacheDelete, cacheGet, cacheSet } from "./cache.ts";
-import { hookEmit } from "./hook.ts";
-import { queuePush } from "./queue.ts";
 import { shipLogs } from "./logging.ts";
-import { executeQueries, executeQuery } from "./database.ts";
+
+/**
+ * Wraps `handler` so it only runs once the call's capability token has been replayed.
+ *
+ * @remarks
+ * Every procedure the host answers itself needs this same wrapping, and `capabilities.wire()`
+ * needs it for every procedure a package registers too: what each one would otherwise have to
+ * remember, one of them will forget. See {@link capabilityServer}.
+ */
+function guarded<I, O>(handler: (request: I) => Future<O>): (request: I, call: CallMetadata) => Future<O> {
+  return (request, call) => CapabilityTokens.run(call.capabilityToken, () => handler(request));
+}
 
 /**
  * The host side of every procedure a worker may call.
  *
  * @remarks
  * A procedure answers only once it is named here, and the packages a handler reaches are the
- * ones `engine/embedder/deno.json` names: adding a service means both, and forgetting the second
- * is a type error rather than a silent 501.
+ * ones `engine/embedder/_collection.json` names: adding a service means both, and forgetting the
+ * second is a type error rather than a silent 501.
  *
- * What the host answers itself is what `foundation` needs to exist at all: the database, the
- * cache, the queue, the hook and the logs. Everything else is registered by the package that owns
- * it, so mounting a package is what makes a worker able to call it, and the host names none of
- * them. Replaying the capability token is done here rather than by each package, because a package
- * that had to do it would be one that could forget to.
+ * What the host answers itself is `Logging.Ship` alone, because it is the one procedure with no
+ * package behind it to own: a project without a `_logs.ts` still has a worker that calls it, and
+ * `shipLogs` is the acknowledgment that call gets. Every other procedure, `foundation`'s own
+ * database, cache, queue and hook included, is registered by the package that owns it through
+ * `capabilities.wire()`, so mounting a package is what makes a worker able to call it, and the host
+ * names none of them itself. Replaying the capability token is done here rather than by each
+ * package, because a package that had to do it would be one that could forget to.
  *
  * Anything the contract declares and nobody wires answers a named 501 rather than a 404. Listing
  * those procedures instead would mean importing the stub of every module the contract knows, and
@@ -72,24 +79,10 @@ import { executeQueries, executeQuery } from "./database.ts";
  */
 export function capabilityServer(): UnaryServer {
   const server = new UnaryServer()
-    .on(Database.method.execute, (query, call) => CapabilityTokens.run(call.capabilityToken, () => executeQuery(query)))
-    .on(
-      Database.method.executeBatch,
-      (batch, call) => CapabilityTokens.run(call.capabilityToken, () => executeQueries(batch)),
-    )
-    .on(Cache.method.get, (request, call) => CapabilityTokens.run(call.capabilityToken, () => cacheGet(request)))
-    .on(Cache.method.set, (request, call) => CapabilityTokens.run(call.capabilityToken, () => cacheSet(request)))
-    .on(
-      Cache.method.delete,
-      (request, call) => CapabilityTokens.run(call.capabilityToken, () => cacheDelete(request)),
-    )
-    .on(Queue.method.push, (request, call) => CapabilityTokens.run(call.capabilityToken, () => queuePush(request)))
-    .on(Hook.method.emit, (event, call) => CapabilityTokens.run(call.capabilityToken, () => hookEmit(event)))
-    .on(Logging.method.ship, (batch, call) => CapabilityTokens.run(call.capabilityToken, () => shipLogs(batch)));
+    .on(Logging.method.ship, guarded(shipLogs));
 
   capabilities.wire({
-    on: (method, handler) =>
-      server.on(method, (request, call) => CapabilityTokens.run(call.capabilityToken, () => handler(request))),
+    on: (method, handler) => server.on(method, guarded(handler)),
   });
 
   return server.otherwise((path) => {
