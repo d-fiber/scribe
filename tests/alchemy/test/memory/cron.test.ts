@@ -65,7 +65,7 @@ Scribe.test("firing a declared run calls what it was scheduled with", async () =
   expect(ran, equals(2));
 });
 
-Scribe.test("firing a key nobody scheduled refuses, naming the key and what is known", async () => {
+Scribe.test("firing a key nobody scheduled refuses, naming the key and what is known", () => {
   const crons = new MemoryCrons();
   crons.schedule({ key: "audience:sweep", schedule: { every: Duration.hours(1) }, run: () => {} });
 

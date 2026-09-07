@@ -104,9 +104,9 @@ Scribe.test("size counts an expired entry until something reads and forgets it",
 Scribe.test("upsert runs the computation once even when two callers ask at the same time", async () => {
   const cache = new MemoryCache<string>({ key: "members" });
   let computations = 0;
-  const compute = async () => {
+  const compute = () => {
     computations++;
-    return "computed";
+    return Promise.resolve("computed");
   };
 
   const [first, second] = await Promise.all([cache.upsert("a", compute), cache.upsert("a", compute)]);
