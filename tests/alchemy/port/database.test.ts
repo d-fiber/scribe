@@ -165,6 +165,33 @@ Scribe.test("narrowing a query carries every step through to the driver", async 
   );
 });
 
+Scribe.test("select and range each carry their own step through to the driver", async () => {
+  const driver = new OneTable();
+  Databases.use(driver);
+
+  await schema<Schema>().table("__audience_members__")
+    .select((columns) => ({ accountId: columns.account_id }))
+    .where((f) => f.account_id.eq("ada"))
+    .range(0, 9)
+    .get();
+
+  expect(
+    driver.query.steps,
+    equals(["select", "where(account_id=ada)", "range(0,9)", "get"]),
+    "select and range did not both reach the driver, in the order they were called",
+  );
+});
+
+Scribe.test("insertOne answers the row the driver wrote, wrapped as an outcome", async () => {
+  Databases.use(new OneTable());
+  const members = schema<Schema>().table("__audience_members__");
+
+  const written = await members.insertOne(ada);
+
+  expect(written.ok, isTrue, "insertOne did not say the write went through");
+  expect(written.ok ? written.data : null, equals(ada), "insertOne did not hand back the row the driver answered");
+});
+
 Scribe.test("reading answers rows, and a write answers an outcome rather than a yes or a no", async () => {
   Databases.use(new OneTable());
   const members = schema<Schema>().table("__audience_members__");

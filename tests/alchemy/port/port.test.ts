@@ -244,6 +244,60 @@ Scribe.test("a cache that answers too slowly raises when the declaration asked i
   await expectLater(() => held.get("ada"), throwsA(isA(TimeoutException)));
 });
 
+Scribe.test("getMany on a cache that answers too slowly is read as a cache holding nothing for every id", async () => {
+  Caches.use({
+    open<T>(): Cache<T> {
+      return {
+        get: () => Promise.resolve(null),
+        getMany: () => new Promise(() => {}),
+        add: () => Promise.resolve(),
+        addMany: () => Promise.resolve(),
+        delete: () => Promise.resolve(),
+        deleteMany: () => Promise.resolve(),
+        upsert: () => Promise.resolve(null as never),
+        clear: () => Promise.resolve(),
+      } as Cache<T>;
+    },
+  });
+
+  const held = cache<string>({ key: "slow", deadline: Duration.milliseconds(5) });
+
+  expect(
+    await held.getMany(["ada", "bob"]),
+    equals([null, null]),
+    "getMany on a timeout did not answer one null per requested id",
+  );
+});
+
+Scribe.test("addMany, deleteMany and clear each reach the driver they were declared against", async () => {
+  const driver = new OpensInMemory();
+  Caches.use(driver);
+  const members = cache<string>({ key: "audience:member" });
+
+  await members.addMany([["ada", "editor"], ["bob", "reader"]]);
+  expect(await members.get("ada"), equals("editor"), "addMany did not add every entry it was given");
+  expect(await members.get("bob"), equals("reader"), "addMany did not add every entry it was given");
+
+  await members.deleteMany("ada", "bob");
+  expect(await members.get("ada"), equals(null), "deleteMany left an entry behind");
+  expect(await members.get("bob"), equals(null), "deleteMany left an entry behind");
+
+  await members.add("carl", "reader");
+  await members.clear();
+  expect(await members.get("carl"), equals(null), "clear left an entry behind");
+});
+
+Scribe.test("isBlocked and unmeasured reach a declared rate limit, and key names the prefix it opened under", async () => {
+  const limiter = new RefusesEverybody();
+  RateLimiters.use({ open: () => limiter } as RateLimiterDriver);
+
+  const limit = rateLimit({ key: "sign_in", limit: 5, window: Duration.minutes(1), penalty: Duration.minutes(10) });
+
+  expect(await limit.isBlocked("", "ada"), equals(true), "isBlocked did not reach the declared limiter");
+  expect(limit.unmeasured(), equals({ ok: true, remaining: 0 }), "unmeasured did not reach the declared limiter");
+  expect(limit.key, equals("sign_in"), "key did not answer the prefix the limit was declared with");
+});
+
 Scribe.test("a write that runs out of time raises whatever the declaration said about reads", async () => {
   Caches.use({
     open<T>(): Cache<T> {

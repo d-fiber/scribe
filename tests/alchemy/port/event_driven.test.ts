@@ -56,6 +56,7 @@ import {
   installCrons,
   installQueues,
   installTriggers,
+  openHooks,
   queue,
   type QueueDriver,
   Queues,
@@ -141,6 +142,35 @@ Scribe.test("a hook opens itself at the first emit, not at the declaration", asy
   expect(opened, equals(0), "the hook was opened before anything was emitted");
 
   await signedUp.emit("ada");
+  expect(told, equals(["ada"]));
+});
+
+Scribe.test("openHooks opens every declared hook before the first emit, so an early listener is heard", async () => {
+  forgetHooks();
+  let opened = 0;
+  const told: unknown[] = [];
+  Hooks.use({
+    open<T>(): DeclaredHook<T> {
+      opened += 1;
+      const listeners: Array<(payload: T) => void | Promise<void>> = [];
+      return {
+        emit: async (payload) => {
+          told.push(payload);
+          for (const listen of listeners) await listen(payload);
+        },
+        on: (listen) => void listeners.push(listen),
+      };
+    },
+  });
+
+  const signedUp = hook<string>({ event: "audience.signed_up" });
+  expect(opened, equals(0), "declaring a hook opened it on its own");
+
+  openHooks();
+  expect(opened, equals(1), "openHooks did not open the hook it was declared for");
+
+  await signedUp.emit("ada");
+  expect(opened, equals(1), "emitting after openHooks opened the hook a second time");
   expect(told, equals(["ada"]));
 });
 
