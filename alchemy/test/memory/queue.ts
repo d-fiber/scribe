@@ -37,6 +37,7 @@
 import type { Future } from "../../async/future.ts";
 import type { UnmodifiableList } from "../../value/list.ts";
 import type { DeclaredQueue, DeclaredQueueOptions, QueueDriver, QueueMessage } from "../../port/queue.ts";
+import { openKeyed } from "./opener.ts";
 
 /**
  * A queue that keeps what is pushed to it in a list, for a test to run a package against.
@@ -107,12 +108,11 @@ export class MemoryQueues implements QueueDriver {
    * or hands back the one already opened under that key.
    */
   open<T>(options: DeclaredQueueOptions): DeclaredQueue<T> {
-    const already = this.opened.get(options.key);
-    if (already !== undefined) return already as unknown as DeclaredQueue<T>;
-
-    const held = new MemoryQueue<T>(options);
-    this.opened.set(options.key, held as unknown as MemoryQueue<never>);
-    return held;
+    return openKeyed(
+      this.opened,
+      options.key,
+      () => new MemoryQueue<T>(options) as unknown as MemoryQueue<never>,
+    ) as unknown as DeclaredQueue<T>;
   }
 
   /** The {@link QueueDriver.consume} implementation: records `options.key` in {@link draining} without draining anything itself. */

@@ -38,6 +38,7 @@ import type { Future } from "../../async/future.ts";
 import type { List, UnmodifiableList } from "../../value/list.ts";
 import type { Cache, CacheDriver, CacheOptions } from "../../port/cache.ts";
 import { Now } from "../../value/date_time.ts";
+import { openKeyed } from "./opener.ts";
 
 /** One entry of a {@link MemoryCache}, with when it stops counting. */
 interface Held<T> {
@@ -191,12 +192,11 @@ export class MemoryCaches implements CacheDriver {
    * or hands back the one already opened under that key.
    */
   open<T>(options: CacheOptions): Cache<T> {
-    const already = this.opened.get(options.key);
-    if (already !== undefined) return already as unknown as Cache<T>;
-
-    const held = new MemoryCache<T>(options);
-    this.opened.set(options.key, held as unknown as MemoryCache<never>);
-    return held;
+    return openKeyed(
+      this.opened,
+      options.key,
+      () => new MemoryCache<T>(options) as unknown as MemoryCache<never>,
+    ) as unknown as Cache<T>;
   }
 }
 

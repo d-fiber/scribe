@@ -46,6 +46,7 @@ import type {
   TriggerDriver,
 } from "../../port/trigger.ts";
 import type { DeclaredUpdateChange } from "../../port/trigger.ts";
+import { openKeyed } from "./opener.ts";
 
 /**
  * A watch that keeps what was written on it and notices nothing, for a test to run a package
@@ -134,12 +135,10 @@ export class MemoryTriggers implements TriggerDriver {
    * table shares handlers with the first instead of watching in isolation.
    */
   watch<TRow>(table: string, options?: DeclaredTriggerOptions): DeclaredTrigger<TRow> {
-    const name = options?.name ?? table;
-    const already = this.opened.get(name);
-    if (already !== undefined) return already as unknown as DeclaredTrigger<TRow>;
-
-    const held = new MemoryTrigger<TRow>();
-    this.opened.set(name, held as unknown as MemoryTrigger<never>);
-    return held;
+    return openKeyed(
+      this.opened,
+      options?.name ?? table,
+      () => new MemoryTrigger<TRow>() as unknown as MemoryTrigger<never>,
+    ) as unknown as DeclaredTrigger<TRow>;
   }
 }

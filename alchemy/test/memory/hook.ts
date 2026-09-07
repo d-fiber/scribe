@@ -36,6 +36,7 @@
 
 import type { Future } from "../../async/future.ts";
 import type { DeclaredHook, HookDriver, HookOptions } from "../../port/hook.ts";
+import { openKeyed } from "./opener.ts";
 
 /**
  * A hook that keeps what is emitted and calls whoever listened, for a test to run a package against.
@@ -83,11 +84,10 @@ export class MemoryHooks implements HookDriver {
    * or hands back the one already opened under that event.
    */
   open<T>(options: HookOptions): DeclaredHook<T> {
-    const already = this.opened.get(options.event);
-    if (already !== undefined) return already as unknown as DeclaredHook<T>;
-
-    const held = new MemoryHook<T>();
-    this.opened.set(options.event, held as unknown as MemoryHook<never>);
-    return held;
+    return openKeyed(
+      this.opened,
+      options.event,
+      () => new MemoryHook<T>() as unknown as MemoryHook<never>,
+    ) as unknown as DeclaredHook<T>;
   }
 }
