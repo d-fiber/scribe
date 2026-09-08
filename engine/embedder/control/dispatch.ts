@@ -36,7 +36,7 @@
 
 import type { Context } from "hono";
 import type { Future } from "@scribe/alchemy";
-import type { Reply } from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
+import type { Reply } from "@scribe/protocol/gen/scribe/protocol/invocation_pb.ts";
 import { isAllowed } from "@scribe/kernel/endpoint/access.ts";
 import { withinRateLimit } from "@scribe/kernel/endpoint/rate_limit.ts";
 import { ServerResponse } from "@scribe/alchemy/route";

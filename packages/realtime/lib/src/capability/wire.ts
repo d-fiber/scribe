@@ -42,10 +42,10 @@ import {
   type GrantRequest,
   type GrantResult,
   GrantResultSchema,
-} from "@scribe/sdk/gen/scribe/packages/realtime/protocol/realtime_pb.ts";
+} from "@scribe/protocol/gen/scribe/packages/realtime/protocol/realtime_pb.ts";
 import { broadcast, GrantedDestination } from "../../realtime.ts";
-import { decodeJson } from "@scribe/sdk/transport.ts";
-import { Realtime } from "@scribe/sdk/gen/scribe/packages/realtime/protocol/realtime_pb.ts";
+import { decodeJson } from "@scribe/protocol/transport.ts";
+import { Realtime } from "@scribe/protocol/gen/scribe/packages/realtime/protocol/realtime_pb.ts";
 import type { CapabilityWiring } from "@scribe/contracts/capability.ts";
 
 function failed(scope: string, cause: unknown): { code: string; message: string } {

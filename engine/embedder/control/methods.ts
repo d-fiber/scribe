@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Method as ProtoMethod } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
+import { Method as ProtoMethod } from "@scribe/protocol/gen/scribe/protocol/common_pb.ts";
 
 /** The method a Hono router mounts a handler under. */
 export type HonoMethod = "get" | "post" | "put" | "patch" | "delete";

@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Search } from "@scribe/sdk/gen/scribe/packages/search/protocol/search_pb.ts";
+import { Search } from "@scribe/protocol/gen/scribe/packages/search/protocol/search_pb.ts";
 import type { CapabilityWiring } from "@scribe/contracts/capability.ts";
 import { create } from "@bufbuild/protobuf";
 import {
@@ -44,9 +44,9 @@ import {
   type SearchRequest,
   type SearchResult,
   SearchResultSchema,
-} from "@scribe/sdk/gen/scribe/packages/search/protocol/search_pb.ts";
+} from "@scribe/protocol/gen/scribe/packages/search/protocol/search_pb.ts";
 import { type AnySearchIndex, indexNamed } from "../../search.ts";
-import { decodeJson, encodeJson } from "@scribe/sdk/transport.ts";
+import { decodeJson, encodeJson } from "@scribe/protocol/transport.ts";
 
 function failed(scope: string, cause: unknown): { code: string; message: string } {
   const message = cause instanceof Error ? cause.message : String(cause);

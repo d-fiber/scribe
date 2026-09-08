@@ -40,8 +40,6 @@
   "@scribe/remote_configs/testing": "../packages/remote_configs/tests/testing/testing.ts",
   "@scribe/runtime/": "../engine/runtime/",
   "@scribe/scholium/": "../engine/scholium/",
-  "@scribe/sdk": "../sdk/js/mod.ts",
-  "@scribe/sdk/": "../sdk/js/",
   "@scribe/search": "../packages/search/lib/search.ts",
   "@scribe/search/lib/src/capability/wire.ts": "../packages/search/lib/src/capability/wire.ts",
   "@scribe/search/testing": "../packages/search/tests/testing/testing.ts",

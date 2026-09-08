@@ -38,7 +38,7 @@ import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals } from "@std/assert";
 import { type DiscoveredLogSink, LogSink, ScribeServer } from "@scribe/sdk";
-import type { Manifest } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
+import type { Manifest } from "@scribe/protocol/gen/scribe/protocol/manifest_pb.ts";
 import type { LoggedEntry } from "@scribe/alchemy/observe";
 import { WorkerLogSinks } from "@scribe/embedder/control/log_sinks.ts";
 import { WorkerClient } from "@scribe/embedder/control/client.ts";

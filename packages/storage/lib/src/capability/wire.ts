@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Storage as StorageService } from "@scribe/sdk/gen/scribe/packages/storage/protocol/storage_pb.ts";
+import { Storage as StorageService } from "@scribe/protocol/gen/scribe/packages/storage/protocol/storage_pb.ts";
 import type { CapabilityWiring } from "@scribe/contracts/capability.ts";
 import { create } from "@bufbuild/protobuf";
 import {
@@ -46,7 +46,7 @@ import {
   ListResultSchema,
   type ObjectSummary,
   ObjectSummarySchema,
-} from "@scribe/sdk/gen/scribe/packages/storage/protocol/storage_pb.ts";
+} from "@scribe/protocol/gen/scribe/packages/storage/protocol/storage_pb.ts";
 import {
   Bytes,
   declaredStorage,

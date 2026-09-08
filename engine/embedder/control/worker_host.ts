@@ -37,8 +37,8 @@
 import type { Future } from "@scribe/alchemy";
 import { Hono } from "hono";
 import { honoRouter } from "@scribe/kernel/http/routing/hono_router.ts";
-import { majorOf, PROTOCOL_VERSION } from "@scribe/sdk/transport.ts";
-import type { Manifest, NodeDeclaration } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
+import { majorOf, PROTOCOL_VERSION } from "@scribe/protocol/transport.ts";
+import type { Manifest, NodeDeclaration } from "@scribe/protocol/gen/scribe/protocol/manifest_pb.ts";
 import { Listeners } from "@scribe/scholium/listener.ts";
 import { Processes } from "@scribe/scholium/process.ts";
 import { workerSettings } from "@scribe/runtime/settings.ts";

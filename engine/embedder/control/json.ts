@@ -36,7 +36,7 @@
 
 import { json as jsonText } from "@scribe/alchemy";
 import { create } from "@bufbuild/protobuf";
-import { type Json, JsonSchema } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
+import { type Json, JsonSchema } from "@scribe/protocol/gen/scribe/protocol/common_pb.ts";
 
 const encoder = new TextEncoder();
 

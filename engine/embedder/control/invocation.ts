@@ -36,7 +36,7 @@
 
 import type { Future } from "@scribe/alchemy";
 import { create } from "@bufbuild/protobuf";
-import { Caller as ProtoCaller, Need } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
+import { Caller as ProtoCaller, Need } from "@scribe/protocol/gen/scribe/protocol/common_pb.ts";
 import { protoMethodOf } from "./methods.ts";
 import {
   DeviceSchema,
@@ -46,8 +46,8 @@ import {
   IpLocationSchema,
   LocalizationSchema,
   RequestSchema,
-} from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
-import type { Route } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
+} from "@scribe/protocol/gen/scribe/protocol/invocation_pb.ts";
+import type { Route } from "@scribe/protocol/gen/scribe/protocol/manifest_pb.ts";
 import { requestDevice } from "@scribe/runtime/device/mod.ts";
 import { currentIdentity } from "@scribe/runtime/http/accessors/identity.ts";
 import { currentLocation } from "@scribe/runtime/http/accessors/location.ts";

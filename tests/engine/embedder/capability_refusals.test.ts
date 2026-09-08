@@ -43,17 +43,20 @@ import {
   BanListRequestSchema,
   BanRequestSchema,
   DeviceRequestSchema,
-} from "@scribe/sdk/gen/scribe/packages/auth/protocol/auth_pb.ts";
+} from "@scribe/protocol/gen/scribe/packages/auth/protocol/auth_pb.ts";
 import {
   BroadcastRequestSchema,
   GrantRequestSchema,
-} from "@scribe/sdk/gen/scribe/packages/realtime/protocol/realtime_pb.ts";
-import { QueueRequestSchema, SearchRequestSchema } from "@scribe/sdk/gen/scribe/packages/search/protocol/search_pb.ts";
+} from "@scribe/protocol/gen/scribe/packages/realtime/protocol/realtime_pb.ts";
+import {
+  QueueRequestSchema,
+  SearchRequestSchema,
+} from "@scribe/protocol/gen/scribe/packages/search/protocol/search_pb.ts";
 import {
   DeleteRequestSchema,
   ListRequestSchema,
   ObjectRefSchema,
-} from "@scribe/sdk/gen/scribe/packages/storage/protocol/storage_pb.ts";
+} from "@scribe/protocol/gen/scribe/packages/storage/protocol/storage_pb.ts";
 import {
   authBan,
   authDeleteAccount,

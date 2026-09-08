@@ -38,8 +38,8 @@ import {
   type Filter,
   type FilterGroup,
   FilterOperator,
-} from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
-import { decodeJson } from "@scribe/sdk/transport.ts";
+} from "@scribe/protocol/gen/scribe/packages/foundation/protocol/database_pb.ts";
+import { decodeJson } from "@scribe/protocol/transport.ts";
 import {
   assertPlainColumn,
   keywordLiteral,

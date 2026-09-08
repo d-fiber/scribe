@@ -42,8 +42,8 @@ import {
   metadataOf,
   TransportFailure,
   UnaryServer,
-} from "@scribe/sdk/transport.ts";
-import { type LogAck, LogAckSchema, type LogBatch, Logging } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
+} from "@scribe/protocol/transport.ts";
+import { type LogAck, LogAckSchema, type LogBatch, Logging } from "@scribe/protocol/gen/scribe/protocol/logs_pb.ts";
 import { capabilities } from "@scribe/contracts/capability.ts";
 import { CapabilityTokens } from "./tokens.ts";
 

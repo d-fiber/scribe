@@ -49,8 +49,8 @@ import {
   ScribeServer,
   Time,
 } from "@scribe/sdk";
-import { PROTOCOL_VERSION } from "@scribe/sdk/transport.ts";
-import { HOST_HEADER } from "@scribe/sdk/src/transport/wire.ts";
+import { PROTOCOL_VERSION } from "@scribe/protocol/transport.ts";
+import { HOST_HEADER } from "@scribe/protocol/transport/wire.ts";
 import { installRateLimiterMock } from "@scribe/foundation/testing";
 import { RequestScope } from "@scribe/runtime/scope.ts";
 import { mountManifest } from "@scribe/embedder/control/mount.ts";

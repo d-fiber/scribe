@@ -38,12 +38,12 @@ import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { fromBinary } from "@bufbuild/protobuf";
-import { FailureSchema } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
-import { Storage } from "@scribe/sdk/gen/scribe/packages/storage/protocol/storage_pb.ts";
-import { procedurePath } from "@scribe/sdk/src/transport/wire.ts";
+import { FailureSchema } from "@scribe/protocol/gen/scribe/protocol/common_pb.ts";
+import { Storage } from "@scribe/protocol/gen/scribe/packages/storage/protocol/storage_pb.ts";
+import { procedurePath } from "@scribe/protocol/transport/wire.ts";
 import { capabilityHandler, capabilityServer } from "@scribe/embedder/capabilities/server.ts";
 import { CapabilityTokens } from "@scribe/embedder/capabilities/tokens.ts";
-import { Database } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
+import { Database } from "@scribe/protocol/gen/scribe/packages/foundation/protocol/database_pb.ts";
 import { assert } from "@std/assert";
 
 /** Calls `path` on the host's capability server, the way a worker would. */

@@ -47,7 +47,7 @@
  * the package's door.
  */
 
-import { Auth } from "@scribe/sdk/gen/scribe/packages/auth/protocol/auth_pb.ts";
+import { Auth } from "@scribe/protocol/gen/scribe/packages/auth/protocol/auth_pb.ts";
 import type { CapabilityWiring } from "@scribe/contracts/capability.ts";
 import { create } from "@bufbuild/protobuf";
 import {
@@ -73,12 +73,12 @@ import {
   type RoleListResult,
   RoleListResultSchema,
   RoleSchema,
-} from "@scribe/sdk/gen/scribe/packages/auth/protocol/auth_pb.ts";
+} from "@scribe/protocol/gen/scribe/packages/auth/protocol/auth_pb.ts";
 import { Duration } from "@scribe/alchemy";
 import { type Ban } from "../../auth.ts";
 import { accountNamed, type AnyAccount, AUTH_EXTENSION, declaredAccounts } from "../../declaration.ts";
 import { extensions } from "@scribe/runtime/wiring/extensions/mod.ts";
-import { encodeJson } from "@scribe/sdk/transport.ts";
+import { encodeJson } from "@scribe/protocol/transport.ts";
 
 const IDENTITY_FIELDS: ReadonlySet<string> = new Set([
   "id",

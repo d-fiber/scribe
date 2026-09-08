@@ -35,16 +35,16 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "@scribe/alchemy";
-import { type Fetcher, PROTOCOL_VERSION, UnaryClient } from "@scribe/sdk/transport.ts";
-import type { Manifest } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
-import { Registration } from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
-import type { Invocation, Reply } from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
-import { Worker as WorkerService } from "@scribe/sdk/gen/scribe/protocol/invocation_pb.ts";
-import { QueueDispatch } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/queue_pb.ts";
-import { HookDispatch } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/hook_pb.ts";
-import { CronDispatch } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/cron_pb.ts";
-import type { LogEntry } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
-import { LogDispatch } from "@scribe/sdk/gen/scribe/protocol/logs_pb.ts";
+import { type Fetcher, PROTOCOL_VERSION, UnaryClient } from "@scribe/protocol/transport.ts";
+import type { Manifest } from "@scribe/protocol/gen/scribe/protocol/manifest_pb.ts";
+import { Registration } from "@scribe/protocol/gen/scribe/protocol/manifest_pb.ts";
+import type { Invocation, Reply } from "@scribe/protocol/gen/scribe/protocol/invocation_pb.ts";
+import { Worker as WorkerService } from "@scribe/protocol/gen/scribe/protocol/invocation_pb.ts";
+import { QueueDispatch } from "@scribe/protocol/gen/scribe/packages/foundation/protocol/queue_pb.ts";
+import { HookDispatch } from "@scribe/protocol/gen/scribe/packages/foundation/protocol/hook_pb.ts";
+import { CronDispatch } from "@scribe/protocol/gen/scribe/packages/foundation/protocol/cron_pb.ts";
+import type { LogEntry } from "@scribe/protocol/gen/scribe/protocol/logs_pb.ts";
+import { LogDispatch } from "@scribe/protocol/gen/scribe/protocol/logs_pb.ts";
 
 /**
  * The host side of the wire, as one replica holds it.

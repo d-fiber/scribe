@@ -35,13 +35,13 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Hono } from "hono";
-import { Caller as ProtoCaller } from "@scribe/sdk/gen/scribe/protocol/common_pb.ts";
+import { Caller as ProtoCaller } from "@scribe/protocol/gen/scribe/protocol/common_pb.ts";
 import type {
   Manifest,
   NodeDeclaration,
   RateLimiter as ProtoRateLimiter,
   Route,
-} from "@scribe/sdk/gen/scribe/protocol/manifest_pb.ts";
+} from "@scribe/protocol/gen/scribe/protocol/manifest_pb.ts";
 import { Duration } from "@scribe/alchemy";
 import type { Caller, RateLimit } from "@scribe/alchemy/route";
 import { honoMethodOf } from "./methods.ts";

@@ -35,10 +35,10 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { CapabilityWiring } from "@scribe/contracts/capability.ts";
-import { Cache } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/cache_pb.ts";
-import { Database } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
-import { Hook } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/hook_pb.ts";
-import { Queue } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/queue_pb.ts";
+import { Cache } from "@scribe/protocol/gen/scribe/packages/foundation/protocol/cache_pb.ts";
+import { Database } from "@scribe/protocol/gen/scribe/packages/foundation/protocol/database_pb.ts";
+import { Hook } from "@scribe/protocol/gen/scribe/packages/foundation/protocol/hook_pb.ts";
+import { Queue } from "@scribe/protocol/gen/scribe/packages/foundation/protocol/queue_pb.ts";
 import { cacheDelete, cacheGet, cacheSet } from "../cache/capability.ts";
 import { executeQueries, executeQuery } from "../database/capability.ts";
 import { hookEmit } from "../hook/capability.ts";
