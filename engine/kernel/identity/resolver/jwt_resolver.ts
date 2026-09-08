@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Duration, valkery } from "@scribe/alchemy";
-import type { Future, ValkeryPort } from "@scribe/alchemy";
+import { cache, Duration } from "@scribe/alchemy";
+import type { Cache, Future } from "@scribe/alchemy";
 import { JwtVerifier } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
 import { IDENTITY_CACHE_KEY, IdentityRevocation } from "@scribe/foundation/redis";
 import { TtlLru } from "@scribe/runtime/primitives/ttl_lru.ts";
@@ -72,7 +72,7 @@ export interface ResolvedJwtIdentity {
 /**
  * A cached identity, carrying the expiry of the token it was resolved from.
  *
- * The shared Valkery is read before the signature is verified, so the entry has to
+ * The cache is read before the signature is verified, so the entry has to
  * answer for the token's lifetime on its own. `exp` is `null` when the token
  * carried no such claim, which is the one case where nothing has to be
  * enforced here.
@@ -84,20 +84,20 @@ interface _CachedJwtIdentity extends ResolvedJwtIdentity {
 const _FETCH_TIMEOUT: Duration = Duration.seconds(5);
 
 /**
- * How long a resolved identity stays in the shared Valkery.
+ * How long a resolved identity stays in the shared cache.
  *
  * @remarks
  * The same value is handed to `IdentityRevocation.remember` as the fingerprint index's own expiry,
- * so an entry `revoke` would need to find never outlives the Valkery entry it belongs to: a token
- * that has already fallen out of the shared Valkery has nothing left in the fingerprint index for a
+ * so an entry `revoke` would need to find never outlives the cache entry it belongs to: a token
+ * that has already fallen out of the shared cache has nothing left in the fingerprint index for a
  * revocation to drop either.
  */
-const _VALKERY_TTL: Duration = Duration.minutes(5);
+const _CACHE_TTL: Duration = Duration.minutes(5);
 
 /**
  * How long this process answers from its own memory before asking Redis again.
  *
- * Every authenticated request reads the shared Valkery, so a token used at any
+ * Every authenticated request reads the identity cache, so a token used at any
  * rate at all is a Redis round trip per request on top of the rate limiter's.
  * This collapses that to one read per window per replica.
  *
@@ -158,9 +158,9 @@ function _identityFromClaims(payload: JWTPayload): ResolvedJwtIdentity | null {
 
 /** Resolves the identity behind a bearer JWT, cached in front of the signature check and GoTrue. */
 export class JwtIdentityResolver {
-  private static readonly _valkery: ValkeryPort<_CachedJwtIdentity> = valkery<_CachedJwtIdentity>({
+  private static readonly _cache: Cache<_CachedJwtIdentity> = cache<_CachedJwtIdentity>({
     key: IDENTITY_CACHE_KEY,
-    ttl: _VALKERY_TTL,
+    ttl: _CACHE_TTL,
   });
 
   private static readonly _local = new TtlLru<_CachedJwtIdentity>({
@@ -190,7 +190,7 @@ export class JwtIdentityResolver {
     const local = this._local.get(cacheKey);
     if (local !== null && !_expired(local.exp)) return local;
 
-    const cached = await this._valkery.get(cacheKey);
+    const cached = await this._cache.get(cacheKey);
     if (cached !== null && !_expired(cached.exp)) {
       this._local.set(cacheKey, cached);
       return cached;
@@ -227,7 +227,7 @@ export class JwtIdentityResolver {
     const revocable = await IdentityRevocation.remember(
       identity.id,
       cacheKey,
-      _VALKERY_TTL.inSeconds,
+      _CACHE_TTL.inSeconds,
     );
     if (!revocable) {
       console.error(
@@ -237,7 +237,7 @@ export class JwtIdentityResolver {
     }
 
     this._local.set(cacheKey, { ...identity, exp });
-    await this._valkery.add(cacheKey, { ...identity, exp });
+    await this._cache.add(cacheKey, { ...identity, exp });
   }
 
   /**
@@ -257,7 +257,7 @@ export class JwtIdentityResolver {
   /**
    * Drops every identity this process is holding, without touching Redis.
    *
-   * Whoever replaces what the shared Valkery holds has to call this, or the
+   * Whoever replaces what the shared cache holds has to call this, or the
    * process keeps answering from a view of the world that no longer exists.
    * That is a test standing a fresh cache up, and it is why the local tier is
    * not something a caller can forget about.

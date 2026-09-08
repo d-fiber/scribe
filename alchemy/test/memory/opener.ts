@@ -39,7 +39,7 @@
  * build one with `build`, keep it, and hand back that instead.
  *
  * @remarks
- * `MemoryValkeries`, `MemoryQueues`, `MemoryHooks` and `MemoryTriggers` each open one of their own
+ * `MemoryCaches`, `MemoryQueues`, `MemoryHooks` and `MemoryTriggers` each open one of their own
  * doubles per key and answer the same instance on a second open under the same key, which is what
  * the port each of them backs promises. Each used to check its own map by hand; this holds that one
  * check instead, so what is left in each driver is only the shape its own double takes.

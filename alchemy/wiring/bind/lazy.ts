@@ -38,17 +38,17 @@
  * A value computed once, the first time it is asked for, and kept from then on.
  *
  * @remarks
- * This is the piece a port that opens on first use shares with the others: a Valkery, a queue, a
+ * This is the piece a port that opens on first use shares with the others: a cache, a queue, a
  * rate limit and a hook each wrap a driver they cannot reach yet, because whatever fills their
  * slot is not up when the port is declared at module scope. Each used to repeat the same private
  * field and the same `??=` behind a differently named method; this holds that one call instead, so
- * what is left in each port is only what makes it different, a Valkery's deadline, a hook's
- * waiting listeners.
+ * what is left in each port is only what makes it different — a cache's deadline, a hook's waiting
+ * listeners.
  *
  * @example
  * ```ts ignore
- * class DeferredValkery<T> implements ValkeryPort<T> {
- *   readonly #store = new Lazy(() => Valkeries.get().open<T>(this.#options));
+ * class DeferredCache<T> implements Cache<T> {
+ *   readonly #store = new Lazy(() => Caches.get().open<T>(this.#options));
  * }
  * ```
  */

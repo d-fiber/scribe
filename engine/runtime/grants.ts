@@ -35,15 +35,15 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Grants, GrantSource } from "@scribe/contracts/grants.ts";
-import { Duration, valkery } from "@scribe/alchemy";
-import type { Future, ValkeryPort } from "@scribe/alchemy";
+import { cache, Duration } from "@scribe/alchemy";
+import type { Cache, Future } from "@scribe/alchemy";
 import { TtlLru } from "@scribe/runtime/primitives/ttl_lru.ts";
 
-/** How long a resolved answer stays in the shared Valkery. */
-const _VALKERY_TTL: Duration = Duration.minutes(5);
+/** How long a resolved answer stays in the shared cache. */
+const _CACHE_TTL: Duration = Duration.minutes(5);
 
 /**
- * How long this process answers from its own memory before asking the shared Valkery again.
+ * How long this process answers from its own memory before asking the shared cache again.
  *
  * Every authenticated request resolves grants, so an account calling at any rate at all is a
  * Redis round trip per request on top of the rate limiter's and the identity cache's. This
@@ -88,10 +88,7 @@ function _grantsNothing(grants: Grants): boolean {
  * source are themselves process-wide.
  */
 export class GrantsResolver {
-  private static readonly _valkery: ValkeryPort<Grants> = valkery<Grants>({
-    key: "identity:grants",
-    ttl: _VALKERY_TTL,
-  });
+  private static readonly _cache: Cache<Grants> = cache<Grants>({ key: "identity:grants", ttl: _CACHE_TTL });
   private static readonly _local = new TtlLru<Grants>({
     max: _LOCAL_MAX_ENTRIES,
     ttlMs: _LOCAL_TTL_MS,
@@ -116,7 +113,7 @@ export class GrantsResolver {
    * What the deployment grants `accountId`, or null when it grants nothing.
    *
    * Three tiers, each answering what the one before could not: this process, then the shared
-   * Valkery, then the source. Concurrent callers asking for the same account share one resolution,
+   * cache, then the source. Concurrent callers asking for the same account share one resolution,
    * so a cold account being called by a burst costs the source one pair of queries rather than
    * one per request.
    */
@@ -124,7 +121,7 @@ export class GrantsResolver {
     const local = this._local.get(accountId);
     if (local !== null) return _grantsNothing(local) ? null : local;
 
-    const cached = await this._valkery.get(accountId);
+    const cached = await this._cache.get(accountId);
     if (cached !== null) {
       this._local.set(accountId, cached);
       return _grantsNothing(cached) ? null : cached;
@@ -138,18 +135,18 @@ export class GrantsResolver {
   static invalidate(accountId?: string): Future<void> {
     if (accountId === undefined) {
       this.forget();
-      return this._valkery.clear();
+      return this._cache.clear();
     }
 
     this._local.delete(accountId);
     this._inFlight.delete(accountId);
-    return this._valkery.delete(accountId);
+    return this._cache.delete(accountId);
   }
 
   /**
-   * Drops every set of grants this process is holding, without touching the shared Valkery.
+   * Drops every set of grants this process is holding, without touching the shared cache.
    *
-   * Whoever replaces what the shared Valkery holds has to call this, or the process keeps answering
+   * Whoever replaces what the shared cache holds has to call this, or the process keeps answering
    * from a view of the world that no longer exists. That is a test standing a fresh cache up, and
    * it is why the local tier is not something a caller can forget about.
    */
@@ -186,7 +183,7 @@ export class GrantsResolver {
     };
 
     this._local.set(accountId, grants);
-    await this._valkery.add(accountId, grants);
+    await this._cache.add(accountId, grants);
     return grants;
   }
 

@@ -52,7 +52,7 @@ export class BindingError extends ScribeError {}
  *
  * @remarks
  * It is the shape every capability of the repo takes: a package writes against an interface, and
- * what implements it arrives from outside. That is what lets `Valkeries` hold a real broker in
+ * what implements it arrives from outside. That is what lets `Caches` hold a real broker in
  * production and a map in a test, without the package that uses it knowing either exists.
  *
  * A slot is filled once at boot, before anything reads it, and read every time from then on.
@@ -64,9 +64,9 @@ export class BindingError extends ScribeError {}
  *
  * @example
  * ```ts ignore
- * export const Valkeries: Slot<ValkeryDriver> = new Slot<ValkeryDriver>("Valkeries");
+ * export const Caches: Slot<CacheDriver> = new Slot<CacheDriver>("Caches");
  *
- * Valkeries.use(new RedisValkeries(url));
+ * Caches.use(new RedisCaches(url));
  * ```
  */
 export class Slot<T> {

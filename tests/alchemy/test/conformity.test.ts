@@ -35,14 +35,14 @@
 // LICENSE file, the LICENSE file governs.
 
 import "@scribe/scholium/runner.ts";
-import { checkValkeryDriver, expectLater, isA, MemoryValkeries, Scribe, throwsA } from "@scribe/alchemy/test";
+import { checkCacheDriver, expectLater, isA, MemoryCaches, Scribe, throwsA } from "@scribe/alchemy/test";
 import { AssertionError } from "@scribe/alchemy/test";
-import type { ValkeryDriver, ValkeryOptions, ValkeryPort } from "@scribe/alchemy";
+import type { Cache, CacheDriver, CacheOptions } from "@scribe/alchemy";
 
-class RunsEveryTime implements ValkeryDriver {
+class RunsEveryTime implements CacheDriver {
   readonly #held = new Map<string, unknown>();
 
-  open<T>(_options: ValkeryOptions): ValkeryPort<T> {
+  open<T>(_options: CacheOptions): Cache<T> {
     const held = this.#held;
     return {
       get: (id) => Promise.resolve((held.get(id) ?? null) as T | null),
@@ -78,10 +78,10 @@ class RunsEveryTime implements ValkeryDriver {
   }
 }
 
-Scribe.test("the Valkery this repository ships keeps every promise the port makes", async () => {
-  await checkValkeryDriver(new MemoryValkeries());
+Scribe.test("the cache this repository ships keeps every promise the port makes", async () => {
+  await checkCacheDriver(new MemoryCaches());
 });
 
 Scribe.test("a driver that runs a computation once per caller is caught, not passed", async () => {
-  await expectLater(() => checkValkeryDriver(new RunsEveryTime()), throwsA(isA(AssertionError)));
+  await expectLater(() => checkCacheDriver(new RunsEveryTime()), throwsA(isA(AssertionError)));
 });

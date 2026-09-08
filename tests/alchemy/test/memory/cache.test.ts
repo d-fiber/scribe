@@ -35,90 +35,90 @@
 // LICENSE file, the LICENSE file governs.
 
 import "@scribe/scholium/runner.ts";
-import { equals, expect, FixedNow, MemoryValkery, MemoryValkeries, same, Scribe } from "@scribe/alchemy/test";
+import { equals, expect, FixedNow, MemoryCache, MemoryCaches, same, Scribe } from "@scribe/alchemy/test";
 import { Duration, Now } from "@scribe/alchemy";
 
 Scribe.test("getMany answers each id in the order it was asked, null where nothing is held", async () => {
-  const valkery = new MemoryValkery<string>({ key: "members" });
-  await valkery.add("a", "value-a");
-  await valkery.add("c", "value-c");
+  const cache = new MemoryCache<string>({ key: "members" });
+  await cache.add("a", "value-a");
+  await cache.add("c", "value-c");
 
-  const found = await valkery.getMany(["a", "b", "c"]);
+  const found = await cache.getMany(["a", "b", "c"]);
 
   expect(found, equals(["value-a", null, "value-c"]));
 });
 
 Scribe.test("addMany holds every entry it was given", async () => {
-  const valkery = new MemoryValkery<number>({ key: "members" });
+  const cache = new MemoryCache<number>({ key: "members" });
 
-  await valkery.addMany([["a", 1], ["b", 2]]);
+  await cache.addMany([["a", 1], ["b", 2]]);
 
-  expect(await valkery.get("a"), equals(1));
-  expect(await valkery.get("b"), equals(2));
+  expect(await cache.get("a"), equals(1));
+  expect(await cache.get("b"), equals(2));
 });
 
 Scribe.test("deleteMany forgets every identifier it was given, and leaves the rest", async () => {
-  const valkery = new MemoryValkery<string>({ key: "members" });
-  await valkery.addMany([["a", "1"], ["b", "2"], ["c", "3"]]);
+  const cache = new MemoryCache<string>({ key: "members" });
+  await cache.addMany([["a", "1"], ["b", "2"], ["c", "3"]]);
 
-  await valkery.deleteMany("a", "c");
+  await cache.deleteMany("a", "c");
 
-  expect(await valkery.get("a"), equals(null));
-  expect(await valkery.get("b"), equals("2"));
-  expect(await valkery.get("c"), equals(null));
+  expect(await cache.get("a"), equals(null));
+  expect(await cache.get("b"), equals("2"));
+  expect(await cache.get("c"), equals(null));
 });
 
 Scribe.test("clear with a pattern forgets only the identifiers that match it", async () => {
-  const valkery = new MemoryValkery<string>({ key: "members" });
-  await valkery.addMany([["session:1", "a"], ["session:2", "b"], ["profile:1", "c"]]);
+  const cache = new MemoryCache<string>({ key: "members" });
+  await cache.addMany([["session:1", "a"], ["session:2", "b"], ["profile:1", "c"]]);
 
-  await valkery.clear("session:*");
+  await cache.clear("session:*");
 
-  expect(await valkery.get("session:1"), equals(null));
-  expect(await valkery.get("session:2"), equals(null));
-  expect(await valkery.get("profile:1"), equals("c"));
+  expect(await cache.get("session:1"), equals(null));
+  expect(await cache.get("session:2"), equals(null));
+  expect(await cache.get("profile:1"), equals("c"));
 });
 
-Scribe.test("clear without a pattern empties the whole Valkery", async () => {
-  const valkery = new MemoryValkery<string>({ key: "members" });
-  await valkery.addMany([["a", "1"], ["b", "2"]]);
+Scribe.test("clear without a pattern empties the whole cache", async () => {
+  const cache = new MemoryCache<string>({ key: "members" });
+  await cache.addMany([["a", "1"], ["b", "2"]]);
 
-  await valkery.clear();
+  await cache.clear();
 
-  expect(valkery.size, equals(0));
+  expect(cache.size, equals(0));
 });
 
 Scribe.test("size counts an expired entry until something reads and forgets it", async () => {
   const now = new FixedNow(0);
   Now.use(now);
-  const valkery = new MemoryValkery<string>({ key: "members", ttl: Duration.seconds(1) });
-  await valkery.add("a", "value-a");
+  const cache = new MemoryCache<string>({ key: "members", ttl: Duration.seconds(1) });
+  await cache.add("a", "value-a");
 
   now.pass(Duration.seconds(2));
-  expect(valkery.size, equals(1), "an expired entry nobody read yet was not counted");
+  expect(cache.size, equals(1), "an expired entry nobody read yet was not counted");
 
-  await valkery.get("a");
-  expect(valkery.size, equals(0), "reading an expired entry did not forget it");
+  await cache.get("a");
+  expect(cache.size, equals(0), "reading an expired entry did not forget it");
 });
 
 Scribe.test("upsert runs the computation once even when two callers ask at the same time", async () => {
-  const valkery = new MemoryValkery<string>({ key: "members" });
+  const cache = new MemoryCache<string>({ key: "members" });
   let computations = 0;
   const compute = () => {
     computations++;
     return Promise.resolve("computed");
   };
 
-  const [first, second] = await Promise.all([valkery.upsert("a", compute), valkery.upsert("a", compute)]);
+  const [first, second] = await Promise.all([cache.upsert("a", compute), cache.upsert("a", compute)]);
 
   expect(first, equals("computed"));
   expect(second, equals("computed"));
   expect(computations, equals(1));
-  expect(valkery.computed, equals(1));
+  expect(cache.computed, equals(1));
 });
 
-Scribe.test("opening the same key twice answers the same Valkery", () => {
-  const driver = new MemoryValkeries();
+Scribe.test("opening the same key twice answers the same cache", () => {
+  const driver = new MemoryCaches();
 
   const first = driver.open<string>({ key: "members" });
   const second = driver.open<string>({ key: "members" });

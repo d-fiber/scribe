@@ -34,8 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { Duration, valkery } from "@scribe/alchemy";
-import type { Future, ValkeryPort } from "@scribe/alchemy";
+import { cache, Duration } from "@scribe/alchemy";
+import type { Cache, Future } from "@scribe/alchemy";
 import { http } from "@scribe/alchemy/http";
 import { isPrivateIp } from "@scribe/runtime/http/ip/mod.ts";
 import type { GeolocationProvider, IpLocation } from "./provider.ts";
@@ -59,10 +59,7 @@ const _EMPTY_LOCATION: IpLocation = { city: "", country: "" };
  * from burning through that limit on repeat callers instead of new ones.
  */
 export class GeolocationResolver {
-  private static readonly _valkery: ValkeryPort<IpLocation> = valkery<IpLocation>({
-    key: "ip:geo",
-    ttl: Duration.days(1),
-  });
+  private static readonly _cache: Cache<IpLocation> = cache<IpLocation>({ key: "ip:geo", ttl: Duration.days(1) });
 
   private static readonly _providers: readonly GeolocationProvider[] = [
     new IpWhoProvider(),
@@ -73,11 +70,11 @@ export class GeolocationResolver {
 
   /**
    * The location of `ip`, or an empty location for a private address or a provider that answers
-   * nothing usable. Reads through Valkery, and tries each provider until one answers.
+   * nothing usable. Reads through the cache, and tries each provider until one answers.
    */
   static locate(ip: string): Future<IpLocation> {
     if (!ip || isPrivateIp(ip)) return Promise.resolve(_EMPTY_LOCATION);
-    return this._valkery.upsert(ip, () => this._resolveViaProviders(ip));
+    return this._cache.upsert(ip, () => this._resolveViaProviders(ip));
   }
 
   private static async _resolveViaProviders(

@@ -99,7 +99,7 @@ export type { BodyFromSchema, BodySchema, FormFromSchema, FormSchema } from "./s
 
 export { auth } from "./src/capabilities/auth.ts";
 export type { Account, AccountBan, AccountDevice, AccountRole } from "./src/capabilities/auth.ts";
-export { valkery } from "./src/capabilities/valkery.ts";
+export { cache } from "./src/capabilities/cache.ts";
 export { host } from "./src/capabilities/channel.ts";
 export { CapabilityError } from "./src/capabilities/error.ts";
 export { hooks } from "./src/capabilities/hook.ts";
