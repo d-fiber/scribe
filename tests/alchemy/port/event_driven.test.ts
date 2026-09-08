@@ -40,10 +40,10 @@ import {
   cron,
   Crons,
   type DeclaredCron,
-  type DeclaredHook,
-  type DeclaredQueue,
+  type HookPort,
+  type QueuePort,
   type DeclaredQueueOptions,
-  type DeclaredTrigger,
+  type TriggerPort,
   DuplicateDeclarationError,
   Duration,
   forgetCrons,
@@ -73,7 +73,7 @@ class KeepingQueues implements QueueDriver {
     this.draining.push(options.key);
   }
 
-  open<T>(): DeclaredQueue<T> {
+  open<T>(): QueuePort<T> {
     this.opened += 1;
     const pushed = this.pushed;
     return {
@@ -124,7 +124,7 @@ Scribe.test("a hook opens itself at the first emit, not at the declaration", asy
   const told: unknown[] = [];
   let opened = 0;
   const driver: HookDriver = {
-    open<T>(): DeclaredHook<T> {
+    open<T>(): HookPort<T> {
       opened += 1;
       const listeners: Array<(payload: T) => void | Promise<void>> = [];
       return {
@@ -150,7 +150,7 @@ Scribe.test("openHooks opens every declared hook before the first emit, so an ea
   let opened = 0;
   const told: unknown[] = [];
   Hooks.use({
-    open<T>(): DeclaredHook<T> {
+    open<T>(): HookPort<T> {
       opened += 1;
       const listeners: Array<(payload: T) => void | Promise<void>> = [];
       return {
@@ -263,9 +263,9 @@ Scribe.test("a watch reaches the driver when the host installs it, and not befor
   forgetTriggers();
   const watched: string[] = [];
   Triggers.use({
-    watch<TRow>(table: string): DeclaredTrigger<TRow> {
+    watch<TRow>(table: string): TriggerPort<TRow> {
       watched.push(table);
-      const one: DeclaredTrigger<TRow> = {
+      const one: TriggerPort<TRow> = {
         onInsert: () => one,
         onUpdate: () => one,
         onDelete: () => one,
@@ -286,8 +286,8 @@ Scribe.test("what was written on a chain is played back in the order it was writ
   forgetTriggers();
   const played: string[] = [];
   Triggers.use({
-    watch<TRow>(): DeclaredTrigger<TRow> {
-      const one: DeclaredTrigger<TRow> = {
+    watch<TRow>(): TriggerPort<TRow> {
+      const one: TriggerPort<TRow> = {
         onInsert: () => {
           played.push("insert");
           return one;
@@ -350,7 +350,7 @@ Scribe.test("a listener written before the host is up hears what is emitted afte
   const told: unknown[] = [];
   const heard: unknown[] = [];
   Hooks.use({
-    open<T>(): DeclaredHook<T> {
+    open<T>(): HookPort<T> {
       const listeners: Array<(payload: T) => void | Promise<void>> = [];
       return {
         emit: async (payload) => {

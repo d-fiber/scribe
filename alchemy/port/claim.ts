@@ -57,7 +57,7 @@ export interface ClaimOptions {
 }
 
 /** What takes a claim, once. */
-export interface ClaimDriver {
+export interface ClaimPort {
   /**
    * Takes `key` for `ttlSeconds`, and answers whether this caller is the one that took it.
    *
@@ -75,7 +75,7 @@ export interface ClaimDriver {
  * never names a store, which is what keeps a nonce, a webhook replay guard and a
  * one-shot job on the same primitive without any of them reaching a package.
  */
-export const Claims: Slot<ClaimDriver> = new Slot<ClaimDriver>("Claims");
+export const Claims: Slot<ClaimPort> = new Slot<ClaimPort>("Claims");
 
 /**
  * Takes `key` for `ttlSeconds`, through whatever the host filled {@link Claims} with.

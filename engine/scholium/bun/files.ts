@@ -39,7 +39,7 @@ import { promises as fs } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import type { FileSystem, FileSystemDriver, FileSystemEntity, Future, List } from "@scribe/alchemy";
+import type { FileSystemPort, FileSystemDriver, FileSystemEntity, Future, List } from "@scribe/alchemy";
 import { Bytes } from "@scribe/alchemy";
 
 /**
@@ -51,7 +51,7 @@ import { Bytes } from "@scribe/alchemy";
  * given: what a package may reach is a deployment's business, decided by what the process was
  * allowed to open, not by a check this class could make and a caller could work around.
  */
-export class LocalFiles implements FileSystem {
+export class LocalFiles implements FileSystemPort {
   /** The bytes at `path`. */
   async read(path: string): Future<Uint8Array> {
     return new Uint8Array(await fs.readFile(path));
@@ -181,7 +181,7 @@ export class LocalFileSystems implements FileSystemDriver {
   readonly #opened = new LocalFiles();
 
   /** The disk this process runs on. */
-  open(): FileSystem {
+  open(): FileSystemPort {
     return this.#opened;
   }
 }

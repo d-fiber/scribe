@@ -96,7 +96,7 @@ export interface QueueMessage<T> {
  * is the host's business. The guarantee it buys over {@link unawaited} is that the work survives
  * this process: a crash between the push and the handling costs nothing.
  */
-export interface DeclaredQueue<T> {
+export interface QueuePort<T> {
   /** Puts `data` on this queue, and answers once the queue has taken it. */
   push(data: T): Future<void>;
 
@@ -112,7 +112,7 @@ export interface DeclaredQueue<T> {
 /** What opens a queue. */
 export interface QueueDriver {
   /** Opens the queue `options` describes. Opening the same key twice answers the same queue. */
-  open<T>(options: DeclaredQueueOptions): DeclaredQueue<T>;
+  open<T>(options: DeclaredQueueOptions): QueuePort<T>;
 
   /**
    * Starts draining `options` with the handler it declared.
@@ -140,9 +140,9 @@ export const Queues: Slot<QueueDriver> = new Slot<QueueDriver>("Queues");
  * point nothing has filled {@link Queues}. Reading the slot there would throw before the host has
  * had a chance to start.
  */
-class DeferredQueue<T> implements DeclaredQueue<T> {
+class DeferredQueue<T> implements QueuePort<T> {
   readonly #options: DeclaredQueueOptions;
-  readonly #queue: Lazy<DeclaredQueue<T>>;
+  readonly #queue: Lazy<QueuePort<T>>;
 
   constructor(options: DeclaredQueueOptions) {
     this.#options = options;
@@ -181,7 +181,7 @@ class DeferredQueue<T> implements DeclaredQueue<T> {
 /** Every queue a package has declared, by the key it answers to. */
 const declared = new Registry<DeclaredQueueOptions>("queue");
 
-export function queue<T>(options: DeclaredQueueOptions): DeclaredQueue<T> {
+export function queue<T>(options: DeclaredQueueOptions): QueuePort<T> {
   declared.declare(options.key, options);
   return new DeferredQueue<T>(options);
 }

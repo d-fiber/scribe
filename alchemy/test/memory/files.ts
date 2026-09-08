@@ -36,7 +36,7 @@
 
 import type { Future } from "../../primitives/async/future.ts";
 import { ScribeError } from "../../primitives/error/scribe_error.ts";
-import type { FileSystem, FileSystemDriver, FileSystemEntity } from "../../port/files.ts";
+import type { FileSystemPort, FileSystemDriver, FileSystemEntity } from "../../port/files.ts";
 import { Bytes } from "../../primitives/value/bytes.ts";
 import type { List } from "../../primitives/value/list.ts";
 
@@ -55,10 +55,10 @@ const BYTES = new TextDecoder();
  * describing a real disk and should say so.
  *
  * Directories are not held as entries of their own. A directory exists as long as something under
- * it does, which is what makes {@link FileSystem.write} able to make the ones above a file without
+ * it does, which is what makes {@link FileSystemPort.write} able to make the ones above a file without
  * anybody asking, and it means an empty directory made by hand disappears once its last file goes.
  */
-export class MemoryFileSystem implements FileSystem {
+export class MemoryFileSystem implements FileSystemPort {
   /** Every path holding bytes, and the bytes it holds. */
   readonly #held: Map<string, Uint8Array> = new Map();
 

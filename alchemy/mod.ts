@@ -145,9 +145,9 @@ export type { RegisteredRun, RunHandler } from "./wiring/lifecycle/run.ts";
 export { cron, Crons, forgetCrons, installCrons } from "./port/cron.ts";
 export type { CronDriver, CronOptions, DeclaredCron, DeclaredSchedule, DeclaredTimeOfDay } from "./port/cron.ts";
 export { forgetHooks, hook, Hooks, openHooks } from "./port/hook.ts";
-export type { DeclaredHook, HookDriver, HookOptions } from "./port/hook.ts";
+export type { HookPort, HookDriver, HookOptions } from "./port/hook.ts";
 export { forgetQueues, installQueues, queue, Queues } from "./port/queue.ts";
-export type { DeclaredQueue, DeclaredQueueOptions, QueueDriver, QueueMessage } from "./port/queue.ts";
+export type { QueuePort, DeclaredQueueOptions, QueueDriver, QueueMessage } from "./port/queue.ts";
 export { forgetTriggers, installTriggers, trigger, Triggers } from "./port/trigger.ts";
 export type {
   Change,
@@ -157,7 +157,7 @@ export type {
   DeclaredFieldChange,
   DeclaredInsertChange,
   DeclaredTransition,
-  DeclaredTrigger,
+  TriggerPort,
   DeclaredTriggerOp,
   DeclaredTriggerOptions,
   DeclaredUpdateChange,
@@ -167,18 +167,18 @@ export type {
 export { cache, Caches, DEFAULT_CACHE_DEADLINE } from "./port/cache.ts";
 export type { Cache, CacheDriver, CacheOptions } from "./port/cache.ts";
 export { claimOnce, Claims } from "./port/claim.ts";
-export type { ClaimDriver, ClaimOptions, WhenUnavailable } from "./port/claim.ts";
+export type { ClaimPort, ClaimOptions, WhenUnavailable } from "./port/claim.ts";
 export { rateLimit, RateLimiters } from "./port/rate_limit.ts";
-export type { RateLimiter, RateLimiterDriver, RateLimitOptions, RateLimitOutcome } from "./port/rate_limit.ts";
+export type { RateLimiterPort, RateLimiterDriver, RateLimitOptions, RateLimitOutcome } from "./port/rate_limit.ts";
 
 export { FileSystems } from "./port/files.ts";
-export type { FileSystem, FileSystemDriver, FileSystemEntity } from "./port/files.ts";
+export type { FileSystemPort, FileSystemDriver, FileSystemEntity } from "./port/files.ts";
 
 export { Environments } from "./port/env.ts";
-export type { Environment } from "./port/env.ts";
+export type { EnvironmentPort } from "./port/env.ts";
 
 export { Commands } from "./port/commands.ts";
-export type { Command, CommandOptions, CommandResult } from "./port/commands.ts";
+export type { CommandPort, CommandOptions, CommandResult } from "./port/commands.ts";
 
 export { renderError } from "./primitives/diagnostic/render.ts";
 export type { RenderOptions } from "./primitives/diagnostic/render.ts";

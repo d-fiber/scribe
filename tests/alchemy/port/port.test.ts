@@ -40,7 +40,7 @@ import type {
   Cache,
   CacheDriver,
   CacheOptions,
-  RateLimiter,
+  RateLimiterPort,
   RateLimiterDriver,
   RateLimitOutcome,
 } from "@scribe/alchemy";
@@ -101,7 +101,7 @@ class OpensInMemory implements CacheDriver {
   }
 }
 
-class RefusesEverybody implements RateLimiter {
+class RefusesEverybody implements RateLimiterPort {
   readonly key = "refuses-everybody";
 
   check(): Promise<RateLimitOutcome> {

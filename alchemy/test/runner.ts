@@ -143,7 +143,7 @@ export interface Declarations {
  * ```ts ignore
  * Scribe.group("discovery", () => {
  *   Scribe.test("sorts what it finds by name", async () => {
- *     const files = mock<FileSystem>({ named: "files" });
+ *     const files = mock<FileSystemPort>({ named: "files" });
  *     when(() => files.list("/packages")).thenResolve(["realtime", "audience"]);
  *
  *     assertEquals(await discover(files), ["audience", "realtime"]);

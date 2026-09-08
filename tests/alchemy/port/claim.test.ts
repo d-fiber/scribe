@@ -37,9 +37,9 @@
 import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { assert, assertEquals, assertFalse } from "@std/assert";
-import { type ClaimDriver, claimOnce, type ClaimOptions, Claims } from "@scribe/alchemy";
+import { type ClaimPort, claimOnce, type ClaimOptions, Claims } from "@scribe/alchemy";
 
-class TakenOnce implements ClaimDriver {
+class TakenOnce implements ClaimPort {
   readonly held = new Set<string>();
 
   claim(key: string, _ttlSeconds: number, _options: ClaimOptions): Promise<boolean> {
@@ -49,13 +49,13 @@ class TakenOnce implements ClaimDriver {
   }
 }
 
-class Unreachable implements ClaimDriver {
+class Unreachable implements ClaimPort {
   claim(_key: string, _ttlSeconds: number, options: ClaimOptions): Promise<boolean> {
     return Promise.resolve(options.whenUnavailable === "allow");
   }
 }
 
-function through<T>(driver: ClaimDriver, body: () => Promise<T>): Promise<T> {
+function through<T>(driver: ClaimPort, body: () => Promise<T>): Promise<T> {
   const held = Claims.configured ? Claims.get() : null;
   Claims.use(driver);
   return body().finally(() => {

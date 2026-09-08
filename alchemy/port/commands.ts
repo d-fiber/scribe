@@ -60,7 +60,7 @@ export interface CommandResult {
  * What a program is given when it is run, beyond its arguments.
  *
  * @remarks
- * There is one field. More are added here rather than as parameters of {@link Command.run} when a
+ * There is one field. More are added here rather than as parameters of {@link CommandPort.run} when a
  * caller needs them, a working directory and an environment being the likely next two.
  */
 export interface CommandOptions {
@@ -77,10 +77,10 @@ export interface CommandOptions {
  * other drivers, in `foundation`, so this file names nothing that runs and a test can stand a
  * fixed answer behind it.
  *
- * It is for a tool that runs once and stops, not one that streams: {@link Command.run} waits for
+ * It is for a tool that runs once and stops, not one that streams: {@link CommandPort.run} waits for
  * the program to exit and reads its output whole.
  */
-export interface Command {
+export interface CommandPort {
   /**
    * Runs `program` with `args` and waits for it to exit.
    *
@@ -108,4 +108,4 @@ export interface Command {
  * Commands.use(new MemoryCommands({ code: 0, stdout: rawFrame }));
  * ```
  */
-export const Commands: Slot<Command> = new Slot<Command>("Commands");
+export const Commands: Slot<CommandPort> = new Slot<CommandPort>("Commands");

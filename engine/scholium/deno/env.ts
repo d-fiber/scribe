@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Environment } from "@scribe/alchemy";
+import type { EnvironmentPort } from "@scribe/alchemy";
 
 /**
  * The environment this process was started in under Deno, as the port describes one.
@@ -45,7 +45,7 @@ import type { Environment } from "@scribe/alchemy";
  * Every read answers the way the host's own reader does: an unset name is `undefined`, and a name
  * set to the empty string is `""`.
  */
-export class LocalEnvironment implements Environment {
+export class LocalEnvironment implements EnvironmentPort {
   /** The value set for `name`, or `undefined` when the process holds none. */
   get(name: string): string | undefined {
     return Deno.env.get(name);

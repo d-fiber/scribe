@@ -36,7 +36,7 @@
 
 import type { Future } from "../../primitives/async/future.ts";
 import type { UnmodifiableList } from "../../primitives/value/list.ts";
-import type { DeclaredQueue, DeclaredQueueOptions, QueueDriver, QueueMessage } from "../../port/queue.ts";
+import type { QueuePort, DeclaredQueueOptions, QueueDriver, QueueMessage } from "../../port/queue.ts";
 import { openKeyed } from "./opener.ts";
 
 /**
@@ -47,7 +47,7 @@ import { openKeyed } from "./opener.ts";
  * and calls {@link deliver} to hand a message to the declared handler when it wants to exercise the
  * other side. Draining by itself would make a case depend on when a timer fired.
  */
-export class MemoryQueue<T> implements DeclaredQueue<T> {
+export class MemoryQueue<T> implements QueuePort<T> {
   /** Everything pushed to this queue, in the order it was pushed. */
   readonly pushed: T[] = [];
 
@@ -61,13 +61,13 @@ export class MemoryQueue<T> implements DeclaredQueue<T> {
     this.#options = options;
   }
 
-  /** The {@link DeclaredQueue.push} implementation: appends `data` to {@link pushed} without delivering it. */
+  /** The {@link QueuePort.push} implementation: appends `data` to {@link pushed} without delivering it. */
   push(data: T): Future<void> {
     this.pushed.push(data);
     return Promise.resolve();
   }
 
-  /** The {@link DeclaredQueue.pushMany} implementation: `push` applied to every message of `batch`. */
+  /** The {@link QueuePort.pushMany} implementation: `push` applied to every message of `batch`. */
   pushMany(batch: UnmodifiableList<T>): Future<void> {
     this.pushed.push(...batch);
     return Promise.resolve();
@@ -107,12 +107,12 @@ export class MemoryQueues implements QueueDriver {
    * The {@link QueueDriver.open} implementation: opens a {@link MemoryQueue} for `options.key`,
    * or hands back the one already opened under that key.
    */
-  open<T>(options: DeclaredQueueOptions): DeclaredQueue<T> {
+  open<T>(options: DeclaredQueueOptions): QueuePort<T> {
     return openKeyed(
       this.opened,
       options.key,
       () => new MemoryQueue<T>(options) as unknown as MemoryQueue<never>,
-    ) as unknown as DeclaredQueue<T>;
+    ) as unknown as QueuePort<T>;
   }
 
   /** The {@link QueueDriver.consume} implementation: records `options.key` in {@link draining} without draining anything itself. */

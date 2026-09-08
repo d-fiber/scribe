@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Environment } from "../../port/env.ts";
+import type { EnvironmentPort } from "../../port/env.ts";
 
 /**
  * A set of process settings held in a map, read the way the real environment would be.
@@ -49,7 +49,7 @@ import type { Environment } from "../../port/env.ts";
  * Environments.use(new MemoryEnvironment({ REDIS_URL: "redis://localhost:6379" }));
  * ```
  */
-export class MemoryEnvironment implements Environment {
+export class MemoryEnvironment implements EnvironmentPort {
   /** Every name this holds, and the value set for it. */
   readonly #held: Map<string, string>;
 

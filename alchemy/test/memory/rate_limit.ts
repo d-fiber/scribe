@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "../../primitives/async/future.ts";
-import type { RateLimiter, RateLimiterDriver, RateLimitOptions, RateLimitOutcome } from "../../port/rate_limit.ts";
+import type { RateLimiterPort, RateLimiterDriver, RateLimitOptions, RateLimitOutcome } from "../../port/rate_limit.ts";
 import { Now } from "../../primitives/value/date_time.ts";
 
 /** What one caller has spent, and until when it is held out. */
@@ -65,7 +65,7 @@ interface Spent {
  * The penalty grows the way the port describes: a caller that goes over is held out for `penalty`,
  * and going over again doubles it, up to `maxPenalty`.
  */
-export class MemoryRateLimiter implements RateLimiter {
+export class MemoryRateLimiter implements RateLimiterPort {
   /** What each caller has spent, by the name the check was made under. */
   readonly #spent = new Map<string, Spent>();
 
@@ -82,7 +82,7 @@ export class MemoryRateLimiter implements RateLimiter {
   }
 
   /**
-   * The {@link RateLimiter.check} implementation: counts the call in a map keyed by `prefix` and
+   * The {@link RateLimiterPort.check} implementation: counts the call in a map keyed by `prefix` and
    * `suffix`, refusing and doubling the held-out penalty once the caller is already over.
    */
   check(prefix = "", suffix = ""): Future<RateLimitOutcome> {
@@ -110,14 +110,14 @@ export class MemoryRateLimiter implements RateLimiter {
     return Promise.resolve({ ok: false, retryAfter: Math.ceil(capped / 1000), strikes: held.strikes });
   }
 
-  /** The {@link RateLimiter.isBlocked} implementation: reads the caller's held-out state without counting a call. */
+  /** The {@link RateLimiterPort.isBlocked} implementation: reads the caller's held-out state without counting a call. */
   isBlocked(prefix = "", suffix = ""): Future<boolean> {
     const at = Now.get().millisecondsSinceEpoch();
     const held = this.#spent.get(`${prefix}:${suffix}`);
     return Promise.resolve(held !== undefined && held.until !== null && at < held.until);
   }
 
-  /** The {@link RateLimiter.unmeasured} implementation: answers as if the full quota were still open. */
+  /** The {@link RateLimiterPort.unmeasured} implementation: answers as if the full quota were still open. */
   unmeasured(): RateLimitOutcome {
     return { ok: true, remaining: this.#options.limit };
   }
@@ -150,7 +150,7 @@ export class MemoryRateLimiters implements RateLimiterDriver {
    * The {@link RateLimiterDriver.open} implementation: opens a {@link MemoryRateLimiter} for
    * `options.key`, or hands back the one already opened under that key.
    */
-  open(options: RateLimitOptions): RateLimiter {
+  open(options: RateLimitOptions): RateLimiterPort {
     const already = this.opened.get(options.key);
     if (already !== undefined) return already;
 

@@ -73,7 +73,7 @@ export interface FileSystemEntity {
  * same split the database port draws: a caller asking for bytes has no useful answer to give back,
  * and a caller asking whether something is there does.
  */
-export interface FileSystem {
+export interface FileSystemPort {
   /** The bytes held at `path`. Throws when nothing is held there. */
   read(path: string): Future<Uint8Array>;
 
@@ -108,7 +108,7 @@ export interface FileSystem {
 /** What opens a file system. */
 export interface FileSystemDriver {
   /** Opens the file system this driver stands for. Opening it twice answers the same one. */
-  open(): FileSystem;
+  open(): FileSystemPort;
 }
 
 /**

@@ -37,7 +37,7 @@
 import "@scribe/scholium/runner.ts";
 import { equals, expect, expectLater, isNot, isNotNull, isTrue, same, Scribe, throwsA } from "@scribe/alchemy/test";
 import { FileSystems } from "@scribe/alchemy";
-import type { FileSystem } from "@scribe/alchemy";
+import type { FileSystemPort } from "@scribe/alchemy";
 import { MemoryFileSystem } from "@scribe/alchemy/test";
 import { LocalFiles, LocalFileSystems } from "@scribe/scholium/bun/files.ts";
 
@@ -231,10 +231,10 @@ Scribe.test("a path under a file names nothing, so it is described as null rathe
 });
 
 Scribe.test("the disk and the in-memory double of alchemy agree on what they were both asked", async () => {
-  const memory: FileSystem = new MemoryFileSystem();
+  const memory: FileSystemPort = new MemoryFileSystem();
 
   await inADirectory(async (disk, root) => {
-    const asked = async (fs: FileSystem, base: string): Promise<unknown[]> => {
+    const asked = async (fs: FileSystemPort, base: string): Promise<unknown[]> => {
       await fs.makeDirectory(`${base}/dir`);
       await fs.writeText(`${base}/dir/a.txt`, "abc");
       return [

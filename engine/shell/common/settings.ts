@@ -46,7 +46,7 @@ import {
   identitySettings,
   workerSettings,
 } from "@scribe/runtime/settings.ts";
-import type { Command, Environment, FileSystemDriver } from "@scribe/alchemy";
+import type { CommandPort, EnvironmentPort, FileSystemDriver } from "@scribe/alchemy";
 import { Commands, Environments, FileSystems, RateLimiters } from "@scribe/alchemy";
 import { LocalCommands as BunCommands } from "@scribe/scholium/bun/commands.ts";
 import { LocalEnvironment as BunEnvironment } from "@scribe/scholium/bun/env.ts";
@@ -66,7 +66,7 @@ import { pickStack } from "@scribe/scholium/stack.ts";
 import { KNOWN_JWT_ALGORITHMS } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
 
 /**
- * The `Environment`, `FileSystemDriver` and `Command` this process's own stack provides.
+ * The `EnvironmentPort`, `FileSystemDriver` and `CommandPort` this process's own stack provides.
  *
  * @remarks
  * A `node` stack has none yet: `engine/scholium/bun/` and `.../deno/` are the only two
@@ -75,8 +75,8 @@ import { KNOWN_JWT_ALGORITHMS } from "@scribe/kernel/identity/resolver/jwt_verif
  *
  * @throws {Error} When {@link currentStack} answers `node`.
  */
-function corePorts(): { environment: Environment; fileSystems: FileSystemDriver; commands: Command } {
-  return pickStack<{ environment: Environment; fileSystems: FileSystemDriver; commands: Command }>(
+function corePorts(): { environment: EnvironmentPort; fileSystems: FileSystemDriver; commands: CommandPort } {
+  return pickStack<{ environment: EnvironmentPort; fileSystems: FileSystemDriver; commands: CommandPort }>(
     {
       deno: () => ({
         environment: new DenoEnvironment(),

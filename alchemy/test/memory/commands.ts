@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Command, CommandOptions, CommandResult } from "../../port/commands.ts";
+import type { CommandPort, CommandOptions, CommandResult } from "../../port/commands.ts";
 
 /** One run a {@link MemoryCommands} was asked for. */
 export interface RanCommand {
@@ -73,7 +73,7 @@ export type CommandAnswer =
  * Commands.use(new MemoryCommands({ code: 1, stderr: new TextEncoder().encode("no such file") }));
  * ```
  */
-export class MemoryCommands implements Command {
+export class MemoryCommands implements CommandPort {
   /** Every run this was asked for, in order. */
   readonly seen: RanCommand[] = [];
 

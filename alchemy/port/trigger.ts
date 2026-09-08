@@ -170,15 +170,15 @@ export interface DeclaredTriggerOptions {
  * write, and the row it is handed may already have moved again by the time it runs. A rule that
  * has to hold belongs in a constraint of the schema, not here.
  */
-export interface DeclaredTrigger<TRow> {
+export interface TriggerPort<TRow> {
   /** Calls `handle` for every row written to this table for the first time. */
-  onInsert(handle: DeclaredChangeHandler<DeclaredInsertChange<TRow>>): DeclaredTrigger<TRow>;
+  onInsert(handle: DeclaredChangeHandler<DeclaredInsertChange<TRow>>): TriggerPort<TRow>;
 
   /** Calls `handle` for every write over a row of this table. */
-  onUpdate(handle: DeclaredChangeHandler<DeclaredUpdateChange<TRow>>): DeclaredTrigger<TRow>;
+  onUpdate(handle: DeclaredChangeHandler<DeclaredUpdateChange<TRow>>): TriggerPort<TRow>;
 
   /** Calls `handle` for every row of this table that goes. */
-  onDelete(handle: DeclaredChangeHandler<DeclaredDeleteChange<TRow>>): DeclaredTrigger<TRow>;
+  onDelete(handle: DeclaredChangeHandler<DeclaredDeleteChange<TRow>>): TriggerPort<TRow>;
 
   /**
    * Calls `handle` for every write that moves `field`.
@@ -189,13 +189,13 @@ export interface DeclaredTrigger<TRow> {
     field: F,
     handle: DeclaredChangeHandler<DeclaredFieldChange<TRow, F>>,
     moving?: DeclaredTransition<TRow[F]>,
-  ): DeclaredTrigger<TRow>;
+  ): TriggerPort<TRow>;
 }
 
 /** What watches a table and hands over what happened to it. */
 export interface TriggerDriver {
   /** Opens a watch on `table`, described by `options`. */
-  watch<TRow>(table: string, options?: DeclaredTriggerOptions): DeclaredTrigger<TRow>;
+  watch<TRow>(table: string, options?: DeclaredTriggerOptions): TriggerPort<TRow>;
 }
 
 /**
@@ -215,7 +215,7 @@ interface DeclaredWatch {
   readonly options: DeclaredTriggerOptions | undefined;
 
   /** Every call written on the chain, in the order it was written. */
-  readonly written: Array<(on: DeclaredTrigger<never>) => void>;
+  readonly written: Array<(on: TriggerPort<never>) => void>;
 }
 
 /** Every watch a package has declared, by the name it answers to. */
@@ -229,26 +229,26 @@ const declared = new Registry<DeclaredWatch>("trigger");
  * receives is kept and played back onto the driver's own watch by {@link installTriggers}, in the
  * order it was written.
  */
-class DeclaredTriggerBuilder<TRow> implements DeclaredTrigger<TRow> {
+class DeclaredTriggerBuilder<TRow> implements TriggerPort<TRow> {
   /** Where each call written on this chain is kept. */
-  readonly #written: Array<(on: DeclaredTrigger<never>) => void>;
+  readonly #written: Array<(on: TriggerPort<never>) => void>;
 
-  constructor(written: Array<(on: DeclaredTrigger<never>) => void>) {
+  constructor(written: Array<(on: TriggerPort<never>) => void>) {
     this.#written = written;
   }
 
-  onInsert(handle: DeclaredChangeHandler<DeclaredInsertChange<TRow>>): DeclaredTrigger<TRow> {
-    this.#written.push((on) => (on as DeclaredTrigger<TRow>).onInsert(handle));
+  onInsert(handle: DeclaredChangeHandler<DeclaredInsertChange<TRow>>): TriggerPort<TRow> {
+    this.#written.push((on) => (on as TriggerPort<TRow>).onInsert(handle));
     return this;
   }
 
-  onUpdate(handle: DeclaredChangeHandler<DeclaredUpdateChange<TRow>>): DeclaredTrigger<TRow> {
-    this.#written.push((on) => (on as DeclaredTrigger<TRow>).onUpdate(handle));
+  onUpdate(handle: DeclaredChangeHandler<DeclaredUpdateChange<TRow>>): TriggerPort<TRow> {
+    this.#written.push((on) => (on as TriggerPort<TRow>).onUpdate(handle));
     return this;
   }
 
-  onDelete(handle: DeclaredChangeHandler<DeclaredDeleteChange<TRow>>): DeclaredTrigger<TRow> {
-    this.#written.push((on) => (on as DeclaredTrigger<TRow>).onDelete(handle));
+  onDelete(handle: DeclaredChangeHandler<DeclaredDeleteChange<TRow>>): TriggerPort<TRow> {
+    this.#written.push((on) => (on as TriggerPort<TRow>).onDelete(handle));
     return this;
   }
 
@@ -256,8 +256,8 @@ class DeclaredTriggerBuilder<TRow> implements DeclaredTrigger<TRow> {
     field: F,
     handle: DeclaredChangeHandler<DeclaredFieldChange<TRow, F>>,
     moving?: DeclaredTransition<TRow[F]>,
-  ): DeclaredTrigger<TRow> {
-    this.#written.push((on) => (on as DeclaredTrigger<TRow>).onField(field, handle, moving));
+  ): TriggerPort<TRow> {
+    this.#written.push((on) => (on as TriggerPort<TRow>).onField(field, handle, moving));
     return this;
   }
 }
@@ -284,8 +284,8 @@ class DeclaredTriggerBuilder<TRow> implements DeclaredTrigger<TRow> {
  *   .onField("status", (change) => refund(change.row), { to: "cancelled" });
  * ```
  */
-export function trigger<TRow>(table: string, options?: DeclaredTriggerOptions): DeclaredTrigger<TRow> {
-  const written: Array<(on: DeclaredTrigger<never>) => void> = [];
+export function trigger<TRow>(table: string, options?: DeclaredTriggerOptions): TriggerPort<TRow> {
+  const written: Array<(on: TriggerPort<never>) => void> = [];
   declared.declare(options?.name ?? table, { table, options, written });
   return new DeclaredTriggerBuilder<TRow>(written);
 }
@@ -296,7 +296,7 @@ export function trigger<TRow>(table: string, options?: DeclaredTriggerOptions): 
  * @remarks
  * The host calls it once, after it has filled {@link Triggers} and before it starts serving.
  */
-export function installTriggers(): UnmodifiableList<DeclaredTrigger<never>> {
+export function installTriggers(): UnmodifiableList<TriggerPort<never>> {
   const driver = Triggers.get();
   return declared.all().map((watch) => {
     const opened = driver.watch<never>(watch.table, watch.options);

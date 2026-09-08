@@ -41,7 +41,7 @@ import type {
   DeclaredFieldChange,
   DeclaredInsertChange,
   DeclaredTransition,
-  DeclaredTrigger,
+  TriggerPort,
   DeclaredTriggerOptions,
   TriggerDriver,
 } from "../../port/trigger.ts";
@@ -57,32 +57,32 @@ import { openKeyed } from "./opener.ts";
  * for a database to notice, which is what lets a package's reaction be exercised without a database
  * at all.
  */
-export class MemoryTrigger<TRow> implements DeclaredTrigger<TRow> {
+export class MemoryTrigger<TRow> implements TriggerPort<TRow> {
   readonly #inserts: Array<DeclaredChangeHandler<DeclaredInsertChange<TRow>>> = [];
   readonly #updates: Array<DeclaredChangeHandler<DeclaredUpdateChange<TRow>>> = [];
   readonly #deletes: Array<DeclaredChangeHandler<DeclaredDeleteChange<TRow>>> = [];
   readonly #fields = new Map<keyof TRow, Array<DeclaredChangeHandler<DeclaredFieldChange<TRow, keyof TRow>>>>();
 
-  /** The {@link DeclaredTrigger.onInsert} implementation: records `handle`, called back by {@link sawInsert}. */
-  onInsert(handle: DeclaredChangeHandler<DeclaredInsertChange<TRow>>): DeclaredTrigger<TRow> {
+  /** The {@link TriggerPort.onInsert} implementation: records `handle`, called back by {@link sawInsert}. */
+  onInsert(handle: DeclaredChangeHandler<DeclaredInsertChange<TRow>>): TriggerPort<TRow> {
     this.#inserts.push(handle);
     return this;
   }
 
-  /** The {@link DeclaredTrigger.onUpdate} implementation: records `handle`, called back by {@link sawUpdate}. */
-  onUpdate(handle: DeclaredChangeHandler<DeclaredUpdateChange<TRow>>): DeclaredTrigger<TRow> {
+  /** The {@link TriggerPort.onUpdate} implementation: records `handle`, called back by {@link sawUpdate}. */
+  onUpdate(handle: DeclaredChangeHandler<DeclaredUpdateChange<TRow>>): TriggerPort<TRow> {
     this.#updates.push(handle);
     return this;
   }
 
-  /** The {@link DeclaredTrigger.onDelete} implementation: records `handle`, called back by {@link sawDelete}. */
-  onDelete(handle: DeclaredChangeHandler<DeclaredDeleteChange<TRow>>): DeclaredTrigger<TRow> {
+  /** The {@link TriggerPort.onDelete} implementation: records `handle`, called back by {@link sawDelete}. */
+  onDelete(handle: DeclaredChangeHandler<DeclaredDeleteChange<TRow>>): TriggerPort<TRow> {
     this.#deletes.push(handle);
     return this;
   }
 
   /**
-   * The {@link DeclaredTrigger.onField} implementation: records `handle` under `field`, called
+   * The {@link TriggerPort.onField} implementation: records `handle` under `field`, called
    * back by {@link sawField}.
    *
    * @remarks
@@ -94,7 +94,7 @@ export class MemoryTrigger<TRow> implements DeclaredTrigger<TRow> {
     field: F,
     handle: DeclaredChangeHandler<DeclaredFieldChange<TRow, F>>,
     _moving?: DeclaredTransition<TRow[F]>,
-  ): DeclaredTrigger<TRow> {
+  ): TriggerPort<TRow> {
     const held = this.#fields.get(field) ?? [];
     held.push(handle as DeclaredChangeHandler<DeclaredFieldChange<TRow, keyof TRow>>);
     this.#fields.set(field, held);
@@ -134,11 +134,11 @@ export class MemoryTriggers implements TriggerDriver {
    * hands back the one already opened under the same name so a second declaration on the same
    * table shares handlers with the first instead of watching in isolation.
    */
-  watch<TRow>(table: string, options?: DeclaredTriggerOptions): DeclaredTrigger<TRow> {
+  watch<TRow>(table: string, options?: DeclaredTriggerOptions): TriggerPort<TRow> {
     return openKeyed(
       this.opened,
       options?.name ?? table,
       () => new MemoryTrigger<TRow>() as unknown as MemoryTrigger<never>,
-    ) as unknown as DeclaredTrigger<TRow>;
+    ) as unknown as TriggerPort<TRow>;
   }
 }

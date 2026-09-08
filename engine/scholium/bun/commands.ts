@@ -36,7 +36,7 @@
 
 import "@scribe/scholium/bun/global.d.ts";
 
-import type { Command, CommandOptions, CommandResult } from "@scribe/alchemy";
+import type { CommandPort, CommandOptions, CommandResult } from "@scribe/alchemy";
 
 /**
  * The subprocesses this process can start under Bun, as the port describes a command runner.
@@ -47,7 +47,7 @@ import type { Command, CommandOptions, CommandResult } from "@scribe/alchemy";
  * program may be started at all is the deployment's business, set by what the process was allowed
  * to run, not by a check this class could make.
  */
-export class LocalCommands implements Command {
+export class LocalCommands implements CommandPort {
   /** Runs `program` with `args`, feeding it `options.stdin` when there is any, and reads it whole. */
   async run(program: string, args: readonly string[], options?: CommandOptions): Promise<CommandResult> {
     const input = options?.stdin;

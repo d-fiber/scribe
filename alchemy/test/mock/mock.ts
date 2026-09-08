@@ -102,7 +102,7 @@ export function recorderOrRefuse(value: unknown, calledFrom: string): Recorder {
  *
  * @example
  * ```ts ignore
- * const files = mock<FileSystem>({ named: "files" });
+ * const files = mock<FileSystemPort>({ named: "files" });
  * when(() => files.list("/packages")).thenReturn(["realtime"]);
  * ```
  */

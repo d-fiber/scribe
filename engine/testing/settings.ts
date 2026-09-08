@@ -39,7 +39,7 @@ import { databaseSettings } from "@scribe/foundation/database";
 import { scribe } from "@scribe/foundation";
 import { queueSettings } from "@scribe/foundation/queue";
 import { deviceSettings, firewallSettings, httpSettings, identitySettings } from "@scribe/runtime/settings.ts";
-import type { Command, Environment, FileSystemDriver } from "@scribe/alchemy";
+import type { CommandPort, EnvironmentPort, FileSystemDriver } from "@scribe/alchemy";
 import { Commands, Environments, FileSystems } from "@scribe/alchemy";
 import { LocalCommands as BunCommands } from "@scribe/scholium/bun/commands.ts";
 import { LocalEnvironment as BunEnvironment } from "@scribe/scholium/bun/env.ts";
@@ -53,7 +53,7 @@ import { pickStack } from "@scribe/scholium/stack.ts";
 import { testRegistrar } from "./registrar.ts";
 
 /**
- * The `Environment`, `FileSystemDriver` and `Command` this process's own stack provides.
+ * The `EnvironmentPort`, `FileSystemDriver` and `CommandPort` this process's own stack provides.
  *
  * @remarks
  * A `node` stack has none yet: `engine/scholium/bun/` and `.../deno/` are the only two
@@ -62,8 +62,8 @@ import { testRegistrar } from "./registrar.ts";
  *
  * @throws {Error} When {@link currentStack} answers `node`.
  */
-function corePorts(): { environment: Environment; fileSystems: FileSystemDriver; commands: Command } {
-  return pickStack<{ environment: Environment; fileSystems: FileSystemDriver; commands: Command }>(
+function corePorts(): { environment: EnvironmentPort; fileSystems: FileSystemDriver; commands: CommandPort } {
+  return pickStack<{ environment: EnvironmentPort; fileSystems: FileSystemDriver; commands: CommandPort }>(
     {
       deno: () => ({
         environment: new DenoEnvironment(),

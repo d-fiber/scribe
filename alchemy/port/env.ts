@@ -49,7 +49,7 @@ import { Slot } from "../wiring/bind/slot.ts";
  * `undefined`, and a name set to the empty string reads `""`. Whether an empty value counts as
  * absent is the caller's policy, not this port's.
  */
-export interface Environment {
+export interface EnvironmentPort {
   /** The value set for `name`, or `undefined` when nothing was. */
   get(name: string): string | undefined;
 
@@ -71,4 +71,4 @@ export interface Environment {
  * Environments.use(new MemoryEnvironment({ PORT: "8080" }));
  * ```
  */
-export const Environments: Slot<Environment> = new Slot<Environment>("Environments");
+export const Environments: Slot<EnvironmentPort> = new Slot<EnvironmentPort>("Environments");

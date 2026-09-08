@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Environment } from "@scribe/alchemy";
+import type { EnvironmentPort } from "@scribe/alchemy";
 import { Environments } from "@scribe/alchemy";
 
 import { currentStack } from "@scribe/scholium/host.ts";
@@ -43,16 +43,16 @@ import { LocalEnvironment as DenoEnvironment } from "@scribe/scholium/deno/env.t
 import { pickStack } from "@scribe/scholium/stack.ts";
 
 /**
- * The {@link Environment} this process falls back to before anything fills {@link Environments}.
+ * The {@link EnvironmentPort} this process falls back to before anything fills {@link Environments}.
  *
  * @remarks
  * Picked once, by {@link currentStack}, rather than at every call: the answer cannot change while
  * the process runs, and a package that reads a setting while it wires itself does so many times.
  */
-function localEnvironment(): Environment {
+function localEnvironment(): EnvironmentPort {
   return pickStack(
     { deno: () => new DenoEnvironment(), bun: () => new BunEnvironment() },
-    `No Environment implementation ships for the "${currentStack()}" stack yet.`,
+    `No EnvironmentPort implementation ships for the "${currentStack()}" stack yet.`,
   );
 }
 
@@ -67,7 +67,7 @@ const _local = localEnvironment();
  * itself, before anything has filled the slot. A test that needs a fixed environment fills it,
  * and from then on every read goes through what it put there.
  */
-export function environment(): Environment {
+export function environment(): EnvironmentPort {
   return Environments.configured ? Environments.get() : _local;
 }
 

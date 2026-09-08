@@ -105,7 +105,7 @@ export type RateLimitOutcome =
  * this. Asking costs a call: a refused caller spends a token, which is the half of the trade that
  * makes a flood of invalid attempts cost the caller rather than the host.
  */
-export interface RateLimiter {
+export interface RateLimiterPort {
   /**
    * The prefix this limit was opened with, which is what names it in a log.
    *
@@ -133,7 +133,7 @@ export interface RateLimiter {
 /** What opens a rate limit. */
 export interface RateLimiterDriver {
   /** Opens the limit `options` describes. */
-  open(options: RateLimitOptions): RateLimiter;
+  open(options: RateLimitOptions): RateLimiterPort;
 }
 
 /**
@@ -152,9 +152,9 @@ export const RateLimiters: Slot<RateLimiterDriver> = new Slot<RateLimiterDriver>
  * {@link RateLimiters} at that point. Declaring touches nothing; the slot is read at the first
  * call.
  */
-class DeferredRateLimiter implements RateLimiter {
+class DeferredRateLimiter implements RateLimiterPort {
   readonly #options: RateLimitOptions;
-  readonly #limit: Lazy<RateLimiter>;
+  readonly #limit: Lazy<RateLimiterPort>;
 
   constructor(options: RateLimitOptions) {
     this.#options = options;
@@ -184,6 +184,6 @@ class DeferredRateLimiter implements RateLimiter {
  * @remarks
  * This is what a package writes, at module scope. Nothing is reached until the first call.
  */
-export function rateLimit(options: RateLimitOptions): RateLimiter {
+export function rateLimit(options: RateLimitOptions): RateLimiterPort {
   return new DeferredRateLimiter(options);
 }

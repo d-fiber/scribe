@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "../../primitives/async/future.ts";
-import type { DeclaredHook, HookDriver, HookOptions } from "../../port/hook.ts";
+import type { HookPort, HookDriver, HookOptions } from "../../port/hook.ts";
 import { openKeyed } from "./opener.ts";
 
 /**
@@ -47,7 +47,7 @@ import { openKeyed } from "./opener.ts";
  * port promises neither either: a package that depends on the order here is a package that will
  * break in production, and this fake is not the place that catches it.
  */
-export class MemoryHook<T> implements DeclaredHook<T> {
+export class MemoryHook<T> implements HookPort<T> {
   /** Everything emitted, in the order it was emitted. */
   readonly emitted: T[] = [];
 
@@ -55,7 +55,7 @@ export class MemoryHook<T> implements DeclaredHook<T> {
   readonly #listening: Array<(payload: T) => void | Future<void>> = [];
 
   /**
-   * The {@link DeclaredHook.emit} implementation: records `payload` in {@link emitted}, then
+   * The {@link HookPort.emit} implementation: records `payload` in {@link emitted}, then
    * calls every listener in registration order, letting a raised error stop the rest.
    */
   async emit(payload: T): Future<void> {
@@ -63,7 +63,7 @@ export class MemoryHook<T> implements DeclaredHook<T> {
     for (const listen of this.#listening) await listen(payload);
   }
 
-  /** The {@link DeclaredHook.on} implementation: records `listen`, called by every later {@link emit}. */
+  /** The {@link HookPort.on} implementation: records `listen`, called by every later {@link emit}. */
   on(listen: (payload: T) => void | Future<void>): void {
     this.#listening.push(listen);
   }
@@ -83,11 +83,11 @@ export class MemoryHooks implements HookDriver {
    * The {@link HookDriver.open} implementation: opens a {@link MemoryHook} for `options.event`,
    * or hands back the one already opened under that event.
    */
-  open<T>(options: HookOptions): DeclaredHook<T> {
+  open<T>(options: HookOptions): HookPort<T> {
     return openKeyed(
       this.opened,
       options.event,
       () => new MemoryHook<T>() as unknown as MemoryHook<never>,
-    ) as unknown as DeclaredHook<T>;
+    ) as unknown as HookPort<T>;
   }
 }
