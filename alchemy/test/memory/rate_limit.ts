@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "../../primitives/async/future.ts";
-import type { RateLimiterPort, RateLimiterDriver, RateLimitOptions, RateLimitOutcome } from "../../port/rate_limit.ts";
+import type { RateLimiterDriver, RateLimiterPort, RateLimitOptions, RateLimitOutcome } from "../../port/rate_limit.ts";
 import { Now } from "../../primitives/value/date_time.ts";
 
 /** What one caller has spent, and until when it is held out. */

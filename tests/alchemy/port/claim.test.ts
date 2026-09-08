@@ -37,7 +37,7 @@
 import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { assert, assertEquals, assertFalse } from "@std/assert";
-import { type ClaimPort, claimOnce, type ClaimOptions, Claims } from "@scribe/alchemy";
+import { claimOnce, type ClaimOptions, type ClaimPort, Claims } from "@scribe/alchemy";
 
 class TakenOnce implements ClaimPort {
   readonly held = new Set<string>();

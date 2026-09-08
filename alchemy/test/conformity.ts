@@ -35,14 +35,14 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "../primitives/async/future.ts";
-import type { CacheDriver } from "../port/cache.ts";
+import type { ValkeryDriver } from "../port/valkery.ts";
 import { Duration } from "../primitives/value/duration.ts";
 import { Now } from "../primitives/value/date_time.ts";
 import { FixedNow } from "./memory/now.ts";
 import { AssertionError } from "./expect/error.ts";
 
 /**
- * Runs every promise the cache port makes against `driver`, and refuses the first one it breaks.
+ * Runs every promise the Valkery port makes against `driver`, and refuses the first one it breaks.
  *
  * @remarks
  * A port is an interface plus a set of promises no signature can express: that opening one key
@@ -64,12 +64,12 @@ import { AssertionError } from "./expect/error.ts";
  *
  * @example
  * ```ts ignore
- * Deno.test("the Redis cache keeps what the port promises", async () => {
- *   await checkCacheDriver(new RedisCaches(url));
+ * Deno.test("the Redis Valkery keeps what the port promises", async () => {
+ *   await checkValkeryDriver(new RedisValkeries(url));
  * });
  * ```
  */
-export async function checkCacheDriver(driver: CacheDriver): Future<void> {
+export async function checkValkeryDriver(driver: ValkeryDriver): Future<void> {
   const clock = new FixedNow(1_700_000_000_000);
   const before = Now.configured ? Now.get() : null;
   Now.use(clock);
@@ -93,13 +93,13 @@ export async function checkCacheDriver(driver: CacheDriver): Future<void> {
 function must(held: unknown, expected: unknown, promise: string): void {
   if (JSON.stringify(held) === JSON.stringify(expected)) return;
   throw new AssertionError(
-    `A cache driver did not keep a promise of the port.\n\n  promise   ${promise}\n  expected  ${
+    `A Valkery driver did not keep a promise of the port.\n\n  promise   ${promise}\n  expected  ${
       JSON.stringify(expected)
     }\n  actual    ${JSON.stringify(held)}`,
   );
 }
 
-async function holdsWhatItWasGiven(driver: CacheDriver): Future<void> {
+async function holdsWhatItWasGiven(driver: ValkeryDriver): Future<void> {
   const held = driver.open<string>({ key: "conformity:held" });
 
   await held.add("ada", "one");
@@ -109,14 +109,14 @@ async function holdsWhatItWasGiven(driver: CacheDriver): Future<void> {
   must(await held.getMany(["grace", "alan"]), ["two", "three"], "a batch comes back in the order it was asked for");
 }
 
-async function answersNothingForWhatItWasNotGiven(driver: CacheDriver): Future<void> {
+async function answersNothingForWhatItWasNotGiven(driver: ValkeryDriver): Future<void> {
   const held = driver.open<string>({ key: "conformity:absent" });
 
   must(await held.get("nobody"), null, "an identifier nothing was held under answers null");
   must(await held.getMany(["nobody", "nor anybody"]), [null, null], "a batch answers null where nothing is held");
 }
 
-async function forgetsAnEntryOnceItsLifetimeHasRun(driver: CacheDriver): Future<void> {
+async function forgetsAnEntryOnceItsLifetimeHasRun(driver: ValkeryDriver): Future<void> {
   const held = driver.open<string>({ key: "conformity:ttl", ttl: Duration.minutes(5) });
 
   await held.add("ada", "one");
@@ -127,7 +127,7 @@ async function forgetsAnEntryOnceItsLifetimeHasRun(driver: CacheDriver): Future<
   must(await held.get("ada"), null, "an entry past its lifetime is gone");
 }
 
-async function answersOneStorePerKey(driver: CacheDriver): Future<void> {
+async function answersOneStorePerKey(driver: ValkeryDriver): Future<void> {
   const first = driver.open<string>({ key: "conformity:shared" });
   const second = driver.open<string>({ key: "conformity:shared" });
 
@@ -135,7 +135,7 @@ async function answersOneStorePerKey(driver: CacheDriver): Future<void> {
   must(await second.get("ada"), "one", "opening one key twice answers one store");
 }
 
-async function runsOneComputationHoweverManyAsk(driver: CacheDriver): Future<void> {
+async function runsOneComputationHoweverManyAsk(driver: ValkeryDriver): Future<void> {
   const held = driver.open<string>({ key: "conformity:once" });
   let ran = 0;
 
@@ -150,7 +150,7 @@ async function runsOneComputationHoweverManyAsk(driver: CacheDriver): Future<voi
   must(asked, Array.from({ length: 10 }, () => "one"), "every caller of upsert is answered the one value");
 }
 
-async function forgetsWhatItIsToldTo(driver: CacheDriver): Future<void> {
+async function forgetsWhatItIsToldTo(driver: ValkeryDriver): Future<void> {
   const held = driver.open<string>({ key: "conformity:clear" });
 
   await held.add("ada", "one");
@@ -174,7 +174,7 @@ async function forgetsWhatItIsToldTo(driver: CacheDriver): Future<void> {
  * about a ttl that was given, which is why the case has to be about the one that was not.
  */
 async function takesTheDefaultWhenAnOptionIsLeftOut(
-  driver: CacheDriver,
+  driver: ValkeryDriver,
   clock: FixedNow,
 ): Future<void> {
   const held = driver.open<string>({ key: "conformity:default" });
@@ -191,7 +191,7 @@ async function takesTheDefaultWhenAnOptionIsLeftOut(
  * write that happened are two different facts, and a caller has no way to tell them apart
  * afterwards except by reading.
  */
-async function neverPassesAWriteOffAsDoneWhenItIsNot(driver: CacheDriver): Future<void> {
+async function neverPassesAWriteOffAsDoneWhenItIsNot(driver: ValkeryDriver): Future<void> {
   const held = driver.open<string>({ key: "conformity:written" });
 
   await held.add("ada", "one");
@@ -213,7 +213,7 @@ async function neverPassesAWriteOffAsDoneWhenItIsNot(driver: CacheDriver): Futur
  * about the fields it did read still holds. So the case opens one store per field the port
  * declares and asks the driver to behave differently for each.
  */
-async function carriesEveryOptionItWasOpenedWith(driver: CacheDriver): Future<void> {
+async function carriesEveryOptionItWasOpenedWith(driver: ValkeryDriver): Future<void> {
   const named = driver.open<string>({ key: "conformity:carried", ttl: Duration.hours(1) });
   const other = driver.open<string>({ key: "conformity:carried:other", ttl: Duration.hours(1) });
 

@@ -36,7 +36,7 @@
 
 import type { Future } from "../../primitives/async/future.ts";
 import type { UnmodifiableList } from "../../primitives/value/list.ts";
-import type { QueuePort, DeclaredQueueOptions, QueueDriver, QueueMessage } from "../../port/queue.ts";
+import type { DeclaredQueueOptions, QueueDriver, QueueMessage, QueuePort } from "../../port/queue.ts";
 import { openKeyed } from "./opener.ts";
 
 /**

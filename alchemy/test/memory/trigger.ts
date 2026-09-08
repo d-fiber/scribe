@@ -41,9 +41,9 @@ import type {
   DeclaredFieldChange,
   DeclaredInsertChange,
   DeclaredTransition,
-  TriggerPort,
   DeclaredTriggerOptions,
   TriggerDriver,
+  TriggerPort,
 } from "../../port/trigger.ts";
 import type { DeclaredUpdateChange } from "../../port/trigger.ts";
 import { openKeyed } from "./opener.ts";

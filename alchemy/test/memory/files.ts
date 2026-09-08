@@ -36,7 +36,7 @@
 
 import type { Future } from "../../primitives/async/future.ts";
 import { ScribeError } from "../../primitives/error/scribe_error.ts";
-import type { FileSystemPort, FileSystemDriver, FileSystemEntity } from "../../port/files.ts";
+import type { FileSystemDriver, FileSystemEntity, FileSystemPort } from "../../port/files.ts";
 import { Bytes } from "../../primitives/value/bytes.ts";
 import type { List } from "../../primitives/value/list.ts";
 

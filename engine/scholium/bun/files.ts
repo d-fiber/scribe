@@ -39,7 +39,7 @@ import { promises as fs } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import type { FileSystemPort, FileSystemDriver, FileSystemEntity, Future, List } from "@scribe/alchemy";
+import type { FileSystemDriver, FileSystemEntity, FileSystemPort, Future, List } from "@scribe/alchemy";
 import { Bytes } from "@scribe/alchemy";
 
 /**

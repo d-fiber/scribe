@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { FileSystemPort, FileSystemDriver, FileSystemEntity, Future, List } from "@scribe/alchemy";
+import type { FileSystemDriver, FileSystemEntity, FileSystemPort, Future, List } from "@scribe/alchemy";
 import { Bytes } from "@scribe/alchemy";
 
 /**

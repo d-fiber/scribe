@@ -145,9 +145,9 @@ export type { RegisteredRun, RunHandler } from "./wiring/lifecycle/run.ts";
 export { cron, Crons, forgetCrons, installCrons } from "./port/cron.ts";
 export type { CronDriver, CronOptions, DeclaredCron, DeclaredSchedule, DeclaredTimeOfDay } from "./port/cron.ts";
 export { forgetHooks, hook, Hooks, openHooks } from "./port/hook.ts";
-export type { HookPort, HookDriver, HookOptions } from "./port/hook.ts";
+export type { HookDriver, HookOptions, HookPort } from "./port/hook.ts";
 export { forgetQueues, installQueues, queue, Queues } from "./port/queue.ts";
-export type { QueuePort, DeclaredQueueOptions, QueueDriver, QueueMessage } from "./port/queue.ts";
+export type { DeclaredQueueOptions, QueueDriver, QueueMessage, QueuePort } from "./port/queue.ts";
 export { forgetTriggers, installTriggers, trigger, Triggers } from "./port/trigger.ts";
 export type {
   Change,
@@ -157,28 +157,28 @@ export type {
   DeclaredFieldChange,
   DeclaredInsertChange,
   DeclaredTransition,
-  TriggerPort,
   DeclaredTriggerOp,
   DeclaredTriggerOptions,
   DeclaredUpdateChange,
   TriggerDriver,
+  TriggerPort,
 } from "./port/trigger.ts";
 
-export { cache, Caches, DEFAULT_CACHE_DEADLINE } from "./port/cache.ts";
-export type { Cache, CacheDriver, CacheOptions } from "./port/cache.ts";
+export { DEFAULT_VALKERY_DEADLINE, Valkeries, valkery } from "./port/valkery.ts";
+export type { ValkeryDriver, ValkeryOptions, ValkeryPort } from "./port/valkery.ts";
 export { claimOnce, Claims } from "./port/claim.ts";
-export type { ClaimPort, ClaimOptions, WhenUnavailable } from "./port/claim.ts";
+export type { ClaimOptions, ClaimPort, WhenUnavailable } from "./port/claim.ts";
 export { rateLimit, RateLimiters } from "./port/rate_limit.ts";
-export type { RateLimiterPort, RateLimiterDriver, RateLimitOptions, RateLimitOutcome } from "./port/rate_limit.ts";
+export type { RateLimiterDriver, RateLimiterPort, RateLimitOptions, RateLimitOutcome } from "./port/rate_limit.ts";
 
 export { FileSystems } from "./port/files.ts";
-export type { FileSystemPort, FileSystemDriver, FileSystemEntity } from "./port/files.ts";
+export type { FileSystemDriver, FileSystemEntity, FileSystemPort } from "./port/files.ts";
 
 export { Environments } from "./port/env.ts";
 export type { EnvironmentPort } from "./port/env.ts";
 
 export { Commands } from "./port/commands.ts";
-export type { CommandPort, CommandOptions, CommandResult } from "./port/commands.ts";
+export type { CommandOptions, CommandPort, CommandResult } from "./port/commands.ts";
 
 export { renderError } from "./primitives/diagnostic/render.ts";
 export type { RenderOptions } from "./primitives/diagnostic/render.ts";

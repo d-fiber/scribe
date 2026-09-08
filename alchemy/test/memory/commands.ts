@@ -34,7 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { CommandPort, CommandOptions, CommandResult } from "../../port/commands.ts";
+import type { CommandOptions, CommandPort, CommandResult } from "../../port/commands.ts";
 
 /** One run a {@link MemoryCommands} was asked for. */
 export interface RanCommand {

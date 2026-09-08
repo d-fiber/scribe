@@ -41,9 +41,9 @@ import { TimeoutException, withDeadline } from "../primitives/async/deadline.ts"
 import { Lazy } from "../wiring/bind/lazy.ts";
 import { Slot } from "../wiring/bind/slot.ts";
 
-/** What opening a cache takes. */
-export interface CacheOptions {
-  /** The prefix every key of this cache carries, which is what keeps two caches apart. */
+/** What opening a Valkery takes. */
+export interface ValkeryOptions {
+  /** The prefix every key of this Valkery carries, which is what keeps two Valkeries apart. */
   readonly key: string;
 
   /** How long an entry stays before it is forgotten. It stays until it is deleted when left out. */
@@ -53,19 +53,19 @@ export interface CacheOptions {
    * How eagerly an entry is recomputed before it expires, as a multiplier on its remaining life.
    *
    * Left out, an entry is recomputed when it is asked for after expiring, which lets several
-   * callers compute the same value at once. It only governs {@link Cache.upsert}, which is the one
-   * member handed a computation to run.
+   * callers compute the same value at once. It only governs {@link ValkeryPort.upsert}, which is
+   * the one member handed a computation to run.
    */
   readonly beta?: number;
 
   /**
-   * How long a single call to this cache has before it is treated as a failure.
+   * How long a single call to this Valkery has before it is treated as a failure.
    *
    * @remarks
-   * A cache that is **slow** is the case a contract usually forgets, and it is the one that takes a
-   * service down: a store answering in eight seconds is not refusing, so nothing gives up, requests
-   * pile onto the pool, and an outage of the thing one could do without becomes an outage of
-   * everything. {@link DEFAULT_CACHE_DEADLINE} when left out.
+   * A Valkery that is **slow** is the case a contract usually forgets, and it is the one that takes
+   * a service down: a store answering in eight seconds is not refusing, so nothing gives up,
+   * requests pile onto the pool, and an outage of the thing one could do without becomes an outage
+   * of everything. {@link DEFAULT_VALKERY_DEADLINE} when left out.
    *
    * What happens when it passes is {@link onTimeout}.
    */
@@ -75,25 +75,25 @@ export interface CacheOptions {
    * What a call that ran out of time answers.
    *
    * @remarks
-   * `"miss"` treats a slow cache as an empty one, which is almost always right: the caller recomputes
-   * and carries on. `"throw"` raises a {@link TimeoutException}, which is what a caller wanting to
-   * know reaches for. `"miss"` when left out, and a write that times out raises either way, because
-   * answering nothing about a write says something untrue.
+   * `"miss"` treats a slow Valkery as an empty one, which is almost always right: the caller
+   * recomputes and carries on. `"throw"` raises a {@link TimeoutException}, which is what a caller
+   * wanting to know reaches for. `"miss"` when left out, and a write that times out raises either
+   * way, because answering nothing about a write says something untrue.
    */
   readonly onTimeout?: "miss" | "throw";
 }
 
-/** How long a call to a cache has when nothing said otherwise. */
-export const DEFAULT_CACHE_DEADLINE: Duration = Duration.milliseconds(250);
+/** How long a call to a Valkery has when nothing said otherwise. */
+export const DEFAULT_VALKERY_DEADLINE: Duration = Duration.milliseconds(250);
 
 /**
  * A store of values held under a name, forgotten after a while.
  *
  * @remarks
- * A package never reaches a cache server. It asks {@link Caches} to open one, and talks to this.
- * What is behind it is the host's business, and a test puts something else there.
+ * A package never reaches a Valkery server. It asks {@link Valkeries} to open one, and talks to
+ * this. What is behind it is the host's business, and a test puts something else there.
  */
-export interface Cache<T> {
+export interface ValkeryPort<T> {
   /** What is held under `id`, or null when nothing is. */
   get(id: string): Future<T | null>;
 
@@ -121,44 +121,44 @@ export interface Cache<T> {
    */
   upsert(id: string, compute: () => Future<T>): Future<T>;
 
-  /** Forgets everything this cache holds, or everything whose identifier matches `pattern`. */
+  /** Forgets everything this Valkery holds, or everything whose identifier matches `pattern`. */
   clear(pattern?: string): Future<void>;
 }
 
-/** What opens a cache. */
-export interface CacheDriver {
-  /** Opens the cache `options` describes. Opening it twice with the same key answers the same store. */
-  open<T>(options: CacheOptions): Cache<T>;
+/** What opens a Valkery. */
+export interface ValkeryDriver {
+  /** Opens the Valkery `options` describes. Opening it twice with the same key answers the same store. */
+  open<T>(options: ValkeryOptions): ValkeryPort<T>;
 }
 
 /**
- * What answers a package that needs a cache.
+ * What answers a package that needs a Valkery.
  *
  * @remarks
  * The host fills this once, at boot, with whatever it runs against. A package reads it and never
  * names an implementation, which is what lets it be written without the framework and tested
  * without anything up.
  */
-export const Caches: Slot<CacheDriver> = new Slot<CacheDriver>("Caches");
+export const Valkeries: Slot<ValkeryDriver> = new Slot<ValkeryDriver>("Valkeries");
 
 /**
- * A cache that opens itself the first time it is used, and not before.
+ * A Valkery that opens itself the first time it is used, and not before.
  *
  * @remarks
- * This is the whole reason a package does not write `Caches.get().open(...)` itself. A cache is
- * declared at module scope, which is evaluated the moment the module is imported, and at that
- * point nothing has filled {@link Caches} yet. Reading the slot there would throw before the host
- * has had a chance to start.
+ * This is the whole reason a package does not write `Valkeries.get().open(...)` itself. A Valkery
+ * is declared at module scope, which is evaluated the moment the module is imported, and at that
+ * point nothing has filled {@link Valkeries} yet. Reading the slot there would throw before the
+ * host has had a chance to start.
  *
  * Declaring touches nothing. The slot is read at the first call, by which time the host is up.
  */
-class DeferredCache<T> implements Cache<T> {
-  readonly #options: CacheOptions;
-  readonly #store: Lazy<Cache<T>>;
+class DeferredValkery<T> implements ValkeryPort<T> {
+  readonly #options: ValkeryOptions;
+  readonly #store: Lazy<ValkeryPort<T>>;
 
-  constructor(options: CacheOptions) {
+  constructor(options: ValkeryOptions) {
     this.#options = options;
-    this.#store = new Lazy(() => Caches.get().open<T>(this.#options));
+    this.#store = new Lazy(() => Valkeries.get().open<T>(this.#options));
   }
 
   get(id: string): Future<T | null> {
@@ -195,7 +195,7 @@ class DeferredCache<T> implements Cache<T> {
 
   /** How long one call has, which is what the declaration said or the default. */
   get #within(): Duration {
-    return this.#options.deadline ?? DEFAULT_CACHE_DEADLINE;
+    return this.#options.deadline ?? DEFAULT_VALKERY_DEADLINE;
   }
 
   /**
@@ -205,7 +205,7 @@ class DeferredCache<T> implements Cache<T> {
    */
   async #read<R>(call: () => Future<R>, absent: () => R = () => null as R): Future<R> {
     try {
-      return await withDeadline(`cache:${this.#options.key}`, this.#within, call());
+      return await withDeadline(`valkery:${this.#options.key}`, this.#within, call());
     } catch (raised) {
       if (raised instanceof TimeoutException && this.#options.onTimeout !== "throw") return absent();
       throw raised;
@@ -214,12 +214,12 @@ class DeferredCache<T> implements Cache<T> {
 
   /** Runs a write against the deadline. A write that ran out of time always raises. */
   #write<R>(call: () => Future<R>): Future<R> {
-    return withDeadline(`cache:${this.#options.key}`, this.#within, call());
+    return withDeadline(`valkery:${this.#options.key}`, this.#within, call());
   }
 }
 
 /**
- * Declares the cache `options` describes, without opening it.
+ * Declares the Valkery `options` describes, without opening it.
  *
  * @remarks
  * This is what a package writes, at module scope, next to the code that uses it. Nothing is
@@ -227,9 +227,9 @@ class DeferredCache<T> implements Cache<T> {
  *
  * @example
  * ```ts ignore
- * const members = cache<CachedMembership>({ key: "audience:member", ttl: Duration.days(7) });
+ * const members = valkery<CachedMembership>({ key: "audience:member", ttl: Duration.days(7) });
  * ```
  */
-export function cache<T>(options: CacheOptions): Cache<T> {
-  return new DeferredCache<T>(options);
+export function valkery<T>(options: ValkeryOptions): ValkeryPort<T> {
+  return new DeferredValkery<T>(options);
 }

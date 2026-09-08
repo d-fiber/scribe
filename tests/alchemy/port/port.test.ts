@@ -37,16 +37,16 @@
 import "@scribe/scholium/runner.ts";
 import { equals, expect, expectLater, isA, isFalse, Scribe, throwsA } from "@scribe/alchemy/test";
 import type {
-  Cache,
-  CacheDriver,
-  CacheOptions,
-  RateLimiterPort,
   RateLimiterDriver,
+  RateLimiterPort,
   RateLimitOutcome,
+  ValkeryDriver,
+  ValkeryOptions,
+  ValkeryPort,
 } from "@scribe/alchemy";
-import { cache, Caches, Duration, rateLimit, RateLimiters, Slot, TimeoutException } from "@scribe/alchemy";
+import { Duration, rateLimit, RateLimiters, Slot, TimeoutException, Valkeries, valkery } from "@scribe/alchemy";
 
-class HeldInMemory<T> implements Cache<T> {
+class HeldInMemory<T> implements ValkeryPort<T> {
   readonly #held = new Map<string, T>();
 
   get(id: string): Promise<T | null> {
@@ -92,10 +92,10 @@ class HeldInMemory<T> implements Cache<T> {
   }
 }
 
-class OpensInMemory implements CacheDriver {
-  readonly opened: CacheOptions[] = [];
+class OpensInMemory implements ValkeryDriver {
+  readonly opened: ValkeryOptions[] = [];
 
-  open<T>(options: CacheOptions): Cache<T> {
+  open<T>(options: ValkeryOptions): ValkeryPort<T> {
     this.opened.push(options);
     return new HeldInMemory<T>();
   }
@@ -117,24 +117,24 @@ class RefusesEverybody implements RateLimiterPort {
   }
 }
 
-function roleOf(members: Cache<string>, who: string): Promise<string> {
+function roleOf(members: ValkeryPort<string>, who: string): Promise<string> {
   return members.upsert(who, () => Promise.resolve("reader"));
 }
 
-Scribe.test("a package reaches a cache without naming what is behind it", async () => {
+Scribe.test("a package reaches a Valkery without naming what is behind it", async () => {
   const driver = new OpensInMemory();
-  Caches.use(driver);
+  Valkeries.use(driver);
 
-  const members = Caches.get().open<string>({ key: "audience:member", ttl: Duration.days(7) });
+  const members = Valkeries.get().open<string>({ key: "audience:member", ttl: Duration.days(7) });
 
   expect(await roleOf(members, "ada"), equals("reader"), "the computed value was not handed back");
   expect(await members.get("ada"), equals("reader"), "what was computed was not kept");
-  expect(driver.opened[0].key, equals("audience:member"), "the cache was opened under another name");
+  expect(driver.opened[0].key, equals("audience:member"), "the Valkery was opened under another name");
 });
 
 Scribe.test("what is already held is handed back instead of being computed again", async () => {
-  Caches.use(new OpensInMemory());
-  const members = Caches.get().open<string>({ key: "audience:member" });
+  Valkeries.use(new OpensInMemory());
+  const members = Valkeries.get().open<string>({ key: "audience:member" });
   await members.add("ada", "editor");
 
   let computed = 0;
@@ -164,26 +164,26 @@ Scribe.test("a refusal carries what the caller needs to try again", async () => 
   }
 });
 
-Scribe.test("declaring a cache at module scope touches nothing, so an import before boot is safe", () => {
-  const untouched = new Slot<CacheDriver>("Untouched");
-  const declared = cache<string>({ key: "audience:member" });
+Scribe.test("declaring a Valkery at module scope touches nothing, so an import before boot is safe", () => {
+  const untouched = new Slot<ValkeryDriver>("Untouched");
+  const declared = valkery<string>({ key: "audience:member" });
 
   expect(untouched.configured, isFalse, "the fixture slot was filled by something");
-  expect(typeof declared.get, equals("function"), "declaring a cache did not hand back a cache");
+  expect(typeof declared.get, equals("function"), "declaring a Valkery did not hand back a Valkery");
 });
 
-Scribe.test("a cache opens itself at the first call, not at the declaration", async () => {
+Scribe.test("a Valkery opens itself at the first call, not at the declaration", async () => {
   const driver = new OpensInMemory();
-  const members = cache<string>({ key: "audience:member" });
+  const members = valkery<string>({ key: "audience:member" });
 
-  Caches.use(driver);
-  expect(driver.opened.length, equals(0), "the cache was opened before anything used it");
+  Valkeries.use(driver);
+  expect(driver.opened.length, equals(0), "the Valkery was opened before anything used it");
 
   await members.add("ada", "editor");
-  expect(driver.opened.length, equals(1), "the cache was not opened by the first call");
+  expect(driver.opened.length, equals(1), "the Valkery was not opened by the first call");
 
   await members.get("ada");
-  expect(driver.opened.length, equals(1), "the cache was opened again by a second call");
+  expect(driver.opened.length, equals(1), "the Valkery was opened again by a second call");
 });
 
 Scribe.test("a rate limit declared at module scope opens at the first call too", async () => {
@@ -202,9 +202,9 @@ Scribe.test("a rate limit declared at module scope opens at the first call too",
   expect(opened, equals(1), "the limit was not opened by the first call");
 });
 
-Scribe.test("a cache that answers too slowly is read as a cache that holds nothing", async () => {
-  Caches.use({
-    open<T>(): Cache<T> {
+Scribe.test("a Valkery that answers too slowly is read as a Valkery that holds nothing", async () => {
+  Valkeries.use({
+    open<T>(): ValkeryPort<T> {
       return {
         get: () => new Promise(() => {}),
         getMany: () => new Promise(() => {}),
@@ -214,18 +214,18 @@ Scribe.test("a cache that answers too slowly is read as a cache that holds nothi
         deleteMany: () => Promise.resolve(),
         upsert: () => new Promise(() => {}),
         clear: () => Promise.resolve(),
-      } as Cache<T>;
+      } as ValkeryPort<T>;
     },
   });
 
-  const held = cache<string>({ key: "slow", deadline: Duration.milliseconds(5) });
+  const held = valkery<string>({ key: "slow", deadline: Duration.milliseconds(5) });
 
-  expect(await held.get("ada"), equals(null), "a slow cache held a request instead of missing");
+  expect(await held.get("ada"), equals(null), "a slow Valkery held a request instead of missing");
 });
 
-Scribe.test("a cache that answers too slowly raises when the declaration asked it to", async () => {
-  Caches.use({
-    open<T>(): Cache<T> {
+Scribe.test("a Valkery that answers too slowly raises when the declaration asked it to", async () => {
+  Valkeries.use({
+    open<T>(): ValkeryPort<T> {
       return {
         get: () => new Promise(() => {}),
         getMany: () => new Promise(() => {}),
@@ -235,18 +235,18 @@ Scribe.test("a cache that answers too slowly raises when the declaration asked i
         deleteMany: () => Promise.resolve(),
         upsert: () => new Promise(() => {}),
         clear: () => Promise.resolve(),
-      } as Cache<T>;
+      } as ValkeryPort<T>;
     },
   });
 
-  const held = cache<string>({ key: "slow", deadline: Duration.milliseconds(5), onTimeout: "throw" });
+  const held = valkery<string>({ key: "slow", deadline: Duration.milliseconds(5), onTimeout: "throw" });
 
   await expectLater(() => held.get("ada"), throwsA(isA(TimeoutException)));
 });
 
-Scribe.test("getMany on a cache that answers too slowly is read as a cache holding nothing for every id", async () => {
-  Caches.use({
-    open<T>(): Cache<T> {
+Scribe.test("getMany on a Valkery that answers too slowly is read as a Valkery holding nothing for every id", async () => {
+  Valkeries.use({
+    open<T>(): ValkeryPort<T> {
       return {
         get: () => Promise.resolve(null),
         getMany: () => new Promise(() => {}),
@@ -256,11 +256,11 @@ Scribe.test("getMany on a cache that answers too slowly is read as a cache holdi
         deleteMany: () => Promise.resolve(),
         upsert: () => Promise.resolve(null as never),
         clear: () => Promise.resolve(),
-      } as Cache<T>;
+      } as ValkeryPort<T>;
     },
   });
 
-  const held = cache<string>({ key: "slow", deadline: Duration.milliseconds(5) });
+  const held = valkery<string>({ key: "slow", deadline: Duration.milliseconds(5) });
 
   expect(
     await held.getMany(["ada", "bob"]),
@@ -271,8 +271,8 @@ Scribe.test("getMany on a cache that answers too slowly is read as a cache holdi
 
 Scribe.test("addMany, deleteMany and clear each reach the driver they were declared against", async () => {
   const driver = new OpensInMemory();
-  Caches.use(driver);
-  const members = cache<string>({ key: "audience:member" });
+  Valkeries.use(driver);
+  const members = valkery<string>({ key: "audience:member" });
 
   await members.addMany([["ada", "editor"], ["bob", "reader"]]);
   expect(await members.get("ada"), equals("editor"), "addMany did not add every entry it was given");
@@ -299,8 +299,8 @@ Scribe.test("isBlocked and unmeasured reach a declared rate limit, and key names
 });
 
 Scribe.test("a write that runs out of time raises whatever the declaration said about reads", async () => {
-  Caches.use({
-    open<T>(): Cache<T> {
+  Valkeries.use({
+    open<T>(): ValkeryPort<T> {
       return {
         get: () => Promise.resolve(null),
         getMany: () => Promise.resolve([]),
@@ -310,11 +310,11 @@ Scribe.test("a write that runs out of time raises whatever the declaration said 
         deleteMany: () => Promise.resolve(),
         upsert: () => new Promise(() => {}),
         clear: () => Promise.resolve(),
-      } as Cache<T>;
+      } as ValkeryPort<T>;
     },
   });
 
-  const held = cache<string>({ key: "slow", deadline: Duration.milliseconds(5), onTimeout: "miss" });
+  const held = valkery<string>({ key: "slow", deadline: Duration.milliseconds(5), onTimeout: "miss" });
 
   await expectLater(() => held.add("ada", "one"), throwsA(isA(TimeoutException)));
 });

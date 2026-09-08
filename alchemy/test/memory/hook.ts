@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import type { Future } from "../../primitives/async/future.ts";
-import type { HookPort, HookDriver, HookOptions } from "../../port/hook.ts";
+import type { HookDriver, HookOptions, HookPort } from "../../port/hook.ts";
 import { openKeyed } from "./opener.ts";
 
 /**

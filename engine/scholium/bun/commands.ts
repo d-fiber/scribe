@@ -36,7 +36,7 @@
 
 import "@scribe/scholium/bun/global.d.ts";
 
-import type { CommandPort, CommandOptions, CommandResult } from "@scribe/alchemy";
+import type { CommandOptions, CommandPort, CommandResult } from "@scribe/alchemy";
 
 /**
  * The subprocesses this process can start under Bun, as the port describes a command runner.
