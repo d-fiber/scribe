@@ -39,9 +39,9 @@ import { assert, assertEquals, assertMatch } from "@std/assert";
 import "@scribe/scholium/runner.ts";
 import { Runners } from "@scribe/alchemy/test";
 import { ClientType, enumValues } from "@scribe/contracts/enums.ts";
-import { PROTOCOL_VERSION } from "../../../sdk/js/transport.ts";
+import { PROTOCOL_VERSION } from "../../../protocol/version.ts";
 
-Deno.test("resolves specifiers from deno.json, sdk/js and a sealed engine layer alike", () => {
+Deno.test("resolves specifiers from deno.json, protocol/ and a sealed engine layer alike", () => {
   assertEquals(typeof PROTOCOL_VERSION, "string");
   assertMatch(PROTOCOL_VERSION, /^\d+\.\d+\.\d+$/);
   assertEquals(typeof Runners.configured, "boolean");

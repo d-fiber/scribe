@@ -39,9 +39,9 @@ import { expect, test } from "bun:test";
 import "@scribe/scholium/runner.ts";
 import { Runners } from "@scribe/alchemy/test";
 import { ClientType, enumValues } from "@scribe/contracts/enums.ts";
-import { PROTOCOL_VERSION } from "../../../sdk/js/transport.ts";
+import { PROTOCOL_VERSION } from "../../../protocol/version.ts";
 
-test("resolves specifiers from scribe.imports.json, sdk/js and a sealed engine layer alike", () => {
+test("resolves specifiers from scribe.imports.json, protocol/ and a sealed engine layer alike", () => {
   expect(typeof PROTOCOL_VERSION).toBe("string");
   expect(PROTOCOL_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
   expect(typeof Runners.configured).toBe("boolean");
