@@ -34,33 +34,34 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "@scribe/alchemy";
-import { runMounted } from "@scribe/runtime/wiring/packages.ts";
-import type { Bootstrapper } from "../../../common/bootstrapper.ts";
+import type { ScribePlugin as Plugin } from "@scribe/alchemy";
+import type { CapabilityRegistrant } from "./capability.ts";
 
 /**
- * Runs the packages a project mounted, at the two moments a long-lived process has.
+ * What a package's `registerWith` step may register, handed in rather than reached for.
  *
  * @remarks
- * It is listed by the runtimes that keep running, and by no others. `starts` is where a package
- * puts the work that outlives a request, a cron loop or a queue consumer, and a process that only
- * dispatches has no business holding either.
- *
- * The engine used to name each of those loops itself, one bootstrapper per subsystem of one
- * package, so mounting a package was not enough to bring what it needs and unmounting one left a
- * dangling import. Here the engine decides when, and never what.
+ * A package never reaches into a capability or extension registry by importing it: it is handed
+ * the one object that lets it register itself, so a test can hand it a fake in place of the real
+ * host and see exactly what a package tried to register.
  */
-export class MountedPackagesBootstrapper implements Bootstrapper {
-  /** This bootstrapper's label in `BootSequence` logging: `packages`. */
-  readonly name = "packages";
+export interface PackageRegistrar {
+  /** Registers a capability this package serves to a worker. */
+  addCapability(handler: CapabilityRegistrant): void;
 
-  /** Runs every mounted package's `starts` step. */
-  boot(): Future<void> {
-    return runMounted("starts");
-  }
-
-  /** Runs every mounted package's `detachFromEngine` step. */
-  shutdown(): Future<void> {
-    return runMounted("detachFromEngine");
-  }
+  /**
+   * Registers `bucket` as the extension a project may declare `name` into, unless another package
+   * already claimed `name`.
+   */
+  addExtension(name: string, bucket: string): void;
 }
+
+/**
+ * A package's plugin, bound to the registrar this framework actually hands it.
+ *
+ * @remarks
+ * Alchemy's own {@link Plugin} leaves its registrar generic, since it has no registrar of its own
+ * to name. This is the shape every package entry writes against: `implements ScribePlugin`, one
+ * name, no generic to repeat.
+ */
+export type ScribePlugin = Plugin<PackageRegistrar>;

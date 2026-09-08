@@ -38,7 +38,7 @@ import type { Future } from "../primitives/async/future.ts";
 import type { Constraint } from "./constraint.ts";
 import type { Version } from "./version.ts";
 
-/** A step a package runs at one of the three moments of its life. */
+/** A step a package runs at one of its two argument-less moments. */
 export type LifecycleStep = () => void | Future<void>;
 
 /**
@@ -93,19 +93,22 @@ export interface Manifest {
  * The three moments a package runs at, as its entry file exports them.
  *
  * @remarks
- * They are functions rather than values, which is why they are read off the module instead of being
- * declared in the manifest. Each one is optional, and a package that offers none simply never runs
- * outside the calls its consumers make.
+ * Mirrors Flutter's `FlutterPlugin`: `registerWith` runs once and is handed a registrar instead of
+ * reaching for a global, the same way a native plugin only ever touches the engine through the
+ * registrar it is given. `TRegistrar` is left to whoever binds this to a real host, since alchemy
+ * itself has no registrar of its own to name. `starts` and `detachFromEngine` take no argument,
+ * since neither registers anything a test would need to fake. Each step is optional, and a package
+ * that offers none simply never runs outside the calls its consumers make.
  */
-export interface LifecycleSteps {
-  /** What is wired as soon as the entry is imported, because it needs nothing to be running. */
-  readonly wires?: LifecycleStep;
+export interface ScribePlugin<TRegistrar = unknown> {
+  /** Registers this package's defaults, once, as soon as the host loads its entry. */
+  readonly registerWith?: (registrar: TRegistrar) => void | Future<void>;
 
   /** What runs once the process can reach the database, after boot. */
   readonly starts?: LifecycleStep;
 
   /** What runs when the process is asked to stop. */
-  readonly stops?: LifecycleStep;
+  readonly detachFromEngine?: LifecycleStep;
 }
 
 /**
@@ -114,36 +117,36 @@ export interface LifecycleSteps {
  * @remarks
  * The steps sit under a member of their own, and the member is required, so a package that runs at
  * no moment says so with an empty one rather than by exporting nothing. That is what buys the
- * check: an entry whose steps are misspelt shares no property with {@link LifecycleSteps} and is
+ * check: an entry whose steps are misspelt shares no property with {@link ScribePlugin} and is
  * refused where it is written. Reading the three names off the module itself could not do that,
  * because a module exports whatever it likes and `start` instead of `starts` read as one more
  * export of the package's own surface.
  *
  * @example
  * ```ts ignore
- * export const scribe: LifecycleSteps = {
+ * export const scribe: ScribePlugin = {
  *   starts: () => Audiences.use(new RedisAudiences(url)),
  * };
  * ```
  */
-export interface PackageEntry {
+export interface PackageEntry<TRegistrar = unknown> {
   /** When this package runs, and empty when it runs at none of the three moments. */
-  readonly scribe: LifecycleSteps;
+  readonly scribe: ScribePlugin<TRegistrar>;
 }
 
 /** A package the host has on hand, with the steps its entry offered. */
-export interface MountedPackage {
+export interface MountedPackage<TRegistrar = unknown> {
   /** What the manifest declared. */
   readonly manifest: Manifest;
 
-  /** What is wired at import, or null when the entry exports nothing for it. */
-  readonly wires: LifecycleStep | null;
+  /** What registers this package's defaults at import, or null when the entry exports nothing for it. */
+  readonly registerWith: ((registrar: TRegistrar) => void | Future<void>) | null;
 
   /** What runs after boot, or null when the entry exports nothing for it. */
   readonly starts: LifecycleStep | null;
 
   /** What runs at shutdown, or null when the entry exports nothing for it. */
-  readonly stops: LifecycleStep | null;
+  readonly detachFromEngine: LifecycleStep | null;
 }
 
 /**
@@ -154,11 +157,14 @@ export interface MountedPackage {
  * rather than at each call site means a package that exports none and a package that exports all
  * three are handed to the host in the same shape.
  */
-export function mount(manifest: Manifest, entry: PackageEntry): MountedPackage {
+export function mount<TRegistrar = unknown>(
+  manifest: Manifest,
+  entry: PackageEntry<TRegistrar>,
+): MountedPackage<TRegistrar> {
   return {
     manifest,
-    wires: entry.scribe.wires ?? null,
+    registerWith: entry.scribe.registerWith ?? null,
     starts: entry.scribe.starts ?? null,
-    stops: entry.scribe.stops ?? null,
+    detachFromEngine: entry.scribe.detachFromEngine ?? null,
   };
 }

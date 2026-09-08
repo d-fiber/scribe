@@ -36,9 +36,11 @@
 
 import "@scribe/scholium/runner.ts";
 import { equals, expect, isA, isFalse, isTrue, Scribe, throwsA } from "@scribe/alchemy/test";
-import { Constraint, type DependencySource, type LifecycleSteps, mount, Package } from "@scribe/alchemy";
+import { Constraint, type DependencySource, mount, Package, type ScribePlugin } from "@scribe/alchemy";
+import type { PackageRegistrar } from "@scribe/contracts/registrar.ts";
 
 const realtime = Package.named("realtime").version("1.2.0").runsOn("^3.0.0").build();
+const registrar: PackageRegistrar = { addCapability: () => {}, addExtension: () => {} };
 
 Scribe.test("mounting keeps the manifest it was given", () => {
   const mounted = mount(realtime, { scribe: {} });
@@ -50,38 +52,42 @@ Scribe.test("mounting keeps the manifest it was given", () => {
 Scribe.test("a package that runs at no moment is mounted all the same", () => {
   const mounted = mount(realtime, { scribe: {} });
 
-  expect(mounted.wires, equals(null), "a package that wires nothing came back with a step");
+  expect(mounted.registerWith, equals(null), "a package that registers nothing came back with a step");
   expect(mounted.starts, equals(null), "a package that starts nothing came back with a step");
-  expect(mounted.stops, equals(null), "a package that stops nothing came back with a step");
+  expect(mounted.detachFromEngine, equals(null), "a package that detaches nothing came back with a step");
 });
 
 Scribe.test("each moment the entry exports is the one that is handed over", () => {
   const ran: string[] = [];
   const mounted = mount(realtime, {
     scribe: {
-      wires: () => void ran.push("wires"),
+      registerWith: () => void ran.push("registerWith"),
       starts: () => void ran.push("starts"),
-      stops: () => void ran.push("stops"),
+      detachFromEngine: () => void ran.push("detachFromEngine"),
     },
   });
 
-  mounted.wires?.();
+  mounted.registerWith?.(registrar);
   mounted.starts?.();
-  mounted.stops?.();
+  mounted.detachFromEngine?.();
 
-  expect(ran, equals(["wires", "starts", "stops"]), "the moments were not the ones the entry exported");
+  expect(
+    ran,
+    equals(["registerWith", "starts", "detachFromEngine"]),
+    "the moments were not the ones the entry exported",
+  );
 });
 
 Scribe.test("what an entry exports beyond the three moments is left alone", () => {
   const entry = { Channel: class {}, scribe: { starts: () => {} } };
   const mounted = mount(realtime, entry);
 
-  expect(mounted.wires, equals(null), "a surface of its own was taken for a moment");
+  expect(mounted.registerWith, equals(null), "a surface of its own was taken for a moment");
   expect(typeof mounted.starts, equals("function"), "the one moment it did export was dropped");
 });
 
 Scribe.test("a package that runs at no moment says so with an empty set of steps", () => {
-  const none: LifecycleSteps = {};
+  const none: ScribePlugin = {};
 
   expect(mount(realtime, { scribe: none }).starts, equals(null));
 });

@@ -38,7 +38,7 @@ import { cacheSettings } from "@scribe/foundation/cache";
 import { databaseSettings } from "@scribe/foundation/database";
 import { queueSettings } from "@scribe/foundation/queue";
 import { RedisRateLimiters } from "@scribe/foundation/internal/rate_limiter";
-import { runMounted } from "@scribe/runtime/wiring/packages.ts";
+import { wireMounted } from "@scribe/runtime/wiring/packages.ts";
 import {
   deviceSettings,
   firewallSettings,
@@ -233,7 +233,7 @@ workerSettings.use({
 });
 
 /**
- * Runs the `wires` step of every package the project mounted.
+ * Runs the `registerWith` step of every package the project mounted.
  *
  * `@generated/registrations.ts` carries one entry per package, and the CLI writes it from
  * `config.yaml`. That indirection is the whole point: this file used to wire four modules by name,
@@ -249,4 +249,4 @@ workerSettings.use({
  * then dies on the first error path that tries to log, because the logger is one of the ports
  * nothing filled. It reads as a healthy start followed by an unexplained exit.
  */
-await runMounted("wires");
+await wireMounted();

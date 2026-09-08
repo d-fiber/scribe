@@ -47,7 +47,10 @@
  * shipped one gets its own driver.
  */
 
-import type { Future, LifecycleSteps } from "@scribe/alchemy";
+import type { Future } from "@scribe/alchemy";
+import { capabilities, type CapabilityRegistrant } from "@scribe/contracts/capability.ts";
+import type { PackageRegistrar, ScribePlugin } from "@scribe/contracts/registrar.ts";
+import { type DeclarationKind, extensions, OptionalExtension, runDeclarations } from "./extensions/mod.ts";
 import { isMissingModule } from "./extensions/missing_module.ts";
 
 /** One package a project mounted, and the three moments it may run at. */
@@ -55,8 +58,8 @@ export interface MountedPackage {
   /** The name the project wrote in its manifest, used only to say which package a failure came from. */
   readonly name: string;
 
-  /** The lifecycle its entry exports, which may hold none of the three steps. */
-  readonly steps: LifecycleSteps;
+  /** The plugin its entry exports, which may hold none of the three steps. */
+  readonly steps: ScribePlugin;
 }
 
 /** What `@generated/registrations.ts` exports, one entry per package a project mounts. */
@@ -89,17 +92,67 @@ export function mountedPackages(): Future<readonly MountedPackage[]> {
 }
 
 /**
- * Runs one moment of every mounted package, in the order the project named them.
+ * Registers a mounted package's defaults with the capability and extension registries this
+ * process actually owns.
+ *
+ * @remarks
+ * This is the one instance every package's `registerWith` is handed: a package never imports
+ * {@link capabilities} or the extension registry itself, which is what lets a test hand it a fake
+ * registrar instead.
+ */
+class HostPackageRegistrar implements PackageRegistrar {
+  /** The {@link PackageRegistrar.addCapability} implementation: registers `handler` with {@link capabilities}. */
+  addCapability(handler: CapabilityRegistrant): void {
+    capabilities.register(handler);
+  }
+
+  /**
+   * The {@link PackageRegistrar.addExtension} implementation: registers `bucket` under `name`,
+   * unless another package already claimed `name`.
+   */
+  addExtension(name: string, bucket: DeclarationKind): void {
+    if (!extensions.declares(name)) {
+      extensions.register(new OptionalExtension(name, () => runDeclarations(bucket)));
+    }
+  }
+}
+
+const registrar: PackageRegistrar = new HostPackageRegistrar();
+
+/**
+ * Runs `registerWith` on every mounted package, in the order the project named them, handing each
+ * the one registrar this process shares.
  *
  * @remarks
  * A step that throws stops the run and is raised with the package it came from, because a package
- * that could not wire itself has left ports unbound and the process would die later on a path that
- * says nothing about the cause.
+ * that could not register itself has left ports unbound and the process would die later on a path
+ * that says nothing about the cause.
  *
  * They run one after another rather than together: a package may fill a port another one reads at
  * its own moment, and the project's order is what decides who wins.
  */
-export async function runMounted(moment: keyof LifecycleSteps): Future<void> {
+export async function wireMounted(): Future<void> {
+  for (const mounted of await mountedPackages()) {
+    const step = mounted.steps.registerWith;
+    if (!step) continue;
+
+    try {
+      await step(registrar);
+    } catch (raised) {
+      console.error(`[packages] ${mounted.name} threw at registerWith.`, raised);
+      throw raised;
+    }
+  }
+}
+
+/**
+ * Runs one no-argument moment of every mounted package, in the order the project named them.
+ *
+ * @remarks
+ * A step that throws stops the run and is raised with the package it came from, for the same
+ * reason {@link wireMounted} does.
+ */
+export async function runMounted(moment: "starts" | "detachFromEngine"): Future<void> {
   for (const mounted of await mountedPackages()) {
     const step = mounted.steps[moment];
     if (!step) continue;

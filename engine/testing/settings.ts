@@ -50,6 +50,7 @@ import { LocalFileSystems as DenoFileSystems } from "@scribe/scholium/deno/files
 import { environment, optional } from "@scribe/scholium/env.ts";
 import { currentStack } from "@scribe/scholium/host.ts";
 import { pickStack } from "@scribe/scholium/stack.ts";
+import { testRegistrar } from "./registrar.ts";
 
 /**
  * The `Environment`, `FileSystemDriver` and `Command` this process's own stack provides.
@@ -98,7 +99,7 @@ export function installTestSettings(): void {
   FileSystems.use(localFileSystems);
   Commands.use(localCommands);
 
-  scribe.wires?.();
+  scribe.registerWith?.(testRegistrar);
 
   cacheSettings.use({ redisUrl: optional("REDIS_URL", "redis://localhost:6379") });
   queueSettings.use({ natsUrl: optional("NATS_URL", "nats://localhost:4222") });

@@ -109,10 +109,10 @@ export { mount } from "./package/manifest.ts";
 export type {
   DependencySource,
   LifecycleStep,
-  LifecycleSteps,
   Manifest,
   MountedPackage,
   PackageEntry,
+  ScribePlugin,
 } from "./package/manifest.ts";
 
 export { isValidPackageName, packageNameProblem, RESERVED_PACKAGE_NAMES } from "./package/name.ts";

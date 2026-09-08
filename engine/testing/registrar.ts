@@ -34,33 +34,16 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import type { Future } from "@scribe/alchemy";
-import { runMounted } from "@scribe/runtime/wiring/packages.ts";
-import type { Bootstrapper } from "../../../common/bootstrapper.ts";
+import type { PackageRegistrar } from "@scribe/contracts/registrar.ts";
 
 /**
- * Runs the packages a project mounted, at the two moments a long-lived process has.
+ * A {@link PackageRegistrar} that answers every call and keeps none of them.
  *
  * @remarks
- * It is listed by the runtimes that keep running, and by no others. `starts` is where a package
- * puts the work that outlives a request, a cron loop or a queue consumer, and a process that only
- * dispatches has no business holding either.
- *
- * The engine used to name each of those loops itself, one bootstrapper per subsystem of one
- * package, so mounting a package was not enough to bring what it needs and unmounting one left a
- * dangling import. Here the engine decides when, and never what.
+ * For a test that calls a package's `registerWith` only to reach the slots it fills, and has no
+ * interest in the capability or extension it also registers along the way.
  */
-export class MountedPackagesBootstrapper implements Bootstrapper {
-  /** This bootstrapper's label in `BootSequence` logging: `packages`. */
-  readonly name = "packages";
-
-  /** Runs every mounted package's `starts` step. */
-  boot(): Future<void> {
-    return runMounted("starts");
-  }
-
-  /** Runs every mounted package's `detachFromEngine` step. */
-  shutdown(): Future<void> {
-    return runMounted("detachFromEngine");
-  }
-}
+export const testRegistrar: PackageRegistrar = {
+  addCapability: () => {},
+  addExtension: () => {},
+};
