@@ -34,16 +34,8 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-export const PROTOCOL_VERSION = "1.0.0";
+export { majorOf, PROTOCOL_VERSION, speaksSameContract } from "@scribe/protocol/version.ts";
 
 export const SDK_VERSION = "1.0.0";
 
 export const WORKER_LANGUAGE = "js";
-
-export function majorOf(version: string): string {
-  return version.split(".")[0] ?? "";
-}
-
-export function speaksSameContract(hostProtocolVersion: string): boolean {
-  return majorOf(hostProtocolVersion) === majorOf(PROTOCOL_VERSION);
-}

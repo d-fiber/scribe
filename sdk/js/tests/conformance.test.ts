@@ -44,7 +44,7 @@ import { QueueDispatch } from "../gen/scribe/packages/foundation/protocol/queue_
 import { HookDispatch } from "../gen/scribe/packages/foundation/protocol/hook_pb.ts";
 import { CronDispatch } from "../gen/scribe/packages/foundation/protocol/cron_pb.ts";
 import { LogDispatch } from "../gen/scribe/protocol/logs_pb.ts";
-import { procedurePath } from "../src/transport/wire.ts";
+import { procedurePath } from "@scribe/protocol/transport/wire.ts";
 
 const sdkRoot = new URL("../", import.meta.url);
 

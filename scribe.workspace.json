@@ -6,19 +6,19 @@
   ],
   "targets": {
     "check": {
-      "dirs": ["engine", "packages"]
+      "dirs": ["engine", "packages", "protocol"]
     },
     "check:examples": {
-      "dirs": ["engine", "alchemy", "packages"],
+      "dirs": ["engine", "alchemy", "packages", "protocol"],
       "docsOnly": true
     },
     "test": {
-      "dirs": ["engine", "packages", "tests"],
+      "dirs": ["engine", "packages", "protocol", "tests"],
       "envFile": "tests/.env.test",
       "network": "loopback"
     },
     "test:net": {
-      "dirs": ["engine", "packages", "tests"],
+      "dirs": ["engine", "packages", "protocol", "tests"],
       "envFile": "tests/.env.test",
       "network": "full"
     },
@@ -34,6 +34,7 @@
     "lineWidth": 120,
     "exclude": [
       "sdk/js/gen",
+      "protocol/gen",
       "packages/*/deploy/services",
       "packages/*/deploy/recipes",
       "packages/*/tests/e2e",
@@ -43,6 +44,7 @@
   "lint": {
     "exclude": [
       "sdk/js/gen",
+      "protocol/gen",
       "sdk/js/example"
     ]
   },
@@ -63,6 +65,7 @@
     "@scribe/contracts/enums.ts": "./engine/contracts/enums.ts",
     "@scribe/contracts/extensions.ts": "./engine/contracts/extensions.ts",
     "@scribe/contracts/rate_limit.ts": "./engine/contracts/rate_limit.ts",
+    "@scribe/contracts/registrar.ts": "./engine/contracts/registrar.ts",
     "@scribe/dynamic_links/": "./packages/dynamic_links/",
     "@scribe/dynamic_links/testing/settings": "./packages/dynamic_links/tests/testing/settings.ts",
     "@scribe/foundation": "./packages/foundation/lib/foundation.ts",
@@ -101,6 +104,7 @@
     "@scribe/storage/": "./packages/storage/",
     "@scribe/storage/testing/settings": "./packages/storage/tests/testing/settings.ts",
     "@scribe/testing/install.ts": "./engine/testing/install.ts",
+    "@scribe/testing/registrar.ts": "./engine/testing/registrar.ts",
     "@scribe/testing/runtime/device.ts": "./engine/testing/runtime/device.ts",
     "@scribe/testing/settings.ts": "./engine/testing/settings.ts",
 

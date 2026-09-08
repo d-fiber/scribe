@@ -44,8 +44,8 @@ import { host } from "../capabilities/channel.ts";
 import { describeWorker } from "../manifest/encode.ts";
 import type { WorkerDefinition } from "../manifest/worker.ts";
 import { PROTOCOL_VERSION, speaksSameContract } from "../protocol/version.ts";
-import { TransportFailure } from "../transport/failure.ts";
-import { UnaryServer } from "../transport/server.ts";
+import { TransportFailure } from "@scribe/protocol/transport/failure.ts";
+import { UnaryServer } from "@scribe/protocol/transport/server.ts";
 import { deliverLogs, handleBatch, handleEvent, invoke, triggerCron } from "./dispatch.ts";
 import { CallScope } from "./scope.ts";
 

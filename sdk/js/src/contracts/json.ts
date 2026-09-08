@@ -34,18 +34,4 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { create } from "@bufbuild/protobuf";
-import { type Json, JsonSchema } from "../../gen/scribe/protocol/common_pb.ts";
-
-const encoder = new TextEncoder();
-
-const decoder = new TextDecoder();
-
-export function encodeJson(value: unknown): Json {
-  return create(JsonSchema, { value: encoder.encode(JSON.stringify(value ?? null)) });
-}
-
-export function decodeJson<T = unknown>(json: Json | undefined): T | null {
-  if (!json || json.value.length === 0) return null;
-  return JSON.parse(decoder.decode(json.value)) as T;
-}
+export { decodeJson, encodeJson } from "@scribe/protocol/transport/json.ts";

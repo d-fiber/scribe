@@ -57,7 +57,7 @@ import { decodeJson, encodeJson } from "../contracts/json.ts";
 import { loggedEntry } from "../observability/log_sink.ts";
 import type { QueueMessage } from "../manifest/events.ts";
 import type { WorkerDefinition } from "../manifest/worker.ts";
-import { describeCause } from "../transport/failure.ts";
+import { describeCause } from "@scribe/protocol/transport/failure.ts";
 import { RequestContext } from "./context.ts";
 import { CallScope } from "./scope.ts";
 

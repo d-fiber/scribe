@@ -35,8 +35,8 @@
 // LICENSE file, the LICENSE file governs.
 
 import { CallScope } from "../runtime/scope.ts";
-import { UnaryClient } from "../transport/client.ts";
-import { TransportFailure } from "../transport/failure.ts";
+import { UnaryClient } from "@scribe/protocol/transport/client.ts";
+import { TransportFailure } from "@scribe/protocol/transport/failure.ts";
 
 /**
  * The address the last handshake announced, or null when none has happened.

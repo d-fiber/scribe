@@ -115,6 +115,12 @@ protoc -I "$STAGE" --descriptor_set_out=/dev/null "${SOURCES[@]}" \
   || fail "protoc rejected the contract."
 say "${#SOURCES[@]} .proto validated."
 
+generate host protoc-gen-es \
+  "npm install --prefix sdk/js @bufbuild/protobuf @bufbuild/protoc-gen-es" \
+  protocol/gen \
+  "--es_out=$ROOT/protocol/gen" \
+  "--es_opt=target=ts,import_extension=.ts,json_types=true"
+
 generate js protoc-gen-es \
   "npm install --prefix sdk/js @bufbuild/protobuf @bufbuild/protoc-gen-es" \
   sdk/js/gen \

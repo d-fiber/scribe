@@ -84,11 +84,12 @@ const ROOT = new URL("../", import.meta.url).pathname.replace(/\/$/, "");
 /**
  * Directories this run never walks into.
  *
- * `sdk/js/gen` and `sdk/js/example` are generated code and an example, the same two `deno lint`
- * itself leaves alone. `.git` holds no source. Anything else under the root is in scope, `.lint/`
- * included, even though none of the five rules today have anything to say about a file there.
+ * `sdk/js/gen` and `protocol/gen` are both generated code, the same two `deno lint` itself leaves
+ * alone; `sdk/js/example` is an example. `.git` holds no source. Anything else under the root is
+ * in scope, `.lint/` included, even though none of the five rules today have anything to say about
+ * a file there.
  */
-const EXCLUDED_DIRECTORIES = [".git", "sdk/js/gen", "sdk/js/example"];
+const EXCLUDED_DIRECTORIES = [".git", "sdk/js/gen", "protocol/gen", "sdk/js/example"];
 
 /**
  * A directory name that carries no source of ours wherever it appears, unlike

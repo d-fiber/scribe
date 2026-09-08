@@ -35,7 +35,7 @@
 // LICENSE file, the LICENSE file governs.
 
 import { AsyncLocalStorage } from "node:async_hooks";
-import type { CallCredentials } from "../transport/client.ts";
+import type { CallCredentials } from "@scribe/protocol/transport/client.ts";
 
 /** What identifies the invocation currently in scope, carried through every capability call it makes. */
 export interface CallScopeState {

@@ -41,16 +41,26 @@
  * Nothing here is reached by a worker's own code: `ScribeServer`/`serveWorker` build a
  * {@link UnaryServer} internally, and no example or fixture worker under this repository's
  * `packages/*\/tests/e2e/` ever names one of these exports itself. `engine/embedder/` and the
- * `capability.ts`/`wire.ts` files a package answers a worker's calls from both read this module
- * instead of `mod.ts`, so that the surface documented as "a worker's only import" stays exactly
- * that, and a host-only symbol never shows up in a worker author's autocomplete.
+ * `capability.ts`/`wire.ts` files a package answers a worker's calls from both read
+ * `@scribe/protocol/transport.ts` directly, never this module: the SDK is not the one place a host
+ * and a worker agree on the wire, `protocol/` is, and this file only re-exports it so a worker
+ * author who imports from here by habit still finds the same names. `SDK_VERSION` and
+ * `WORKER_LANGUAGE` are the two names `@scribe/protocol/transport.ts` does not carry, since they
+ * answer "which SDK, which language" rather than "which wire contract" — a question `sdk/dart`
+ * answers on its own terms, not this file's.
  */
-export { majorOf, PROTOCOL_VERSION, SDK_VERSION, speaksSameContract, WORKER_LANGUAGE } from "./src/protocol/version.ts";
+export {
+  decodeJson,
+  encodeJson,
+  failureResponse,
+  majorOf,
+  metadataOf,
+  PROTOCOL_VERSION,
+  speaksSameContract,
+  TransportFailure,
+  UnaryClient,
+  UnaryServer,
+} from "@scribe/protocol/transport.ts";
+export type { CallCredentials, CallMetadata, Fetcher } from "@scribe/protocol/transport.ts";
 
-export { UnaryClient } from "./src/transport/client.ts";
-export type { CallCredentials, Fetcher } from "./src/transport/client.ts";
-export { TransportFailure } from "./src/transport/failure.ts";
-export { failureResponse, metadataOf, UnaryServer } from "./src/transport/server.ts";
-export type { CallMetadata } from "./src/transport/server.ts";
-
-export { decodeJson, encodeJson } from "./src/contracts/json.ts";
+export { SDK_VERSION, WORKER_LANGUAGE } from "./src/protocol/version.ts";
