@@ -73,7 +73,7 @@ export type CapabilityRegistrant = (wiring: CapabilityWiring) => void;
  * The packages that answer a worker, each adding itself and all of them read at boot.
  *
  * @remarks
- * A package registers inside its own `wires`, so the order is the one the project's manifest
+ * A package registers inside its own `registerWith`, so the order is the one the project's manifest
  * names. A host with nothing mounted has an empty registry, which is the honest answer rather than
  * a refusal: the framework has to boot with no project on the other side.
  */

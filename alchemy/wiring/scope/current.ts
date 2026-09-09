@@ -74,7 +74,7 @@ export interface CurrentDriver {
  * @remarks
  * Carrying a value along an asynchronous call tree cannot be done without the platform: it takes
  * something like an async context, and nothing here reaches the platform. So the shape is here and
- * the mechanism is filled from outside, exactly as a cache or a client is.
+ * the mechanism is filled from outside, exactly as a Valkery or a client is.
  */
 export const Currents: Slot<CurrentDriver> = new Slot<CurrentDriver>("Currents");
 
