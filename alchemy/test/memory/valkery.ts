@@ -36,11 +36,11 @@
 
 import type { Future } from "../../primitives/async/future.ts";
 import type { List, UnmodifiableList } from "../../primitives/value/list.ts";
-import type { Cache, CacheDriver, CacheOptions } from "../../port/cache.ts";
+import type { ValkeryDriver, ValkeryOptions, ValkeryPort } from "../../port/valkery.ts";
 import { Now } from "../../primitives/value/date_time.ts";
 import { openKeyed } from "./opener.ts";
 
-/** One entry of a {@link MemoryCache}, with when it stops counting. */
+/** One entry of a {@link MemoryValkery}, with when it stops counting. */
 interface Held<T> {
   /** What was put in. */
   readonly value: T;
@@ -50,7 +50,7 @@ interface Held<T> {
 }
 
 /**
- * A cache that keeps what it is given in a map, for a test to run a package against.
+ * A Valkery that keeps what it is given in a map, for a test to run a package against.
  *
  * @remarks
  * It honours the two things the port promises and a hand-written double usually does not. Time-to
@@ -59,59 +59,59 @@ interface Held<T> {
  * several callers ask at the same time, which is the only reason that member exists: a fake that
  * ran it once per caller let a package ship a stampede its suite said could not happen.
  */
-export class MemoryCache<T> implements Cache<T> {
+export class MemoryValkery<T> implements ValkeryPort<T> {
   /** What is held, by identifier. */
   readonly #held = new Map<string, Held<T>>();
 
   /** A computation already running for an identifier, so a second caller waits on the first. */
   readonly #computing = new Map<string, Future<T>>();
 
-  /** The prefix and the lifetime this cache was opened with. */
-  readonly #options: CacheOptions;
+  /** The prefix and the lifetime this Valkery was opened with. */
+  readonly #options: ValkeryOptions;
 
   /** How many times a computation handed to {@link upsert} has actually been run. */
   computed = 0;
 
-  constructor(options: CacheOptions) {
+  constructor(options: ValkeryOptions) {
     this.#options = options;
   }
 
-  /** The {@link Cache.get} implementation: reads `id`, forgetting it first if its lifetime has run out. */
+  /** The {@link ValkeryPort.get} implementation: reads `id`, forgetting it first if its lifetime has run out. */
   get(id: string): Future<T | null> {
     return Promise.resolve(this.#read(id));
   }
 
-  /** The {@link Cache.getMany} implementation: `get` applied to each of `ids`, in order. */
+  /** The {@link ValkeryPort.getMany} implementation: `get` applied to each of `ids`, in order. */
   getMany(ids: UnmodifiableList<string>): Future<(T | null)[]> {
     return Promise.resolve(ids.map((id) => this.#read(id)));
   }
 
-  /** The {@link Cache.add} implementation: stores `value` under `id`, timed by this cache's own `ttl`. */
+  /** The {@link ValkeryPort.add} implementation: stores `value` under `id`, timed by this Valkery's own `ttl`. */
   add(id: string, value: T): Future<void> {
     this.#held.set(id, { value, until: this.#expiry() });
     return Promise.resolve();
   }
 
-  /** The {@link Cache.addMany} implementation: `add` applied to each of `entries`. */
+  /** The {@link ValkeryPort.addMany} implementation: `add` applied to each of `entries`. */
   addMany(entries: readonly [string, T][]): Future<void> {
     for (const [id, value] of entries) this.#held.set(id, { value, until: this.#expiry() });
     return Promise.resolve();
   }
 
-  /** The {@link Cache.delete} implementation: forgets `id`, whether or not it was held. */
+  /** The {@link ValkeryPort.delete} implementation: forgets `id`, whether or not it was held. */
   delete(id: string): Future<void> {
     this.#held.delete(id);
     return Promise.resolve();
   }
 
-  /** The {@link Cache.deleteMany} implementation: `delete` applied to each of `ids`. */
+  /** The {@link ValkeryPort.deleteMany} implementation: `delete` applied to each of `ids`. */
   deleteMany(...ids: List<string>): Future<void> {
     for (const id of ids) this.#held.delete(id);
     return Promise.resolve();
   }
 
   /**
-   * The {@link Cache.upsert} implementation: answers the held value when there is one, otherwise
+   * The {@link ValkeryPort.upsert} implementation: answers the held value when there is one, otherwise
    * joins an already-running computation for `id` or starts one, so `compute` never runs twice for
    * callers that ask at the same time.
    */
@@ -136,7 +136,7 @@ export class MemoryCache<T> implements Cache<T> {
   }
 
   /**
-   * The {@link Cache.clear} implementation: empties the whole cache when `pattern` is left out,
+   * The {@link ValkeryPort.clear} implementation: empties what this Valkery holds when `pattern` is left out,
    * otherwise forgets only the identifiers `matcherFor(pattern)` accepts.
    */
   clear(pattern?: string): Future<void> {
@@ -169,7 +169,7 @@ export class MemoryCache<T> implements Cache<T> {
     return held.value;
   }
 
-  /** When an entry written now stops counting, or null when this cache holds until deleted. */
+  /** When an entry written now stops counting, or null when this Valkery holds until deleted. */
   #expiry(): number | null {
     const ttl = this.#options.ttl;
     return ttl === undefined ? null : Now.get().millisecondsSinceEpoch() + ttl.inMilliseconds;
@@ -177,26 +177,26 @@ export class MemoryCache<T> implements Cache<T> {
 }
 
 /**
- * A driver that opens a {@link MemoryCache} per key, for a test to fill {@link Caches} with.
+ * A driver that opens a {@link MemoryValkery} per key, for a test to fill {@link Valkeries} with.
  *
  * @remarks
- * Opening the same key twice answers the same cache, which is what the port promises and what lets
+ * Opening the same key twice answers the same Valkery, which is what the port promises and what lets
  * a case check that two declarations of one key share what they hold.
  */
-export class MemoryCaches implements CacheDriver {
-  /** Every cache opened so far, by the key it was opened under. */
-  readonly opened: Map<string, MemoryCache<never>> = new Map<string, MemoryCache<never>>();
+export class MemoryValkeries implements ValkeryDriver {
+  /** Every Valkery opened so far, by the key it was opened under. */
+  readonly opened: Map<string, MemoryValkery<never>> = new Map<string, MemoryValkery<never>>();
 
   /**
-   * The {@link CacheDriver.open} implementation: opens a {@link MemoryCache} for `options.key`,
+   * The {@link ValkeryDriver.open} implementation: opens a {@link MemoryValkery} for `options.key`,
    * or hands back the one already opened under that key.
    */
-  open<T>(options: CacheOptions): Cache<T> {
+  open<T>(options: ValkeryOptions): ValkeryPort<T> {
     return openKeyed(
       this.opened,
       options.key,
-      () => new MemoryCache<T>(options) as unknown as MemoryCache<never>,
-    ) as unknown as Cache<T>;
+      () => new MemoryValkery<T>(options) as unknown as MemoryValkery<never>,
+    ) as unknown as ValkeryPort<T>;
   }
 }
 

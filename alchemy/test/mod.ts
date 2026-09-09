@@ -95,7 +95,7 @@ export { MemoryFileSystem, MemoryFileSystemDriver, MissingFileError } from "./me
 export { MemoryEnvironment } from "./memory/env.ts";
 export { MemoryCommands } from "./memory/commands.ts";
 export type { CommandAnswer, RanCommand } from "./memory/commands.ts";
-export { MemoryCache, MemoryCaches } from "./memory/cache.ts";
+export { MemoryValkeries, MemoryValkery } from "./memory/valkery.ts";
 export { MemoryQueue, MemoryQueues } from "./memory/queue.ts";
 export { MemoryHook, MemoryHooks } from "./memory/hook.ts";
 export { MemoryCrons } from "./memory/cron.ts";
@@ -104,6 +104,6 @@ export { MemoryRateLimiter, MemoryRateLimiters } from "./memory/rate_limit.ts";
 export { MemoryClient } from "./memory/http.ts";
 export type { MemoryAnswer } from "./memory/http.ts";
 
-export { checkCacheDriver } from "./conformity.ts";
+export { checkValkeryDriver } from "./conformity.ts";
 export { FixedNow } from "./memory/now.ts";
 export { SequentialUuids } from "./memory/uuids.ts";

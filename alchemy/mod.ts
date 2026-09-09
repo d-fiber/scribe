@@ -164,8 +164,8 @@ export type {
   TriggerPort,
 } from "./port/trigger.ts";
 
-export { cache, Caches, DEFAULT_CACHE_DEADLINE } from "./port/cache.ts";
-export type { Cache, CacheDriver, CacheOptions } from "./port/cache.ts";
+export { DEFAULT_VALKERY_DEADLINE, Valkeries, valkery } from "./port/valkery.ts";
+export type { ValkeryDriver, ValkeryOptions, ValkeryPort } from "./port/valkery.ts";
 export { claimOnce, Claims } from "./port/claim.ts";
 export type { ClaimOptions, ClaimPort, WhenUnavailable } from "./port/claim.ts";
 export { rateLimit, RateLimiters } from "./port/rate_limit.ts";

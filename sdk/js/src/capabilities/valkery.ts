@@ -42,14 +42,14 @@ import type { Time } from "../contracts/time.ts";
 import { host } from "./channel.ts";
 import { raiseOn } from "./error.ts";
 
-const CAPABILITY = "cache";
+const CAPABILITY = "valkery";
 
 function keyOf(namespace: string, key: string) {
   return create(CacheKeySchema, { namespace, key });
 }
 
-/** The store the host keeps for the whole project, reached over the worker channel. */
-export interface CacheCapability {
+/** The Valkery store the host keeps for the whole project, reached over the worker channel. */
+export interface ValkeryCapability {
   /**
    * The value held under `key` in `namespace`, or null when the store holds none.
    *
@@ -79,7 +79,7 @@ export interface CacheCapability {
   delete(namespace: string, key: string, prefix?: boolean): Promise<number>;
 }
 
-export const cache: CacheCapability = {
+export const valkery: ValkeryCapability = {
   async get<T>(namespace: string, key: string): Promise<T | null> {
     const result = await host.client().call(Cache.method.get, { key: keyOf(namespace, key) });
     raiseOn(CAPABILITY, result.error);

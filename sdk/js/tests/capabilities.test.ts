@@ -37,7 +37,7 @@
 import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals, assertRejects } from "@std/assert";
-import { cache, CallScope, CapabilityError, database, host } from "../mod.ts";
+import { CallScope, CapabilityError, database, host, valkery } from "../mod.ts";
 import { UnaryServer } from "../transport.ts";
 import {
   Database,
@@ -74,7 +74,7 @@ async function withHost(
     })
     .on(Cache.method.get, () => ({ hit: true, value: encodeJson({ cached: true }) }))
     .on(Cache.method.set, () => ({
-      error: { code: "cache_failed", message: "redis is down" },
+      error: { code: "valkery_failed", message: "redis is down" },
     }));
 
   const listener = Deno.serve({ port: 0, onListen: () => {} }, (request) => server.handle(request));
@@ -150,13 +150,13 @@ Scribe.test("a failing capability raises instead of returning a silent null", as
   const capture: Capture = { query: null, token: "", trace: "" };
 
   await withHost(capture, [], async () => {
-    assertEquals(await cache.get<{ cached: boolean }>("brands", "list"), { cached: true });
+    assertEquals(await valkery.get<{ cached: boolean }>("brands", "list"), { cached: true });
 
     const error = await assertRejects(
-      () => cache.set("brands", "list", { cached: true }),
+      () => valkery.set("brands", "list", { cached: true }),
       CapabilityError,
     );
-    assertEquals(error.code, "cache_failed");
+    assertEquals(error.code, "valkery_failed");
   });
 });
 
