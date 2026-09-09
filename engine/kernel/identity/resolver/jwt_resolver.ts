@@ -37,7 +37,7 @@
 import { Duration, valkery } from "@scribe/alchemy";
 import type { Future, ValkeryPort } from "@scribe/alchemy";
 import { JwtVerifier } from "@scribe/kernel/identity/resolver/jwt_verifier.ts";
-import { IDENTITY_CACHE_KEY, IdentityRevocation } from "@scribe/foundation/redis";
+import { IDENTITY_CACHE_KEY, IdentityRevocation } from "@scribe/foundation";
 import { TtlLru } from "@scribe/runtime/primitives/ttl_lru.ts";
 import { sha256Hex } from "@scribe/runtime/primitives/crypto/hash.ts";
 import { identitySettings } from "@scribe/runtime/settings.ts";

@@ -34,10 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { cacheSettings } from "@scribe/foundation/cache";
-import { databaseSettings } from "@scribe/foundation/database";
-import { scribe } from "@scribe/foundation";
-import { queueSettings } from "@scribe/foundation/queue";
+import { databaseSettings, queueSettings, scribe, valkerySettings } from "@scribe/foundation";
 import { deviceSettings, firewallSettings, httpSettings, identitySettings } from "@scribe/runtime/settings.ts";
 import type { CommandPort, EnvironmentPort, FileSystemDriver } from "@scribe/alchemy";
 import { Commands, Environments, FileSystems } from "@scribe/alchemy";
@@ -85,14 +82,14 @@ function corePorts(): { environment: EnvironmentPort; fileSystems: FileSystemDri
  * and does nothing on a second call.
  *
  * @remarks
- * The guard is `cacheSettings.configured`: once one slot is filled, all of them are, so a suite
+ * The guard is `valkerySettings.configured`: once one slot is filled, all of them are, so a suite
  * that wired its own settings before importing this module is left alone rather than overwritten.
  * This runs at import, the last line of the file calling it directly, because a slot refuses to
  * be read before something calls `.use()` on it and a test cannot be trusted to call this itself
  * before touching a setting.
  */
 export function installTestSettings(): void {
-  if (cacheSettings.configured) return;
+  if (valkerySettings.configured) return;
 
   const { environment: localEnvironment, fileSystems: localFileSystems, commands: localCommands } = corePorts();
   Environments.use(localEnvironment);
@@ -101,8 +98,8 @@ export function installTestSettings(): void {
 
   scribe.registerWith?.(testRegistrar);
 
-  cacheSettings.use({ redisUrl: optional("REDIS_URL", "redis://localhost:6379") });
-  queueSettings.use({ natsUrl: optional("NATS_URL", "nats://localhost:4222") });
+  valkerySettings.use({ redisUrl: optional("REDIS_URL", "redis://localhost:6379") });
+  queueSettings.use({ driver: "nats", natsUrl: optional("NATS_URL", "nats://localhost:4222") });
   databaseSettings.use({
     restUrl: optional("REST_INTERNAL_URL", "http://localhost:3000"),
     anonKey: optional("ANON_KEY", "anon"),

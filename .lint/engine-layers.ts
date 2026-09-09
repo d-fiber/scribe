@@ -65,9 +65,9 @@ function layerOf(filename: string): string | null {
  * specifier: an entry ending in `/` matches by prefix, and any other entry matches only whole.
  *
  * @remarks
- * `@scribe/foundation` and `@scribe/foundation/cache` are two different entries in the map this
+ * `@scribe/foundation` and `@scribe/foundation/testing` are two different entries in the map this
  * rule reads, not one general `@scribe/foundation/` prefix, because the framework's own `imports`
- * never declared that general form either: a layer that may read `foundation/cache` was never
+ * never declared that general form either: a layer that may read `foundation/testing` was never
  * handed the rest of the package by the same line. Matching on prefix alone here would grant more
  * than the `deno.json` this rule replaced ever did.
  */

@@ -34,9 +34,7 @@
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
 
-import { cacheSettings } from "@scribe/foundation/cache";
-import { databaseSettings } from "@scribe/foundation/database";
-import { queueSettings } from "@scribe/foundation/queue";
+import { databaseSettings, queueSettings, valkerySettings } from "@scribe/foundation";
 import { RedisRateLimiters } from "@scribe/foundation/internal/rate_limiter";
 import { wireMounted } from "@scribe/runtime/wiring/packages.ts";
 import {
@@ -139,8 +137,8 @@ function maxInflightBodyBytes(): number {
   return megabytes * 1024 * 1024;
 }
 
-cacheSettings.use({ redisUrl: required("REDIS_URL") });
-queueSettings.use({ natsUrl: required("NATS_URL") });
+valkerySettings.use({ redisUrl: required("REDIS_URL") });
+queueSettings.use({ driver: "nats", natsUrl: required("NATS_URL") });
 databaseSettings.use({
   restUrl: required("REST_INTERNAL_URL"),
   anonKey: required("ANON_KEY"),
