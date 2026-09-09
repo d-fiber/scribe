@@ -38,7 +38,7 @@ import "@scribe/scholium/runner.ts";
 import { Scribe } from "@scribe/alchemy/test";
 import { assertEquals } from "@std/assert";
 import { create } from "@bufbuild/protobuf";
-import { cache, Caller, Get, host, NodeRoot, type RateLimiter, response, ScribeServer, Time } from "../mod.ts";
+import { Caller, Get, host, NodeRoot, type RateLimiter, response, ScribeServer, Time, valkery } from "../mod.ts";
 import { PROTOCOL_VERSION, TransportFailure, UnaryClient, UnaryServer } from "../transport.ts";
 import { Registration } from "../gen/scribe/protocol/manifest_pb.ts";
 import {
@@ -67,7 +67,7 @@ class AppNode extends NodeRoot {
 
 class ReadCached extends Get {
   protected override async run(): Promise<Response> {
-    return response.ok({ data: { value: await cache.get<string>("brands", "42") } });
+    return response.ok({ data: { value: await valkery.get<string>("brands", "42") } });
   }
 }
 
