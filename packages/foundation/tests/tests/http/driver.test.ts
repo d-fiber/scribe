@@ -34,11 +34,12 @@
 // This header is a summary written for convenience. Where it differs from the
 import "@scribe/scholium/runner.ts";
 import { equals, expect, isNot, isTrue, same, Scribe } from "@scribe/alchemy/test";
-import { Caches, Crons, Databases, Hooks, Now, Queues, RateLimiters, Triggers } from "@scribe/alchemy";
+import { Crons, Databases, Hooks, Now, Queues, RateLimiters, Triggers, Valkeries } from "@scribe/alchemy";
 import { Clients } from "@scribe/alchemy/http";
 import { Loggers } from "@scribe/alchemy/observe";
 import { FetchClient, FetchClients } from "../../../lib/src/http/fetch_client.ts";
 import { scribe } from "@scribe/foundation";
+import { testRegistrar } from "@scribe/testing/registrar.ts";
 Scribe.test("the driver opens a client that goes on the network", () => {
   const client = new FetchClients().open();
 
@@ -60,20 +61,20 @@ Scribe.test("each call opens its own client, since a caller closes what it was g
 Scribe.test("wiring the package fills the slot an outbound call goes through", () => {
   Clients.clear();
 
-  scribe.wires?.();
+  scribe.registerWith?.(testRegistrar);
 
   expect(Clients.get().open() instanceof FetchClient, isTrue, "http.get has nothing to send through until this runs");
   Clients.clear();
 });
 
 Scribe.test("wiring the package answers every slot its drivers are for", () => {
-  const every = [Clients, Loggers, Now, Caches, RateLimiters, Queues, Hooks, Crons, Triggers, Databases];
+  const every = [Clients, Loggers, Now, Valkeries, RateLimiters, Queues, Hooks, Crons, Triggers, Databases];
   for (const slot of every) slot.clear();
 
-  scribe.wires?.();
+  scribe.registerWith?.(testRegistrar);
 
   expect(every.map((slot) => slot.configured), equals(every.map(() => true)));
-  expect(Caches.get().open({ key: "probe" }).constructor.name, equals("RedisCache"));
+  expect(Valkeries.get().open({ key: "probe" }).constructor.name, equals("Valkery"));
 });
 
 Scribe.test("wiring the package leaves standing whatever the host already put there", () => {
@@ -82,15 +83,15 @@ Scribe.test("wiring the package leaves standing whatever the host already put th
       return 42;
     }
   }
-  const every = [Clients, Loggers, Now, Caches, RateLimiters, Queues, Hooks, Crons, Triggers, Databases];
+  const every = [Clients, Loggers, Now, Valkeries, RateLimiters, Queues, Hooks, Crons, Triggers, Databases];
   for (const slot of every) slot.clear();
   Now.use(new HostClock());
 
-  scribe.wires?.();
+  scribe.registerWith?.(testRegistrar);
 
   expect(Now.get().constructor.name, equals("HostClock"));
   expect(Now.get().millisecondsSinceEpoch(), equals(42));
-  expect(Caches.configured, equals(true), "a slot nobody filled is still filled");
+  expect(Valkeries.configured, equals(true), "a slot nobody filled is still filled");
 
   for (const slot of every) slot.clear();
 });

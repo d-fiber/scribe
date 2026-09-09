@@ -35,7 +35,7 @@
 -- LICENSE file, the LICENSE file governs.
 
 create table if not exists foundation.__inits__ (
-  name text primary key,
+  name   text primary key,
   ran_at timestamptz not null default now()
 );
 
@@ -45,5 +45,9 @@ revoke all on foundation.__inits__ from anon, authenticated;
 
 grant select, insert on foundation.__inits__ to service_role;
 
+drop policy if exists "service_role reads and tracks init jobs" on foundation.__inits__;
 create policy "service_role reads and tracks init jobs" on foundation.__inits__
-  for all to service_role using (true) with check (true);
+  for all
+  to service_role
+  using (true)
+  with check (true);

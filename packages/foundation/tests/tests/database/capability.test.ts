@@ -40,9 +40,9 @@ import "@scribe/testing/settings.ts";
 
 import { create } from "@bufbuild/protobuf";
 import { installMock } from "@scribe/testing/install.ts";
-import { PostgrestClients } from "@scribe/foundation/database";
+import { PostgrestClients } from "@scribe/foundation";
 import { FakePostgrestClient } from "@scribe/foundation/testing";
-import { Operation, QuerySchema } from "@scribe/protocol/gen/scribe/packages/foundation/protocol/database_pb.ts";
+import { Operation, QuerySchema } from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
 import { executeQuery } from "../../../lib/src/database/capability.ts";
 
 const UNOWNED = "t_email_templates";

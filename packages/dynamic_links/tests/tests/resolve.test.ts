@@ -35,11 +35,11 @@
 // LICENSE file, the LICENSE file governs.
 
 import "@scribe/scholium/runner.ts";
+import { DateTime, Future } from "@scribe/alchemy";
 import { equals, expect, fail, isFalse, isTrue, Scribe } from "@scribe/alchemy/test";
 import { LinkError, LinkOutcome, LinkPlatform } from "../../lib/contracts/link.ts";
 import { DynamicLink } from "../../lib/src/core/declaration.ts";
 import { DestinationKind, type Visit } from "../../lib/src/core/destination.ts";
-import { onLinkPreview } from "../../lib/src/core/preview.ts";
 import { dynamicLinkStatisticsQueue, type RecordedVisit } from "../../lib/src/db/statistics.ts";
 import { resolveLink } from "../../lib/src/runtime/resolve.ts";
 import { installDynamicLinksMock } from "../testing/mock.ts";
@@ -51,6 +51,11 @@ interface Party {
 }
 
 const party = DynamicLink.deeplink<Party>("resolve-party", { path: "/party/{partyId}" });
+
+DynamicLink.deeplink<Party>("resolve-party-preview", {
+  path: "/party/{partyId}",
+  preview: (data, locale) => ({ title: `${locale}:${data.partyId}` }),
+});
 
 const VISIT: Visit = {
   platform: LinkPlatform.IOS,
@@ -148,7 +153,7 @@ Scribe.test("a slug nobody created is cached as absent", async () => {
 
 Scribe.test("a link past its expiry answers expired rather than not found", async () => {
   const database = installDynamicLinksMock({
-    __dynamic_links__: [row({ slug: "expiredslu", expires_at: Date.now() - 1 })],
+    __dynamic_links__: [row({ slug: "expiredslu", expires_at: DateTime.now().millisecondsSinceEpoch - 1 })],
   });
 
   try {
@@ -183,7 +188,7 @@ Scribe.test("recording a visit enqueues it instead of writing it on the request 
     "push",
     ((visit: RecordedVisit) => {
       pushed.push(visit);
-      return Promise.resolve("job-1");
+      return Future.value("job-1");
     }) as typeof dynamicLinkStatisticsQueue.push,
   );
   const database = installDynamicLinksMock({ __dynamic_links__: [row({ slug: "recordslug" })] });
@@ -210,16 +215,54 @@ Scribe.test("recording a visit enqueues it instead of writing it on the request 
 });
 
 Scribe.test("a preview rule answers in the language the visitor announced", async () => {
-  const database = installDynamicLinksMock({ __dynamic_links__: [row()] });
-  onLinkPreview((link, locale) => ({ title: `${locale}:${link.name}:${link.data.partyId}` }));
+  const database = installDynamicLinksMock({
+    __dynamic_links__: [row({ slug: "previewslug", payload: { k: "resolve-party-preview", a: { partyId: "42" } } })],
+  });
 
   try {
-    const resolved = await resolveLink("abcdefghij");
+    const resolved = await resolveLink("previewslug");
     if (!resolved.ok) fail("a seeded slug must resolve");
 
-    expect(resolved.data.preview("fr"), equals({ title: "fr:resolve-party:42" }));
+    expect(resolved.data.preview("fr"), equals({ title: "fr:42" }));
   } finally {
-    onLinkPreview(null);
+    database.restore();
+  }
+});
+
+Scribe.test("recording a visit under the mock alone reaches the statistics table", async () => {
+  const database = installDynamicLinksMock({ __dynamic_links__: [row({ slug: "queueslug" })] });
+
+  try {
+    const resolved = await resolveLink("queueslug");
+    if (!resolved.ok) fail("a seeded slug must resolve");
+
+    await resolved.data.record(LinkOutcome.OpenedApp, { platform: LinkPlatform.IOS });
+
+    expect(
+      database.statistics().length,
+      equals(1),
+      "the mock must stand in for the statistics queue, not only for Postgrest and the cache",
+    );
+  } finally {
+    database.restore();
+  }
+});
+
+Scribe.test("creating a link primes the cache, so its own first resolution never reaches the table", async () => {
+  const database = installDynamicLinksMock();
+
+  try {
+    const created = await party.create({ partyId: "99" });
+    if (!created.ok) fail("creating a link must succeed against a table that accepts the insert");
+
+    database.seed("__dynamic_links__", []);
+    const resolved = await resolveLink(created.data.slug);
+
+    if (!resolved.ok) {
+      fail("the link's first resolution must come from what create() primed, not from a table it never touches again");
+    }
+    expect(resolved.data.data, equals({ partyId: "99" }));
+  } finally {
     database.restore();
   }
 });

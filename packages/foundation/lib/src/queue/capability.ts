@@ -39,9 +39,9 @@ import {
   type PushRequest,
   type PushResult,
   PushResultSchema,
-} from "@scribe/protocol/gen/scribe/packages/foundation/protocol/queue_pb.ts";
+} from "@scribe/sdk/gen/scribe/packages/foundation/protocol/queue_pb.ts";
 import { Duration } from "@scribe/alchemy";
-import { decodeJson } from "@scribe/protocol/transport.ts";
+import { decodeJson } from "@scribe/sdk/transport.ts";
 import { causeMessage } from "../error_message.ts";
 import { QueuePublisher } from "./queue.ts";
 import { queueRegistry } from "./queue_registry.ts";

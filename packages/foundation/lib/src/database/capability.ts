@@ -43,8 +43,8 @@ import {
   type QueryResultBatch,
   QueryResultBatchSchema,
   QueryResultSchema,
-} from "@scribe/protocol/gen/scribe/packages/foundation/protocol/database_pb.ts";
-import { decodeJson, encodeJson } from "@scribe/protocol/transport.ts";
+} from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
+import { decodeJson, encodeJson } from "@scribe/sdk/transport.ts";
 import type { PostgrestClient } from "@supabase/postgrest-js";
 import { causeMessage } from "../error_message.ts";
 import { PostgrestClients } from "./postgrest_clients.ts";

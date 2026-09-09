@@ -33,16 +33,17 @@
 //
 // This header is a summary written for convenience. Where it differs from the
 // LICENSE file, the LICENSE file governs.
+
 import "@scribe/scholium/runner.ts";
 import { equals, expect, isFalse, Scribe } from "@scribe/alchemy/test";
 import { AudienceError } from "../../lib/contracts/audience.ts";
 import { Audience } from "../../lib/src/core/declaration.ts";
 import { audiencesOf } from "../../lib/src/core/member.ts";
 import { installAudienceMock } from "../testing/mock.ts";
-import { PostgrestClients } from "@scribe/foundation/database";
+import { PostgrestClients } from "@scribe/foundation";
 import { type InstalledMock, installMock } from "@scribe/testing/install.ts";
 import type { PostgrestClient } from "@supabase/postgrest-js";
-const editors = Audience.keyed("down-editors");
+const editors = Audience.for("down").namespaced("down-editors");
 
 function installUnreachableDatabase(): InstalledMock {
   const unreachable = {
@@ -75,8 +76,8 @@ Scribe.test("a table that cannot be reached lists nobody", async () => {
   const down = installUnreachableDatabase();
 
   try {
-    expect(await editors.in("p1").members(), equals([]));
-    expect(await audiencesOf("a1"), equals([]));
+    expect(await editors.in("p1").members(), equals({ members: [], cursor: null, truncated: false }));
+    expect(await audiencesOf("a1"), equals({ audiences: [], truncated: false }));
   } finally {
     down.restore();
     audiences.restore();
@@ -89,6 +90,21 @@ Scribe.test("a table that cannot be reached refuses a write instead of throwing"
 
   try {
     const added = await editors.in("p1").add("a1");
+
+    expect(added.ok, isFalse);
+    expect(added.ok ? null : added.error, equals(AudienceError.Backend));
+  } finally {
+    down.restore();
+    audiences.restore();
+  }
+});
+
+Scribe.test("a table that cannot be reached refuses a bulk write instead of throwing", async () => {
+  const audiences = installAudienceMock();
+  const down = installUnreachableDatabase();
+
+  try {
+    const added = await editors.in("p1").addMany(["a1", "a2"]);
 
     expect(added.ok, isFalse);
     expect(added.ok ? null : added.error, equals(AudienceError.Backend));

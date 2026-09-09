@@ -48,9 +48,8 @@
  */
 
 import { wireSearch } from "./src/capability/wire.ts";
-import { capabilities } from "@scribe/contracts/capability.ts";
-import type { LifecycleSteps } from "@scribe/alchemy";
-import { extensions, OptionalExtension, runDeclarations } from "@scribe/runtime/wiring/extensions/mod.ts";
+import type { Future } from "@scribe/alchemy";
+import type { PackageRegistrar, ScribePlugin } from "@scribe/contracts/registrar.ts";
 import { required } from "@scribe/scholium/env.ts";
 import { SEARCH_EXTENSION } from "./src/core/extension.ts";
 import { syncDeclaredIndices } from "./src/db/indices.ts";
@@ -61,6 +60,7 @@ import { Search } from "./src/core/search.ts";
 
 export { Search } from "./src/core/search.ts";
 export type {
+  AutoQueryParams,
   DeclaredSorts,
   DocumentStep,
   IndexOptions,
@@ -69,11 +69,13 @@ export type {
   QueryContext,
   QueryStep,
 } from "./src/core/search.ts";
+export { SearchError } from "./contracts/definition.ts";
+export type { QueryPlan, SearchParams } from "./contracts/definition.ts";
 export { SearchIndex } from "./src/core/search_index.ts";
 export { declaredIndices, indexNamed } from "./src/core/registry.ts";
 export type { AnySearchIndex } from "./src/core/registry.ts";
 export { SEARCH_EXTENSION } from "./src/core/extension.ts";
-export { digest, roundCoord, stableKey, timeBucket } from "./src/core/cache_key.ts";
+export { digest, roundCoord, stableKey, timeBucket } from "./src/core/valkery_key.ts";
 
 export { Field } from "./src/fields/mapping.ts";
 export { DEFAULT_SETTINGS, SORT_NORMALIZER } from "./src/fields/mapping.ts";
@@ -103,32 +105,41 @@ export { drainSearchOutbox, searchDrain } from "./src/sync/drain.ts";
  */
 export const declares = { searchers: Search };
 
-/**
- * When this package runs: the cluster at import, the mappings once the database answers.
- *
- * @remarks
- * The settings are where this package reaches the cluster, read from the process environment, and
- * the transport is what answers a query once they are filled. Neither needs anything running.
- *
- * The extension is where the project's own declarations are loaded from, on the first drain that
- * needs them. A declaration lives in the project, and the drain runs in a process that has no
- * reason to have imported it, so registering it here is what makes an index findable by name in a
- * worker that only ever handled queue work. The drain's own cron job is registered by the line
- * that publishes `searchDrain` above, since a re-export evaluates the file it names.
- *
- * The indices cannot be wired at import: a declaration lives at module scope and is evaluated
- * before anything is connected, so the mapping it asks for is written after boot.
- */
-export const scribe: LifecycleSteps = {
-  wires: () => {
-    capabilities.register(wireSearch);
+class SearchPlugin implements ScribePlugin {
+  /**
+   * Registers this package's defaults, once, at import: the cluster, the transport, and the
+   * extension bucket.
+   *
+   * @remarks
+   * The settings are where this package reaches the cluster, read from the process environment, and
+   * the transport is what answers a query once they are filled. Neither needs anything running.
+   *
+   * The extension is where the project's own declarations are loaded from, on the first drain that
+   * needs them. A declaration lives in the project, and the drain runs in a process that has no
+   * reason to have imported it, so registering it here is what makes an index findable by name in a
+   * worker that only ever handled queue work. The drain's own cron job is registered by the line
+   * that publishes `searchDrain` above, since a re-export evaluates the file it names.
+   */
+  registerWith(registrar: PackageRegistrar): void {
+    registrar.addCapability(wireSearch);
 
     searchSettings.use({ clusterUrl: required("OPENSEARCH_URL") });
     SearchTransports.use(new OpenSearchTransport());
 
-    if (!extensions.declares(SEARCH_EXTENSION)) {
-      extensions.register(new OptionalExtension(SEARCH_EXTENSION, () => runDeclarations("searchers")));
-    }
-  },
-  starts: () => syncDeclaredIndices(),
-};
+    registrar.addExtension(SEARCH_EXTENSION, "searchers");
+  }
+
+  /**
+   * Writes the mappings a project declared, once the process can reach the database.
+   *
+   * @remarks
+   * A declaration lives at module scope and is evaluated before anything is connected, so the
+   * mapping it asks for is written after boot rather than at import.
+   */
+  starts(): Future<void> {
+    return syncDeclaredIndices();
+  }
+}
+
+/** When this package runs: the cluster at import, the mappings once the database answers. */
+export const scribe: ScribePlugin = new SearchPlugin();

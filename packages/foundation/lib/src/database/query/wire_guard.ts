@@ -41,8 +41,8 @@ import {
   FilterSchema,
   Operation,
   type Query,
-} from "@scribe/protocol/gen/scribe/packages/foundation/protocol/database_pb.ts";
-import { encodeJson } from "@scribe/protocol/transport.ts";
+} from "@scribe/sdk/gen/scribe/packages/foundation/protocol/database_pb.ts";
+import { encodeJson } from "@scribe/sdk/transport.ts";
 import { ownerOf } from "../table_owners.ts";
 import { NOBODY, ownerScope } from "./owner_scope.ts";
 import { namesSomething } from "./wire_filters.ts";

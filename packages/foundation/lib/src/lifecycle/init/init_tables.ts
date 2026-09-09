@@ -36,31 +36,30 @@
 
 import { Table } from "../../database/table.ts";
 
-/** One row of the table that tracks which `@Init` job has already run. */
+/** One row of the table that says which named jobs already ran. */
 export interface InitRow {
-  /** The name the job was declared under — an `@Init` method's own class name. */
+  /** The name the job was declared under. */
   name: string;
 
-  /** When the job was recorded as having run. */
+  /** When it ran, as Postgres recorded it. */
   ran_at: string;
 }
 
 /**
- * The table this package ships, as the query builder needs to see it.
+ * The one table this subject ships, as the query builder needs to see it.
  *
- * It is declared here rather than taken from a generated schema because the package owns the
- * SQL that creates it — the same reason `storage`'s own `StorageSchema` is declared next to its
- * table rather than derived from a project's own generated file.
+ * Declared here rather than taken from a generated schema because the package owns the SQL that
+ * creates it, and `scribe gen code` does not walk the SQL of a package.
  */
-export type LifecycleInitSchema = {
-  /** Which `@Init` job has already run, one row per job. */
+export type InitSchema = {
+  /** Which named jobs already ran, and when. */
   __inits__: { row: InitRow };
 };
 
-/** A handle on this package's own table. */
-export class InitTable<K extends keyof LifecycleInitSchema & string> extends Table<LifecycleInitSchema, K> {}
+/** A handle on this subject's own table. */
+export class InitTable<K extends keyof InitSchema & string> extends Table<InitSchema, K> {}
 
-/** The jobs `runDeclaredInits` has already recorded as run. */
+/** Which named jobs already ran, and when. */
 export function inits(): InitTable<"__inits__"> {
   return new InitTable("__inits__");
 }

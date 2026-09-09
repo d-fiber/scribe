@@ -39,10 +39,11 @@ import { equals, expect, isFalse, isTrue, Scribe } from "@scribe/alchemy/test";
 import { Audience } from "../../lib/src/core/declaration.ts";
 import { audiencesOf, forgetMember } from "../../lib/src/core/member.ts";
 import { installAudienceMock } from "../testing/mock.ts";
-const banned = Audience.plain("member-banned");
-const editors = Audience.keyed("member-editors");
+const member = Audience.for("member");
+const banned = member.global("member-banned");
+const editors = member.namespaced("member-editors");
 
-Scribe.test("a member is listed under every audience it belongs to", async () => {
+Scribe.test("a member is listed under every audience it belongs to, across features", async () => {
   const audiences = installAudienceMock();
 
   try {
@@ -50,7 +51,7 @@ Scribe.test("a member is listed under every audience it belongs to", async () =>
     await editors.in("p1").add("a1");
     await editors.in("p2").add("a2");
 
-    expect(await audiencesOf("a1"), equals(["member-banned", "member-editors:p1"]));
+    expect((await audiencesOf("a1")).audiences, equals(["member-banned", "member-editors:p1"]));
   } finally {
     audiences.restore();
   }
@@ -68,7 +69,7 @@ Scribe.test("a member that is forgotten belongs nowhere, cache included", async 
     expect((await forgetMember("a1")).ok, isTrue);
     expect(await banned.has("a1"), isFalse);
     expect(await editors.in("p1").has("a1"), isFalse);
-    expect(await audiencesOf("a1"), equals([]));
+    expect((await audiencesOf("a1")).audiences, equals([]));
   } finally {
     audiences.restore();
   }
@@ -82,7 +83,7 @@ Scribe.test("forgetting a member leaves the others where they are", async () => 
     await editors.in("p1").add("a2");
 
     await forgetMember("a1");
-    expect(await editors.in("p1").members(), equals(["a2"]));
+    expect((await editors.in("p1").members()).members, equals(["a2"]));
   } finally {
     audiences.restore();
   }

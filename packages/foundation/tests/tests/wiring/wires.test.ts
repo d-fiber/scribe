@@ -34,12 +34,13 @@
 // This header is a summary written for convenience. Where it differs from the
 import "@scribe/scholium/runner.ts";
 import { allOf, equals, expect, isA, isTrue, same, Scribe, throwsA, withMessage } from "@scribe/alchemy/test";
-import { Caches, Crons, Databases, Duration, Hooks, Now, Queues, RateLimiters, Triggers } from "@scribe/alchemy";
+import { Crons, Databases, Duration, Hooks, Now, Queues, RateLimiters, Triggers, Valkeries } from "@scribe/alchemy";
 import { Clients } from "@scribe/alchemy/http";
 import { Loggers } from "@scribe/alchemy/observe";
 import type { Slot } from "@scribe/alchemy";
 import { scribe } from "@scribe/foundation";
-import { cacheSettings } from "../../../lib/src/cache/cache_settings.ts";
+import { testRegistrar } from "@scribe/testing/registrar.ts";
+import { valkerySettings } from "../../../lib/src/valkery/valkery_settings.ts";
 import { databaseSettings } from "../../../lib/src/database/database_settings.ts";
 import { queueSettings } from "../../../lib/src/queue/queue_settings.ts";
 import { installMock } from "../../testing/install.ts";
@@ -47,7 +48,7 @@ const PORTS: readonly Slot<unknown>[] = [
   Clients,
   Loggers,
   Now,
-  Caches,
+  Valkeries,
   RateLimiters,
   Queues,
   Hooks,
@@ -60,7 +61,7 @@ const NAMES: readonly string[] = [
   "Clients",
   "Loggers",
   "Now",
-  "Caches",
+  "Valkeries",
   "RateLimiters",
   "Queues",
   "Hooks",
@@ -93,10 +94,10 @@ function mount<T>(body: () => T): T {
 
 Scribe.test("wiring twice settles on the same driver in every slot", () => {
   mount(() => {
-    scribe.wires?.();
+    scribe.registerWith?.(testRegistrar);
     const first = held();
 
-    scribe.wires?.();
+    scribe.registerWith?.(testRegistrar);
 
     expect(held(), equals(first), "a second mount must not replace what the first put there");
   });
@@ -108,7 +109,7 @@ Scribe.test("a slot the host filled is left standing, one slot at a time", () =>
   PORTS.forEach((slot, at) => {
     mount(() => {
       slot.use(stand as never);
-      scribe.wires?.();
+      scribe.registerWith?.(testRegistrar);
 
       expect(slot.get(), same(stand), `${NAMES[at]} was written over`);
       expect(PORTS.every((one) => one.configured), equals(true), `the slots beside ${NAMES[at]} were left empty`);
@@ -118,17 +119,17 @@ Scribe.test("a slot the host filled is left standing, one slot at a time", () =>
 
 Scribe.test("a partial clear refills only what was cleared", () => {
   mount(() => {
-    scribe.wires?.();
+    scribe.registerWith?.(testRegistrar);
     const first = held();
 
-    Caches.clear();
+    Valkeries.clear();
     Queues.clear();
-    scribe.wires?.();
+    scribe.registerWith?.(testRegistrar);
 
     const after = held();
     PORTS.forEach((slot, at) => {
       expect(slot.configured, isTrue, `${NAMES[at]} was left empty by the second mount`);
-      if (slot === Caches || slot === Queues) return;
+      if (slot === Valkeries || slot === Queues) return;
       expect(after[at], same(first[at]), `${NAMES[at]} was untouched and should have been left alone`);
     });
   });
@@ -137,20 +138,20 @@ Scribe.test("a partial clear refills only what was cleared", () => {
 Scribe.test("two mounts racing over a microtask boundary still leave one driver per slot", async () => {
   await mount(async () => {
     const both = [
-      Promise.resolve().then(() => scribe.wires?.()),
-      Promise.resolve().then(() => scribe.wires?.()),
+      Promise.resolve().then(() => scribe.registerWith?.(testRegistrar)),
+      Promise.resolve().then(() => scribe.registerWith?.(testRegistrar)),
     ];
     await Promise.all(both);
 
     expect(PORTS.map((slot) => slot.configured), equals(PORTS.map(() => true)));
     const settled = held();
-    scribe.wires?.();
+    scribe.registerWith?.(testRegistrar);
     expect(held(), equals(settled));
   });
 });
 
 Scribe.test("mounting reads no setting and opens no connection", () => {
-  const settings = [cacheSettings, queueSettings, databaseSettings] as const;
+  const settings = [valkerySettings, queueSettings, databaseSettings] as const;
   const kept = settings.map((slot) => (slot.configured ? slot.get() : null));
   let dialled = 0;
   const refuse = () => {
@@ -164,7 +165,7 @@ Scribe.test("mounting reads no setting and opens no connection", () => {
     for (const slot of settings) slot.clear();
 
     mount(() => {
-      scribe.wires?.();
+      scribe.registerWith?.(testRegistrar);
 
       expect(dialled, equals(0), "a driver that dials while it is being built makes the port untestable");
       for (const slot of settings) {
@@ -184,11 +185,11 @@ Scribe.test("mounting reads no setting and opens no connection", () => {
 
 Scribe.test("every mounted driver answers the members its port declares", () => {
   mount(() => {
-    scribe.wires?.();
+    scribe.registerWith?.(testRegistrar);
 
     const members: Record<string, readonly string[]> = {
       Clients: ["open"],
-      Caches: ["open"],
+      Valkeries: ["open"],
       RateLimiters: ["open"],
       Queues: ["open", "consume"],
       Hooks: ["open"],
@@ -210,11 +211,11 @@ Scribe.test("every mounted driver answers the members its port declares", () => 
 
 Scribe.test("re-wiring after a clear refuses the cron key the driver it replaced had already declared", () => {
   mount(() => {
-    scribe.wires?.();
+    scribe.registerWith?.(testRegistrar);
     Crons.get().schedule({ key: "wiring:cron", schedule: { every: Duration.minutes(1) }, run: () => {} });
 
     Crons.clear();
-    scribe.wires?.();
+    scribe.registerWith?.(testRegistrar);
 
     Crons.get().schedule({ key: "wiring:cron", schedule: { every: Duration.minutes(1) }, run: () => {} });
   });
@@ -222,11 +223,11 @@ Scribe.test("re-wiring after a clear refuses the cron key the driver it replaced
 
 Scribe.test("re-wiring after a clear refuses the queue key the driver it replaced had already opened", () => {
   mount(() => {
-    scribe.wires?.();
+    scribe.registerWith?.(testRegistrar);
     Queues.get().open({ key: "wiring:queue" });
 
     Queues.clear();
-    scribe.wires?.();
+    scribe.registerWith?.(testRegistrar);
 
     Queues.get().open({ key: "wiring:queue" });
   });
@@ -234,11 +235,11 @@ Scribe.test("re-wiring after a clear refuses the queue key the driver it replace
 
 Scribe.test("re-wiring after a clear refuses the hook event the driver it replaced had already opened", () => {
   mount(() => {
-    scribe.wires?.();
+    scribe.registerWith?.(testRegistrar);
     Hooks.get().open({ event: "wiring.event" });
 
     Hooks.clear();
-    scribe.wires?.();
+    scribe.registerWith?.(testRegistrar);
 
     Hooks.get().open({ event: "wiring.event" });
   });
@@ -246,14 +247,14 @@ Scribe.test("re-wiring after a clear refuses the hook event the driver it replac
 
 Scribe.test("a mount that follows a clear still answers the store its predecessor opened, rather than a second one", () => {
   mount(() => {
-    scribe.wires?.();
-    const opened = Caches.get().open({ key: "wiring:cache" });
+    scribe.registerWith?.(testRegistrar);
+    const opened = Valkeries.get().open({ key: "wiring:valkery" });
 
-    Caches.clear();
-    scribe.wires?.();
+    Valkeries.clear();
+    scribe.registerWith?.(testRegistrar);
 
     expect(
-      Caches.get().open({ key: "wiring:cache" }),
+      Valkeries.get().open({ key: "wiring:valkery" }),
       same(opened),
       "the port promises one store per key, and a rebuilt driver hands out a second",
     );
@@ -262,7 +263,7 @@ Scribe.test("a mount that follows a clear still answers the store its predecesso
 
 Scribe.test("declaring the same cron key twice through one driver answers the same run rather than firing twice", () => {
   mount(() => {
-    scribe.wires?.();
+    scribe.registerWith?.(testRegistrar);
     const driver = Crons.get();
 
     const first = driver.schedule({ key: "wiring:once", schedule: { every: Duration.minutes(1) }, run: () => {} });
@@ -275,7 +276,7 @@ Scribe.test("declaring the same cron key twice through one driver answers the sa
 
 Scribe.test("a schedule naming none of the three shapes is refused where it is written", () => {
   mount(() => {
-    scribe.wires?.();
+    scribe.registerWith?.(testRegistrar);
 
     expect(
       () => Crons.get().schedule({ key: "wiring:bad", schedule: {} as never, run: () => {} }),

@@ -180,7 +180,7 @@ export interface TriggerMethods<TRow extends object> {
 /**
  * A table trigger: declaring it and arming it are the same thing.
  *
- * ```ts ignore
+ * ```ts
  * const orders = Trigger.of<OrdersRow>();
  *
  * export const onOrderCreated = orders.onInsert(
@@ -226,7 +226,7 @@ export class Trigger {
   /**
    * The five methods, bound to the type of the rows the table holds.
    *
-   * ```ts ignore
+   * ```ts
    * const orders = Trigger.of<OrdersRow>();
    * ```
    *
@@ -374,7 +374,7 @@ function changeOf(event: TriggerEvent, param: string): AnyChange {
     table: event.table,
     key: event.key,
     params: { [param]: event.key },
-    at: DateTime.fromMillisecondsSinceEpoch(new Date(event.at).getTime()),
+    at: DateTime.parse(event.at),
   };
 
   if (event.field === null) {
